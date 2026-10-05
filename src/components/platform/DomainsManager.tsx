@@ -100,6 +100,44 @@ function DnsRecords({ domain }: { domain: CompanyDomainView }) {
   );
 }
 
+/** Every record a custom domain has ever needed, kept after it was published and removed from the provider's list. */
+function DnsHistory({ domain }: { domain: CompanyDomainView }) {
+  if (domain.history.length === 0) return null;
+  return (
+    <details className="group rounded-lg border bg-background/60">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-medium">
+        <span>DNS records for {domain.host} ({domain.history.length})</span>
+        <span className="text-xs font-normal text-muted-foreground group-open:hidden">Show</span>
+        <span className="hidden text-xs font-normal text-muted-foreground group-open:inline">Hide</span>
+      </summary>
+      <ul className="space-y-2 border-t p-3" aria-label={`All DNS records of ${domain.host}`}>
+        {domain.history.map((r) => (
+          <li key={`${r.host}:${r.type}:${r.name}:${r.value}`} className="rounded-lg border bg-background p-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-muted-foreground">
+                {r.reason} <span className="font-mono">({r.host})</span>
+                {r.seenAt && <span suppressHydrationWarning> · listed {formatDateTime(r.seenAt)}</span>}
+              </span>
+              {r.current ? <Pill tone="amber"><CircleDashed className="size-3" /> Needed now</Pill> : <Pill tone="muted"><Check className="size-3" /> Not outstanding</Pill>}
+            </div>
+            <dl className="grid grid-cols-[4rem_1fr] gap-x-3 gap-y-1.5 text-xs">
+              <dt className="font-medium text-muted-foreground">Type</dt>
+              <dd className="font-mono font-semibold">{r.type}</dd>
+              <dt className="font-medium text-muted-foreground">Name</dt>
+              <dd className="min-w-0"><CopyValue value={r.name} label={`${r.type} record name`} /></dd>
+              <dt className="font-medium text-muted-foreground">Value</dt>
+              <dd className="min-w-0"><CopyValue value={r.value} label={`${r.type} record value`} /></dd>
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+        Records you published stay in your DNS provider; this list is only a reference. Remove a verification (TXT) record there only if your hosting provider says it is no longer needed.
+      </p>
+    </details>
+  );
+}
+
 /** The state of the panels address `app.<domain>`, which has its own verification and DNS. */
 function AppPill({ app }: { app: NonNullable<CompanyDomainView["app"]> }) {
   if (app.ssl === "active") return <Pill tone="green"><Lock className="size-3" /> Panels live at {app.host}</Pill>;
@@ -283,6 +321,7 @@ export default function DomainsManager({ initial, maxCustom, actions }: { initia
                 </p>
               )}
               <DnsRecords domain={d} />
+              <DnsHistory domain={d} />
             </li>
           );
         })}

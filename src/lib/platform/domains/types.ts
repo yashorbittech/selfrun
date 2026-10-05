@@ -36,6 +36,16 @@ export interface DomainProvider {
 /** Whether one record the owner must publish is in place, as of the last check. */
 export type RecordState = "ok" | "missing" | "mismatch" | "unknown";
 
+/** One DNS record that was ever required for a domain, kept so the owner can look it up after it has been published. */
+export interface DnsHistoryEntry extends DnsRecord {
+  /** The hostname the record was asked for (the website host or its `app.` panels host). */
+  host: string;
+  /** When it was first listed (ISO); null for records that are derived rather than logged. */
+  seenAt: string | null;
+  /** Still outstanding right now (otherwise it was published or is no longer needed). */
+  current: boolean;
+}
+
 /** A company domain as the Domains settings page shows it (serialisable, safe for the client). */
 export interface CompanyDomainView {
   host: string;
@@ -51,6 +61,8 @@ export interface CompanyDomainView {
   /** Hosting side (routing + TLS). `ssl: "manual"` = attached by the platform operator, not an API. */
   hosting: { providerId: string | null; dnsConfigured: boolean; ssl: "active" | "pending" | "manual" | "error"; error: string | null };
   lastCheckedAt: string | null;
+  /** Every record this domain has needed (ownership proof, routing, the hosting provider's challenges), newest first. */
+  history: DnsHistoryEntry[];
   /** The panels address `app.<domain>` of a custom domain: it has its own hosting state, and its own records appear in `records`. */
   app: { host: string; ssl: "active" | "pending" | "manual" | "error"; verified: boolean; dnsConfigured: boolean; error: string | null } | null;
 }

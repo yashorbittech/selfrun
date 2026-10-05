@@ -78,6 +78,8 @@ export interface CompanyDomain {
     records?: DnsRecord[];
     challenged?: boolean;
   };
+  /** Every DNS record the hosting provider ever asked for, kept after it is published (Settings → Domains → DNS records). */
+  dnsLog?: { host: string; type: DnsRecord["type"]; name: string; value: string; reason: string; seenAt: Date }[];
   /** Outcome of the last ownership check of a custom domain (`domains/custom.ts`). */
   lastCheck?: { at: Date; txt: "found" | "missing" | "mismatch" | "error"; detail: string | null };
   createdAt: Date;

@@ -137,6 +137,19 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     app = { host: appHost, ssl: appSsl, verified: Boolean(ap?.verified), dnsConfigured: Boolean(ap?.dnsConfigured), error: ap?.error ?? null };
   }
 
+  // Everything this domain has needed, so a record that disappeared from the list above once published can still be looked up.
+  const history: CompanyDomainView["history"] = [];
+  const remember = (host: string, r: DnsRecord, seenAt: Date | null) => {
+    if (history.some((x) => sameRecord(x, r))) return;
+    history.push({ ...r, host, seenAt: seenAt ? seenAt.toISOString() : null, current: records.some((x) => sameRecord(x, r) && x.state !== "ok") });
+  };
+  if (kind === "custom" && !localOnly) {
+    for (const e of [...(d.dnsLog ?? [])].sort((a, b) => b.seenAt.getTime() - a.seenAt.getTime())) remember(e.host, e, e.seenAt);
+    remember(d._id, verificationRecord(d), null);
+    remember(d._id, routingRecord(d._id), null);
+    remember(appHostOf(d._id), { ...routingRecord(appHostOf(d._id)), reason: "Serves your panels (Workspace and the rest)" }, null);
+  }
+
   let ssl: CompanyDomainView["hosting"]["ssl"];
   if (localOnly || p?.id === "manual") ssl = "manual";
   else if (p?.error) ssl = "error";
@@ -154,6 +167,7 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     records,
     hosting: { providerId: localOnly ? null : (p?.id ?? null), dnsConfigured: Boolean(p?.dnsConfigured), ssl, error: p?.error ?? null },
     lastCheckedAt: (d.lastCheck?.at ?? p?.checkedAt)?.toISOString() ?? null,
+    history,
     app,
   };
 }

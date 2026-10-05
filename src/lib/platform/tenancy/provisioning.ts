@@ -220,6 +220,13 @@ export async function syncAtProvider(host: string, op: "add" | "status" | "verif
   const previous = await domains.findOne({ _id: store.docId }, { projection: { provider: 1, appProvider: 1 } });
   const challenged = Boolean(previous?.[store.field]?.challenged) || (!state.verified && state.records.some((r) => r.type === "TXT"));
   await domains.updateOne({ _id: store.docId }, { $set: { [store.field]: { id: provider.id, ...state, error, checkedAt: new Date(), challenged } } });
+  // Keep every record the provider asked for: once it is published the provider stops listing it, but the owner may need it again.
+  for (const r of state.records) {
+    await domains.updateOne(
+      { _id: store.docId, dnsLog: { $not: { $elemMatch: { type: r.type, name: r.name, value: r.value } } } },
+      { $push: { dnsLog: { host, type: r.type, name: r.name, value: r.value, reason: r.reason, seenAt: new Date() } } },
+    );
+  }
   if (error) console.error(`[domains] ${op} ${host} at ${provider.id} failed`, error);
   return { providerId: provider.id, status, error };
 }
