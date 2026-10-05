@@ -8,7 +8,7 @@ import { COMPANY_DOMAINS_COLLECTION, forgetCompanyRouting, isPlatformHost, norma
 import { syncAtProvider } from "@/lib/platform/tenancy/provisioning";
 import { activeDomainProvider } from "@/lib/platform/domains";
 import { routingRecord } from "@/lib/platform/domains/vercel";
-import type { CompanyDomainView, DnsRecord, DomainActionResult, RecordState } from "@/lib/platform/domains/types";
+import type { DnsHistoryEntry, CompanyDomainView, DnsRecord, DomainActionResult, RecordState } from "@/lib/platform/domains/types";
 import { forgetCompanySiteUrls } from "@/lib/platform/tenancy/site-url";
 
 /**
@@ -141,7 +141,12 @@ export function toView(d: CompanyDomain): CompanyDomainView {
   const history: CompanyDomainView["history"] = [];
   const remember = (host: string, r: DnsRecord, seenAt: Date | null) => {
     if (history.some((x) => sameRecord(x, r))) return;
-    history.push({ ...r, host, seenAt: seenAt ? seenAt.toISOString() : null, current: records.some((x) => sameRecord(x, r) && x.state !== "ok") });
+    // A record counts as connected when the host it belongs to is in the state that record exists to achieve: ownership proof (TXT)
+    // → verified, routing (A / CNAME) → DNS pointing at the hosting platform.
+    const hp = host === d._id ? d.provider : d.appProvider;
+    const verifiedHere = host === d._id ? d.status === "verified" || Boolean(hp?.verified) : Boolean(hp?.verified);
+    const state: DnsHistoryEntry["state"] = !hp || hp.id === "manual" ? "unchecked" : (r.type === "TXT" ? verifiedHere : hp.dnsConfigured) ? "connected" : "not-connected";
+    history.push({ ...r, host, seenAt: seenAt ? seenAt.toISOString() : null, state });
   };
   if (kind === "custom" && !localOnly) {
     for (const e of [...(d.dnsLog ?? [])].sort((a, b) => b.seenAt.getTime() - a.seenAt.getTime())) remember(e.host, e, e.seenAt);

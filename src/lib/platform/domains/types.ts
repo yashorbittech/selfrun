@@ -42,8 +42,8 @@ export interface DnsHistoryEntry extends DnsRecord {
   host: string;
   /** When it was first listed (ISO); null for records that are derived rather than logged. */
   seenAt: string | null;
-  /** Still outstanding right now (otherwise it was published or is no longer needed). */
-  current: boolean;
+  /** Is it in place? `connected` = the hosting provider accepts it, `not-connected` = still missing, `unchecked` = nothing can confirm it (manual hosting). */
+  state: "connected" | "not-connected" | "unchecked";
 }
 
 /** A company domain as the Domains settings page shows it (serialisable, safe for the client). */

@@ -118,7 +118,13 @@ function DnsHistory({ domain }: { domain: CompanyDomainView }) {
                 {r.reason} <span className="font-mono">({r.host})</span>
                 {r.seenAt && <span suppressHydrationWarning> · listed {formatDateTime(r.seenAt)}</span>}
               </span>
-              {r.current ? <Pill tone="amber"><CircleDashed className="size-3" /> Needed now</Pill> : <Pill tone="muted"><Check className="size-3" /> Not outstanding</Pill>}
+              {r.state === "connected" ? (
+                <Pill tone="green"><CheckCircle2 className="size-3" /> Connected</Pill>
+              ) : r.state === "not-connected" ? (
+                <Pill tone="amber"><XCircle className="size-3" /> Not connected: add it at your DNS provider</Pill>
+              ) : (
+                <Pill tone="muted"><CircleDashed className="size-3" /> Not checked</Pill>
+              )}
             </div>
             <dl className="grid grid-cols-[4rem_1fr] gap-x-3 gap-y-1.5 text-xs">
               <dt className="font-medium text-muted-foreground">Type</dt>
@@ -132,7 +138,7 @@ function DnsHistory({ domain }: { domain: CompanyDomainView }) {
         ))}
       </ul>
       <p className="border-t px-3 py-2 text-xs text-muted-foreground">
-        Records you published stay in your DNS provider; this list is only a reference. Remove a verification (TXT) record there only if your hosting provider says it is no longer needed.
+        Connected = your hosting provider has accepted the record. Not connected = it is still missing or hasn't propagated yet (can take up to an hour). Keep records in your DNS provider unless the provider says one is no longer needed.
       </p>
     </details>
   );
