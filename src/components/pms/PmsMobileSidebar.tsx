@@ -1,0 +1,48 @@
+"use client";
+
+import { PanelName } from "@/components/platform/PanelsProvider";
+import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
+import { useState } from "react";
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import PmsSidebar from "@/components/pms/PmsSidebar";
+import BrandMark from "@/components/BrandMark";
+import type { PmsRole } from "@/lib/pms-roles";
+import { BrandName } from "@/components/platform/BrandProvider";
+
+export default function PmsMobileSidebar({
+  roles,
+  permissionOverrides,
+  employeeId,
+}: {
+  roles: PmsRole[];
+  permissionOverrides?: Record<string, boolean>;
+  employeeId: string | null;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button type="button" variant="ghost" size="icon" className="md:hidden" onClick={() => setOpen(true)} aria-label="Open navigation menu">
+        <Menu className="size-5" />
+      </Button>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="left" className="flex w-72 flex-col p-0 sm:max-w-72">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <SheetDescription className="sr-only"><PanelName panel="pms" fallback="PMS" /> navigation menu</SheetDescription>
+          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
+            <BrandMark className="size-6 shrink-0" />
+            <span className="text-sm font-bold">
+              <BrandName />
+            </span>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <PmsSidebar roles={roles} permissionOverrides={permissionOverrides} employeeId={employeeId} onNavigate={() => setOpen(false)} />
+          </div>
+          <MobileSidebarProfile />
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}

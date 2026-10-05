@@ -1,0 +1,29 @@
+import { NextResponse } from "next/server";
+import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { applicantDocument } from "@/lib/careers/applicant-profile";
+import { readPortalDocStream } from "@/lib/portal/documents";
+
+type Context = { params: Promise<{ id: string; docId: string }> };
+
+/**
+ * Staff download of a document shared to an applicant's portal account, for
+ * the LMS applicant profile. The document is re-checked to belong to THIS
+ * applicant's portal account — never served by id alone.
+ */
+export async function GET(_req: Request, { params }: Context) {
+  const user = await getCurrentLmsUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { id, docId } = await params;
+  const doc = await applicantDocument(id, docId);
+  if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const obj = await readPortalDocStream(doc.storageKey);
+  if (!obj) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return new NextResponse(obj.stream, {
+    headers: {
+      "Content-Type": doc.contentType || obj.contentType || "application/octet-stream",
+      "Content-Disposition": `inline; filename="${encodeURIComponent(doc.name)}"`,
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
+}
