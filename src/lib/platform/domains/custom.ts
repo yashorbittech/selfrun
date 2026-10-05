@@ -79,6 +79,14 @@ export function appHostOf(host: string): string {
   return `app.${host.replace(/^www\./, "")}`;
 }
 
+/**
+ * Attaches / re-checks the panels host `app.<domain>` at the hosting provider and keeps its state on the domain's own document
+ * (it has no document of its own), so the Domains page can show its ownership challenge and routing records next to the website's.
+ */
+async function syncAppHost(domainHost: string, op: "add" | "status" | "verify") {
+  return syncAtProvider(appHostOf(domainHost), op, { docId: domainHost, field: "appProvider" });
+}
+
 // ─── View ───────────────────────────────────────────────────────────────────
 
 export function verificationRecord(d: Pick<CompanyDomain, "_id" | "verificationToken">): DnsRecord {
@@ -110,8 +118,24 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     }
   }
 
-  // The panels host: it needs its own routing record next to the website's.
-  if (kind === "custom" && !localOnly) records.push({ ...routingRecord(appHostOf(d._id)), reason: "Serves your panels (Workspace and the rest) at app.<your domain>", state: "unknown" });
+  // The panels host `app.<domain>` is a second host at the hosting provider: it can demand its own ownership proof and needs its own
+  // routing record. Its records are listed with the website's so everything is published in one go.
+  let app: CompanyDomainView["app"] = null;
+  if (kind === "custom" && !localOnly) {
+    const ap = d.appProvider;
+    const appHost = appHostOf(d._id);
+    const add = (r: DnsRecord, state: RecordState) => {
+      if (!records.some((x) => sameRecord(x, r))) records.push({ ...r, state });
+    };
+    if (ap && ap.id !== "manual") {
+      for (const r of ap.records ?? []) add({ ...r, reason: r.type === "TXT" ? `Proves you can serve ${appHost} (hosting provider)` : `Serves your panels at ${appHost}` }, "missing");
+      if (!ap.dnsConfigured && !(ap.records ?? []).some((r) => r.type !== "TXT")) add({ ...routingRecord(appHost), reason: `Serves your panels (Workspace and the rest) at ${appHost}` }, "missing");
+    } else {
+      add({ ...routingRecord(appHost), reason: `Serves your panels (Workspace and the rest) at ${appHost}` }, "unknown");
+    }
+    const appSsl: NonNullable<CompanyDomainView["app"]>["ssl"] = ap?.id === "manual" ? "manual" : ap?.error ? "error" : ap?.attached && ap.verified && ap.dnsConfigured ? "active" : "pending";
+    app = { host: appHost, ssl: appSsl, verified: Boolean(ap?.verified), dnsConfigured: Boolean(ap?.dnsConfigured), error: ap?.error ?? null };
+  }
 
   let ssl: CompanyDomainView["hosting"]["ssl"];
   if (localOnly || p?.id === "manual") ssl = "manual";
@@ -130,6 +154,7 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     records,
     hosting: { providerId: localOnly ? null : (p?.id ?? null), dnsConfigured: Boolean(p?.dnsConfigured), ssl, error: p?.error ?? null },
     lastCheckedAt: (d.lastCheck?.at ?? p?.checkedAt)?.toISOString() ?? null,
+    app,
   };
 }
 
@@ -179,7 +204,7 @@ export async function addCustomDomain(raw: string): Promise<DomainActionResult> 
   }
   // Non-fatal: the record exists either way, and "Check now" retries the provider.
   const attach = await syncAtProvider(host, "add");
-  await syncAtProvider(appHostOf(host), "add");
+  await syncAppHost(host, "add");
   return ok(attach.error ? `Added ${host}. The hosting provider couldn't attach it yet; we'll retry when you check it.` : `Added ${host}. Publish the DNS records below, then check it.`);
 }
 
@@ -219,13 +244,13 @@ export async function verifyCustomDomain(raw: string, resolver: TxtResolver = re
     // Ownership is settled; only the hosting side (DNS routing, TLS) can still change.
     // A record that was never attached (provider outage at add time) gets attached now.
     await syncAtProvider(d._id, d.provider?.attached ? "status" : "add");
-    await syncAtProvider(appHostOf(d._id), "add");
+    await syncAppHost(d._id, d.appProvider?.attached ? (d.appProvider.verified ? "status" : "verify") : "add");
     forgetCompanyRouting();
     forgetCompanySiteUrls();
     return ok(`${d._id} is verified.`);
   }
 
-  const [txt, hosting] = await Promise.all([checkTxt(d, resolver), syncAtProvider(d._id, d.provider?.attached ? "verify" : "add")]);
+  const [txt, hosting] = await Promise.all([checkTxt(d, resolver), syncAtProvider(d._id, d.provider?.attached ? "verify" : "add"), syncAppHost(d._id, d.appProvider?.attached ? "verify" : "add")]).then(([t, h]) => [t, h] as const);
   // The provider's "verified" counts as proof only when it had asked for its own
   // TXT challenge: a host no other provider account uses is "verified" there
   // without its owner doing anything, and a manual provider reports everything verified.
@@ -305,7 +330,7 @@ export async function recheckPendingDomains(resolver: TxtResolver = resolveTxt) 
   return forEachCompany(async (companyId) => {
     const domains = await domainsCollection();
     const due = await domains
-      .find({ companyId, kind: "custom", $or: [{ status: "pending" }, { "provider.dnsConfigured": { $ne: true } }] }, { projection: { _id: 1, status: 1 } })
+      .find({ companyId, kind: "custom", $or: [{ status: "pending" }, { "provider.dnsConfigured": { $ne: true } }, { "appProvider.dnsConfigured": { $ne: true } }, { "appProvider.verified": { $ne: true } }] }, { projection: { _id: 1, status: 1 } })
       .toArray();
     let verified = 0;
     for (const d of due) {

@@ -100,6 +100,14 @@ function DnsRecords({ domain }: { domain: CompanyDomainView }) {
   );
 }
 
+/** The state of the panels address `app.<domain>`, which has its own verification and DNS. */
+function AppPill({ app }: { app: NonNullable<CompanyDomainView["app"]> }) {
+  if (app.ssl === "active") return <Pill tone="green"><Lock className="size-3" /> Panels live at {app.host}</Pill>;
+  if (app.ssl === "manual") return <Pill tone="muted"><Lock className="size-3" /> Panels: managed by platform</Pill>;
+  if (app.ssl === "error") return <Pill tone="red"><AlertTriangle className="size-3" /> <span title={app.error ?? undefined}>Panels address: hosting error</span></Pill>;
+  return <Pill tone="amber"><CircleDashed className="size-3" /> {app.verified ? `Panels (${app.host}): waiting for DNS` : `Panels (${app.host}): needs its records`}</Pill>;
+}
+
 function SslPill({ domain }: { domain: CompanyDomainView }) {
   const { ssl, error } = domain.hosting;
   if (ssl === "active") return <Pill tone="green"><Lock className="size-3" /> SSL active</Pill>;
@@ -225,6 +233,7 @@ export default function DomainsManager({ initial, maxCustom, actions }: { initia
                     {d.isPrimary && <Pill tone="blue"><Star className="size-3" /> Primary</Pill>}
                     <Pill tone="muted">{d.kind === "subdomain" ? "Workspace address" : "Custom domain"}</Pill>
                     {d.status === "verified" && <SslPill domain={d} />}
+                    {d.app && <AppPill app={d.app} />}
                   </div>
                   {d.lastCheckedAt && (
                     // Shown in the viewer's own time zone, which the server can't know — hence the hydration opt-out.

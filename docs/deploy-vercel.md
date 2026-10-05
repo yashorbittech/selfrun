@@ -572,6 +572,13 @@ the steps itself on its **Workspace → Settings → Custom domains** page, whic
 
 You can see every company's domains in Platform Panel → **Domains & SSL**.
 
+> [!NOTE]
+> **Nothing has to be done by hand in the Vercel dashboard.** A custom domain brings two hosts to Vercel: the website (`www.acme.com`) and
+> the panels (`app.acme.com`). If Vercel asks for an ownership TXT record for either (it shows "Verification Required" on that host), the
+> company's Domains page lists that exact record next to the others, under the domain. The company publishes **all** listed records once.
+> After that, **Check now** and the daily automatic check verify both hosts through the Vercel API, and the page shows "Panels live at
+> app.acme.com". The platform cannot write DNS records at the company's DNS provider by itself, so publishing the records is the one step that stays with the domain owner.
+
 > ✅ **Checkpoint:** a test domain reaches **Verified** and **SSL active**, and `https://<that domain>` shows the company's website while `https://app.<that domain>` shows its panels.
 
 ---

@@ -43,6 +43,7 @@ export default function DomainsGuide({ domains }: { domains: CompanyDomainView[]
                 <tr><td className="px-3 py-2">Proves you own the domain</td><td className="px-3 py-2 font-mono">TXT</td><td className="px-3 py-2 font-mono">_domain-verify.{example}</td><td className="px-3 py-2">shown in the list</td></tr>
                 <tr><td className="px-3 py-2">Shows your website at <strong>{example}</strong></td><td className="px-3 py-2 font-mono">CNAME</td><td className="px-3 py-2 font-mono">{example.startsWith("www.") ? "www" : example}</td><td className="px-3 py-2">shown in the list</td></tr>
                 <tr><td className="px-3 py-2">Shows your panels at <strong>{appHost}</strong></td><td className="px-3 py-2 font-mono">CNAME</td><td className="px-3 py-2 font-mono">app</td><td className="px-3 py-2">shown in the list</td></tr>
+                <tr><td className="px-3 py-2">Lets the hosting provider serve <strong>{appHost}</strong> (shown only when it asks for it)</td><td className="px-3 py-2 font-mono">TXT</td><td className="px-3 py-2 font-mono">_vercel</td><td className="px-3 py-2">shown in the list</td></tr>
               </tbody>
             </table>
           </div>
@@ -51,6 +52,7 @@ export default function DomainsGuide({ domains }: { domains: CompanyDomainView[]
             <li>If a record with the same name already exists (an old <code className="rounded bg-muted px-1">www</code> or <code className="rounded bg-muted px-1">app</code> record), replace it. Leave your email records (MX, SPF, DKIM) alone.</li>
             <li>Cloudflare: set the orange cloud to <strong>DNS only</strong> (grey) for these records until the domain is verified.</li>
             <li>Do <strong>not</strong> change your domain&apos;s nameservers.</li>
+            <li>Publish <strong>every</strong> record in the list, including the ones for <code className="rounded bg-muted px-1">{appHost}</code>, in one go. Nothing has to be done in the hosting dashboard: after the records are in, <em>Check now</em> (and the daily automatic check) verifies everything, including the panels address, by itself.</li>
           </ul>
         </>
       ),

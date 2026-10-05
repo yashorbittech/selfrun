@@ -67,6 +67,17 @@ export interface CompanyDomain {
     /** The provider demanded its own ownership proof at some point — see `domains/custom.ts`. */
     challenged?: boolean;
   };
+  /** The same, for the company's panels host `app.<domain>` of a custom domain (its own ownership challenge and routing). */
+  appProvider?: {
+    id: string;
+    attached: boolean;
+    verified: boolean;
+    dnsConfigured: boolean;
+    error: string | null;
+    checkedAt: Date;
+    records?: DnsRecord[];
+    challenged?: boolean;
+  };
   /** Outcome of the last ownership check of a custom domain (`domains/custom.ts`). */
   lastCheck?: { at: Date; txt: "found" | "missing" | "mismatch" | "error"; detail: string | null };
   createdAt: Date;

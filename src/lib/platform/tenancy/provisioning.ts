@@ -192,7 +192,7 @@ export interface ProviderSync {
  * `verify` asks the provider to re-check ownership now — with the outcome
  * stored on the domain record's `provider` field. Never throws.
  */
-export async function syncAtProvider(host: string, op: "add" | "status" | "verify"): Promise<ProviderSync> {
+export async function syncAtProvider(host: string, op: "add" | "status" | "verify", store: { docId: string; field: "provider" | "appProvider" } = { docId: host, field: "provider" }): Promise<ProviderSync> {
   const platform = await getPlatformDb();
   const domains = platform.collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION);
   // A *.localhost address needs nothing attached anywhere.
@@ -201,7 +201,7 @@ export async function syncAtProvider(host: string, op: "add" | "status" | "verif
   // nothing is attached per company (which also keeps the project's domain count flat). Custom domains are never covered.
   if (wildcardSubdomainsEnabled() && isSubdomainOfRoot(host, platformRootDomain())) {
     const state: DomainStatus = { attached: true, verified: true, dnsConfigured: true, records: [] };
-    await domains.updateOne({ _id: host }, { $set: { provider: { id: "wildcard", ...state, error: null, checkedAt: new Date(), challenged: false } } });
+    await domains.updateOne({ _id: store.docId }, { $set: { [store.field]: { id: "wildcard", ...state, error: null, checkedAt: new Date(), challenged: false } } });
     return { providerId: "wildcard", status: state, error: null };
   }
   const provider = await activeDomainProvider();
@@ -217,9 +217,9 @@ export async function syncAtProvider(host: string, op: "add" | "status" | "verif
   const state = status ?? { attached: false, verified: false, dnsConfigured: false, records: [] };
   // Once the provider has demanded its own ownership proof (a TXT challenge),
   // that stays on record: it's what lets custom.ts trust a later "verified".
-  const previous = await domains.findOne({ _id: host }, { projection: { provider: 1 } });
-  const challenged = Boolean(previous?.provider?.challenged) || (!state.verified && state.records.some((r) => r.type === "TXT"));
-  await domains.updateOne({ _id: host }, { $set: { provider: { id: provider.id, ...state, error, checkedAt: new Date(), challenged } } });
+  const previous = await domains.findOne({ _id: store.docId }, { projection: { provider: 1, appProvider: 1 } });
+  const challenged = Boolean(previous?.[store.field]?.challenged) || (!state.verified && state.records.some((r) => r.type === "TXT"));
+  await domains.updateOne({ _id: store.docId }, { $set: { [store.field]: { id: provider.id, ...state, error, checkedAt: new Date(), challenged } } });
   if (error) console.error(`[domains] ${op} ${host} at ${provider.id} failed`, error);
   return { providerId: provider.id, status, error };
 }

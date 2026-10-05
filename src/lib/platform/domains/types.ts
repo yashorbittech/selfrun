@@ -51,6 +51,8 @@ export interface CompanyDomainView {
   /** Hosting side (routing + TLS). `ssl: "manual"` = attached by the platform operator, not an API. */
   hosting: { providerId: string | null; dnsConfigured: boolean; ssl: "active" | "pending" | "manual" | "error"; error: string | null };
   lastCheckedAt: string | null;
+  /** The panels address `app.<domain>` of a custom domain: it has its own hosting state, and its own records appear in `records`. */
+  app: { host: string; ssl: "active" | "pending" | "manual" | "error"; verified: boolean; dnsConfigured: boolean; error: string | null } | null;
 }
 
 export type DomainActionResult = { ok: true; domains: CompanyDomainView[]; message?: string } | { ok: false; error: string };

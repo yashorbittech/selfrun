@@ -8,7 +8,7 @@ import type { DnsRecord, DomainProvider, DomainResult, DomainStatus } from "@/li
  * else `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` / `VERCEL_TEAM_ID`).
  */
 
-const API = "https://api.vercel.com";
+const API = (process.env.VERCEL_API_URL?.trim() || "https://api.vercel.com").replace(/\/+$/, "");
 
 export interface VercelConfig {
   token: string;
