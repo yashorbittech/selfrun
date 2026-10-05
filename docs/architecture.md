@@ -30,8 +30,7 @@ website ends with a one-time hand-off that signs the new owner in on their app h
 
 `src/lib/saas/hosts.ts` lists the hosts of the product itself:
 
-- site hosts: `SAAS_HOSTS` (comma separated; the `www.` or apex variant is added), on Vercel production the project's production
-  domain, in development `localhost` and `saas.localhost`;
+- site hosts: `SAAS_HOSTS` (comma separated; the `www.` or apex variant is added), in development `localhost` and `saas.localhost`;
 - app hosts: `app.` plus every site host without `www.` (`app.selfrunbusiness.com`; in development `app.localhost`).
 
 `resolveHostInfo` in `src/lib/platform/tenancy/companies.ts` resolves every request host to a company and a side, in this order:

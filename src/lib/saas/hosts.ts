@@ -21,13 +21,8 @@ export function saasHosts(env: Record<string, string | undefined> = process.env)
     out.add(h);
     out.add(h.startsWith("www.") ? h.slice(4) : `www.${h}`);
   }
-  // On Vercel production this project's own production domain IS the product's host, so a deployment works even before
-  // SAAS_HOSTS is set (customers' own domains are attached to the project too, but they are never its production domain).
-  const prod = env.VERCEL_ENV === "production" ? normalize(env.VERCEL_PROJECT_PRODUCTION_URL ?? "") : null;
-  if (prod && !prod.endsWith(".vercel.app")) {
-    out.add(prod);
-    out.add(prod.startsWith("www.") ? prod.slice(4) : `www.${prod}`);
-  }
+  // Only SAAS_HOSTS defines the product's hosts. Vercel's production-domain variable is deliberately NOT used: it names one of the
+  // project's domains (possibly a customer's own domain attached to the project), so trusting it would serve the product website there.
   if (env.NODE_ENV !== "production") {
     out.add("localhost");
     out.add("saas.localhost");
@@ -65,8 +60,6 @@ export function primarySaasHost(env: Record<string, string | undefined> = proces
     const h = normalize(raw);
     if (h) return h.replace(/^www\./, "");
   }
-  const prod = env.VERCEL_ENV === "production" ? normalize(env.VERCEL_PROJECT_PRODUCTION_URL ?? "") : null;
-  if (prod && !prod.endsWith(".vercel.app")) return prod.replace(/^www\./, "");
   return "localhost";
 }
 

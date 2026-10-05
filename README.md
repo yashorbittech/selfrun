@@ -125,7 +125,7 @@ tickets or docs.
 | Variable | Purpose |
 | --- | --- |
 | `SAAS_ADMIN_PASSWORD` | Optional. Password for that account. If omitted, a temporary one is printed once in the server log. **Wrap it in quotes** if it contains `#` or spaces, otherwise `.env` treats the rest as a comment |
-| `SAAS_HOSTS` | Production: comma-separated hosts serving the product website (`www.` variants are added). On Vercel production the project's own production domain is added automatically. Development: `localhost` is included |
+| `SAAS_HOSTS` | Production: comma-separated hosts serving the product website (`www.` variants are added). Required in production (it is the only thing that marks a host as the product's). Development: `localhost` is included |
 | `PLATFORM_ROOT_DOMAIN` | Production: the domain under which company addresses live (`<slug>.<domain>`) |
 | `PLATFORM_WILDCARD_SUBDOMAINS` | `1` once `*.<root domain>` is served by Vercel (see the deploy guide) |
 | `PLATFORM_ENCRYPTION_KEY` | Encrypts platform secrets stored in the database. Generate once and keep it |

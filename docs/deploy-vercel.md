@@ -351,7 +351,7 @@ You add **four** domain names to the project. Do them one by one.
 > ✅ **Checkpoint:** four domains are listed (`www`, the bare domain with a redirect, `app`, and `*`), all marked as needing DNS.
 
 > [!TIP]
-> The platform treats the project's production domain as a website host automatically, but still set `SAAS_HOSTS` (step 6) as a safety net.
+> `SAAS_HOSTS` (step 6) is the only thing that marks a host as the product's website, so it must be set. Customers' own domains attached to this project are never treated as the product's.
 
 ---
 
