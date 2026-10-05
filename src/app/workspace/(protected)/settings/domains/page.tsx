@@ -27,7 +27,7 @@ export default async function DomainsSettingsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: "Domains" }]}
           title={<>Domains</>}
-          description={<>Serve your website on your own domain. Your panels (this workspace) are served at <strong>{panelsUrl.replace(/^https?:\/\//, "")}</strong>, and at <strong>app.&lt;your domain&gt;</strong> once you connect one. SSL certificates are issued automatically once DNS is in place.</>}
+          description={<>Put your website on your own domain, and your panels (this workspace) on <strong>app.&lt;your domain&gt;</strong>. Right now your panels are at <strong>{panelsUrl.replace(/^https?:\/\//, "")}</strong>. Follow the steps below; the SSL padlock is added automatically.</>}
         />
 <div className="space-y-4">
         <GlassCard>

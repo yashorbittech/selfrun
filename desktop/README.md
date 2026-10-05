@@ -19,7 +19,7 @@ the change up the next time it starts, or within 30 minutes while it runs. The l
 
 On the platform, nobody runs `build:company` by hand: when a company completes onboarding (and when its name or icon changes) the
 platform starts the **Desktop apps** workflow, which builds Windows, macOS and Linux apps for that company, publishes them and
-puts the download links on the company's **Workspace → Settings → Apps** page. See "Desktop apps (automatic builds)" in
+puts the download links on the company's **Workspace → Settings → Apps** page. See "Optional: automatic desktop and mobile apps" (step 15) in
 `docs/deploy-vercel.md` for the one-time setup. The workflow runs `scripts/build-company.mjs` and then `scripts/publish-build.mjs`
 (uploads to the public releases repository and reports back through `scripts/ci-report.mjs`).
 

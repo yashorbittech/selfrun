@@ -190,14 +190,16 @@ async function lookupHost(host: string): Promise<HostInfo | null> {
   // A company's own verified domain wins over the generic platform hosts, so a customer can be served on a domain that
   // used to be the platform's (a deployment's production URL) without any special case. `app.<its domain>` is the same
   // company's panels.
-  const candidates = [host, bare];
+  const wwwHost = `www.${bare}`;
+  const candidates = [host, bare, wwwHost]; // `acme.com` and `www.acme.com` are one site, whichever was added
   const appBase = host.startsWith("app.") ? host.slice(4) : null;
-  if (appBase) candidates.push(appBase, appBase.startsWith("www.") ? appBase.slice(4) : appBase);
+  // `app.acme.com` is the panels of the company whose domain is `acme.com` OR `www.acme.com` (routing treats them as one).
+  if (appBase) candidates.push(appBase, appBase.startsWith("www.") ? appBase.slice(4) : `www.${appBase}`);
   const domain = await db
     .collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION)
     .find({ _id: { $in: candidates }, status: "verified" }, { projection: { companyId: 1 } })
     .toArray();
-  const direct = domain.find((d) => d._id === host || d._id === bare);
+  const direct = domain.find((d) => d._id === host || d._id === bare || d._id === wwwHost);
   if (direct) {
     const id = await activeId(direct.companyId);
     return id ? { companyId: id, surface: "site" } : null;

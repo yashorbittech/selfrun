@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { CompanyDomainView, DomainActionResult, RecordState } from "@/lib/platform/domains/types";
+import DomainsGuide from "@/components/platform/DomainsGuide";
 
 export interface DomainsManagerActions {
   add: (host: string) => Promise<DomainActionResult>;
@@ -145,6 +146,7 @@ export default function DomainsManager({ initial, maxCustom, actions }: { initia
 
   return (
     <div className="space-y-6">
+      <DomainsGuide domains={domains} />
       <form
         className="space-y-2"
         onSubmit={(e) => {
@@ -187,7 +189,7 @@ export default function DomainsManager({ initial, maxCustom, actions }: { initia
           </Button>
         </div>
         <p id="domain-host-help" className="text-xs text-muted-foreground">
-          {atLimit ? `You've connected the maximum of ${maxCustom} custom domains. Remove one to add another.` : "A domain you own, such as www.yourcompany.com or app.yourcompany.com. You'll verify it with a DNS record next."}
+          {atLimit ? `You've connected the maximum of ${maxCustom} custom domains. Remove one to add another.` : "A domain you own, such as www.yourcompany.com. Your panels are set up for you at app.yourcompany.com. You'll verify the domain with a DNS record next (see the steps above)."}
         </p>
         {addError && (
           <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">

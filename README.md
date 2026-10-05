@@ -264,7 +264,7 @@ Each platform of a build reports back and the download links appear on the Apps 
 job generates apps for companies that finished onboarding earlier, restarts builds that never finished (up to 3 tries), and
 rebuilds the apps when the company's name or icon changes (switchable).
 Colours, shortcuts and the start page need no rebuild: every installed desktop app reads them from the server. One-time platform setup:
-[docs/deploy-vercel.md](./docs/deploy-vercel.md#desktop-and-mobile-apps-automatic-builds). Until the build service is connected, builds wait in
+[docs/deploy-vercel.md](./docs/deploy-vercel.md#15-optional-automatic-desktop-and-mobile-apps). Until the build service is connected, builds wait in
 the queue and start by themselves once it is.
 
 ### Desktop app (Windows, macOS, Linux)

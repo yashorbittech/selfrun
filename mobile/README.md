@@ -18,7 +18,7 @@ node scripts/build-company-mobile.mjs --origin https://acme-app.selfrunbusiness.
 
 The script downloads `/api/apps/assets/pack/<platform>` from the workspace, applies the icons for every density, the splash, the
 version and the company name and id (`com.selfrun.<slug>`), and zips the project. The platform runs it automatically (see
-`.github/workflows/desktop.yml` and "Desktop and mobile apps (automatic builds)" in `docs/deploy-vercel.md`).
+`.github/workflows/desktop.yml` and step 15 of `docs/deploy-vercel.md`).
 
 Good to know: the app shows the live workspace inside a web view. Push notifications on a phone come from the PWA (Android and
 iPhone Home Screen); native push would need your own Firebase / Apple push setup. Apple may question apps that only wrap a website:
