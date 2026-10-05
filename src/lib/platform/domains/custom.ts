@@ -161,7 +161,22 @@ export function toView(d: CompanyDomain): CompanyDomainView {
 /** All of the current company's domains — the automatic address first, then primary, then oldest. */
 export async function listCompanyDomains(): Promise<CompanyDomainView[]> {
   const companyId = await currentCompanyId();
-  const rows = await (await domainsCollection()).find({ companyId }).toArray();
+  const domains = await domainsCollection();
+  let rows = await domains.find({ companyId }).toArray();
+  // A verified domain's panels host (`app.<domain>`) is attached and checked at the hosting provider on its own: whenever it has never
+  // been looked at, or is still waiting (ownership proof, DNS), fetch its state now so the records to publish are listed without
+  // anyone having to press a button. Throttled, so reopening the page doesn't hammer the provider.
+  const stale = rows.filter((d) => {
+    if (d.kind !== "custom" || d.status !== "verified" || d._id.endsWith(".localhost")) return false;
+    const ap = d.appProvider;
+    if (!ap) return true;
+    if (ap.id === "manual" || ap.id === "wildcard" || (ap.attached && ap.verified && ap.dnsConfigured)) return false;
+    return Date.now() - ap.checkedAt.getTime() > 60_000;
+  });
+  if (stale.length) {
+    await Promise.all(stale.map((d) => syncAppHost(d._id, d.appProvider?.attached ? (d.appProvider.verified ? "status" : "verify") : "add").catch(() => null)));
+    rows = await domains.find({ companyId }).toArray();
+  }
   const rank = (d: CompanyDomain) => (d.kind === "subdomain" ? 0 : d.isPrimary ? 1 : 2);
   rows.sort((a, b) => rank(a) - rank(b) || a.createdAt.getTime() - b.createdAt.getTime());
   return rows.map(toView);
