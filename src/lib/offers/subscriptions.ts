@@ -2,6 +2,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/offers/db";
 import { notifyPortalUser } from "@/lib/portal/notifications";
+import { queueBroadcast } from "@/lib/webpush/send";
 import type { SubscriptionInput, SubscriptionSource } from "@/lib/offers/subscription-validation";
 import type { Audience } from "@/lib/offers/constants";
 
@@ -79,6 +80,9 @@ export async function dispatchCampaignStart(campaign: { _id: string; name: strin
     .collection<{ _id: string; startNotifiedAt?: Date }>("offer_campaigns")
     .findOneAndUpdate({ _id: campaign._id, startNotifiedAt: { $exists: false } }, { $set: { startNotifiedAt: new Date() } });
   if (!claimed) return null; // already dispatched
+
+  // Website visitors who opted in to offers get a push (once: the stamp above guarantees it).
+  await queueBroadcast({ topic: "offers", title: `${campaign.name} is live`, body: "New offers are available now. Tap to see them.", url: "/offers", trigger: "offer" });
 
   const c = await getCollection();
   const subs = await c.find({ $or: [{ campaignId: campaign._id }, { campaignId: null }], notifiedCampaignIds: { $ne: campaign._id } }).toArray();

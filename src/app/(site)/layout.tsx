@@ -1,5 +1,6 @@
 import Header, { type HeaderVariant } from "@/components/Header";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
+import WebPushPrompt from "@/components/webpush/WebPushPrompt";
 import SiteFooter from "@/components/footer/SiteFooter";
 import { layoutCss } from "@/lib/cms/component-variants";
 import { ThemeVariantsProvider } from "@/components/cms/ThemeVariantsContext";
@@ -62,6 +63,7 @@ export default async function SiteLayout({
       <CmsAdminToolbar />
       {/* Floating contact buttons — website only, never shown in panels. */}
       <FloatingContactButtons />
+      <WebPushPrompt />
     </OfferClaimProvider>
   );
 }

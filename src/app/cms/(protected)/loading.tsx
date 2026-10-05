@@ -4,7 +4,7 @@ import GlassCard from "@/components/lms/GlassCard";
 /** Shown while a CMS screen loads — mirrors the header + toolbar + list layout every screen uses. */
 export default function CmsLoading() {
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6" aria-busy="true" aria-label="Loading">
+    <div className="space-y-4" aria-busy="true" aria-label="Loading">
       <div className="space-y-2">
         <Skeleton className="h-3.5 w-32" />
         <div className="flex items-center gap-3">

@@ -1,7 +1,7 @@
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION, type Company } from "@/lib/platform/tenancy/companies";
-import { companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl } from "@/lib/platform/tenancy/provisioning";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { recordPlatformAudit } from "@/lib/platform/audit";
@@ -363,7 +363,7 @@ async function notify(companyId: string, kind: NoticeKind): Promise<void> {
     if (!to) return;
     const plan = sub ? await getPlan(sub.planId) : null;
     const planName = plan?.name ?? "your plan";
-    const url = `${companyBaseUrl(company.slug)}/workspace/settings/billing`;
+    const url = `${companyAppBaseUrl(company.slug)}/workspace/settings/billing`;
     const copy: Record<NoticeKind, { subject: string; heading: string; paragraphs: string[]; label: string }> = {
       payment_failed: {
         subject: `Payment failed for ${company.name}`,

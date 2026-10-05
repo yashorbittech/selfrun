@@ -19,7 +19,7 @@ export default async function CmsThemeEditPage({ params }: { params: Promise<{ k
   if (!doc) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Themes", href: "/cms/theme" }, { label: doc.name }]}
         icon={Palette}

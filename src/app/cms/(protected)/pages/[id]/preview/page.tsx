@@ -16,7 +16,7 @@ export default async function CmsPagePreviewPage({ params }: { params: Promise<{
   if (!page) notFound();
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Pages", href: "/cms/pages" }, { label: displayTitle(page.title, page.path), href: `/cms/pages/${page._id}` }, { label: "Preview" }]}
         icon={Eye}

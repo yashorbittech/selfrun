@@ -75,11 +75,17 @@ const at = (days, minutes = 0) => new Date(NOW - days * DAY - minutes * 60000);
 const tokens = (text) => Math.max(1, Math.round(text.length / 4));
 const cost = (inT, outT) => (inT * PRICE.input + outT * PRICE.output) / 1_000_000;
 
+/** Filter for this seeder's rows. Matched by id list, not a regex: keyed collections store `<companyId>::<id>`, which an `^id` regex cannot match. */
+async function demoRows(db, collection) {
+  const ids = (await db.collection(collection).find({}, { projection: { _id: 1 } }).toArray()).map((d) => d._id).filter((id) => String(id).startsWith(D));
+  return { _id: { $in: ids } };
+}
+
 /** Deletes the OpenAI objects the previous run created. Best-effort — they may already be gone. */
 async function cleanupOpenAI(db, openai) {
-  const bots = await db.collection("aibots_bots").find({ _id: new RegExp(`^${D}`) }, { projection: { vectorStoreId: 1 } }).toArray();
-  const files = await db.collection("aibots_files").find({ _id: new RegExp(`^${D}`) }, { projection: { openaiFileId: 1 } }).toArray();
-  const chats = await db.collection("aibots_chats").find({ _id: new RegExp(`^${D}`) }, { projection: { conversationId: 1 } }).toArray();
+  const bots = await db.collection("aibots_bots").find(await demoRows(db, "aibots_bots"), { projection: { vectorStoreId: 1 } }).toArray();
+  const files = await db.collection("aibots_files").find(await demoRows(db, "aibots_files"), { projection: { openaiFileId: 1 } }).toArray();
+  const chats = await db.collection("aibots_chats").find(await demoRows(db, "aibots_chats"), { projection: { conversationId: 1 } }).toArray();
   let n = 0;
   const drop = (p) => p.then(() => n++).catch(() => {});
   await Promise.all([
@@ -115,8 +121,7 @@ export async function seedAibots(db, { openai = null, log = () => {} } = {}) {
   // ── Reset previous demo rows (and their OpenAI objects) ──────────────
   const cleaned = openai ? await cleanupOpenAI(db, openai) : 0;
   if (cleaned) log(`   removed ${cleaned} OpenAI object(s) from the previous run`);
-  const demoRows = { _id: new RegExp(`^${D}`) };
-  for (const c of ["aibots_bots", "aibots_files", "aibots_chats", "aibots_runs", "aibots_activity_logs"]) await db.collection(c).deleteMany(demoRows);
+  for (const c of ["aibots_bots", "aibots_files", "aibots_chats", "aibots_runs", "aibots_activity_logs"]) await db.collection(c).deleteMany(await demoRows(db, c));
 
   // Settings are admin-owned: only create the defaults when none exist yet.
   await db.collection("aibots_settings").updateOne(

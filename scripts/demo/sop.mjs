@@ -64,7 +64,7 @@ export async function seedSop(db) {
     let empId = null;
     if (dept) {
       empId = `${D}emp-${local}`;
-      await db.collection("hrms_employees").deleteOne({ _id: empId });
+      await db.collection("hrms_employees").deleteMany({ $or: [{ _id: empId }, { email }, { workEmail: email }] });
       await db.collection("hrms_employees").insertOne({
         _id: empId, employeeCode: `DSOP-${String(i + 1).padStart(3, "0")}`, firstName: local[0].toUpperCase() + local.slice(1), lastName: "Demo", workEmail: email, email, /* legacy unique `email` index exists on some databases */ status: "active",
         personal: { dateOfBirth: null, gender: null, maritalStatus: null, personalEmail: null, phone: null, addressLine: null, city: null, state: null, postalCode: null, photoKey: null },

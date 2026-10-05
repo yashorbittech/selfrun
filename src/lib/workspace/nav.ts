@@ -37,6 +37,7 @@ import { resolvePermission, type RoleContext } from "@/lib/permission-overrides"
 export type NavSectionKey = "dashboard" | "panels" | "analytics" | "manage" | "company" | "account" | "platform";
 
 export type NavIcon =
+  | "smartphone"
   | "dashboard"
   | "users"
   | "projects"
@@ -245,7 +246,7 @@ const MANAGE: NavItemDef[] = MANAGE_PAGES.map(([group, path, label, icon, permis
 const COMPANY_GROUPS: Record<string, string> = {
   setup: "Organization", profile: "Organization", users: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
-  branding: "Branding & domains", domains: "Branding & domains",
+  branding: "Branding & domains", domains: "Branding & domains", app: "Branding & domains",
   payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation",
   audit: "Security & logs", security: "Security & logs",
 };
@@ -258,6 +259,7 @@ const COMPANY: NavItemDef[] = [
   company("invoices", "/workspace/settings/billing/invoices", "receipt", "Invoices & payments", "Tax invoices, credit notes and every payment made for your subscription."),
   company("usage", "/workspace/settings/usage", "gauge", "Usage", "Seats, AI tokens and file storage used against your plan's limits."),
   company("branding", "/workspace/settings/branding", "palette", "Branding", "Logo, name and colour across panels, emails and PDFs."),
+  company("app", "/workspace/settings/apps", "smartphone", "Apps & downloads", "Your company's own apps for phones and Windows, macOS and Linux computers: settings and download links, generated automatically.", "Apps"),
   company("domains", "/workspace/settings/domains", "globe", "Custom domains", "Your workspace address and your own custom domains, with automatic SSL.", "Domains"),
   company("payments", "/workspace/settings/payments", "bank", "Payment account", "Connect your own Razorpay account to collect invoice payments and pay salaries.", "Payments & payouts"),
   company("integrations", "/workspace/settings/integrations", "plug", "Integrations", "What your workspace is connected to: payment gateway, webhooks and your own domain."),

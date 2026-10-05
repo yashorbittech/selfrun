@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Files, Image as ImageIcon, Menu as MenuIcon, PanelBottom, ClipboardList, Palette, Settings, ScrollText,
-  BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush,
+  BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush, BellRing,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -124,6 +124,7 @@ export default function CmsSidebar({ flags, onNavigate, collapsed = false }: { f
       label: "Search",
       items: [{ href: "/cms/seo", label: "SEO Overview", icon: SearchCheck }],
     },
+    ...(flags.settings ? [{ label: "Engagement", items: [{ href: "/cms/push", label: "Push notifications", icon: BellRing }] }] : []),
     {
       label: "Settings",
       items: [

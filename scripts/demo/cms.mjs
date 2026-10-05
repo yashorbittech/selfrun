@@ -133,7 +133,7 @@ function reorderedWebAppDevSections() {
 
 const DRAFT_PAGES = [
   // "/" and "/services" are seeded with EMPTY drafts on purpose: their real
-  // content comes from the content migration (npm run db:migrate-cms-content),
+  // content comes from the content migration (content migration),
   // which publishes it and drops an empty placeholder draft like these.
   // Seeding a partial section list here instead would mean publishing it
   // deletes every section it doesn't list from the live page.

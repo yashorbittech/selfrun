@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { slugFormatError } from "@/lib/platform/tenancy/slug";
-import { COMPANIES_COLLECTION, COMPANY_DOMAINS_COLLECTION, forgetCompanyRouting, type Company, type CompanyDomain } from "@/lib/platform/tenancy/companies";
+import { APP_SLUG_SUFFIX, COMPANIES_COLLECTION, COMPANY_DOMAINS_COLLECTION, forgetCompanyRouting, type Company, type CompanyDomain } from "@/lib/platform/tenancy/companies";
 import { activeDomainProvider, type DomainStatus } from "@/lib/platform/domains";
 import { loadIntegrationsDoc, resolvedRootDomain } from "@/lib/platform/integrations/store";
 import { getPlatformSettings, reservedSlugError } from "@/lib/platform/settings";
@@ -14,8 +14,7 @@ import { startTrial } from "@/lib/platform/billing/subscription";
 import { isSubdomainOfRoot, rootDomainFromHost } from "@/lib/platform/tenancy/root-domain";
 
 /**
- * Creating a company (tenant): the one code path shared by self-serve sign-up
- * and the `db:create-company` script, so both produce identical workspaces.
+ * Creating a company (tenant): the one code path used by self-serve sign-up, so every company gets an identical workspace.
  */
 
 export { slugFormatError, slugFromName } from "@/lib/platform/tenancy/slug";
@@ -48,12 +47,26 @@ export function companySubdomain(slug: string): string {
   return `${slug}.${platformRootDomain()}`;
 }
 
+/** `<slug>-app.<root>` — the address of a company's panels (Workspace, HRMS, …); its website stays on `<slug>.<root>`. */
+export function companyAppSubdomain(slug: string): string {
+  return `${slug}${APP_SLUG_SUFFIX}.${platformRootDomain()}`;
+}
+
 /**
  * Absolute base URL for a company's workspace. On `localhost` it keeps the
  * port of the request the link is being built from (`hostHint`), since
  * `*.localhost` resolves to the same machine.
  */
 export function companyBaseUrl(slug: string, hostHint?: string | null): string {
+  return baseUrlFor(slug, hostHint);
+}
+
+/** Absolute base URL of a company's PANELS host (`<slug>-app.<root>`): where Workspace and every other panel live. */
+export function companyAppBaseUrl(slug: string, hostHint?: string | null): string {
+  return baseUrlFor(`${slug}${APP_SLUG_SUFFIX}`, hostHint);
+}
+
+function baseUrlFor(label: string, hostHint?: string | null): string {
   let root = platformRootDomain();
   if (root === "localhost" && process.env.NODE_ENV === "production") {
     // Production with no root domain configured must never print a localhost address: derive it from the host the
@@ -66,9 +79,9 @@ export function companyBaseUrl(slug: string, hostHint?: string | null): string {
   }
   if (root === "localhost") {
     const port = hostHint?.match(/:(\d+)$/)?.[1] ?? process.env.PORT ?? "3000";
-    return `http://${slug}.localhost:${port}`;
+    return `http://${label}.localhost:${port}`;
   }
-  return `https://${slug}.${root}`;
+  return `https://${label}.${root}`;
 }
 
 export interface NewCompany {
@@ -145,7 +158,8 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
     { $setOnInsert: { companyId: company._id, status: "verified", verificationToken: randomUUID(), isPrimary: true, kind: "subdomain", createdAt: now, verifiedAt: now } },
     { upsert: true },
   );
-  const hostingError = await attachAtProvider(host);
+  // Its panels host (`<slug>-app.<root>`) is derived from the slug and needs no record of its own, only the provider attach.
+  const [hostingError, appHostingError] = await Promise.all([attachAtProvider(host), attachAtProvider(companyAppSubdomain(input.slug))]);
   forgetCompanyRouting();
 
   // Every new company starts on a free trial of the default plan. Non-fatal.
@@ -154,7 +168,7 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
   // A working public site from minute one (neutral starter pages, editable in the CMS). Non-fatal.
   await runAsCompany(company._id, () => publishStarterWebsite()).catch((err) => console.error(`[provisioning] starter website for ${company.slug} failed`, err));
 
-  return { ok: true, companyId: company._id, adminId, host, hostingError };
+  return { ok: true, companyId: company._id, adminId, host, hostingError: hostingError ?? appHostingError };
 }
 
 /**

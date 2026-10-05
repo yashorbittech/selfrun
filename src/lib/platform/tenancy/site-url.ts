@@ -6,7 +6,8 @@ import { siteUrl as PLATFORM_OWNER_SITE_URL } from "@/lib/seo";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { COMPANY_DOMAINS_COLLECTION, getCompany, type CompanyDomain } from "@/lib/platform/tenancy/companies";
-import { companyBaseUrl, companySubdomain, platformRootDomain } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl, companyBaseUrl, companySubdomain, platformRootDomain } from "@/lib/platform/tenancy/provisioning";
+import { saasAppOrigin } from "@/lib/saas/hosts";
 import { loadIntegrationsDoc } from "@/lib/platform/integrations/store";
 
 /**
@@ -101,4 +102,24 @@ export async function companySiteUrl(): Promise<string> {
 /** The current company's public site host, e.g. `acme.com` (with port on localhost). */
 export async function companySiteHost(): Promise<string> {
   return new URL(await companySiteUrl()).host;
+}
+
+/**
+ * Where the current company's PANELS live (Workspace, HRMS, Platform Panel, …), as an origin without a trailing slash:
+ * `app.<primary custom domain>` when it has one, else `<slug>-app.<root>`; the platform operator's is `app.<SaaS host>`.
+ * The public website (`siteUrlForCompany`) never serves panels.
+ */
+export async function appUrlForCompany(companyId: string, hostHint: string | null = null): Promise<string> {
+  const [company] = await Promise.all([getCompany(companyId), loadIntegrationsDoc()]);
+  if (!company) throw new Error(`Unknown company ${companyId}`);
+  if (company.isPlatformOwner) return saasAppOrigin(hostHint);
+  const db = await getPlatformDb();
+  const primary = await db
+    .collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION)
+    .find({ companyId, status: "verified", isPrimary: true, kind: "custom" })
+    .sort({ verifiedAt: 1, _id: 1 })
+    .limit(1)
+    .next();
+  if (primary && !primary._id.endsWith(".localhost")) return `https://app.${primary._id.replace(/^www\./, "")}`;
+  return companyAppBaseUrl(company.slug, hostHint);
 }

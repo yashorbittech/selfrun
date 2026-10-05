@@ -4,6 +4,8 @@ import { newId } from "@/lib/hrms/db";
 import type { CurrentHrmsUser } from "@/lib/hrms-auth";
 import { hasStaffRole } from "@/lib/hrms-roles";
 import { todayDateString } from "@/lib/hrms/time";
+import { queuePush, userIdsWithRoles } from "@/lib/push/send";
+import { categorizeType } from "@/lib/push/categories";
 
 /**
  * In-app HR notifications. Two audiences:
@@ -96,6 +98,8 @@ export async function notify(input: NotifyInput): Promise<void> {
       dedupeKey: input.dedupeKey ?? null,
       createdAt: new Date(),
     });
+    const recipients = input.recipientUserId ? [input.recipientUserId] : input.audience === "staff" ? await userIdsWithRoles(["super_admin", "hr", "manager"]) : [];
+    await queuePush("staff", recipients, { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
   } catch {
     // A duplicate-key race on dedupeKey, or any other failure — non-fatal.
   }

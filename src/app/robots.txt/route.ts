@@ -1,6 +1,6 @@
 import { getSeoSiteState } from "@/lib/seo-panel/public";
 import { defaultRobots } from "@/lib/seo-panel/robots-store";
-import { onSaasHost, saasOrigin } from "@/lib/saas/request";
+import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
 import { saasRobots } from "@/lib/saas/seo";
 
 /**
@@ -11,6 +11,8 @@ import { saasRobots } from "@/lib/saas/seo";
  * the panel reaches the live file without a deploy.
  */
 export async function GET() {
+  // Panels hosts have nothing to index.
+  if (await onAppSurface()) return new Response("User-agent: *\nDisallow: /\n", { headers: { "Content-Type": "text/plain; charset=utf-8" } });
   // The SaaS product's own host serves the product's robots.txt, never a customer's.
   if (await onSaasHost()) return new Response(saasRobots(await saasOrigin()), { headers: { "Content-Type": "text/plain; charset=utf-8" } });
   const { robotsTxt } = await getSeoSiteState();

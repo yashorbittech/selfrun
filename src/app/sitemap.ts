@@ -9,7 +9,7 @@ import type { EngagementCategory } from "@/types/content";
 import { getSeoSiteState } from "@/lib/seo-panel/public";
 import { loadProducts } from "@/lib/products/server";
 import { isProductsHref, productHref } from "@/lib/products/shared";
-import { onSaasHost, saasOrigin } from "@/lib/saas/request";
+import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
 import { saasSitemap } from "@/lib/saas/seo";
 
 const APP_DIR = path.join(process.cwd(), "src/app/(site)");
@@ -113,6 +113,7 @@ export async function baseSitemap(): Promise<MetadataRoute.Sitemap> {
  * set to noindex, are dropped; priority / change frequency overrides win.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (await onAppSurface()) return [];
   if (await onSaasHost()) return saasSitemap(await saasOrigin());
   const entries = await baseSitemap();
   const { sitemap: overrides, overrides: meta } = await getSeoSiteState();

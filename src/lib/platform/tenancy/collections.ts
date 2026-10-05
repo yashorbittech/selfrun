@@ -31,6 +31,8 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "support_articles",
   "support_config",
   "support_counters",
+  // Desktop app builds: the platform's build pipeline (rows carry their companyId; see lib/apps/store.ts)
+  "app_builds",
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
   "saas_inquiries",
 ]);
@@ -60,6 +62,8 @@ export const KEYED_COLLECTIONS = new Set<string>([
   // Settings / config singletons
   "aibots_settings",
   "cms_settings",
+  "web_push_settings",
+  "pwa_settings",
   "dlms_settings",
   "hrms_settings",
   "hrms_company",

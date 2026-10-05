@@ -13,7 +13,7 @@ export default async function CmsFormsPage() {
   const fields = await getFormDoc("contact", CONTACT_FORM_FIELD_NAMES);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Forms" }]}
         icon={ClipboardList}

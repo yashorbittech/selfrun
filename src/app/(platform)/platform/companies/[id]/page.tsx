@@ -10,7 +10,8 @@ import GlassCard from "@/components/lms/GlassCard";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { can, requirePlatformPermission } from "@/lib/platform/console/access";
 import { getCompanyDetail } from "@/lib/platform/console/companies";
-import { companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl, companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { saasAppOrigin } from "@/lib/saas/hosts";
 import { requestOrigin } from "@/lib/platform/request";
 import StatusBadge from "../StatusBadge";
 import StatusControl from "./StatusControl";
@@ -44,6 +45,7 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
   const domains = await listDomainsForCompany(company.id);
   const { host } = await requestOrigin();
   const base = companyBaseUrl(company.slug, host);
+  const appBase = company.isPlatformOwner ? saasAppOrigin(host) : companyAppBaseUrl(company.slug, host);
   const { onboarding: ob } = company;
   const [allAddons, heldAddons] = company.isPlatformOwner ? [[], []] : await Promise.all([listAddons(), getCompanyAddons(company.id)]);
   const trial = company.isPlatformOwner ? null : await getTrialOverview(company.id);
@@ -58,6 +60,9 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
             <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1">
               <a href={base} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground">
                 {base.replace(/^https?:\/\//, "")} <ExternalLink className="size-3" />
+              </a>
+              <a href={appBase} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-foreground">
+                Panels: {appBase.replace(/^https?:\/\//, "")} <ExternalLink className="size-3" />
               </a>
               <StatusBadge status={company.status} isPlatformOwner={company.isPlatformOwner} />
             </span>

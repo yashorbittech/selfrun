@@ -3,6 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/wallet/db";
 import type { ReferralQualifyingEvent, RewardRuleAudience } from "@/lib/wallet/constants";
 import type { ReferralCampaignWriteInput } from "@/lib/wallet/campaign-validation";
+import { queueBroadcast } from "@/lib/webpush/send";
 
 export const CAMPAIGNS_COLLECTION = "wallet_referral_campaigns";
 
@@ -53,14 +54,25 @@ export async function getCampaign(id: string): Promise<ReferralCampaign | null> 
   return (await getCollection()).findOne({ _id: id, ...notDeleted });
 }
 
+/** A reward campaign is live: website visitors subscribed to "Credits and rewards" get a push (no-op when website push is off). */
+async function announce(name: string): Promise<void> {
+  await queueBroadcast({ topic: "rewards", title: `Earn credits: ${name}`, body: "A new rewards campaign is on. Tap to see how to earn.", url: "/rewards", trigger: "reward" });
+}
+
 export async function createCampaign(data: ReferralCampaignWriteInput, actorId: string): Promise<ReferralCampaign> {
   const doc: ReferralCampaign = { _id: newId(), ...toDoc(data), ...createStamp(actorId) };
   await (await getCollection()).insertOne(doc);
+  if (doc.isActive) await announce(doc.name);
   return doc;
 }
 
 export async function updateCampaign(id: string, data: ReferralCampaignWriteInput, actorId: string): Promise<ReferralCampaign | null> {
-  return (await getCollection()).findOneAndUpdate({ _id: id, ...notDeleted }, { $set: { ...toDoc(data), ...updateStamp(actorId) } }, { returnDocument: "after" });
+  const col = await getCollection();
+  const before = await col.findOne({ _id: id, ...notDeleted }, { projection: { isActive: 1 } });
+  const after = await col.findOneAndUpdate({ _id: id, ...notDeleted }, { $set: { ...toDoc(data), ...updateStamp(actorId) } }, { returnDocument: "after" });
+  // Switched on just now: tell the visitors who asked to hear about rewards.
+  if (after?.isActive && before && !before.isActive) await announce(after.name);
+  return after;
 }
 
 export async function deleteCampaign(id: string, actorId: string): Promise<void> {

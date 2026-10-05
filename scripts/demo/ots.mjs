@@ -321,7 +321,7 @@ export async function seedOts(db) {
     if (a.dept) {
       empId = `${D}emp-${local}`;
       const d = dept(a.dept);
-      await db.collection("hrms_employees").deleteOne({ _id: empId });
+      await db.collection("hrms_employees").deleteMany({ $or: [{ _id: empId }, { email: a.email }, { workEmail: a.email }] });
       await db.collection("hrms_employees").insertOne({
         _id: empId, employeeCode: `DOTS-${String(i + 1).padStart(3, "0")}`, firstName: local[0].toUpperCase() + local.slice(1), lastName: "Demo", workEmail: a.email, email: a.email, status: "active",
         personal: { dateOfBirth: null, gender: null, maritalStatus: null, personalEmail: null, phone: null, addressLine: null, city: null, state: null, postalCode: null, photoKey: null },

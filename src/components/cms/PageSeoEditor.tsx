@@ -79,7 +79,7 @@ export default function PageSeoEditor({
   };
 
   return (
-    <div id="seo" className="mx-auto max-w-4xl scroll-mt-4 px-4 pb-6 sm:px-6">
+    <div id="seo" className="scroll-mt-4 pb-6">
       <GlassCard className="space-y-4 p-5">
         <div>
           <h2 className="text-lg font-semibold text-foreground">SEO &amp; structured data</h2>

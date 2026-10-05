@@ -18,7 +18,7 @@ export default async function CmsCollectionRecordPage({ params }: { params: Prom
   if (!rec) notFound();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Collections", href: "/cms/collections" }, { label: def.label, href: `/cms/collections/${key}` }, { label: def.titleOf(def.parse(rec.data) ?? rec.data) || slug }]}
         icon={COLLECTION_META[key as CollectionKey].icon}

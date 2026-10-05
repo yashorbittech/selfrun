@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import GlassCard from "@/components/lms/GlassCard";
 import { getCurrentHubUser } from "@/lib/hub-auth";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
 import { listCompanyDomains, MAX_CUSTOM_DOMAINS } from "@/lib/platform/domains/custom";
 import DomainsManager from "@/components/platform/DomainsManager";
 import { addDomainAction, removeDomainAction, setPrimaryDomainAction, verifyDomainAction } from "./actions";
@@ -17,6 +19,7 @@ export default async function DomainsSettingsPage() {
   if (!user) redirect("/workspace/login");
   if (!user.roles.includes("super_admin")) redirect("/workspace");
   const domains = await listCompanyDomains();
+  const panelsUrl = await appUrlForCompany(await currentCompanyId());
 
   return (
     <div className="min-h-screen bg-muted/70 px-4 py-10 dark:bg-background">
@@ -24,7 +27,7 @@ export default async function DomainsSettingsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: "Domains" }]}
           title={<>Domains</>}
-          description={<>Serve your workspace and website on your own domain. SSL certificates are issued automatically once DNS is in place.</>}
+          description={<>Serve your website on your own domain. Your panels (this workspace) are served at <strong>{panelsUrl.replace(/^https?:\/\//, "")}</strong>, and at <strong>app.&lt;your domain&gt;</strong> once you connect one. SSL certificates are issued automatically once DNS is in place.</>}
         />
 <div className="space-y-4">
         <GlassCard>

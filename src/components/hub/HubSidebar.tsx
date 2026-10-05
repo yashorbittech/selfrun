@@ -39,6 +39,7 @@ import {
   Bell,
   FileText,
   LifeBuoy,
+  Smartphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -69,6 +70,7 @@ const ICONS: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   receipt: ReceiptText,
   gauge: Gauge,
   palette: Palette,
+  smartphone: Smartphone,
   bank: Wallet,
   plug: Plug,
   zap: Zap,

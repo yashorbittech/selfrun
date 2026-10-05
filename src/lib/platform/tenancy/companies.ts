@@ -4,7 +4,7 @@ import type { DnsRecord } from "@/lib/platform/domains/types";
 import { RESERVED_SLUGS } from "@/lib/platform/tenancy/slug";
 import { cachedIntegrationsDoc, loadIntegrationsDoc } from "@/lib/platform/integrations/store";
 import { productionRootDomain } from "@/lib/platform/tenancy/root-domain";
-import { saasHosts } from "@/lib/saas/hosts";
+import { saasAppHosts, saasHosts } from "@/lib/saas/hosts";
 
 /**
  * The company (tenant) registry and host → company routing. Both
@@ -128,8 +128,15 @@ const MISS_TTL_MS = 5_000;
 const VERSION_CHECK_MS = 2_000;
 const ROUTING_VERSION_ID = "routing";
 
+/** Which side of a company a host serves: its public website, or its panels (Workspace, HRMS, …). */
+export type HostSurface = "site" | "app";
+export interface HostInfo {
+  companyId: string;
+  surface: HostSurface;
+}
+
 interface RoutingCache {
-  hosts: Map<string, { id: string | null; at: number }>;
+  hosts: Map<string, { info: HostInfo | null; at: number }>;
   owner: { id: string; at: number } | null;
   version: number | null;
   versionCheckedAt: number;
@@ -164,46 +171,76 @@ export async function getPlatformOwnerCompanyId(): Promise<string | null> {
   return owner?._id ?? null;
 }
 
-async function lookupHost(host: string): Promise<string | null> {
+/** The label a company's panels host carries after its slug: `<slug>-app.<root>`. Slugs may not end with it (see slug.ts). */
+export const APP_SLUG_SUFFIX = "-app";
+
+async function lookupHost(host: string): Promise<HostInfo | null> {
   const bare = host.startsWith("www.") ? host.slice(4) : host;
-  // The SaaS product's own host serves its sign-up and Platform Panel, which run in the platform operator's company scope.
-  if (saasHosts().has(host)) return getPlatformOwnerCompanyId();
+  // The SaaS product's own hosts run in the platform operator's company scope: the site hosts show its website, the
+  // `app.` hosts its panels (Platform Panel, Workspace, …).
+  if (saasHosts().has(host) || saasAppHosts().has(host)) {
+    const id = await getPlatformOwnerCompanyId();
+    return id ? { companyId: id, surface: saasAppHosts().has(host) ? "app" : "site" } : null;
+  }
 
   const db = await getPlatformDb();
   const companies = db.collection<Company>(COMPANIES_COLLECTION);
+  const activeId = async (companyId: string) => (await companies.findOne({ _id: companyId, status: "active" }, { projection: { _id: 1 } }))?._id ?? null;
 
   // A company's own verified domain wins over the generic platform hosts, so a customer can be served on a domain that
-  // used to be the platform's (a deployment's production URL) without any special case.
+  // used to be the platform's (a deployment's production URL) without any special case. `app.<its domain>` is the same
+  // company's panels.
+  const candidates = [host, bare];
+  const appBase = host.startsWith("app.") ? host.slice(4) : null;
+  if (appBase) candidates.push(appBase, appBase.startsWith("www.") ? appBase.slice(4) : appBase);
   const domain = await db
     .collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION)
-    .findOne({ _id: { $in: [host, bare] }, status: "verified" }, { projection: { companyId: 1 } });
-  if (domain) {
-    const company = await companies.findOne({ _id: domain.companyId, status: "active" }, { projection: { _id: 1 } });
-    return company?._id ?? null;
+    .find({ _id: { $in: candidates }, status: "verified" }, { projection: { companyId: 1 } })
+    .toArray();
+  const direct = domain.find((d) => d._id === host || d._id === bare);
+  if (direct) {
+    const id = await activeId(direct.companyId);
+    return id ? { companyId: id, surface: "site" } : null;
+  }
+  const viaApp = appBase ? domain[0] : undefined;
+  if (viaApp) {
+    const id = await activeId(viaApp.companyId);
+    return id ? { companyId: id, surface: "app" } : null;
   }
 
-  if (platformHosts().has(host) || platformHosts().has(bare)) return getPlatformOwnerCompanyId();
+  if (platformHosts().has(host) || platformHosts().has(bare)) {
+    const id = await getPlatformOwnerCompanyId();
+    return id ? { companyId: id, surface: "site" } : null;
+  }
 
   for (const root of platformRootDomains()) {
     if (!host.endsWith(`.${root}`)) continue;
-    const slug = host.slice(0, -(root.length + 1));
-    if (!slug || slug.includes(".") || RESERVED_SLUGS.has(slug)) continue;
+    const label = host.slice(0, -(root.length + 1));
+    if (!label || label.includes(".") || RESERVED_SLUGS.has(label)) continue;
+    const isApp = label.endsWith(APP_SLUG_SUFFIX);
+    const slug = isApp ? label.slice(0, -APP_SLUG_SUFFIX.length) : label;
+    if (!slug || RESERVED_SLUGS.has(slug)) continue;
     const company = await companies.findOne({ slug, status: "active" }, { projection: { _id: 1 } });
-    if (company) return company._id;
+    if (company) return { companyId: company._id, surface: isApp ? "app" : "site" };
   }
   return null;
 }
 
-export async function resolveCompanyIdByHost(rawHost: string | null | undefined): Promise<string | null> {
+/** The company a host belongs to and which side of it the host serves, or null when no active company owns it. */
+export async function resolveHostInfo(rawHost: string | null | undefined): Promise<HostInfo | null> {
   const host = normalizeHost(rawHost);
   if (!host) return null;
   // Also primes the integrations cache the synchronous root-domain accessors read.
   await Promise.all([followRoutingVersion(), loadIntegrationsDoc()]);
   const hit = routing.hosts.get(host);
-  if (hit && Date.now() - hit.at < (hit.id ? HIT_TTL_MS : MISS_TTL_MS)) return hit.id;
-  const id = await lookupHost(host);
-  routing.hosts.set(host, { id, at: Date.now() });
-  return id;
+  if (hit && Date.now() - hit.at < (hit.info ? HIT_TTL_MS : MISS_TTL_MS)) return hit.info;
+  const info = await lookupHost(host);
+  routing.hosts.set(host, { info, at: Date.now() });
+  return info;
+}
+
+export async function resolveCompanyIdByHost(rawHost: string | null | undefined): Promise<string | null> {
+  return (await resolveHostInfo(rawHost))?.companyId ?? null;
 }
 
 /**

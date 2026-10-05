@@ -41,7 +41,7 @@ export default async function CmsThemePreviewPage({
   const sections = key !== "default" && variantSections?.length ? variantSections : (selectedPage?.live?.sections ?? selectedPage?.draft.sections ?? []);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link href={`/cms/theme/${key}`} className="mb-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">

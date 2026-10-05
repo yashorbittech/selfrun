@@ -91,7 +91,7 @@ const P = (key: string, name: string, shortName: string, description: string, ic
   active: true,
 });
 
-/** The starter registry written by `npm run db:seed-panels` (and used as a fallback until it has run). */
+/** The starter registry written on first start (and used as a fallback until it has run). */
 export const DEFAULT_PANELS: PanelRecord[] = [
   P("workspace", "Workspace", "Workspace", "Your panels, analytics and company settings", "dashboard", 0, true),
   P("hrms", "HR & Payroll", "HR", "Employees, attendance, leave, payroll and recruitment", "users", 10),

@@ -54,7 +54,7 @@ export function hashPassword(password) {
   return `${salt}:${scryptSync(password, salt, 64).toString("hex")}`;
 }
 
-const FIRST = ["Aarav", "Vivaan", "Aditya", "Arjun", "Sai", "Reyansh", "Krishna", "Ishaan", "Rohan", "Kabir", "Ananya", "Diya", "Saanvi", "Aadhya", "Kavya", "Myra", "Anika", "Riya", "Priya", "Neha", "Rahul", "Amit", "Vikram", "Karan", "Nikhil", "Pooja", "Sneha", "Meera", "Shreya", "Anjali", "Divya", "Nisha", "Tanvi", "Harsh", "Yash", "Mohit", "Simran", "Aman", "Ritika", "Varun", "Isha", "Devansh", "Tara", "Zoya", "Farhan", "Imran", "Lakshmi", "Gautam", "Bhavna", "Sahil"];
+const FIRST = ["Aarav", "Vivaan", "Aditya", "Arjun", "Sai", "Reyansh", "Krishna", "Ishaan", "Rohan", "Kabir", "Ananya", "Diya", "Saanvi", "Aadhya", "Kavya", "Myra", "Anika", "Riya", "Priya", "Neha", "Rahul", "Amit", "Vikram", "Karan", "Nikhil", "Pooja", "Sneha", "Meera", "Shreya", "Anjali", "Divya", "Nisha", "Tanvi", "Harsh", "Mohit", "Simran", "Aman", "Ritika", "Varun", "Isha", "Devansh", "Tara", "Zoya", "Farhan", "Imran", "Lakshmi", "Gautam", "Bhavna", "Sahil"];
 const LAST = ["Sharma", "Verma", "Gupta", "Singh", "Kumar", "Patel", "Reddy", "Rao", "Nair", "Iyer", "Mehta", "Shah", "Joshi", "Chopra", "Malhotra", "Kapoor", "Bansal", "Agarwal", "Saxena", "Tiwari", "Khan", "Das", "Bose", "Menon", "Pillai", "Desai", "Chauhan", "Yadav", "Mishra", "Pandey"];
 let nameCounter = 0;
 export function personName() {

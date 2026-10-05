@@ -13,7 +13,7 @@ export default async function CmsSiteIdentityPage() {
   const info = await getSiteInfoForEdit();
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Site Identity" }]}
         icon={BadgeInfo}

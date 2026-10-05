@@ -15,7 +15,7 @@ export default async function CmsPagesPage({ searchParams }: { searchParams: Pro
   const title = area ? areaLabel(area) : "Pages";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={area ? [{ label: "Pages", href: "/cms/pages" }, { label: title }] : [{ label: "Pages" }]}
         icon={Files}

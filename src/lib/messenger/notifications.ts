@@ -1,6 +1,8 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/messenger/db";
+import { queuePush } from "@/lib/push/send";
+import { categorizeType } from "@/lib/push/categories";
 
 /**
  * Per-recipient Messenger notifications. `recipientUserId` is an `admin_users`
@@ -79,6 +81,7 @@ export async function notify(input: NotifyInput): Promise<void> {
       dedupeKey: input.dedupeKey ?? null,
       createdAt: new Date(),
     });
+    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
   } catch {
     // dup dedupeKey or transient error — ignore.
   }

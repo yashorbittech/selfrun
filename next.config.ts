@@ -43,6 +43,23 @@ const nextConfig: NextConfig = {
   // tracking scripts and chat widgets in CMS → Settings, which a fixed policy would block.)
   async headers() {
     return [
+      // The service worker must always be re-checked, and may control the whole origin.
+      {
+        source: "/web-sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
       {
         source: "/:path*",
         headers: [
@@ -64,7 +81,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        { source: "/:file((?!robots\\.txt$|sitemap[^/]*\\.xml$|manifest\\.json$)[A-Za-z0-9][A-Za-z0-9._-]*\\.(?:html?|xml|txt|json|js|csv))", destination: "/api/site-verification/:file" },
+        { source: "/:file((?!robots\\.txt$|sitemap[^/]*\\.xml$|manifest\\.json$|sw\\.js$|web-sw\\.js$|offline\\.html$)[A-Za-z0-9][A-Za-z0-9._-]*\\.(?:html?|xml|txt|json|js|csv))", destination: "/api/site-verification/:file" },
       ],
       afterFiles: [],
       fallback: [],

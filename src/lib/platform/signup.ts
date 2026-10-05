@@ -2,7 +2,7 @@ import "server-only";
 import { resolveBusiness, type BusinessSelection } from "@/lib/platform/business-taxonomy";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
-import { companyBaseUrl, createCompanyWithOwner, isSlugTaken, slugFormatError } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl, createCompanyWithOwner, isSlugTaken, slugFormatError } from "@/lib/platform/tenancy/provisioning";
 import { getSignupMode, platformEmailIdentity, reservedSlugError } from "@/lib/platform/settings";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
@@ -217,7 +217,7 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
   // "Address just taken" (two sign-ups racing for it) belongs on the address field.
   if (!created.ok) return { ok: false, errors: /address/i.test(created.error) ? { slug: created.error } : { form: created.error } };
 
-  const base = companyBaseUrl(input.slug, ctx.hostHint);
+  const base = companyAppBaseUrl(input.slug, ctx.hostHint);
   await sendOwnerVerification(created, base);
   return { ok: true, kind: "created", redirectTo: await issueHandoff(created, base) };
 }
@@ -253,7 +253,7 @@ export async function confirmSignup(token: string, ctx: { hostHint: string | nul
     return { ok: false, error: created.error };
   }
 
-  const base = companyBaseUrl(doc.slug, ctx.hostHint);
+  const base = companyAppBaseUrl(doc.slug, ctx.hostHint);
   void sendWorkspaceReadyEmail(doc, base);
 
   return { ok: true, redirectTo: await issueHandoff(created, base) };
@@ -325,7 +325,7 @@ export async function approveSignup(id: string, ctx: { hostHint: string | null }
     await pending.insertOne(doc);
     return { ok: false, error: created.error };
   }
-  const base = companyBaseUrl(doc.slug, ctx.hostHint);
+  const base = companyAppBaseUrl(doc.slug, ctx.hostHint);
   await sendOwnerVerification(created, base);
   const sent = await sendWorkspaceReadyEmail(doc, base, true);
   return { ok: true, companyId: created.companyId, host: created.host, emailed: sent.ok };

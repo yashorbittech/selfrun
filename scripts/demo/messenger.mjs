@@ -19,7 +19,7 @@ export async function seedMessenger(db, pms) {
 
   const users = await db.collection("chat_users").find({ deletedAt: null }).project({ _id: 1, displayName: 1 }).limit(60).toArray();
   if (users.length < 4) {
-    console.log("  ⚠ Messenger: no chat users found — run the base seeder first (npm run db:seed-demo). Skipped.");
+    console.log("  ⚠ Messenger: no chat users found. Skipped.");
     return;
   }
   const adminUser = await db.collection("chat_users").findOne({ email: "admin@example.com" }, { projection: { _id: 1, displayName: 1 } });

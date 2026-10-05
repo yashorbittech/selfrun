@@ -64,6 +64,7 @@ export function parseCustomDomain(raw: string): { ok: true; host: string } | { o
   if (labels.length < 2) return { ok: false, error: "Enter a full domain including its ending, like yourcompany.com." };
   if (!labels.every((l) => LABEL_RE.test(l))) return { ok: false, error: "That doesn't look like a domain name." };
   if (!TLD_RE.test(labels[labels.length - 1])) return { ok: false, error: "That domain ending isn't valid." };
+  if (labels[0] === "app") return { ok: false, error: "Add your main domain (like yourcompany.com). The app. address for your panels is set up for you." };
   if (isPlatformHost(host)) return { ok: false, error: "Platform addresses can't be added. Your workspace address is already connected." };
   return { ok: true, host };
 }
@@ -71,6 +72,11 @@ export function parseCustomDomain(raw: string): { ok: true; host: string } | { o
 /** The same site with / without `www.` — routing treats them as one (see `lookupHost`). */
 function wwwCounterpart(host: string): string {
   return host.startsWith("www.") ? host.slice(4) : `www.${host}`;
+}
+
+/** Where a custom domain's panels live: `app.<domain>` (the domain itself serves only the website). */
+export function appHostOf(host: string): string {
+  return `app.${host.replace(/^www\./, "")}`;
 }
 
 // ─── View ───────────────────────────────────────────────────────────────────
@@ -103,6 +109,9 @@ export function toView(d: CompanyDomain): CompanyDomainView {
       records.push({ ...routingRecord(d._id), state: "unknown" });
     }
   }
+
+  // The panels host: it needs its own routing record next to the website's.
+  if (kind === "custom" && !localOnly) records.push({ ...routingRecord(appHostOf(d._id)), reason: "Serves your panels (Workspace and the rest) at app.<your domain>", state: "unknown" });
 
   let ssl: CompanyDomainView["hosting"]["ssl"];
   if (localOnly || p?.id === "manual") ssl = "manual";
@@ -170,6 +179,7 @@ export async function addCustomDomain(raw: string): Promise<DomainActionResult> 
   }
   // Non-fatal: the record exists either way, and "Check now" retries the provider.
   const attach = await syncAtProvider(host, "add");
+  await syncAtProvider(appHostOf(host), "add");
   return ok(attach.error ? `Added ${host}. The hosting provider couldn't attach it yet; we'll retry when you check it.` : `Added ${host}. Publish the DNS records below, then check it.`);
 }
 
@@ -209,6 +219,7 @@ export async function verifyCustomDomain(raw: string, resolver: TxtResolver = re
     // Ownership is settled; only the hosting side (DNS routing, TLS) can still change.
     // A record that was never attached (provider outage at add time) gets attached now.
     await syncAtProvider(d._id, d.provider?.attached ? "status" : "add");
+    await syncAtProvider(appHostOf(d._id), "add");
     forgetCompanyRouting();
     forgetCompanySiteUrls();
     return ok(`${d._id} is verified.`);
@@ -272,8 +283,11 @@ export async function removeCustomDomain(raw: string): Promise<DomainActionResul
   forgetCompanySiteUrls();
 
   try {
-    const detached = await (await activeDomainProvider()).remove(d._id);
-    if (!detached.ok) console.error(`[domains] detaching ${d._id} failed`, detached.error);
+    const provider = await activeDomainProvider();
+    for (const h of [d._id, appHostOf(d._id)]) {
+      const detached = await provider.remove(h);
+      if (!detached.ok) console.error(`[domains] detaching ${h} failed`, detached.error);
+    }
   } catch (err) {
     console.error(`[domains] detaching ${d._id} failed`, err);
   }

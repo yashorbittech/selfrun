@@ -1,10 +1,10 @@
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION, COMPANY_DOMAINS_COLLECTION, type Company, type CompanyDomain } from "@/lib/platform/tenancy/companies";
-import { siteUrlForCompany } from "@/lib/platform/tenancy/site-url";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
 
 /**
- * The origin of the workspace a visitor means by `input` — a company slug (`acme`), its automatic subdomain or its own
+ * The origin of the panels (app host) of the workspace a visitor means by `input` — a company slug (`acme`), its automatic subdomain or its own
  * verified domain — or null when no active company matches. Nothing about the company is revealed beyond that it exists.
  */
 export async function findLoginOrigin(input: string, hostHint: string | null): Promise<string | null> {
@@ -28,5 +28,5 @@ export async function findLoginOrigin(input: string, hostHint: string | null): P
   }
   if (!companyId) return null;
   const active = await companies.findOne({ _id: companyId, status: "active" }, { projection: { _id: 1 } });
-  return active ? siteUrlForCompany(companyId, hostHint) : null;
+  return active ? appUrlForCompany(companyId, hostHint) : null;
 }

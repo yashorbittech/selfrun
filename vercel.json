@@ -35,6 +35,10 @@
     {
       "path": "/api/platform/billing/subscriptions/cron",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/apps/builds/cron",
+      "schedule": "0 7 * * *"
     }
   ]
 }

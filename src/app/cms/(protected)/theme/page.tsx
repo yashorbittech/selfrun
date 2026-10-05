@@ -19,7 +19,7 @@ export default async function CmsThemeListPage() {
   const fontsUrl = googleFontsUrl(FONT_OPTIONS.map((f) => f.key));
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       {fontsUrl && <link rel="stylesheet" href={fontsUrl} precedence="default" />}
       <CmsPageHeader
         breadcrumbs={[{ label: "Themes" }]}

@@ -8,8 +8,7 @@
 //     hired → taken and scored, some written answers still waiting for an evaluator).
 // Applicants are never invented here: a role nobody has applied for gets its test but no assignments.
 //
-// Idempotent: every row has a `demo-ots-car-` id and is replaced on each run. Called from `seedOts` (db:seed-ots) and
-// runnable on its own: `npm run db:seed-ots-careers`.
+// Idempotent: every row has a `demo-ots-car-` id and is replaced on each run. Called by `npm run demo:seeders`.
 import { makeRng } from "./lib.mjs";
 import { CONFIG, autoGradable, computeResult, grade, publicView, respond, section } from "./ots.mjs";
 

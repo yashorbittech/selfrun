@@ -2,7 +2,7 @@ import "server-only";
 import type { Collection } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION, type Company } from "@/lib/platform/tenancy/companies";
-import { companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl } from "@/lib/platform/tenancy/provisioning";
 import { getDefaultPlan, getPlan } from "@/lib/platform/billing/plans";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
 import { getBillingSettings, type PlatformBillingSettings } from "@/lib/platform/billing/settings";
@@ -72,7 +72,7 @@ async function ownerEmail(companyId: string): Promise<string | null> {
   return owner?.email ?? null;
 }
 
-const billingUrl = (slug: string) => `${companyBaseUrl(slug)}/workspace/settings/billing`;
+const billingUrl = (slug: string) => `${companyAppBaseUrl(slug)}/workspace/settings/billing`;
 const plural = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 const brandOf = (s: PlatformBillingSettings) => s.seller.tradeName || s.seller.legalName || "Our team";
 

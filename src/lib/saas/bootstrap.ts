@@ -16,7 +16,7 @@ export type EnsureOperatorResult =
 /**
  * Makes sure the platform operator exists: the company that runs the product, holding the platform staff and the
  * Platform Panel. Does nothing when one already exists. Used by the first start of a new deployment (see
- * `src/instrumentation.ts`) and by `npm run db:init-saas`.
+ * `src/instrumentation.ts`).
  *
  * `password` omitted → a random one is generated, returned once as `temporaryPassword`, and must be changed at first sign-in.
  */

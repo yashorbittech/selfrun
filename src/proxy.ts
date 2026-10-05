@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isMaintenanceOn, isPublicSitePath } from "@/lib/cms/maintenance-gate";
-import { resolveCompanyIdByHost } from "@/lib/platform/tenancy/companies";
+import { resolveCompanyIdByHost, resolveHostInfo, type HostInfo } from "@/lib/platform/tenancy/companies";
+import { counterpartHost, surfaceRedirect } from "@/lib/platform/tenancy/surfaces";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { isSaasHost } from "@/lib/saas/hosts";
 import { isSaasPagePath } from "@/lib/saas/routes";
@@ -73,14 +74,30 @@ export async function proxy(request: NextRequest) {
   // host no company owns gets a plain "no workspace here" page, not an
   // error. A registry lookup failure falls through (fail open): the page's
   // own data access resolves the company again and fails safe on its own.
-  let companyId: string | null | undefined;
+  let info: HostInfo | null | undefined;
   try {
-    companyId = await resolveCompanyIdByHost(request.headers.get("host"));
+    info = await resolveHostInfo(request.headers.get("host"));
   } catch (err) {
     console.error("[tenancy] company lookup failed in proxy", err);
   }
-  if (companyId === null) {
+  if (info === null) {
     return NextResponse.rewrite(new URL("/workspace-not-found", request.url), { status: 404 });
+  }
+  const companyId = info?.companyId;
+
+  // A company's website and its panels live on different hosts: a page of the other side is sent to its own host
+  // (so a link to /workspace from the website, or to / from a panel, still lands somewhere right).
+  if (info) {
+    const action = surfaceRedirect(info.surface, request.nextUrl.pathname);
+    if (action) {
+      // Built from the Host header, not `request.url`, which can carry the server's own hostname.
+      const hostHeader = request.headers.get("host");
+      const proto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() || request.nextUrl.protocol.replace(":", "");
+      const to = (host: string, path: string) => NextResponse.redirect(new URL(path, `${proto}://${host}`));
+      if (action === "app-home" && hostHeader) return to(hostHeader, "/workspace");
+      const target = action === "app-home" ? null : counterpartHost(hostHeader, action === "to-app" ? "site" : "app");
+      if (target) return to(target, `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    }
   }
 
   const blocked = await panelGate(request, companyId);

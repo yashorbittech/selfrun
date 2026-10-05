@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { getCompany } from "@/lib/platform/tenancy/companies";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
-import { siteUrlForCompany } from "@/lib/platform/tenancy/site-url";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { notify } from "@/lib/platform/notifications";
@@ -91,7 +91,7 @@ async function runAction(action: WorkflowAction, wf: Pick<WorkflowDoc, "_id" | "
 /** Runs one workflow's actions for an event and logs the run. Conditions are the caller's job. */
 export async function executeWorkflow(wf: WorkflowDoc, event: RunnableEvent, opts: { test?: boolean } = {}): Promise<{ status: "success" | "failed"; results: ActionResult[] }> {
   const companyId = await currentCompanyId();
-  const [company, origin] = await Promise.all([getCompany(companyId).catch(() => null), siteUrlForCompany(companyId).catch(() => null)]);
+  const [company, origin] = await Promise.all([getCompany(companyId).catch(() => null), appUrlForCompany(companyId).catch(() => null)]);
   const env = { brand: company?.name ?? "Your workspace", origin, test: opts.test === true };
 
   // Loop guard: anything an action emits is recorded but can't trigger workflows again.

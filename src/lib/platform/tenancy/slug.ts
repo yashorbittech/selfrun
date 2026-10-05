@@ -14,6 +14,8 @@ export function slugFormatError(slug: string): string | null {
   if (slug.length < 3) return "Use at least 3 characters.";
   if (!SLUG_RE.test(slug)) return "Use lowercase letters, numbers and hyphens (not at the start or end).";
   if (RESERVED_SLUGS.has(slug)) return "That address is reserved.";
+  // `<slug>-app` is the address of a company's panels, so no slug may look like one.
+  if (slug.endsWith("-app")) return "Addresses can't end with \"-app\".";
   return null;
 }
 

@@ -219,7 +219,7 @@ export default function PageBuilder({
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4 pt-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Pages", href: "/cms/pages" }, { label: displayTitle(title, path) }]}
         icon={FileText}

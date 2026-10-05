@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { jsonForScript } from "@/lib/security/json-script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -22,7 +22,10 @@ import { panelMetaFor } from "@/lib/platform/panels/store";
 import PlatformNoticeBanner from "@/components/platform/PlatformNoticeBanner";
 import { getTracking, type TrackingSettings } from "@/lib/cms/tracking";
 import { getPlatformSettings } from "@/lib/platform/settings";
-import { onSaasHost, saasOrigin } from "@/lib/saas/request";
+import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
+import { getPwaIdentity } from "@/lib/pwa/identity";
+import PwaRegister from "@/components/pwa/PwaRegister";
+import { InstallBanner } from "@/components/pwa/InstallApp";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { SAAS_THEME } from "@/lib/saas/theme";
 
@@ -44,8 +47,38 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-/** Site-wide SEO defaults every page inherits — CMS → Settings (see lib/cms/site-seo.ts). */
+/** Panels hosts (`app.…`, `<slug>-app.…`) are for signed-in work: never indexed. */
 export async function generateMetadata(): Promise<Metadata> {
+  const metadata = await siteWideMetadata();
+  if (!(await onAppSurface())) return metadata;
+  // The installable app (panels hosts only): manifest, iOS home-screen settings and app icons.
+  const pwa = await getPwaIdentity().catch(() => null);
+  return {
+    ...metadata,
+    robots: { index: false, follow: false },
+    ...(pwa
+      ? {
+          manifest: "/manifest.webmanifest",
+          applicationName: pwa.shortName,
+          appleWebApp: { capable: true, title: pwa.shortName, statusBarStyle: pwa.statusBar },
+          formatDetection: { telephone: false },
+          other: { "mobile-web-app-capable": "yes", "msapplication-TileColor": pwa.themeColor, "msapplication-tap-highlight": "no" },
+          icons: { icon: [{ url: `/pwa/icons/192.png?v=${pwa.version}`, sizes: "192x192", type: "image/png" }, { url: `/pwa/icons/512.png?v=${pwa.version}`, sizes: "512x512", type: "image/png" }], apple: [{ url: `/pwa/icons/180.png?v=${pwa.version}`, sizes: "180x180", type: "image/png" }] },
+        }
+      : {}),
+  };
+}
+
+/** Phones: full-bleed under the notch (the app uses safe-area insets) and a themed browser/status bar in the app. */
+export async function generateViewport(): Promise<Viewport> {
+  const base: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+  if (!(await onAppSurface())) return base;
+  const pwa = await getPwaIdentity().catch(() => null);
+  return pwa ? { ...base, themeColor: [{ media: "(prefers-color-scheme: light)", color: pwa.themeColor }, { media: "(prefers-color-scheme: dark)", color: pwa.themeColorDark }], colorScheme: "light dark" } : base;
+}
+
+/** Site-wide SEO defaults every page inherits — CMS → Settings (see lib/cms/site-seo.ts). */
+async function siteWideMetadata(): Promise<Metadata> {
   // The SaaS product's own website carries the product's identity, never a customer's.
   if (await onSaasHost()) {
     return {
@@ -77,6 +110,8 @@ export default async function RootLayout({
   // No company owns this host (the proxy is showing /workspace-not-found): render the bare shell.
   // On the SaaS product's host the page chrome is the product's own (bare shell + SaaS brand), not the owner company's.
   const saasHost = await onSaasHost();
+  const appSurface = await onAppSurface();
+  const installPrompt = appSurface ? ((await getPwaIdentity().catch(() => null))?.installPrompt ?? true) : false;
   const companyId = saasHost ? null : await currentCompanyIdOrNull();
   const hasCompany = companyId !== null;
   // The Panel Registry (names, descriptions, what is switched on) as it applies to this company; never fails the page.
@@ -98,7 +133,8 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning data-ui={modernUi ? "modern" : undefined} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <head>
         {/* The active theme, for the website and every panel. */}
-        {themeCss && <style id="company-theme-vars" dangerouslySetInnerHTML={{ __html: themeCss }} />}
+        {/* `themeCss` is "" with no company: `"" && …` would put a text node in <head> (hydration error, page left unstyled). */}
+        {themeCss ? <style id="company-theme-vars" dangerouslySetInnerHTML={{ __html: themeCss }} /> : null}
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {jsonLd.map((schema, i) => (
@@ -117,6 +153,12 @@ export default async function RootLayout({
                 {children}
 
                 {notice && <PlatformNoticeBanner message={notice} />}
+                {appSurface ? (
+                  <>
+                    <PwaRegister />
+                    {installPrompt ? <InstallBanner /> : null}
+                  </>
+                ) : null}
               </SiteInfoProvider>
             </PanelsProvider>
           </BrandProvider>

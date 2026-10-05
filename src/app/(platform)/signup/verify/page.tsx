@@ -5,7 +5,7 @@ import { CardHeader, CardTitle, CardDescription, CardContent } from "@/component
 import GlassCard from "@/components/lms/GlassCard";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { describePendingSignup } from "@/lib/platform/signup";
-import { companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl, companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
 import ConfirmForm from "./ConfirmForm";
 
 export const metadata: Metadata = { title: "Confirm your workspace", robots: { index: false, follow: false } };
@@ -28,8 +28,9 @@ export default async function VerifySignupPage({ searchParams }: { searchParams:
               <CardHeader>
                 <CardTitle className="text-xl">Create {pending.companyName}</CardTitle>
                 <CardDescription>
-                  Email confirmed for <strong className="text-foreground">{pending.email}</strong>. Your workspace will be at{" "}
-                  <strong className="text-foreground">{companyBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong>.
+                  Email confirmed for <strong className="text-foreground">{pending.email}</strong>. Your website will be at{" "}
+                  <strong className="text-foreground">{companyBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong> and your panels at{" "}
+                  <strong className="text-foreground">{companyAppBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong>.
                 </CardDescription>
               </CardHeader>
               <CardContent>

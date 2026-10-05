@@ -1,6 +1,7 @@
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { queuePush } from "@/lib/push/send";
 
 /**
  * Company-wide in-app notifications, one row per recipient, shown by the
@@ -77,6 +78,7 @@ export async function notify(input: { to: NotifyTarget; title: string; body?: st
   const body = (input.body ?? "").trim().slice(0, 1000);
   const url = safeInternalUrl(input.url);
   await (await col()).insertMany(recipients.map((userId) => ({ _id: new ObjectId(), userId, title, body, url, readAt: null, createdAt: now })));
+  await queuePush("staff", recipients, { category: "workflow", title, body, url });
   return recipients.length;
 }
 

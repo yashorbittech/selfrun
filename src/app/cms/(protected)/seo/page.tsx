@@ -11,7 +11,7 @@ export default async function CmsSeoOverviewPage() {
   const pages = await listPages();
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "SEO Overview" }]}
         icon={SearchCheck}

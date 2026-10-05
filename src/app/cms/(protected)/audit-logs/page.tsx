@@ -15,7 +15,7 @@ export default async function CmsAuditLogsPage() {
   const { items } = await listAudit({ pageSize: 100 });
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Audit Logs" }]}
         icon={ScrollText}

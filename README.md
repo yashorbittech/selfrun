@@ -1,117 +1,93 @@
-# SelfRun Business Platform
+# SelfRun Business
 
-One integrated suite of public, internal and external-user panels built on a
-single Next.js app, a single MongoDB database, one shared identity and one
-design system.
+AI-powered business automation as a multi-tenant SaaS. A company signs up, gets its own workspace and website address, and
+runs its whole business from one place: people, projects, sales, finance, procurement, training, documents, marketing and
+support, with AI built into every panel.
 
-- **Public website:** marketing site, blog, careers, offers, rewards, register/login
-- **Internal panels:** Admin, Workspace, HRMS, PMS, PRMS, TMS, FMS, Messenger, LMS
-- **External portal:** for students, interns, clients, businesses and job applicants, with a wallet, credits and referral system
+One Next.js app and one MongoDB database serve three audiences:
 
-For what each panel is and why it exists, see [PANELS.md](./PANELS.md). This
-file covers setup, running, seeding demo data, configuration and deployment.
-
----
-
-## SaaS setup — step by step
-
-SelfRun Business runs as one SaaS: the product website, sign-up and the Platform Panel on the SaaS host, and every
-customer (including your own company) as an ordinary tenant on its own address. Everything below runs from the project
-folder.
-
-### 1. Environment (`.env`)
-
-| Variable | Value |
+| Who | What they use |
 | --- | --- |
-| `MONGODB_URI` | a NEW, empty database for the SaaS (e.g. `…mongodb.net/selfrun`) |
-| `SAAS_ADMIN_EMAIL` | the platform staff login, e.g. `info@selfrunbusiness.ai` |
-| `SAAS_ADMIN_PASSWORD` | optional; omitted = a temporary password is printed once in the server log |
-| `SAAS_HOSTS` | production only: `selfrunbusiness.ai` (in development `localhost` is a SaaS host automatically) |
-| `PLATFORM_ROOT_DOMAIN` | production only: `selfrunbusiness.ai` (customers get `<slug>.selfrunbusiness.ai`) |
+| **Visitors** | The product website: features, modules, pricing, resources, demo request and `/signup` |
+| **Customers** (companies) | Their public website on `<slug>.<root domain>` or their own domain, and their panels (workspace, portal, …) on a separate app address |
+| **Platform staff** | The Platform Panel: companies, plans, billing, coupons, domains, support and platform settings |
 
-Keep the encryption keys and storage tokens (`PLATFORM_ENCRYPTION_KEY`, `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`,
-`DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY`, `BLOB_READ_WRITE_TOKEN` …) identical to the deployment you import data from.
+For what every panel does, see [docs/panels.md](./docs/panels.md). Architecture and deployment details are in
+[docs/architecture.md](./docs/architecture.md) and [docs/deploy-vercel.md](./docs/deploy-vercel.md).
 
-### 2. First run
+> **Next.js 16.** APIs and file conventions differ from older versions (for example `src/proxy.ts` replaces
+> middleware). Read the relevant guide in `node_modules/next/dist/docs/` before writing framework-level code.
+> See [AGENTS.md](./AGENTS.md).
 
-```bash
-npm install
-npm run dev
-```
+## Contents
 
-On the first start the server creates the platform operator and your staff account from `SAAS_ADMIN_EMAIL` and prints
-`[saas] Platform operator … created`. `http://localhost:3000` is the product website; staff sign in at
-`/workspace/login` and manage plans, prices and companies at `/platform`.
+1. [Product overview](#product-overview)
+2. [How it works](#how-it-works)
+3. [Tech stack](#tech-stack)
+4. [Environment variables](#environment-variables)
+5. [Run locally](#run-locally)
+6. [Register a company](#register-a-company)
+7. [Demo data](#demo-data)
+8. [Deploy to production (Vercel)](#deploy-to-production-vercel)
+9. [NPM scripts](#npm-scripts)
+10. [Project structure](#project-structure)
+11. [Architecture notes](#architecture-notes)
+12. [Troubleshooting](#troubleshooting)
+13. [Contributing](#contributing)
 
-(Manual alternative: `npm run db:init-saas -- --email you@company.com`.)
-
-### 3. Register a company
-
-Open `http://localhost:3000/signup`, fill in company name, workspace address (the slug), work email, password, business
-categories and accept the terms. The company's workspace is `http://<slug>.localhost:3000` in development and
-`https://<slug>.<PLATFORM_ROOT_DOMAIN>` in production; the sign-up creates its Super Admin account.
-
-### 4. Import an existing business (one time)
-
-To bring a business that already runs on an older database onto the SaaS, register it first (step 3), then:
-
-```bash
-# dry run — shows what would be copied, writes nothing
-SOURCE_MONGODB_URI='mongodb+srv://<user>:<password>@<cluster>/<old_database>' \
-  npm run db:import-company -- --to-company <slug>
-
-# copy it
-SOURCE_MONGODB_URI='mongodb+srv://<user>:<password>@<cluster>/<old_database>' \
-  npm run db:import-company -- --to-company <slug> --apply
-```
-
-Options: `--from-company <id|slug>` (which company of the old database; default the one flagged as owner),
-`--only a,b,c` (just these collections; each is replaced, so it is safe to re-run), `--keep-script`.
-
-- The old database is only read.
-- Documents keep their `_id`s; settings, counters and themes are re-keyed for the new company.
-- The target's own starter content in the imported collections is replaced; users are merged by email, so the account
-  created at sign-up is kept.
-- Every failure is printed (`✗ <collection>: … FAILED — <reason>`). The script deletes itself and its npm command only
-  after a fully successful `--apply`.
-
-Afterwards check `http://<slug>.localhost:3000` (website, products, offers), sign in at `/workspace/login` with an old
-user's credentials, and set the company's two-tone wordmark in Settings → Branding if needed. Rotate the credentials you
-used for `SOURCE_MONGODB_URI`.
-
-### 5. Production (Vercel)
-
-1. Make `selfrunbusiness.ai` the project's production domain; add each customer's own domain as a custom domain.
-2. Set `MONGODB_URI` (the new database), `SAAS_ADMIN_EMAIL`, `SAAS_ADMIN_PASSWORD`, `SAAS_HOSTS`,
-   `PLATFORM_ROOT_DOMAIN` and the keys/tokens from step 1, then deploy. The first start creates the operator.
-3. Register the company at `https://selfrunbusiness.ai/signup`; import with the same commands, with `MONGODB_URI` pointing
-   at the production SaaS database.
-4. Verify each customer's domain in Settings → Domains.
-
-A local-only copy of these steps with your real values lives in `SETUP.local.md` (git-ignored).
-
-More detail: [docs/saas-product-separation.md](./docs/saas-product-separation.md) and
-[docs/deploy-vercel.md](./docs/deploy-vercel.md).
+(The installable app and push notifications are described under [Mobile app and push notifications](#mobile-app-and-push-notifications).)
 
 ---
 
-## Table of contents
+## Product overview
 
-0. [SaaS setup — step by step](#saas-setup--step-by-step)
-1. [Tech stack](#tech-stack)
-2. [Panels and routes](#panels-and-routes)
-3. [Quick start](#quick-start)
-4. [Environment variables](#environment-variables)
-5. [NPM scripts](#npm-scripts)
-6. [Database and demo data](#database-and-demo-data)
-7. [Demo logins](#demo-logins)
-8. [Project structure](#project-structure)
-9. [Architecture notes](#architecture-notes)
-10. [Wallet, credits and referrals](#wallet-credits-and-referrals)
-11. [AI chatbot and knowledge base](#ai-chatbot-and-knowledge-base)
-12. [Build, verify and deploy](#build-verify-and-deploy)
-13. [Troubleshooting](#troubleshooting)
-14. [Contributing notes](#contributing-notes)
+Every company gets the panels its plan includes. Panels are switched on or off per plan, and the platform staff manage the
+plans and prices.
+
+| Area | Panels |
+| --- | --- |
+| **Core** | Workspace (dashboard, users, roles, branding, domains, billing, audit log), Team Chat |
+| **People and operations** | HR & Payroll, Projects, Procurement & Assets, Training, SOPs & Policies |
+| **Sales and finance** | CRM & Sales (leads, pipeline, campaigns, offers, wallet), Finance |
+| **Documents and knowledge** | Legal & Documents, Digi Locker, Online Tests |
+| **AI** | AI Assistants (custom bots), AI Intelligence (ask questions about your business data) |
+| **Marketing and web** | Social Media, SEO, Website (CMS) with a public site per company |
+| **External users** | Client & Student Portal for clients, students, interns and applicants |
+| **Help** | Help & Support: AI help chatbot, help center and support requests to the platform team |
+
+Customer self-service: sign-up with email confirmation, a 30-day trial, plan upgrade and billing, add-ons, coupons, custom
+domains with automatic TLS, and a starter website that is live from the first minute.
+
+Platform staff: company registry, plans and prices, subscriptions, revenue metrics, invoices, coupons, add-ons, usage,
+domains and SSL, support requests and help content, platform roles, audit log and integrations.
+
+---
+
+## How it works
+
+Every company has **two addresses**: one for its **website** and one for its **panels**. The website host serves only the
+website; the panels host serves only the panels. A page that belongs to the other side is redirected there.
+
+| Who | Website (public pages only) | Panels (Workspace, HR, Finance, … and the portal) |
+| --- | --- | --- |
+| SelfRun Business | `selfrunbusiness.com`, `www.selfrunbusiness.com` (product website, `/signup`, `/login`) | `app.selfrunbusiness.com` (Platform Panel and Workspace for platform staff) |
+| A customer on an automatic address | `<slug>.selfrunbusiness.com` | `<slug>-app.selfrunbusiness.com` |
+| A customer with its own domain | `acme.com` | `app.acme.com` |
+| Anything else | "No workspace here" | |
+
+In development: `localhost:3000` is the product website and `app.localhost:3000` its panels; a customer is
+`<slug>.localhost:3000` (website) and `<slug>-app.localhost:3000` (panels).
+
+- **Operator company.** The first start creates the company that runs the product (flagged as the platform owner) and the
+  first platform staff account. Staff sign in at `app.selfrunbusiness.com/workspace/login` and manage the product at `/platform`.
+- **Customers are all equal.** A company registers at `/signup` and gets a Super Admin account, its panels and a starter
+  website. Nothing is special-cased for any customer.
+- **Tenancy.** Data lives in shared collections scoped by `companyId`; the database layer adds the scope automatically, so a
+  query cannot see another company's rows.
+- **Host routing.** `src/lib/saas/hosts.ts` decides which hosts serve the product (site and app); `src/proxy.ts` rewrites the
+  product website's marketing paths to `/saas/*` and sends a page to the other side's host when it is requested on the wrong one
+  (`src/lib/platform/tenancy/surfaces.ts`). Panels hosts are never indexed (`noindex`, `Disallow: /`).
+- **Slugs.** A workspace address can't end in `-app` (that is the panels host of another address).
 
 ---
 
@@ -120,115 +96,261 @@ More detail: [docs/saas-product-separation.md](./docs/saas-product-separation.md
 | Area | Technology |
 | --- | --- |
 | Framework | Next.js 16 (App Router, Turbopack), React 19, TypeScript |
-| Styling / UI | Tailwind CSS 4, shadcn-style components (`components.json`), Base UI, lucide-react, next-themes |
+| Styling / UI | Tailwind CSS 4, shadcn-style components, Base UI, lucide-react, next-themes |
+| Data | MongoDB (official driver, no ODM) |
 | Charts / motion | Recharts, Framer Motion |
-| Data | MongoDB (official `mongodb` driver, no ODM) |
-| Drag and drop | dnd-kit (Kanban boards) |
 | Documents / exports | ExcelJS, `@react-pdf/renderer` |
-| AI | OpenAI Responses API with file_search (chatbot), ElevenLabs (voice) |
-| Payments (optional) | Razorpay / RazorpayX (payouts) |
-| Hosting | Vercel (cron in `vercel.json`) |
-
-> **Important: this is Next.js 16.** APIs, conventions and file structure differ
-> from older versions (for example `src/proxy.ts` replaces middleware). Before
-> writing framework-level code, read the relevant guide in
-> `node_modules/next/dist/docs/` and heed deprecation notices. See
-> [AGENTS.md](./AGENTS.md).
-
----
-
-## Panels and routes
-
-Each internal panel has its own login page (`/<panel>/login`) and its own
-session cookie. Internal accounts all live in one `admin_users` collection with
-per-panel `roles`. Logging into one panel provisions sessions for every other
-panel the account has a role in (cross-module single sign-on).
-
-| Panel | Route | Purpose |
-| --- | --- | --- |
-| Public website | `/` | Marketing pages, services, blog, careers, offers, FAQs |
-| Register / Login / Rewards | `/register`, `/login`, `/rewards` | Public account creation, sign-in, "ways to earn credits" guide |
-| Admin | `/admin` | Super-admin command center, users, roles, permissions, cross-module analytics |
-| Workspace | `/workspace` | Staff hub for employees |
-| HRMS | `/hrms` | Employees, org structure, leave, payroll, careers pipeline, offers |
-| PMS | `/pms` | Clients, projects, milestones, tasks, timesheets, documents, activity |
-| PRMS | `/prms` | Vendors, requisitions, purchase orders, assets, expenses, subscriptions, budgets, invoices |
-| TMS | `/tms` | Programs, batches, students, classes, attendance, assignments, certificates, fees |
-| FMS | `/fms` | Invoices, receipts, credit notes, ledger, chart of accounts, banking, reports |
-| Messenger | `/messenger` | Channels, DMs, groups, project channels, announcements, meetings, WebRTC calls |
-| LMS (lead management) | `/lms` | CRM, campaigns, offers, wallet controls, AI chatbot management |
-| External portal | `/portal` | Role-based dashboards for students, interns, clients, businesses, hiring |
-| Public links | `/pay/[token]`, `/verify/[code]` | Public invoice checkout link and certificate verification |
-
----
-
-## Quick start
-
-### Prerequisites
-
-- Node.js **20.9 or newer** (developed on 20.x)
-- npm (the repo uses `package-lock.json`)
-- A MongoDB database (Atlas or local). No replica set is required.
-- Optional: OpenAI, ElevenLabs and Razorpay keys for the features that use them
-
-### Install and run
-
-```bash
-git clone <repo-url>
-cd website
-npm install
-
-cp .env.example .env
-# edit .env and set at least MONGODB_URI
-
-npm run dev
-```
-
-Open <http://localhost:3000>.
-
-### First-time data
-
-Pick one:
-
-```bash
-# A) Just the super admin (empty system)
-npm run db:seed-super-admin
-
-# B) Full demo dataset for every panel (recommended for demos)
-npm run db:reset-demo
-```
-
-Then sign in at `/admin/login` (or any panel's login) with the
-[demo logins](#demo-logins).
+| AI | OpenAI (Responses API, file search, image generation), ElevenLabs (voice) |
+| Payments | Razorpay (subscriptions, payouts) |
+| Storage | Vercel Blob (private) |
+| Email | Resend |
+| Hosting | Vercel (cron jobs in `vercel.json`) |
 
 ---
 
 ## Environment variables
 
-Copy `.env.example` to `.env`. `.env*` files are git-ignored. Only
-`MONGODB_URI` is needed to boot; the rest enable specific features.
+Copy `.env.example` to `.env` (git-ignored) and fill it in. Never commit real values, and never paste them into chat,
+tickets or docs.
 
-| Variable | Required | Used for |
+### Required
+
+| Variable | Purpose |
+| --- | --- |
+| `MONGODB_URI` | MongoDB connection string. Use a **new, empty** database; the database name is the URI path |
+| `SAAS_ADMIN_EMAIL` | Email of the first platform staff account, created automatically on first start |
+
+### Platform setup
+
+| Variable | Purpose |
+| --- | --- |
+| `SAAS_ADMIN_PASSWORD` | Optional. Password for that account. If omitted, a temporary one is printed once in the server log. **Wrap it in quotes** if it contains `#` or spaces, otherwise `.env` treats the rest as a comment |
+| `SAAS_HOSTS` | Production: comma-separated hosts serving the product website (`www.` variants are added). On Vercel production the project's own production domain is added automatically. Development: `localhost` is included |
+| `PLATFORM_ROOT_DOMAIN` | Production: the domain under which company addresses live (`<slug>.<domain>`) |
+| `PLATFORM_WILDCARD_SUBDOMAINS` | `1` once `*.<root domain>` is served by Vercel (see the deploy guide) |
+| `PLATFORM_ENCRYPTION_KEY` | Encrypts platform secrets stored in the database. Generate once and keep it |
+| `CRON_SECRET` | Bearer secret protecting cron endpoints |
+| `NEXT_PUBLIC_APP_URL` | Public base URL |
+| `SAAS_OPERATOR_NAME` | Optional legal name shown in the footer and legal pages |
+| `SAAS_HELLO_EMAIL`, `SAAS_SALES_EMAIL`, `SAAS_SUPPORT_EMAIL`, `SAAS_SECURITY_EMAIL` | Optional public contact addresses |
+
+### Storage, email, domains
+
+| Variable | Purpose |
+| --- | --- |
+| `BLOB_READ_WRITE_TOKEN`, `BLOB_STORE_ID`, `BLOB_WEBHOOK_PUBLIC_KEY` | Vercel Blob (private store) for every file upload |
+| `EMAIL_PROVIDER`, `RESEND_API_KEY`, `EMAIL_FROM` | Outgoing email (`console` only logs mail in development) |
+| `DOMAIN_PROVIDER`, `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` | Automatic custom-domain attach on Vercel |
+
+### Feature keys (each is optional and enables one feature)
+
+| Variable | Feature |
+| --- | --- |
+| `OPENAI_API_KEY`, `OPENAI_CHATBOT_VECTOR_STORE_ID`, `CHATBOT_CRAWL_BASE_URL`, `CHATBOT_ADMIN_API_SECRET` | AI chatbot, AI assistants, AI Intelligence and AI generation |
+| `ELEVENLABS_API_KEY` | Voice mode |
+| `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`, `DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY` | Encryption of bank details, finance accounts, Digi Locker credentials and social tokens. Generate each with `openssl rand -base64 32` |
+| `HRMS_API_SECRET`, `LEADS_API_SECRET`, `INDEXING_API_SECRET` | Bearer secrets for API and export endpoints |
+| `HRMS_PAYOUT_PROVIDER`, `RAZORPAY_*` | Salary payouts and subscription billing |
+| `MESSENGER_TURN_URL`, `MESSENGER_TURN_USERNAME`, `MESSENGER_TURN_CREDENTIAL`, `MESSENGER_CALL_MAX` | TURN relay for Team Chat calls |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notifications to the installed app. Generate the pair once with `npx web-push generate-vapid-keys`; `VAPID_SUBJECT` (a `mailto:` address) is optional and defaults to `SAAS_ADMIN_EMAIL` |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Search Console token |
+| `META_*`, `GOOGLE_OAUTH_*`, `LINKEDIN_*` | Social publishing |
+
+> Treat encryption keys as permanent once data is written. Do not change them without re-encrypting the stored data.
+
+---
+
+## Run locally
+
+Requirements: Node.js 20.9 or newer, npm, and a MongoDB database (Atlas or local).
+
+```bash
+npm install
+cp .env.example .env
+# edit .env: set MONGODB_URI (a new empty database) and SAAS_ADMIN_EMAIL
+npm run dev
+```
+
+On the first start the server creates the operator company and the staff account, and logs
+`[saas] Platform operator … created`.
+
+| URL | What you see |
+| --- | --- |
+| `http://localhost:3000` | The SelfRun Business website |
+| `http://localhost:3000/signup` | Company sign-up |
+| `http://app.localhost:3000/workspace/login` | Staff sign-in (panels host) |
+| `http://app.localhost:3000/platform` | Platform Panel (staff only) |
+
+`*.localhost` addresses resolve to your machine in Chrome; if your browser does not resolve them, add them to `/etc/hosts`.
+
+---
+
+## Register a company
+
+1. Open `/signup`.
+2. Enter the company name, workspace address (slug), work email, password and business categories, and accept the terms.
+3. Confirm the email (in development with `EMAIL_PROVIDER=console`, the link is printed in the server log).
+4. The company is created with a Super Admin account, a 30-day trial, its panels and a starter website.
+
+Its website is `http://<slug>.localhost:3000` in development and `https://<slug>.<PLATFORM_ROOT_DOMAIN>` in production; its
+panels are at `http://<slug>-app.localhost:3000` and `https://<slug>-app.<PLATFORM_ROOT_DOMAIN>`. After sign-up the owner is
+signed in on the panels address.
+
+---
+
+## Mobile app and push notifications
+
+There are two separate things:
+
+1. **The app, for the company's team** (and its portal users): the **panels** (every `app.…` / `<slug>-app.…` address) are an
+   installable app (PWA) with push notifications, so a business can be run from a phone.
+2. **Website push, for the company's visitors**: the public website can ask visitors for notification permission and the
+   business sends them offers, rewards and news. See [Website push](#website-push-for-a-companys-visitors) below.
+
+A company's website is **not** an installable app: it has no manifest and no offline mode, only the opt-in bell.
+
+| Where | How to install |
+| --- | --- |
+| Android, Windows, Linux, ChromeOS, macOS (Chrome, Edge, Brave, Opera, Samsung Internet) | The browser offers “Install app”; the app also shows its own Install button |
+| iPhone and iPad (Safari) | Share → **Add to Home Screen** (push works only from the installed app, iOS/iPadOS 16.4+) |
+| macOS Safari | File → **Add to Dock** |
+| Firefox | Android: Add to Home screen. Desktop Firefox cannot install web apps but still gets push in the browser |
+
+- **Every company's app is its own, and dynamic.** Name (`Acme — Workspace`), short name, logo or initials, status-bar colour
+  (light and dark mode), splash background, start page, shortcuts and more all come from the company's branding and theme
+  automatically, and a Super Admin can override each of them in **Workspace → Settings → Mobile app**: names, an app icon (the
+  Branding logo, an uploaded icon or initials) with its background, custom colours, which panel the app opens on, up to 4
+  long-press shortcuts, window style, orientation, the iPhone status bar and whether the install banner shows, with a live
+  preview. Icons (including maskable ones for Android) are generated from these settings. The product's own panels host is
+  “SelfRun Business — Workspace” and is fixed.
+- **Offline.** Installed or not, a lost connection shows a friendly offline page. Pages and data are never cached, so a shared
+  device never shows another person's data.
+- **Push.** Business events, reminders, alerts, workflow updates, AI activity, messages and system notices that already appear in a
+  panel's bell are also pushed to that person's devices: HR, Projects, Procurement, Training, Team Chat, SOPs, Digi Locker, SEO,
+  Social, AI assistants, Online Tests, automations and the client portal.
+- **Controls.** Each person opens Workspace → Notifications → **Settings** (portal: Notifications → Settings) to turn notifications on
+  per device, switch each category on or off, set quiet hours with a time zone, send a test, and remove devices. Alerts ignore
+  quiet hours; the in-app bell always shows everything.
+- **Set up.** Set `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY`, then redeploy. Without them push is simply off (the install button and
+  everything else still work). Never change the pair later: every device would have to subscribe again.
+- **Safety.** Subscriptions are per company and per person; only addresses of the real browser push services are accepted; a link in a
+  notification can only point inside the app; dead subscriptions are removed automatically.
+
+### Apps (generated for every company)
+
+**Workspace → Settings → Apps & downloads** (Super Admin) is one place for all of a company's apps, in three tabs, plus the
+settings that shape them (name, icon, colours, start page, shortcuts, desktop defaults). Everything is per company and dynamic.
+
+| Tab | What it is | Output |
 | --- | --- | --- |
-| `MONGODB_URI` | **Yes** | MongoDB connection string. The database name is the URI path |
-| `OPENAI_API_KEY` | For chatbot | RAG chatbot (Responses API + file_search) |
-| `OPENAI_CHATBOT_VECTOR_STORE_ID` | No | Existing vector store; auto-created on first index if unset |
-| `CHATBOT_CRAWL_BASE_URL` | No | Base URL the knowledge-base crawler fetches (use `http://localhost:3000` locally) |
-| `CHATBOT_ADMIN_API_SECRET` | No | Bearer secret to trigger `POST /api/admin/chatbot/reindex` from cron or CI |
-| `ELEVENLABS_API_KEY` | For voice | Voice mode (speech-to-text and text-to-speech) on the Ask page |
-| `LEADS_API_SECRET` | No | Bearer secret for lead/PII API endpoints and CSV exports |
-| `HRMS_API_SECRET` | No | Bearer secret for HRMS API endpoints (for example the employee CSV export) |
-| `HRMS_ENCRYPTION_KEY` | Before storing bank details | AES-256-GCM key for employee bank data. `openssl rand -base64 32`. Do not swap without re-encrypting rows |
-| `FMS_ENCRYPTION_KEY` | Before storing bank accounts | Separate AES-256-GCM key for company bank accounts |
-| `HRMS_PAYOUT_PROVIDER` | No | `manual` (default) or `razorpay` |
-| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_ACCOUNT_NUMBER`, `RAZORPAY_WEBHOOK_SECRET` | If provider is `razorpay` | RazorpayX payouts |
-| `INDEXING_API_SECRET` | No | Bearer secret for the Google Indexing notification endpoint |
-| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | No | Search Console verification token (public) |
-| `MESSENGER_TURN_URL`, `MESSENGER_TURN_USERNAME`, `MESSENGER_TURN_CREDENTIAL` | No | TURN relay for calls across arbitrary networks (STUN is the default) |
-| `MESSENGER_CALL_MAX` | No | Max participants in a mesh call (default 12) |
-| `CRON_SECRET` or `WALLET_CRON_SECRET` | For wallet cron | Bearer secret protecting `/api/wallet/expiry-sweep` |
+| **PWA Application** (all devices) | The installable web app. Ready as soon as the workspace exists; no build | Address, QR code, install steps per device, live preview, asset pack |
+| **Mobile Application** (Android & iOS) | A native shell that opens the workspace | Android APK and Android Studio project, Xcode project (you sign with your own Apple account), previews, asset packs |
+| **Desktop Application** (Windows, Linux, macOS) | Electron apps | `.exe`, `.dmg`, `.AppImage`, `.deb` |
 
-Never commit secrets. Treat encryption keys as permanent once data is written.
+Every image the apps need is **generated from the company's own name, logo and colours** and previewed on the page: icons for every
+density and size, Android adaptive and round icons, Play Store icon and feature graphic, the iOS icon set, splash screens, and the
+desktop icons. Each tab has a downloadable asset pack (ZIP). Change the name, logo or colours and all of it follows.
+
+**Two ways to generate.** Each of the Mobile and Desktop tabs shows both:
+
+- **Automatic** (on by default, switchable): the moment a company completes onboarding, its apps are queued and handed to the
+  build service (a GitHub Actions workflow); after a rename or new icon they are rebuilt; a daily job fills in anything missing.
+  While an automatic build is running, the **Generate manually** button stays visible but paused, with a message saying why. If
+  automatic generation isn't producing anything (the build service isn't connected, or the last build failed), the button becomes
+  available with a message so the company can generate by hand. With automatic generation switched off, manual is the only way.
+- **Manual**: the **Generate manually** button starts a build of that tab's apps right now.
+
+Each platform of a build reports back and the download links appear on the Apps page, which updates while it waits. A daily
+job generates apps for companies that finished onboarding earlier, restarts builds that never finished (up to 3 tries), and
+rebuilds the apps when the company's name or icon changes (switchable).
+Colours, shortcuts and the start page need no rebuild: every installed desktop app reads them from the server. One-time platform setup:
+[docs/deploy-vercel.md](./docs/deploy-vercel.md#desktop-and-mobile-apps-automatic-builds). Until the build service is connected, builds wait in
+the queue and start by themselves once it is.
+
+### Desktop app (Windows, macOS, Linux)
+
+`desktop/` is an Electron app that opens a company's workspace in its own window with a tray icon and native notifications. It is
+**fully dynamic**: nothing about a company is built in. On every start it reads the company's name, icon, theme colours
+(light/dark), start page and shortcuts from `/api/desktop/branding`, which uses the same settings as the mobile app (Workspace →
+Settings → Mobile app). Use one generic app (it asks for the workspace address once) or build an installer for one company named and
+iconed as that company: `cd desktop && npm install && npm run build:company -- --address acme`. Electron has no Web Push, so the
+desktop app polls `/api/desktop/notifications` and shows native notifications while it runs (it can stay in the tray). Details,
+security notes and the CI workflow (`.github/workflows/desktop.yml`): [desktop/README.md](./desktop/README.md). Building needs Node 22.
+
+### Website push (for a company's visitors)
+
+For each company, its public website (`<slug>.selfrunbusiness.com` or its own domain) can offer visitors notifications. The
+business controls it in **CMS → Push notifications** (Super Admin or anyone with the CMS settings permission).
+
+- **Off by default.** Turn on *Website notifications* and save. Visitors then see a small bell (and, after a delay you choose, a card)
+  asking which topics they want: *Offers and deals*, *Credits and rewards*, *News and updates*, *Announcements*. They can change
+  or turn it off from the same bell at any time. iPhone/iPad Safari can't receive push from a plain website, so the bell is hidden there.
+- **Automatic.** When a festival offer campaign goes live, a reward or referral campaign is switched on, or a blog post is
+  published, the matching topic is notified (each can be switched off).
+- **Manual.** Compose a title and message, choose a topic and the page it opens, preview, confirm the audience size and send.
+- **Controls.** A daily limit (default 3, manual and automatic together), topics on/off, the prompt text and delay.
+- **Results.** Subscribers (total, per topic, new this week) and a history with delivered, failed and opened counts per send.
+- **Privacy.** Subscribers are anonymous browsers (no name, email or account). Credits a *logged-in* client earns are pushed
+  to that person in the app (Part 1), not through the website.
+- **Safety.** Public endpoints exist only on website hosts and are rate limited; only real push-service addresses are
+  accepted; links open pages of the site only.
+
+---
+
+## Demo data
+
+One command fills a demo company with realistic data for every panel. It is for demos and development.
+
+```bash
+# 1. Register the demo company at /signup
+# 2. Fill it
+npm run demo:seeders                        # when it is the only customer company
+npm run demo:seeders -- --company <slug>    # when there are several
+```
+
+- **Scoped to one company.** Everything is written through the company-scoped database; other companies and the operator
+  company are never read or changed. The operator company is refused.
+- **Safe to re-run.** It replaces the previous demo rows instead of duplicating them. Your own Super Admin login stays.
+- **All panels:** HR and payroll, projects, CRM and offers, finance, procurement, training, team chat, SOPs, legal
+  documents, Digi Locker, online tests, AI assistants, social media, SEO, website, portal and wallet, help and support.
+  AI Intelligence answers from the same business data.
+- **Logins.** The command prints the demo accounts per panel at the end; they use `example.com` addresses and one shared
+  demo password, also printed there. Do not use this on a real company.
+- **Plan.** A panel shows in the sidebar only if the company's plan includes it (Platform Panel → Companies).
+- **AI assistants** get conversations and files as metadata only unless `OPENAI_API_KEY` is set.
+
+To start over, use a new empty database (change `MONGODB_URI`) and register the company again.
+
+---
+
+## Deploy to production (Vercel)
+
+1. Import the repository into Vercel.
+2. Make `selfrunbusiness.com` the project's **production domain** (and `www.selfrunbusiness.com`). Add the wildcard
+   `*.selfrunbusiness.com` (covers every `<slug>` and `<slug>-app` address) so every company gets a working HTTPS address.
+3. Add environment variables for **Production**:
+   - `MONGODB_URI` (a new, empty database), `SAAS_ADMIN_EMAIL`, `SAAS_ADMIN_PASSWORD` (quoted)
+   - `SAAS_HOSTS` and `PLATFORM_ROOT_DOMAIN` (both `selfrunbusiness.com`)
+   - `PLATFORM_ENCRYPTION_KEY`, `CRON_SECRET`, `BLOB_READ_WRITE_TOKEN`, `RESEND_API_KEY`, `EMAIL_FROM`
+   - the feature keys you use
+4. **Redeploy** after any variable change; the running deployment does not pick them up otherwise.
+5. Open `https://www.selfrunbusiness.com`. The first start creates the operator and logs it. Check `/`, `/pricing` and
+   `/signup`.
+6. Add the domain `app.selfrunbusiness.com` to the project too, then sign in at `https://app.selfrunbusiness.com/workspace/login`
+   as the staff account, open `/platform`, and set up plans, prices and the Razorpay keys.
+7. Register a test company and confirm both its website (`<slug>.selfrunbusiness.com`) and its panels
+   (`<slug>-app.selfrunbusiness.com`) work.
+
+Notes:
+
+- Use MongoDB Atlas with Vercel's IPs allow-listed.
+- Cron jobs in `vercel.json` register automatically. Protect them with `CRON_SECRET`.
+- Local files under `uploads/` are not persistent on serverless hosting. Use Vercel Blob.
+- Customers connect their own domains in Workspace → Settings → Domains; TLS is issued automatically.
+
+Full guide, including DNS, email and payments: [docs/deploy-vercel.md](./docs/deploy-vercel.md).
+
+Self-hosting: `npm run build && npm start` (port 3000; set `PORT` to change), and schedule the cron endpoints.
 
 ---
 
@@ -236,106 +358,13 @@ Never commit secrets. Treat encryption keys as permanent once data is written.
 
 | Script | What it does |
 | --- | --- |
-| `npm run dev` | Start the dev server on port 3000 |
+| `npm run dev` | Development server on port 3000 |
 | `npm run build` | Production build |
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint |
-| `npm run create-lms` | Create an LMS (lead management) admin account |
-| `npm run index-kb` | Crawl the site and index the AI chatbot knowledge base |
-| `npm run db:truncate` | **Delete all data** in the configured database |
-| `npm run db:seed-super-admin` | Create the super admin account |
-| `npm run db:seed-all-panels` | Base data for all panels (admin users and basic records) |
-| `npm run db:seed-demo-portal` | Large demo dataset layer (see below) |
-| `npm run db:seed-demo` | Base seed then demo layer (no truncate) |
-| `npm run db:reset-demo` | Truncate, base seed, then demo layer |
-| `npm run db:seed-wallet-rules` | Seed the default wallet reward rules only |
+| `npm run demo:seeders` | Fill a demo company with realistic data for every panel |
 
-All `db:*` and script commands load `.env` through `node --env-file=.env`.
-
----
-
-## Database and demo data
-
-### One-command reset (recommended)
-
-```bash
-npm run db:reset-demo
-```
-
-### Step by step
-
-```bash
-npm run db:truncate           # deletes all data
-npm run db:seed-all-panels    # base data
-npm run db:seed-demo-portal   # large demo layer
-```
-
-> **Warning:** `db:truncate` and `db:reset-demo` wipe the database named in
-> `MONGODB_URI`. Never run them against a real or production database.
-
-### Seed into a separate database (safe testing)
-
-The demo layer supports an override so your main database stays untouched:
-
-```bash
-SEED_DB=demo_seedtest node --env-file=.env scripts/seed-demo-portal.mjs
-```
-
-(This applies to the demo layer only. Truncate and base seed always use the
-database in `MONGODB_URI`. To run everything against another database, point
-`MONGODB_URI` at it.)
-
-### What the demo layer creates
-
-Scripts live in `scripts/demo/` and run from `scripts/seed-demo-portal.mjs`.
-They use a deterministic random generator, so results are repeatable, and all
-demo records use `demo-` ids (or a `_demo: true` flag), so re-running replaces
-the previous demo data instead of duplicating it.
-
-| Module | Data |
-| --- | --- |
-| TMS | Programs, batches, about 130 students, classes, attendance, assignments, submissions, certificates, fee plans, placements |
-| PMS | 24 clients, 72 projects, milestones, documents, tasks, team members, timesheets, task comments, activity timelines |
-| FMS | Invoices, receipts, credit notes, chart of accounts, bank and cash accounts, ledger transactions, audit trails |
-| PRMS | Vendors, requisitions, purchase orders, assets, expenses, subscriptions, infrastructure, budgets, vendor invoices, payments |
-| HRMS | 150 employees, departments, designations, teams, leave types/balances/requests, payroll runs and payslips |
-| Portal and leads | External users of every type, leads, timelines, messages, documents, applications, interviews, offers |
-| Offers and wallet | Campaigns, offers, coupons, claims, analytics events, reward and usage rules, referral network, wallet ledger, streaks |
-| Messenger | Project, group and team channels, DMs, announcements, meetings, shared files |
-| Chatbot | Sessions, messages, voice conversations |
-| LMS marketing | Campaign import history |
-
-Known gap: the LMS chatbot **Knowledge Base** page stays empty until you upload
-or index documents (`npm run index-kb`, needs `OPENAI_API_KEY`).
-
-### FMS side effect to know about
-
-The FMS dashboard calls `src/lib/fms/seed-realistic-data.ts` on load, which
-writes fixed sample finance records into whatever database is connected. That is
-fine for demo databases; do not point a real production database at this build
-without removing that call.
-
----
-
-## Demo logins
-
-After `npm run db:reset-demo`:
-
-| Account | Email | Password |
-| --- | --- | --- |
-| Super admin (all panels) | `admin@example.com` | `Admin#2026pw` |
-| Student portal | `demo.student@example.com` | `Demo@12345` |
-| Intern portal | `demo.intern@example.com` | `Demo@12345` |
-| Client portal | `demo.client@example.com` | `Demo@12345` |
-| Business portal | `demo.business@example.com` | `Demo@12345` |
-| Hiring portal | `demo.hiring@example.com` | `Demo@12345` |
-
-Login URLs: `/admin/login`, `/hrms/login`, `/pms/login`, `/prms/login`,
-`/tms/login`, `/fms/login`, `/messenger/login`, `/lms/login`,
-`/workspace/login`, and `/portal/login` (or the public `/login`) for the portal.
-
-These are demo credentials. Change them, or do not seed, in any shared or
-production environment.
+`demo:seeders` loads `.env` automatically.
 
 ---
 
@@ -344,127 +373,50 @@ production environment.
 ```
 src/
   app/
-    (site)/            Public website, /register, /login, /rewards, /blog, /careers, /offers
-    admin/ hrms/ pms/ prms/ tms/ fms/ lms/ messenger/ workspace/
-    portal/            External user portal (app, register, join)
-    api/               Route handlers (intake, wallet, messenger, chatbot, cron)
-    pay/ verify/       Public invoice checkout and certificate verification
-  components/          UI by area (portal, offers, lms, messenger, pms, prms, ...)
-  lib/                 Server logic by module
-    wallet/            Wallet, ledger, referrals, campaigns, usage rules, reversals, expiry
-    portal/            Portal data, dashboards, notifications, registration
-    lead-management/   Lead provisioning and workflows
-    offers/            Offers, coupons, claims
-    hrms/ pms/ prms/ tms/ fms/ messenger/   Panel data layers
-  proxy.ts             Request proxy (Next 16 replacement for middleware), referral capture
+    saas/              Product website (served on SaaS hosts through proxy rewrites)
+    (platform)/        Sign-up, Platform Panel, workspace-not-found
+    (site)/            Customer public website (CMS-driven)
+    workspace/ hrms/ pms/ prms/ tms/ fms/ lms/ messenger/ sop/ lpms/ dlms/ ots/ aibots/
+    intelligence/ smms/ seo/ cms/ support/
+    portal/            External user portal
+    api/               Route handlers
+  components/          UI by area
+  lib/
+    saas/              Brand, hosts, routes, theme, content and bootstrap of the product site
+    platform/          Tenancy, companies, billing, panel registry, domains, website starter
+    cms/               CMS collections, theme, content
+    …                  One folder per module
+  instrumentation.ts   First-start operator setup
+  proxy.ts             Request proxy (host routing and rewrites)
+desktop/               Electron desktop app and per-company build script
+mobile/                Android and iOS app build script (Capacitor)
 scripts/
-  seed-*.mjs, truncate-all-data.mjs, create-lms.mjs, index-knowledge-base.mjs
-  demo/                Demo data modules (tms, pms, people, growth, panels, messenger,
-                       chatbot, procurement, prms-ops, marketing)
-public/                Static assets
-uploads/               Local file storage for documents and attachments (git-ignored data)
-vercel.json            Cron schedule
-PANELS.md              Product overview of every panel
-AGENTS.md / CLAUDE.md  Instructions for AI coding agents
+  demo-seeders.ts      The demo data command
+  demo/                Demo data modules, one per panel
+  test-*.ts, e2e/      Verification scripts
+public/selfrun/        Logo, mark and favicon
+docs/                  Architecture and deployment guides
 ```
 
 ---
 
 ## Architecture notes
 
-- **Identity:** internal users are `admin_users` with a `roles` array; external
-  people are `external_users` with one of four roles (`job_applicant`,
-  `intern`, `trainee`, `client`). Portal dashboards (Student, Intern, Client,
-  Business, Hiring) are generated from the role plus the lead category.
-  Sessions are separate cookies per panel.
-- **IDs and audit fields:** documents use string ids and shared audit fields
-  (`createdAt`, `updatedAt`, `createdBy`, `updatedBy`, `deletedAt` for soft
-  delete). Several pages assume these exist.
-- **No multi-document transactions.** Atomicity comes from single-document
-  `findOneAndUpdate` with guard filters, plus an idempotency-lock collection
-  for the wallet.
-- **Server/client split:** files that import `server-only` must not be imported
-  by client components. Shared constants live in client-safe files
-  (for example `src/lib/wallet/constants.ts`).
-- **Realtime:** Messenger uses Server-Sent Events over a `chat_events` log, and
-  WebRTC (mesh) for calls with signaling over SSE.
-- **Design system:** plain glass cards, centered `max-w-*` page wrappers, no
-  custom per-page hover shadows. Match the existing panels when adding UI.
-- **Brand wordmark:** use `brandify()` from `src/lib/brand.tsx` so the brand name
-  renders with its first part in the normal colour and its second in the accent colour.
+- **Identity.** Internal users have a `roles` array per panel; external people sign in through the portal. Sessions are
+  separate cookies per panel, with single sign-on across the panels a user has a role in. Platform staff have their own
+  platform roles.
+- **Plans and panels.** The Panel Registry lists every panel with its name, route and on/off state; plans decide which
+  panels a company gets.
+- **Audit fields.** Documents use string ids and shared fields (`createdAt`, `updatedAt`, `createdBy`, `updatedBy`,
+  `deletedAt` for soft delete).
+- **No multi-document transactions.** Atomicity comes from single-document updates with guard filters.
+- **Caching.** Company and CMS lookups are cached (up to an hour). After editing the database directly, restart the
+  server and clear `.next` to see changes immediately.
+- **Server/client split.** Files importing `server-only` must not be imported by client components.
+- **Brand.** The product brand lives in `src/lib/saas/brand.ts`; a customer's own wordmark is rendered by `brandify()` in
+  `src/lib/brand.tsx` from its Branding settings.
 
----
-
-## Wallet, credits and referrals
-
-A centralized wallet gives every portal user credits that can be earned and spent.
-
-- **Earning:** signup bonus, referral rewards (referrer and referee), daily
-  visit streaks, stage-completion and activity rewards, admin adjustments.
-  Rules are editable in LMS (`/lms/wallet`) with no redeploy.
-- **Referral flow:** share `/register?ref=CODE`; the code is captured
-  first-touch, attributed at account creation, and rewarded once, with
-  fraud checks (self-referral, shared IP, shared device, velocity).
-- **Spending:** credits apply to festival offers, TMS fees and FMS invoices,
-  governed by usage rules per module and user role.
-- **Ledger:** immutable `wallet_transactions` with before/after balances, FIFO
-  lot expiry, reversals and refunds. Wallet balances are buckets
-  (available, pending, locked, lifetime totals).
-- **Expiry cron:** `vercel.json` schedules `/api/wallet/expiry-sweep` daily at
-  02:30 UTC. Protect it with `CRON_SECRET` or `WALLET_CRON_SECRET`.
-- **Portal pages:** `/portal/wallet`, `/portal/referrals`, `/portal/rewards/*`.
-  **LMS pages:** `/lms/wallet/*` (rules, usage rules, campaigns, referrals,
-  wallets, ledger, users).
-
----
-
-## AI chatbot and knowledge base
-
-- Public "Ask SelfRun Business" assistant using the OpenAI Responses API with hosted
-  vector-store file search. Optional voice mode via ElevenLabs.
-- Index the site into the vector store:
-
-  ```bash
-  CHATBOT_CRAWL_BASE_URL=http://localhost:3000 npm run index-kb
-  ```
-
-- Manage configuration, documents, sessions and analytics under `/lms/chatbot`.
-- Without `OPENAI_API_KEY` the chatbot is disabled; the rest of the app is unaffected.
-
----
-
-## Build, verify and deploy
-
-### Verify before shipping
-
-```bash
-npm run lint
-npm run build
-echo $?        # must print 0
-```
-
-`tsc --noEmit` alone is not a reliable gate in this repo. Always check the exit
-code of a real `next build`, and do not run other heavy tasks while it runs
-(a concurrent run can fail with a missing `.next/server/*manifest` error).
-
-### Deploy on Vercel
-
-1. Import the repository into Vercel.
-2. Set the environment variables from the table above (at minimum `MONGODB_URI`;
-   add `CRON_SECRET` for the wallet expiry cron).
-3. Deploy. Cron jobs from `vercel.json` register automatically.
-4. Use MongoDB Atlas with the deployment's IPs allow-listed.
-5. Local file uploads under `uploads/` are not persistent on serverless hosting.
-   Use a persistent storage layer before relying on uploads in production.
-
-### Self-hosting
-
-```bash
-npm run build
-npm start          # serves on port 3000; use PORT to change
-```
-
-Run a scheduler that calls `/api/wallet/expiry-sweep` daily with the cron bearer secret.
+More detail: [docs/architecture.md](./docs/architecture.md).
 
 ---
 
@@ -472,78 +424,26 @@ Run a scheduler that calls `/api/wallet/expiry-sweep` daily with the cron bearer
 
 | Problem | Fix |
 | --- | --- |
-| Pages crash after seeding with "cannot read properties of undefined" | Old base-seed documents with a different shape. Run `npm run db:reset-demo` for a clean, consistent dataset |
-| Login works but a panel shows no data | You seeded only the base layer. Run `npm run db:seed-demo-portal` |
-| Messenger "Project Channels" empty for admin | Project channels sync from PMS teams by employee link. Re-run the demo seeder, which links the admin account to a demo employee |
-| Chatbot says it is unavailable | Set `OPENAI_API_KEY` and run `npm run index-kb` |
-| Voice mode missing | Set `ELEVENLABS_API_KEY` and enable it in LMS, Chatbot, Conversation AI |
-| Bank details cannot be saved | Set `HRMS_ENCRYPTION_KEY` / `FMS_ENCRYPTION_KEY` |
-| Calls connect only on the same network | Add a TURN server via the `MESSENGER_TURN_*` variables |
-| Build fails with `pages-manifest.json` ENOENT | Another process touched `.next` during the build. Stop other tasks and rebuild |
-| `db:*` script cannot connect | Check `MONGODB_URI` in `.env` and your Atlas IP allow-list |
+| Production site shows a 404 with a small monogram header | The host is not recognised as a SaaS host. Set `SAAS_HOSTS` and `PLATFORM_ROOT_DOMAIN`, make the domain the production domain, then redeploy |
+| Staff cannot sign in | A `#` in an unquoted `SAAS_ADMIN_PASSWORD` truncates it. Quote the value and restart |
+| `localhost:3000/platform` redirects to `app.localhost:3000/platform` | Expected: panels are never served on the website host. Sign in there as the staff account from `SAAS_ADMIN_EMAIL` |
+| `E11000 duplicate key` on first start | Drop the new database and start again; the setup guards against the race |
+| A page shows empty data after a direct database change | Restart the server and delete `.next` (cached lookups) |
+| A panel is missing from a company's sidebar | The company's plan does not include it (Platform Panel → Companies → plan) |
+| Bank details cannot be saved | Set the matching `*_ENCRYPTION_KEY` |
+| Chatbot unavailable | Set `OPENAI_API_KEY`, then re-index from CRM → Chatbot |
+| Calls connect only on the same network | Add a TURN server through the `MESSENGER_TURN_*` variables |
+| Build fails with a missing `.next/server/*manifest` | Another process touched `.next` during the build; stop it and rebuild |
+| `demo:seeders` cannot connect | Check `MONGODB_URI` and the Atlas IP allow-list |
 
 ---
 
-## Contributing notes
+## Contributing
 
-- Read [AGENTS.md](./AGENTS.md): this Next.js version has breaking changes, so
-  check `node_modules/next/dist/docs/` before writing framework code.
+- Read [AGENTS.md](./AGENTS.md); check `node_modules/next/dist/docs/` before writing framework code.
 - Match the surrounding code: naming, comment density and UI patterns.
-- Keep new panel UI inside the shared design system.
-- When you add a module that shows data, add its records to `scripts/demo/` so
-  demos never show blank sections.
-- Commit only source and docs. Never commit `.env` or uploaded files.
-
-
-
-==========================================================================
-✨ Done. Portal demo logins (password for all: Demo@12345) — sign in at /login
-==========================================================================
-  • Student (industrial training)      demo.student@example.com
-  • Intern                             demo.intern@example.com
-  • Client                             demo.client@example.com
-  • Business (hiring + services)       demo.business@example.com
-  • Hiring (job applicant)             demo.hiring@example.com
-
-
-Needed in Vercel before going live
-
-SMMS_ENCRYPTION_KEY (your local .env already has one).
-CRON_SECRET.
-For publishing: META_APP_ID/META_APP_SECRET, GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET, LINKEDIN_CLIENT_ID/LINKEDIN_CLIENT_SECRET.
-For demo data, run npm run db:seed-smms. It creates the logins demo.smms.{admin,manager,specialist,employee}@example.com (password Demo@12345). Testing used a scratch database, which I dropped afterwards.
-
-# demo (the database in .env)
-npm run db:migrate-cms-content                 # dry run: prints the database name and what it will create
-npm run db:migrate-cms-content -- --apply
-
-# platform: same cluster connection string, database name changed
-MONGODB_URI="mongodb+srv://…/platform?…" npm run db:migrate-cms-content -- --apply
-
-
-npm run db:migrate-cms-content -- --apply
-
-
-Before you push or deploy
-Migrate the production database: npm run db:migrate-tenancy -- --apply against platform.
-Add PLATFORM_ENCRYPTION_KEY, RAZORPAY_BILLING_WEBHOOK_SECRET and CRON_SECRET to Vercel.
-After deploy, run scripts/backfill-subscription-events.ts so revenue analytics aren't empty. It is a dry run unless you pass --apply.
-Enter your Razorpay test keys in Platform Panel → Payments & Razorpay
-
-
-npm run db:migrate-cms-content
-npm run db:migrate-cms-content -- --apply
-npm run db:add-products-nav
-npm run db:add-products-nav -- --apply
-
-
-npm run db:migrate-cms-content          # naya product aur uske text keys banata hai
-npm run db:migrate-cms-content -- --apply
-npm run db:add-products-nav             # Products menu me naya item
-npm run db:add-products-nav -- --apply
-npm run db:revert-services-nav          # sirf agar aapne pehle db:update-services-nav live par chalayi thi
-npm run db:revert-services-nav -- --apply
-
-npm run db:migrate-cms-content
-npm run db:add-products-nav
-npm run db:revert-services-nav     # sirf agar aapne pehle db:update-services-nav live par chalayi thi
+- When you add a module that shows data, add demo data for it in `scripts/demo/` and call it from
+  `scripts/demo-seeders.ts`, so demos never show blank sections.
+- Before shipping run `npm run lint` and `npm run build`, and check that the build's exit code is 0
+  (`tsc --noEmit` alone is not a reliable gate here).
+- Commit only source and docs. Never commit `.env`, uploaded files or credentials.

@@ -4,7 +4,7 @@ import type { Collection } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { COMPANIES_COLLECTION, getCompany, type Company } from "@/lib/platform/tenancy/companies";
-import { companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
+import { companyAppBaseUrl } from "@/lib/platform/tenancy/provisioning";
 import { getCompanyDetails, type CompanyDetails } from "@/lib/hrms/company";
 import { getPlan } from "@/lib/platform/billing/plans";
 import { getBillingSettings, type PlatformBillingSettings } from "@/lib/platform/billing/settings";
@@ -265,7 +265,7 @@ function describeLine(line: QuoteLine, period: { start: Date; end: Date } | null
 
 async function emailInvoice(inv: SaasInvoice, slug: string): Promise<void> {
   if (!inv.buyer.email || !inv.number || inv.status !== "paid") return;
-  const url = `${companyBaseUrl(slug)}/workspace/settings/billing/invoices`;
+  const url = `${companyAppBaseUrl(slug)}/workspace/settings/billing/invoices`;
   const period = inv.periodStart && inv.periodEnd ? ` (${formatInvoiceDate(inv.periodStart)} to ${formatInvoiceDate(inv.periodEnd)})` : "";
   const { html, text } = renderEmail({
     brand: inv.seller.name,

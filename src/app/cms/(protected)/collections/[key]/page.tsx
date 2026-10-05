@@ -19,7 +19,7 @@ export default async function CmsCollectionPage({ params }: { params: Promise<{ 
   const rows = await listAdminRecords(k);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Collections", href: "/cms/collections" }, { label: def.label }]}
         icon={COLLECTION_META[k].icon}

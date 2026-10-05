@@ -28,7 +28,7 @@ export default async function CmsCollectionsPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Collections" }]}
         icon={Database}

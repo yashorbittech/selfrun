@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BellOff, CheckCheck, Clock } from "lucide-react";
+import { BellOff, CheckCheck, Clock, Settings2 } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import GlassCard from "@/components/lms/GlassCard";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { usePanelMeta } from "@/components/platform/PanelsProvider";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import { cn } from "@/lib/utils";
@@ -113,11 +114,18 @@ export default function GenericPanelNotificationsPage({
         title={<>{panelName} Notifications</>}
         description={description || `Updates, alerts and automations for ${panelName}`}
         actions={
-          unreadCount > 0 ? (
-            <Button type="button" variant="outline" size="sm" onClick={markAllRead} className="h-8 gap-1.5 text-xs">
-              <CheckCheck className="size-3.5 text-primary" /> Mark all read
-            </Button>
-          ) : null
+          <div className="flex flex-wrap items-center gap-2">
+            {panel === "workspace" || panel === "portal" ? (
+              <Link href={`/${panel}/notifications/settings`} className={buttonVariants({ variant: "outline", size: "sm", className: "h-8 gap-1.5 text-xs" })}>
+                <Settings2 className="size-3.5 text-primary" /> Settings
+              </Link>
+            ) : null}
+            {unreadCount > 0 ? (
+              <Button type="button" variant="outline" size="sm" onClick={markAllRead} className="h-8 gap-1.5 text-xs">
+                <CheckCheck className="size-3.5 text-primary" /> Mark all read
+              </Button>
+            ) : null}
+          </div>
         }
       />
 <div className="space-y-4">

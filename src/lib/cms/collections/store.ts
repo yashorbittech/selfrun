@@ -1,4 +1,5 @@
 import "server-only";
+import { queueBroadcast } from "@/lib/webpush/send";
 import { companyCache } from "@/lib/platform/tenancy/cache";
 import { getDb } from "@/lib/mongodb";
 import { CMS_SITE_TAG, expireSiteCache, updateStamp, createStamp, newId } from "@/lib/cms/db";
@@ -189,6 +190,8 @@ export async function publishRecord(key: CollectionKey, slug: string, actorId: s
   );
   const pageCreated = def.pathOf ? await ensureRecordPage(key, slug, def.titleOf(parsed), actorId) : false;
   expireSiteCache();
+  // A blog post going live for the first time: tell the visitors who subscribed to news (no-op when website push is off).
+  if (key === "blog" && !doc.live) await queueBroadcast({ topic: "updates", title: `New: ${def.titleOf(parsed)}`, body: "A new post was just published. Tap to read it.", url: def.pathOf ? def.pathOf(slug) : `/blog/${slug}`, trigger: "post" });
   return { ok: true, pageCreated };
 }
 

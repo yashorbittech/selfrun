@@ -27,7 +27,7 @@ export async function submitInquiry(kind: InquiryKind, _prev: InquiryState | nul
   return { ok: true };
 }
 
-/** Sign-in entry: find a workspace from its address (`acme`, `acme.selfrunbusiness.ai` or its own domain) and send the visitor to that workspace's login. */
+/** Sign-in entry: find a workspace from its address (`acme`, `acme.selfrunbusiness.com` or its own domain) and send the visitor to that workspace's login. */
 export async function findWorkspace(_prev: { error?: string } | null, fd: FormData): Promise<{ error?: string }> {
   const h = await headers();
   if (!isSaasHost(h.get("host"))) return { error: "This isn't available here." };

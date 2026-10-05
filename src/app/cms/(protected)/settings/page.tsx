@@ -15,7 +15,7 @@ export default async function CmsSettingsPage() {
   const [settings, tracking] = await Promise.all([getSettings(), getTrackingForEdit()]);
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-4 sm:p-6">
+    <div className="space-y-4">
       <CmsPageHeader
         breadcrumbs={[{ label: "Settings" }]}
         icon={Settings}
