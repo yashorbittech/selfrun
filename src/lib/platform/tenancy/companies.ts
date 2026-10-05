@@ -103,7 +103,7 @@ export function normalizeHost(host: string | null | undefined): string | null {
 function platformHosts(): Set<string> {
   // The root domain itself and www.<root> (https://www.example.com) are the platform owner's own site: no env entry needed.
   const roots = platformRootDomains().filter((r) => r !== "localhost");
-  return new Set(["localhost", "127.0.0.1", ...roots, ...roots.map((r) => `www.${r}`), ...envList("PLATFORM_HOSTS", "VERCEL_URL", "VERCEL_BRANCH_URL", "VERCEL_PROJECT_PRODUCTION_URL")]);
+  return new Set(["localhost", "127.0.0.1", ...roots, ...roots.map((r) => `www.${r}`), ...envList("PLATFORM_HOSTS", "VERCEL_URL", "VERCEL_BRANCH_URL")]);
 }
 
 /** `localhost`, every `PLATFORM_ROOT_DOMAIN` entry, and the root domain saved in Platform Panel → Integrations. */
