@@ -7,7 +7,8 @@ import GlassCard from "@/components/lms/GlassCard";
 import { requireWorkspaceAccess } from "@/lib/workspace/access";
 import { getCompanySecurity } from "@/lib/workspace/company";
 import { formatDateTime } from "@/lib/utils";
-import SignOutEverywhere from "./SignOutEverywhere";
+import SecuritySections from "./SecuritySections";
+import { ObjectId } from "mongodb";
 
 export const metadata: Metadata = { title: "Security", robots: { index: false, follow: false } };
 
@@ -34,18 +35,15 @@ export default async function SecurityPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <p id="security-last-signin">{user.lastLoginAt ? `Last sign-in: ${formatDateTime(user.lastLoginAt.toISOString())}` : "This is your first sign-in."}</p>
-            <p id="security-sessions" data-count={s.ownSessions}>
-              {s.ownSessions === 1 ? "You have 1 open Workspace session (this one)." : `You have ${s.ownSessions} open Workspace sessions, including this one.`} Sessions end by themselves after 7 days.
-            </p>
             <div className="flex flex-wrap items-center gap-2">
               <Link href="/workspace/change-password" className={linkClass}>
                 Change password <ArrowRight className="size-3.5" />
               </Link>
-              <SignOutEverywhere />
             </div>
-            <p className="text-xs text-muted-foreground">Signing out everywhere ends your sessions in every panel, on every device, including this one.</p>
           </CardContent>
         </GlassCard>
+
+        <SecuritySections adminId={new ObjectId(user.id)} email={user.email} />
 
         <GlassCard interactive={false}>
           <CardHeader>

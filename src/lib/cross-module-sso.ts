@@ -30,6 +30,7 @@ import { createSeoSession, setSeoSessionCookie, clearSeoSessionCookie } from "@/
 import { hasCmsAccess } from "@/lib/cms-roles";
 import { createCmsSession, setCmsSessionCookie, clearCmsSessionCookie } from "@/lib/cms-auth";
 import { createHubSession, setHubSessionCookie, clearHubSessionCookie } from "@/lib/hub-auth";
+import { loginSessions, LOGIN_COOKIE } from "@/lib/security/store";
 
 /**
  * Cross-module single sign-on / sign-off. Every internal panel shares one
@@ -223,9 +224,22 @@ export async function provisionAccessibleSessions(adminId: ObjectId, skip?: SsoM
  */
 export async function destroySessionsEverywhere(adminId: ObjectId): Promise<void> {
   const db = await getDb();
-  const collections = [...new Set(MODULES.map((m) => m.collection))];
-  await Promise.all(collections.map((name) => db.collection(name).deleteMany({ adminId })));
+  await Promise.all(sessionCollectionNames().map((name) => db.collection(name).deleteMany({ adminId })));
+  // The Security page's list: every sign-in of this account is over.
+  await (await loginSessions()).updateMany({ adminId: adminId.toString(), revokedAt: null }, { $set: { revokedAt: new Date(), revokedReason: "signed_out_everywhere" } }).catch(() => {});
+  await clearAllSessionCookies();
+}
+
+/** Every Mongo collection that holds panel sessions (the LMS and admin ones share one). */
+export function sessionCollectionNames(): string[] {
+  return [...new Set(MODULES.map((m) => m.collection))];
+}
+
+/** Clears every panel's session cookie (and the Security page's device id) in the current browser. */
+export async function clearAllSessionCookies(): Promise<void> {
   await Promise.all(MODULES.map((m) => m.clearCookie()));
+  const store = await cookies();
+  store.delete(LOGIN_COOKIE);
   // The separate admin panel is gone; drop its cookie from browsers that still carry one.
-  (await cookies()).delete("admin_session");
+  store.delete("admin_session");
 }

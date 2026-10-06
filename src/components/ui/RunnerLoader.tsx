@@ -52,7 +52,7 @@ export default function RunnerLoader({ width = "22rem", scene = "run", sign = "4
             <rect x="-2.5" y="40" width="5" height="52" rx="2" className="rl-f-muted-foreground-60" />
             <g transform="rotate(-6 0 44)">
               <rect x="-30" y="22" width="60" height="26" rx="6" strokeWidth="2.5" className="rl-f-card rl-s-primary" />
-              <text x="0" y="40" textAnchor="middle" fontSize={sign.length > 3 ? 12 : 17} fontWeight="900" className="rl-f-primary">{sign}</text>
+              <text x="0" y="40" textAnchor="middle" fontSize={sign.length > 6 ? 10 : sign.length > 3 ? 12 : 17} fontWeight="900" className="rl-f-primary">{sign}</text>
               <path d="M-30 30l9 3-6 5" strokeWidth="1.5" fill="none" strokeLinecap="round" className="rl-s-primary-40" />
             </g>
           </g>

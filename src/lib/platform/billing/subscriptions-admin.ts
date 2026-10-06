@@ -202,9 +202,10 @@ export async function adminExtendTrial(companyId: string, days: number, actorId:
 /**
  * Complimentary = never billed, every panel, no limits (stored status
  * "internal"). A live Razorpay subscription is canceled first. Turning it off
- * puts the company on a fresh trial of its plan (default trial length).
+ * puts the company on a fresh trial of its plan (default trial length), or — `after: "subscribe"` — straight to "must subscribe": no trial,
+ * the workspace is read-only until it buys a plan.
  */
-export async function adminSetComplimentary(companyId: string, on: boolean, actorId: string): Promise<BillingActionResult> {
+export async function adminSetComplimentary(companyId: string, on: boolean, actorId: string, after: "trial" | "subscribe" = "trial"): Promise<BillingActionResult> {
   const e = await editable(companyId);
   if (!e.ok) return e;
   const sub = e.sub;
@@ -219,6 +220,10 @@ export async function adminSetComplimentary(companyId: string, on: boolean, acto
     return { ok: true, message: "Marked complimentary — this company is no longer billed." };
   }
   if (sub.status !== "internal") return { ok: false, error: "This company isn't complimentary." };
+  if (after === "subscribe") {
+    await applyChange(companyId, sub, { status: "suspended", complimentary: false, trialEndsAt: new Date(Date.now() - 1000), graceEndsAt: null, currentPeriodStart: null, currentPeriodEnd: null, cancelAtPeriodEnd: false, pendingChange: null, dunning: null }, { actorId, action: "subscription.admin.complimentary_off", details: { requireSubscription: true } });
+    return { ok: true, message: "Free access removed — the company must now choose a plan to continue." };
+  }
   const settings = await getBillingSettings();
   const plan = await getPlan(sub.planId);
   const days = plan?.trialDays ?? settings.billing.defaultTrialDays;

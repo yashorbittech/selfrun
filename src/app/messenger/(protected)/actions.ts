@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 import { getCurrentChatUser } from "@/lib/messenger-auth";
 import { goOffline } from "@/lib/messenger/presence";
 import { markRead, markAllRead } from "@/lib/messenger/notifications";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 
 /**
  * Centralized logout: destroys this account's session in EVERY panel (not
@@ -17,7 +17,7 @@ export async function messengerLogoutAction(): Promise<void> {
   if (user) {
     await goOffline(user.id).catch(() => {});
     if (ObjectId.isValid(user.id)) {
-      await destroySessionsEverywhere(new ObjectId(user.id));
+      await signOutThisDevice(new ObjectId(user.id));
     }
   }
   redirect("/workspace/login");

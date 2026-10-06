@@ -26,6 +26,11 @@ import TrialCard from "./TrialCard";
 import CompanyPanelsCard from "./CompanyPanelsCard";
 import { disabledPanelKeys, listPanels } from "@/lib/platform/panels/store";
 import { getTrialOverview } from "@/lib/platform/billing/trials";
+import { getCompanyMaintenance } from "@/lib/platform/maintenance-state";
+import MaintenanceForm from "../../maintenance/MaintenanceForm";
+import FreeAccessCard from "./FreeAccessCard";
+import LoginAsCompanyButton from "../LoginAsCompanyButton";
+import { getCompanySubscription } from "@/lib/platform/billing/subscription";
 
 export const metadata: Metadata = { title: "Company" };
 
@@ -50,6 +55,8 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
   const [allAddons, heldAddons] = company.isPlatformOwner ? [[], []] : await Promise.all([listAddons(), getCompanyAddons(company.id)]);
   const trial = company.isPlatformOwner ? null : await getTrialOverview(company.id);
   const [registry, disabledHere] = await Promise.all([listPanels(), disabledPanelKeys(company.id)]);
+  const maintenance = company.isPlatformOwner ? null : await getCompanyMaintenance(company.id);
+  const subscription = company.isPlatformOwner ? null : await getCompanySubscription(company.id);
 
   return (
     <div className="space-y-4 p-1">
@@ -71,7 +78,10 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
             company.isPlatformOwner ? (
               <p className="max-w-56 text-xs text-muted-foreground">The platform owner company runs the platform and can&apos;t be suspended.</p>
             ) : !can(user, "companies.status") ? null : (
-              <StatusControl companyId={company.id} companyName={company.name} status={company.status} />
+              <div className="flex flex-wrap items-start gap-2">
+                {company.status === "active" && <LoginAsCompanyButton companyId={company.id} companyName={company.name} variant="default" />}
+                <StatusControl companyId={company.id} companyName={company.name} status={company.status} />
+              </div>
             )
           }
         />
@@ -227,6 +237,10 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
             />
           </CardContent>
         </GlassCard>
+
+        {subscription && <FreeAccessCard companyId={company.id} companyName={company.name} free={subscription.status === "internal"} canManage={can(user, "subscriptions.manage")} />}
+
+        {maintenance && can(user, "companies.status") && <MaintenanceForm initial={maintenance} companyId={company.id} companyName={company.name} />}
 
         <CompanyAddonsCard
             companyId={company.id}

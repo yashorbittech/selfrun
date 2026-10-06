@@ -1,0 +1,21 @@
+"use client";
+
+import { LayoutGrid } from "lucide-react";
+import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
+import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
+
+/** The signed-in person at the bottom of the Platform Panel's sidebar (desktop and the mobile drawer): the same profile block as every other panel. */
+export default function PlatformProfileMenu({ email, createdAt, lastLoginAt }: { email: string; createdAt?: string; lastLoginAt?: string | null }) {
+  return (
+    <UnifiedProfileMenu
+      email={email}
+      roleLabel="Platform admin"
+      roles={["Platform admin"]}
+      createdAt={createdAt}
+      lastLoginAt={lastLoginAt ?? null}
+      governanceItems={[{ label: "Workspace", href: "/workspace", icon: LayoutGrid }]}
+      onLogout={() => hubLogoutAction()}
+      panelName="Platform Panel"
+    />
+  );
+}

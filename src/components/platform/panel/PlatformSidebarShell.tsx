@@ -1,19 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
-import { LayoutGrid, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
 import PlatformSidebar, { type PlatformNavFlags } from "@/components/platform/panel/PlatformSidebar";
-import { useSidebarCollapse } from "@/components/lms/SidebarCollapseContext";
+import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
+import PlatformProfileMenu from "@/components/platform/panel/PlatformProfileMenu";
 import { BrandName } from "@/components/platform/BrandProvider";
-import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
 import { cn } from "@/lib/utils";
 
 const EXPANDED_WIDTH = 248;
 const COLLAPSED_WIDTH = 68;
 
-export default function PlatformSidebarShell({ email, flags }: { email: string; flags: PlatformNavFlags }) {
+export default function PlatformSidebarShell({ email, createdAt, lastLoginAt, flags }: { email: string; createdAt?: string; lastLoginAt?: string | null; flags: PlatformNavFlags }) {
   const { collapsed, toggle, hydrated } = useSidebarCollapse();
 
   return (
@@ -46,21 +45,9 @@ export default function PlatformSidebarShell({ email, flags }: { email: string; 
         <PlatformSidebar flags={flags} collapsed={collapsed} />
       </div>
 
-      <div className={cn("shrink-0 border-t border-border/60 p-3", collapsed && "px-2")}>
-        {!collapsed && <p className="mb-2 truncate px-1 text-xs text-muted-foreground" title={email}>{email}</p>}
-        <div className={cn("flex gap-1", collapsed ? "flex-col items-center" : "items-center")}>
-          <Link href="/workspace" aria-label="Workspace" className="flex flex-1 items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary">
-            <LayoutGrid className="size-4 shrink-0" />
-            {!collapsed && "Workspace"}
-          </Link>
-          <form action={hubLogoutAction}>
-            <button type="submit" aria-label="Sign out" className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
-              <LogOut className="size-4 shrink-0" />
-              {!collapsed && "Sign out"}
-            </button>
-          </form>
-        </div>
-      </div>
+      <SidebarProfileSlot>
+        <PlatformProfileMenu email={email} createdAt={createdAt} lastLoginAt={lastLoginAt} />
+      </SidebarProfileSlot>
     </motion.aside>
   );
 }

@@ -286,6 +286,7 @@ const NAV_ITEMS: NavItemDef[] = [
   ...COMPANY,
   { key: "account.documents", section: "account", label: "Documents", description: "Documents uploaded across Projects, HR and the External Portal.", href: "/workspace/account/documents", icon: "file", allow: may(P.documents) },
   { key: "account.notifications", section: "account", label: "Notifications", href: "/workspace/notifications", icon: "bell", allow: anyone },
+  { key: "account.sessions", section: "account", label: "Security & sessions", description: "Where you are signed in, and your sign-in history.", href: "/workspace/account/sessions", icon: "lock", allow: anyone },
   { key: "account.password", section: "account", label: "Change Password", href: "/workspace/change-password", icon: "key", allow: anyone },
   {
     key: "platform.panel",

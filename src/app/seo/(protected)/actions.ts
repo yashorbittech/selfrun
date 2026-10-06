@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 import { getCurrentSeoUser } from "@/lib/seo-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { notifyGoogleIndexing } from "@/lib/google-indexing";
 import type { SeoPermission } from "@/lib/seo-roles";
 import { requireViewer, can, ForbiddenError, SeoInputError, type SeoViewer } from "@/lib/seo-panel/viewer";
@@ -65,7 +65,7 @@ const s = (v: unknown, max = 500) => (typeof v === "string" ? v.slice(0, max) : 
 /** Logs out of EVERY panel (single sign-off), like every other panel. */
 export async function seoLogoutAction(): Promise<void> {
   const user = await getCurrentSeoUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

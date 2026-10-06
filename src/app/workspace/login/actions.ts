@@ -9,6 +9,7 @@ import {
 } from "@/lib/hub-auth";
 import { safeNextPath } from "@/lib/workspace-session";
 import { provisionAccessibleSessions } from "@/lib/cross-module-sso";
+import { startLoginSession } from "@/lib/security/sessions";
 import { loginLanding } from "@/lib/platform/onboarding/state";
 
 export interface HubLoginState {
@@ -28,12 +29,14 @@ export async function hubLoginAction(_prevState: HubLoginState, formData: FormDa
     return { error: result.error };
   }
 
+  const startedAt = new Date();
   const token = await createHubSession(result.adminId);
   await setHubSessionCookie(token);
 
   // Mint a real session in every other panel this account's roles actually
   // grant access to, so no separate login is needed to open them.
   await provisionAccessibleSessions(result.adminId, "hub");
+  await startLoginSession(result.adminId, { startedAt, email, via: "password" });
 
   const user = await getSessionHubUser(token);
   if (user?.mustChangePassword) redirect("/workspace/change-password");

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { getCurrentAibotsUser } from "@/lib/aibots-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { isOpenAIConfigured } from "@/lib/openai";
 import type { AibotsPermission } from "@/lib/aibots-roles";
 import { requireViewer, can, AibotsInputError, ForbiddenError, NotFoundError, type AibotsViewer } from "@/lib/aibots/viewer";
@@ -56,7 +56,7 @@ async function run<T extends object>(permission: AibotsPermission | null, fn: (v
 
 export async function aibotsLogoutAction(): Promise<void> {
   const user = await getCurrentAibotsUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

@@ -4,8 +4,8 @@ import { PanelHeading } from "@/components/platform/PanelsProvider";
 import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutGrid, LogOut, Menu, Sparkles } from "lucide-react";
-import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
+import { Menu, Sparkles } from "lucide-react";
+import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import ThemeToggle from "@/components/lms/ThemeToggle";
@@ -16,7 +16,7 @@ import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import PanelBellLink from "@/components/platform/PanelBellLink";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 
-export default function PlatformTopbar({ flags, email }: { flags: PlatformNavFlags; email: string }) {
+export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; email?: string }) {
   const [open, setOpen] = useState(false);
   const [aiOpen, setAiOpen] = useAskAiOpen();
   const [bellOpen, setBellOpen] = useState(false);
@@ -38,20 +38,7 @@ export default function PlatformTopbar({ flags, email }: { flags: PlatformNavFla
           <div className="min-h-0 flex-1 overflow-y-auto">
             <PlatformSidebar flags={flags} onNavigate={() => setOpen(false)} />
           </div>
-          {/* The signed-in person, as in the desktop sidebar's footer. */}
-          <div className="shrink-0 border-t border-border/60 p-3">
-            <p className="mb-2 truncate px-1 text-xs text-muted-foreground" title={email}>{email}</p>
-            <div className="flex items-center gap-1">
-              <Link href="/workspace" onClick={() => setOpen(false)} className="flex flex-1 items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary">
-                <LayoutGrid className="size-4 shrink-0" /> Workspace
-              </Link>
-              <form action={hubLogoutAction}>
-                <button type="submit" className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
-                  <LogOut className="size-4 shrink-0" /> Sign out
-                </button>
-              </form>
-            </div>
-          </div>
+          <MobileSidebarProfile />
         </SheetContent>
       </Sheet>
       <PanelHeading panel="platform" fallbackTitle="Platform Panel" fallbackDescription="Every company, plan and setting of the SaaS platform" />

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { getCurrentDlmsUser } from "@/lib/dlms-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import type { DlmsPermission } from "@/lib/dlms-roles";
 import { RECORD_TYPES, STATUSES, type RecordStatus, type RecordType } from "@/lib/dlms/constants";
 import { requireViewer, can, DlmsInputError, ForbiddenError, type DlmsViewer } from "@/lib/dlms/viewer";
@@ -70,7 +70,7 @@ const asInput = (v: unknown): Record<string, unknown> => (v && typeof v === "obj
 /** Logs out of EVERY panel (single sign-off), like every other panel. */
 export async function dlmsLogoutAction(): Promise<void> {
   const user = await getCurrentDlmsUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

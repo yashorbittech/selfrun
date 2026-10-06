@@ -20,6 +20,9 @@ import { PanelsProvider } from "@/components/platform/PanelsProvider";
 import PanelTextSync from "@/components/platform/PanelTextSync";
 import { panelMetaFor } from "@/lib/platform/panels/store";
 import PlatformNoticeBanner from "@/components/platform/PlatformNoticeBanner";
+import MaintenanceBanner from "@/components/platform/MaintenanceBanner";
+import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
+import { isBannerNow, maintenancePhase } from "@/lib/platform/maintenance-shared";
 import { getTracking, type TrackingSettings } from "@/lib/cms/tracking";
 import { getPlatformSettings } from "@/lib/platform/settings";
 import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
@@ -115,7 +118,7 @@ export default async function RootLayout({
   const hasCompany = companyId !== null;
   // Everything the shell needs is independent: fetched together (each is a database read, and this runs on every full page load, so
   // doing them one after another is what made the installed app sit on a blank screen). Every one of them is non-fatal.
-  const [pwa, panels, siteInfoRes, seoRes, brand, tracking, themeState, platformSettings] = await Promise.all([
+  const [pwa, panels, siteInfoRes, seoRes, brand, tracking, themeState, platformSettings, maintenance] = await Promise.all([
     appSurface ? getPwaIdentity().catch(() => null) : null,
     // The Panel Registry (names, descriptions, what is switched on) as it applies to this company.
     hasCompany ? panelMetaFor(companyId).catch(() => ({})) : {},
@@ -128,6 +131,8 @@ export default async function RootLayout({
     hasCompany ? resolveSiteThemeState().catch(() => null) : null,
     // Platform Panel → Platform settings: a maintenance message for every company's panels (cached).
     hasCompany ? getPlatformSettings().catch(() => null) : null,
+    // The platform maintenance window (Platform Panel → Maintenance); never on the product's own hosts.
+    hasCompany && !saasHost ? getEffectiveMaintenance(companyId) : null,
   ]);
   const installPrompt = appSurface ? (pwa?.installPrompt ?? true) : false;
   const siteInfo = siteInfoRes;
@@ -160,6 +165,9 @@ export default async function RootLayout({
             <PanelsProvider panels={panels}>
               <PanelTextSync />
               <SiteInfoProvider value={{ ...siteInfo, liveChatId }}>
+                {maintenance && !brand.isPlatformOwner && isBannerNow(maintenance, appSurface ? "app" : "site") ? (
+                  <MaintenanceBanner surface={appSurface ? "app" : "site"} phase={maintenancePhase(maintenance) as "upcoming" | "active"} message={maintenance.message} startsAt={maintenance.startsAt} endsAt={maintenance.endsAt} />
+                ) : null}
                 {children}
 
                 {notice && <PlatformNoticeBanner message={notice} />}

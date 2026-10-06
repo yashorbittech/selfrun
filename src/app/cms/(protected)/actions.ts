@@ -3,13 +3,13 @@
 import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { getCurrentCmsUser } from "@/lib/cms-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { displayTitle } from "@/lib/cms/site-areas";
 
 /** Logs out of EVERY panel (single sign-off), like every other panel. */
 export async function cmsLogoutAction(): Promise<void> {
   const user = await getCurrentCmsUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

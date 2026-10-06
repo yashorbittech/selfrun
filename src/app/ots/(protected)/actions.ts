@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { getCurrentOtsUser } from "@/lib/ots-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { run } from "@/lib/ots/run";
 import { can, OtsInputError, type OtsViewer } from "@/lib/ots/viewer";
 import { recordAudit, diffSummary } from "@/lib/ots/audit";
@@ -43,7 +43,7 @@ const who = (v: OtsViewer) => ({ actorId: v.userId, actorEmail: v.email });
 
 export async function otsLogoutAction(): Promise<void> {
   const user = await getCurrentOtsUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

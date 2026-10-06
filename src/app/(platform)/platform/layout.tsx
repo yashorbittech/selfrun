@@ -35,7 +35,7 @@ export default async function PlatformPanelLayout({ children }: { children: Reac
             <div className="absolute inset-0 bg-grid-slate-900/[0.015] dark:bg-grid-slate-400/[0.02] [mask-image:linear-gradient(to_bottom,black,transparent_80%)]" />
           </div>
 
-          <PlatformSidebarShell email={user.email} flags={flags} />
+          <PlatformSidebarShell email={user.email} createdAt={user.createdAt?.toISOString?.()} lastLoginAt={user.lastLoginAt ? user.lastLoginAt.toISOString() : null} flags={flags} />
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">

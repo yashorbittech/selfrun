@@ -5,6 +5,8 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { WORKSPACE_SESSION_COOKIE } from "@/lib/workspace-session";
 import { verifyPassword, hashPassword } from "@/lib/lms-auth";
+import { recordLoginEvent } from "@/lib/security/store";
+import { touchLoginSession } from "@/lib/security/touch";
 
 /**
  * Workspace authentication — THE company sign-in (`/workspace/login`) for
@@ -100,14 +102,19 @@ export async function verifyHubCredentials(
   // which accounts exist.
   const GENERIC = "Invalid email or password.";
 
-  if (!user) return { ok: false, error: GENERIC };
+  if (!user) {
+    await recordLoginEvent({ type: "login_failed", email: normalizedEmail, reason: "unknown_account" });
+    return { ok: false, error: GENERIC };
+  }
 
   if (user.lockedUntil && user.lockedUntil > new Date()) {
+    await recordLoginEvent({ type: "login_locked", email: normalizedEmail, adminId: user._id.toString(), reason: "locked" });
     return { ok: false, error: "Too many failed attempts. Try again in a few minutes." };
   }
 
   const valid = verifyPassword(password, user.passwordHash);
   if (!valid) {
+    await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: "wrong_password" });
     const attempts = (user.failedLoginAttempts ?? 0) + 1;
     const lockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_MS) : null;
     await users.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockedUntil } });
@@ -181,7 +188,9 @@ export async function clearHubSessionCookie(): Promise<void> {
 export async function getCurrentHubUser(): Promise<CurrentHubUser | null> {
   const store = await cookies();
   const token = store.get(HUB_SESSION_COOKIE)?.value;
-  return getSessionHubUser(token);
+  const user = await getSessionHubUser(token);
+  if (user) await touchLoginSession();
+  return user;
 }
 
 /**

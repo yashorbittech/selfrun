@@ -7,6 +7,7 @@ import AdminDataGrid, { type AdminDataGridColumn } from "@/components/workspace/
 import { formatDate } from "@/lib/utils";
 import type { CompanyRow } from "@/lib/platform/console/companies";
 import StatusBadge from "./StatusBadge";
+import LoginAsCompanyButton from "./LoginAsCompanyButton";
 
 const columns: AdminDataGridColumn<CompanyRow>[] = [
   {
@@ -49,6 +50,7 @@ const columns: AdminDataGridColumn<CompanyRow>[] = [
   },
   { key: "createdAt", label: "Created", render: (row) => formatDate(row.createdAt) },
   { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} isPlatformOwner={row.isPlatformOwner} /> },
+  { key: "access", label: "", render: (row) => (row.isPlatformOwner || row.status !== "active" ? null : <LoginAsCompanyButton companyId={row.id} companyName={row.name} label="Login" />) },
 ];
 
 export default function CompaniesGrid({

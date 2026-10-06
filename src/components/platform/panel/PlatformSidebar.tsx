@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   BookOpen,
   SlidersHorizontal,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -90,6 +91,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
       { href: "/platform/integrations", label: "Integrations", icon: Plug },
       { href: "/platform/audit", label: "Audit log", icon: ScrollText },
       { href: "/platform/settings", label: "Platform settings", icon: Settings2, exact: true },
+      { href: "/platform/maintenance", label: "Maintenance", icon: Wrench },
     ],
   },
 ];

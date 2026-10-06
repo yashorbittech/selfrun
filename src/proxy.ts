@@ -4,7 +4,9 @@ import { isMaintenanceOn, isPublicSitePath } from "@/lib/cms/maintenance-gate";
 import { resolveCompanyIdByHost, resolveHostInfo, type HostInfo } from "@/lib/platform/tenancy/companies";
 import { counterpartHost, surfaceRedirect } from "@/lib/platform/tenancy/surfaces";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
-import { isSaasHost } from "@/lib/saas/hosts";
+import { isSaasAppHost, isSaasHost } from "@/lib/saas/hosts";
+import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
+import { isTakeoverNow } from "@/lib/platform/maintenance-shared";
 import { isSaasPagePath } from "@/lib/saas/routes";
 
 /**
@@ -97,6 +99,19 @@ export async function proxy(request: NextRequest) {
       if (action === "app-home" && hostHeader) return to(hostHeader, "/workspace");
       const target = action === "app-home" ? null : counterpartHost(hostHeader, action === "to-app" ? "site" : "app");
       if (target) return to(target, `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    }
+  }
+
+  // Platform maintenance (Platform Panel → Maintenance), "takeover" mode: every company's website / panels show the maintenance screen for
+  // the length of the window and come back on their own after it. Page views only (APIs, webhooks, crons and payment links keep working),
+  // and never the product's own hosts, so the platform staff can always end it.
+  if (info && !isSaasHost(request.headers.get("host")) && !isSaasAppHost(request.headers.get("host"))) {
+    const first = request.nextUrl.pathname.split("/")[1] ?? "";
+    if (!["platform-maintenance", "offline-shell", "pay", "verify"].includes(first)) {
+      const m = await getEffectiveMaintenance(info.companyId);
+      if (isTakeoverNow(m, info.surface)) {
+        return NextResponse.rewrite(new URL("/platform-maintenance", request.url), { status: 503, headers: { "Retry-After": String(Math.max(30, Math.ceil((m.endsAt - Date.now()) / 1000))), "Cache-Control": "no-store" } });
+      }
     }
   }
 

@@ -151,6 +151,14 @@ export type StartSignupResult =
   | { ok: false; errors: SignupFieldErrors };
 
 /** One-time sign-in token for the new owner, redeemed on the company's own host. */
+/** A one-time sign-in link for a Platform Panel user to enter a company's panels as that company's Super Admin (`next` is where it lands). */
+export async function issueSupportHandoff(created: { companyId: string; adminId: string }, appBase: string, next = "/workspace?via=platform"): Promise<string> {
+  const { handoffs } = await collections();
+  const handoff = randomBytes(32).toString("hex");
+  await handoffs.insertOne({ _id: sha256(handoff), companyId: created.companyId, adminId: created.adminId, next, expiresAt: new Date(Date.now() + HANDOFF_TTL_MS) });
+  return `${appBase}/workspace/handoff?token=${handoff}`;
+}
+
 async function issueHandoff(created: { companyId: string; adminId: string }, base: string): Promise<string> {
   const { handoffs } = await collections();
   const handoff = randomBytes(32).toString("hex");

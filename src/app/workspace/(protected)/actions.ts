@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { getCurrentHubUser } from "@/lib/hub-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { sendVerificationEmail } from "@/lib/platform/email-verification";
 import { requestOrigin } from "@/lib/platform/request";
 
@@ -15,7 +15,7 @@ import { requestOrigin } from "@/lib/platform/request";
 export async function hubLogoutAction(): Promise<void> {
   const user = await getCurrentHubUser();
   if (user && ObjectId.isValid(user.id)) {
-    await destroySessionsEverywhere(new ObjectId(user.id));
+    await signOutThisDevice(new ObjectId(user.id));
   }
   redirect("/workspace/login");
 }

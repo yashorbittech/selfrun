@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { getCurrentIntelligenceUser } from "@/lib/intelligence-auth";
 import { intelligenceCan } from "@/lib/intelligence-roles";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { deleteConversation } from "@/lib/intelligence/conversations";
 
 /** Every action resolves the user from the SESSION and only ever touches that user's own conversations. */
@@ -19,6 +19,6 @@ export async function deleteConversationAction(id: string): Promise<{ ok: boolea
 
 export async function intelligenceLogoutAction(): Promise<void> {
   const user = await getCurrentIntelligenceUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }

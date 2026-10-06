@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { getCurrentSopUser } from "@/lib/sop-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { sopCan } from "@/lib/sop-roles";
 import { requireViewer } from "@/lib/sop/viewer";
 import { toAccessDoc } from "@/lib/sop/access";
@@ -75,7 +75,7 @@ const strArr = (v: unknown, max = 500) => (Array.isArray(v) ? v.filter((x): x is
 /** Logs out of EVERY panel (single sign-off), like every other panel. */
 export async function sopLogoutAction(): Promise<void> {
   const user = await getCurrentSopUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { getCurrentSmmsUser } from "@/lib/smms-auth";
-import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { signOutThisDevice } from "@/lib/security/sessions";
 import { run } from "@/lib/smms/run";
 import { requireViewer, can, ForbiddenError, SmmsInputError } from "@/lib/smms/viewer";
 import { recordAudit, diffSummary } from "@/lib/smms/audit";
@@ -32,7 +32,7 @@ const instr = (s: unknown) => (typeof s === "string" && s.trim() ? s.trim().slic
 
 export async function smmsLogoutAction(): Promise<void> {
   const user = await getCurrentSmmsUser();
-  if (user && ObjectId.isValid(user.id)) await destroySessionsEverywhere(new ObjectId(user.id));
+  if (user && ObjectId.isValid(user.id)) await signOutThisDevice(new ObjectId(user.id));
   redirect("/workspace/login");
 }
 
