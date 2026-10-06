@@ -650,3 +650,8 @@ html[data-ui="modern"].dark body > main :is(#faqs, [data-site-cta]) {
 .app-nav-pill { pointer-events: none; position: fixed; bottom: 22px; left: 50%; z-index: 10000; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); padding: 6px 14px 6px 10px; border-radius: 9999px; border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--foreground); font-size: 12px; font-weight: 600; box-shadow: 0 8px 24px color-mix(in oklab, var(--primary) 14%, transparent); backdrop-filter: blur(8px); animation: app-nav-pill 0.25s ease-out 0.12s both; }
 .app-nav-spin { width: 14px; height: 14px; border-radius: 9999px; border: 2px solid color-mix(in oklab, var(--primary) 25%, transparent); border-top-color: var(--primary); animation: app-ring 0.7s linear infinite; }
 @keyframes app-nav-pill { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Panel opening: the full splash on the first load, the panel's frame (sidebar + header) once the app has been on screen (see AppLoading). */
+.app-shell-wrap { display: none; }
+html[data-app-shell-seen] .app-splash-wrap { display: none; }
+html[data-app-shell-seen] .app-shell-wrap { display: block; }

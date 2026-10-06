@@ -3,6 +3,8 @@ import BrandSplashName from "@/components/ui/BrandSplashName";
 import BrandBackdrop from "@/components/ui/BrandBackdrop";
 import LoadingStatus from "@/components/ui/LoadingStatus";
 import RunnerLoader from "@/components/ui/RunnerLoader";
+import BrandMark from "@/components/BrandMark";
+import SnapshotShell from "@/components/ui/SnapshotShell";
 
 const PAGE_STEPS = ["Fetching your data", "Putting the page together", "Polishing the details", "Nearly there"];
 
@@ -29,7 +31,7 @@ export function PageLoading() {
  * that moves on. Everything — logo, name, colours — comes from the company of the host (the theme and `BrandProvider`); on a host with
  * no company it is neutral. Respects reduced motion. Server component, no data access.
  */
-export function AppLoading() {
+function AppSplash() {
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 overflow-hidden bg-background px-6" aria-busy="true">
       <span className="sr-only">Loading…</span>
@@ -43,5 +45,62 @@ export function AppLoading() {
         <LoadingStatus />
       </div>
     </div>
+  );
+}
+
+/**
+ * What a panel shows while it opens AFTER the app has already been on screen (workspace to another panel and back): the panel's frame —
+ * the company's own sidebar (logo, name, menu rows) and header — stays, and only the content area shows the loader. The frame is drawn with
+ * the same surfaces and spacing as the real panels, so when the real page arrives it simply fills in. Company brand and theme only.
+ */
+function ShellLoading() {
+  return (
+    <div className="lms-shell fixed inset-0 z-50 flex gap-3 overflow-hidden bg-canvas p-3" aria-busy="true">
+      <span className="sr-only">Loading…</span>
+      <aside className="lms-surface hidden w-[248px] shrink-0 flex-col overflow-hidden rounded-3xl border border-border/40 bg-background/95 backdrop-blur-md md:flex dark:bg-card/85">
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
+          <BrandMark className="size-6 shrink-0" />
+          <BrandSplashName className="truncate text-sm font-bold" />
+        </div>
+        <div className="flex-1 space-y-1 overflow-hidden p-3">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-xl px-2 py-2">
+              <div className="skeleton-shine size-5 shrink-0 rounded-md bg-muted/70" style={{ animationDelay: `${i * 80}ms` }} />
+              <div className="skeleton-shine h-3 rounded-md bg-muted/70" style={{ width: `${55 + ((i * 17) % 35)}%`, animationDelay: `${i * 80 + 50}ms` }} />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center gap-2 border-t border-border/60 p-3">
+          <div className="skeleton-shine size-9 shrink-0 rounded-full bg-muted/70" />
+          <div className="flex-1 space-y-1.5"><div className="skeleton-shine h-3 w-24 rounded-md bg-muted/70" /><div className="skeleton-shine h-2.5 w-16 rounded-md bg-muted/70" /></div>
+        </div>
+      </aside>
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
+        <div className="lms-surface flex h-14 shrink-0 items-center gap-3 rounded-3xl border border-border/40 bg-background/95 px-4 backdrop-blur-md dark:bg-card/85">
+          <BrandMark className="size-6 shrink-0 md:hidden" />
+          <div className="space-y-1.5"><div className="skeleton-shine h-3.5 w-36 rounded-md bg-muted/70" /><div className="skeleton-shine h-2.5 w-52 max-w-[40vw] rounded-md bg-muted/70" /></div>
+          <div className="skeleton-shine mx-auto hidden h-9 w-full max-w-sm rounded-full bg-muted/70 md:block" />
+          <div className="ml-auto flex gap-2">{[0, 1, 2].map((i) => <div key={i} className="skeleton-shine size-9 rounded-full bg-muted/70" style={{ animationDelay: `${i * 70}ms` }} />)}</div>
+        </div>
+        <main className="min-h-0 flex-1 overflow-hidden rounded-2xl">
+          <PageLoading />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The panel-opening loader (every panel's top-level `loading.tsx`): the full splash the first time, the panel's frame (sidebar and header)
+ * afterwards. Both are in the markup and plain CSS shows one of them, by the `data-app-shell-seen` attribute that `NavigationProgress` puts on
+ * <html> once the app has been on screen in this tab (it is gone again on a full reload). No script decides during render, so the server's
+ * HTML and the client always agree.
+ */
+export function AppLoading() {
+  return (
+    <>
+      <div className="app-splash-wrap"><AppSplash /></div>
+      <div className="app-shell-wrap"><SnapshotShell fallback={<ShellLoading />} loader={<PageLoading />} /></div>
+    </>
   );
 }

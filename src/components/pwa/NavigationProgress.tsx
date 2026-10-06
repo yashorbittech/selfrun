@@ -1,7 +1,8 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { captureShell } from "@/components/ui/SnapshotShell";
 
 /**
  * A thin progress bar at the top of the window that starts the moment a link to another page of the app is clicked and ends when the
@@ -14,8 +15,14 @@ function Bar() {
   const [pending, setPending] = useState(false);
   const [label, setLabel] = useState("");
 
-  // A new location arrived: done.
-  useEffect(() => setPending(false), [pathname, search]);
+  // A new location arrived: done. (And the first change of location means the app's shell has been on screen: later panel switches keep
+  // the sidebar and header while they load: `data-app-shell-seen` on <html>, see `AppLoading` in components/ui/page-loading.)
+  const firstRender = useRef(true);
+  useEffect(() => {
+    setPending(false);
+    if (firstRender.current) firstRender.current = false;
+    else document.documentElement.setAttribute("data-app-shell-seen", "");
+  }, [pathname, search]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -30,6 +37,9 @@ function Bar() {
       }
       if (url.origin !== window.location.origin) return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+      document.documentElement.setAttribute("data-app-shell-seen", "");
+      // Going to another panel: keep a copy of this one's sidebar and header to show while the next one opens.
+      if (url.pathname.split("/")[1] !== window.location.pathname.split("/")[1]) captureShell();
       setLabel((a.getAttribute("aria-label") || a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 28));
       setPending(true);
     };
