@@ -15,7 +15,7 @@ export interface PlanFormValues {
   description: string;
   currency: string;
   /** One row per known billing cycle. Price in major units, up to 2 decimals. */
-  cycles: { id: BillingInterval; enabled: boolean; price: string; /** The "usual" price shown struck through (blank = none). */ list: string }[];
+  cycles: { id: BillingInterval; enabled: boolean; price: string; /** The "usual" price shown struck through (blank or absent = none). */ list?: string }[];
   allModules: boolean;
   modules: string[];
   /** One highlight per line. */

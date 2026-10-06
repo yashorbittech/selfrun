@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireWorkspaceAccess } from "@/lib/workspace/access";
-import { CONNECTION_PROVIDERS } from "@/lib/platform/connections/catalog";
+import { CONNECTION_PROVIDERS, HIDDEN_FROM_COMPANIES } from "@/lib/platform/connections/catalog";
 import { listConnectionViews } from "@/lib/platform/connections/store";
 import { resolveConnection } from "@/lib/platform/connections/resolve";
 import { isPlatformEncryptionConfigured } from "@/lib/platform/crypto";
@@ -21,7 +21,8 @@ export default async function IntegrationsPage() {
   const trackingOn = !!tracking && (tracking.ga4Ids.length + tracking.gtmIds.length + tracking.clarityIds.length + tracking.metaPixelIds.length + tracking.scripts.length > 0 || !!tracking.tawkId);
 
   const providers: HubProvider[] = [];
-  for (const p of CONNECTION_PROVIDERS) {
+  // Email, SMS, AI & voice and automations are provided by the platform: they are not set up here.
+  for (const p of CONNECTION_PROVIDERS.filter((x) => !HIDDEN_FROM_COMPANIES.includes(x.key))) {
     const view = views[p.key];
     let environment = false;
     let statusNote: string | null = null;
@@ -52,8 +53,7 @@ export default async function IntegrationsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: "Integrations" }]}
           title={<>Integrations</>}
-          description={<>Connect your own accounts once — email, SMS, AI, social, Google and more. Every panel and automation in your workspace uses these connections, so there is nothing to set up again inside each panel.
-            Keys are encrypted and are never shown again.</>}
+          description={<>Connect your own accounts once — social, Google, payments and more. Email, SMS, AI and voice are already included in your plan, so there is nothing to set up for them. Keys are encrypted and are never shown again.</>}
         />
 <div className="space-y-6">
         <ConnectionsHub providers={providers} encryptionReady={isPlatformEncryptionConfigured()} />

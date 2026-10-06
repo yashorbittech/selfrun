@@ -5,7 +5,9 @@
  *  - Speed: immutable build files (/_next/static/) and the app icons are cached.
  *  - Push: shows notifications, opens the right page on tap, and re-subscribes if the browser rotates the subscription.
  */
-const VERSION = "v2";
+const VERSION = "v3";
+// Local development serves build files under stable names (not content-hashed): caching them "first" would pin the browser to old code. Never intercept them there.
+const DEV_HOST = /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$/.test(self.location.hostname);
 const STATIC_CACHE = `app-static-${VERSION}`;
 const SHELL_CACHE = `app-shell-${VERSION}`;
 // The offline page is rendered by the site itself (so it carries the company's logo, name and colours); the plain static page is the
@@ -101,8 +103,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Immutable build output: cache first.
-  if (url.pathname.startsWith("/_next/static/")) {
+  // Immutable build output: cache first (production only — see DEV_HOST).
+  if (!DEV_HOST && url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.open(STATIC_CACHE).then(async (cache) => {
         const hit = await cache.match(req);

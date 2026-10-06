@@ -262,30 +262,3 @@ export async function fetchInvoiceSubscriptionId(invoiceId: string): Promise<str
 export async function refundPayment(paymentId: string, amount: number, notes: Record<string, string>): Promise<{ id: string; amount: number }> {
   return call<{ id: string; amount: number }>("POST", `/payments/${encodeURIComponent(paymentId)}/refund`, { amount, notes });
 }
-
-
-// ── One-time orders (usage top-ups) ─────────────────────────────────────────────
-
-export interface RazorpayOrder {
-  id: string;
-  amount: number;
-  currency: string;
-  status: "created" | "attempted" | "paid";
-  notes?: Record<string, string>;
-}
-
-/** A one-time payment. `amount` is the tax-inclusive total in the smallest currency unit. */
-export async function createOrder(input: { amount: number; currency: string; receipt: string; notes: Record<string, string> }): Promise<RazorpayOrder> {
-  return call<RazorpayOrder>("POST", "/orders", { amount: input.amount, currency: input.currency, receipt: input.receipt.slice(0, 40), notes: input.notes });
-}
-
-export async function fetchOrder(id: string): Promise<RazorpayOrder> {
-  return call<RazorpayOrder>("GET", `/orders/${encodeURIComponent(id)}`);
-}
-
-/** Checkout handler signature for an order: HMAC-SHA256(`order_id|payment_id`, key secret). */
-export async function verifyOrderSignature(orderId: string, paymentId: string, signature: string): Promise<boolean> {
-  const secret = (await getRazorpayCredentials())?.keySecret;
-  if (!secret || !orderId || !paymentId || !signature) return false;
-  return safeEqualHex(createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex"), signature);
-}

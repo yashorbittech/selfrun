@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireWorkspaceAction } from "@/lib/workspace/access";
-import { providerByKey } from "@/lib/platform/connections/catalog";
+import { HIDDEN_FROM_COMPANIES, providerByKey } from "@/lib/platform/connections/catalog";
 import { disconnectConnection, saveConnection, type SaveResult } from "@/lib/platform/connections/store";
 import { testConnection, type TestOutcome } from "@/lib/platform/connections/test";
 
@@ -11,7 +11,7 @@ const NAV_KEY = "company.integrations";
 function known(provider: unknown): string | null {
   const key = typeof provider === "string" ? provider : "";
   const p = providerByKey.get(key);
-  return p && p.fields.length > 0 ? key : null;
+  return p && p.fields.length > 0 && !HIDDEN_FROM_COMPANIES.includes(key) ? key : null;
 }
 
 export async function saveConnectionAction(provider: string, values: Record<string, string>): Promise<SaveResult> {

@@ -4,7 +4,7 @@ import { connectionValues } from "@/lib/platform/connections/resolve";
 const API_BASE = "https://api.elevenlabs.io/v1";
 const STT_MODEL = "scribe_v1";
 
-/** The workspace's own ElevenLabs key (Workspace → Settings → Integrations). */
+/** The platform's ElevenLabs key (used for every company). */
 async function workspaceKey(): Promise<string | null> {
   return (await connectionValues("elevenlabs"))?.apiKey ?? null;
 }
@@ -15,7 +15,7 @@ export async function isElevenLabsConfigured(): Promise<boolean> {
 
 async function requireKey(): Promise<string> {
   const key = await workspaceKey();
-  if (!key) throw new Error("ElevenLabs isn't connected for this workspace. Add your ElevenLabs API key in Workspace → Settings → Integrations.");
+  if (!key) throw new Error("Voice isn't available right now. Please contact support.");
   return key;
 }
 

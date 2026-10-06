@@ -182,3 +182,13 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
 ];
 
 export const providerByKey = new Map(CONNECTION_PROVIDERS.map((p) => [p.key, p]));
+
+
+/**
+ * Services the PLATFORM provides to every company (email, SMS, AI, voice): companies never bring their own keys, so they are not shown in a
+ * company's Integrations and anything saved for them earlier is ignored. They use the deployment's own credentials and count against the
+ * company's plan allowance.
+ */
+export const PLATFORM_PROVIDED_PROVIDERS = ["smtp", "resend", "sendgrid", "twilio", "openai", "elevenlabs"] as const;
+/** Everything hidden from a company's Integrations page: the platform-provided services and the automations tile. */
+export const HIDDEN_FROM_COMPANIES: readonly string[] = [...PLATFORM_PROVIDED_PROVIDERS, "webhooks"];

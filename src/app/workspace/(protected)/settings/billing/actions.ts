@@ -18,7 +18,6 @@ import {
 } from "@/lib/platform/billing/subscriptions";
 import type { BillingDetails, BillingDetailsErrors, PriceSummary } from "@/lib/platform/billing/billing-details";
 import type { BillingInterval } from "@/lib/platform/billing/types";
-import { confirmTopup, quoteTopup, startTopupCheckout, type TopupCheckout, type TopupQuote } from "@/lib/platform/billing/topups";
 
 /** Super Admins of this company only — re-checked in every action. */
 async function requireOwner(): Promise<{ companyId: string; userId: string }> {
@@ -81,25 +80,4 @@ export async function cancelSubscriptionAction(): Promise<BillingActionResult> {
 export async function resumeSubscriptionAction(): Promise<StartCheckoutResult> {
   const { companyId, userId } = await requireOwner();
   return resumeSubscription(companyId, userId);
-}
-
-
-// ── Extra usage, bought once ────────────────────────────────────────────────────
-
-export async function topupQuoteAction(limitKey: string, units: number): Promise<{ ok: true; quote: TopupQuote } | { ok: false; error: string }> {
-  await requireOwner();
-  const res = await quoteTopup(String(limitKey ?? ""), Number(units));
-  return res.ok ? { ok: true, quote: res.quote } : res;
-}
-
-export async function startTopupAction(limitKey: string, units: number): Promise<{ ok: true; checkout: TopupCheckout } | { ok: false; error: string }> {
-  const { companyId, userId } = await requireOwner();
-  return startTopupCheckout(companyId, { limitKey: String(limitKey ?? ""), units: Number(units) }, userId);
-}
-
-export async function confirmTopupAction(response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
-  const { companyId, userId } = await requireOwner();
-  const res = await confirmTopup(companyId, { razorpay_payment_id: String(response?.razorpay_payment_id ?? ""), razorpay_order_id: String(response?.razorpay_order_id ?? ""), razorpay_signature: String(response?.razorpay_signature ?? "") }, userId);
-  if (res.ok) revalidatePath("/workspace/settings/billing");
-  return res;
 }

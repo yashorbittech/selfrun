@@ -122,7 +122,7 @@ export async function seatBlockReason(adding = 1, opts: { countPendingInvites?: 
   const [used, pending] = await Promise.all([countSeatsUsed(), opts.countPendingInvites ? pendingInvitationCount() : Promise.resolve(0)]);
   if (used + pending + adding <= limit) return null;
   const inUse = pending > 0 ? `${fmt(used)} active and ${fmt(pending)} invited` : `${fmt(used)} in use`;
-  return `Your plan includes ${fmt(limit)} user${limit === 1 ? "" : "s"} (${inUse}). Deactivate someone or add seats in Settings → Billing.`;
+  return `Your plan includes ${fmt(limit)} user${limit === 1 ? "" : "s"} (${inUse}). Deactivate someone or upgrade your plan in Settings → Billing.`;
 }
 
 export async function assertSeatAvailable(adding = 1, opts: { countPendingInvites?: boolean } = {}): Promise<void> {
@@ -141,7 +141,7 @@ export async function aiBlockReason(): Promise<string | null> {
   if (limit === null) return null;
   const used = await getUsage("ai_tokens");
   if (used < limit) return null;
-  return `Your workspace has used this month's ${fmt(limit)} AI tokens. The allowance resets on the 1st — to keep going now, upgrade or add AI tokens in Settings → Billing.`;
+  return `Your workspace has used this month's ${fmt(limit)} AI tokens. The allowance resets on the 1st — to keep going now, upgrade your plan in Settings → Billing.`;
 }
 
 export async function assertAiAvailable(): Promise<void> {
@@ -186,7 +186,7 @@ export async function storageBlockReason(addingBytes: number): Promise<string | 
   if (limitMb === null || addingBytes <= 0) return null;
   const used = await storageUsedBytes();
   if (used + addingBytes <= limitMb * MB) return null;
-  return `Your workspace has used its ${fmt(limitMb)} MB of file storage (${fmt(Math.round(used / MB))} MB stored). Delete old files, or upgrade or add storage in Settings → Billing.`;
+  return `Your workspace has used its ${fmt(limitMb)} MB of file storage (${fmt(Math.round(used / MB))} MB stored). Delete old files, or upgrade your plan in Settings → Billing.`;
 }
 
 export async function assertStorageAvailable(addingBytes: number): Promise<void> {
@@ -252,7 +252,7 @@ export async function emailBlockReason(): Promise<string | null> {
   const limit = e.limits.emailsPerMonth;
   if (limit === null || limit === undefined) return null;
   const used = await getUsage("emails");
-  return used < limit ? null : `This month's ${fmt(limit)} emails are used up. The allowance resets on the 1st — add emails or upgrade in Settings → Billing.`;
+  return used < limit ? null : `This month's ${fmt(limit)} emails are used up. The allowance resets on the 1st — upgrade your plan in Settings → Billing.`;
 }
 
 /** Why voice can't be used right now (not in the plan, or this month's minutes are used), or null. */
@@ -261,9 +261,9 @@ export async function voiceBlockReason(): Promise<string | null> {
   if (e.readOnly) return READ_ONLY_MESSAGE;
   const limit = e.limits.voiceMinutesPerMonth;
   if (limit === null || limit === undefined) return null;
-  if (limit === 0) return "Voice isn't included in your plan. Upgrade or add voice minutes in Settings → Billing.";
+  if (limit === 0) return "Voice isn't included in your plan. Upgrade your plan in Settings → Billing.";
   const used = (await getUsage("voice_seconds")) / 60;
-  return used < limit ? null : `This month's ${fmt(limit)} voice minutes are used up. Add minutes or upgrade in Settings → Billing.`;
+  return used < limit ? null : `This month's ${fmt(limit)} voice minutes are used up. Upgrade your plan in Settings → Billing.`;
 }
 
 /** Why another custom domain can't be added, or null. `current` = domains already connected. */
@@ -271,6 +271,6 @@ export async function domainBlockReason(current: number): Promise<string | null>
   const e = await getEntitlements();
   const limit = e.limits.customDomains;
   if (limit === null || limit === undefined) return null;
-  if (limit === 0) return "Custom domains aren't included in your plan. Upgrade or add a domain in Settings → Billing.";
-  return current < limit ? null : `Your plan includes ${fmt(limit)} custom domain${limit === 1 ? "" : "s"}. Add another in Settings → Billing, or upgrade.`;
+  if (limit === 0) return "Custom domains aren't included in your plan. Upgrade your plan in Settings → Billing.";
+  return current < limit ? null : `Your plan includes ${fmt(limit)} custom domain${limit === 1 ? "" : "s"}. Upgrade your plan in Settings → Billing to add more.`;
 }

@@ -1,10 +1,12 @@
 import "server-only";
 import { isPlatformOwnerContext, currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { getSavedConnection } from "@/lib/platform/connections/store";
+import { PLATFORM_PROVIDED_PROVIDERS } from "@/lib/platform/connections/catalog";
 
 /**
  * What the rest of the app asks for: "the credentials for <provider>, for the current company".
  *
+ *  0. email, SMS, AI and voice (`PLATFORM_PROVIDED_PROVIDERS`): always the deployment's own credentials, for every company
  *  1. the company's own saved connection (Workspace → Settings → Integrations)
  *  2. else — for the PLATFORM OWNER's own workspace only — the deployment's environment variables, so an existing
  *     env-configured deployment keeps working
@@ -13,6 +15,7 @@ import { getSavedConnection } from "@/lib/platform/connections/store";
 export const ENV_CONNECTION_PROVIDERS = (): string[] => Object.keys(ENV);
 const ENV: Record<string, Record<string, string[]>> = {
   openai: { apiKey: ["OPENAI_API_KEY"] },
+  twilio: { accountSid: ["TWILIO_ACCOUNT_SID"], authToken: ["TWILIO_AUTH_TOKEN"], smsFrom: ["TWILIO_SMS_FROM"], whatsappFrom: ["TWILIO_WHATSAPP_FROM"] },
   elevenlabs: { apiKey: ["ELEVENLABS_API_KEY"] },
   "google-service-account": { clientEmail: ["GOOGLE_SEO_CLIENT_EMAIL", "GOOGLE_INDEXING_CLIENT_EMAIL"], privateKey: ["GOOGLE_SEO_PRIVATE_KEY", "GOOGLE_INDEXING_PRIVATE_KEY"] },
   pagespeed: { apiKey: ["PAGESPEED_API_KEY"] },
@@ -36,8 +39,15 @@ export function fromEnv(provider: string): Record<string, string> | null {
 
 export type ResolvedConnection = { values: Record<string, string>; source: "workspace" | "environment" };
 
+const PLATFORM_PROVIDED = new Set<string>(PLATFORM_PROVIDED_PROVIDERS);
+
 export async function resolveConnection(provider: string): Promise<ResolvedConnection | null> {
   if (!(await currentCompanyIdOrNull())) return null;
+  // Email, SMS, AI and voice are the platform's: every company uses the deployment's credentials, never its own.
+  if (PLATFORM_PROVIDED.has(provider)) {
+    const env = fromEnv(provider);
+    return env ? { values: env, source: "environment" } : null;
+  }
   const saved = await getSavedConnection(provider);
   if (saved && Object.keys(saved).length) return { values: saved, source: "workspace" };
   if (await isPlatformOwnerContext()) {

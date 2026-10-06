@@ -26,29 +26,29 @@ export const PLANS_COLLECTION = "billing_plans";
 
 type PlanSeed = Omit<Plan, "createdAt" | "updatedAt">;
 
-const GROWTH_PANELS: ModuleKey[] = ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"];
+const ALL_FLAGS = ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"];
 
 /**
- * The simple pricing every company can understand at a glance: 1 person free for life, then 10 / 50 / 200 people at ₹499 / ₹999 / ₹1,999 a
- * month, and 500 people by talking to support. `listPrices` are the "usual" prices shown struck through; `prices` are what is charged.
- * Yearly = 10 × monthly (two months free). Every plan states its limits for each paid third-party service (see `USAGE_SERVICES`); more
- * usage can be bought once, more people needs a bigger plan. Editable in the Platform Panel at any time.
+ * The five plans, always. Every plan has every panel and every feature; the only things that change are how many people, and the allowance
+ * of each paid third-party service (storage, AI, email, voice, domains — see `USAGE_SERVICES`). Nothing is sold separately: more of anything
+ * means the next plan. `listPrices` are the "usual" prices shown struck through; `prices` are what is charged (about 75% off, monthly and
+ * yearly; yearly = 10 × monthly, two months free). Editable in the Platform Panel at any time.
  */
 export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "free",
     name: "Free",
-    description: "For one person getting started. Free for life.",
+    description: "For one person. Every panel and feature, free for life.",
     currency: "INR",
     priceMonthly: 0,
     priceYearly: 0,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 0, yearly: 0 },
     lifetimeFree: true,
-    highlights: ["Free for life, no card needed", "1 user"],
-    flags: [],
-    modules: ["pms", "sop", "cms"],
-    limits: { seats: 1, aiTokensPerMonth: 20_000, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 0, customDomains: 0, smsPerMonth: 0 },
+    highlights: ["Free for life, no card needed"],
+    flags: ALL_FLAGS,
+    modules: "all",
+    limits: { seats: 1, aiTokensPerMonth: 20_000, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 10, customDomains: 1, smsPerMonth: 0 },
     trialDays: 0,
     active: true,
     isDefault: true,
@@ -57,18 +57,18 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "starter",
     name: "Starter",
-    description: "For a small team that wants to get organised. Up to 10 people.",
+    description: "For a small team. Up to 10 people, every panel and feature.",
     currency: "INR",
     priceMonthly: 49_900,
     priceYearly: 499_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 49_900, yearly: 499_000 },
-    listPrices: { monthly: 99_900, yearly: 1_198_800 },
+    listPrices: { monthly: 199_900, yearly: 2_398_800 },
     offerLabel: "Launch offer",
-    highlights: ["Up to 10 users"],
-    flags: ["customDomain"],
-    modules: ["hrms", "pms", "lms", "sop", "cms"],
-    limits: { seats: 10, aiTokensPerMonth: 300_000, storageMb: 5_120, emailsPerMonth: 1_000, voiceMinutesPerMonth: 30, customDomains: 1, smsPerMonth: 0 },
+    highlights: [],
+    flags: ALL_FLAGS,
+    modules: "all",
+    limits: { seats: 10, aiTokensPerMonth: 300_000, storageMb: 5_120, emailsPerMonth: 1_000, voiceMinutesPerMonth: 30, customDomains: 2, smsPerMonth: 0 },
     trialDays: 0,
     active: true,
     isDefault: false,
@@ -77,18 +77,18 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "growth",
     name: "Growth",
-    description: "Run delivery, sales and finance in one place. Up to 50 people.",
+    description: "For a growing team. Up to 50 people, every panel and feature.",
     currency: "INR",
     priceMonthly: 99_900,
     priceYearly: 999_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 99_900, yearly: 999_000 },
-    listPrices: { monthly: 199_900, yearly: 2_398_800 },
+    listPrices: { monthly: 399_900, yearly: 4_798_800 },
     offerLabel: "Launch offer",
-    highlights: ["Up to 50 users", "Priority support"],
-    flags: ["customDomain", "prioritySupport"],
-    modules: GROWTH_PANELS,
-    limits: { seats: 50, aiTokensPerMonth: 1_500_000, storageMb: 25_600, emailsPerMonth: 5_000, voiceMinutesPerMonth: 120, customDomains: 2, smsPerMonth: 0 },
+    highlights: [],
+    flags: ALL_FLAGS,
+    modules: "all",
+    limits: { seats: 50, aiTokensPerMonth: 1_500_000, storageMb: 25_600, emailsPerMonth: 5_000, voiceMinutesPerMonth: 120, customDomains: 3, smsPerMonth: 0 },
     trialDays: 0,
     active: true,
     isDefault: false,
@@ -97,16 +97,16 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "business",
     name: "Business",
-    description: "Every panel, AI and automation for a growing company. Up to 200 people.",
+    description: "For a company. Up to 200 people, every panel and feature.",
     currency: "INR",
     priceMonthly: 199_900,
     priceYearly: 1_999_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 199_900, yearly: 1_999_000 },
-    listPrices: { monthly: 399_900, yearly: 4_798_800 },
+    listPrices: { monthly: 799_900, yearly: 9_598_800 },
     offerLabel: "Launch offer",
-    highlights: ["Up to 200 users", "White-label and API access", "Priority support"],
-    flags: ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"],
+    highlights: [],
+    flags: ALL_FLAGS,
     modules: "all",
     limits: { seats: 200, aiTokensPerMonth: 6_000_000, storageMb: 102_400, emailsPerMonth: 25_000, voiceMinutesPerMonth: 600, customDomains: 5, smsPerMonth: 0 },
     trialDays: 0,
@@ -124,8 +124,8 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     intervals: ["monthly"],
     prices: { monthly: 0 },
     contactSales: true,
-    highlights: ["Up to 500 users", "Custom limits and onboarding", "Dedicated support"],
-    flags: ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"],
+    highlights: ["Dedicated onboarding and support"],
+    flags: ALL_FLAGS,
     modules: "all",
     limits: { seats: 500, aiTokensPerMonth: 20_000_000, storageMb: 512_000, emailsPerMonth: 100_000, voiceMinutesPerMonth: 3_000, customDomains: 20, smsPerMonth: 10_000 },
     trialDays: 0,
@@ -134,6 +134,8 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     sortOrder: 50,
   },
 ];
+
+export const STANDARD_PLAN_IDS = DEFAULT_PLANS.map((p) => p._id);
 
 let seeded = false;
 async function collection() {
@@ -567,4 +569,53 @@ export async function applySimplePricing(actorId: string): Promise<{ ok: true; c
     await col.updateOne({ _id: seed._id }, { $set: { sortOrder: seed.sortOrder } });
   }
   return { ok: true, created, updated };
+}
+
+
+/**
+ * The five plans the pricing screens always show, in order: the catalogue's own version of each (so edits in the Platform Panel apply),
+ * or the built-in one when it is missing or switched off. Missing plans are also written to the catalogue (existing ones are never
+ * touched), so a fresh database sells the five plans from the first request. Never returns fewer than five.
+ */
+let upgrading: Promise<unknown> | null = null;
+
+/** A stored plan from before the five-plan pricing (no list prices / plan kind / new limits): it is brought up to date once. */
+function isLegacyStandardPlan(live: Plan, seed: PlanSeed): boolean {
+  return (
+    (seed.listPrices !== undefined && live.listPrices === undefined) ||
+    (seed.lifetimeFree === true && live.lifetimeFree === undefined) ||
+    (seed.contactSales === true && live.contactSales === undefined) ||
+    live.limits.emailsPerMonth === undefined
+  );
+}
+
+export async function getStandardPlans(): Promise<Plan[]> {
+  const col = await collection();
+  let stored = await col.find({ _id: { $in: STANDARD_PLAN_IDS } }).toArray();
+  // Plans saved before the five-plan pricing are updated in place (a price change is a new price version, so subscribers keep theirs).
+  if (stored.some((live) => { const seed = DEFAULT_PLANS.find((d) => d._id === live._id); return seed ? isLegacyStandardPlan(live, seed) : false; })) {
+    upgrading ??= applySimplePricing("system").finally(() => { upgrading = null; });
+    await upgrading.catch(() => {});
+    stored = await col.find({ _id: { $in: STANDARD_PLAN_IDS } }).toArray();
+  }
+  const byId = new Map(stored.map((p) => [p._id, p]));
+  const missing = DEFAULT_PLANS.filter((p) => !byId.has(p._id));
+  if (missing.length > 0) {
+    const now = new Date();
+    await col
+      .insertMany(
+        missing.map((p) => {
+          const prices = p.prices ?? { monthly: p.priceMonthly, yearly: p.priceYearly };
+          const intervals: BillingInterval[] = p.intervals ?? ["monthly", "yearly"];
+          return { ...p, intervals, prices, priceVersion: 1, priceHistory: [{ version: 1, currency: p.currency, intervals, prices, effectiveFrom: now, createdBy: "seed" }], createdAt: now, updatedAt: now };
+        }),
+        { ordered: false },
+      )
+      .catch(() => {});
+  }
+  const now = new Date();
+  return DEFAULT_PLANS.map((seed) => {
+    const live = byId.get(seed._id);
+    return live && live.active ? live : { ...seed, createdAt: now, updatedAt: now };
+  });
 }

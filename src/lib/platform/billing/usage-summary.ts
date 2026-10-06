@@ -4,7 +4,6 @@ import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { countSeatsUsed, storageUsedBytes } from "@/lib/platform/billing/enforce";
 import { getUsage } from "@/lib/platform/billing/usage";
-import { getTopupCatalog, type TopupOption } from "@/lib/platform/billing/topups";
 import { USAGE_SERVICES } from "@/lib/platform/billing/types";
 
 export interface UsageRow {
@@ -19,16 +18,13 @@ export interface UsageRow {
   /** 0–100 (0 when unlimited). */
   percent: number;
   comingSoon: boolean;
-  /** Present when extra can be bought. */
-  topup: TopupOption | null;
 }
 
 /** This month's use of every paid service against the company's limits (plan + add-ons + top-ups). Runs inside the company's context. */
 export async function getUsageSummary(): Promise<UsageRow[]> {
   const companyId = await currentCompanyId();
-  const [e, catalog, seats, storageBytes, tokens, emails, voiceSeconds, sms, domains] = await Promise.all([
+  const [e, seats, storageBytes, tokens, emails, voiceSeconds, sms, domains] = await Promise.all([
     getEntitlements(),
-    getTopupCatalog(),
     countSeatsUsed().catch(() => 0),
     storageUsedBytes().catch(() => 0),
     getUsage("ai_tokens").catch(() => 0),
@@ -59,7 +55,6 @@ export async function getUsageSummary(): Promise<UsageRow[]> {
       limit,
       percent: limit === null || limit === 0 ? (limit === 0 && value > 0 ? 100 : 0) : Math.min(100, Math.round((value / limit) * 100)),
       comingSoon: u.comingSoon === true,
-      topup: catalog.find((t) => t.limitKey === u.limitKey) ?? null,
     };
   });
 }

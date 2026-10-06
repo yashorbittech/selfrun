@@ -13,6 +13,13 @@ export default function PwaRegister() {
     if (isDesktopApp()) return;
     initInstallCapture();
     if (!("serviceWorker" in navigator)) return;
+    // Development: no service worker, and any left from an earlier run is removed (with its caches), so the browser always runs the code
+    // being edited. Set NEXT_PUBLIC_PWA_DEV=1 to try the worker locally.
+    if (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PWA_DEV !== "1") {
+      navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => void r.unregister())).catch(() => {});
+      if ("caches" in window) caches.keys().then((ks) => ks.forEach((k) => void caches.delete(k))).catch(() => {});
+      return;
+    }
 
     let cancelled = false;
     navigator.serviceWorker

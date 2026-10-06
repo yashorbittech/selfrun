@@ -5,12 +5,12 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { assertAiAvailable, meterAiTokens } from "@/lib/platform/billing/enforce";
 import { connectionValues } from "@/lib/platform/connections/resolve";
 
-// One client per distinct credential set (a workspace brings its own OpenAI key — Workspace → Settings → Integrations),
+// One client per distinct credential set (the platform's own OpenAI key, used for every company),
 // reused across hot reloads and invocations. Created lazily, so a workspace without a key only gets a clear error when it
 // actually tries to use AI.
 const globalForOpenAI = globalThis as unknown as { _openAIClients?: Map<string, OpenAI> };
 
-export const OPENAI_NOT_CONNECTED = "OpenAI isn't connected for this workspace. Add your OpenAI API key in Workspace → Settings → Integrations.";
+export const OPENAI_NOT_CONNECTED = "AI isn't available right now. Please contact support.";
 
 export async function getOpenAI(): Promise<OpenAI> {
   const creds = await connectionValues("openai");

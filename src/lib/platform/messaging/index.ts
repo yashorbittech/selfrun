@@ -1,6 +1,5 @@
 import "server-only";
 import { connectionValues } from "@/lib/platform/connections/resolve";
-import { getSavedConnection } from "@/lib/platform/connections/store";
 
 /**
  * SMS and WhatsApp through the WORKSPACE's own accounts (Workspace → Settings → Integrations): Twilio for SMS and
@@ -28,8 +27,8 @@ export async function sendSms(to: string, body: string): Promise<MessageResult> 
   try {
     if (!isPhoneNumber(to)) return { ok: false, error: "That isn't a phone number." };
     const v = await connectionValues("twilio");
-    if (!v?.accountSid || !v.authToken) return { ok: false, error: "Twilio isn't connected. Add it in Workspace → Settings → Integrations." };
-    if (!v.smsFrom) return { ok: false, error: "Add an SMS sender number to your Twilio connection." };
+    if (!v?.accountSid || !v.authToken) return { ok: false, error: "SMS isn't available right now. Please contact support." };
+    if (!v.smsFrom) return { ok: false, error: "SMS isn't available right now. Please contact support." };
     const sender: Record<string, string> = /^MG/i.test(v.smsFrom) ? { MessagingServiceSid: v.smsFrom } : { From: v.smsFrom };
     return await twilioSend(v, { To: E164(to), Body: body.slice(0, 1500), ...sender });
   } catch (err) {
@@ -40,7 +39,7 @@ export async function sendSms(to: string, body: string): Promise<MessageResult> 
 export async function sendWhatsApp(to: string, body: string): Promise<MessageResult> {
   try {
     if (!isPhoneNumber(to)) return { ok: false, error: "That isn't a phone number." };
-    const twilio = await getSavedConnection("twilio");
+    const twilio = await connectionValues("twilio");
     if (twilio?.accountSid && twilio.authToken && twilio.whatsappFrom) {
       const from = twilio.whatsappFrom.startsWith("whatsapp:") ? twilio.whatsappFrom : `whatsapp:${twilio.whatsappFrom}`;
       return await twilioSend(twilio, { To: `whatsapp:${E164(to)}`, From: from, Body: body.slice(0, 1500) });
@@ -56,7 +55,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<MessageRes
       const data = (await res.json().catch(() => ({}))) as { messages?: { id?: string }[]; error?: { message?: string } };
       return res.ok ? { ok: true, id: data.messages?.[0]?.id ?? null } : { ok: false, error: `WhatsApp ${res.status}: ${data.error?.message ?? "request failed"}` };
     }
-    return { ok: false, error: "WhatsApp isn't connected. Add Twilio (with a WhatsApp sender) or WhatsApp Business in Workspace → Settings → Integrations." };
+    return { ok: false, error: "WhatsApp isn't connected. Add WhatsApp Business in Workspace → Settings → Integrations." };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "WhatsApp failed" };
   }

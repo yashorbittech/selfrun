@@ -161,7 +161,7 @@ export default function PlanForm({
                 )}
                 {c.enabled && (
                   <Field id={`${id}-list`} label={`Usual ${label.toLowerCase()} price, shown struck through (optional)`} hint="Display only. What is charged is the price above." error={errors[`listPrice.${c.id}`]}>
-                    <Input {...a11y(`listPrice.${c.id}`, `${id}-list`)} inputMode="decimal" value={c.list} onChange={(e) => set("cycles", values.cycles.map((x, i) => (i === index ? { ...x, list: e.target.value } : x)))} placeholder="e.g. 1999" />
+                    <Input {...a11y(`listPrice.${c.id}`, `${id}-list`)} inputMode="decimal" value={c.list ?? ""} onChange={(e) => set("cycles", values.cycles.map((x, i) => (i === index ? { ...x, list: e.target.value } : x)))} placeholder="e.g. 1999" />
                   </Field>
                 )}
               </div>

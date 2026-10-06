@@ -63,29 +63,13 @@ async function addonDocs(ids: string[]): Promise<AddonLimitDoc[]> {
     .toArray();
 }
 
-/**
- * Pure: adds what the company bought once (`subscription.topups`). A "permanent" extra always counts; a "monthly" one only in the month
- * it was bought for. Unlimited (null) stays unlimited. Seats are never topped up.
- */
-export function applyTopups(base: PlanLimits, topups: CompanySubscription["topups"], month: string): PlanLimits {
-  const out: PlanLimits = { ...base };
-  for (const t of topups ?? []) {
-    if (!t || t.limitKey === "seats" || !Number.isFinite(t.amount) || t.amount <= 0) continue;
-    if (t.kind === "monthly" && t.month !== month) continue;
-    const current = out[t.limitKey];
-    if (current === null || current === undefined) continue;
-    out[t.limitKey] = current + t.amount;
-  }
-  return out;
-}
-
-/** Effective limits for a subscription whose plan is already loaded: plan + add-ons + one-time top-ups. */
+/** Effective limits for a subscription whose plan is already loaded: the plan's, plus any add-ons. */
 export async function effectiveLimitsFor(sub: CompanySubscription | null, plan: Plan | null): Promise<PlanLimits> {
   if (!sub || sub.status === "internal") return { ...UNLIMITED_LIMITS };
   const base = plan?.limits ?? UNLIMITED_LIMITS;
   const addons = subscriptionAddons(sub);
-  const withAddons = addons.length === 0 ? { ...base } : applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
-  return applyTopups(withAddons, sub.topups, new Date().toISOString().slice(0, 7));
+  if (addons.length === 0) return { ...base };
+  return applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
 }
 
 /** Plan limits + purchased add-on extras for a company. The platform owner is unlimited. */

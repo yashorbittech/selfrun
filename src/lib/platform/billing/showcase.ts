@@ -19,9 +19,19 @@ export interface ShowcasePlan {
   flags: string[];
   highlights: string[];
   /** Every paid service with this plan's allowance, in `USAGE_SERVICES` order (seats excluded: it is shown as "Up to N users"). */
-  limits: { key: string; label: string; provider: string | null; value: string; included: boolean }[];
+  limits: { key: string; label: string; /** Short name and value for the cards ("AI", "300K"). */ short: string; shortValue: string; provider: string | null; value: string; included: boolean; /** The number (null = unlimited) for drawing bars. */ raw: number | null }[];
   popular: boolean;
 }
+
+const n1 = (v: number) => v.toLocaleString("en-IN", { maximumFractionDigits: 1 });
+const SHORT: Record<string, { label: string; fmt: (v: number) => string }> = {
+  storageMb: { label: "Storage", fmt: (v) => (v >= 1024 ? `${n1(v / 1024)} GB` : `${v} MB`) },
+  aiTokensPerMonth: { label: "AI", fmt: (v) => (v >= 1_000_000 ? `${n1(v / 1_000_000)}M` : `${Math.round(v / 1000)}K`) },
+  emailsPerMonth: { label: "Emails", fmt: (v) => v.toLocaleString("en-IN") },
+  voiceMinutesPerMonth: { label: "Voice", fmt: (v) => `${v} min` },
+  customDomains: { label: "Domains", fmt: (v) => String(v) },
+  smsPerMonth: { label: "SMS", fmt: (v) => v.toLocaleString("en-IN") },
+};
 
 export function buildShowcase(plans: Plan[]): ShowcasePlan[] {
   const paid = plans.filter((p) => !p.lifetimeFree && !p.contactSales);
@@ -36,12 +46,15 @@ export function buildShowcase(plans: Plan[]): ShowcasePlan[] {
     list: { monthly: p.listPrices?.monthly ?? null, yearly: p.listPrices?.yearly ?? null },
     offerLabel: p.offerLabel ?? "",
     seats: p.limits.seats ?? null,
-    panels: p.modules === "all" ? "Every panel" : `${p.modules.length} panels + the essentials`,
+    // Every plan has every panel; only the limits differ.
+    panels: "Every panel and feature",
     flags: (p.flags ?? []).flatMap((f) => PLAN_FLAGS.find((d) => d.key === f)?.label ?? []),
     highlights: p.highlights ?? [],
     limits: USAGE_SERVICES.filter((u) => u.limitKey !== "seats").map((u) => {
       const v = p.limits[u.limitKey];
-      return { key: u.limitKey, label: u.label, provider: u.provider, value: u.comingSoon && (v === 0 || v === undefined) ? "Coming soon" : formatLimitValue(u.limitKey, v ?? (u.limitKey in p.limits ? null : 0)), included: v === null || (typeof v === "number" && v > 0) };
+      const sh = SHORT[u.limitKey];
+      const shortValue = v === null ? "Unlimited" : typeof v !== "number" || v === 0 ? (u.comingSoon ? "Soon" : "—") : (sh?.fmt(v) ?? String(v));
+      return { key: u.limitKey, label: u.label, short: sh?.label ?? u.label, shortValue, provider: u.provider, value: u.comingSoon && (v === 0 || v === undefined) ? "Coming soon" : formatLimitValue(u.limitKey, v ?? (u.limitKey in p.limits ? null : 0)), included: v === null || (typeof v === "number" && v > 0), raw: typeof v === "number" ? v : null };
     }),
     popular: p._id === popularId,
   }));

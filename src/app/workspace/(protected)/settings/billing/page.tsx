@@ -9,18 +9,16 @@ import { getCurrentHubUser } from "@/lib/hub-auth";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
-import { getPlan, listPlans } from "@/lib/platform/billing/plans";
+import { getPlan, getStandardPlans } from "@/lib/platform/billing/plans";
 import { razorpayConfigured } from "@/lib/platform/billing/razorpay";
 import { hasLiveSubscription } from "@/lib/platform/billing/subscriptions";
 import type { PlanOption } from "@/lib/platform/billing/billing-details";
 import { planPrice } from "@/lib/platform/billing/pricing";
 import BillingManager, { type BillingView } from "@/components/platform/billing/BillingManager";
 import PlanChooser from "@/components/billing/PlanChooser";
-import UsageTopups from "@/components/billing/UsageTopups";
+import UsageMeters from "@/components/billing/UsageMeters";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { getUsageSummary } from "@/lib/platform/billing/usage-summary";
-import { reconcileTopups } from "@/lib/platform/billing/topups";
-import { topupQuoteAction, startTopupAction, confirmTopupAction } from "./actions";
 import {
   cancelSubscriptionAction,
   changePlanAction,
@@ -38,7 +36,7 @@ function Shell({ title, description, children }: { title: string; description: s
     <div className="min-h-screen bg-muted/70 px-4 py-10 dark:bg-background">
       <div className="space-y-4">
 <PanelPageHeader breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: title }]} title={<>{title}</>} description={<>{description}</>} />
-<div className="mx-auto max-w-4xl space-y-4">
+<div className="mx-auto max-w-7xl space-y-4">
         {children}
       </div>
 </div>
@@ -70,15 +68,14 @@ export default async function BillingSettingsPage() {
 
   const [entitlements, plans, currentPlan, pendingPlan, configured] = await Promise.all([
     getEntitlements(),
-    listPlans({ activeOnly: true }),
+    // The five plans, always (a plan switched off in the catalogue still shows with its built-in terms).
+    getStandardPlans(),
     getPlan(sub.planId),
     sub.pendingChange ? getPlan(sub.pendingChange.planId) : Promise.resolve(null),
     razorpayConfigured(),
   ]);
   const pricing = sub.pricing && sub.pricing.planId === sub.planId && sub.pricing.interval === sub.interval ? sub.pricing : null;
 
-  // A payment whose checkout window was closed before it was confirmed is picked up here.
-  await reconcileTopups(companyId);
   const usageRows = await getUsageSummary().catch(() => []);
   const showcase = buildShowcase(plans);
   const options: PlanOption[] = plans.filter((p) => !p.lifetimeFree && !p.contactSales).map((p) => ({
@@ -112,39 +109,21 @@ export default async function BillingSettingsPage() {
 
   return (
     <Shell title="Plan & billing" description="Your plan, what you have used, and the details printed on your GST invoices.">
-      <GlassCard>
-        <CardContent>
-          <h2 className="mb-1 text-base font-semibold">Choose a plan</h2>
-          <p className="mb-6 text-sm text-muted-foreground">More people means a bigger plan. Need more of anything else? Add it below with a one-time payment.</p>
-          <PlanChooser plans={showcase} currentPlanId={sub.planId} interval={sub.interval} />
-        </CardContent>
-      </GlassCard>
-      {usageRows.length > 0 && (
-        <GlassCard>
-          <CardContent>
-            <h2 className="mb-1 text-base font-semibold">Usage and extra</h2>
-            <p className="mb-4 text-sm text-muted-foreground">This month&apos;s use of every service in your plan. Add more any time; you pay once, for as much as you need.</p>
-            <UsageTopups rows={usageRows} canBuy={configured && sub.status !== "internal"} actions={{ quote: topupQuoteAction, start: startTopupAction, confirm: confirmTopupAction }} />
-          </CardContent>
-        </GlassCard>
-      )}
-      <GlassCard>
-        <CardContent>
-          <BillingManager
-            view={view}
-            plans={options}
-            actions={{
-              quote: quoteAction,
-              saveDetails: saveBillingDetailsAction,
-              startCheckout: startCheckoutAction,
-              confirmCheckout: confirmCheckoutAction,
-              changePlan: changePlanAction,
-              cancel: cancelSubscriptionAction,
-              resume: resumeSubscriptionAction,
-            }}
-          />
-        </CardContent>
-      </GlassCard>
+      <BillingManager
+        view={view}
+        plans={options}
+        plansSlot={<PlanChooser plans={showcase} currentPlanId={sub.planId} interval={sub.interval} />}
+        usageSlot={usageRows.length > 0 ? <UsageMeters rows={usageRows} /> : null}
+        actions={{
+          quote: quoteAction,
+          saveDetails: saveBillingDetailsAction,
+          startCheckout: startCheckoutAction,
+          confirmCheckout: confirmCheckoutAction,
+          changePlan: changePlanAction,
+          cancel: cancelSubscriptionAction,
+          resume: resumeSubscriptionAction,
+        }}
+      />
     </Shell>
   );
 }

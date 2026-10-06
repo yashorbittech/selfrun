@@ -5,9 +5,6 @@ import { createConsoleEmailProvider } from "@/lib/platform/email/console";
 import { createResendEmailProvider } from "@/lib/platform/email/resend";
 import type { EmailMessage, EmailProvider, EmailResult } from "@/lib/platform/email/types";
 import { resolveEmailConfig, type ResolvedEmailConfig } from "@/lib/platform/integrations/resolve";
-import { createSmtpEmailProvider } from "@/lib/platform/email/smtp";
-import { createSendgridEmailProvider } from "@/lib/platform/email/sendgrid";
-import { getSavedConnection } from "@/lib/platform/connections/store";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 
 export type { EmailMessage, EmailResult } from "@/lib/platform/email/types";
@@ -31,18 +28,10 @@ function providerFor(cfg: ResolvedEmailConfig): EmailProvider {
 }
 
 /**
- * The WORKSPACE's own email connection (Workspace → Settings → Integrations: SMTP, Resend or SendGrid), when it has one.
- * Mail sent while serving a company goes out through the company's own account and sender; otherwise it falls back to the
- * platform's provider below. SMTP wins over Resend over SendGrid when several are connected.
+ * Email is provided by the platform for every company: nothing a company saved is used, so mail always goes out through the platform's
+ * provider and sender. (Kept as a function so the call sites below read the same.)
  */
 async function workspaceEmail(): Promise<{ provider: EmailProvider; from: string } | null> {
-  if (!(await currentCompanyIdOrNull())) return null;
-  const smtp = await getSavedConnection("smtp");
-  if (smtp?.host && smtp.fromEmail) return { provider: createSmtpEmailProvider(smtp), from: smtp.fromName ? `${smtp.fromName} <${smtp.fromEmail}>` : smtp.fromEmail };
-  const resend = await getSavedConnection("resend");
-  if (resend?.apiKey && resend.from) return { provider: createResendEmailProvider(resend.apiKey), from: resend.from };
-  const sendgrid = await getSavedConnection("sendgrid");
-  if (sendgrid?.apiKey && sendgrid.from) return { provider: createSendgridEmailProvider(sendgrid.apiKey), from: sendgrid.from };
   return null;
 }
 
