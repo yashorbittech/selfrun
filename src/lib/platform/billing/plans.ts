@@ -26,48 +26,112 @@ export const PLANS_COLLECTION = "billing_plans";
 
 type PlanSeed = Omit<Plan, "createdAt" | "updatedAt">;
 
+const GROWTH_PANELS: ModuleKey[] = ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"];
+
+/**
+ * The simple pricing every company can understand at a glance: 1 person free for life, then 10 / 50 / 200 people at ₹499 / ₹999 / ₹1,999 a
+ * month, and 500 people by talking to support. `listPrices` are the "usual" prices shown struck through; `prices` are what is charged.
+ * Yearly = 10 × monthly (two months free). Every plan states its limits for each paid third-party service (see `USAGE_SERVICES`); more
+ * usage can be bought once, more people needs a bigger plan. Editable in the Platform Panel at any time.
+ */
 export const DEFAULT_PLANS: PlanSeed[] = [
+  {
+    _id: "free",
+    name: "Free",
+    description: "For one person getting started. Free for life.",
+    currency: "INR",
+    priceMonthly: 0,
+    priceYearly: 0,
+    intervals: ["monthly", "yearly"],
+    prices: { monthly: 0, yearly: 0 },
+    lifetimeFree: true,
+    highlights: ["Free for life, no card needed", "1 user"],
+    flags: [],
+    modules: ["pms", "sop", "cms"],
+    limits: { seats: 1, aiTokensPerMonth: 20_000, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 0, customDomains: 0, smsPerMonth: 0 },
+    trialDays: 0,
+    active: true,
+    isDefault: true,
+    sortOrder: 10,
+  },
   {
     _id: "starter",
     name: "Starter",
-    description: "For small teams getting organised.",
+    description: "For a small team that wants to get organised. Up to 10 people.",
     currency: "INR",
-    priceMonthly: 99_900,
-    priceYearly: 999_000,
+    priceMonthly: 49_900,
+    priceYearly: 499_000,
+    intervals: ["monthly", "yearly"],
+    prices: { monthly: 49_900, yearly: 499_000 },
+    listPrices: { monthly: 99_900, yearly: 1_198_800 },
+    offerLabel: "Launch offer",
+    highlights: ["Up to 10 users"],
+    flags: ["customDomain"],
     modules: ["hrms", "pms", "lms", "sop", "cms"],
-    limits: { seats: 10, aiTokensPerMonth: 200_000, storageMb: 5_000 },
-    trialDays: DEFAULT_TRIAL_DAYS,
+    limits: { seats: 10, aiTokensPerMonth: 300_000, storageMb: 5_120, emailsPerMonth: 1_000, voiceMinutesPerMonth: 30, customDomains: 1, smsPerMonth: 0 },
+    trialDays: 0,
     active: true,
     isDefault: false,
-    sortOrder: 10,
+    sortOrder: 20,
   },
   {
     _id: "growth",
     name: "Growth",
-    description: "Run delivery, sales and finance in one place.",
+    description: "Run delivery, sales and finance in one place. Up to 50 people.",
     currency: "INR",
-    priceMonthly: 199_900,
-    priceYearly: 1_999_000,
-    modules: ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"],
-    limits: { seats: 50, aiTokensPerMonth: 1_000_000, storageMb: 25_000 },
-    trialDays: DEFAULT_TRIAL_DAYS,
+    priceMonthly: 99_900,
+    priceYearly: 999_000,
+    intervals: ["monthly", "yearly"],
+    prices: { monthly: 99_900, yearly: 999_000 },
+    listPrices: { monthly: 199_900, yearly: 2_398_800 },
+    offerLabel: "Launch offer",
+    highlights: ["Up to 50 users", "Priority support"],
+    flags: ["customDomain", "prioritySupport"],
+    modules: GROWTH_PANELS,
+    limits: { seats: 50, aiTokensPerMonth: 1_500_000, storageMb: 25_600, emailsPerMonth: 5_000, voiceMinutesPerMonth: 120, customDomains: 2, smsPerMonth: 0 },
+    trialDays: 0,
     active: true,
-    isDefault: true,
-    sortOrder: 20,
+    isDefault: false,
+    sortOrder: 30,
   },
   {
     _id: "business",
     name: "Business",
-    description: "Every panel, AI and automation for growing companies.",
+    description: "Every panel, AI and automation for a growing company. Up to 200 people.",
     currency: "INR",
-    priceMonthly: 499_900,
-    priceYearly: 4_999_000,
+    priceMonthly: 199_900,
+    priceYearly: 1_999_000,
+    intervals: ["monthly", "yearly"],
+    prices: { monthly: 199_900, yearly: 1_999_000 },
+    listPrices: { monthly: 399_900, yearly: 4_798_800 },
+    offerLabel: "Launch offer",
+    highlights: ["Up to 200 users", "White-label and API access", "Priority support"],
+    flags: ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"],
     modules: "all",
-    limits: { seats: 200, aiTokensPerMonth: 5_000_000, storageMb: 100_000 },
-    trialDays: DEFAULT_TRIAL_DAYS,
+    limits: { seats: 200, aiTokensPerMonth: 6_000_000, storageMb: 102_400, emailsPerMonth: 25_000, voiceMinutesPerMonth: 600, customDomains: 5, smsPerMonth: 0 },
+    trialDays: 0,
     active: true,
     isDefault: false,
-    sortOrder: 30,
+    sortOrder: 40,
+  },
+  {
+    _id: "enterprise",
+    name: "Enterprise",
+    description: "For large teams. Up to 500 people, set up with you.",
+    currency: "INR",
+    priceMonthly: 0,
+    priceYearly: 0,
+    intervals: ["monthly"],
+    prices: { monthly: 0 },
+    contactSales: true,
+    highlights: ["Up to 500 users", "Custom limits and onboarding", "Dedicated support"],
+    flags: ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"],
+    modules: "all",
+    limits: { seats: 500, aiTokensPerMonth: 20_000_000, storageMb: 512_000, emailsPerMonth: 100_000, voiceMinutesPerMonth: 3_000, customDomains: 20, smsPerMonth: 10_000 },
+    trialDays: 0,
+    active: true,
+    isDefault: false,
+    sortOrder: 50,
   },
 ];
 
@@ -81,8 +145,8 @@ async function collection() {
       await col
         .insertMany(
           DEFAULT_PLANS.map((p) => {
-            const prices = { monthly: p.priceMonthly, yearly: p.priceYearly };
-            const intervals: BillingInterval[] = ["monthly", "yearly"];
+            const prices = p.prices ?? { monthly: p.priceMonthly, yearly: p.priceYearly };
+            const intervals: BillingInterval[] = p.intervals ?? ["monthly", "yearly"];
             return { ...p, intervals, prices, priceVersion: 1, priceHistory: [{ version: 1, currency: p.currency, intervals, prices, effectiveFrom: now, createdBy: "seed" }], createdAt: now, updatedAt: now };
           }),
         )
@@ -146,6 +210,11 @@ export interface PlanInput {
   trialDays: number | null;
   active: boolean;
   isDefault: boolean;
+  /** Struck-through "usual" prices per cycle (display only), the offer badge, and the plan kinds. */
+  listPrices?: Partial<Record<BillingInterval, number>>;
+  offerLabel?: string;
+  lifetimeFree?: boolean;
+  contactSales?: boolean;
 }
 
 /** Keys: id, name, description, currency, intervals, price.<interval>, modules, highlights, flags, limit.<key>, trialDays, isDefault. */
@@ -196,6 +265,11 @@ export function validatePlanInput(input: PlanInput, mode: "create" | "update"): 
   if (!Array.isArray(input.highlights) || input.highlights.length > MAX_HIGHLIGHTS) errors.highlights = `Up to ${MAX_HIGHLIGHTS} highlights.`;
   else if (input.highlights.some((h) => typeof h !== "string" || !h.trim() || h.trim().length > 120)) errors.highlights = "Each highlight needs 1–120 characters.";
   if (!Array.isArray(input.flags) || input.flags.some((f) => !FLAG_KEYS.has(f))) errors.flags = "Unknown feature flag.";
+  for (const i of intervals) {
+    const lp = input.listPrices?.[i];
+    if (lp !== undefined && (!isWholeNumber(lp) || lp < 0 || lp > MAX_PRICE)) errors[`listPrice.${i}`] = "Enter a price of 0 or more, or leave blank.";
+  }
+  if ((input.offerLabel ?? "").trim().length > 40) errors.offerLabel = "Keep the offer label under 40 characters.";
 
   const limitKeys = Object.keys(input.limits ?? {});
   for (const def of PLAN_LIMIT_DEFS) if (!limitKeys.includes(def.key)) errors[`limit.${def.key}`] = "Missing limit.";
@@ -223,6 +297,8 @@ function normalise(input: PlanInput): PlanInput {
   const prices: Partial<Record<BillingInterval, number>> = {};
   for (const i of intervals) prices[i] = input.prices?.[i] as number;
   const limits: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null };
+  const listPrices: Partial<Record<BillingInterval, number>> = {};
+  for (const i of intervals) if (typeof input.listPrices?.[i] === "number") listPrices[i] = input.listPrices[i] as number;
   for (const [k, v] of Object.entries(input.limits ?? {})) limits[String(k).trim()] = v === null || v === undefined ? null : (v as number);
   return {
     _id: String(input._id ?? "").trim().toLowerCase(),
@@ -238,6 +314,10 @@ function normalise(input: PlanInput): PlanInput {
     trialDays: input.trialDays === null || input.trialDays === undefined ? null : input.trialDays,
     active: input.active === true,
     isDefault: input.isDefault === true,
+    listPrices,
+    offerLabel: String(input.offerLabel ?? "").trim(),
+    lifetimeFree: input.lifetimeFree === true,
+    contactSales: input.contactSales === true,
   };
 }
 
@@ -253,7 +333,7 @@ const samePricing = (a: ReturnType<typeof pricingOf>, b: ReturnType<typeof prici
 
 /** Which top-level fields differ (for the audit log; values are small and secret-free). */
 function changedFields(before: Plan, after: Record<string, unknown>): string[] {
-  const keys = ["name", "description", "currency", "intervals", "prices", "modules", "highlights", "flags", "limits", "trialDays", "active", "isDefault"];
+  const keys = ["name", "description", "currency", "intervals", "prices", "modules", "highlights", "flags", "limits", "trialDays", "active", "isDefault", "listPrices", "offerLabel", "lifetimeFree", "contactSales"];
   return keys.filter((k) => JSON.stringify((before as unknown as Record<string, unknown>)[k] ?? null) !== JSON.stringify(after[k] ?? null));
 }
 
@@ -292,6 +372,10 @@ export async function savePlan(raw: PlanInput, mode: "create" | "update", actorI
     trialDays: clean.trialDays,
     active: clean.active,
     isDefault: clean.isDefault,
+    listPrices: clean.listPrices ?? {},
+    offerLabel: clean.offerLabel ?? "",
+    lifetimeFree: clean.lifetimeFree === true,
+    contactSales: clean.contactSales === true,
     updatedAt: now,
   };
 
@@ -440,4 +524,47 @@ export async function countCompaniesByPlan(): Promise<Map<string, number>> {
 /** Whether a plan switches on a capability flag. */
 export function planHasFlag(plan: Pick<Plan, "flags"> | null | undefined, flag: string): boolean {
   return Boolean(plan?.flags?.includes(flag));
+}
+
+
+/**
+ * Loads (or refreshes) the simple pricing: Free, Starter, Growth, Business, Enterprise (see `DEFAULT_PLANS`). Plans that already exist are
+ * updated in place; a price change becomes a new price version, so companies already subscribed keep what they bought. Free becomes the
+ * default plan for new sign-ups. Anything else in the catalogue is left as it is.
+ */
+export async function applySimplePricing(actorId: string): Promise<{ ok: true; created: string[]; updated: string[] } | { ok: false; error: string }> {
+  const col = await collection();
+  const created: string[] = [];
+  const updated: string[] = [];
+  // Free first, so it takes the default flag before the old default is edited.
+  for (const seed of DEFAULT_PLANS) {
+    const exists = Boolean(await col.findOne({ _id: seed._id }, { projection: { _id: 1 } }));
+    const res = await savePlan(
+      {
+        _id: seed._id,
+        name: seed.name,
+        description: seed.description,
+        currency: seed.currency,
+        intervals: seed.intervals ?? ["monthly", "yearly"],
+        prices: seed.prices ?? { monthly: seed.priceMonthly, yearly: seed.priceYearly },
+        modules: seed.modules,
+        highlights: seed.highlights ?? [],
+        flags: seed.flags ?? [],
+        limits: seed.limits,
+        trialDays: seed.trialDays,
+        active: true,
+        isDefault: seed.isDefault,
+        listPrices: seed.listPrices ?? {},
+        offerLabel: seed.offerLabel ?? "",
+        lifetimeFree: seed.lifetimeFree === true,
+        contactSales: seed.contactSales === true,
+      },
+      exists ? "update" : "create",
+      actorId,
+    );
+    if (!res.ok) return { ok: false, error: `${seed.name}: ${res.error}${res.fieldErrors ? ` (${Object.entries(res.fieldErrors).map(([k, v]) => `${k}: ${v}`).join("; ")})` : ""}` };
+    (exists ? updated : created).push(seed._id);
+    await col.updateOne({ _id: seed._id }, { $set: { sortOrder: seed.sortOrder } });
+  }
+  return { ok: true, created, updated };
 }

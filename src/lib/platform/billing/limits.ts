@@ -12,11 +12,11 @@ import type { CompanySubscription, Plan, PlanLimits } from "@/lib/platform/billi
  * `null` (unlimited) stays unlimited whatever is added.
  */
 
-export const UNLIMITED_LIMITS: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null };
+export const UNLIMITED_LIMITS: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null, emailsPerMonth: null, voiceMinutesPerMonth: null, customDomains: null, smsPerMonth: null };
 export const ADDONS_COLLECTION = "billing_addons";
 
 export type LimitKey = keyof PlanLimits;
-const LIMIT_KEYS: LimitKey[] = ["seats", "aiTokensPerMonth", "storageMb"];
+const LIMIT_KEYS: LimitKey[] = ["seats", "aiTokensPerMonth", "storageMb", "emailsPerMonth", "voiceMinutesPerMonth", "customDomains", "smsPerMonth"];
 
 export interface SubscriptionAddon {
   addonId: string;
@@ -63,13 +63,29 @@ async function addonDocs(ids: string[]): Promise<AddonLimitDoc[]> {
     .toArray();
 }
 
-/** Effective limits for a subscription whose plan is already loaded. */
+/**
+ * Pure: adds what the company bought once (`subscription.topups`). A "permanent" extra always counts; a "monthly" one only in the month
+ * it was bought for. Unlimited (null) stays unlimited. Seats are never topped up.
+ */
+export function applyTopups(base: PlanLimits, topups: CompanySubscription["topups"], month: string): PlanLimits {
+  const out: PlanLimits = { ...base };
+  for (const t of topups ?? []) {
+    if (!t || t.limitKey === "seats" || !Number.isFinite(t.amount) || t.amount <= 0) continue;
+    if (t.kind === "monthly" && t.month !== month) continue;
+    const current = out[t.limitKey];
+    if (current === null || current === undefined) continue;
+    out[t.limitKey] = current + t.amount;
+  }
+  return out;
+}
+
+/** Effective limits for a subscription whose plan is already loaded: plan + add-ons + one-time top-ups. */
 export async function effectiveLimitsFor(sub: CompanySubscription | null, plan: Plan | null): Promise<PlanLimits> {
   if (!sub || sub.status === "internal") return { ...UNLIMITED_LIMITS };
   const base = plan?.limits ?? UNLIMITED_LIMITS;
   const addons = subscriptionAddons(sub);
-  if (addons.length === 0) return { ...base };
-  return applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
+  const withAddons = addons.length === 0 ? { ...base } : applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
+  return applyTopups(withAddons, sub.topups, new Date().toISOString().slice(0, 7));
 }
 
 /** Plan limits + purchased add-on extras for a company. The platform owner is unlimited. */

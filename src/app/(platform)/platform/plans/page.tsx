@@ -17,6 +17,7 @@ import { BILLING_INTERVALS, PLAN_FLAGS, PLAN_LIMIT_DEFS, formatMoney, type Plan 
 import { MODULES } from "@/lib/platform/onboarding/catalog";
 import { panelLabels } from "@/lib/platform/panels/choices";
 import PlanActions from "./PlanActions";
+import LoadSimplePricing from "./LoadSimplePricing";
 
 export const metadata: Metadata = { title: "Plans & pricing" };
 
@@ -52,9 +53,12 @@ export default async function PlansPage() {
         title="Plans & pricing"
         description="What companies can subscribe to. Prices exclude GST. A price change creates a new price version for new subscriptions; companies already subscribed keep what they bought."
         actions={
-          <Link href="/platform/plans/new" id="plan-new" className={cn(buttonVariants())}>
-            <Plus className="size-4" data-icon="inline-start" /> New plan
-          </Link>
+          <div className="flex flex-wrap items-start gap-2">
+            <LoadSimplePricing />
+            <Link href="/platform/plans/new" id="plan-new" className={cn(buttonVariants())}>
+              <Plus className="size-4" data-icon="inline-start" /> New plan
+            </Link>
+          </div>
         }
       />
 

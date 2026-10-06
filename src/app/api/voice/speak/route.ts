@@ -6,6 +6,8 @@ import { ensureVoiceConversation, recordVoiceTurn } from "@/lib/voice-conversati
 import { saveVoiceAudio } from "@/lib/voice-storage";
 import { bumpVoiceRollup } from "@/lib/voice-rollup";
 import { afterForCompany } from "@/lib/platform/tenancy/context";
+import { voiceBlockReason } from "@/lib/platform/billing/enforce";
+import { recordUsage } from "@/lib/platform/billing/usage";
 
 export const maxDuration = 60;
 
@@ -22,6 +24,9 @@ export async function POST(req: NextRequest) {
   if (!(await isElevenLabsConfigured())) {
     return NextResponse.json({ error: "Voice mode is not configured yet." }, { status: 503 });
   }
+  // The plan's voice minutes (and any bought).
+  const voiceBlocked = await voiceBlockReason().catch(() => null);
+  if (voiceBlocked) return NextResponse.json({ error: voiceBlocked }, { status: 402 });
 
   const session = await getSessionFromRequest(req);
   if (!session) {
@@ -85,6 +90,7 @@ export async function POST(req: NextRequest) {
       const audio = Buffer.concat(chunks.map((c) => Buffer.from(c)));
       const ttsMs = Date.now() - startedAt;
       const assistantDurationMs = Math.round((audio.byteLength / MP3_BYTES_PER_SEC) * 1000);
+      await recordUsage("voice_seconds", assistantDurationMs / 1000).catch(() => {});
 
       const stored = await saveVoiceAudio(audio, "mp3");
       const conversationId = await ensureVoiceConversation(session, voice.voiceId);

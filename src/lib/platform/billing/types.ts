@@ -34,7 +34,51 @@ export const PLAN_LIMIT_DEFS = [
   { key: "seats", label: "Seats (users)", unit: "users", min: 1 },
   { key: "aiTokensPerMonth", label: "AI tokens per month", unit: "tokens", min: 0 },
   { key: "storageMb", label: "Storage (MB)", unit: "MB", min: 0 },
+  { key: "emailsPerMonth", label: "Emails per month", unit: "emails", min: 0 },
+  { key: "voiceMinutesPerMonth", label: "Voice minutes per month", unit: "minutes", min: 0 },
+  { key: "customDomains", label: "Custom domains", unit: "domains", min: 0 },
+  { key: "smsPerMonth", label: "SMS per month", unit: "SMS", min: 0 },
 ] as const;
+
+/**
+ * Every third-party service the platform pays for, the limit that caps a company's use of it, and how extra can be bought.
+ * Users (seats) are never sold as extra: more people means a bigger plan. `topup`: "monthly" extra is valid in the month it is
+ * bought; "permanent" extra stays. `unitSize` is how much one pack adds; `price` is per pack in paise before GST — platform settings
+ * (`billing_topups`) can override it.
+ */
+export interface UsageService {
+  limitKey: string;
+  /** What the company sees. */
+  label: string;
+  /** The third party behind it. */
+  provider: string | null;
+  unit: string;
+  /** Short explanation of what counts. */
+  note: string;
+  topup: null | { kind: "monthly" | "permanent"; unitSize: number; unitLabel: string; price: number; max: number };
+  /** Not wired to a provider yet: limit is recorded, nothing is metered. */
+  comingSoon?: boolean;
+}
+
+export const USAGE_SERVICES: UsageService[] = [
+  { limitKey: "seats", label: "Users (seats)", provider: null, unit: "users", note: "Active accounts. To add people, upgrade the plan.", topup: null },
+  { limitKey: "storageMb", label: "File storage", provider: "Vercel Blob", unit: "MB", note: "Documents, resumes, chat attachments, voice files.", topup: { kind: "permanent", unitSize: 1024, unitLabel: "1 GB", price: 4900, max: 500 } },
+  { limitKey: "aiTokensPerMonth", label: "AI tokens", provider: "OpenAI", unit: "tokens", note: "Chatbot, assistants, Intelligence and AI generation.", topup: { kind: "monthly", unitSize: 100_000, unitLabel: "100,000 tokens", price: 9900, max: 500 } },
+  { limitKey: "emailsPerMonth", label: "Emails sent", provider: "Resend", unit: "emails", note: "Invites, invoices, reminders and notifications.", topup: { kind: "monthly", unitSize: 1000, unitLabel: "1,000 emails", price: 9900, max: 200 } },
+  { limitKey: "voiceMinutesPerMonth", label: "Voice minutes", provider: "ElevenLabs", unit: "minutes", note: "Voice replies and voice chatbot.", topup: { kind: "monthly", unitSize: 10, unitLabel: "10 minutes", price: 14900, max: 500 } },
+  { limitKey: "customDomains", label: "Custom domains", provider: "Vercel", unit: "domains", note: "Your own address for the website and the app.", topup: { kind: "permanent", unitSize: 1, unitLabel: "1 domain", price: 19900, max: 20 } },
+  { limitKey: "smsPerMonth", label: "SMS", provider: "SMS provider", unit: "SMS", note: "OTP and alerts. Coming soon.", topup: { kind: "monthly", unitSize: 100, unitLabel: "100 SMS", price: 9900, max: 500 }, comingSoon: true },
+];
+
+/** "25 GB", "1.5M tokens", "Unlimited" for a limit value. */
+export function formatLimitValue(limitKey: string, value: number | null | undefined): string {
+  if (value === null || value === undefined) return "Unlimited";
+  if (value === 0) return "Not included";
+  if (limitKey === "storageMb") return value >= 1024 ? `${(value / 1024).toLocaleString("en-IN", { maximumFractionDigits: 1 })} GB` : `${value} MB`;
+  if (limitKey === "aiTokensPerMonth") return value >= 1_000_000 ? `${(value / 1_000_000).toLocaleString("en-IN", { maximumFractionDigits: 1 })}M tokens` : `${Math.round(value / 1000).toLocaleString("en-IN")}K tokens`;
+  const unit = USAGE_SERVICES.find((u) => u.limitKey === limitKey)?.unit ?? "";
+  return `${value.toLocaleString("en-IN")}${unit ? ` ${unit}` : ""}`;
+}
 
 /**
  * Capability flags a plan can switch on (enforced by the feature that owns
@@ -90,6 +134,17 @@ export interface Plan {
   highlights?: string[];
   /** Capability flags (see `PLAN_FLAGS`). */
   flags?: string[];
+  /**
+   * "List" prices shown struck through next to the real (offer) price, per cycle, smallest unit. Display only: what is charged is
+   * `prices`. Absent = no strike-through.
+   */
+  listPrices?: Partial<Record<BillingInterval, number>>;
+  /** Badge on the offer, e.g. "Launch offer". */
+  offerLabel?: string;
+  /** Free for ever: never billed, no trial; a company on it keeps it until it upgrades. */
+  lifetimeFree?: boolean;
+  /** Not sold online: the pricing page shows "Contact support" instead of a price. */
+  contactSales?: boolean;
   /** Panels included; "all" = every panel. Core panels (see MODULES.core) are always included. */
   modules: ModuleKey[] | "all";
   limits: PlanLimits;
@@ -144,6 +199,11 @@ export interface CompanySubscription {
   checkout?: { subscriptionId: string; pricing: SubscriptionPricing } | null;
   /** Set by the Platform Panel: never billed (status "internal") although not the platform owner. */
   complimentary?: boolean;
+  /**
+   * Extra usage the company bought once (see `billing/topups.ts`). "permanent" extras (storage, domains) stay; "monthly" ones are
+   * added to the allowance of the month they were bought for (`month` = yyyy-mm).
+   */
+  topups?: { id: string; limitKey: string; amount: number; kind: "monthly" | "permanent"; month: string | null; paymentId: string; paid: number; at: Date }[];
   updatedAt: Date;
 }
 
@@ -181,7 +241,7 @@ export interface SubscriptionPricing {
 }
 
 /** Usage metrics metered per company per calendar month. */
-export type UsageMetric = "ai_tokens" | "storage_mb" | "emails";
+export type UsageMetric = "ai_tokens" | "storage_mb" | "emails" | "voice_seconds" | "sms";
 
 /** What the current company may do right now — the single question every panel asks. */
 export interface Entitlements {

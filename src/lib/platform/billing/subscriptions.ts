@@ -207,6 +207,8 @@ export async function priceSubscription(input: {
     getBillingSettings(),
   ]);
   if (!quote || !plan || (!plan.active && !input.priceVersion)) return { ok: false, error: "That plan isn't available." };
+  if (plan.contactSales) return { ok: false, error: `${plan.name} is arranged with our team. Please contact support.` };
+  if (plan.lifetimeFree) return { ok: false, error: `${plan.name} is free for life and needs no payment.` };
   let priceVersion = currentPriceVersion(plan);
   if (input.priceVersion && input.priceVersion !== priceVersion) {
     // Grandfathered subscriber: the plan line stays at the version they bought; the discount is re-worked on the new subtotal.

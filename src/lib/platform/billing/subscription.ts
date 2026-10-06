@@ -44,6 +44,8 @@ export async function getCompanySubscription(companyId: string): Promise<Company
   if (company.isPlatformOwner) return INTERNAL;
   if (company.subscription) return company.subscription;
   const plan = await getDefaultPlan();
+  // A free-for-life default plan is simply active, with no trial and no end.
+  if (plan?.lifetimeFree) return { ...INTERNAL, planId: plan._id, status: "active", updatedAt: company.createdAt };
   const trialDays = resolveTrialDays(plan, (await getBillingSettings()).billing.defaultTrialDays);
   return {
     ...INTERNAL,
@@ -59,15 +61,16 @@ export async function startTrial(companyId: string, planId?: string): Promise<Co
   const plan = planId ? await getPlan(planId) : await getDefaultPlan();
   const trialDays = resolveTrialDays(plan, (await getBillingSettings()).billing.defaultTrialDays);
   const now = new Date();
+  const free = plan?.lifetimeFree === true;
   const sub: CompanySubscription = {
     ...INTERNAL,
     planId: plan?._id ?? "trial",
-    status: "trialing",
-    trialEndsAt: new Date(now.getTime() + trialDays * 86_400_000),
+    status: free ? "active" : "trialing",
+    trialEndsAt: free ? null : new Date(now.getTime() + trialDays * 86_400_000),
     updatedAt: now,
   };
   const res = await (await companies()).updateOne({ _id: companyId, isPlatformOwner: { $ne: true } }, { $set: { subscription: sub } });
-  if (res.modifiedCount === 1) await recordSubscriptionEvent({ companyId, type: "trial_started", planId: sub.planId, interval: sub.interval, at: now });
+  if (res.modifiedCount === 1 && !free) await recordSubscriptionEvent({ companyId, type: "trial_started", planId: sub.planId, interval: sub.interval, at: now });
   return sub;
 }
 

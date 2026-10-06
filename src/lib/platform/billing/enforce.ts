@@ -239,3 +239,38 @@ export async function getBillingNotice(): Promise<BillingNoticeInfo | null> {
       return null;
   }
 }
+
+
+// ---------------------------------------------------------------------------
+// Emails, voice minutes and custom domains: the other paid services (see `USAGE_SERVICES`).
+// ---------------------------------------------------------------------------
+
+/** Why no more emails may be sent this month, or null. Only inside a company; never for the platform's own mail. */
+export async function emailBlockReason(): Promise<string | null> {
+  if (!(await currentCompanyIdOrNull())) return null;
+  const e = await getEntitlements();
+  const limit = e.limits.emailsPerMonth;
+  if (limit === null || limit === undefined) return null;
+  const used = await getUsage("emails");
+  return used < limit ? null : `This month's ${fmt(limit)} emails are used up. The allowance resets on the 1st — add emails or upgrade in Settings → Billing.`;
+}
+
+/** Why voice can't be used right now (not in the plan, or this month's minutes are used), or null. */
+export async function voiceBlockReason(): Promise<string | null> {
+  const e = await getEntitlements();
+  if (e.readOnly) return READ_ONLY_MESSAGE;
+  const limit = e.limits.voiceMinutesPerMonth;
+  if (limit === null || limit === undefined) return null;
+  if (limit === 0) return "Voice isn't included in your plan. Upgrade or add voice minutes in Settings → Billing.";
+  const used = (await getUsage("voice_seconds")) / 60;
+  return used < limit ? null : `This month's ${fmt(limit)} voice minutes are used up. Add minutes or upgrade in Settings → Billing.`;
+}
+
+/** Why another custom domain can't be added, or null. `current` = domains already connected. */
+export async function domainBlockReason(current: number): Promise<string | null> {
+  const e = await getEntitlements();
+  const limit = e.limits.customDomains;
+  if (limit === null || limit === undefined) return null;
+  if (limit === 0) return "Custom domains aren't included in your plan. Upgrade or add a domain in Settings → Billing.";
+  return current < limit ? null : `Your plan includes ${fmt(limit)} custom domain${limit === 1 ? "" : "s"}. Add another in Settings → Billing, or upgrade.`;
+}

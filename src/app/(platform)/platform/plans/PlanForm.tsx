@@ -159,11 +159,29 @@ export default function PlanForm({
                     <Input {...a11y(`price.${c.id}`, id)} inputMode="decimal" value={c.price} onChange={(e) => set("cycles", values.cycles.map((x, i) => (i === index ? { ...x, price: e.target.value } : x)))} placeholder="0" />
                   </Field>
                 )}
+                {c.enabled && (
+                  <Field id={`${id}-list`} label={`Usual ${label.toLowerCase()} price, shown struck through (optional)`} hint="Display only. What is charged is the price above." error={errors[`listPrice.${c.id}`]}>
+                    <Input {...a11y(`listPrice.${c.id}`, `${id}-list`)} inputMode="decimal" value={c.list} onChange={(e) => set("cycles", values.cycles.map((x, i) => (i === index ? { ...x, list: e.target.value } : x)))} placeholder="e.g. 1999" />
+                  </Field>
+                )}
               </div>
             );
           })}
         </div>
         {errors.intervals && <p className="text-xs text-destructive">{errors.intervals}</p>}
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field id="plan-offer-label" label="Offer badge" hint="Shown on the card, e.g. “Launch offer”." error={errors.offerLabel}>
+            <Input {...a11y("offerLabel", "plan-offer-label")} value={values.offerLabel} onChange={(e) => set("offerLabel", e.target.value)} maxLength={40} />
+          </Field>
+          <label className="flex items-start gap-2 rounded-xl border border-border p-3 text-sm">
+            <input type="checkbox" className={cn(checkbox, "mt-0.5")} checked={values.lifetimeFree} onChange={(e) => set("lifetimeFree", e.target.checked)} />
+            <span><span className="block font-medium">Free for life</span><span className="block text-xs text-muted-foreground">Never billed, no trial. A company stays on it until it upgrades.</span></span>
+          </label>
+          <label className="flex items-start gap-2 rounded-xl border border-border p-3 text-sm">
+            <input type="checkbox" className={cn(checkbox, "mt-0.5")} checked={values.contactSales} onChange={(e) => set("contactSales", e.target.checked)} />
+            <span><span className="block font-medium">Contact support instead of a price</span><span className="block text-xs text-muted-foreground">Not sold online; the pricing page shows “Contact support”.</span></span>
+          </label>
+        </div>
         <p className={cn("text-xs", priceChanged ? "font-medium text-amber-700 dark:text-amber-400" : "text-muted-foreground")} role={priceChanged ? "status" : undefined}>
           {priceChanged
             ? `Saving creates a new price version. It applies to new subscriptions only${companies > 0 ? ` — the ${companies} ${companies === 1 ? "company" : "companies"} already on this plan keep the price they bought` : ""}.`

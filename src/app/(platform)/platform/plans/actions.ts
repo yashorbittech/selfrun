@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requirePlatformPermission } from "@/lib/platform/console/access";
-import { deletePlan, movePlan, savePlan, setDefaultPlan, setPlanActive, validatePlanInput, type PlanMutationResult } from "@/lib/platform/billing/plans";
+import { applySimplePricing, deletePlan, movePlan, savePlan, setDefaultPlan, setPlanActive, validatePlanInput, type PlanMutationResult } from "@/lib/platform/billing/plans";
 import { parsePlanForm, type PlanFormErrors, type PlanFormValues } from "./planFormValues";
 
 export type SavePlanActionResult = { ok: true; id: string; message: string } | { ok: false; error: string; fieldErrors?: PlanFormErrors };
@@ -57,4 +57,15 @@ export async function deletePlanAction(id: string): Promise<PlanMutationResult> 
   const res = await deletePlan(String(id), user.id);
   if (res.ok) done();
   return res;
+}
+
+
+/** Loads the simple pricing (Free, Starter, Growth, Business, Enterprise) into the catalogue; existing subscribers keep the price they bought. */
+export async function applySimplePricingAction(): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  const user = await requirePlatformPermission("plans.manage");
+  const res = await applySimplePricing(user.id);
+  if (!res.ok) return res;
+  done();
+  revalidatePath("/pricing");
+  return { ok: true, message: `Simple pricing loaded: ${[...res.created, ...res.updated].join(", ")}.` };
 }

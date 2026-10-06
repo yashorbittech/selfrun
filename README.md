@@ -24,16 +24,17 @@ For what every panel does, see [docs/panels.md](./docs/panels.md). Architecture 
 1. [Product overview](#product-overview)
 2. [How it works](#how-it-works)
 3. [Tech stack](#tech-stack)
-4. [Environment variables](#environment-variables)
-5. [Run locally](#run-locally)
-6. [Register a company](#register-a-company)
-7. [Demo data](#demo-data)
-8. [Deploy to production (Vercel)](#deploy-to-production-vercel)
-9. [NPM scripts](#npm-scripts)
-10. [Project structure](#project-structure)
-11. [Architecture notes](#architecture-notes)
-12. [Troubleshooting](#troubleshooting)
-13. [Contributing](#contributing)
+4. [Third-party services and costs](#third-party-services-and-costs)
+5. [Environment variables](#environment-variables)
+6. [Run locally](#run-locally)
+7. [Register a company](#register-a-company)
+8. [Demo data](#demo-data)
+9. [Deploy to production (Vercel)](#deploy-to-production-vercel)
+10. [NPM scripts](#npm-scripts)
+11. [Project structure](#project-structure)
+12. [Architecture notes](#architecture-notes)
+13. [Troubleshooting](#troubleshooting)
+14. [Contributing](#contributing)
 
 (The installable app and push notifications are described under [Mobile app and push notifications](#mobile-app-and-push-notifications).)
 
@@ -105,6 +106,41 @@ In development: `localhost:3000` is the product website and `app.localhost:3000`
 | Storage | Vercel Blob (private) |
 | Email | Resend |
 | Hosting | Vercel (cron jobs in `vercel.json`) |
+
+---
+
+## Third-party services and costs
+
+Everything the platform depends on outside this repository. "Required" means the product needs it to run; the rest switch on one feature each.
+Prices change, so none are listed: the last column says how each one is billed. Keys for these services are listed under
+[Environment variables](#environment-variables).
+
+| # | Service | Used for | Required? | Cost | How it is billed |
+| --- | --- | --- | --- | --- | --- |
+| 1 | **Vercel** (server / hosting) | App, API, cron jobs, SSL, CDN, domains | Yes | Paid | Pro plan (per seat, monthly) plus bandwidth and function usage |
+| 2 | **MongoDB Atlas** (database) | All data, every company's | Yes | Paid | Paid cluster (M10 or above), with storage and backups |
+| 3 | **Vercel Blob** (storage) | Resumes, documents, chat attachments, voice files | Yes | Paid | GB stored plus transfer |
+| 4 | **Resend** (email) | Verification, invitation, invoice and reminder emails | Yes | Free limit, then paid | Monthly plan after the free limit |
+| 5 | **Razorpay** (payments) | SaaS subscriptions and payments | Yes | Per transaction | About 2% plus GST per transaction, no monthly fee |
+| 6 | **Domain registrar** (your main domain) | The product address, `app.` and `*.` subdomains | Yes | Paid | Yearly |
+| 7 | **Customers' custom domains** (e.g. `acme.com`) | A company's own address | When a company wants one | Paid by the customer | The customer's registrar fee. Your side: adding domains to the Vercel project (included in Pro) |
+| 8 | **OpenAI** | AI chatbot, assistants, Intelligence, SOP and social-post generation, file search | When AI is used | Paid | Per token, plus vector-store storage |
+| 9 | **ElevenLabs** | Voice / text to speech | When voice is used | Paid | Monthly plan or per character |
+| 10 | **SMS provider** (MSG91, Twilio, Fast2SMS) | OTP and alerts | Not built in yet | Paid | Per SMS, once added |
+| 11 | **RazorpayX** (payouts) | Direct payouts from Finance | Only for payouts | Paid | Per payout fee plus account |
+| 12 | **GitHub Actions** | Desktop and mobile app builds | Only for apps | Free minutes, then paid | Private repositories get limited free minutes; Windows and macOS minutes count extra |
+| 13 | **Apple Developer** | iOS app and macOS signing | Only for iOS / macOS apps | Paid | Yearly |
+| 14 | **Google Play Developer** | Publishing the Android app | Only for the Android app | Paid | One time |
+| 15 | **Windows code-signing certificate** | Removes the "unknown publisher" warning on the installer | Optional | Paid | Yearly |
+| 16 | **TURN server** (Twilio, Metered, or your own coturn) | Team Chat calls across different networks | When calls are used | Paid | Per GB or server cost |
+| 17 | **Error monitoring** (e.g. Sentry) | Catching production errors | Recommended, not built in | Free to paid | Monthly |
+| 18 | **Uptime monitor** (UptimeRobot, Better Stack) | Alerts when the site is down | Recommended | Free to paid | Monthly |
+| 19 | **Web Push** (VAPID keys) | Notifications for the app and the website | Yes | Free | Generate the keys once |
+| 20 | **Google APIs** (Search Console, Indexing, OAuth) | SEO panel and Google sign-in | When SEO is used | Free | Service-account setup only |
+| 21 | **Meta and LinkedIn APIs** | Social media publishing | When Social Media is used | Free | App review, no fee |
+| 22 | **Tawk.to** (live chat) | Website live-chat widget | Optional | Free tier | Free tier |
+
+The first running costs come from rows 1 to 6 and row 8. OpenAI is usage-based, so set AI limits on the plans.
 
 ---
 

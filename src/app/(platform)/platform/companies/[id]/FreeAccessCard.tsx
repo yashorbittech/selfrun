@@ -28,7 +28,7 @@ export default function FreeAccessCard({ companyId, companyName, free, canManage
       if (res.ok) {
         setOn(next);
         setAsking(false);
-        setNote({ ok: true, text: res.message });
+        setNote({ ok: true, text: res.message ?? (next ? "Free access is on." : "Free access removed.") });
         router.refresh();
       } else setNote({ ok: false, text: res.error });
     });

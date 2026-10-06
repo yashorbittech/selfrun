@@ -90,6 +90,19 @@ export default function BillingManager({ view, plans, actions }: { view: Billing
     };
   }, [planId, interval, coupon, actions]);
 
+  // The plan cards above ask for a plan to be selected here (they only compare; the checkout is this section).
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const d = (e as CustomEvent<{ planId: string; interval: BillingInterval }>).detail;
+      if (d && plans.some((p) => p.id === d.planId)) {
+        setPlanId(d.planId);
+        setInterval(d.interval);
+      }
+    };
+    window.addEventListener("billing:select-plan", onSelect);
+    return () => window.removeEventListener("billing:select-plan", onSelect);
+  }, [plans]);
+
   const samePlan = view.hasLive && planId === view.planId && interval === view.interval && (coupon ?? null) === (view.chargedPerCycle?.couponCode ?? null);
   const isInternal = view.status === "internal";
 
@@ -206,7 +219,7 @@ export default function BillingManager({ view, plans, actions }: { view: Billing
       </section>
 
       {!isInternal && (
-        <section aria-labelledby="billing-choose" className="space-y-4">
+        <section id="billing-checkout" aria-labelledby="billing-choose" className="space-y-4">
           <div>
             <h2 id="billing-choose" className="text-base font-semibold">
               {view.hasLive ? "Change plan" : "Choose a plan"}

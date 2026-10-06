@@ -683,3 +683,9 @@ html[data-app-shell-seen] .app-shell-wrap { display: block; }
 .mt-switch-on { padding: 0 40px 0 12px; border-color: transparent; color: var(--primary-foreground); background: linear-gradient(135deg, var(--primary), color-mix(in oklab, var(--primary) 65%, #000)); box-shadow: 0 6px 18px color-mix(in oklab, var(--primary) 35%, transparent); }
 .mt-switch-on .mt-switch-knob { left: calc(100% - 34px); }
 .mt-switch-on .mt-switch-label { animation: mt-pulse 1.6s ease-in-out infinite; }
+
+/* Pricing: the price pops when the billing cycle changes; the offer badge shimmers. */
+@keyframes plan-price-pop { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+.plan-price-pop { display: inline-block; animation: plan-price-pop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.plan-offer { background-image: linear-gradient(100deg, transparent 30%, color-mix(in oklab, #fff 55%, transparent) 50%, transparent 70%); background-size: 200% 100%; animation: skeleton-shine 2.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .plan-price-pop, .plan-offer { animation: none; } }

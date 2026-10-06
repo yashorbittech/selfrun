@@ -15,7 +15,7 @@ export interface PlanFormValues {
   description: string;
   currency: string;
   /** One row per known billing cycle. Price in major units, up to 2 decimals. */
-  cycles: { id: BillingInterval; enabled: boolean; price: string }[];
+  cycles: { id: BillingInterval; enabled: boolean; price: string; /** The "usual" price shown struck through (blank = none). */ list: string }[];
   allModules: boolean;
   modules: string[];
   /** One highlight per line. */
@@ -29,6 +29,12 @@ export interface PlanFormValues {
   trialDays: string;
   active: boolean;
   isDefault: boolean;
+  /** Badge on the offer, e.g. "Launch offer". */
+  offerLabel: string;
+  /** Free for life: never billed, no trial. */
+  lifetimeFree: boolean;
+  /** Not sold online: "Contact support" instead of a price. */
+  contactSales: boolean;
 }
 
 export interface ParsedPlanForm {
@@ -45,6 +51,10 @@ export interface ParsedPlanForm {
   trialDays: number | null;
   active: boolean;
   isDefault: boolean;
+  listPrices: Partial<Record<BillingInterval, number>>;
+  offerLabel: string;
+  lifetimeFree: boolean;
+  contactSales: boolean;
 }
 
 /** Same keys as the server's `PlanFieldErrors` (id, price.<cycle>, limit.<key>, customLimits …). */
@@ -56,7 +66,7 @@ export function emptyPlanForm(currency: string): PlanFormValues {
     name: "",
     description: "",
     currency,
-    cycles: BILLING_INTERVALS.map((i) => ({ id: i.id, enabled: true, price: "" })),
+    cycles: BILLING_INTERVALS.map((i) => ({ id: i.id, enabled: true, price: "", list: "" })),
     allModules: false,
     modules: [],
     highlights: "",
@@ -66,6 +76,9 @@ export function emptyPlanForm(currency: string): PlanFormValues {
     trialDays: "",
     active: true,
     isDefault: false,
+    offerLabel: "",
+    lifetimeFree: false,
+    contactSales: false,
   };
 }
 
@@ -98,7 +111,8 @@ export function planToFormValues(plan: Plan): PlanFormValues {
     currency: plan.currency,
     cycles: BILLING_INTERVALS.map((i) => {
       const price = offered.includes(i.id) ? planPrice(plan, i.id) : (plan.prices?.[i.id] ?? null);
-      return { id: i.id, enabled: offered.includes(i.id), price: price === null ? "" : minorToMajor(price) };
+      const list = plan.listPrices?.[i.id];
+      return { id: i.id, enabled: offered.includes(i.id), price: price === null ? "" : minorToMajor(price), list: typeof list === "number" ? minorToMajor(list) : "" };
     }),
     allModules: plan.modules === "all",
     modules: plan.modules === "all" ? [] : [...plan.modules],
@@ -111,6 +125,9 @@ export function planToFormValues(plan: Plan): PlanFormValues {
     trialDays: plan.trialDays === null || plan.trialDays === undefined ? "" : String(plan.trialDays),
     active: plan.active,
     isDefault: plan.isDefault,
+    offerLabel: plan.offerLabel ?? "",
+    lifetimeFree: plan.lifetimeFree === true,
+    contactSales: plan.contactSales === true,
   };
 }
 
@@ -124,6 +141,7 @@ export function parsePlanForm(v: PlanFormValues): { input: ParsedPlanForm; error
   const cycles = Array.isArray(v.cycles) ? v.cycles : [];
   const intervals: BillingInterval[] = [];
   const prices: Partial<Record<BillingInterval, number>> = {};
+  const listPrices: Partial<Record<BillingInterval, number>> = {};
   for (const c of cycles) {
     if (!c || c.enabled !== true) continue;
     const id = String(c.id) as BillingInterval;
@@ -131,6 +149,12 @@ export function parsePlanForm(v: PlanFormValues): { input: ParsedPlanForm; error
     const amount = majorToMinor(String(c.price ?? ""));
     if (Number.isNaN(amount)) errors[`price.${id}`] = "Enter an amount, e.g. 999 or 999.50.";
     prices[id] = amount;
+    const listText = String(c.list ?? "").trim();
+    if (listText !== "") {
+      const lp = majorToMinor(listText);
+      if (Number.isNaN(lp)) errors[`listPrice.${id}`] = "Enter an amount, or leave blank.";
+      else listPrices[id] = lp;
+    }
   }
 
   const limits: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null };
@@ -171,6 +195,10 @@ export function parsePlanForm(v: PlanFormValues): { input: ParsedPlanForm; error
       trialDays: trial === "" ? null : toInt(trial),
       active: v.active === true,
       isDefault: v.isDefault === true,
+      listPrices,
+      offerLabel: String(v.offerLabel ?? ""),
+      lifetimeFree: v.lifetimeFree === true,
+      contactSales: v.contactSales === true,
     },
   };
 }

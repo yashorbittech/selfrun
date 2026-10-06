@@ -15,6 +15,12 @@ import { hasLiveSubscription } from "@/lib/platform/billing/subscriptions";
 import type { PlanOption } from "@/lib/platform/billing/billing-details";
 import { planPrice } from "@/lib/platform/billing/pricing";
 import BillingManager, { type BillingView } from "@/components/platform/billing/BillingManager";
+import PlanChooser from "@/components/billing/PlanChooser";
+import UsageTopups from "@/components/billing/UsageTopups";
+import { buildShowcase } from "@/lib/platform/billing/showcase";
+import { getUsageSummary } from "@/lib/platform/billing/usage-summary";
+import { reconcileTopups } from "@/lib/platform/billing/topups";
+import { topupQuoteAction, startTopupAction, confirmTopupAction } from "./actions";
 import {
   cancelSubscriptionAction,
   changePlanAction,
@@ -71,7 +77,11 @@ export default async function BillingSettingsPage() {
   ]);
   const pricing = sub.pricing && sub.pricing.planId === sub.planId && sub.pricing.interval === sub.interval ? sub.pricing : null;
 
-  const options: PlanOption[] = plans.map((p) => ({
+  // A payment whose checkout window was closed before it was confirmed is picked up here.
+  await reconcileTopups(companyId);
+  const usageRows = await getUsageSummary().catch(() => []);
+  const showcase = buildShowcase(plans);
+  const options: PlanOption[] = plans.filter((p) => !p.lifetimeFree && !p.contactSales).map((p) => ({
     id: p._id,
     name: p.name,
     description: p.description,
@@ -101,7 +111,23 @@ export default async function BillingSettingsPage() {
   };
 
   return (
-    <Shell title="Plan & billing" description="Your plan, payments through Razorpay, and the details printed on your GST invoices.">
+    <Shell title="Plan & billing" description="Your plan, what you have used, and the details printed on your GST invoices.">
+      <GlassCard>
+        <CardContent>
+          <h2 className="mb-1 text-base font-semibold">Choose a plan</h2>
+          <p className="mb-6 text-sm text-muted-foreground">More people means a bigger plan. Need more of anything else? Add it below with a one-time payment.</p>
+          <PlanChooser plans={showcase} currentPlanId={sub.planId} interval={sub.interval} />
+        </CardContent>
+      </GlassCard>
+      {usageRows.length > 0 && (
+        <GlassCard>
+          <CardContent>
+            <h2 className="mb-1 text-base font-semibold">Usage and extra</h2>
+            <p className="mb-4 text-sm text-muted-foreground">This month&apos;s use of every service in your plan. Add more any time; you pay once, for as much as you need.</p>
+            <UsageTopups rows={usageRows} canBuy={configured && sub.status !== "internal"} actions={{ quote: topupQuoteAction, start: startTopupAction, confirm: confirmTopupAction }} />
+          </CardContent>
+        </GlassCard>
+      )}
       <GlassCard>
         <CardContent>
           <BillingManager

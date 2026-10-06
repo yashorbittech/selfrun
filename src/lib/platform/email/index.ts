@@ -1,4 +1,6 @@
 import "server-only";
+import { emailBlockReason } from "@/lib/platform/billing/enforce";
+import { recordUsage } from "@/lib/platform/billing/usage";
 import { createConsoleEmailProvider } from "@/lib/platform/email/console";
 import { createResendEmailProvider } from "@/lib/platform/email/resend";
 import type { EmailMessage, EmailProvider, EmailResult } from "@/lib/platform/email/types";
@@ -56,11 +58,15 @@ export async function defaultFrom(): Promise<string> {
  */
 export async function sendEmail(message: Omit<EmailMessage, "from"> & { from?: string }): Promise<EmailResult> {
   try {
+    // A company's own monthly email allowance (never applied to the platform's own mail, which has no company).
+    const blocked = await emailBlockReason().catch(() => null);
+    if (blocked) return { ok: false, error: blocked };
     const own = await workspaceEmail().catch(() => null);
     const cfg = own ? null : await resolveEmailConfig();
     const provider = own ? own.provider : providerFor(cfg!);
     const result = await provider.send({ ...message, from: message.from ?? own?.from ?? cfg!.from });
     if (!result.ok) console.error(`[email:${provider.id}] send failed`, result.error);
+    else await recordUsage("emails", 1).catch(() => {});
     return result;
   } catch (err) {
     console.error("[email] send failed", err);

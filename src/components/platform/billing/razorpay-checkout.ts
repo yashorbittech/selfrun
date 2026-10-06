@@ -85,3 +85,33 @@ export async function openSubscriptionCheckout(opts: {
     rzp.open();
   });
 }
+
+
+// ── One-time orders (usage top-ups) ─────────────────────────────────────────────
+
+export interface RazorpayOrderResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+/** Opens Checkout for a one-time order; resolves with the handler response, or null when closed. */
+export async function openOrderCheckout(o: { key: string; orderId: string; amount: number; currency: string; name: string; description: string; prefill?: { name?: string; email?: string }; onPaymentFailed?: (message: string) => void }): Promise<RazorpayOrderResponse | null> {
+  await loadRazorpayCheckout();
+  return new Promise((resolve) => {
+    const Rz = window.Razorpay as unknown as new (options: Record<string, unknown>) => { open(): void; on(e: string, cb: (r: { error?: { description?: string } }) => void): void };
+    const rzp = new Rz({
+      key: o.key,
+      order_id: o.orderId,
+      amount: o.amount,
+      currency: o.currency,
+      name: o.name,
+      description: o.description,
+      prefill: o.prefill,
+      handler: (r: RazorpayOrderResponse) => resolve(r),
+      modal: { ondismiss: () => resolve(null) },
+    });
+    rzp.on("payment.failed", (r) => o.onPaymentFailed?.(r.error?.description ?? "The payment failed."));
+    rzp.open();
+  });
+}

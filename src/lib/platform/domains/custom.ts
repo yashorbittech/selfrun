@@ -1,4 +1,5 @@
 import "server-only";
+import { domainBlockReason } from "@/lib/platform/billing/enforce";
 import { randomBytes } from "node:crypto";
 import { resolveTxt } from "node:dns/promises";
 import { domainToASCII } from "node:url";
@@ -221,7 +222,11 @@ export async function addCustomDomain(raw: string): Promise<DomainActionResult> 
     if (existing.companyId !== companyId && !isStaleClaim(existing)) return { ok: false, error: TAKEN };
   }
 
-  if ((await domains.countDocuments({ companyId, kind: "custom" })) >= MAX_CUSTOM_DOMAINS) {
+  const connected = await domains.countDocuments({ companyId, kind: "custom" });
+  // The plan's (and any bought) custom-domain allowance.
+  const planBlock = await domainBlockReason(connected).catch(() => null);
+  if (planBlock) return { ok: false, error: planBlock };
+  if (connected >= MAX_CUSTOM_DOMAINS) {
     return { ok: false, error: `A workspace can connect up to ${MAX_CUSTOM_DOMAINS} custom domains. Remove one to add another.` };
   }
 
