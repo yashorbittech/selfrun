@@ -50,7 +50,7 @@ export async function getPwaIdentity(): Promise<PwaIdentity | null> {
   if (saas) {
     return {
       scope: "product-app",
-      name: `${SAAS_BRAND.name} — Workspace`,
+      name: SAAS_BRAND.name,
       shortName: "SelfRun",
       description: "Run SelfRun Business: companies, plans, billing and support.",
       themeColor: SAAS_THEME.colors.primary,
@@ -106,7 +106,7 @@ export async function buildCompanyIdentity(): Promise<PwaIdentity> {
 
   return {
     scope: "company-app",
-    name: settings.name || clip(`${company} — Workspace`, 45),
+    name: settings.name || clip(company, 45),
     shortName: settings.shortName || clip(company, 12),
     description: settings.description || `${company}: your team's workspace and panels.`,
     themeColor,

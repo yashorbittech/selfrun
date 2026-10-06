@@ -7,7 +7,7 @@ export interface ColorChoice {
 }
 
 export interface AppSettings {
-  /** Full app name (install dialog, app switcher). Empty = "<Company> — Workspace". */
+  /** Full app name (install dialog, app switcher). Empty = the company name. */
   name: string;
   /** Name under the icon (keep it short: phones show ~12 characters). Empty = the company name. */
   shortName: string;

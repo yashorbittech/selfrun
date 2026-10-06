@@ -4,7 +4,8 @@ import { PanelHeading } from "@/components/platform/PanelsProvider";
 import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Sparkles, Bell } from "lucide-react";
+import { LayoutGrid, LogOut, Menu, Sparkles } from "lucide-react";
+import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import ThemeToggle from "@/components/lms/ThemeToggle";
@@ -15,7 +16,7 @@ import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import PanelBellLink from "@/components/platform/PanelBellLink";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 
-export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags }) {
+export default function PlatformTopbar({ flags, email }: { flags: PlatformNavFlags; email: string }) {
   const [open, setOpen] = useState(false);
   const [aiOpen, setAiOpen] = useAskAiOpen();
   const [bellOpen, setBellOpen] = useState(false);
@@ -25,17 +26,31 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags }) {
         <Menu className="size-5" />
       </Button>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-72 p-0 sm:max-w-72">
+        <SheetContent side="left" className="flex w-72 flex-col p-0 sm:max-w-72">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only">Platform Panel navigation menu</SheetDescription>
-          <div className="flex h-14 items-center gap-2 border-b border-border/60 px-4">
+          <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
             <BrandMark className="size-6 shrink-0" />
             <span className="text-sm font-bold">
               <BrandName />
             </span>
           </div>
-          <div className="overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto">
             <PlatformSidebar flags={flags} onNavigate={() => setOpen(false)} />
+          </div>
+          {/* The signed-in person, as in the desktop sidebar's footer. */}
+          <div className="shrink-0 border-t border-border/60 p-3">
+            <p className="mb-2 truncate px-1 text-xs text-muted-foreground" title={email}>{email}</p>
+            <div className="flex items-center gap-1">
+              <Link href="/workspace" onClick={() => setOpen(false)} className="flex flex-1 items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-primary/5 hover:text-primary">
+                <LayoutGrid className="size-4 shrink-0" /> Workspace
+              </Link>
+              <form action={hubLogoutAction}>
+                <button type="submit" className="flex items-center gap-2 rounded-lg px-2 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive">
+                  <LogOut className="size-4 shrink-0" /> Sign out
+                </button>
+              </form>
+            </div>
           </div>
         </SheetContent>
       </Sheet>

@@ -18,7 +18,7 @@ export default function HubTopbar({ email, nav, unread = 0 }: { email: string; n
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <HubMobileSidebar nav={nav} />
       <PanelHeading panel="workspace" fallbackTitle="Workspace" fallbackDescription="Your panels, analytics & settings" />
-      <div className="flex min-w-0 flex-1 justify-center">
+      <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">

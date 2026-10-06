@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AlertTriangle, Check, CheckCircle2, Clock, Copy, Download, ExternalLink, Globe, Laptop, Loader2, Monitor, PackageOpen, RefreshCw, Smartphone, Terminal, Wand2 } from "lucide-react";
+import PanelTabs from "@/components/platform/panel/PanelTabs";
 import GlassCard from "@/components/lms/GlassCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -265,17 +266,12 @@ export default function AppsTabs({ initial, brand, qr, actions }: { initial: App
   return (
     <div className="space-y-4">
       {/* tabs */}
-      <div role="tablist" aria-label="Apps" className="grid gap-2 sm:grid-cols-3">
-        {TABS.map((t) => {
-          const on = tab === t.key;
-          return (
-            <button key={t.key} type="button" role="tab" aria-selected={on} onClick={() => choose(t.key)} className={`flex items-center gap-3 rounded-2xl border p-3.5 text-left transition-colors ${on ? "border-primary bg-primary/5 shadow-sm" : "border-border bg-card hover:bg-muted/50"}`}>
-              <span className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${on ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}><t.icon className="size-5" /></span>
-              <span className="min-w-0"><span className="block text-sm font-semibold">{t.label}</span><span className="block text-xs text-muted-foreground">{t.sub}</span></span>
-            </button>
-          );
-        })}
-      </div>
+      <PanelTabs
+        label="Apps"
+        active={tab}
+        onSelect={(k) => choose(k as TabKey)}
+        tabs={TABS.map((t) => ({ key: t.key, label: t.label, icon: <t.icon className="size-4" />, title: t.sub }))}
+      />
 
       {/* 1. PWA */}
       {tab === "pwa" ? (

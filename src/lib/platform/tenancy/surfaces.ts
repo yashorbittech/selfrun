@@ -37,7 +37,7 @@ const PANEL_SEGMENTS = new Set([
 ]);
 
 /** Public links that work on either host (payment links, certificate verification) and internal rewrite targets. */
-const SHARED_SEGMENTS = new Set(["pay", "verify", "panel-unavailable", "workspace-not-found", "maintenance"]);
+const SHARED_SEGMENTS = new Set(["pay", "verify", "panel-unavailable", "workspace-not-found", "maintenance", "offline-shell"]);
 
 const firstSegment = (pathname: string) => pathname.split("/")[1] ?? "";
 

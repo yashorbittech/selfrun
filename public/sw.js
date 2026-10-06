@@ -5,13 +5,58 @@
  *  - Speed: immutable build files (/_next/static/) and the app icons are cached.
  *  - Push: shows notifications, opens the right page on tap, and re-subscribes if the browser rotates the subscription.
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `app-static-${VERSION}`;
 const SHELL_CACHE = `app-shell-${VERSION}`;
-const OFFLINE_URL = "/offline.html";
+// The offline page is rendered by the site itself (so it carries the company's logo, name and colours); the plain static page is the
+// last resort. Both are kept in the shell cache, and the dynamic one is refreshed whenever it is older than a day.
+const OFFLINE_URL = "/offline-shell";
+const OFFLINE_FALLBACK_URL = "/offline.html";
+const OFFLINE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+/** Keeps the themed offline page, and what it needs to draw without a network (its stylesheets and logo), up to date. */
+async function cacheOfflinePage() {
+  const shell = await caches.open(SHELL_CACHE);
+  const res = await fetch(OFFLINE_URL, { cache: "no-store", credentials: "same-origin" });
+  if (!res.ok) throw new Error("offline page unavailable");
+  // Keep the page as plain HTML + CSS: with no network its script bundles cannot load, and a page that tries to hydrate would end in
+  // the framework's "couldn't load" error. Only the page's own tiny retry script is kept (not the framework's data scripts, which also quote it).
+  const html = (await res.text()).replace(/<script\b[^>]*>([\s\S]*?)<\/script>/g, (m, body) => (body.includes("offline-retry") && !body.includes("__next_f") ? m : ""));
+  await shell.put(OFFLINE_URL, new Response(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8", "x-cached-at": String(Date.now()) } }));
+  const statics = await caches.open(STATIC_CACHE);
+  const css = [...html.matchAll(/href="(\/_next\/static\/[^"]+\.css[^"]*)"/g)].map((m) => m[1]);
+  await Promise.all(css.map((u) => statics.add(u).catch(() => {})));
+  const logos = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&")).filter((u) => !u.startsWith("data:")).slice(0, 3);
+  await Promise.all(
+    logos.map(async (u) => {
+      // fetch + put (not add): a logo on another host comes back opaque, which `add` refuses but `put` keeps.
+      const r = new Request(u, { mode: u.startsWith("/") ? "same-origin" : "no-cors" });
+      const got = await fetch(r).catch(() => null);
+      if (got && (got.ok || got.type === "opaque")) await statics.put(r, got);
+    }),
+  );
+}
+
+async function offlineResponse() {
+  const shell = await caches.open(SHELL_CACHE);
+  return (await shell.match(OFFLINE_URL)) || (await shell.match(OFFLINE_FALLBACK_URL)) || Response.error();
+}
+
+async function offlineIsStale() {
+  const hit = await (await caches.open(SHELL_CACHE)).match(OFFLINE_URL);
+  const at = Number(hit?.headers.get("x-cached-at") ?? 0);
+  return !at || Date.now() - at > OFFLINE_MAX_AGE_MS;
+}
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.add(new Request(OFFLINE_URL, { cache: "reload" }))).then(() => self.skipWaiting()));
+  event.waitUntil(
+    (async () => {
+      const shell = await caches.open(SHELL_CACHE);
+      await shell.add(new Request(OFFLINE_FALLBACK_URL, { cache: "reload" })).catch(() => {});
+      await cacheOfflinePage().catch(() => {});
+      await self.skipWaiting();
+    })(),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -32,6 +77,11 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+  // Images (the company's logo, wherever it is stored): network first; offline, the copy kept for the offline page.
+  if (req.destination === "image" && !url.pathname.startsWith("/_next/")) {
+    event.respondWith(fetch(req).catch(async () => (await (await caches.open(STATIC_CACHE)).match(req)) || Response.error()));
+    return;
+  }
   if (url.origin !== self.location.origin) return;
 
   // Pages: network only; the offline page when the network is down.
@@ -39,9 +89,12 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       (async () => {
         try {
-          return (await event.preloadResponse) || (await fetch(req));
+          const res = (await event.preloadResponse) || (await fetch(req));
+          // Online and fine: keep the offline page fresh in the background (at most once a day).
+          if (res.ok) event.waitUntil(offlineIsStale().then((stale) => stale && cacheOfflinePage()).catch(() => {}));
+          return res;
         } catch {
-          return (await (await caches.open(SHELL_CACHE)).match(OFFLINE_URL)) || Response.error();
+          return offlineResponse();
         }
       })(),
     );

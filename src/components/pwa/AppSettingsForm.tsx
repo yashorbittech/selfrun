@@ -51,7 +51,7 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
   const set = (patch: Partial<AppSettings>) => setS((x) => ({ ...x, ...patch }));
 
   // ---- what the app will look like (mirrors lib/pwa/identity.ts and icon.tsx)
-  const name = s.name || `${company.name} — Workspace`;
+  const name = s.name || company.name;
   const shortName = s.shortName || company.name.slice(0, 12);
   const themeColor = s.themeColor.mode === "custom" ? s.themeColor.value : theme.primary;
   const splashBg = s.backgroundColor.mode === "custom" ? s.backgroundColor.value : theme.background;
@@ -107,7 +107,7 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="app-name">App name</Label>
-              <Input id="app-name" maxLength={45} value={s.name} placeholder={`${company.name} — Workspace`} onChange={(e) => set({ name: e.target.value })} />
+              <Input id="app-name" maxLength={45} value={s.name} placeholder={company.name} onChange={(e) => set({ name: e.target.value })} />
               <p className="text-xs text-muted-foreground">Shown in the install dialog and app switcher. Empty = automatic.</p>
             </div>
             <div className="space-y-1.5">

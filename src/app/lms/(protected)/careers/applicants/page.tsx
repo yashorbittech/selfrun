@@ -2,6 +2,7 @@ import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Breadcrumbs from "@/components/lms/Breadcrumbs";
 import CareerApplicationsDataTable from "@/components/lms/CareerApplicationsDataTable";
 import CareersExportButton from "@/components/lms/CareersExportButton";
+import RestoreAccountsButton from "./RestoreAccountsButton";
 import { searchApplications, getAllJobPositions } from "@/lib/career-applications";
 import { isValidCareerApplicationStatus } from "@/lib/career-application-status";
 import type { SerializedCareerApplication } from "@/components/lms/types";
@@ -71,7 +72,7 @@ export default async function ApplicantsListPage({
         breadcrumbs={[{ label: "Dashboard", href: "/lms" }, { label: "Applicants" }]}
         title={<>Applicants</>}
         description={<>{total} application{total === 1 ? "" : "s"}</>}
-        actions={<><CareersExportButton
+        actions={<><RestoreAccountsButton /><CareersExportButton
           params={{
             search: sp.search,
             status,

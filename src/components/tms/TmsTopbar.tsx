@@ -31,7 +31,7 @@ export default function TmsTopbar({
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <TmsMobileSidebar roles={roles} permissionOverrides={permissionOverrides} studentId={studentId} />
       <PanelHeading panel="tms" fallbackTitle="Training Management" fallbackDescription="Courses, assessments & learning paths" />
-      <div className="flex min-w-0 flex-1 justify-center">
+      <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">

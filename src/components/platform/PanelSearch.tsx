@@ -125,12 +125,14 @@ export default function PanelSearch({ variant = "pill" }: { variant?: "pill" | "
         onClick={() => setOpen(true)}
         aria-label={`Search ${name}`}
         className={cn(
-          "flex h-9 w-full items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground",
-          variant === "pill" ? "max-w-sm" : "h-10 rounded-xl bg-background sm:w-80 sm:max-w-full",
+          "flex items-center gap-2 border border-border/60 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground",
+          // Phones: a round icon button like the other header icons. md and up: the wide pill (or field).
+          "size-9 shrink-0 justify-center rounded-full bg-muted/30 hover:bg-primary/10 hover:text-primary",
+          variant === "pill" ? "md:h-9 md:w-full md:max-w-sm md:justify-start md:bg-muted/40 md:px-3" : "md:h-10 md:w-80 md:max-w-full md:justify-start md:rounded-xl md:bg-background md:px-3",
         )}
       >
         <Search className="size-4 shrink-0" />
-        <span className="truncate">Search {name} pages, records…</span>
+        <span className="hidden truncate md:inline">Search {name} pages, records…</span>
         <kbd className="ml-auto hidden rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] sm:inline">⌘K</kbd>
       </button>
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setQuery(""); setRecords([]); } }}>

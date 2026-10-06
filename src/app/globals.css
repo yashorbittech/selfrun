@@ -446,3 +446,207 @@ html[data-ui="modern"]:not(.dark) body > main :is(#faqs, [data-site-cta]) {
 html[data-ui="modern"].dark body > main :is(#faqs, [data-site-cta]) {
   background-color: color-mix(in oklch, var(--section-bg) 82%, black);
 }
+
+/* Indeterminate progress bar of the panel loading screen and the navigation indicator. */
+@keyframes app-loading {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
+
+/* App-opening screen: a light sweep over placeholders, a gentle rise-in, a turning ring and a fading message. */
+@keyframes skeleton-shine {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton-shine {
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in oklab, var(--primary) 12%, var(--background)) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: skeleton-shine 1.8s ease-in-out infinite;
+}
+@keyframes app-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.app-rise { animation: app-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes app-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.app-fade { animation: app-fade 0.35s ease-out both; }
+@keyframes app-ring { to { transform: rotate(360deg); } }
+.app-ring { animation: app-ring 0.9s linear infinite; }
+
+/* Brand splash: the mark pops in, a halo breathes, the aurora drifts slowly. */
+@keyframes app-pop {
+  0% { opacity: 0; transform: scale(0.82); }
+  60% { transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.app-pop { animation: app-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes app-halo {
+  0%, 100% { opacity: 0.55; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+.app-halo { animation: app-halo 2.4s ease-in-out infinite; }
+@keyframes app-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(60px, 40px) scale(1.12); }
+}
+.app-drift { animation: app-drift 14s ease-in-out infinite; }
+
+/* The faint grid behind the brand splash. */
+.app-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--border) 45%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 55% 50% at 50% 50%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(ellipse 55% 50% at 50% 50%, #000 20%, transparent 100%);
+}
+
+/* Brand splash extras: tilt-able tile, orbiting lights, a periodic light sweep across the logo tile. */
+.app-tile {
+  transform: perspective(500px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.18s ease-out;
+  will-change: transform;
+}
+@keyframes app-orbit { to { transform: rotate(360deg); } }
+.app-orbit { animation: app-orbit 4.5s linear infinite; }
+@keyframes app-sweep {
+  0%, 55% { transform: translateX(-130%) skewX(-18deg); }
+  100% { transform: translateX(130%) skewX(-18deg); }
+}
+.app-sweep {
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, white 55%, transparent), transparent);
+  width: 45%;
+  animation: app-sweep 3.2s ease-in-out infinite;
+}
+
+/* The cartoon runner of the app-opening screen (components/ui/RunnerLoader). One loop = 3 s: the crate slides in, the runner hops it. */
+.run-thigh, .run-shin, .run-arm, .run-forearm { transform-origin: 0 0; transform-box: view-box; animation-duration: 0.6s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+.run-thigh { animation-name: run-thigh; }
+.run-shin { animation-name: run-shin; }
+.run-arm { animation-name: run-arm; }
+.run-forearm { animation-name: run-forearm; }
+@keyframes run-thigh { 0%, 100% { transform: rotate(38deg); } 50% { transform: rotate(-52deg); } }
+@keyframes run-shin { 0%, 100% { transform: rotate(14deg); } 25% { transform: rotate(92deg); } 50% { transform: rotate(8deg); } 75% { transform: rotate(24deg); } }
+@keyframes run-arm { 0%, 100% { transform: rotate(-58deg); } 50% { transform: rotate(48deg); } }
+@keyframes run-forearm { 0%, 100% { transform: rotate(-78deg); } 50% { transform: rotate(-52deg); } }
+.run-bob { animation: run-bob 0.3s ease-in-out infinite; }
+@keyframes run-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3.5px); } }
+.run-jump { animation: run-jump 3s linear infinite; transform-box: view-box; }
+@keyframes run-jump {
+  0%, 50% { transform: translateY(0); animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1); }
+  59% { transform: translateY(-30px); animation-timing-function: cubic-bezier(0.7, 0, 0.8, 0.4); }
+  68%, 100% { transform: translateY(0); }
+}
+.run-shadow { transform-box: fill-box; transform-origin: center; animation: run-shadow 3s linear infinite; }
+@keyframes run-shadow { 0%, 50%, 68%, 100% { transform: scaleX(1); opacity: 1; } 59% { transform: scaleX(0.55); opacity: 0.5; } }
+.run-crate { animation: run-crate 3s linear infinite; }
+@keyframes run-crate { from { transform: translateX(350px); } to { transform: translateX(-40px); } }
+.run-ground { animation: run-ground 0.5s linear infinite; }
+@keyframes run-ground { to { stroke-dashoffset: -30; } }
+.run-dust { transform-box: fill-box; transform-origin: center; animation: run-dust 0.6s ease-out infinite; }
+@keyframes run-dust { 0% { transform: translate(0, 0) scale(0.4); opacity: 0.8; } 100% { transform: translate(-26px, -6px) scale(1.7); opacity: 0; } }
+.run-speed { animation: run-speed 0.5s linear infinite; }
+@keyframes run-speed { 0% { transform: translateX(10px); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateX(-22px); opacity: 0; } }
+.run-cloud { animation: run-cloud 9s linear infinite; }
+@keyframes run-cloud { from { transform: translateX(0); } to { transform: translateX(-380px); } }
+
+/* "Lost" scene of the cartoon runner (404 / no workspace): it stands, scratches its head, wonders; the old signpost sways. */
+.run-wonder { animation: run-wonder 2.6s ease-in-out infinite; transform-box: view-box; transform-origin: 0 92px; }
+@keyframes run-wonder { 0%, 100% { transform: rotate(0deg) translateY(0); } 50% { transform: rotate(-2deg) translateY(-1.5px); } }
+.run-scratch { animation: run-scratch 0.5s ease-in-out infinite alternate; transform-origin: 0 0; transform-box: view-box; }
+@keyframes run-scratch { from { transform: rotate(-146deg); } to { transform: rotate(-158deg); } }
+.run-scratch-fore { animation: run-scratch-fore 0.5s ease-in-out infinite alternate; transform-origin: 0 0; transform-box: view-box; }
+@keyframes run-scratch-fore { from { transform: rotate(-52deg); } to { transform: rotate(-30deg); } }
+.run-wonder-q { animation: run-q 2.1s ease-out infinite; transform-box: fill-box; transform-origin: center; opacity: 0; }
+@keyframes run-q { 0% { transform: translateY(8px) scale(0.5) rotate(-12deg); opacity: 0; } 25% { opacity: 1; } 100% { transform: translateY(-34px) scale(1.15) rotate(10deg); opacity: 0; } }
+.run-sign { transform-origin: 0 92px; transform-box: view-box; animation: run-sign 3.4s ease-in-out infinite; }
+@keyframes run-sign { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.6deg); } }
+
+/* Cartoon runner paint: plain classes (no dependency on utility-class generation), all from the theme's tokens. */
+.rl { display: block; width: min(var(--rl-w, 22rem), 88vw); height: auto; overflow: visible; }
+.rl-f-primary { fill: var(--primary); }
+.rl-s-primary { stroke: var(--primary); }
+.rl-f-primary-10 { fill: color-mix(in oklab, var(--primary) 10%, transparent); }
+.rl-s-primary-10 { stroke: color-mix(in oklab, var(--primary) 10%, transparent); }
+.rl-f-primary-15 { fill: color-mix(in oklab, var(--primary) 15%, transparent); }
+.rl-s-primary-15 { stroke: color-mix(in oklab, var(--primary) 15%, transparent); }
+.rl-f-primary-40 { fill: color-mix(in oklab, var(--primary) 40%, transparent); }
+.rl-s-primary-40 { stroke: color-mix(in oklab, var(--primary) 40%, transparent); }
+.rl-f-primary-50 { fill: color-mix(in oklab, var(--primary) 50%, transparent); }
+.rl-s-primary-50 { stroke: color-mix(in oklab, var(--primary) 50%, transparent); }
+.rl-f-primary-60 { fill: color-mix(in oklab, var(--primary) 60%, transparent); }
+.rl-s-primary-60 { stroke: color-mix(in oklab, var(--primary) 60%, transparent); }
+.rl-f-foreground { fill: var(--foreground); }
+.rl-s-foreground { stroke: var(--foreground); }
+.rl-f-foreground-10 { fill: color-mix(in oklab, var(--foreground) 10%, transparent); }
+.rl-s-foreground-10 { stroke: color-mix(in oklab, var(--foreground) 10%, transparent); }
+.rl-f-foreground-15 { fill: color-mix(in oklab, var(--foreground) 15%, transparent); }
+.rl-s-foreground-15 { stroke: color-mix(in oklab, var(--foreground) 15%, transparent); }
+.rl-f-foreground-40 { fill: color-mix(in oklab, var(--foreground) 40%, transparent); }
+.rl-s-foreground-40 { stroke: color-mix(in oklab, var(--foreground) 40%, transparent); }
+.rl-f-foreground-50 { fill: color-mix(in oklab, var(--foreground) 50%, transparent); }
+.rl-s-foreground-50 { stroke: color-mix(in oklab, var(--foreground) 50%, transparent); }
+.rl-f-foreground-60 { fill: color-mix(in oklab, var(--foreground) 60%, transparent); }
+.rl-s-foreground-60 { stroke: color-mix(in oklab, var(--foreground) 60%, transparent); }
+.rl-f-muted-foreground { fill: var(--muted-foreground); }
+.rl-s-muted-foreground { stroke: var(--muted-foreground); }
+.rl-f-muted-foreground-10 { fill: color-mix(in oklab, var(--muted-foreground) 10%, transparent); }
+.rl-s-muted-foreground-10 { stroke: color-mix(in oklab, var(--muted-foreground) 10%, transparent); }
+.rl-f-muted-foreground-15 { fill: color-mix(in oklab, var(--muted-foreground) 15%, transparent); }
+.rl-s-muted-foreground-15 { stroke: color-mix(in oklab, var(--muted-foreground) 15%, transparent); }
+.rl-f-muted-foreground-40 { fill: color-mix(in oklab, var(--muted-foreground) 40%, transparent); }
+.rl-s-muted-foreground-40 { stroke: color-mix(in oklab, var(--muted-foreground) 40%, transparent); }
+.rl-f-muted-foreground-50 { fill: color-mix(in oklab, var(--muted-foreground) 50%, transparent); }
+.rl-s-muted-foreground-50 { stroke: color-mix(in oklab, var(--muted-foreground) 50%, transparent); }
+.rl-f-muted-foreground-60 { fill: color-mix(in oklab, var(--muted-foreground) 60%, transparent); }
+.rl-s-muted-foreground-60 { stroke: color-mix(in oklab, var(--muted-foreground) 60%, transparent); }
+.rl-f-card { fill: var(--card); }
+.rl-s-card { stroke: var(--card); }
+.rl-f-card-10 { fill: color-mix(in oklab, var(--card) 10%, transparent); }
+.rl-s-card-10 { stroke: color-mix(in oklab, var(--card) 10%, transparent); }
+.rl-f-card-15 { fill: color-mix(in oklab, var(--card) 15%, transparent); }
+.rl-s-card-15 { stroke: color-mix(in oklab, var(--card) 15%, transparent); }
+.rl-f-card-40 { fill: color-mix(in oklab, var(--card) 40%, transparent); }
+.rl-s-card-40 { stroke: color-mix(in oklab, var(--card) 40%, transparent); }
+.rl-f-card-50 { fill: color-mix(in oklab, var(--card) 50%, transparent); }
+.rl-s-card-50 { stroke: color-mix(in oklab, var(--card) 50%, transparent); }
+.rl-f-card-60 { fill: color-mix(in oklab, var(--card) 60%, transparent); }
+.rl-s-card-60 { stroke: color-mix(in oklab, var(--card) 60%, transparent); }
+.rl-f-border { fill: var(--border); }
+.rl-s-border { stroke: var(--border); }
+.rl-f-border-10 { fill: color-mix(in oklab, var(--border) 10%, transparent); }
+.rl-s-border-10 { stroke: color-mix(in oklab, var(--border) 10%, transparent); }
+.rl-f-border-15 { fill: color-mix(in oklab, var(--border) 15%, transparent); }
+.rl-s-border-15 { stroke: color-mix(in oklab, var(--border) 15%, transparent); }
+.rl-f-border-40 { fill: color-mix(in oklab, var(--border) 40%, transparent); }
+.rl-s-border-40 { stroke: color-mix(in oklab, var(--border) 40%, transparent); }
+.rl-f-border-50 { fill: color-mix(in oklab, var(--border) 50%, transparent); }
+.rl-s-border-50 { stroke: color-mix(in oklab, var(--border) 50%, transparent); }
+.rl-f-border-60 { fill: color-mix(in oklab, var(--border) 60%, transparent); }
+.rl-s-border-60 { stroke: color-mix(in oklab, var(--border) 60%, transparent); }
+
+/* Brand stage backdrop (components/ui/BrandBackdrop): drifting glows and a grid, kept as plain CSS so it never depends on utility generation. */
+.app-backdrop { pointer-events: none; position: absolute; inset: 0; overflow: hidden; }
+.app-glow { position: absolute; border-radius: 9999px; filter: blur(64px); }
+.app-glow-a { left: -6rem; top: -6rem; width: 26rem; height: 26rem; background: color-mix(in oklab, var(--primary) 20%, transparent); animation: app-drift 14s ease-in-out infinite; }
+.app-glow-b { right: -5rem; bottom: -8rem; width: 30rem; height: 30rem; background: color-mix(in oklab, var(--primary) 15%, transparent); animation: app-drift 14s ease-in-out -6s infinite reverse; }
+
+/*
+ * Reduced motion: the loading and not-found screens stay alive (the runner keeps running in place, the ring turns, the status moves on:
+ * small, contained movement) but everything that travels across the screen or jumps is switched off — the drifting glows and clouds, the
+ * orbiting lights, the hop over the crate (the crate is not drawn).
+ */
+@media (prefers-reduced-motion: reduce) {
+  .app-drift, .app-glow, .run-cloud, .app-orbit, .run-jump, .run-shadow { animation: none; }
+  .run-crate { display: none; }
+}
+
+/* Instant feedback on a click (components/pwa/NavigationProgress): a bar runs along the top and a pill at the bottom says "Opening…". */
+.app-nav-bar { pointer-events: none; position: fixed; inset: 0 0 auto 0; z-index: 10000; height: 3px; overflow: hidden; background: color-mix(in oklab, var(--primary) 12%, transparent); }
+.app-nav-bar-fill { height: 100%; width: 35%; border-radius: 9999px; background: var(--primary); animation: app-loading 1s ease-in-out infinite; }
+.app-nav-pill { pointer-events: none; position: fixed; bottom: 22px; left: 50%; z-index: 10000; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); padding: 6px 14px 6px 10px; border-radius: 9999px; border: 1px solid color-mix(in oklab, var(--border) 70%, transparent); background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--foreground); font-size: 12px; font-weight: 600; box-shadow: 0 8px 24px color-mix(in oklab, var(--primary) 14%, transparent); backdrop-filter: blur(8px); animation: app-nav-pill 0.25s ease-out 0.12s both; }
+.app-nav-spin { width: 14px; height: 14px; border-radius: 9999px; border: 2px solid color-mix(in oklab, var(--primary) 25%, transparent); border-top-color: var(--primary); animation: app-ring 0.7s linear infinite; }
+@keyframes app-nav-pill { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }

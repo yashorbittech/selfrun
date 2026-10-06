@@ -37,7 +37,7 @@ export default function MessengerTopbar({
         unreadNotifications={unread}
       />
       <PanelHeading panel="messenger" fallbackTitle="Team Communication" fallbackDescription="Messages, channels & team collaboration" />
-      <div className="flex min-w-0 flex-1 justify-center">
+      <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">

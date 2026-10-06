@@ -19,12 +19,12 @@ export function usePanelMeta(key: string): PanelMeta | null {
 }
 
 /** The title + description every panel shows in its top bar — read from the Panel Registry, so one edit changes it everywhere. */
-export function PanelHeading({ panel, fallbackTitle, fallbackDescription, className = "min-w-0" }: { panel: string; fallbackTitle?: string; fallbackDescription?: string; className?: string }) {
+export function PanelHeading({ panel, fallbackTitle, fallbackDescription, className = "min-w-0 flex-1 md:flex-none" }: { panel: string; fallbackTitle?: string; fallbackDescription?: string; className?: string }) {
   const meta = usePanelMeta(panel);
   return (
     <div className={className}>
-      <p className="truncate text-sm font-semibold text-foreground">{meta?.headerTitle ?? fallbackTitle ?? panel}</p>
-      <p className="truncate text-[11px] text-muted-foreground">{meta?.headerDescription ?? fallbackDescription ?? ""}</p>
+      <p className="truncate text-sm font-semibold text-foreground" title={meta?.headerTitle ?? fallbackTitle ?? panel}>{meta?.headerTitle ?? fallbackTitle ?? panel}</p>
+      <p className="truncate text-[11px] text-muted-foreground" title={meta?.headerDescription ?? fallbackDescription ?? ""}>{meta?.headerDescription ?? fallbackDescription ?? ""}</p>
     </div>
   );
 }

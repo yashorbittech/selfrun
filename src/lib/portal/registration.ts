@@ -4,6 +4,7 @@ import { externalUsers } from "@/lib/portal-auth";
 import { newId } from "@/lib/portal/db";
 import { matchDomainRecord } from "@/lib/portal/identity";
 import { recordPortalAudit } from "@/lib/portal/audit";
+import { adoptOrphanLeads, restoreAccountFor } from "@/lib/portal/repair";
 import { notifyPortalUser } from "@/lib/portal/notifications";
 import { PORTAL_ROLE_META } from "@/lib/portal-roles";
 import { awardSignupBonus } from "@/lib/wallet/signup-bonus";
@@ -60,6 +61,8 @@ export async function registerExternalUser(
     referredByCode: referralCode,
   });
 
+  // History already on file for this person (a lead whose account was missing) belongs to the new account.
+  await adoptOrphanLeads(_id, email).catch((e) => console.error("[portal] adopt leads failed", e));
   await recordPortalAudit({ actorId: _id, action: "register", entity: "account", entityId: _id, summary: `role=${match.role}` });
   try {
     await awardSignupBonus(_id, match.role);
@@ -82,7 +85,8 @@ export async function registerExternalUser(
 export async function verifyForReset(emailRaw: string, phoneRaw: string): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
   const email = emailRaw.trim().toLowerCase();
   const users = await externalUsers();
-  const user = await users.findOne({ email });
+  // A lead on file without its account (data brought over from elsewhere): the same email + phone restores it, so reset can finish.
+  const user = (await users.findOne({ email })) ?? (await restoreAccountFor(emailRaw, phoneRaw).catch(() => null));
   // Generic message either way so we don't reveal which emails have accounts.
   const GENERIC = "If that email and phone match an account, you can set a new password below.";
   if (!user) return { ok: false, error: GENERIC };

@@ -84,6 +84,24 @@ export async function loginAsPortalUserAction(
     user = await col.findOne({ email: opts.email.trim().toLowerCase() });
   }
 
+  // Staff are signed in, and the person is on file (a lead or an application) but their account is missing — e.g. data brought over
+  // from another system without it. Put the account back (no password is set; they choose theirs via "Forgot password").
+  if (!user) {
+    const { restoreAccountFor } = await import("@/lib/portal/repair");
+    let email = opts.email ?? null;
+    let phone: string | null = null;
+    if (targetLeadId) {
+      const { getLeadRecord } = await import("@/lib/lead-management/records");
+      const lead = await getLeadRecord(targetLeadId).catch(() => null);
+      if (lead) { email = lead.email; phone = lead.phone; }
+    }
+    if ((!email || !phone) && opts.applicationId) {
+      const { getApplication } = await import("@/lib/career-applications");
+      const app = await getApplication(opts.applicationId).catch(() => null);
+      if (app) { email = app.email; phone = app.phone; }
+    }
+    if (email && phone) user = await restoreAccountFor(email, phone).catch(() => null);
+  }
   if (!user) return { ok: false, error: "No portal account found for this user." };
   if (user.status === "suspended") {
     return { ok: false, error: "This portal account is suspended and cannot be accessed." };

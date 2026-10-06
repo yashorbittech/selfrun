@@ -134,7 +134,8 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
         </GlassCard>
 
         <div className="space-y-4">
-          <GlassCard interactive={false}>
+          {/* `h-auto`: a GlassCard fills its parent's height by default, which inside this stacked column made the first card cover the second. */}
+          <GlassCard interactive={false} containerClassName="h-auto">
             <CardHeader>
               <CardTitle>Status</CardTitle>
             </CardHeader>
@@ -143,7 +144,7 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
               <DeleteButton id={id} />
             </CardContent>
           </GlassCard>
-          <GlassCard interactive={false}>
+          <GlassCard interactive={false} containerClassName="h-auto">
             <CardHeader>
               <CardTitle className="text-base">At a glance</CardTitle>
             </CardHeader>
@@ -375,13 +376,24 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
         title={<>{application.name}</>}
         description={<>{`${application.positionTitle} · applied ${formatDateTime(application.createdAt)}${lead ? ` · ${lead.code}` : ""}`}</>}
         actions={<><div className="flex flex-wrap items-center gap-2">
-          <LoginAsPortalUserButton
-            applicationId={id}
-            leadId={lead?.id}
-            externalUserId={account?.id}
-            displayName={application.name}
-            variant="full"
-          />
+          {account ? (
+            <LoginAsPortalUserButton
+              applicationId={id}
+              leadId={lead?.id}
+              externalUserId={account.id}
+              email={application.email}
+              displayName={application.name}
+              variant="full"
+            />
+          ) : (
+            // Signing in as someone needs their portal account, which exists once they register on the portal.
+            <span
+              className="inline-flex h-8 cursor-not-allowed items-center gap-1.5 rounded-lg border border-dashed border-border px-2.5 text-xs text-muted-foreground"
+              title="This applicant has not registered on the portal yet, so there is no account to sign in to."
+            >
+              No portal account yet
+            </span>
+          )}
           <CareerStatusBadge status={application.status} />
         </div></>}
       />

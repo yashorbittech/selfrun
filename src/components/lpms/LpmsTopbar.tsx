@@ -10,10 +10,11 @@ import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { LpmsNavFlags } from "@/components/lpms/LpmsSidebar";
+import LpmsMobileSidebar from "@/components/lpms/LpmsMobileSidebar";
 
 export default function LpmsTopbar({
   roles: _roles,
-  flags: _flags,
+  flags,
 }: {
   roles: string[];
   flags: LpmsNavFlags;
@@ -22,8 +23,9 @@ export default function LpmsTopbar({
   const [bellOpen, setBellOpen] = useState(false);
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
+      <LpmsMobileSidebar flags={flags} />
       <PanelHeading panel="lpms" fallbackTitle="Legal & Document Automation" fallbackDescription="Policies, agreements & document workflows" />
-      <div className="flex min-w-0 flex-1 justify-center">
+      <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">

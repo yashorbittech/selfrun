@@ -25,6 +25,7 @@ import { getPlatformSettings } from "@/lib/platform/settings";
 import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
 import { getPwaIdentity } from "@/lib/pwa/identity";
 import PwaRegister from "@/components/pwa/PwaRegister";
+import NavigationProgress from "@/components/pwa/NavigationProgress";
 import { InstallBanner } from "@/components/pwa/InstallApp";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { SAAS_THEME } from "@/lib/saas/theme";
@@ -109,25 +110,34 @@ export default async function RootLayout({
   // Brand, contact details and social links (CMS → Site Identity); site-wide structured data (CMS → Settings).
   // No company owns this host (the proxy is showing /workspace-not-found): render the bare shell.
   // On the SaaS product's host the page chrome is the product's own (bare shell + SaaS brand), not the owner company's.
-  const saasHost = await onSaasHost();
-  const appSurface = await onAppSurface();
-  const installPrompt = appSurface ? ((await getPwaIdentity().catch(() => null))?.installPrompt ?? true) : false;
+  const [saasHost, appSurface] = await Promise.all([onSaasHost(), onAppSurface()]);
   const companyId = saasHost ? null : await currentCompanyIdOrNull();
   const hasCompany = companyId !== null;
-  // The Panel Registry (names, descriptions, what is switched on) as it applies to this company; never fails the page.
-  const panels = hasCompany ? await panelMetaFor(companyId).catch(() => ({})) : {};
-  const [siteInfo, { jsonLd }, brand] = hasCompany
-    ? await Promise.all([getSiteInfo(), getSiteSeo(), getCompanyBrand()])
-    : [parseSiteInfo(null), parseSiteSeo(null), NEUTRAL_BRAND];
-  // The company's active theme (CMS → Themes, or the pick made in setup) — colours, fonts and corner radius
-  // for the public website AND every panel. A CMS user previewing a theme sees that one instead. Never fails the page.
-  const liveChatId = hasCompany ? (await getTracking()).tawkId : "";
-  const themeTokens = hasCompany ? ((await resolveSiteThemeState().catch(() => null))?.tokens ?? FALLBACK_THEME) : FALLBACK_THEME;
+  // Everything the shell needs is independent: fetched together (each is a database read, and this runs on every full page load, so
+  // doing them one after another is what made the installed app sit on a blank screen). Every one of them is non-fatal.
+  const [pwa, panels, siteInfoRes, seoRes, brand, tracking, themeState, platformSettings] = await Promise.all([
+    appSurface ? getPwaIdentity().catch(() => null) : null,
+    // The Panel Registry (names, descriptions, what is switched on) as it applies to this company.
+    hasCompany ? panelMetaFor(companyId).catch(() => ({})) : {},
+    hasCompany ? getSiteInfo() : parseSiteInfo(null),
+    // Site-wide structured data (CMS → Settings): public-website only.
+    hasCompany && !appSurface ? getSiteSeo() : parseSiteSeo(null),
+    hasCompany ? getCompanyBrand() : NEUTRAL_BRAND,
+    hasCompany && !appSurface ? getTracking() : null,
+    // The company's active theme (CMS → Themes, or the pick made in setup): colours, fonts, corner radius for the website and every panel.
+    hasCompany ? resolveSiteThemeState().catch(() => null) : null,
+    // Platform Panel → Platform settings: a maintenance message for every company's panels (cached).
+    hasCompany ? getPlatformSettings().catch(() => null) : null,
+  ]);
+  const installPrompt = appSurface ? (pwa?.installPrompt ?? true) : false;
+  const siteInfo = siteInfoRes;
+  const { jsonLd } = seoRes;
+  const liveChatId = tracking?.tawkId ?? "";
+  const themeTokens = hasCompany ? (themeState?.tokens ?? FALLBACK_THEME) : FALLBACK_THEME;
   const themeCss = saasHost ? themeCssBlock(SAAS_THEME) : hasCompany ? themeCssBlock(themeTokens) : "";
   // Every theme but the original default gets the modern panel treatment (see globals.css `[data-ui="modern"]`).
   const modernUi = saasHost || (hasCompany && !isDefaultTokens(themeTokens));
-  // Platform Panel → Platform settings: a maintenance message for every company's panels (cached; never fails the page).
-  const notice = hasCompany ? ((await getPlatformSettings().catch(() => null))?.maintenanceBanner ?? "") : "";
+  const notice = platformSettings?.maintenanceBanner ?? "";
 
   return (
     <html lang="en" suppressHydrationWarning data-ui={modernUi ? "modern" : undefined} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
@@ -156,6 +166,7 @@ export default async function RootLayout({
                 {appSurface ? (
                   <>
                     <PwaRegister />
+                    <NavigationProgress />
                     {installPrompt ? <InstallBanner /> : null}
                   </>
                 ) : null}
