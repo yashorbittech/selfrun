@@ -18,26 +18,29 @@ const RETRY = `(function(){var b=document.getElementById('offline-retry'),s=docu
 
 export default function OfflinePage() {
   return (
-    <main className="fixed inset-0 z-[9999] isolate flex overflow-y-auto bg-background px-5 py-10">
+    <main className="fixed inset-0 z-[9999] isolate flex overflow-y-auto bg-background px-4 py-4 sm:px-6">
       <BrandBackdrop />
-      <div className="m-auto flex w-full max-w-lg flex-col items-center gap-3">
-        <BrandSplashMark size="md" />
-        <BrandSplashName className="app-rise text-center text-xl font-black tracking-tight" />
-        <div className="app-rise mt-9 sm:mt-10" style={{ animationDelay: "200ms" }}>
-          <RunnerLoader scene="lost" sign="OFFLINE" width="20rem" />
-        </div>
-        <div className="app-rise w-full rounded-3xl border border-border/70 bg-card/80 p-7 text-center shadow-xl shadow-primary/5 backdrop-blur sm:p-9" style={{ animationDelay: "320ms" }}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">No connection</p>
-          <h1 className="text-balance text-3xl font-black tracking-tight text-foreground sm:text-4xl">You’re offline</h1>
-          <p className="mx-auto mt-4 max-w-md text-pretty text-[15px] leading-relaxed text-muted-foreground">
-            This app needs an internet connection. Check your connection and try again. Nothing you entered has been lost on the server.
-          </p>
-          <div className="mt-7 flex flex-col items-center gap-3">
-            <button id="offline-retry" type="button" className={buttonVariants({ size: "lg" })}>
-              Try again
-            </button>
-            <p id="offline-status" className="text-xs text-muted-foreground" aria-live="polite">We’ll reconnect automatically when you’re back online.</p>
+      <div className="m-auto flex w-full max-w-5xl flex-col gap-3">
+        <div className="app-rise flex items-center gap-4 sm:gap-5">
+          <div className="shrink-0"><BrandSplashMark size="sm" /></div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <BrandSplashName className="truncate text-sm font-bold text-muted-foreground" />
+              <span className="arcade-chip">No connection</span>
+            </div>
+            <h1 className="text-balance text-xl font-black leading-tight tracking-tight text-foreground sm:text-3xl">You’re offline</h1>
+            <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">This app needs an internet connection. Check your connection and try again. Nothing you entered has been lost on the server.</p>
           </div>
+        </div>
+        {/* The game needs scripts and a network, neither of which an offline page has: the same wide stage, with the lost runner. */}
+        <div className="app-rise game-hero flex items-center justify-center py-3" style={{ animationDelay: "120ms", maxHeight: "calc(100vh - 340px)", minHeight: "9rem" }}>
+          <RunnerLoader scene="lost" sign="OFFLINE" width="min(100%, 22rem)" />
+        </div>
+        <div className="app-rise arcade-message flex flex-col items-center gap-2" style={{ animationDelay: "240ms" }}>
+          <button id="offline-retry" type="button" className={buttonVariants({ size: "lg" })}>
+            Try again
+          </button>
+          <p id="offline-status" className="text-xs text-muted-foreground" aria-live="polite">We’ll reconnect automatically when you’re back online.</p>
         </div>
       </div>
       <script dangerouslySetInnerHTML={{ __html: RETRY }} />
