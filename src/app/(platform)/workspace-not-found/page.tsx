@@ -30,6 +30,7 @@ export default async function WorkspaceNotFoundPage() {
   return (
     <ErrorScreen
       code="404"
+      gamePage="no-workspace"
       icon={<Globe className="size-6" />}
       title="No workspace here"
       actions={

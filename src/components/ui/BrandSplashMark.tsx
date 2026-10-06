@@ -11,12 +11,12 @@ import { useBrand } from "@/components/platform/BrandProvider";
  * finger) over it tilts the tile in 3D with a glare that follows — so the wait is something to play with, not stare at.
  * The logo keeps its own proportions and colours (never cropped or tinted). Client-only; no data besides the brand from context.
  */
-export default function BrandSplashMark({ size = "lg" }: { size?: "lg" | "md" }) {
+export default function BrandSplashMark({ size = "lg" }: { size?: "lg" | "md" | "sm" }) {
   const brand = useBrand();
   const hasIdentity = Boolean(brand.logoUrl || brand.name || brand.namePrimary);
   // Sizes are set inline (not by utility classes): whatever logo a company uploaded, however large its pixels, the mark never grows past these.
-  const boxPx = size === "lg" ? 160 : 128;
-  const tilePx = size === "lg" ? 112 : 88;
+  const boxPx = size === "lg" ? 160 : size === "md" ? 128 : 84;
+  const tilePx = size === "lg" ? 112 : size === "md" ? 88 : 60;
   const ref = useRef<HTMLDivElement>(null);
 
   const tilt = (e: React.PointerEvent) => {
@@ -60,9 +60,9 @@ export default function BrandSplashMark({ size = "lg" }: { size?: "lg" | "md" })
           // eslint-disable-next-line @next/next/no-img-element -- company-uploaded logo from arbitrary storage hosts
           <img src={brand.logoUrl} alt="" aria-hidden="true" draggable={false} width={Math.round(tilePx * 0.68)} height={Math.round(tilePx * 0.68)} style={{ width: "68%", height: "68%" }} className="select-none object-contain" />
         ) : hasIdentity ? (
-          <BrandMark className={size === "lg" ? "size-16" : "size-12"} />
+          <BrandMark className={size === "lg" ? "size-16" : size === "md" ? "size-12" : "size-8"} />
         ) : (
-          <Compass className={`${size === "lg" ? "size-12" : "size-9"} text-primary`} strokeWidth={1.6} />
+          <Compass className={`${size === "lg" ? "size-12" : size === "md" ? "size-9" : "size-6"} text-primary`} strokeWidth={1.6} />
         )}
         {/* light sweep and pointer glare */}
         <span aria-hidden className="app-sweep pointer-events-none absolute inset-0" />

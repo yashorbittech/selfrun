@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import BrandBackdrop from "@/components/ui/BrandBackdrop";
-import BrandSplashMark from "@/components/ui/BrandSplashMark";
-import BrandSplashName from "@/components/ui/BrandSplashName";
-import RunnerLoader from "@/components/ui/RunnerLoader";
+import ArcadeStage from "@/components/game/ArcadeStage";
 import MaintenanceCountdown from "@/components/platform/MaintenanceCountdown";
 import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
@@ -19,23 +17,16 @@ export default async function PlatformMaintenancePage() {
   const m = await getEffectiveMaintenance(await currentCompanyIdOrNull());
   const message = m.message || "We’re making things better and will be back shortly. Thanks for your patience.";
   return (
-    <main className="fixed inset-0 z-[9999] isolate flex overflow-y-auto bg-background px-5 py-10">
+    <main className="fixed inset-0 z-[9999] isolate flex overflow-y-auto bg-background px-4 py-4 sm:px-6">
       <BrandBackdrop />
-      <div className="m-auto flex w-full max-w-xl flex-col items-center gap-3 text-center">
-        <BrandSplashMark size="md" />
-        <BrandSplashName className="app-rise text-xl font-black tracking-tight" />
-        <div className="app-rise mt-8" style={{ animationDelay: "200ms" }}>
-          <RunnerLoader scene="lost" sign="BACK SOON" width="20rem" />
-        </div>
-        <div className="app-rise w-full rounded-3xl border border-border/70 bg-card/80 p-7 shadow-xl shadow-primary/5 backdrop-blur sm:p-9" style={{ animationDelay: "320ms" }}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Scheduled maintenance</p>
-          <h1 className="text-balance text-3xl font-black tracking-tight text-foreground sm:text-4xl">We’ll be right back</h1>
-          <p className="mx-auto mt-4 max-w-md text-pretty text-[15px] leading-relaxed text-muted-foreground">{message}</p>
-          <div className="mt-7 flex flex-col items-center gap-2">
+      <div className="m-auto w-full">
+        <ArcadeStage code="BRB" chip="Scheduled maintenance" title="We’ll be right back" description={message} gamePage="maintenance">
+          <div className="flex flex-col items-center gap-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Back in</p>
             <MaintenanceCountdown endsAt={m.endsAt} />
+            <p className="text-xs text-muted-foreground">This page reloads by itself when we are done.</p>
           </div>
-        </div>
+        </ArcadeStage>
       </div>
     </main>
   );

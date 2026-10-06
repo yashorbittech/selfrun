@@ -31,6 +31,8 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "support_articles",
   "support_config",
   "support_counters",
+  // The mini-game on the 404 / no-workspace / maintenance pages: one row per player per scope (a company, or "global"); see lib/game/scores.ts
+  "game_scores",
   // Desktop app builds: the platform's build pipeline (rows carry their companyId; see lib/apps/store.ts)
   "app_builds",
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
