@@ -196,6 +196,13 @@ async function lookupHost(host: string): Promise<HostInfo | null> {
     return id ? { companyId: id, surface: saasAppHosts().has(host) ? "app" : "site" } : null;
   }
 
+  // Dev only: the ngrok host in DEV_TUNNEL_HOST (set in .env.local) serves the platform owner's panels (dev tunnel). Ignored in production.
+  if (process.env.NODE_ENV !== "production" && process.env.DEV_TUNNEL_HOST && normalizeHost(process.env.DEV_TUNNEL_HOST) === host) {
+    // No platform-owner company in this dev database: fall back to the first active company so the workspace still opens.
+    const id = (await getPlatformOwnerCompanyId()) ?? (await listActiveCompanyIds())[0] ?? null;
+    return id ? { companyId: id, surface: "app" } : null;
+  }
+
   const db = await getPlatformDb();
   const companies = db.collection<Company>(COMPANIES_COLLECTION);
   const activeId = async (companyId: string) => (await companies.findOne({ _id: companyId, status: "active" }, { projection: { _id: 1 } }))?._id ?? null;

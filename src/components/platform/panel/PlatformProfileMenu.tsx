@@ -1,6 +1,5 @@
 "use client";
 
-import { LayoutGrid } from "lucide-react";
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
 
@@ -13,7 +12,6 @@ export default function PlatformProfileMenu({ email, createdAt, lastLoginAt }: {
       roles={["Platform admin"]}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt ?? null}
-      governanceItems={[{ label: "Workspace", href: "/workspace", icon: LayoutGrid }]}
       onLogout={() => hubLogoutAction()}
       panelName="Platform Panel"
     />

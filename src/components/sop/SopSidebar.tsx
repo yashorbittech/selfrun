@@ -13,7 +13,6 @@ import {
   LayoutTemplate,
   ShieldCheck,
   BarChart3,
-  ScrollText,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -110,6 +109,10 @@ export default function SopSidebar({ flags, onNavigate, collapsed = false }: { f
       {nav({ href: "/sop/departments", label: "Departments", icon: Building2 })}
       {nav({ href: "/sop/categories", label: "Categories", icon: Tags })}
       {flags.templates && nav({ href: "/sop/templates", label: "Templates", icon: LayoutTemplate })}
+
+      {(flags.reports || flags.settings) && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
+      {flags.reports && nav({ href: "/sop/reports", label: "Reports & Analytics", icon: BarChart3 })}
+      {flags.settings && nav({ href: "/sop/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

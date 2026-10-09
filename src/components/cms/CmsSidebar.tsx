@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Files, Image as ImageIcon, Menu as MenuIcon, PanelBottom, ClipboardList, Palette, Settings, ScrollText,
-  BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush, BellRing,
+  LayoutDashboard, Files, Image as ImageIcon, Menu as MenuIcon, PanelBottom, ClipboardList, Palette, Settings, BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush, BellRing,
+  Bot, MessagesSquare, BookOpen, SlidersHorizontal, AudioLines, Mic, Settings2, Gift, TicketPercent, Coins, Sparkles, BookText,
+  Share2, Megaphone, SlidersVertical, WalletCards,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -124,12 +125,53 @@ export default function CmsSidebar({ flags, onNavigate, collapsed = false }: { f
       label: "Search",
       items: [{ href: "/cms/seo", label: "SEO Overview", icon: SearchCheck }],
     },
+    {
+      label: "Applicants",
+      items: [{ href: "/lms/careers", label: "Applicants", icon: Briefcase }],
+    },
+    {
+      label: "Festival Offers",
+      items: [
+        { href: "/cms/offers", label: "Campaigns", icon: Gift },
+        { href: "/cms/offers/coupons", label: "Coupons", icon: TicketPercent },
+        { href: "/cms/offers/claims", label: "Claims", icon: ClipboardList },
+        { href: "/cms/offers/subscribers", label: "Subscribers", icon: BellRing },
+      ],
+    },
+    {
+      label: "Wallet & Credits",
+      items: [
+        { href: "/cms/wallet", label: "Overview", icon: Coins, exact: true },
+        { href: "/cms/wallet/rules", label: "Reward Rules", icon: Sparkles },
+        { href: "/cms/wallet/referrals", label: "Referrals", icon: Share2 },
+        { href: "/cms/wallet/campaigns", label: "Referral Campaigns", icon: Megaphone },
+        { href: "/cms/wallet/usage-rules", label: "Usage Rules", icon: SlidersVertical },
+        { href: "/cms/wallet/wallets", label: "Balances", icon: WalletCards },
+        { href: "/cms/wallet/ledger", label: "Ledger", icon: BookText },
+      ],
+    },
+    {
+      label: "AI Chatbot",
+      items: [
+        { href: "/cms/chatbot", label: "Dashboard", icon: Bot, exact: true },
+        { href: "/cms/chatbot/conversations", label: "Conversations", icon: MessagesSquare },
+        { href: "/cms/chatbot/knowledge-base", label: "Knowledge Base", icon: BookOpen },
+        { href: "/cms/chatbot/config", label: "AI Config", icon: SlidersHorizontal, exact: true },
+      ],
+    },
+    {
+      label: "Conversation AI",
+      items: [
+        { href: "/cms/chatbot/voice", label: "Voice Dashboard", icon: AudioLines, exact: true },
+        { href: "/cms/chatbot/voice/conversations", label: "Voice Conversations", icon: Mic },
+        { href: "/cms/chatbot/voice/config", label: "ElevenLabs Config", icon: Settings2 },
+      ],
+    },
     ...(flags.settings ? [{ label: "Engagement", items: [{ href: "/cms/push", label: "Push notifications", icon: BellRing }] }] : []),
     {
       label: "Settings",
       items: [
         ...(flags.settings ? [{ href: "/cms/settings", label: "Settings", icon: Settings }] : []),
-        ...(flags.audit ? [{ href: "/cms/audit-logs", label: "Audit Logs", icon: ScrollText }] : []),
       ],
     },
   ];

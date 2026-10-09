@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import TmsMobileSidebar from "@/components/tms/TmsMobileSidebar";
 import TmsNotificationsBell, { type BellItem } from "@/components/tms/TmsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { TmsRole } from "@/lib/tms-roles";
@@ -46,7 +45,6 @@ export default function TmsTopbar({
           <Sparkles className="size-4" />
         </button>
         <TmsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

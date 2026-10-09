@@ -186,7 +186,7 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
               ))}
             </ol>
           )}
-          <Link href="/cms/audit-logs" className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+          <Link href="/workspace/settings/audit-log?source=panels&module=cms" className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
             Full audit log <ArrowRight className="size-3" />
           </Link>
         </GlassCard>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Building2, Users, KeyRound, Files, Link2, StickyNote, CalendarClock, ScrollText, Settings } from "lucide-react";
+import { LayoutDashboard, Building2, Users, KeyRound, Files, Link2, StickyNote, CalendarClock, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
@@ -96,6 +96,10 @@ export default function DlmsSidebar({ flags, onNavigate, collapsed = false }: { 
       {nav({ href: "/dlms/documents", label: "Document Vault", icon: Files })}
       {nav({ href: "/dlms/urls", label: "URLs & Accounts", icon: Link2 })}
       {nav({ href: "/dlms/notes", label: "Notes", icon: StickyNote })}
+
+      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
+      {nav({ href: "/dlms/expiry", label: "Expiry & Alerts", icon: CalendarClock, badge: flags.expired })}
+      {flags.settings && nav({ href: "/dlms/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

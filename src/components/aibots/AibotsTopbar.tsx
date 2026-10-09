@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import AibotsMobileSidebar from "@/components/aibots/AibotsMobileSidebar";
 import AibotsNotificationsBell from "@/components/aibots/AibotsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { AibotsNavFlags, SidebarBot } from "@/components/aibots/AibotsSidebar";
@@ -46,7 +45,6 @@ export default function AibotsTopbar({
           <Sparkles className="size-4" />
         </button>
         <AibotsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

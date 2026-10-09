@@ -1,4 +1,4 @@
-/** Client-safe types for the SelfRun Business AI Help & Support Center. */
+/** Client-safe types for the SelfRun AI AI Help & Support Center. */
 
 export type FieldType = "text" | "textarea" | "select";
 

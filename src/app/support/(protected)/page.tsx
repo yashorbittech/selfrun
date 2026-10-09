@@ -37,7 +37,7 @@ export default async function SupportDashboardPage({ searchParams }: { searchPar
     <div className="space-y-4">
       <PanelDashboardHeader
         title="Support Overview"
-        description={`Track every request ${caller.companyName} has sent to SelfRun Business, see what needs your reply, and get instant help from the AI assistant.`}
+        description={`Track every request ${caller.companyName} has sent to SelfRun AI, see what needs your reply, and get instant help from the AI assistant.`}
         actions={
           <>
             <Link href="/support/assistant" className={buttonVariants({ variant: "outline", size: "sm" })}><Bot className="size-3.5" data-icon="inline-start" /> Ask the assistant</Link>
@@ -78,7 +78,7 @@ export default async function SupportDashboardPage({ searchParams }: { searchPar
               <Link key={r._id} href={`/support/requests/${r._id}`} className="flex items-center gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm transition-colors hover:bg-amber-500/15">
                 <Hourglass className="size-4 shrink-0 text-amber-600" />
                 <span className="min-w-0 flex-1 truncate"><span className="font-semibold">#{r.number}</span> {r.title}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">SelfRun Business is waiting for your reply</span>
+                <span className="shrink-0 text-xs text-muted-foreground">SelfRun AI is waiting for your reply</span>
               </Link>
             ))}
           </div>

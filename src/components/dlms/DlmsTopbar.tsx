@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import DlmsMobileSidebar from "@/components/dlms/DlmsMobileSidebar";
 import DlmsNotificationsBell from "@/components/dlms/DlmsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { DlmsNavFlags } from "@/components/dlms/DlmsSidebar";
@@ -44,7 +43,6 @@ export default function DlmsTopbar({
           <Sparkles className="size-4" />
         </button>
         <DlmsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

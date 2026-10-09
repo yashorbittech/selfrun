@@ -9,7 +9,7 @@ import GlassCard from "@/components/lms/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { saveVoiceConfigAction } from "@/app/lms/(protected)/chatbot/actions";
+import { saveVoiceConfigAction } from "@/app/cms/(protected)/chatbot/actions";
 import type { VoiceConfig } from "@/lib/chatbot-config";
 import { useBrand } from "@/components/platform/BrandProvider";
 

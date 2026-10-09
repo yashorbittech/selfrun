@@ -32,7 +32,7 @@ export function saasHosts(env: Record<string, string | undefined> = process.env)
 
 export function isSaasHost(host: string | null | undefined): boolean {
   const h = host ? normalize(host) : null;
-  return h !== null && saasHosts().has(h);
+  return h !== null && (saasHosts().has(h) || isDevTunnelHost(h));
 }
 
 /** The host's canonical name without `www.` or `app.` (for contact addresses and absolute URLs). */
@@ -81,4 +81,11 @@ export function saasSiteOrigin(hostHint?: string | null): string {
   const h = hostHint ? normalize(hostHint) : null;
   const base = h && (isSaasHost(h) || isSaasAppHost(h)) ? saasCanonicalHost(h) : primarySaasHost();
   return originFor(base, hostHint);
+}
+
+/** Dev only: the ngrok host named in `DEV_TUNNEL_HOST` (`.env.local`) serves the product website AND the panels on one domain. */
+export function isDevTunnelHost(host: string | null | undefined): boolean {
+  const t = process.env.NODE_ENV !== "production" ? process.env.DEV_TUNNEL_HOST : undefined;
+  const h = host ? normalize(host) : null;
+  return !!t && h !== null && normalize(t) === h;
 }

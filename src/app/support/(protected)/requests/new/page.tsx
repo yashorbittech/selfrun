@@ -16,7 +16,7 @@ export default async function NewRequestPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-4">
-      <PanelDashboardHeader title="New Request" description="Tell the SelfRun Business team what you need: a question, a problem, a feature idea or feedback. We'll reply here." />
+      <PanelDashboardHeader title="New Request" description="Tell the SelfRun AI team what you need: a question, a problem, a feature idea or feedback. We'll reply here." />
       <GlassCard interactive={false} className="max-w-3xl p-5 sm:p-6">
         <RequestForm config={config} initial={{ type: sp.type }} />
       </GlassCard>

@@ -26,7 +26,7 @@ export default async function MyRequestsPage({ searchParams }: { searchParams: P
     <div className="space-y-4">
       <PanelDashboardHeader
         title="My Requests"
-        description={`Everything ${caller.companyName} has sent to SelfRun Business: support requests, bug reports, feature requests and feedback.`}
+        description={`Everything ${caller.companyName} has sent to SelfRun AI: support requests, bug reports, feature requests and feedback.`}
         actions={<Link href="/support/requests/new" className={buttonVariants({ size: "sm" })}><PlusCircle className="size-3.5" data-icon="inline-start" /> New request</Link>}
         filters={
           <PanelFilterBar

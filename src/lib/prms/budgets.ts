@@ -41,17 +41,24 @@ export interface SerializedBudget extends Omit<Budget, "createdAt" | "updatedAt"
   utilisation: number;
 }
 
+/** An ISO string for a stored date; empty when an older or differently-shaped record has none (so one odd record cannot break the whole list). */
+const iso = (d: Date | undefined | null): string => (d instanceof Date && !Number.isNaN(d.getTime()) ? d.toISOString() : "");
+
 export function serializeBudget(b: Budget): SerializedBudget {
-  const remaining = round2(b.allocatedAmount - b.consumedAmount);
+  const allocated = Number(b.allocatedAmount) || 0;
+  const consumed = Number(b.consumedAmount) || 0;
+  const remaining = round2(allocated - consumed);
   return {
     ...b,
-    createdAt: b.createdAt.toISOString(),
-    updatedAt: b.updatedAt.toISOString(),
-    deletedAt: b.deletedAt ? b.deletedAt.toISOString() : null,
-    periodStart: b.periodStart.toISOString().slice(0, 10),
-    periodEnd: b.periodEnd.toISOString().slice(0, 10),
+    allocatedAmount: allocated,
+    consumedAmount: consumed,
+    createdAt: iso(b.createdAt),
+    updatedAt: iso(b.updatedAt),
+    deletedAt: b.deletedAt ? iso(b.deletedAt) || null : null,
+    periodStart: iso(b.periodStart).slice(0, 10),
+    periodEnd: iso(b.periodEnd).slice(0, 10),
     remaining,
-    utilisation: b.allocatedAmount > 0 ? Math.round((b.consumedAmount / b.allocatedAmount) * 100) : 0,
+    utilisation: allocated > 0 ? Math.round((consumed / allocated) * 100) : 0,
   };
 }
 

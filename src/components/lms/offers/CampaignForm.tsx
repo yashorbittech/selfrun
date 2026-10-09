@@ -29,7 +29,7 @@ import {
   type PopupFrequency,
   type PageTargetingMode,
 } from "@/lib/offers/constants";
-import { saveCampaignAction, type CampaignFormInput } from "@/app/lms/(protected)/offers/actions";
+import { saveCampaignAction, type CampaignFormInput } from "@/app/cms/(protected)/offers/actions";
 import type { SerializedCampaign } from "@/lib/offers/campaigns";
 
 function toLocalInput(iso?: string): string {

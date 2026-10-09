@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Sparkles, Bell } from "lucide-react";
 import FmsMobileSidebar from "@/components/fms/FmsMobileSidebar";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { FmsRole } from "@/lib/fms-roles";
@@ -47,7 +46,6 @@ export default function FmsTopbar({
         >
           <Bell className="size-4" />
         </Link>
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

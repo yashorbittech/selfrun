@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { PanelLeftClose, PanelLeftOpen, ScrollText, Settings } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import BrandMark from "@/components/BrandMark";
 import LpmsSidebar from "@/components/lpms/LpmsSidebar";
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
@@ -28,10 +28,6 @@ export default function LpmsSidebarShell({
 }) {
   const { collapsed, toggle, hydrated } = useSidebarCollapse();
 
-  const governanceItems = [
-    ...(flags.canViewAudit ? [{ label: "Audit Logs", href: "/lpms/audit-logs", icon: ScrollText }] : []),
-    ...(flags.canSettings ? [{ label: "Settings", href: "/lpms/settings", icon: Settings }] : []),
-  ];
 
   return (
     <motion.aside
@@ -75,7 +71,6 @@ export default function LpmsSidebarShell({
         roles={roles}
         createdAt={createdAt}
         lastLoginAt={lastLoginAt}
-        governanceItems={governanceItems}
         onLogout={() => {
           window.location.href = "/lpms/login";
         }}

@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import HrmsMobileSidebar from "@/components/hrms/HrmsMobileSidebar";
 import HrmsNotificationsBell, { type BellItem } from "@/components/hrms/HrmsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { HrmsRole } from "@/lib/hrms-roles";
@@ -46,7 +45,6 @@ export default function HrmsTopbar({
           <Sparkles className="size-4" />
         </button>
         <HrmsNotificationsBell items={notifications} unread={unread} basePath="/hrms" />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

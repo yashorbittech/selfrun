@@ -8,7 +8,6 @@ import { Menu, Sparkles } from "lucide-react";
 import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import BrandMark from "@/components/BrandMark";
 import { BrandName } from "@/components/platform/BrandProvider";
 import PlatformSidebar, { type PlatformNavFlags } from "@/components/platform/panel/PlatformSidebar";
@@ -54,7 +53,6 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; ema
           <Sparkles className="size-4" />
         </button>
         <PanelBellLink href="/platform/notifications" unread={flags.unreadNotifications ?? 0} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

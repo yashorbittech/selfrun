@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import SopMobileSidebar from "@/components/sop/SopMobileSidebar";
 import SopNotificationsBell from "@/components/sop/SopNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { SopNavFlags } from "@/components/sop/SopSidebar";
@@ -44,7 +43,6 @@ export default function SopTopbar({
           <Sparkles className="size-4" />
         </button>
         <SopNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

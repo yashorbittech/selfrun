@@ -308,7 +308,7 @@ export const NAV_SECTIONS: { key: NavSectionKey; label: string; href?: string; /
   { key: "manage", label: "Management", sidebar: false },
   { key: "company", label: "Company", href: "/workspace/settings" },
   { key: "account", label: "Account", sidebar: false },
-  { key: "platform", label: "Platform", sidebar: false },
+  { key: "platform", label: "Platform" },
 ];
 
 export const NAV_KEYS: string[] = NAV_ITEMS.map((i) => i.key);

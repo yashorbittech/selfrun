@@ -5,7 +5,6 @@ import { Sparkles } from "lucide-react";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import SupportMobileSidebar from "@/components/support/SupportMobileSidebar";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import PanelSearch from "@/components/platform/PanelSearch";
 import PanelBellLink from "@/components/platform/PanelBellLink";
 
@@ -14,7 +13,7 @@ export default function SupportTopbar({ openRequests, unread }: { openRequests: 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <SupportMobileSidebar openRequests={openRequests} />
-      <PanelHeading panel="support" fallbackTitle="Help & Support" fallbackDescription="AI help, guides & requests to SelfRun Business" />
+      <PanelHeading panel="support" fallbackTitle="Help & Support" fallbackDescription="AI help, guides & requests to SelfRun AI" />
       <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
@@ -29,7 +28,6 @@ export default function SupportTopbar({ openRequests, unread }: { openRequests: 
           <Sparkles className="size-4" />
         </button>
         <PanelBellLink href="/support/notifications" unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer open={aiOpen} onClose={() => setAiOpen(false)} panelId="support" panelTitle="Help & Support" panelDescription="Get help using this panel" />
     </header>

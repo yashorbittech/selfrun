@@ -2,7 +2,7 @@
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { intelligenceLogoutAction } from "@/app/intelligence/(protected)/actions";
-import { primaryIntelligenceRoleLabel, normalizeIntelligenceRoles, INTELLIGENCE_ROLE_META } from "@/lib/intelligence-roles";
+import { primaryIntelligenceRoleLabel, normalizeIntelligenceRoles, INTELLIGENCE_ROLE_META } from "@/lib/intelligence-roles"
 
 export default function IntelligenceProfileMenu({
   email,
@@ -25,7 +25,6 @@ export default function IntelligenceProfileMenu({
       roles={roleNames}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={[]}
       onLogout={() => intelligenceLogoutAction()}
       panelName="Business Intelligence"
     />

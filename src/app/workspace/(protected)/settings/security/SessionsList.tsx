@@ -19,7 +19,7 @@ function ago(iso: string): string {
 }
 
 /** Where the account is signed in: every device with its place and time, each with its own "Log out", plus "log out others" and "log out everywhere". */
-export default function SessionsList({ sessions }: { sessions: SessionView[] }) {
+export default function SessionsList({ sessions, onChange }: { sessions: SessionView[]; onChange?: () => void }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
@@ -36,6 +36,7 @@ export default function SessionsList({ sessions }: { sessions: SessionView[] }) 
       if (res && "error" in res && res.error) return setNote({ ok: false, text: res.error });
       setNote({ ok: true, text: `${s.deviceLabel} was signed out.` });
       router.refresh();
+      onChange?.();
     });
   }
   function endOthers() {
@@ -46,6 +47,7 @@ export default function SessionsList({ sessions }: { sessions: SessionView[] }) 
       setBusy(null);
       setNote({ ok: true, text: res.count ? `Signed out of ${res.count} other device${res.count === 1 ? "" : "s"}.` : "There were no other devices." });
       router.refresh();
+      onChange?.();
     });
   }
   function endAll() {

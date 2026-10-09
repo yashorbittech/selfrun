@@ -6,7 +6,7 @@
  * touches the database — safe to import from client components.
  */
 
-export const ACTIVITY_LOG_MODULES = ["prms", "pms", "teamchat", "tms", "hrms", "portal", "ots"] as const;
+export const ACTIVITY_LOG_MODULES = ["prms", "pms", "teamchat", "tms", "hrms", "portal", "ots", "lpms", "sop", "fms", "smms", "aibots", "cms", "dlms", "seo"] as const;
 export type ActivityLogModule = (typeof ACTIVITY_LOG_MODULES)[number];
 
 const MODULE_LABELS: Record<ActivityLogModule, string> = {
@@ -17,6 +17,14 @@ const MODULE_LABELS: Record<ActivityLogModule, string> = {
   hrms: "HRMS",
   portal: "External Portal",
   ots: "Online Tests",
+  lpms: "Legal Documents",
+  sop: "SOPs",
+  fms: "Finance",
+  smms: "Social Media",
+  aibots: "AI Bots",
+  cms: "Website",
+  dlms: "Digital Vault",
+  seo: "SEO",
 };
 
 export function activityModuleLabel(module: string): string {

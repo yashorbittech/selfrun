@@ -2,7 +2,7 @@
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { aibotsLogoutAction } from "@/app/aibots/(protected)/actions";
-import { primaryAibotsRoleLabel } from "@/lib/aibots-roles";
+import { primaryAibotsRoleLabel } from "@/lib/aibots-roles"
 
 export default function AibotsProfileMenu({
   email,
@@ -24,7 +24,6 @@ export default function AibotsProfileMenu({
       roles={roles}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={[]}
       onLogout={() => aibotsLogoutAction()}
       panelName="AI Bots Management"
     />

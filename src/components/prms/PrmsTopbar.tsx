@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import PrmsMobileSidebar from "@/components/prms/PrmsMobileSidebar";
 import PrmsNotificationsBell, { type BellItem } from "@/components/prms/PrmsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { PrmsRole } from "@/lib/prms-roles";
@@ -44,7 +43,6 @@ export default function PrmsTopbar({
           <Sparkles className="size-4" />
         </button>
         <PrmsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

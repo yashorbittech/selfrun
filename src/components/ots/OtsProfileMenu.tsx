@@ -2,7 +2,7 @@
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { otsLogoutAction } from "@/app/ots/(protected)/actions";
-import { primaryOtsRoleLabel, OTS_ROLE_META, effectiveOtsRoles } from "@/lib/ots-roles";
+import { primaryOtsRoleLabel, OTS_ROLE_META, effectiveOtsRoles } from "@/lib/ots-roles"
 
 export default function OtsProfileMenu({
   email,
@@ -25,7 +25,6 @@ export default function OtsProfileMenu({
       roles={roleNames}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={[]}
       onLogout={() => otsLogoutAction()}
       panelName="Online Testing System"
     />

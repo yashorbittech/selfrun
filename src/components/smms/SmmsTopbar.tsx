@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import SmmsMobileSidebar from "@/components/smms/SmmsMobileSidebar";
 import SmmsNotificationsBell from "@/components/smms/SmmsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { SmmsNavFlags } from "@/components/smms/SmmsSidebar";
@@ -44,7 +43,6 @@ export default function SmmsTopbar({
           <Sparkles className="size-4" />
         </button>
         <SmmsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

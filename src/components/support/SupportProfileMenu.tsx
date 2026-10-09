@@ -11,7 +11,6 @@ export default function SupportProfileMenu({ email, roles, createdAt, lastLoginA
       roles={roles}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={[]}
       onLogout={() => hubLogoutAction()}
       panelName="Help & Support"
     />

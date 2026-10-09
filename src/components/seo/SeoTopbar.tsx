@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import SeoMobileSidebar from "@/components/seo/SeoMobileSidebar";
 import SeoNotificationsBell from "@/components/seo/SeoNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { SeoNavFlags } from "@/components/seo/SeoSidebar";
@@ -44,7 +43,6 @@ export default function SeoTopbar({
           <Sparkles className="size-4" />
         </button>
         <SeoNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

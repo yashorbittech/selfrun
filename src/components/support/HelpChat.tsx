@@ -17,7 +17,7 @@ interface Turn extends ChatTurn {
 }
 
 const STORE = "support:chat";
-const GREETING = "Hi, I'm the SelfRun Assistant. Ask me how anything in SelfRun Business works — I answer from the official help content, and if I can't, I'll help you send a request to the SelfRun Business team.";
+const GREETING = "Hi, I'm the SelfRun Assistant. Ask me how anything in SelfRun AI works — I answer from the official help content, and if I can't, I'll help you send a request to the SelfRun AI team.";
 
 /** The AI Help chatbot: used full-page on the Help Assistant screen and inside the drawer available from every panel. */
 export default function HelpChat({ compact = false, suggestions = [] }: { compact?: boolean; suggestions?: string[] }) {
@@ -128,7 +128,7 @@ export default function HelpChat({ compact = false, suggestions = [] }: { compac
             <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <Sparkles className="size-4 text-primary" /> Review your request
             </p>
-            <p className="mb-3 text-xs text-muted-foreground">I prepared this from our conversation. Edit anything, then send it to SelfRun Business.</p>
+            <p className="mb-3 text-xs text-muted-foreground">I prepared this from our conversation. Edit anything, then send it to SelfRun AI.</p>
             <RequestForm config={form.config} initial={form.initial} chat={plain} source="chat" compact />
             <button type="button" onClick={() => setForm(null)} className="mt-3 text-xs text-muted-foreground hover:text-foreground">Cancel</button>
           </div>

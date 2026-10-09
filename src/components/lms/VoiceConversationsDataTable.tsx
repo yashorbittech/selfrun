@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatDateTime } from "@/lib/utils";
 import VoiceExportButton from "@/components/lms/VoiceExportButton";
-import { bulkDeleteVoiceConversationsAction } from "@/app/lms/(protected)/chatbot/actions";
+import { bulkDeleteVoiceConversationsAction } from "@/app/cms/(protected)/chatbot/actions";
 import type { VoiceConversationRow } from "@/lib/voice-conversations";
 
 const DEVICE_OPTIONS = ["mobile", "tablet", "desktop", "bot", "unknown"];
@@ -272,7 +272,7 @@ export default function VoiceConversationsDataTable({
                 <TableRow
                   key={row._id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/lms/chatbot/voice/conversations/${row.sessionId}`)}
+                  onClick={() => router.push(`/cms/chatbot/voice/conversations/${row.sessionId}`)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox checked={selected.has(row._id)} onCheckedChange={() => toggleOne(row._id)} aria-label="Select" />
@@ -302,7 +302,7 @@ export default function VoiceConversationsDataTable({
                   <TableCell className="text-sm text-muted-foreground">{formatDateTime(row.startedAt)}</TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Link
-                      href={`/lms/chatbot/voice/conversations/${row.sessionId}`}
+                      href={`/cms/chatbot/voice/conversations/${row.sessionId}`}
                       className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
                       aria-label="Open"
                     >

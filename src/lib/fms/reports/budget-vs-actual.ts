@@ -78,6 +78,8 @@ export async function getBudgetVsActual(): Promise<BudgetVsActualResult> {
 
   await Promise.all(
     budgets.map(async (b: Budget) => {
+      // A record without a period (an older or differently-shaped one) cannot be compared with actual spend.
+      if (!(b.periodStart instanceof Date) || !(b.periodEnd instanceof Date)) return;
       if (b.level !== "company" && b.level !== "project") {
         uncomparable.push({
           budgetId: b._id,

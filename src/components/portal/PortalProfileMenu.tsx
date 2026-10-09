@@ -2,7 +2,7 @@
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { portalLogoutAction } from "@/app/portal/(app)/actions";
-import { PORTAL_ROLE_META, type PortalRole } from "@/lib/portal-roles";
+import { PORTAL_ROLE_META, type PortalRole } from "@/lib/portal-roles"
 
 export default function PortalProfileMenu({
   email,
@@ -27,7 +27,7 @@ export default function PortalProfileMenu({
       roles={[roleLabel]}
       createdAt={createdAt ?? new Date().toISOString()}
       lastLoginAt={lastLoginAt ?? null}
-      governanceItems={[]}
+      profileHref="/portal/profile"
       onLogout={() => portalLogoutAction()}
       panelName="Client Portal"
     />

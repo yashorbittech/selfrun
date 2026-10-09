@@ -1,7 +1,7 @@
 import "server-only";
 import { articlesCol, type ArticleDoc } from "@/lib/support/db";
 
-/** Help content: managed by SelfRun Business in the Platform Panel, read by every company. */
+/** Help content: managed by SelfRun AI in the Platform Panel, read by every company. */
 
 export type ArticleView = Omit<ArticleDoc, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string };
 

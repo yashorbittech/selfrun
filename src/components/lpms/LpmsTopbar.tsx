@@ -6,7 +6,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Sparkles, Bell } from "lucide-react";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { LpmsNavFlags } from "@/components/lpms/LpmsSidebar";
@@ -47,7 +46,6 @@ export default function LpmsTopbar({
         >
           <Bell className="size-4" />
         </Link>
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

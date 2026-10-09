@@ -1,3 +1,4 @@
+import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { companyScope, messagesCol, nextRequestNumber, requestsCol, type MessageDoc, type RequestDoc } from "@/lib/support/db";
 import { firstStatusIn, getSupportConfig, initialStatus, stateOf } from "@/lib/support/config";
@@ -170,7 +171,7 @@ export async function companyReply(caller: CompanyCaller, id: string, body: stri
   return { ok: true };
 }
 
-// ── Staff (SelfRun Business) ────────────────────────────────────────────────────────────────────────────────────────────
+// ── Staff (SelfRun AI) ────────────────────────────────────────────────────────────────────────────────────────────
 export interface StaffFilters {
   q?: string;
   state?: StatusState | "all";
@@ -293,7 +294,7 @@ export async function staffReply(id: string, actor: { id: string; email: string 
   const req = await col.findOne({ _id: clean(id, 60) });
   if (!req) return { ok: false, error: "Request not found." };
   const now = new Date();
-  await (await messagesCol()).insertOne({ _id: crypto.randomUUID(), requestId: req._id, companyId: req.companyId, authorType: "staff", visibility: internal ? "internal" : "public", authorId: actor.id, authorLabel: "SelfRun Business Support", body: text, createdAt: now });
+  await (await messagesCol()).insertOne({ _id: crypto.randomUUID(), requestId: req._id, companyId: req.companyId, authorType: "staff", visibility: internal ? "internal" : "public", authorId: actor.id, authorLabel: "SelfRun AI Support", body: text, createdAt: now });
   const set: Record<string, unknown> = { updatedAt: now };
   const history: RequestDoc["history"] = [{ at: now, by: actor.email, action: internal ? "internal note" : "replied" }];
   if (!internal) {
@@ -346,7 +347,7 @@ export async function companyDashboard(companyId: string, f: { from?: string; to
   const q = clean(f.q, 80);
   if (q) match.title = { $regex: q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
 
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const tz = mongoTimeZone();
   const group = (field: string) => col.aggregate<{ _id: string; n: number }>([{ $match: match }, { $group: { _id: `$${field}`, n: { $sum: 1 } } }, { $sort: { n: -1 } }]).toArray();
   const [byStatus, byType, byPriority, trend, resolution, needsYou, recent] = await Promise.all([
     group("status"),

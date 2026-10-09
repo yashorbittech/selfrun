@@ -37,7 +37,7 @@ export async function updateRequestAction(id: string, patch: StaffPatch): Promis
   if (res.statusChanged) {
     const label = statusOf(cfg, res.request.status)?.label ?? res.request.status;
     const state = stateOf(cfg, res.request.status);
-    if (state === "resolved" || state === "closed" || state === "waiting") await notifyRequester(res.request, `Request #${res.request.number}: ${label}`, state === "waiting" ? "SelfRun Business needs a bit more information from you." : res.request.title);
+    if (state === "resolved" || state === "closed" || state === "waiting") await notifyRequester(res.request, `Request #${res.request.number}: ${label}`, state === "waiting" ? "SelfRun AI needs a bit more information from you." : res.request.title);
   }
   touch(String(id));
   return { ok: true };
@@ -50,7 +50,7 @@ export async function replyAction(id: string, body: string, internal: boolean): 
   const res = await staffReply(String(id), { id: auth.user.id, email: auth.user.email }, String(body ?? ""), internal === true, cfg);
   if (!res.ok) return res;
   await recordPlatformAudit({ actorId: auth.user.id, action: internal ? "support.request.note" : "support.request.reply", target: { type: "support_request", id: res.request._id }, companyId: res.request.companyId });
-  if (!internal) await notifyRequester(res.request, `SelfRun Business replied to request #${res.request.number}`, String(body).slice(0, 200));
+  if (!internal) await notifyRequester(res.request, `SelfRun AI replied to request #${res.request.number}`, String(body).slice(0, 200));
   touch(String(id));
   return { ok: true };
 }

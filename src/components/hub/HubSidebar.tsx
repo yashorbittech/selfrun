@@ -171,9 +171,6 @@ export default function HubSidebar({
       {nav.filter((section) => section.sidebar).map((section) => {
         const filteredItems = section.items.filter(
           (item) =>
-            item.group !== "Security & logs" &&
-            item.key !== "company.audit" &&
-            item.key !== "company.security" &&
             item.key !== "company.payments" &&
             item.label !== "Payment account"
         );

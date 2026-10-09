@@ -17,7 +17,7 @@ export default async function HelpCenterPage({ searchParams }: { searchParams: P
     <div className="space-y-4">
       <PanelDashboardHeader
         title="Help Center"
-        description="Guides, FAQs and troubleshooting from SelfRun Business. Search for a topic, or ask the assistant for a direct answer."
+        description="Guides, FAQs and troubleshooting from SelfRun AI. Search for a topic, or ask the assistant for a direct answer."
         filters={<PanelFilterBar title="Search the Help Center" description="Find a guide by topic, feature or error" fields={[{ key: "q", label: "Search", type: "search", placeholder: "e.g. create a project, invoice, add employee…" }]} />}
       />
       {articles.length === 0 ? (

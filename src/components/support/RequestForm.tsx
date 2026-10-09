@@ -51,7 +51,7 @@ export default function RequestForm({ config, initial, chat, source = "form", co
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
         <CheckCircle2 className="size-8 text-emerald-600" />
-        <p className="text-sm font-semibold text-foreground">Request #{created.number} sent to SelfRun Business</p>
+        <p className="text-sm font-semibold text-foreground">Request #{created.number} sent to SelfRun AI</p>
         <p className="text-xs text-muted-foreground">We&apos;ll reply here and notify you when there&apos;s an update.</p>
         <Link href={`/support/requests/${created.id}`} className="mt-1 text-sm font-medium text-primary hover:underline">View request →</Link>
       </div>
@@ -162,7 +162,7 @@ export default function RequestForm({ config, initial, chat, source = "form", co
       )}
 
       <Button type="submit" disabled={pending || !type || files.uploading > 0}>
-        {pending && <Loader2 className="size-4 animate-spin" />} Send to SelfRun Business
+        {pending && <Loader2 className="size-4 animate-spin" />} Send to SelfRun AI
       </Button>
     </form>
   );

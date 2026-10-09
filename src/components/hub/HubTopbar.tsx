@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import type { NavSection } from "@/lib/workspace/nav";
 import HubMobileSidebar from "@/components/hub/HubMobileSidebar";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import PanelSearch from "@/components/platform/PanelSearch";
 import NotificationBell from "@/components/platform/hub/NotificationBell";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
@@ -33,7 +32,6 @@ export default function HubTopbar({ email, nav, unread = 0 }: { email: string; n
           <Sparkles className="size-4" />
         </button>
         <NotificationBell initial={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

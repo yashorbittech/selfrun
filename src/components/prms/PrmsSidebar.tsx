@@ -11,11 +11,13 @@ import {
   Boxes,
   Cloud,
   ClipboardList,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { PrmsRole } from "@/lib/prms-roles";
-import { hasPrmsStaffRole } from "@/lib/prms-roles";
+import { hasPrmsStaffRole, canManageSettings, canViewAuditLog } from "@/lib/prms-roles";
 
 function NavLink({
   href,
@@ -101,6 +103,7 @@ export default function PrmsSidebar({
   }) => <NavLink {...props} collapsed={collapsed} onNavigate={onNavigate} />;
 
   const isStaff = hasPrmsStaffRole(roles);
+  const roleCtx = { roles, permissionOverrides };
 
   // Employee self-service
   if (!isStaff) {
@@ -130,6 +133,10 @@ export default function PrmsSidebar({
       <SectionLabel collapsed={collapsed}>Company Assets</SectionLabel>
       {nav({ href: "/prms/assets", label: "Hardware & Assets", icon: Boxes })}
       {nav({ href: "/prms/subscriptions", label: "Subscriptions", icon: Cloud })}
+
+      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
+      {nav({ href: "/prms/analytics", label: "Analytics", icon: BarChart3 })}
+      {canManageSettings(roleCtx) && nav({ href: "/prms/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

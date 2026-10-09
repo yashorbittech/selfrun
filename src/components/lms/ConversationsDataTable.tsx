@@ -47,7 +47,7 @@ import {
 import { formatDateTime } from "@/lib/utils";
 import ConversationSheet from "@/components/lms/ConversationSheet";
 import ChatbotExportButton from "@/components/lms/ChatbotExportButton";
-import { bulkDeleteConversationsAction } from "@/app/lms/(protected)/chatbot/actions";
+import { bulkDeleteConversationsAction } from "@/app/cms/(protected)/chatbot/actions";
 import type { ConversationRow } from "@/lib/chat-conversations";
 
 const DEVICE_OPTIONS = ["mobile", "tablet", "desktop", "bot", "unknown"];
@@ -355,7 +355,7 @@ export default function ConversationsDataTable({
                   <TableCell className="text-sm text-muted-foreground">{formatDateTime(row.lastActivityAt)}</TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Link
-                      href={`/lms/chatbot/conversations/${row.sessionId}`}
+                      href={`/cms/chatbot/conversations/${row.sessionId}`}
                       className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
                       aria-label="Open conversation"
                     >

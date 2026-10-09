@@ -10,7 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import ServicePicker from "@/components/lms/offers/ServicePicker";
 import { AUDIENCES, DISCOUNT_TYPES, type Audience, type DiscountType } from "@/lib/offers/constants";
 import { getCategoryLabel, type CategorySlug } from "@/lib/categories";
-import { saveCouponAction } from "@/app/lms/(protected)/offers/coupons/actions";
+import { saveCouponAction } from "@/app/cms/(protected)/offers/coupons/actions";
 import type { SerializedCoupon } from "@/lib/offers/coupons";
 import type { ApplicableServiceInput } from "@/lib/offers/coupon-validation";
 

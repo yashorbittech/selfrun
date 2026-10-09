@@ -1,3 +1,4 @@
+import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { COLLECTIONS, aibotsCollection, newId, notDeleted } from "@/lib/aibots/db";
 import { chatsCollection, toListItem, type ChatListItem } from "@/lib/aibots/chats";
@@ -85,7 +86,7 @@ export interface DashboardData {
 export async function getDashboard(viewer: AibotsViewer, filters: { from?: string; to?: string } = {}): Promise<DashboardData> {
   const mine = !viewer.seesAll;
   // Day buckets use the server's timezone on both sides (Mongo defaults to UTC).
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const tz = mongoTimeZone();
   const who = mine ? { userId: viewer.userId } : {};
   // Default window is the last 30 days; the dashboard's From / To filters override it (capped at a year).
   const validDate = (v?: string) => (v && !Number.isNaN(Date.parse(v)) ? new Date(`${v}T00:00:00`) : null);

@@ -241,7 +241,7 @@ export default async function SopDetailPage({
       <div className="sop-print-hide flex flex-wrap items-center justify-between gap-3">
         <PanelTabs label="SOP sections" active={tab} tabs={visibleTabs.map((t) => ({ key: t, label: tabLabels[t], href: tabLink(t) }))} />
         {sopCan(ctx, "VIEW_AUDIT") && (
-          <Link href={`/sop/audit-logs?sop=${id}`} className="flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground">
+          <Link href={`/workspace/settings/audit-log?source=panels&module=sop&search=${id}`} className="flex shrink-0 items-center gap-1 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground">
             <ScrollText className="size-3.5" />
             Audit trail
           </Link>

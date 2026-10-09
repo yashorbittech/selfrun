@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Megaphone, Share2, Images, Sparkles, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Megaphone, Share2, Images, Sparkles, BarChart3, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
@@ -66,6 +66,9 @@ export default function SmmsSidebar({ flags, onNavigate, collapsed = false }: { 
       {(flags.ai || flags.analytics) && <SectionLabel collapsed={collapsed}>Insights</SectionLabel>}
       {flags.ai && <NavLink {...common} href="/smms/ai" label="AI Content Generator" icon={<Sparkles className="size-4" />} />}
       {flags.analytics && <NavLink {...common} href="/smms/analytics" label="Analytics" icon={<BarChart3 className="size-4" />} />}
+
+      {flags.settings && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
+      {flags.settings && <NavLink {...common} href="/smms/settings" label="Settings" icon={<Settings className="size-4" />} />}
     </nav>
   );
 }

@@ -37,6 +37,6 @@ export async function findWorkspace(_prev: { error?: string } | null, fd: FormDa
   if (!raw || !/^[a-z0-9.-]+$/.test(raw) || raw.length > 253) return { error: "Enter your workspace address, for example acme or acme.yourdomain.com." };
   const { findLoginOrigin } = await import("@/lib/saas/workspaces");
   const origin = await findLoginOrigin(raw, h.get("host"));
-  if (!origin) return { error: "We couldn't find a workspace with that address. Check the spelling, or start a free trial to create one." };
+  if (!origin) return { error: "We couldn't find a workspace with that address. Check the spelling, or get started free to create one." };
   redirect(`${origin}/workspace/login`);
 }

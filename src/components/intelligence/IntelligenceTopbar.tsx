@@ -6,7 +6,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { Sparkles, Bell } from "lucide-react";
 import IntelligenceMobileSidebar from "@/components/intelligence/IntelligenceMobileSidebar";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import PanelSearch from "@/components/platform/PanelSearch";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
@@ -40,7 +39,6 @@ export default function IntelligenceTopbar({ roles: _roles }: { roles: string[] 
         >
           <Bell className="size-4" />
         </Link>
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

@@ -19,6 +19,25 @@ const nextConfig: NextConfig = {
   // URLs stored in notifications keep working. Order matters: first match wins.
   async redirects() {
     return [
+      // Festival Offers, Wallet & Credits, AI Chatbot, Conversation AI moved from the LMS panel to the CMS panel.
+      { source: "/lms/:section(offers|wallet|chatbot)", destination: "/cms/:section", permanent: true },
+      { source: "/lms/:section(offers|wallet|chatbot)/:path*", destination: "/cms/:section/:path*", permanent: true },
+
+      // Every panel's own audit log moved into the one central Audit log of the Workspace.
+      { source: "/lpms/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=lpms", permanent: true },
+      { source: "/sop/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=sop", permanent: true },
+      { source: "/fms/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=fms", permanent: true },
+      { source: "/aibots/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=aibots", permanent: true },
+      { source: "/cms/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=cms", permanent: true },
+      { source: "/dlms/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=dlms", permanent: true },
+      { source: "/seo/audit-logs", destination: "/workspace/settings/audit-log?source=panels&module=seo", permanent: true },
+      { source: "/hrms/audit", destination: "/workspace/settings/audit-log?source=panels&module=hrms", permanent: true },
+      { source: "/prms/activity", destination: "/workspace/settings/audit-log?source=panels&module=prms", permanent: true },
+      { source: "/tms/activity", destination: "/workspace/settings/audit-log?source=panels&module=tms", permanent: true },
+      { source: "/pms/activity", destination: "/workspace/settings/audit-log?source=panels&module=pms", permanent: true },
+      { source: "/ots/activity", destination: "/workspace/settings/audit-log?source=panels&module=ots", permanent: true },
+      { source: "/smms/activity", destination: "/workspace/settings/audit-log?source=panels&module=smms", permanent: true },
+
       { source: "/admin", destination: "/workspace", permanent: true },
       { source: "/admin/login", destination: "/workspace/login", permanent: true },
       { source: "/admin/change-password", destination: "/workspace/change-password", permanent: true },
@@ -87,7 +106,7 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  allowedDevOrigins: ['7710-103-44-54-34.ngrok-free.app'],
+  allowedDevOrigins: ['viminal-susann-calorimetric.ngrok-free.dev'],
 };
 
 export default nextConfig;

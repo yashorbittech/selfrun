@@ -13,7 +13,7 @@ export default async function HelpAssistantPage() {
   const articles = await listPublished(40);
   return (
     <div className="space-y-4">
-      <PanelDashboardHeader title="Help Assistant" description="Ask how anything in SelfRun Business works. Answers come from the official help content; if it can't solve your problem, it prepares a request for the SelfRun Business team." />
+      <PanelDashboardHeader title="Help Assistant" description="Ask how anything in SelfRun AI works. Answers come from the official help content; if it can't solve your problem, it prepares a request for the SelfRun AI team." />
       <GlassCard interactive={false} className="mx-auto max-w-4xl p-4">
         {/* Starter questions come from the published articles, so they stay in step with the help content. */}
         <HelpChat suggestions={articles.slice(0, 4).map((a) => a.title)} />

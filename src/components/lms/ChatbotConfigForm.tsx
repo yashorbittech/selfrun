@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { saveChatbotConfigAction } from "@/app/lms/(protected)/chatbot/actions";
+import { saveChatbotConfigAction } from "@/app/cms/(protected)/chatbot/actions";
 import type { SerializedChatbotConfig } from "@/lib/chatbot-config";
 
 const MODEL_SUGGESTIONS = ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5-mini"];

@@ -56,7 +56,7 @@ export default function HelpLauncher() {
                     </span>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-bold text-foreground">SelfRun Assistant · {supportName}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">AI help from the SelfRun Business team</p>
+                      <p className="truncate text-[11px] text-muted-foreground">AI help from the SelfRun AI team</p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">

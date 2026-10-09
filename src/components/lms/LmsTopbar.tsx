@@ -6,7 +6,6 @@ import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import MobileSidebar from "@/components/lms/MobileSidebar";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import NotificationsBell from "@/components/lms/NotificationsBell";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
@@ -57,7 +56,6 @@ export default function LmsTopbar({
           recentLeads={recentLeads}
           recentApplications={recentApplications}
         />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

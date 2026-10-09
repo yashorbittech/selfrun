@@ -75,7 +75,7 @@ function RowActions({ row }: { row: AdminVoiceConversationRow }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             render={
-              <a href={`/lms/chatbot/voice/conversations/${row._id}`}>
+              <a href={`/cms/chatbot/voice/conversations/${row._id}`}>
                 <ExternalLink className="size-3.5" />
                 View transcript
               </a>

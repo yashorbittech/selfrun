@@ -92,6 +92,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
       { href: "/platform/audit", label: "Audit log", icon: ScrollText },
       { href: "/platform/settings", label: "Platform settings", icon: Settings2, exact: true },
       { href: "/platform/maintenance", label: "Maintenance", icon: Wrench },
+      { href: "/workspace", label: "Workspace", icon: LayoutGrid, exact: true },
     ],
   },
 ];

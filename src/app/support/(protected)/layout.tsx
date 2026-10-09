@@ -17,7 +17,7 @@ export const generateMetadata = () => brandedMetadata("{brand} {panel:support}",
 
 /**
  * The Help & Support Center every company uses. There is no panel-specific role or sign-in: any signed-in member of the
- * company (the Workspace session) can get help and send requests — the data itself is SelfRun Business's, see `lib/support`.
+ * company (the Workspace session) can get help and send requests — the data itself is SelfRun AI's, see `lib/support`.
  */
 export default async function ProtectedSupportLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentHubUser();

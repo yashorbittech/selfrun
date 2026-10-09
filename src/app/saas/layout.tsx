@@ -1,14 +1,15 @@
 import { notFound } from "next/navigation";
-import { Manrope } from "next/font/google";
 import "./saas.css";
 import Header from "@/components/saas/Header";
 import Footer from "@/components/saas/Footer";
+import Interactions from "@/components/saas/Interactions";
 import { onSaasHost, requestHostOrNull, saasOrigin } from "@/lib/saas/request";
 import { saasCanonicalHost } from "@/lib/saas/hosts";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { jsonForScript } from "@/lib/security/json-script";
+import { SAAS_THEME } from "@/lib/saas/theme";
+import { themeCssVars } from "@/lib/cms/theme-shared";
 
-const display = Manrope({ variable: "--font-sr-display", subsets: ["latin"], weight: ["600", "700", "800"] });
 
 /** The product website exists only on the product's own host; on a customer's domain this path is not a page. */
 export default async function SaasLayout({ children }: { children: React.ReactNode }) {
@@ -24,10 +25,12 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     description: SAAS_BRAND.description,
   };
   const site = { "@context": "https://schema.org", "@type": "WebSite", name: SAAS_BRAND.name, url: origin };
+  // The panels' own light colours, set on the wrapper so the website stays light even when the visitor's system is dark.
   return (
-    <div className={`sr ${display.variable}`}>
+    <div className="sr" style={themeCssVars(SAAS_THEME) as React.CSSProperties}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(org) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(site) }} />
+      <Interactions />
       <Header />
       <main>{children}</main>
       <Footer host={host} />

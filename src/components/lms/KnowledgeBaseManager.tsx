@@ -47,7 +47,7 @@ import {
   reindexPagesAction,
   reindexPdfAction,
   deletePdfAction,
-} from "@/app/lms/(protected)/chatbot/actions";
+} from "@/app/cms/(protected)/chatbot/actions";
 import type { SerializedKbWebsitePage, WebsiteKbSummary } from "@/lib/kb-website";
 import type { SerializedKbPdfDocument, PdfKbSummary } from "@/lib/kb-pdf";
 import type { SerializedKbRun } from "@/lib/kb-runs";

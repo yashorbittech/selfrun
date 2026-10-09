@@ -120,7 +120,7 @@ const IOS_CONTENTS = (): string =>
         { size: "83.5x83.5", idiom: "ipad", scale: "2x", filename: "icon-167.png" },
         { size: "1024x1024", idiom: "ios-marketing", scale: "1x", filename: "icon-1024.png" },
       ],
-      info: { version: 1, author: "SelfRun Business" },
+      info: { version: 1, author: "SelfRun AI" },
     },
     null,
     2,

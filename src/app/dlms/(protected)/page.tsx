@@ -79,7 +79,7 @@ export default async function DlmsDashboardPage({ searchParams }: { searchParams
         <SectionCard title="Expiring credentials & documents" description={`Expired, or within ${settings.warnDays} days`} action={<Link href={withQ("/dlms/expiry")} className="text-xs text-primary hover:underline">View all</Link>}>
           <FeedList items={d.expiring} show="expiry" empty="Nothing is expired or expiring soon." />
         </SectionCard>
-        <SectionCard title="Recent activity" description={d.activityIsOwn ? "Your own actions" : "Latest actions across the vault"} action={can(viewer, "VIEW_AUDIT") ? <Link href="/dlms/audit-logs" className="text-xs text-primary hover:underline">View log</Link> : undefined}>
+        <SectionCard title="Recent activity" description={d.activityIsOwn ? "Your own actions" : "Latest actions across the vault"} action={can(viewer, "VIEW_AUDIT") ? <Link href="/workspace/settings/audit-log?source=panels&module=dlms" className="text-xs text-primary hover:underline">View log</Link> : undefined}>
           {d.activity.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">No activity yet.</p>
           ) : (

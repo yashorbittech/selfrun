@@ -217,7 +217,7 @@ export interface Step {
 }
 
 export const HOW_IT_WORKS: Step[] = [
-  { title: "Register and choose a plan", body: "Create your account with your work email, verify it and pick the plan that fits. Every plan starts with a free trial — no card needed to look around." },
+  { title: "Register and choose a plan", body: "Create your account with your work email, verify it and start on the free-forever plan — no card needed. Upgrade only when your team grows." },
   { title: "Set up your company", body: "A short guided setup collects your business details, creates your departments, invites your team and lets you switch modules on or off. It takes minutes, not weeks." },
   { title: "Configure your website, AI and automations", body: "Choose a theme and publish your website, connect your AI and email, and switch on the automations that matter. Every setting is yours to change at any time." },
   { title: "Run your business from one place", body: "Your team works in the modules they need, leadership watches the live dashboard, and the platform handles the repetitive work in the background." },
@@ -262,12 +262,14 @@ export const INDUSTRIES: Industry[] = [
 export interface Faq {
   q: string;
   a: string;
+  /** Group shown on the FAQ page. */
+  topic?: string;
 }
 
 export const FAQS: Faq[] = [
-  { q: "What is SelfRun Business?", a: "SelfRun Business is a cloud platform that brings your sales, HR, finance, projects, procurement, training, documents, website and team communication into one system, with AI and workflow automation running through all of it." },
+  { q: "What is SelfRun AI?", a: "SelfRun AI is a cloud platform that brings your sales, HR, finance, projects, procurement, training, documents, website and team communication into one system, with AI and workflow automation running through all of it." },
   { q: "Do I need to use every module?", a: "No. Each plan includes a set of modules and you switch on only what you need during setup. You can turn modules on or off later from your workspace settings." },
-  { q: "Is there a free trial?", a: "Yes. Every plan starts with a free trial, and you can look around the product without entering a card. The trial length for each plan is shown on the pricing page." },
+  { q: "Is there a free plan?", a: "Yes. The Free plan is free forever for one person and includes every panel and every feature — no card needed. Paid plans add more people and bigger storage, AI, email and voice allowances." },
   { q: "How long does setup take?", a: "A guided setup takes a few minutes: company details, departments, team invitations and the modules you want. Importing existing leads, clients or employees from CSV is built in." },
   { q: "Can I use my own domain for my website?", a: "Yes. Plans that include a custom domain let you connect your own domain with automatic SSL. Every workspace also gets its own address on our domain from the start." },
   { q: "How does the AI use my data?", a: "AI features run only against your own workspace, with the permissions of the person asking. Answers show how they were calculated, and AI usage is metered per plan so there are no surprises." },
@@ -276,7 +278,34 @@ export const FAQS: Faq[] = [
   { q: "Can I import my existing data?", a: "Yes. Leads, clients and employees can be imported from CSV, and the importer validates each row and tells you exactly what needs fixing." },
   { q: "What happens if I cancel?", a: "You can cancel from your billing page. Your workspace stays readable for a period after the plan ends so you can export what you need." },
   { q: "How is pricing calculated?", a: "Pricing is per workspace and depends on the plan: it sets the modules, the number of users, the AI allowance and storage. Prices are shown in your currency and exclude applicable taxes." },
-  { q: "Can I get a demo?", a: "Yes. Request a demo and we will walk you through the platform using your own business scenarios. You can also start a free trial and explore on your own." },
+  { q: "Can I get a demo?", a: "Yes. Request a demo and we will walk you through the platform using your own business scenarios. You can also get started free and explore on your own." },
+];
+
+
+/** More answers, grouped by topic on the FAQ page. */
+export const FAQS_MORE: Faq[] = [
+  { topic: "Plans & pricing", q: "What does the Free plan include?", a: "Every panel and every feature, free forever, for one person. Paid plans add more people and bigger storage, AI, email and voice allowances." },
+  { topic: "Plans & pricing", q: "Are any features locked behind a higher plan?", a: "No. Every plan includes every panel and every feature. Plans differ only by team size and by allowances." },
+  { topic: "Plans & pricing", q: "Can I change plans later?", a: "Yes. You can upgrade as your team grows or move down when you need less. Your data stays in place." },
+  { topic: "Plans & pricing", q: "Are prices shown with tax?", a: "No. Prices exclude applicable taxes, and invoices show the tax separately." },
+  { topic: "Your brand", q: "Will my team and clients see SelfRun's brand?", a: "No. Your logo, name, colours, domain, emails and apps carry your company's identity. SelfRun stays in the background." },
+  { topic: "Your brand", q: "Can I have my own mobile and desktop apps?", a: "Yes. The platform generates your installable app, Android and iOS apps and Windows, macOS and Linux desktop apps from your branding. For the stores you sign the Android and iOS projects with your own developer accounts." },
+  { topic: "Your brand", q: "Can I use more than one website theme?", a: "Yes. The theme library lets you preview, activate and customise themes — colours, fonts and components — and switch whenever you like." },
+  { topic: "Your brand", q: "Do push notifications come from my company?", a: "Yes. Push notifications reach your team and your website visitors in your name, on the devices where they have allowed them." },
+  { topic: "AI & automation", q: "What can I ask the AI?", a: "Anything about your business data in plain language — for example overdue invoices, leads by source, who is on leave or which projects are late. It answers with text, a table or a chart and shows how it calculated the answer." },
+  { topic: "AI & automation", q: "Can the AI change my data?", a: "No. Questions are answered with read-only queries, and the AI only uses data the person asking is allowed to see." },
+  { topic: "AI & automation", q: "Do I need to write code to automate things?", a: "No. Workflows are built from a trigger, optional conditions and actions on a settings screen, starting from ready-made templates." },
+  { topic: "AI & automation", q: "Can I build an AI assistant on my own documents?", a: "Yes. Create a bot with your instructions and knowledge files, choose who can use it, and track its usage and cost." },
+  { topic: "AI & automation", q: "Can AI answer my website visitors?", a: "Yes. The website chatbot answers from a knowledge base you control, and Conversation AI adds voice. Every conversation is logged for review." },
+  { topic: "Apps & devices", q: "Which devices are supported?", a: "The web app works in any modern browser. You can install it on Android, iPhone and iPad, Windows, macOS, Linux and ChromeOS, and generate Android, iOS and desktop apps." },
+  { topic: "Apps & devices", q: "Do the apps need updating when you add features?", a: "No. The apps load your workspace, so new features and branding changes appear without reinstalling." },
+  { topic: "Data & security", q: "Can I export my data?", a: "Yes. You can export records and reports at any time, and after a plan ends your workspace stays readable for a period so you can take what you need." },
+  { topic: "Data & security", q: "How do I see who did what?", a: "The Workspace audit log records activity across every panel with filters and CSV export, and each person can see their own sign-in history and devices." },
+  { topic: "Data & security", q: "How are passwords and credentials protected?", a: "Credentials, API keys and vault documents are encrypted at rest, and company data is isolated from every other company at the data layer." },
+  { topic: "Setup", q: "How do I get my existing data in?", a: "Import leads, clients and employees from CSV. Every row is validated and the importer tells you exactly what to fix. Imports never trigger workflows." },
+  { topic: "Setup", q: "Can I use my own domain?", a: "Yes. Add your domain, publish the DNS records shown, and the platform verifies it and issues the SSL certificate automatically." },
+  { topic: "Setup", q: "Do I have to switch on every panel?", a: "No. Switch on only what you need and add the rest whenever you are ready — they all share the same data from day one." },
+  { topic: "Support", q: "Where do I get help?", a: "Signed-in users have an AI help assistant that knows the screen they are on, a searchable help center and a request desk with status tracking. You can also contact the team from this website." },
 ];
 
 export interface Integration {
@@ -322,7 +351,7 @@ export const RESOURCES: ResourceArticle[] = [
     category: "Getting started",
     readMinutes: 5,
     sections: [
-      { heading: "Create your account", body: ["Register with your work email and choose a plan. We email a verification link; open it to activate your account. Every plan begins with a free trial."] },
+      { heading: "Create your account", body: ["Register with your work email and choose a plan. We email a verification link; open it to activate your account. Start on the free-forever plan and upgrade when your team grows."] },
       { heading: "Complete the guided setup", body: ["The first time you sign in, setup asks for your business details, creates your departments from a template that fits your industry, lets you invite your team and lets you choose which modules to switch on.", "You can skip setup and return to it later — a banner keeps it one click away until it is done."] },
       { heading: "Invite your team and set roles", body: ["Invite people by email and give each one a role. Roles control which modules a person can open and which actions they may take. You can fine-tune permissions per person at any time."] },
       { heading: "Bring in your data", body: ["Import leads, clients or employees from CSV in Settings → Import. The importer validates every row and lists exactly what to fix before anything is saved."] },

@@ -6,7 +6,7 @@ import { hubMarkAllReadAction, hubMarkReadAction } from "@/app/workspace/hub-act
 
 export const dynamic = "force-dynamic";
 
-/** Updates on this person's requests (SelfRun Business replies and status changes), from the same feed the Workspace bell reads. */
+/** Updates on this person's requests (SelfRun AI replies and status changes), from the same feed the Workspace bell reads. */
 export default async function SupportNotificationsPage() {
   const user = await getCurrentHubUser();
   if (!user) redirect("/workspace/login");
@@ -26,7 +26,7 @@ export default async function SupportNotificationsPage() {
       live
       panelName="Help & Support"
       shortCode="HELP"
-      description="Replies and status updates on your requests to SelfRun Business."
+      description="Replies and status updates on your requests to SelfRun AI."
       unreadEvent="hub:unread"
       initialNotifications={items.map((n) => ({ id: n.id, meta: n.source, title: n.title, body: n.body ?? "", createdAt: new Date(n.createdAt).toISOString(), read: n.read, link: n.url ?? undefined }))}
       onMarkRead={markRead}

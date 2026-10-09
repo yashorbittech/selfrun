@@ -1,9 +1,8 @@
 "use client";
 
-import { BarChart3, Settings, ScrollText } from "lucide-react";
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
 import { fmsLogoutAction } from "@/app/fms/(protected)/actions";
-import { primaryFmsRoleLabel, type FmsRole, canManageAccounts, canViewAuditLog } from "@/lib/fms-roles";
+import { primaryFmsRoleLabel, type FmsRole } from "@/lib/fms-roles"
 
 export default function FmsProfileMenu({
   email,
@@ -19,13 +18,7 @@ export default function FmsProfileMenu({
   lastLoginAt: string | null;
 }) {
   const roleLabel = primaryFmsRoleLabel(roles);
-  const roleCtx = { roles, permissionOverrides };
 
-  const governanceItems = [
-    { label: "Analytics", href: "/fms/reports/financial-summary", icon: BarChart3 },
-    ...(canManageAccounts(roleCtx) ? [{ label: "Settings", href: "/fms/settings/accounts", icon: Settings }] : []),
-    ...(canViewAuditLog(roleCtx) ? [{ label: "Audit Log", href: "/fms/audit-logs", icon: ScrollText }] : []),
-  ];
 
   return (
     <UnifiedProfileMenu
@@ -34,7 +27,6 @@ export default function FmsProfileMenu({
       roles={roles}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={governanceItems}
       onLogout={() => fmsLogoutAction()}
       panelName="Financial Management System"
     />

@@ -13,7 +13,7 @@ import OfferCard from "@/components/offers/OfferCard";
 import { nowMs } from "@/lib/offers/live";
 import { AUDIENCES, AUDIENCE_PRESETS, OFFER_STATUSES, PRICING_MODES, DEFAULT_CURRENCY, OFFER_TYPES, PRICING_UNITS, OFFER_SEGMENTS, LIMIT_KINDS, type Audience, type PricingMode, type OfferType, type PricingUnit, type OfferSegment, type LimitKind } from "@/lib/offers/constants";
 import type { CategorySlug } from "@/lib/categories";
-import { saveOfferAction } from "@/app/lms/(protected)/offers/[id]/offers/actions";
+import { saveOfferAction } from "@/app/cms/(protected)/offers/[id]/offers/actions";
 import type { SerializedOffer } from "@/lib/offers/offers";
 
 function toLocalInput(iso?: string): string {

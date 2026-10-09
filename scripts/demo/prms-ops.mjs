@@ -150,7 +150,7 @@ export async function seedPrmsOps(db, pms) {
   }
 
   for (const c of ["prms_expenses", "prms_software_subscriptions", "prms_infrastructure", "prms_budgets", "prms_invoices", "prms_payments", "pms_activity_logs"]) await wipe(c);
-  for (const [c, f] of [["prms_expenses", { expenseCode: { $exists: false } }], ["prms_software_subscriptions", { serviceName: { $exists: false } }], ["prms_infrastructure", { resourceType: { $exists: false } }], ["prms_budgets", { budgetCode: { $exists: false } }], ["prms_invoices", { invoiceNumber: { $exists: false } }], ["prms_payments", { paymentCode: { $exists: false } }]]) await db.collection(c).deleteMany(f);
+  for (const [c, f] of [["prms_expenses", { expenseCode: { $exists: false } }], ["prms_software_subscriptions", { serviceName: { $exists: false } }], ["prms_infrastructure", { resourceType: { $exists: false } }], ["prms_budgets", { $or: [{ budgetCode: { $exists: false } }, { periodStart: { $exists: false } }] }], ["prms_invoices", { invoiceNumber: { $exists: false } }], ["prms_payments", { paymentCode: { $exists: false } }]]) await db.collection(c).deleteMany(f);
   // orphaned base-seeder projects (their clients were removed as wrong-shaped) can't open; drop them with their children
   const clientIds = (await db.collection("pms_clients").find({}).project({ _id: 1 }).toArray()).map((c) => c._id);
   const orphans = (await db.collection("pms_projects").find({ clientId: { $nin: clientIds } }).project({ _id: 1 }).toArray()).map((p) => p._id);

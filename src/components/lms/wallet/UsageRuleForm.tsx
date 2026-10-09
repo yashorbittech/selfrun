@@ -17,7 +17,7 @@ import {
   type UsageModule,
   type RewardRuleAudience,
 } from "@/lib/wallet/constants";
-import { saveUsageRuleAction } from "@/app/lms/(protected)/wallet/usage-rules/actions";
+import { saveUsageRuleAction } from "@/app/cms/(protected)/wallet/usage-rules/actions";
 import type { SerializedUsageRule } from "@/lib/wallet/usage-rules";
 
 export default function UsageRuleForm({ rule }: { rule?: SerializedUsageRule }) {

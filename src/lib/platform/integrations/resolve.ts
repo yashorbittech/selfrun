@@ -29,7 +29,7 @@ export const DOMAIN_PROVIDERS = ["vercel", "manual"] as const;
 export type EmailProviderId = (typeof EMAIL_PROVIDERS)[number];
 export type DomainProviderId = (typeof DOMAIN_PROVIDERS)[number];
 
-export const DEFAULT_EMAIL_FROM = `SelfRun Business <no-reply@${new URL(siteUrl).hostname}>`;
+export const DEFAULT_EMAIL_FROM = `SelfRun AI <no-reply@${new URL(siteUrl).hostname}>`;
 
 function env(name: string): string | null {
   return process.env[name]?.trim() || null;

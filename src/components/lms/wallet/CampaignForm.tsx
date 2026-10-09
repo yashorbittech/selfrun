@@ -17,7 +17,7 @@ import {
   type ReferralQualifyingEvent,
   type RewardRuleAudience,
 } from "@/lib/wallet/constants";
-import { saveCampaignAction } from "@/app/lms/(protected)/wallet/campaigns/actions";
+import { saveCampaignAction } from "@/app/cms/(protected)/wallet/campaigns/actions";
 import type { SerializedReferralCampaign } from "@/lib/wallet/campaigns";
 
 const day = (iso: string | null | undefined) => (iso ? iso.slice(0, 10) : "");

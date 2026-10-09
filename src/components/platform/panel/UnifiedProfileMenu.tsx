@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { usePanelMeta } from "@/components/platform/PanelsProvider";
-import { LogOut, Settings, ShieldCheck, UserRound, Clock } from "lucide-react";
+import { LogOut, MonitorSmartphone, ShieldCheck, UserCog } from "lucide-react";
+import AccountDrawer, { type AccountView } from "@/components/platform/panel/AccountDrawer";
 import { useSidebarCollapse } from "@/components/lms/SidebarCollapseContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -16,15 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { formatDateTime, cn } from "@/lib/utils";
-
-export interface GovernanceLinkItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string | number;
-}
+import { cn } from "@/lib/utils";
 
 export interface UnifiedProfileMenuProps {
   email?: string;
@@ -33,7 +23,8 @@ export interface UnifiedProfileMenuProps {
   roles?: string[];
   createdAt?: string;
   lastLoginAt?: string | null;
-  governanceItems?: GovernanceLinkItem[];
+  /** Where the account lives for a person without a Workspace account (the Client Portal); everyone else gets the side panel. */
+  profileHref?: string;
   onLogout?: () => void;
   panelName?: string;
 }
@@ -50,22 +41,30 @@ function initialsFor(emailOrName: string) {
   return (clean.slice(0, 2) || "IN").toUpperCase();
 }
 
+/** The only two navigation entries of the sidebar user block; everything else a panel offers lives in its sidebar. */
+const MENU = [
+  { key: "sessions", label: "Sessions & Devices", icon: MonitorSmartphone },
+  { key: "profile", label: "Profile & Settings", icon: UserCog },
+] as const;
+
 export default function UnifiedProfileMenu({
   email = "",
   name,
   roleLabel = "Administrator",
   roles = ["admin"],
-  createdAt = new Date().toISOString(),
+  createdAt,
   lastLoginAt = null,
-  governanceItems = [],
+  profileHref = "/workspace/settings",
   onLogout,
-  panelName: fallbackPanelName = "Workspace",
 }: UnifiedProfileMenuProps) {
-  // The panel is named by the Panel Registry (the panel this profile menu sits in), like every other listing.
-  const panelName = usePanelMeta(usePathname().split("/")[1] ?? "")?.name ?? fallbackPanelName;
   const { collapsed } = useSidebarCollapse();
   const [isPending, startTransition] = useTransition();
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [drawer, setDrawer] = useState<AccountView | null>(null);
+  const [lastView, setLastView] = useState<AccountView>("profile");
+  const openDrawer = (v: AccountView) => {
+    setLastView(v);
+    setDrawer(v);
+  };
 
   const displayName = name || nameFromEmail(email);
   const initials = initialsFor(email);
@@ -141,30 +140,12 @@ export default function UnifiedProfileMenu({
 
           {/* Section 2: Menu Items */}
           <DropdownMenuSeparator className="my-1" />
-          {governanceItems.map((item, idx) => {
-            const IconComponent = item.icon;
-            return (
-              <DropdownMenuItem
-                key={idx}
-                className="cursor-pointer py-1.5"
-                render={
-                  <Link href={item.href} className="flex items-center gap-2.5 text-xs font-medium w-full">
-                    <IconComponent className="size-4 shrink-0 text-muted-foreground" />
-                    <span className="truncate">{item.label}</span>
-                    {item.badge !== undefined && (
-                      <span className="ml-auto rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                }
-              />
-            );
-          })}
-          <DropdownMenuItem onClick={() => setProfileOpen(true)} className="cursor-pointer py-1.5 text-xs font-medium">
-            <UserRound className="size-4 shrink-0 text-muted-foreground" />
-            <span>Profile</span>
-          </DropdownMenuItem>
+          {MENU.map(({ label, icon: Icon, key }) => (
+            <DropdownMenuItem key={key} onClick={() => openDrawer(key)} className="cursor-pointer py-1.5 text-xs font-medium">
+              <Icon className="size-4 shrink-0 text-muted-foreground" />
+              <span className="truncate">{label}</span>
+            </DropdownMenuItem>
+          ))}
 
           {/* Section 3: Logout */}
           <DropdownMenuSeparator className="my-1" />
@@ -180,50 +161,20 @@ export default function UnifiedProfileMenu({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Profile Detail Sheet */}
-      <Sheet open={profileOpen} onOpenChange={setProfileOpen}>
-        <SheetContent side="right" className="sm:max-w-md">
-          <SheetHeader className="border-b border-border/60 pb-4">
-            <SheetTitle className="text-lg font-bold">{panelName} Profile</SheetTitle>
-            <SheetDescription className="text-xs">
-              User session and security credentials for {panelName}.
-            </SheetDescription>
-          </SheetHeader>
-          <div className="space-y-6 pt-6 text-xs sm:text-sm">
-            <div className="flex items-center gap-4">
-              <Avatar className="size-14 ring-2 ring-primary/20">
-                <AvatarFallback className="bg-primary/10 text-lg font-bold text-primary">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <p className="truncate text-base font-bold text-foreground">{displayName}</p>
-                <p className="truncate text-xs text-muted-foreground">{email}</p>
-                <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                  <ShieldCheck className="size-3" /> {finalRoleLabel}
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-2xl border border-border/60 bg-muted/20 p-4">
-              <div className="flex justify-between border-b border-border/40 pb-2">
-                <span className="text-muted-foreground">Assigned Roles:</span>
-                <span className="font-semibold text-foreground">{roles.join(", ")}</span>
-              </div>
-              <div className="flex justify-between border-b border-border/40 pb-2">
-                <span className="text-muted-foreground">Member Since:</span>
-                <span className="font-semibold text-foreground">{formatDateTime(createdAt)}</span>
-              </div>
-              {lastLoginAt && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Last Session:</span>
-                  <span className="font-semibold text-foreground">{formatDateTime(lastLoginAt)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <AccountDrawer
+        open={drawer !== null}
+        view={drawer ?? lastView}
+        onViewChange={openDrawer}
+        onClose={() => setDrawer(null)}
+        email={email}
+        displayName={displayName}
+        initials={initials}
+        roleLabel={finalRoleLabel}
+        roles={roles}
+        createdAt={createdAt}
+        lastLoginAt={lastLoginAt}
+        fallbackHref={profileHref}
+      />
     </div>
   );
 }

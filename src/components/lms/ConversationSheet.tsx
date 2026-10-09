@@ -41,7 +41,7 @@ import { Separator } from "@/components/ui/separator";
 import ChatTranscript from "@/components/lms/ChatTranscript";
 import { formatDateTime } from "@/lib/utils";
 import type { ConversationDetail } from "@/lib/chat-conversations";
-import { deleteConversationInPlaceAction } from "@/app/lms/(protected)/chatbot/actions";
+import { deleteConversationInPlaceAction } from "@/app/cms/(protected)/chatbot/actions";
 
 function MetaRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
   return (
@@ -170,7 +170,7 @@ export default function ConversationSheet({
         <SheetFooter className="flex-row items-center justify-between gap-2">
           {session && (
             <Link
-              href={`/lms/chatbot/conversations/${session.sessionId}`}
+              href={`/cms/chatbot/conversations/${session.sessionId}`}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               Open full page

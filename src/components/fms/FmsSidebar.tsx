@@ -24,7 +24,6 @@ import {
   Scale,
   BarChart3,
   Settings,
-  ScrollText,
   Send,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -142,6 +141,10 @@ export default function FmsSidebar({
       {nav({ href: "/fms/payouts", label: "Payouts", icon: Send })}
       {nav({ href: "/fms/beneficiaries", label: "Bank Directory", icon: Building2 })}
       {nav({ href: "/fms/transactions", label: "Transactions", icon: ArrowLeftRight })}
+
+      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
+      {nav({ href: "/fms/reports/financial-summary", label: "Analytics", icon: BarChart3 })}
+      {canManageAccounts(roleCtx) && nav({ href: "/fms/settings/accounts", label: "Settings", icon: Settings })}
     </nav>
   );
 }

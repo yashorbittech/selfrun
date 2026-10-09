@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { adjustWalletAction, setWalletFrozenAction } from "@/app/lms/(protected)/wallet/actions";
+import { adjustWalletAction, setWalletFrozenAction } from "@/app/cms/(protected)/wallet/actions";
 
 export default function AdjustWalletForm({ userId, frozen }: { userId: string; frozen: boolean }) {
   const [pending, start] = useTransition();

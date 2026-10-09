@@ -19,7 +19,6 @@ export default function SidebarProfileMenu({
       roles={["Administrator"]}
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
-      governanceItems={[]}
       onLogout={() => logoutAction()}
       panelName="Lead Management"
     />

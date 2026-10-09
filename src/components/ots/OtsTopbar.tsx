@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import OtsMobileSidebar from "@/components/ots/OtsMobileSidebar";
 import OtsNotificationsBell from "@/components/ots/OtsNotificationsBell";
 import PanelSearch from "@/components/platform/PanelSearch";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import type { OtsNavFlags } from "@/components/ots/OtsSidebar";
@@ -44,7 +43,6 @@ export default function OtsTopbar({
           <Sparkles className="size-4" />
         </button>
         <OtsNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

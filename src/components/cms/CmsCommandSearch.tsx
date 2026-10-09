@@ -13,7 +13,7 @@ const SCREENS: CmsSearchEntry[] = [
   ["Dashboard", "/cms"], ["Pages", "/cms/pages"], ["Services pages", "/cms/pages?area=services"], ["Blog Posts", "/cms/collections/blog"],
   ["Careers (jobs)", "/cms/collections/jobs"], ["Hiring Models", "/cms/collections/engagement"], ["Products", "/cms/collections/products"],
   ["Header & Navigation", "/cms/navigation"], ["Footer", "/cms/footer"], ["Site Identity", "/cms/site-identity"], ["Media Library", "/cms/media"],
-  ["Forms", "/cms/forms"], ["Themes", "/cms/theme"], ["SEO Overview", "/cms/seo"], ["Settings", "/cms/settings"], ["Audit Logs", "/cms/audit-logs"],
+  ["Forms", "/cms/forms"], ["Themes", "/cms/theme"], ["SEO Overview", "/cms/seo"], ["Settings", "/cms/settings"],
 ].map(([title, href]) => ({ kind: "screen" as const, title, subtitle: "CMS screen", href }));
 
 const KIND_ICON = { page: FileText, record: Database, screen: LayoutGrid } as const;
@@ -82,10 +82,12 @@ export default function CmsCommandSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-9 w-full max-w-sm items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+        aria-label="Search the CMS"
+        // Phones: a round icon button like the other header icons. md and up: the wide pill.
+        className="flex size-9 shrink-0 items-center justify-center gap-2 rounded-full border border-border/60 bg-muted/30 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary md:h-9 md:w-full md:max-w-sm md:justify-start md:bg-muted/40 md:px-3"
       >
         <Search className="size-4 shrink-0" />
-        <span className="truncate">Search pages, posts, jobs…</span>
+        <span className="hidden truncate md:inline">Search pages, posts, jobs…</span>
         <kbd className="ml-auto hidden rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] sm:inline">⌘K</kbd>
       </button>
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setQuery(""); }}>

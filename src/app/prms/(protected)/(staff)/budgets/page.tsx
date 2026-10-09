@@ -88,7 +88,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
           cells: {
             code: `${b.budgetCode} · ${b.name}`,
             level: b.scopeName ? `${b.level} · ${b.scopeName}` : b.level,
-            period: `${formatDate(b.periodStart)} – ${formatDate(b.periodEnd)}`,
+            period: b.periodStart && b.periodEnd ? `${formatDate(b.periodStart)} – ${formatDate(b.periodEnd)}` : "—",
             allocated: formatMoney(b.allocatedAmount, b.currency),
             consumed: formatMoney(b.consumedAmount, b.currency),
             remaining: <span className={b.remaining < 0 ? "text-destructive font-semibold" : ""}>{formatMoney(b.remaining, b.currency)}</span>,

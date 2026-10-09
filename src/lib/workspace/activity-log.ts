@@ -23,7 +23,10 @@ export type { ActivityLogModule };
  * curated, user-facing notification feed; this is the raw event trail.
  */
 
-const SOURCES: { module: ActivityLogModule; collection: string }[] = [
+/** LPMS names the entity `entityType` and stores its time as an ISO string; everything else already has the shared shape. */
+const LPMS_PREP = [{ $addFields: { entity: "$entityType", createdAt: { $toDate: "$createdAt" } } }];
+
+const SOURCES: { module: ActivityLogModule; collection: string; prep?: Record<string, unknown>[] }[] = [
   { module: "prms", collection: "prms_activity_logs" },
   { module: "pms", collection: "pms_activity_logs" },
   { module: "teamchat", collection: "chat_activity_logs" },
@@ -31,6 +34,14 @@ const SOURCES: { module: ActivityLogModule; collection: string }[] = [
   { module: "hrms", collection: "hrms_audit_logs" },
   { module: "portal", collection: "portal_activity_logs" },
   { module: "ots", collection: "ots_activity_logs" },
+  { module: "lpms", collection: "lpms_audit", prep: LPMS_PREP },
+  { module: "sop", collection: "sop_activity_logs" },
+  { module: "fms", collection: "fms_activity_logs" },
+  { module: "smms", collection: "smms_activity_logs" },
+  { module: "aibots", collection: "aibots_activity_logs" },
+  { module: "cms", collection: "cms_audit" },
+  { module: "dlms", collection: "dlms_activity_logs" },
+  { module: "seo", collection: "seo_activity_logs" },
 ];
 
 export interface AdminActivityRow {
@@ -105,13 +116,14 @@ export async function searchActivityLog(opts: SearchActivityLogOptions = {}): Pr
   const [first, ...rest] = sources;
 
   const pipeline: Record<string, unknown>[] = [
+    ...(first.prep ?? []),
     { $match: match },
     { $addFields: { module: first.module } },
     PROJECT_STAGE,
     ...rest.map((s) => ({
       $unionWith: {
         coll: s.collection,
-        pipeline: [{ $match: match }, { $addFields: { module: s.module } }, PROJECT_STAGE],
+        pipeline: [...(s.prep ?? []), { $match: match }, { $addFields: { module: s.module } }, PROJECT_STAGE],
       },
     })),
     { $sort: { createdAt: -1 } },
@@ -163,13 +175,14 @@ export async function exportActivityLog(opts: SearchActivityLogOptions = {}): Pr
   const [first, ...rest] = sources;
 
   const pipeline: Record<string, unknown>[] = [
+    ...(first.prep ?? []),
     { $match: match },
     { $addFields: { module: first.module } },
     PROJECT_STAGE,
     ...rest.map((s) => ({
       $unionWith: {
         coll: s.collection,
-        pipeline: [{ $match: match }, { $addFields: { module: s.module } }, PROJECT_STAGE],
+        pipeline: [...(s.prep ?? []), { $match: match }, { $addFields: { module: s.module } }, PROJECT_STAGE],
       },
     })),
     { $sort: { createdAt: -1 } },

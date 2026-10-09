@@ -7,7 +7,6 @@ import { Sparkles } from "lucide-react";
 import MessengerMobileSidebar from "@/components/messenger/MessengerMobileSidebar";
 import MessengerNotificationsBell, { type BellItem } from "@/components/messenger/MessengerNotificationsBell";
 import { ConnectionPill } from "@/components/messenger/ConnectionPill";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import PanelSearch from "@/components/platform/PanelSearch";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
@@ -53,7 +52,6 @@ export default function MessengerTopbar({
         </button>
         <ConnectionPill />
         <MessengerNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

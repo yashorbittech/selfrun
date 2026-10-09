@@ -18,7 +18,7 @@ import {
   type RewardRuleType,
   type RewardRuleAudience,
 } from "@/lib/wallet/constants";
-import { saveRewardRuleAction } from "@/app/lms/(protected)/wallet/rules/actions";
+import { saveRewardRuleAction } from "@/app/cms/(protected)/wallet/rules/actions";
 import type { SerializedRewardRule } from "@/lib/wallet/reward-rules";
 
 export default function RewardRuleForm({ rule }: { rule?: SerializedRewardRule }) {

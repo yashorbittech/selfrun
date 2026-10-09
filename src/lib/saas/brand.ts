@@ -7,11 +7,11 @@ export const SAAS_BRAND = {
   /** Wordmark parts: "SelfRun" + "Business". */
   namePrimary: "SelfRun",
   nameAccent: "Business",
-  name: "SelfRun Business",
+  name: "SelfRun AI",
   tagline: "The AI business platform that runs itself",
   /** One line for search results and link previews. */
   description:
-    "SelfRun Business is one AI-powered platform that automates sales, HR, finance, projects, procurement, training and your website — so your business keeps running without you chasing it.",
+    "SelfRun AI is one AI-powered platform that automates sales, HR, finance, projects, procurement, training and your website — so your business keeps running without you chasing it.",
   /** The palette of the product. Customers' themes never touch these. */
   colors: {
     primary: "#4338ca",

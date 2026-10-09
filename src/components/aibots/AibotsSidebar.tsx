@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, ScrollText, Settings, Search } from "lucide-react";
+import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, Settings, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import BotAvatar from "@/components/aibots/BotAvatar";
@@ -118,7 +118,6 @@ export default function AibotsSidebar({ flags, bots, onNavigate, collapsed = fal
       {(flags.manageBots || flags.allChats || flags.audit || flags.settings) && <SectionLabel collapsed={collapsed}>Manage</SectionLabel>}
       {flags.manageBots && <NavLink {...common} href="/aibots/bots" label="Manage Bots" icon={<Bot className="size-4" />} exact />}
       {flags.allChats && <NavLink {...common} href="/aibots/chats" label="All Chats" icon={<MessagesSquare className="size-4" />} />}
-      {flags.audit && <NavLink {...common} href="/aibots/audit-logs" label="Activity Log" icon={<ScrollText className="size-4" />} />}
       {flags.settings && <NavLink {...common} href="/aibots/settings" label="Settings" icon={<Settings className="size-4" />} />}
     </nav>
   );

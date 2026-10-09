@@ -55,13 +55,13 @@ export default async function RequestDetailPage({ params }: { params: Promise<{ 
         {messages.map((m) => (
           <div key={m._id} className={cn("flex", m.authorType === "company" ? "justify-end" : "justify-start")}>
             <div className={cn("max-w-[85%] rounded-2xl px-4 py-3 text-sm", m.authorType === "company" ? "rounded-tr-sm bg-primary/10" : "rounded-tl-sm border border-border/60 bg-card")}>
-              <p className="mb-1 text-[11px] font-semibold text-muted-foreground">{m.authorType === "staff" ? "SelfRun Business Support" : m.authorLabel} · {formatDateTime(m.createdAt)}</p>
+              <p className="mb-1 text-[11px] font-semibold text-muted-foreground">{m.authorType === "staff" ? "SelfRun AI Support" : m.authorLabel} · {formatDateTime(m.createdAt)}</p>
               {m.body && <p className="whitespace-pre-wrap text-foreground">{m.body}</p>}
               <AttachmentList items={m.attachments} />
             </div>
           </div>
         ))}
-        {messages.length === 0 && <p className="text-center text-xs text-muted-foreground">No replies yet. The SelfRun Business team has your request and will respond here.</p>}
+        {messages.length === 0 && <p className="text-center text-xs text-muted-foreground">No replies yet. The SelfRun AI team has your request and will respond here.</p>}
       </div>
 
       <GlassCard interactive={false} className="p-4">

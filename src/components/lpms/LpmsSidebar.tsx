@@ -13,6 +13,7 @@ import {
   Layers,
   Tags,
   GitBranch,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -116,6 +117,9 @@ export default function LpmsSidebar({ flags, onNavigate, collapsed = false }: { 
       <SectionLabel collapsed={collapsed}>Manage</SectionLabel>
       {nav({ href: "/lpms/categories", label: "Categories", icon: Tags })}
       {flags.canManageTemplates && nav({ href: "/lpms/workflows", label: "Workflows", icon: GitBranch })}
+
+      {flags.canSettings && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
+      {flags.canSettings && nav({ href: "/lpms/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

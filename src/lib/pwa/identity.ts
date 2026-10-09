@@ -52,7 +52,7 @@ export async function getPwaIdentity(): Promise<PwaIdentity | null> {
       scope: "product-app",
       name: SAAS_BRAND.name,
       shortName: "SelfRun",
-      description: "Run SelfRun Business: companies, plans, billing and support.",
+      description: "Run SelfRun AI: companies, plans, billing and support.",
       themeColor: SAAS_THEME.colors.primary,
       themeColorDark: SAAS_THEME.colorsDark.background,
       backgroundColor: SAAS_THEME.colors.background,

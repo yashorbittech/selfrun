@@ -6,7 +6,6 @@ import { Sparkles } from "lucide-react";
 import PortalMobileSidebar from "@/components/portal/PortalMobileSidebar";
 import PortalNotificationsBell, { type BellItem } from "@/components/portal/PortalNotificationsBell";
 import LeadSwitcher, { type LeadSummary } from "@/components/portal/LeadSwitcher";
-import ThemeToggle from "@/components/lms/ThemeToggle";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
 import { PORTAL_ROLE_META, type PortalRole } from "@/lib/portal-roles";
@@ -41,7 +40,6 @@ export default function PortalTopbar({
           <Sparkles className="size-4" />
         </button>
         <PortalNotificationsBell items={notifications} unread={unread} />
-        <ThemeToggle />
       </div>
       <AskAiDrawer
         open={aiOpen}

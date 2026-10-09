@@ -15,7 +15,6 @@ import {
   PieChart,
   FolderTree,
   Tags,
-  ScrollText,
   Settings,
   ListChecks,
 } from "lucide-react";
@@ -133,7 +132,6 @@ export default function OtsSidebar({ flags, onNavigate, collapsed = false }: { f
       {setup && <SectionLabel collapsed={collapsed}>Setup</SectionLabel>}
       {flags.categories && nav({ href: "/ots/categories/questions", label: "Question Categories", icon: FolderTree })}
       {flags.categories && nav({ href: "/ots/categories/tests", label: "Test Categories", icon: Tags })}
-      {flags.audit && nav({ href: "/ots/activity", label: "Activity Logs", icon: ScrollText })}
       {flags.settings && nav({ href: "/ots/settings", label: "Settings", icon: Settings })}
     </nav>
   );

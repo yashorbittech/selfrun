@@ -12,7 +12,6 @@ import {
   CalendarDays,
   CalendarCheck,
   Wallet,
-  ScrollText,
   Settings,
   FileText,
   UserRound,
@@ -170,6 +169,10 @@ export default function HrmsSidebar({
       {nav({ href: "/hrms/leave", label: "Leave", icon: CalendarDays })}
       {nav({ href: "/hrms/holidays", label: "Holidays", icon: CalendarCheck })}
       {canRunPayroll(roleCtx) && nav({ href: "/hrms/payroll", label: "Payroll", icon: Wallet })}
+
+      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
+      {nav({ href: "/hrms/analytics", label: "Analytics", icon: BarChart3 })}
+      {canManageSettings(roleCtx) && nav({ href: "/hrms/settings", label: "Settings", icon: Settings })}
 
       {employeeId && !roles.includes("super_admin") && (
         <>

@@ -4,7 +4,7 @@ import type { FieldDef, OptionDef, RequestTypeDef, StatusDef, StatusState, Suppo
 
 /**
  * The Help & Support Center's configuration — request types (and their form fields), categories, priorities,
- * severities, teams and the status workflow — lives in ONE document (`support_config` / `_id: "main"`) that SelfRun Business
+ * severities, teams and the status workflow — lives in ONE document (`support_config` / `_id: "main"`) that SelfRun AI
  * edits in the Platform Panel. The values below are only the starter set written the first time it is read; nothing in
  * the code refers to a particular type, priority or status by name (the workflow works from each status's `state`).
  */

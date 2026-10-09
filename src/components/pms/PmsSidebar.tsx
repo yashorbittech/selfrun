@@ -11,11 +11,13 @@ import {
   CalendarDays,
   Clock,
   CheckSquare,
+  BarChart3,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { PmsRole } from "@/lib/pms-roles";
-import { canReviewTimesheets, hasPmsStaffRole } from "@/lib/pms-roles";
+import { canReviewTimesheets, canManageSettings, canViewActivityLog, hasPmsStaffRole } from "@/lib/pms-roles";
 
 function NavLink({
   href,
@@ -122,6 +124,10 @@ export default function PmsSidebar({
 
       <SectionLabel collapsed={collapsed}>Timesheets & Tracking</SectionLabel>
       {canReviewTimesheets(roleCtx) && nav({ href: "/pms/timesheets", label: "Timesheet", icon: Clock })}
+
+      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
+      {nav({ href: "/pms/analytics", label: "Analytics", icon: BarChart3 })}
+      {canManageSettings(roleCtx) && nav({ href: "/pms/settings", label: "Settings", icon: Settings })}
 
       {employeeId && !roles.includes("super_admin") && (
         <>

@@ -1,3 +1,4 @@
+import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { getCampaignAnalytics, type CampaignRow } from "@/lib/campaigns";
 import { notDeleted } from "@/lib/smms/db";
@@ -196,7 +197,7 @@ export async function getAnalytics(from?: Date, to?: Date): Promise<AnalyticsDat
   if (from) range.$gte = from;
   if (to) range.$lte = to;
   const inRange = from || to ? [{ $match: { "variants.publish.at": range } }] : [];
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  const tz = mongoTimeZone();
   const [byPlatform, byType, top, weekly, paid] = await Promise.all([
     postMetricsByPlatform(from, to),
     posts
