@@ -90,7 +90,7 @@ async function siteWideMetadata(): Promise<Metadata> {
       title: { default: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, template: `%s | ${SAAS_BRAND.name}` },
       description: SAAS_BRAND.description,
       applicationName: SAAS_BRAND.name,
-      icons: { icon: [{ url: SAAS_BRAND.assets.favicon, type: "image/svg+xml" }], apple: SAAS_BRAND.assets.mark },
+      icons: { icon: [{ url: SAAS_BRAND.assets.faviconIco, sizes: "any" }, { url: SAAS_BRAND.assets.faviconSmall, type: "image/png", sizes: "16x16" }, { url: SAAS_BRAND.assets.favicon, type: "image/png", sizes: "32x32" }], shortcut: SAAS_BRAND.assets.faviconIco, apple: SAAS_BRAND.assets.appleTouch },
       openGraph: { type: "website", siteName: SAAS_BRAND.name, title: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, description: SAAS_BRAND.description, images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: SAAS_BRAND.name }] },
       twitter: { card: "summary_large_image", title: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, description: SAAS_BRAND.description },
     };
@@ -155,10 +155,10 @@ export default async function RootLayout({
         {jsonLd.map((schema, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(schema) }} />
         ))}
+        {/* On the product's own hosts (its website and its panels) the theme is the website's: light unless the visitor chose dark with the website's switch, kept under the same key. Customers' hosts keep following the system. */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          {...(saasHost ? { defaultTheme: "light", enableSystem: false, storageKey: "sr-theme" } : { defaultTheme: "system", enableSystem: true })}
           disableTransitionOnChange
         >
           <BrandProvider brand={saasHost ? { ...NEUTRAL_BRAND, name: SAAS_BRAND.name, namePrimary: SAAS_BRAND.namePrimary, nameAccent: SAAS_BRAND.nameAccent, logoUrl: SAAS_BRAND.assets.mark } : brand}>

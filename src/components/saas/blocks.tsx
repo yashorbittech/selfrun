@@ -27,12 +27,12 @@ export function SectionHead({ eyebrow, title, accent, lead, center = true, icon,
           <Icon name={icon} className={`h-6 w-6 ${dark ? "text-white" : "text-primary"}`} />
         </div>
       )}
-      {eyebrow && <p className={`sr-eyebrow mb-3 ${dark ? "!text-white/80" : ""}`}>{eyebrow}</p>}
-      <h2 className={`sr-h2 mb-4 ${dark ? "!text-white" : ""}`}>
+      {eyebrow && <p className={`sr-eyebrow mb-3 ${dark ? "sr-dh-soft" : ""}`}>{eyebrow}</p>}
+      <h2 className={`sr-h2 mb-4 ${dark ? "sr-dh" : ""}`}>
         {title}
         {accent && <> <span className={`bg-gradient-to-r bg-clip-text text-transparent ${dark ? "from-white to-white/60" : "from-primary to-brand-accent"}`}>{accent}</span></>}
       </h2>
-      {lead && <p className={`sr-lead ${dark ? "!text-white/80" : ""}`}>{lead}</p>}
+      {lead && <p className={`sr-lead ${dark ? "sr-dh-soft" : ""}`}>{lead}</p>}
     </Reveal>
   );
 }
@@ -62,12 +62,17 @@ export function PageHero({
   const home = size === "home";
   const artSrc = art ? heroFor(art) : null;
   const bgSrc = art ? heroFor(`bg-${art}`) : null;
+  const bgDark = art ? heroFor(`bg-${art}-dark`) : null;
   return (
     <section className={`relative flex items-center overflow-hidden border-b border-border/50 ${home ? "py-20 lg:min-h-[780px] lg:py-24" : "py-16 lg:min-h-[560px] lg:py-20"}`}>
       {bgSrc && (
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={bgSrc} alt="" width={1920} height={820} fetchPriority="high" decoding="async" className="h-full w-full object-cover object-right" />
+          <img src={bgSrc} alt="" width={1920} height={820} fetchPriority="high" decoding="async" className="h-full w-full object-cover object-right [[data-theme=dark]_&]:hidden" />
+          {bgDark && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={bgDark} alt="" width={1920} height={820} decoding="async" className="hidden h-full w-full object-cover object-right [[data-theme=dark]_&]:block" />
+          )}
         </div>
       )}
       {!artSrc && <div className="pointer-events-none absolute inset-0" aria-hidden>
@@ -78,8 +83,9 @@ export function PageHero({
         <div className="absolute inset-0 hidden bg-background lg:block" style={{ maskImage: "linear-gradient(to top, black 0%, transparent 35%)", WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 35%)" }} />
       </div>}
       {!bgSrc && <Blobs strong />}
+      {bgSrc && <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--primary)_7%,var(--background)),var(--background)_70%)] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,color-mix(in_oklch,var(--primary)_16%,var(--background)),var(--background)_75%)] lg:hidden" aria-hidden />}
       {/* a light tint over the background keeps the heading and text clearly readable */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-900/[0.10] via-slate-900/[0.05] to-slate-900/[0.02]" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-900/[0.10] via-slate-900/[0.05] to-slate-900/[0.02] [[data-theme=dark]_&]:from-black/30 [[data-theme=dark]_&]:via-black/10 [[data-theme=dark]_&]:to-transparent" aria-hidden />
       <div className="sr-grid-bg" aria-hidden />
       <div className={`sr-container relative grid items-center gap-10 ${artSrc ? "lg:grid-cols-[1fr_1.22fr]" : "gap-14 lg:grid-cols-[1fr_1.08fr]"}`}>
         <div className="max-w-2xl">
@@ -95,7 +101,7 @@ export function PageHero({
             </h1>
           </Reveal>
           <Reveal delay={160}><div className={`max-w-xl leading-relaxed text-foreground/75 ${home ? "text-lg sm:text-xl" : "text-lg"}`}>{lead}</div></Reveal>
-          {children && <Reveal delay={240} className="flex flex-col items-start gap-4 pt-9 sm:flex-row sm:flex-wrap">{children}</Reveal>}
+          {children && <Reveal delay={240} className="flex flex-row flex-wrap items-center gap-3 pt-9 sm:gap-4">{children}</Reveal>}
           {notes && (
             <Reveal delay={300} className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
               {notes.map((t) => <span key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-primary" />{t}</span>)}
@@ -123,11 +129,11 @@ export function PageHero({
 export function HeroCtas({ primary = { label: "Get started free", href: "/signup" }, secondary = { label: "Request a demo", href: "/demo" } }: { primary?: { label: string; href: string }; secondary?: { label: string; href: string } | null }) {
   return (
     <>
-      <Link href={primary.href} className="group inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-105 active:scale-95">
+      <Link href={primary.href} className="group inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-foreground px-4 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-105 active:scale-95 sm:flex-none sm:px-8">
         {primary.label} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </Link>
       {secondary && (
-        <Link href={secondary.href} className="group inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/60 px-8 py-4 text-sm font-bold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-muted/60">
+        <Link href={secondary.href} className="group inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-full border border-border/50 bg-background/60 px-4 py-4 text-sm font-bold text-foreground shadow-sm backdrop-blur-sm transition-all hover:bg-muted/60 sm:flex-none sm:px-8">
           <Play className="h-4 w-4 text-primary transition-transform group-hover:scale-110" fill="currentColor" /> {secondary.label}
         </Link>
       )}

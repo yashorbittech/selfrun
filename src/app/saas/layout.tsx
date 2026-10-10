@@ -3,12 +3,12 @@ import "./saas.css";
 import Header from "@/components/saas/Header";
 import Footer from "@/components/saas/Footer";
 import Interactions from "@/components/saas/Interactions";
+import { OfferAdHost, OfferPopupHost, OfferTopBar } from "@/components/saas/OfferChrome";
 import { onSaasHost, requestHostOrNull, saasOrigin } from "@/lib/saas/request";
 import { saasCanonicalHost } from "@/lib/saas/hosts";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { jsonForScript } from "@/lib/security/json-script";
-import { SAAS_THEME } from "@/lib/saas/theme";
-import { themeCssVars } from "@/lib/cms/theme-shared";
+import SrRoot from "@/components/saas/SrRoot";
 
 
 /** The product website exists only on the product's own host; on a customer's domain this path is not a page. */
@@ -25,15 +25,18 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     description: SAAS_BRAND.description,
   };
   const site = { "@context": "https://schema.org", "@type": "WebSite", name: SAAS_BRAND.name, url: origin };
-  // The panels' own light colours, set on the wrapper so the website stays light even when the visitor's system is dark.
+  // The product's own colours (light by default, dark when chosen), set on the wrapper.
   return (
-    <div className="sr" style={themeCssVars(SAAS_THEME) as React.CSSProperties}>
+    <SrRoot>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(org) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(site) }} />
       <Interactions />
+      <OfferTopBar />
       <Header />
       <main>{children}</main>
       <Footer host={host} />
-    </div>
+      <OfferAdHost />
+      <OfferPopupHost />
+    </SrRoot>
   );
 }

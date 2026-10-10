@@ -82,17 +82,20 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
         {list.length === 0 ? (
           <p className="py-24 text-center text-muted-foreground">No screen matches. Try another word.</p>
         ) : (
-          <div className={`grid grid-flow-dense gap-4 sm:grid-cols-2 2xl:grid-cols-3 ${mosaic ? "sm:auto-rows-[230px]" : ""} ${mosaic ? "lg:grid-cols-3" : "lg:grid-cols-3"}`}>
+          <div className={`grid grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3 ${mosaic ? "sm:auto-rows-[230px]" : ""} lg:grid-cols-3`}>
             {visible.map((it, n) => (
-              <button key={it.id} type="button" onClick={() => setOpen(n)} aria-label={`Open ${it.title}`} className={`group relative block overflow-hidden rounded-[1.75rem] border border-border/60 bg-muted text-left shadow-md transition-all duration-500 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/25 ${mosaic ? "min-h-[230px]" : "aspect-[16/10]"} ${span(n)}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={it.src} alt={`${it.panel}: ${it.title}`} width={1280} height={800} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-[900ms] group-hover:scale-[1.07]" />
-                <span className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100" aria-hidden />
-                {it.featured && <span className="absolute left-3.5 top-3.5 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black shadow"><Star className="h-3 w-3 fill-amber-400 text-amber-400" />Featured</span>}
-                <span className="absolute right-3.5 top-3.5 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 sm:scale-75"><Maximize2 className="h-4 w-4" /></span>
-                <span className="absolute inset-x-0 bottom-0 p-5 text-white">
-                  <span className="mb-1.5 inline-block rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold backdrop-blur">{it.panel}</span>
-                  <span className="block text-lg font-black leading-tight tracking-tight">{it.title}</span>
+              <button key={it.id} type="button" onClick={() => setOpen(n)} aria-label={`Open ${it.title}`} className={`group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-border/60 bg-card text-left shadow-md transition-all duration-500 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/25 sm:block ${mosaic ? "sm:min-h-[230px]" : "sm:aspect-[16/10]"} ${span(n)}`}>
+                {/* phones: the whole screen on top, its name beneath; larger screens: the screen fills the tile with the name over it */}
+                <span className="relative block aspect-[16/10] w-full overflow-hidden bg-muted sm:absolute sm:inset-0 sm:aspect-auto">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={it.src} alt={`${it.panel}: ${it.title}`} width={1280} height={800} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-[900ms] group-hover:scale-[1.07]" />
+                  <span className="absolute inset-0 hidden bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100 sm:block" aria-hidden />
+                  {it.featured && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black shadow"><Star className="h-3 w-3 fill-amber-400 text-amber-400" />Featured</span>}
+                  <span className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 sm:scale-75"><Maximize2 className="h-4 w-4" /></span>
+                </span>
+                <span className="block p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-5 sm:text-white">
+                  <span className="mb-1.5 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary sm:bg-white/20 sm:text-white sm:backdrop-blur">{it.panel}</span>
+                  <span className="block text-base font-black leading-tight tracking-tight sm:text-lg">{it.title}</span>
                 </span>
               </button>
             ))}
@@ -107,27 +110,28 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
       </div>
 
       {cur && (
-        <div className="fixed inset-0 z-[80] flex flex-col overflow-hidden bg-black" role="dialog" aria-modal="true" aria-label={cur.title}>
+        <div className="fixed inset-0 z-[80] flex flex-col overflow-hidden bg-background text-foreground" role="dialog" aria-modal="true" aria-label={cur.title}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img key={`bg-${cur.id}`} src={cur.src} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-40 blur-3xl" />
-          <div className="relative flex items-center justify-between gap-4 px-4 py-4 text-white sm:px-8">
-            <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-white/70">{cur.panel} · {(open ?? 0) + 1} of {list.length}</p></div>
+          <img key={`bg-${cur.id}`} src={cur.src} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-20 blur-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/10 via-background/70 to-background/90" aria-hidden />
+          <div className="relative flex items-center justify-between gap-4 border-b border-border/60 bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-8">
+            <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-muted-foreground">{cur.panel} · {(open ?? 0) + 1} of {list.length}</p></div>
             <div className="flex items-center gap-2">
-              <Link href={`/features/${cur.panelKey}`} className="hidden items-center gap-1.5 rounded-full bg-white/10 px-4 py-2.5 text-sm font-semibold backdrop-blur hover:bg-white/20 sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
-              <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/25"><X className="h-5 w-5" /></button>
+              <Link href={`/features/${cur.panelKey}`} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
+              <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted/50 transition-colors hover:border-primary/50 hover:text-primary"><X className="h-5 w-5" /></button>
             </div>
           </div>
-          <div className="relative flex min-h-0 flex-1 items-center justify-center px-3 sm:px-20" onClick={() => setOpen(null)}>
-            <button type="button" onClick={(e) => { e.stopPropagation(); move(-1); }} aria-label="Previous" className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/25 sm:left-6"><ArrowLeft className="h-5 w-5" /></button>
+          <div className="relative flex min-h-0 flex-1 items-center justify-center px-3 py-4 sm:px-20" onClick={() => setOpen(null)}>
+            <button type="button" onClick={(e) => { e.stopPropagation(); move(-1); }} aria-label="Previous" className="absolute left-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 shadow-lg backdrop-blur transition-colors hover:border-primary/50 hover:text-primary sm:left-6"><ArrowLeft className="h-5 w-5" /></button>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img key={cur.id} src={cur.src} alt={`${cur.panel}: ${cur.title}`} onClick={(e) => e.stopPropagation()} className="max-h-full max-w-full rounded-2xl object-contain shadow-[0_40px_120px_-20px_rgb(0_0_0/.8)] ring-1 ring-white/20" style={{ animation: "sr-in .35s ease both" }} />
-            <button type="button" onClick={(e) => { e.stopPropagation(); move(1); }} aria-label="Next" className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur hover:bg-white/25 sm:right-6"><ArrowRight className="h-5 w-5" /></button>
+            <img key={cur.id} src={cur.src} alt={`${cur.panel}: ${cur.title}`} onClick={(e) => e.stopPropagation()} className="max-h-full max-w-full rounded-2xl border border-border/70 bg-card object-contain shadow-[0_40px_100px_-30px] shadow-primary/40" style={{ animation: "sr-in .35s ease both" }} />
+            <button type="button" onClick={(e) => { e.stopPropagation(); move(1); }} aria-label="Next" className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 shadow-lg backdrop-blur transition-colors hover:border-primary/50 hover:text-primary sm:right-6"><ArrowRight className="h-5 w-5" /></button>
           </div>
-          <div className="sr-scroll-x relative flex justify-center gap-2.5 px-4 py-4">
+          <div className="sr-scroll-x relative flex justify-center gap-2.5 border-t border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl">
             {list.slice(Math.max(0, (open ?? 0) - 6), Math.max(0, (open ?? 0) - 6) + 13).map((t, k) => {
               const idx = Math.max(0, (open ?? 0) - 6) + k;
               return (
-                <button key={t.id} type="button" onClick={() => setOpen(idx)} aria-label={t.title} className={`h-14 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition-all sm:h-16 sm:w-28 ${idx === open ? "ring-white" : "opacity-50 ring-transparent hover:opacity-90"}`}>
+                <button key={t.id} type="button" onClick={() => setOpen(idx)} aria-label={t.title} className={`h-14 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition-all sm:h-16 sm:w-28 ${idx === open ? "ring-primary" : "opacity-60 ring-transparent hover:opacity-100"}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={t.src} alt="" loading="lazy" className="h-full w-full object-cover object-left-top" />
                 </button>

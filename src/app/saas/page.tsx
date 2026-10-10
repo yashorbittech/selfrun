@@ -107,7 +107,7 @@ export default async function SaasHome() {
         <div className="sr-container">
           <SectionHead center icon="workflow" eyebrow="Fully automated" title="How your entire business" accent="runs itself." lead="Work enters once, flows through every panel on its own, and the platform follows up, approves, reminds and reports — while AI turns it all into answers." />
           <TimelineSteps items={RUNS_ITSELF.map((l) => ({ title: l.title, text: l.text, icon: l.icon, points: l.points }))} />
-          <div className="mt-20 grid items-center gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
+          <div className="mt-20 grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
             <Reveal><AutomationFlow flows={FLOWS} /></Reveal>
             <Reveal delay={120}><MarketingShot screenKey="automations" name="Automations" /></Reveal>
           </div>

@@ -41,7 +41,7 @@ export function BeforeAfter({ modules }: { modules: { name: string; color: strin
         <p className="sr-mono text-[12px] tracking-wider uppercase sr-muted">Before · many tools, many logins</p>
         <div className="flex flex-wrap gap-2.5">
           {SCATTER.map((t, i) => (
-            <span key={t} className="rounded-xl border border-dashed bg-white px-3.5 py-2 text-[13.5px] font-medium text-[var(--sr-muted)]" style={{ transform: `rotate(${[-3, 2, -1.5, 3, -2, 1.5, -3, 2.5, -1][i]}deg)` }}>{t}</span>
+            <span key={t} className="rounded-xl border border-dashed bg-card px-3.5 py-2 text-[13.5px] font-medium text-[var(--sr-muted)]" style={{ transform: `rotate(${[-3, 2, -1.5, 3, -2, 1.5, -3, 2.5, -1][i]}deg)` }}>{t}</span>
           ))}
         </div>
         <p className="text-[14.5px] leading-snug sr-muted">Data copied by hand between apps. Nobody sees the whole picture.</p>
@@ -50,7 +50,7 @@ export function BeforeAfter({ modules }: { modules: { name: string; color: strin
       <div className="space-y-4">
         <p className="sr-mono text-[12px] tracking-wider uppercase" style={{ color: "var(--sr-primary)" }}>After · one platform, one login</p>
         <div className="flex flex-wrap gap-2">
-          {modules.map((m) => <span key={m.name} className="inline-flex items-center gap-2 rounded-full bg-white py-1.5 pr-3.5 pl-2 text-[13px] font-medium shadow-sm ring-1 ring-[var(--sr-line)]"><span className="size-3.5 rounded-full" style={{ background: m.color }} />{m.name}</span>)}
+          {modules.map((m) => <span key={m.name} className="inline-flex items-center gap-2 rounded-full bg-card py-1.5 pr-3.5 pl-2 text-[13px] font-medium shadow-sm ring-1 ring-[var(--sr-line)]"><span className="size-3.5 rounded-full" style={{ background: m.color }} />{m.name}</span>)}
         </div>
         <p className="text-[14.5px] leading-snug">Everything shares one record. Work moves between teams on its own.</p>
       </div>

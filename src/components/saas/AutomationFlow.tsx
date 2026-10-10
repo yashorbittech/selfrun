@@ -45,8 +45,8 @@ export default function AutomationFlow({ flows }: { flows: Flow[] }) {
   );
 
   return (
-    <div className="sr-band rounded-[2rem] p-5 shadow-2xl shadow-primary/30 sm:p-8">
-      <div className="relative">
+    <div className="sr-band min-w-0 max-w-full rounded-[2rem] p-5 shadow-2xl shadow-primary/30 sm:p-8">
+      <div className="relative min-w-0">
         <div className="sr-scroll-x mb-6 flex gap-2" role="tablist" aria-label="Example automations">
           {flows.map((f) => (
             <button key={f.id} role="tab" aria-selected={f.id === flow.id} onClick={() => { setId(f.id); setStep(-1); }} className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition-all ${f.id === flow.id ? "border-transparent bg-white text-black shadow-lg" : "border-white/20 bg-white/10 text-white hover:bg-white/20"}`}>{f.area}</button>

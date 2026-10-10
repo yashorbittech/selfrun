@@ -285,3 +285,118 @@ details.sr-faq[open] .sr-faq-plus { background: var(--primary); color: var(--pri
 @keyframes sr-hero-float { 50% { transform: translateY(-10px); } }
 .sr .sr-hero-art { filter: drop-shadow(0 30px 50px rgb(67 56 202 / .12)); animation: sr-hero-float 7s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .sr .sr-hero-art { animation: none; } }
+
+@keyframes sr-tick { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sr [style*="sr-tick"] { animation: none !important; } }
+
+/* ═════════ Dark theme ═════════
+ * The colour tokens switch in SrRoot (`.sr[data-theme="dark"]`). Everything below only re-tunes what is not a token: highlights, glows,
+ * glass and the bands, so dark looks designed rather than inverted.
+ */
+html:has(.sr[data-theme="dark"]) { background: #0b1020; color-scheme: dark; }
+.sr[data-theme="dark"] { color-scheme: dark; --sr-surface: color-mix(in oklch, var(--muted) 70%, black); --sr-line-strong: color-mix(in oklch, var(--border) 80%, white 10%); --sr-glow: color-mix(in oklch, var(--primary) 22%, transparent); }
+.sr[data-theme="dark"]::before {
+  background: radial-gradient(900px 500px at 12% -5%, color-mix(in oklch, var(--primary) 22%, transparent), transparent 60%),
+              radial-gradient(800px 480px at 95% 8%, color-mix(in oklch, var(--brand-gradient) 14%, transparent), transparent 60%);
+}
+.sr[data-theme="dark"] ::selection { background: var(--primary); color: #0b1020; }
+
+/* cards: no white edge highlight, deeper shadows, a faint lit rim instead */
+.sr[data-theme="dark"] :is(.rounded-2xl, .rounded-3xl, [class*="rounded-\[2"], .sr-card):is(.border, .sr-card):not(img, figure, input, textarea, select, button, summary):not([class*="bg-gradient"], [class*="bg-black"], [class*="bg-foreground"], [class*="bg-primary"], [class*="border-white"], [class*="text-white"]) {
+  background-color: color-mix(in oklch, var(--card) 88%, transparent);
+  border-color: color-mix(in oklch, var(--border) 85%, white 6%);
+  box-shadow: 0 1px 0 0 rgb(255 255 255 / .05) inset, 0 1px 2px rgb(0 0 0 / .35), 0 12px 32px -14px rgb(0 0 0 / .6);
+}
+@media (hover: hover) {
+  .sr[data-theme="dark"] :is(.rounded-2xl, .rounded-3xl, [class*="rounded-\[2"], .sr-card):is(.border, .sr-card):is(.group, .sr-spot, .sr-card-hover):not([class*="bg-gradient"], [class*="bg-black"], [class*="text-white"]):hover,
+  .sr[data-theme="dark"] a:is(.rounded-2xl, .rounded-3xl, [class*="rounded-\[2"]):is(.border):not([class*="bg-gradient"], [class*="bg-black"], [class*="text-white"]):hover {
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / .06) inset, 0 2px 4px rgb(0 0 0 / .4), 0 28px 48px -22px color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+}
+
+/* sections that were a dotted tint */
+.sr[data-theme="dark"] .sr-section.bg-muted\/10 { background-image: radial-gradient(color-mix(in oklch, var(--foreground) 9%, transparent) 1px, transparent 1px); background-color: color-mix(in oklch, var(--muted) 45%, transparent); }
+.sr[data-theme="dark"] .sr-grid-bg { opacity: .6; }
+
+/* tables */
+.sr[data-theme="dark"] table thead th { background: color-mix(in oklch, var(--primary) 18%, var(--card)); color: var(--foreground); }
+.sr[data-theme="dark"] table thead th:first-child, .sr[data-theme="dark"] table tbody td:first-child { background: color-mix(in oklch, var(--card) 96%, var(--primary) 4%); }
+
+/* the dark bands (offers, savings, benefits…) gain a lit edge so they stay distinct from a dark page */
+.sr[data-theme="dark"] .sr-band { box-shadow: inset 0 1px 0 rgb(255 255 255 / .12), inset 0 0 0 1px rgb(255 255 255 / .06); }
+.sr[data-theme="dark"] .sr-stage { border-color: color-mix(in oklch, var(--primary) 35%, var(--border)); background: linear-gradient(145deg, color-mix(in oklch, var(--primary) 14%, var(--card)), var(--card) 55%, color-mix(in oklch, var(--brand-gradient) 10%, var(--card))); box-shadow: 0 40px 80px -40px color-mix(in oklch, var(--primary) 45%, black); }
+.sr[data-theme="dark"] .sr-glass { border-color: rgb(255 255 255 / .14); }
+.sr[data-theme="dark"] .sr-light { background: var(--card) !important; }
+
+/* inputs, tabs, kbd, chips */
+.sr[data-theme="dark"] .sr-input { background: color-mix(in oklch, var(--background) 60%, var(--muted)); border-color: color-mix(in oklch, var(--border) 90%, white 5%); color: var(--foreground); }
+.sr[data-theme="dark"] .sr-input::placeholder { color: color-mix(in oklch, var(--muted-foreground) 80%, transparent); }
+.sr[data-theme="dark"] .sr-btn-primary, .sr[data-theme="dark"] .sr-btn-accent { box-shadow: 0 10px 24px -10px rgb(0 0 0 / .8); }
+.sr[data-theme="dark"] .sr-outline { -webkit-text-stroke-color: color-mix(in oklch, var(--primary) 70%, white 10%); }
+.sr[data-theme="dark"] .group:hover > .sr-outline { color: color-mix(in oklch, var(--primary) 25%, transparent); }
+.sr[data-theme="dark"] .sr-hero-art { filter: drop-shadow(0 30px 50px rgb(0 0 0 / .45)); }
+.sr[data-theme="dark"] figure > div { box-shadow: 0 30px 70px -30px rgb(0 0 0 / .8); }
+.sr[data-theme="dark"] .sr-top { background: color-mix(in oklch, var(--card) 88%, transparent); }
+
+/* dark: the bands use the deep indigo, not the light dark-mode primary, so white text on them keeps its contrast */
+.sr[data-theme="dark"] .sr-band {
+  background: radial-gradient(900px 520px at 12% 0%, color-mix(in oklch, var(--brand-gradient) 38%, transparent), transparent 62%),
+              radial-gradient(900px 560px at 92% 100%, rgb(79 70 229 / .55), transparent 62%),
+              linear-gradient(160deg, #1b1a5c, #0c2a3a);
+}
+.sr[data-theme="dark"] [class*="text-[var(--primary)]"] { color: #4338ca; }
+
+/* ═════════ Dark mode: the bands turn light ═════════
+ * In light mode the offer strip, the offer ad, the pop-up header, the savings, benefits and product bands are deep indigo. In dark mode
+ * they invert to a pale indigo with dark text, so they stand out from the dark page the same way. Pure presentation: the markup keeps its
+ * "white on indigo" classes and these rules re-colour them.
+ */
+.sr[data-theme="dark"] .sr-band {
+  color: #14183a;
+  background: radial-gradient(900px 520px at 12% 0%, rgb(16 185 129 / .16), transparent 62%),
+              radial-gradient(900px 560px at 92% 100%, rgb(99 102 241 / .28), transparent 62%),
+              linear-gradient(160deg, #eef0ff, #dde2ff);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .9), 0 30px 70px -30px rgb(0 0 0 / .7);
+}
+.sr[data-theme="dark"] .sr-band::before {
+  opacity: .5;
+  background-image: linear-gradient(rgb(67 56 202 / .08) 1px, transparent 1px), linear-gradient(90deg, rgb(67 56 202 / .08) 1px, transparent 1px);
+}
+/* text */
+.sr[data-theme="dark"] .sr-band :is([class*="text-white"], .text-foreground) { color: #14183a; }
+.sr[data-theme="dark"] .sr-band [class*="text-white/"] { color: rgb(20 24 58 / .74); }
+.sr[data-theme="dark"] .sr-band .text-muted-foreground { color: rgb(20 24 58 / .7); }
+.sr[data-theme="dark"] .sr-band .text-primary { color: #4338ca; }
+.sr[data-theme="dark"] .sr-band [class*="from-white"] { --tw-gradient-from: #4338ca; --tw-gradient-to: #0b8f68; }
+/* translucent white chips, glass and rings become translucent indigo */
+.sr[data-theme="dark"] .sr-band [class*="bg-white/"] { background-color: rgb(67 56 202 / .10); }
+.sr[data-theme="dark"] .sr-band :is([class*="border-white"], [class*="ring-white"]) { border-color: rgb(67 56 202 / .24); --tw-ring-color: rgb(67 56 202 / .24); }
+.sr[data-theme="dark"] .sr-band .sr-glass { background: rgb(255 255 255 / .62); border-color: rgb(67 56 202 / .2); color: #14183a; box-shadow: 0 1px 0 rgb(255 255 255 / .9) inset, 0 20px 40px -22px rgb(67 56 202 / .45); }
+.sr[data-theme="dark"] .sr-band .sr-glass :is([class*="text-white"]) { color: #14183a; }
+.sr[data-theme="dark"] .sr-band [class*="text-white/"] .sr-numeral { opacity: .5; }
+/* the solid white buttons become dark buttons */
+.sr[data-theme="dark"] .sr-band .bg-white { background-color: #0b1020 !important; color: #fff !important; box-shadow: 0 10px 24px -10px rgb(11 16 32 / .7); }
+.sr[data-theme="dark"] .sr-band .bg-white :is(span, svg) { color: inherit; }
+.sr[data-theme="dark"] .sr-band .rounded-full.bg-white.text-\[var\(--primary\)\] { color: #fff !important; }
+/* the countdown tiles keep their lit look, in indigo */
+.sr[data-theme="dark"] .sr-band [role="timer"] > span > span:first-child { background: rgb(255 255 255 / .75); box-shadow: inset 0 1px 0 #fff; --tw-ring-color: rgb(67 56 202 / .25); }
+/* the savings calculator's sliders and light panel */
+.sr[data-theme="dark"] .sr-band .sr-range { background: linear-gradient(90deg, #4338ca var(--pct, 0%), rgb(67 56 202 / .2) var(--pct, 0%)); }
+.sr[data-theme="dark"] .sr-band .sr-range::-webkit-slider-thumb { background: #4338ca; box-shadow: 0 0 0 6px rgb(67 56 202 / .22), 0 6px 14px rgb(11 16 32 / .35); }
+.sr[data-theme="dark"] .sr-band .sr-range::-moz-range-thumb { background: #4338ca; box-shadow: 0 0 0 6px rgb(67 56 202 / .22); }
+.sr[data-theme="dark"] .sr-band .sr-light { background: #14183a !important; color: #eef0ff; }
+.sr[data-theme="dark"] .sr-band .sr-light .text-muted-foreground { color: #a3acc9; }
+.sr[data-theme="dark"] .sr-band .sr-light .text-foreground { color: #eef0ff; }
+
+/* a section heading on a dark band: plain classes (not important utilities, which a layered rule would always win against) */
+.sr .sr-dh { color: #fff; }
+.sr .sr-dh-soft { color: rgb(255 255 255 / .8); }
+.sr[data-theme="dark"] .sr-band .sr-dh { color: #14183a; }
+.sr[data-theme="dark"] .sr-band .sr-dh-soft { color: rgb(20 24 58 / .74); }
+.sr[data-theme="dark"] .sr-band [class*="text-white/["] { color: rgb(20 24 58 / .07); }
+.sr[data-theme="dark"] .sr-band .sr-glass [class*="text-white/["] { color: rgb(20 24 58 / .07); }
+.sr[data-theme="dark"] .sr-band .sr-light .text-primary { color: #a5b4fc; }
+.sr[data-theme="dark"] .sr-band .sr-light [class*="text-transparent"] { color: transparent; }
+
+/* every grid has one shrinkable column on phones: its content can no longer push the grid (and the page) wider than the screen */
+@layer base { .sr .grid { grid-template-columns: minmax(0, 1fr); } }

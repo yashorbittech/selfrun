@@ -30,9 +30,9 @@ export default async function Footer({}: { host?: string }) {
               <h2 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">Put your business on <span className="text-white/70">autopilot.</span></h2>
               <p className="mt-1.5 max-w-xl text-[15px] text-white/80">Free forever for one person, with every panel and every feature — or talk to the team first.</p>
             </div>
-            <div className="flex flex-none flex-col gap-3 sm:flex-row">
-              <Link href="/signup" className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-3 text-[15px] font-bold text-black shadow-xl transition-transform hover:scale-105">Get started free <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
-              <Link href="/contact" className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/10 px-7 py-3 text-[15px] font-bold text-white backdrop-blur transition-all hover:bg-white/20"><MessageCircle className="h-5 w-5" />Contact us</Link>
+            <div className="flex w-full flex-none flex-row gap-3 lg:w-auto">
+              <Link href="/signup" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-black shadow-xl transition-transform hover:scale-105">Get started free <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
+              <Link href="/contact" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-white/40 bg-white/10 px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-white backdrop-blur transition-all hover:bg-white/20"><MessageCircle className="h-5 w-5" />Contact us</Link>
             </div>
           </div>
         </div>

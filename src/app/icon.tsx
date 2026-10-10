@@ -1,8 +1,10 @@
 import { renderCompanyIcon } from "@/lib/platform/branding/icon";
+import { productIconResponse } from "@/lib/saas/static-icon";
+import { SAAS_BRAND } from "@/lib/saas/brand";
 
 export const size = { width: 64, height: 64 };
 export const contentType = "image/png";
 
-export default function Icon() {
-  return renderCompanyIcon(64);
+export default async function Icon() {
+  return (await productIconResponse(SAAS_BRAND.assets.favicon, "image/png")) ?? renderCompanyIcon(64);
 }

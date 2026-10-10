@@ -197,18 +197,20 @@ SPECS.legal = () => page(`${bgGlows(1)}
 
 /* ───────── hero backgrounds ───────── */
 const BW = 1920, BH = 820;
-const bgCss = `
+const bgCss = (dark) => `
 html,body{width:${BW}px;height:${BH}px}
 .bgs{position:relative;width:${BW}px;height:${BH}px;overflow:hidden;
- background:radial-gradient(1100px 650px at 86% 18%,rgba(67,56,202,.17),transparent 62%),radial-gradient(900px 620px at 96% 96%,rgba(16,185,129,.17),transparent 62%),radial-gradient(900px 520px at 4% -6%,rgba(67,56,202,.07),transparent 60%),radial-gradient(700px 420px at 40% 110%,rgba(16,185,129,.06),transparent 60%),linear-gradient(180deg,#f9faff,#f2f4fc)}
-.motif{position:absolute;inset:0;opacity:.6;transform:perspective(2400px) rotateY(-9deg) rotateX(3deg) scale(1.04);transform-origin:78% 50%;-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%);mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%)}
-.mc{position:absolute;background:rgba(255,255,255,.72);border:1.5px solid rgba(67,56,202,.16);border-radius:20px;box-shadow:0 30px 60px -28px rgba(67,56,202,.32)}
-.mc.hi{border-color:rgba(16,185,129,.55);background:rgba(255,255,255,.9)}
-.mb{position:absolute;display:block;border-radius:8px;background:rgba(67,56,202,.2)}
-.mb.g{background:rgba(16,185,129,.4)}.mb.d{background:rgba(67,56,202,.45)}
+ background:${dark
+  ? "radial-gradient(1100px 650px at 86% 18%,rgba(124,117,245,.30),transparent 62%),radial-gradient(900px 620px at 96% 96%,rgba(16,185,129,.20),transparent 62%),radial-gradient(900px 520px at 4% -6%,rgba(124,117,245,.12),transparent 60%),linear-gradient(180deg,#0d1226,#0b1020)"
+  : "radial-gradient(1100px 650px at 86% 18%,rgba(67,56,202,.17),transparent 62%),radial-gradient(900px 620px at 96% 96%,rgba(16,185,129,.17),transparent 62%),radial-gradient(900px 520px at 4% -6%,rgba(67,56,202,.07),transparent 60%),radial-gradient(700px 420px at 40% 110%,rgba(16,185,129,.06),transparent 60%),linear-gradient(180deg,#f9faff,#f2f4fc)"}}
+.motif{position:absolute;inset:0;opacity:${dark ? ".6" : ".6"};transform:perspective(2400px) rotateY(-9deg) rotateX(3deg) scale(1.04);transform-origin:78% 50%;-webkit-mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%);mask-image:linear-gradient(90deg,transparent 0%,transparent 30%,#000 62%)}
+.mc{position:absolute;background:${dark ? "rgba(30,36,74,.72)" : "rgba(255,255,255,.72)"};border:1.5px solid ${dark ? "rgba(140,132,255,.28)" : "rgba(67,56,202,.16)"};border-radius:20px;box-shadow:0 30px 60px -28px ${dark ? "rgba(0,0,0,.7)" : "rgba(67,56,202,.32)"}}
+.mc.hi{border-color:rgba(16,185,129,.6);background:${dark ? "rgba(22,52,60,.8)" : "rgba(255,255,255,.9)"}}
+.mb{position:absolute;display:block;border-radius:8px;background:${dark ? "rgba(150,142,255,.35)" : "rgba(67,56,202,.2)"}}
+.mb.g{background:${dark ? "rgba(52,211,153,.55)" : "rgba(16,185,129,.4)"}}.mb.d{background:${dark ? "rgba(170,163,255,.7)" : "rgba(67,56,202,.45)"}}
 .mo{position:absolute;border-radius:50%;background:linear-gradient(135deg,#4338ca,#10b981);opacity:.78}
-.mo.s{opacity:.28;background:rgba(67,56,202,.5)}
-.dash{position:absolute;border-top:3px dotted rgba(67,56,202,.35)}
+.mo.s{opacity:${dark ? ".5" : ".28"};background:${dark ? "rgba(150,142,255,.8)" : "rgba(67,56,202,.5)"}}
+.dash{position:absolute;border-top:3px dotted ${dark ? "rgba(150,142,255,.5)" : "rgba(67,56,202,.35)"}}
 .gl{position:absolute;opacity:.2}
 `;
 const mx = (x, y, w, h, c = "", r = 20) => `<div class="mc ${c}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${r}px"></div>`;
@@ -247,7 +249,7 @@ const MOTIFS = {
 const BG_KIND = { home: "workspace", features: "workspace", pricing: "pricing", about: "orbit", contact: "contact", demo: "demo", docs: "docs", gallery: "gallery", login: "vault", legal: "shield", "panel-workspace": "workspace", "panel-lms": "kanban", "panel-hrms": "org", "panel-fms": "finance", "panel-pms": "gantt", "panel-prms": "procure", "panel-tms": "learn", "panel-messenger": "chat", "panel-sop": "docs", "panel-lpms": "docs", "panel-dlms": "vault", "panel-ots": "quiz", "panel-aibots": "ai", "panel-intelligence": "ai", "panel-smms": "social", "panel-seo": "seo", "panel-cms": "site", "panel-website": "site", "panel-portal": "people", "panel-support": "support" };
 for (const plan of ["free", "starter", "growth", "business", "enterprise"]) BG_KIND[`plan-${plan}`] = "pricing";
 const BGS = {};
-for (const [id, kind] of Object.entries(BG_KIND)) BGS[`bg-${id}`] = () => { return `<!doctype html><meta charset="utf-8"><style>*{box-sizing:border-box;margin:0}${bgCss}</style><div class="bgs"><div class="motif">${MOTIFS[kind]()}</div></div>`; };
+for (const [id, kind] of Object.entries(BG_KIND)) for (const dark of [false, true]) BGS[`bg-${id}${dark ? "-dark" : ""}`] = () => `<!doctype html><meta charset="utf-8"><style>*{box-sizing:border-box;margin:0}${bgCss(dark)}</style><div class="bgs"><div class="motif">${MOTIFS[kind]()}</div></div>`;
 
 /* ───────── render ───────── */
 const wanted = process.argv.slice(2);

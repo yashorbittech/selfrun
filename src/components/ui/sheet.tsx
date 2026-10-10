@@ -12,11 +12,13 @@ function Sheet({ ...props }: SheetPrimitive.Root.Props) {
 }
 
 function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
+  // With a `render` element (a Button, usually) that element keeps its own data-slot: setting one here as well made the server and the
+  // client disagree about which of the two wins, which is the "data-slot" hydration warning.
+  return <SheetPrimitive.Trigger data-slot={props.render ? undefined : "sheet-trigger"} {...props} />
 }
 
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
-  return <SheetPrimitive.Close data-slot="sheet-close" {...props} />
+  return <SheetPrimitive.Close data-slot={props.render ? undefined : "sheet-close"} {...props} />
 }
 
 function SheetPortal({ ...props }: SheetPrimitive.Portal.Props) {

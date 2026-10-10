@@ -59,7 +59,7 @@ export default function PanelOrbit({ panels, brand }: { panels: OrbitPanel[]; br
       <div className="absolute rounded-full" style={{ inset: "30%", background: "radial-gradient(circle, color-mix(in oklch, var(--primary) 14%, transparent), transparent 70%)" }} aria-hidden />
       {ring(outer, 0.45, "min(11.5%, 76px)", false)}
       {ring(inner, 0.3, "min(12.5%, 82px)", true)}
-      <div className="absolute inset-[35%] flex flex-col items-center justify-center rounded-full bg-white p-3 text-center" style={{ boxShadow: "0 20px 50px -18px color-mix(in oklch, var(--primary) 45%, transparent)", border: "1px solid var(--border)" }} aria-live="polite">
+      <div className="absolute inset-[35%] flex flex-col items-center justify-center rounded-full bg-card p-3 text-center" style={{ boxShadow: "0 20px 50px -18px color-mix(in oklch, var(--primary) 45%, transparent)", border: "1px solid var(--border)" }} aria-live="polite">
         {active ? (
           <>
             <span className="sr-circle size-9 sm:size-11"><Icon name={active.icon} /></span>

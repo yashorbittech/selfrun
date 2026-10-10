@@ -6,11 +6,11 @@ import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getSignupMode } from "@/lib/platform/settings";
 import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 import { getFeatureModules } from "@/lib/saas/modules";
-import { SAAS_THEME } from "@/lib/saas/theme";
-import { themeCssVars } from "@/lib/cms/theme-shared";
+import SrRoot from "@/components/saas/SrRoot";
 import Header from "@/components/saas/Header";
 import Footer from "@/components/saas/Footer";
 import Interactions from "@/components/saas/Interactions";
+import { OfferTopBar } from "@/components/saas/OfferChrome";
 import MarketingShot from "@/components/saas/MarketingShot";
 import SignupForm from "./SignupForm";
 
@@ -32,8 +32,9 @@ export default async function SignupPage() {
   const [mode, modules] = await Promise.all([getSignupMode(), getFeatureModules()]);
 
   return (
-    <div className="sr" style={themeCssVars(SAAS_THEME) as React.CSSProperties}>
+    <SrRoot>
       <Interactions />
+      <OfferTopBar />
       <Header />
       <main>
         <section className="relative overflow-hidden">
@@ -86,6 +87,6 @@ export default async function SignupPage() {
         </section>
       </main>
       <Footer />
-    </div>
+    </SrRoot>
   );
 }
