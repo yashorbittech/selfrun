@@ -9,6 +9,7 @@ import { guideFor } from "@/lib/saas/guide-steps";
 import FaqSection from "@/components/saas/FaqSection";
 import { HeroCtas, PageHero } from "@/components/saas/blocks";
 import Icon from "@/components/saas/Icon";
+import DocsNav from "@/components/saas/DocsNav";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,10 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
   const onScreen = ft ? [
     { t: "Tabs", v: ft.tabs }, { t: ft.labels.some((l) => /\*$/.test(l)) ? "Form fields" : "Search and filters", v: [...ft.placeholders.slice(0, 1), ...clean(ft.labels)] }, { t: "Columns in the list", v: ft.headers }, { t: "Buttons", v: clean(ft.buttons).filter((b) => !/^(previous|next|columns)$/i.test(b)) }, { t: "Sections", v: ft.headings },
   ].filter((x) => x.v.length) : [];
+  const navPanels = all.map((p) => {
+    const fs = featuresOf(p.key);
+    return { key: p.key, name: p.name, icon: p.icon, groups: [...new Set(fs.map((x) => x.group))].map((g) => ({ name: g, items: fs.filter((x) => x.group === g).map((x) => ({ slug: x.slug, name: x.name })) })) };
+  }).filter((p) => p.groups.length);
   const toc = [
     { id: "simple", label: "In simple words", show: true },
     { id: "before", label: "Before you start", show: true },
@@ -71,24 +76,17 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
       <HeroCtas primary={{ label: guide.auto ? "See how it works" : "Start the steps", href: "#steps" }} secondary={{ label: `All ${m.name} guides`, href: `/docs#${m.key}` }} />
     </PageHero>
     <section className="sr-section">
-      <div className="sr-container grid max-w-[92rem] gap-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[260px_minmax(0,1fr)_280px]">
+      <div className="sr-container grid max-w-[calc(var(--sr-max)+12rem)] gap-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[340px_minmax(0,1fr)_280px] 2xl:grid-cols-[380px_minmax(0,1fr)_300px]">
       <aside className="hidden xl:block">
-        <nav aria-label={`${m.name} guides`} className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto rounded-3xl border border-border/60 bg-background p-4 shadow-sm">
-          <Link href="/docs" className="mb-3 flex items-center gap-1.5 px-2 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary"><ArrowLeft className="h-3.5 w-3.5" />All documentation</Link>
-          <div className="mb-4 flex items-center gap-3 px-2"><span className="sr-icon h-10 w-10"><Icon name={m.icon} className="h-5 w-5" /></span><div><p className="font-black leading-tight">{m.name}</p><p className="text-xs text-muted-foreground">{list.length} guides</p></div></div>
-          {groupNames.map((g) => (
-            <div key={g} className="mb-3">
-              <p className="px-2 pb-1.5 text-[11px] font-bold uppercase tracking-widest text-primary">{g}</p>
-              <ul className="space-y-0.5">
-                {list.filter((x) => x.group === g).map((x) => (
-                  <li key={x.slug}><Link href={`/docs/${m.key}/${x.slug}`} aria-current={x.slug === f.slug ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${x.slug === f.slug ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{x.name}</Link></li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </nav>
+        <div className="sticky top-28 flex max-h-[calc(100vh-8rem)] flex-col rounded-3xl border border-border/60 bg-background p-4 shadow-sm">
+          <DocsNav panels={navPanels} currentPanel={m.key} currentSlug={f.slug} />
+        </div>
       </aside>
       <div className="min-w-0 space-y-12">
+        <details className="group rounded-2xl border border-border/60 bg-background shadow-sm xl:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold"><span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" />Browse all documentation</span><ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" /></summary>
+          <div className="max-h-[70vh] border-t border-border/60 p-3 [&>nav]:max-h-[65vh]"><DocsNav panels={navPanels} currentPanel={m.key} currentSlug={f.slug} /></div>
+        </details>
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
           <Link href="/docs" className="hover:text-primary">Documentation</Link><ChevronRight className="h-3.5 w-3.5" />
           <Link href={`/docs#${m.key}`} className="hover:text-primary">{m.name}</Link><ChevronRight className="h-3.5 w-3.5" />

@@ -13,6 +13,9 @@ export interface CompanyBrand {
   logoUrl: string | null;
   /** Brand accent colour as `#rrggbb`, or null for the platform default. */
   primaryColor: string | null;
+  /** Full logo (mark + wordmark) for light / dark backgrounds. Set only for the SelfRun product itself; companies never have it. */
+  wordmarkUrl?: string | null;
+  wordmarkDarkUrl?: string | null;
   /** The platform owner keeps the platform's own built-in logo mark. */
   isPlatformOwner: boolean;
 }

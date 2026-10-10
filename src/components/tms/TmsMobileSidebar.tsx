@@ -7,9 +7,8 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import TmsSidebar from "@/components/tms/TmsSidebar";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import type { TmsRole } from "@/lib/tms-roles";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 export default function TmsMobileSidebar({
   roles,
@@ -32,10 +31,7 @@ export default function TmsMobileSidebar({
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only"><PanelName panel="tms" fallback="TMS" /> navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
-            <BrandMark className="size-6 shrink-0" />
-            <span className="text-sm font-bold">
-              <BrandName />
-            </span>
+            <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <TmsSidebar roles={roles} permissionOverrides={permissionOverrides} studentId={studentId} onNavigate={() => setOpen(false)} />

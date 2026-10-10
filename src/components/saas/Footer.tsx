@@ -22,7 +22,7 @@ export default async function Footer({}: { host?: string }) {
   return (
     <footer className="relative overflow-hidden border-t border-border/50 bg-muted/20">
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
-      <div className="relative mx-auto max-w-7xl px-6 py-9 lg:px-8">
+      <div className="relative mx-auto max-w-[var(--sr-max)] px-6 py-9 lg:px-8">
         <div className="sr-band relative mb-9 rounded-[2rem] p-6 shadow-xl shadow-primary/25 sm:px-9 sm:py-7">
           <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/15 blur-3xl" aria-hidden />
           <div className="relative flex flex-col items-start gap-5 lg:flex-row lg:items-center lg:justify-between">

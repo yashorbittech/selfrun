@@ -40,7 +40,7 @@ export default function Header() {
   return (
     <>
     <header ref={header} className={`sticky top-0 z-50 border-b transition-all duration-300 ${scrolled ? "border-border/50 bg-background/80 shadow-sm backdrop-blur-xl" : "border-transparent bg-background/60 backdrop-blur-md"}`}>
-      <nav className="mx-auto flex h-[76px] max-w-7xl items-center gap-6 px-6 lg:px-8" aria-label="Main">
+      <nav className="mx-auto flex h-[76px] max-w-[var(--sr-max)] items-center gap-6 px-6 lg:px-8" aria-label="Main">
         <Logo />
         <div className="ml-auto hidden items-center gap-0.5 lg:flex xl:gap-1">
           {NAV_LINKS.map((l) => (
@@ -66,7 +66,7 @@ export default function Header() {
       <AnimatePresence>
       {drawer && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-x-0 bottom-0 z-40 overflow-y-auto bg-background lg:hidden" style={{ top: drawerTop }}>
-          <div className="mx-auto max-w-7xl px-6 py-4">
+          <div className="mx-auto max-w-[var(--sr-max)] px-6 py-4">
             <ul>
               {NAV_LINKS.map((l) => (
                 <li key={l.href} className="border-b border-border/50">

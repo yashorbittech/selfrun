@@ -386,6 +386,8 @@ Notes:
 
 Full guide, including DNS, email and payments: [docs/deploy-vercel.md](./docs/deploy-vercel.md).
 
+Moving production from Vercel to one low-cost AWS server (EC2, Docker, Caddy, self-hosted MongoDB, in-app scheduler, `.env` file), including the end-to-end migration of every customer, database, file, subdomain and custom domain, with the code changes it needs: [docs/deploy-aws.md](./docs/deploy-aws.md).
+
 Self-hosting: `npm run build && npm start` (port 3000; set `PORT` to change), and schedule the cron endpoints.
 
 ---

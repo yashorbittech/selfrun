@@ -2,13 +2,12 @@
 
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import PortalSidebar from "@/components/portal/PortalSidebar";
 import PortalProfileMenu from "@/components/portal/PortalProfileMenu";
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
 import type { PortalRole } from "@/lib/portal-roles";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 const EXPANDED = 244;
 const COLLAPSED = 68;
@@ -38,12 +37,7 @@ export default function PortalSidebarShell({
         )}
       >
         <div className="flex min-w-0 items-center gap-2">
-          <BrandMark className="size-6 shrink-0" />
-          {!collapsed && (
-            <span className="truncate text-sm font-bold">
-              <BrandName />
-            </span>
-          )}
+          <SidebarBrand collapsed={collapsed} />
         </div>
         <button
           type="button"

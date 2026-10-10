@@ -7,9 +7,8 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import PmsSidebar from "@/components/pms/PmsSidebar";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import type { PmsRole } from "@/lib/pms-roles";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 export default function PmsMobileSidebar({
   roles,
@@ -32,10 +31,7 @@ export default function PmsMobileSidebar({
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only"><PanelName panel="pms" fallback="PMS" /> navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
-            <BrandMark className="size-6 shrink-0" />
-            <span className="text-sm font-bold">
-              <BrandName />
-            </span>
+            <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <PmsSidebar roles={roles} permissionOverrides={permissionOverrides} employeeId={employeeId} onNavigate={() => setOpen(false)} />

@@ -8,8 +8,7 @@ import { Menu, Sparkles } from "lucide-react";
 import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import BrandMark from "@/components/BrandMark";
-import { BrandName } from "@/components/platform/BrandProvider";
+import SidebarBrand from "@/components/SidebarBrand";
 import PlatformSidebar, { type PlatformNavFlags } from "@/components/platform/panel/PlatformSidebar";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import PanelBellLink from "@/components/platform/PanelBellLink";
@@ -29,10 +28,7 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; ema
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only">Platform Panel navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
-            <BrandMark className="size-6 shrink-0" />
-            <span className="text-sm font-bold">
-              <BrandName />
-            </span>
+            <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <PlatformSidebar flags={flags} onNavigate={() => setOpen(false)} />

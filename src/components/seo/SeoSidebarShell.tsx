@@ -2,13 +2,12 @@
 
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import SeoSidebar from "@/components/seo/SeoSidebar";
 import SeoProfileMenu from "@/components/seo/SeoProfileMenu";
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
 import type { SeoNavFlags } from "@/components/seo/SeoSidebar";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 const EXPANDED_WIDTH = 244;
 const COLLAPSED_WIDTH = 68;
@@ -42,12 +41,7 @@ export default function SeoSidebarShell({
         )}
       >
         <div className="flex min-w-0 items-center gap-2">
-          <BrandMark className="size-6 shrink-0" />
-          {!collapsed && (
-            <span className="truncate text-sm font-bold">
-              <BrandName />
-            </span>
-          )}
+          <SidebarBrand collapsed={collapsed} />
         </div>
         <button
           type="button"

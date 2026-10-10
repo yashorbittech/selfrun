@@ -7,9 +7,8 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SopSidebar from "@/components/sop/SopSidebar";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import type { SopNavFlags } from "@/components/sop/SopSidebar";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 export default function SopMobileSidebar({ flags }: { flags: SopNavFlags }) {
   const [open, setOpen] = useState(false);
@@ -24,10 +23,7 @@ export default function SopMobileSidebar({ flags }: { flags: SopNavFlags }) {
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only"><PanelName panel="sop" fallback="SOP" /> navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
-            <BrandMark className="size-6 shrink-0" />
-            <span className="text-sm font-bold">
-              <BrandName />
-            </span>
+            <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <SopSidebar flags={flags} onNavigate={() => setOpen(false)} />

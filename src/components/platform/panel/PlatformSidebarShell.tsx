@@ -2,11 +2,10 @@
 
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import PlatformSidebar, { type PlatformNavFlags } from "@/components/platform/panel/PlatformSidebar";
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
 import PlatformProfileMenu from "@/components/platform/panel/PlatformProfileMenu";
-import { BrandName } from "@/components/platform/BrandProvider";
 import { cn } from "@/lib/utils";
 
 const EXPANDED_WIDTH = 248;
@@ -24,12 +23,7 @@ export default function PlatformSidebarShell({ email, createdAt, lastLoginAt, fl
     >
       <div className={cn("sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-md dark:bg-card/60", collapsed ? "justify-center gap-1.5 px-2" : "justify-between")}>
         <div className="flex min-w-0 items-center gap-2">
-          <BrandMark className="size-6 shrink-0" />
-          {!collapsed && (
-            <span className="truncate text-sm font-bold">
-              <BrandName />
-            </span>
-          )}
+          <SidebarBrand collapsed={collapsed} />
         </div>
         <button
           type="button"

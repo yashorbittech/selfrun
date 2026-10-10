@@ -8,8 +8,7 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import HubSidebar from "@/components/hub/HubSidebar";
-import BrandMark from "@/components/BrandMark";
-import { BrandName } from "@/components/platform/BrandProvider";
+import SidebarBrand from "@/components/SidebarBrand";
 
 export default function HubMobileSidebar({ nav }: { nav: NavSection[] }) {
   const [open, setOpen] = useState(false);
@@ -24,10 +23,7 @@ export default function HubMobileSidebar({ nav }: { nav: NavSection[] }) {
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <SheetDescription className="sr-only"><PanelName panel="workspace" fallback="Workspace" /> navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
-            <BrandMark className="size-6 shrink-0" />
-            <span className="text-sm font-bold">
-              <BrandName />
-            </span>
+            <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
             <HubSidebar nav={nav} onNavigate={() => setOpen(false)} />

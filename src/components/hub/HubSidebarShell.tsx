@@ -3,12 +3,11 @@
 import type { NavSection } from "@/lib/workspace/nav";
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import HubSidebar from "@/components/hub/HubSidebar";
 import HubProfileMenu from "@/components/hub/HubProfileMenu";
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 const EXPANDED_WIDTH = 240;
 const COLLAPSED_WIDTH = 68;
@@ -38,12 +37,7 @@ export default function HubSidebarShell({
         )}
       >
         <div className="flex min-w-0 items-center gap-2">
-          <BrandMark className="size-6 shrink-0" />
-          {!collapsed && (
-            <span className="truncate text-sm font-bold">
-              <BrandName />
-            </span>
-          )}
+          <SidebarBrand collapsed={collapsed} />
         </div>
         <button
           type="button"

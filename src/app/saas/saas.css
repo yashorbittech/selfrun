@@ -27,7 +27,11 @@
 .sr main { overflow-x: clip; }
 
 /* ── layout ───────────────────────────────────────── */
-.sr-container { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: 1.5rem; }
+.sr { --sr-max: 80rem; }
+@media (min-width: 1536px) { .sr { --sr-max: 90rem; } }
+@media (min-width: 1920px) { .sr { --sr-max: 104rem; } }
+@media (min-width: 2560px) { .sr { --sr-max: 120rem; } }
+.sr-container { width: 100%; max-width: var(--sr-max); margin-inline: auto; padding-inline: 1.5rem; }
 @media (min-width: 1024px) { .sr-container { padding-inline: 2rem; } }
 .sr-container > * { min-width: 0; }
 .sr-section { padding-block: clamp(5rem, 9vw, 8rem); position: relative; }

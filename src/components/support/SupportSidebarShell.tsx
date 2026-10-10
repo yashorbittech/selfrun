@@ -2,12 +2,11 @@
 
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import BrandMark from "@/components/BrandMark";
+import SidebarBrand from "@/components/SidebarBrand";
 import SupportSidebar from "@/components/support/SupportSidebar";
 import SupportProfileMenu from "@/components/support/SupportProfileMenu";
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
-import { BrandName } from "@/components/platform/BrandProvider";
 
 const EXPANDED_WIDTH = 244;
 const COLLAPSED_WIDTH = 68;
@@ -23,12 +22,7 @@ export default function SupportSidebarShell({ email, roles, openRequests, create
     >
       <div className={cn("sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-md dark:bg-card/60", collapsed ? "justify-center gap-1.5 px-2" : "justify-between")}>
         <div className="flex min-w-0 items-center gap-2">
-          <BrandMark className="size-6 shrink-0" />
-          {!collapsed && (
-            <span className="truncate text-sm font-bold">
-              <BrandName />
-            </span>
-          )}
+          <SidebarBrand collapsed={collapsed} />
         </div>
         <button type="button" onClick={toggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} className="flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/8 hover:text-primary">
           {collapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}

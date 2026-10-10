@@ -161,7 +161,7 @@ export default async function RootLayout({
           {...(saasHost ? { defaultTheme: "light", enableSystem: false, storageKey: "sr-theme" } : { defaultTheme: "system", enableSystem: true })}
           disableTransitionOnChange
         >
-          <BrandProvider brand={saasHost ? { ...NEUTRAL_BRAND, name: SAAS_BRAND.name, namePrimary: SAAS_BRAND.namePrimary, nameAccent: SAAS_BRAND.nameAccent, logoUrl: SAAS_BRAND.assets.mark } : brand}>
+          <BrandProvider brand={saasHost ? { ...NEUTRAL_BRAND, name: SAAS_BRAND.name, namePrimary: SAAS_BRAND.namePrimary, nameAccent: SAAS_BRAND.nameAccent, logoUrl: SAAS_BRAND.assets.mark, wordmarkUrl: SAAS_BRAND.assets.logo, wordmarkDarkUrl: SAAS_BRAND.assets.logoDark } : brand}>
             <PanelsProvider panels={panels}>
               <PanelTextSync />
               <SiteInfoProvider value={{ ...siteInfo, liveChatId }}>
