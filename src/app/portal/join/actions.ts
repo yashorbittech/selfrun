@@ -5,6 +5,10 @@ import { externalUsers, createPortalSession, setPortalSessionCookie } from "@/li
 import { provisionLeadAndAccount } from "@/lib/lead-management/provision";
 import { resolveReferralCode, clearReferralCookie } from "@/lib/wallet/referral-capture";
 import type { LeadManagementSource } from "@/lib/lead-management/types";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
+import { headers } from "next/headers";
+import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 
 export interface PortalJoinState {
   error?: string;
@@ -56,5 +60,12 @@ export async function portalJoinAction(_prev: PortalJoinState, formData: FormDat
   const { token } = await createPortalSession(result.externalUserId, false);
   await setPortalSessionCookie(token, false);
   await clearReferralCookie();
-  redirect("/portal");
+
+  // Redirect to the company's app host so the browser lands on the right domain.
+  // The session cookie is now scoped to the root domain (.selfrunbusiness.com) so it
+  // will be sent on the app host too — this avoids the cross-domain cookie loss.
+  const companyId = await currentCompanyId();
+  const hostHint = platformRootDomain() === "localhost" ? (await headers()).get("host") : null;
+  const appUrl = await appUrlForCompany(companyId, hostHint).catch(() => null);
+  redirect(appUrl ? `${appUrl}/portal` : "/portal");
 }

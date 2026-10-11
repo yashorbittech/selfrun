@@ -3,6 +3,10 @@
 import { redirect } from "next/navigation";
 import { registerExternalUser } from "@/lib/portal/registration";
 import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
+import { headers } from "next/headers";
+import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 
 export interface PortalRegisterState {
   error?: string;
@@ -23,5 +27,11 @@ export async function portalRegisterAction(_prev: PortalRegisterState, formData:
 
   const { token } = await createPortalSession(result.userId, false);
   await setPortalSessionCookie(token, false);
-  redirect("/portal");
+
+  // Redirect to the company's app host so the browser lands on the correct domain.
+  const companyId = await currentCompanyId();
+  const hostHint = platformRootDomain() === "localhost" ? (await headers()).get("host") : null;
+  const appUrl = await appUrlForCompany(companyId, hostHint).catch(() => null);
+  redirect(appUrl ? `${appUrl}/portal` : "/portal");
 }
+

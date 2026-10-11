@@ -31,7 +31,7 @@ async function starterSiteInfo(name: string, namePrimary: string, nameAccent: st
     {
       ...base,
       brand: { namePrimary, nameAccent, subtitle: "", logoUrl: "", logoDarkUrl: "" },
-      header: { ...base.header, askAiLabel: "", askAiHref: "" },
+      header: { ...base.header, askAiLabel: base.header?.askAiLabel || "Ask AI", askAiHref: base.header?.askAiHref || "/ask" },
       floating: { ...base.floating, assistantLabel: "Ask AI" },
       // Filled in from the company profile (onboarding) — never guessed.
       contact: { email: "", phoneDisplay: "", phoneHref: "", whatsappHref: "", linkedinHref: "", mapsUrl: "", addressName: "", address: "" },

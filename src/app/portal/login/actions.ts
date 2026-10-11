@@ -8,6 +8,10 @@ import {
   getSessionPortalUser,
 } from "@/lib/portal-auth";
 import { recordPortalAudit } from "@/lib/portal/audit";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
+import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
+import { headers } from "next/headers";
+import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 
 export interface PortalLoginState {
   error?: string;
@@ -28,6 +32,12 @@ export async function portalLoginAction(_prev: PortalLoginState, formData: FormD
   await recordPortalAudit({ actorId: result.userId, action: "login", entity: "account", entityId: result.userId });
 
   const user = await getSessionPortalUser(token);
-  if (user?.mustChangePassword) redirect("/portal/change-password");
-  redirect("/portal");
+
+  // Redirect to the company's app host so the browser lands on the correct domain.
+  const companyId = await currentCompanyId();
+  const hostHint = platformRootDomain() === "localhost" ? (await headers()).get("host") : null;
+  const appUrl = await appUrlForCompany(companyId, hostHint).catch(() => null);
+  const base = appUrl ?? "";
+  if (user?.mustChangePassword) redirect(`${base}/portal/change-password`);
+  redirect(`${base}/portal`);
 }

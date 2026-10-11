@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getDb } from "@/lib/mongodb";
 import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { isPortalRole, type PortalRole } from "@/lib/portal-roles";
+import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 
 /**
  * External User Portal authentication. A completely separate identity store
@@ -183,11 +184,17 @@ export async function getSessionPortalUser(token: string | undefined | null): Pr
 
 export async function setPortalSessionCookie(token: string, remember: boolean): Promise<void> {
   const store = await cookies();
+  const root = platformRootDomain();
+  // Set domain to the root (e.g. .selfrunbusiness.com) so the cookie is readable
+  // on both the site host (demo.x.com) and the app host (demo-app.x.com).
+  // On localhost every subdomain is a different port — no domain attribute needed.
+  const domain = root !== "localhost" ? `.${root}` : undefined;
   store.set(PORTAL_SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
+    ...(domain ? { domain } : {}),
     // Remember me → persistent 30-day cookie; otherwise a session cookie.
     ...(remember ? { maxAge: REMEMBER_TTL_MS / 1000 } : {}),
   });
@@ -195,7 +202,16 @@ export async function setPortalSessionCookie(token: string, remember: boolean): 
 
 export async function clearPortalSessionCookie(): Promise<void> {
   const store = await cookies();
-  store.delete(PORTAL_SESSION_COOKIE);
+  const root = platformRootDomain();
+  const domain = root !== "localhost" ? `.${root}` : undefined;
+  store.set(PORTAL_SESSION_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    ...(domain ? { domain } : {}),
+    maxAge: 0,
+  });
 }
 
 export async function getCurrentPortalUser(): Promise<CurrentPortalUser | null> {

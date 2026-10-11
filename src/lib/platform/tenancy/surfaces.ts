@@ -31,13 +31,10 @@ const PANEL_SEGMENTS = new Set([
   "cms",
   "support",
   "portal",
-  // The portal's own sign-in and registration for a company's clients, students and applicants.
-  "login",
-  "register",
 ]);
 
-/** Public links that work on either host (payment links, certificate verification) and internal rewrite targets. */
-const SHARED_SEGMENTS = new Set(["pay", "verify", "panel-unavailable", "workspace-not-found", "maintenance", "offline-shell", "platform-maintenance"]);
+/** Public links that work on either host (payment links, certificate verification, portal login/register) and internal rewrite targets. */
+const SHARED_SEGMENTS = new Set(["pay", "verify", "panel-unavailable", "workspace-not-found", "maintenance", "offline-shell", "platform-maintenance", "login", "register"]);
 
 const firstSegment = (pathname: string) => pathname.split("/")[1] ?? "";
 
