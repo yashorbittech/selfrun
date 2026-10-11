@@ -23,6 +23,10 @@ import ThemePreviewBridge from "@/components/cms/theme/ThemePreviewBridge";
 import CmsAdminToolbar from "@/components/cms/CmsAdminToolbar";
 import { getSiteInfo } from "@/lib/cms/site-info";
 
+/** Tailwind's max-w-7xl (80rem) is the site's content width; on big screens it grows so the sides are not left empty. */
+const WIDE_CONTAINER_CSS =
+  "@media (min-width:1536px){:root{--container-7xl:90rem}}@media (min-width:1920px){:root{--container-7xl:104rem}}@media (min-width:2560px){:root{--container-7xl:120rem}}";
+
 export default async function SiteLayout({
   children,
 }: Readonly<{
@@ -43,7 +47,7 @@ export default async function SiteLayout({
   return (
     <OfferClaimProvider>
       {/* Overrides globals.css's :root/.dark custom properties — CSS cascade (later tag wins) does the rest, no globals.css change needed. */}
-      <style id="cms-theme-vars" dangerouslySetInnerHTML={{ __html: themeCssBlock(theme) + layoutCss(components) }} />
+      <style id="cms-theme-vars" dangerouslySetInnerHTML={{ __html: themeCssBlock(theme) + layoutCss(components) + WIDE_CONTAINER_CSS }} />
       {components.images === "themed" && <ThemeImageFilters tokens={theme} />}
       {/* The company's own analytics / tracking — never while a CMS user is previewing a theme. */}
       {!preview && <SiteTracking t={tracking} />}
