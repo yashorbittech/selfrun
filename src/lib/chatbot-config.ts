@@ -153,6 +153,13 @@ async function getConfigCollection(): Promise<Collection<ChatbotConfig>> {
 
 /** Reads the singleton config, seeding defaults on first access. */
 export async function getChatbotConfig(): Promise<ChatbotConfig> {
+  const config = await readChatbotConfig();
+  // The "Main service" choice is the operator's own list of services (`categories.ts`); no other company's visitor is asked it.
+  if (!(await isPlatformOwnerContext())) config.preChat = { ...config.preChat, fields: { ...config.preChat.fields, service: "off" } };
+  return config;
+}
+
+async function readChatbotConfig(): Promise<ChatbotConfig> {
   const collection = await getConfigCollection();
   const existing = await collection.findOne({ _id: CONFIG_ID });
   const DEFAULTS = await defaultConfig();

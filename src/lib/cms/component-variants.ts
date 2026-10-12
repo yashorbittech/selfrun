@@ -54,7 +54,7 @@ export const FOOTER_VARIANTS: VariantOption[] = [
 
 export const WIDTH_VARIANTS: VariantOption[] = [
   { key: "standard", label: "Standard", description: "The usual page width." },
-  { key: "narrow", label: "Narrow", description: "A tighter reading width — calm and focused." },
+  { key: "narrow", label: "Narrow", description: "A slightly tighter page width — calm and focused." },
   { key: "wide", label: "Wide", description: "Extra-wide pages that use more of large screens." },
 ];
 
@@ -159,7 +159,9 @@ export function layoutCss(sel: Required<ThemeComponentSelections>): string {
   let css = `:root{--site-header-h:88px;}`;
   const header = HEADER_HEIGHT_DESKTOP[sel.header] ?? 88;
   if (header !== 88) css += `@media (min-width:1280px){:root{--site-header-h:${header}px;}}`;
-  const width = { narrow: "64rem", wide: "92rem" }[sel.width as "narrow" | "wide"];
+  // Relative to the standard page width, which itself grows on large screens: a narrow theme is a little tighter, never a thin column
+  // with wide empty sides, and a wide theme uses more of the screen.
+  const width = { narrow: "calc(var(--container-7xl) * 0.92)", wide: "calc(var(--container-7xl) * 1.15)" }[sel.width as "narrow" | "wide"];
   if (width) css += `html .max-w-7xl{max-width:${width};}`;
   const y = { compact: ["3.5rem", "4.5rem"], spacious: ["7rem", "10rem"] }[sel.density as "compact" | "spacious"];
   if (y) css += `html main .py-24{padding-block:${y[0]};}@media (min-width:40rem){html main .sm\\:py-32{padding-block:${y[1]};}}`;

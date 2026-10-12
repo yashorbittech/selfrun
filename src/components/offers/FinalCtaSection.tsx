@@ -31,7 +31,7 @@ export default function FinalCtaSection({
           <h2 className="text-4xl font-black tracking-tight text-foreground sm:text-5xl mb-6">
             {tx("offers.finalCtaSection.your-next-project-or-career-move-could-c")}</h2>
           <p className="text-lg text-muted-foreground mb-10">
-            {hasCampaign ? "Festival offers are available for a limited period." : "Talk to us — we'll let you know when the next festival offer goes live."}
+            {hasCampaign ? tx("offers.finalCtaSection.live") : tx("offers.finalCtaSection.upcoming")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button

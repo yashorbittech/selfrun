@@ -194,10 +194,13 @@ export function ContactFormSection({
   initialCategory,
   initialSubService,
   formFields = [],
+  leadCategories,
 }: ContactFormCopy & {
-  initialCategory?: CategorySlug;
+  initialCategory?: string;
   initialSubService?: string;
   formFields?: CmsFormFieldConfig[];
+  /** A company's own enquiry categories (see `lib/lead-categories.ts`). Absent = the operator's built-in services. */
+  leadCategories?: { slug: string; label: string; acceptsResume: boolean; subServices: { slug: string; label: string }[] }[];
 }) {
   const l = useUiLabels();
   const fields = completeFormFields(CONTACT_FORM_FIELD_NAMES, formFields);
@@ -207,10 +210,15 @@ export function ContactFormSection({
   const phoneField = fieldConfig("phone");
   const messageField = fieldConfig("message");
 
-  const initialCat = initialCategory ?? CATEGORIES[0].slug;
+  const options = React.useMemo(
+    () => leadCategories ?? CATEGORIES.map((c) => ({ slug: c.slug as string, label: c.label as string, acceptsResume: categoryAcceptsResume(c.slug), subServices: getSubServices(c.slug) })),
+    [leadCategories],
+  );
+  const subsOf = (slug: string) => options.find((o) => o.slug === slug)?.subServices ?? [];
+  const initialCat = options.some((o) => o.slug === initialCategory) ? (initialCategory as string) : options[0].slug;
   const { brand, contact } = useSiteInfo();
-  const [category, setCategory] = React.useState<CategorySlug>(initialCat);
-  const [subService, setSubService] = React.useState<string>(initialSubService ?? getSubServices(initialCat)[0].slug);
+  const [category, setCategory] = React.useState<string>(initialCat);
+  const [subService, setSubService] = React.useState<string>(initialSubService ?? subsOf(initialCat)[0]?.slug ?? "");
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [phoneNumber, setPhoneNumber] = React.useState("");
@@ -219,11 +227,11 @@ export function ContactFormSection({
   const { status, error, fieldErrors, submit, reset } = useLeadSubmit();
   const { ref: cardBodyRef, minHeight: cardMinHeight } = useStableCardHeight(status === "success");
 
-  const wantsResume = categoryAcceptsResume(category);
+  const wantsResume = options.find((o) => o.slug === category)?.acceptsResume ?? false;
 
-  function handleCategoryChange(next: CategorySlug) {
+  function handleCategoryChange(next: string) {
     setCategory(next);
-    setSubService(getSubServices(next)[0].slug);
+    setSubService(subsOf(next)[0]?.slug ?? "");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -233,7 +241,7 @@ export function ContactFormSection({
       email,
       phone: phoneNumber,
       message: wantsResume ? undefined : message,
-      subService,
+      subService: subService || undefined,
       resume: wantsResume ? resumeFile : undefined,
       source: "contact-page",
     });
@@ -335,20 +343,20 @@ export function ContactFormSection({
                 />
               ) : (
               <form key="form" className="relative z-10 space-y-6" onSubmit={handleSubmit} noValidate>
-                  <div>
+                  {options.length > 1 && (<div>
                     <label htmlFor="category" className="block text-sm font-semibold text-foreground mb-2">{interestLabel}</label>
                     <select
                       id="category"
                       value={category}
-                      onChange={(e) => handleCategoryChange(e.target.value as CategorySlug)}
+                      onChange={(e) => handleCategoryChange(e.target.value)}
                       className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                     >
-                      {CATEGORIES.map((c) => (
+                      {options.map((c) => (
                         <option key={c.slug} value={c.slug}>{c.label}</option>
                       ))}
                     </select>
-                  </div>
-                  <div>
+                  </div>)}
+                  {subsOf(category).length > 0 && (<div>
                     <label htmlFor="subService" className="block text-sm font-semibold text-foreground mb-2">{subServiceLabel}</label>
                     <select
                       id="subService"
@@ -356,12 +364,12 @@ export function ContactFormSection({
                       onChange={(e) => setSubService(e.target.value)}
                       className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                     >
-                      {getSubServices(category).map((s) => (
+                      {subsOf(category).map((s) => (
                         <option key={s.slug} value={s.slug}>{s.label}</option>
                       ))}
                     </select>
                     {fieldErrors.subService && <p className="text-xs text-red-500 mt-1">{fieldErrors.subService}</p>}
-                  </div>
+                  </div>)}
                   <div>
                     <label htmlFor="firstName" className="block text-sm font-semibold text-foreground mb-2">{nameField.label}</label>
                     <input type="text" id="firstName" value={name} onChange={(e) => setName(e.target.value)} required={nameField.required} className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors" placeholder={nameField.placeholder} />

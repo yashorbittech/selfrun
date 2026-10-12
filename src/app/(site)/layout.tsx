@@ -25,7 +25,8 @@ import { getSiteInfo } from "@/lib/cms/site-info";
 
 /** Tailwind's max-w-7xl (80rem) is the site's content width; on big screens it grows so the sides are not left empty. */
 const WIDE_CONTAINER_CSS =
-  "@media (min-width:1536px){:root{--container-7xl:90rem}}@media (min-width:1920px){:root{--container-7xl:104rem}}@media (min-width:2560px){:root{--container-7xl:120rem}}";
+  // Safety net for every theme on phones: nothing may push the page wider than the screen.
+  "html,body{max-width:100%;overflow-x:clip}@media (min-width:1536px){:root{--container-7xl:90rem}}@media (min-width:1920px){:root{--container-7xl:104rem}}@media (min-width:2560px){:root{--container-7xl:120rem}}";
 
 export default async function SiteLayout({
   children,

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getViewer, can } from "@/lib/cms/viewer";
 import { getFormDoc, CONTACT_FORM_FIELD_NAMES } from "@/lib/cms/forms";
 import ContactFormEditor from "@/components/cms/ContactFormEditor";
+import LeadCategoriesEditor from "@/components/cms/LeadCategoriesEditor";
+import { getLeadCategories } from "@/lib/lead-categories";
 import { ClipboardList } from "lucide-react";
 import CmsPageHeader from "@/components/cms/ui/CmsPageHeader";
 
@@ -11,6 +13,7 @@ export default async function CmsFormsPage() {
   if (!viewer) redirect("/cms/login");
 
   const fields = await getFormDoc("contact", CONTACT_FORM_FIELD_NAMES);
+  const leadSet = await getLeadCategories();
 
   return (
     <div className="space-y-4">
@@ -22,6 +25,7 @@ export default async function CmsFormsPage() {
       />
       <PanelListFilters>
 <ContactFormEditor initialFields={fields} canEdit={can(viewer, "FORMS_MANAGE")} />
+{leadSet.custom && <LeadCategoriesEditor initial={leadSet.categories} canEdit={can(viewer, "FORMS_MANAGE")} />}
 </PanelListFilters>
     </div>
   );

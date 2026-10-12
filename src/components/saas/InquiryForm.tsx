@@ -30,8 +30,8 @@ export default function InquiryForm({ kind }: { kind: InquiryKind }) {
           {err("name")}
         </div>
         <div>
-          <label htmlFor="email" className="sr-label">Work email</label>
-          <input id="email" name="email" type="email" placeholder="Enter your work email" className="sr-input" autoComplete="email" required maxLength={200} />
+          <label htmlFor="email" className="sr-label">Email address</label>
+          <input id="email" name="email" type="email" placeholder="Enter your email address" className="sr-input" autoComplete="email" required maxLength={200} />
           {err("email")}
         </div>
         <div>

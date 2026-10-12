@@ -1,3 +1,4 @@
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -37,7 +38,8 @@ export default async function CmsThemePreviewPage({
 
   const components = normalizeSelections(theme.components);
   const [cmsFooter, cmsNavigation, collections, siteInfo] = await Promise.all([getPublicFooter(), getPublicNav(), getSnapshot(["blog", "jobs", "engagement"]), getSiteInfo()]);
-  const variantSections = selectedPage?.themeVariants?.[key]?.sections;
+  // Same rule as the live site: only the platform operator's site has per-theme page arrangements.
+  const variantSections = (await isPlatformOwnerContext()) ? selectedPage?.themeVariants?.[key]?.sections : undefined;
   const sections = key !== "default" && variantSections?.length ? variantSections : (selectedPage?.live?.sections ?? selectedPage?.draft.sections ?? []);
 
   return (

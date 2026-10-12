@@ -49,7 +49,7 @@ export default async function SignupPage() {
               <h1 className="sr-h1 mt-6">
                 The business that <span className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-transparent">runs itself.</span>
               </h1>
-              <p className="sr-lead mt-5 max-w-xl">Create your workspace in about two minutes. Every panel and every feature is included — pay only when your team grows.</p>
+              <p className="sr-lead mt-5 max-w-xl">Create your workspace in a few seconds. Every panel and every feature is included — pay only when your team grows.</p>
 
               <ul className="mt-8 space-y-4">
                 {POINTS.map((p) => (

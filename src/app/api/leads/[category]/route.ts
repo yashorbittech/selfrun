@@ -13,21 +13,35 @@ import {
 } from "@/lib/leads";
 import { provisionLeadAndAccount } from "@/lib/lead-management/provision";
 import { CATEGORY_TO_SOURCE } from "@/lib/lead-management/types";
+import { getLeadCategories, type LeadCategoryConfig } from "@/lib/lead-categories";
+import type { CategorySlug } from "@/lib/categories";
 import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
 
 type Context = { params: Promise<{ category: string }> };
 
+/**
+ * The category being submitted to: the operator's built-in six, or — for every other company — one of that company's own categories.
+ * `custom` is null for the built-in ones (their rules are unchanged).
+ */
+async function resolveCategory(slug: string): Promise<{ slug: CategorySlug; custom: LeadCategoryConfig | null; allowed: string } | null> {
+  const set = await getLeadCategories();
+  if (!set.custom) return isValidCategory(slug) ? { slug, custom: null, allowed: CATEGORIES.map((c) => c.slug).join(", ") } : null;
+  const found = set.categories.find((c) => c.slug === slug);
+  // The slug is a company-chosen string, not one of the built-in literals: the data layer only uses it to name the collection.
+  if (found) return { slug: found.slug as CategorySlug, custom: found, allowed: "" };
+  // Forms built into the site's own sections (product demo, catalogue enquiry) post to a built-in slug; for a company they land
+  // in its first category, with the service it chose left out rather than rejected.
+  const first = set.categories[0];
+  return first ? { slug: first.slug as CategorySlug, custom: { ...first, subServices: [] }, allowed: "" } : null;
+}
+
 export async function POST(req: NextRequest, { params }: Context) {
   const limited = await limitOr429(req, "lead-submit", 10, 600);
   if (limited) return limited;
-  const { category } = await params;
-
-  if (!isValidCategory(category)) {
-    return NextResponse.json(
-      { error: `Invalid category. Must be one of: ${CATEGORIES.map((c) => c.slug).join(", ")}` },
-      { status: 400 }
-    );
-  }
+  const { category: categoryParam } = await params;
+  const resolved = await resolveCategory(categoryParam);
+  if (!resolved) return NextResponse.json({ error: "Invalid category." }, { status: 400 });
+  const category = resolved.slug;
 
   let formData: FormData;
   try {
@@ -53,8 +67,11 @@ export async function POST(req: NextRequest, { params }: Context) {
     return NextResponse.json({ error: "Validation failed.", fields: validation.errors }, { status: 422 });
   }
 
-  const validSubServices = getSubServices(category);
-  if (!validation.data.subService || !validSubServices.some((s) => s.slug === validation.data.subService)) {
+  // A company's own category may have no sub-services at all (then none is asked for or stored).
+  const validSubServices = resolved.custom ? resolved.custom.subServices : getSubServices(category);
+  if (resolved.custom && validSubServices.length === 0) {
+    validation.data.subService = undefined;
+  } else if (!validation.data.subService || !validSubServices.some((s) => s.slug === validation.data.subService)) {
     return NextResponse.json(
       { error: "Validation failed.", fields: { subService: "Please choose a specific service." } },
       { status: 422 }
@@ -85,7 +102,7 @@ export async function POST(req: NextRequest, { params }: Context) {
     if (validation.data.email) {
       try {
         const result = await provisionLeadAndAccount({
-          source: CATEGORY_TO_SOURCE[category],
+          source: CATEGORY_TO_SOURCE[category] ?? "client_inquiry",
           name: validation.data.name,
           email: validation.data.email,
           phone: validation.data.phone,
@@ -118,14 +135,10 @@ export async function GET(req: NextRequest, { params }: Context) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { category } = await params;
-
-  if (!isValidCategory(category)) {
-    return NextResponse.json(
-      { error: `Invalid category. Must be one of: ${CATEGORIES.map((c) => c.slug).join(", ")}` },
-      { status: 400 }
-    );
-  }
+  const { category: categoryParam } = await params;
+  const resolved = await resolveCategory(categoryParam);
+  if (!resolved) return NextResponse.json({ error: "Invalid category." }, { status: 400 });
+  const category = resolved.slug;
 
   const searchParams = req.nextUrl.searchParams;
   const limit = Number(searchParams.get("limit")) || undefined;

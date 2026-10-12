@@ -200,7 +200,7 @@ export function RegisterForm({
                     </li>
                   ))}
                 </ol>
-                <p className="mt-4 text-xs text-muted-foreground">{t.creditsNote}<Link href={t.earnMoreHref} className="font-semibold text-primary underline">{t.earnMoreLabel}</Link></p>
+                <p className="mt-4 text-xs text-muted-foreground">{t.creditsNote}{t.earnMoreLabel.trim() && t.earnMoreHref.trim() && <Link href={t.earnMoreHref} className="font-semibold text-primary underline">{t.earnMoreLabel}</Link>}</p>
               </div>
             )}
           </motion.div>
@@ -223,7 +223,7 @@ export function RegisterForm({
                     <label htmlFor="accountType" className="mb-2 block text-sm font-semibold text-foreground">{t.accountTypeLabel}</label>
                     <select id="accountType" name="accountType" required defaultValue="" className={input}>
                       <option value="" disabled>{t.accountTypePlaceholder}</option>
-                      {TYPES.map((type) => <option key={type.value} value={type.value}>{t[type.labelKey]}</option>)}
+                      {TYPES.filter((type) => t[type.labelKey].trim()).map((type) => <option key={type.value} value={type.value}>{t[type.labelKey]}</option>)}
                     </select>
                     {fe.accountType && <p className="mt-1 text-xs text-red-500">{fe.accountType}</p>}
                   </div>

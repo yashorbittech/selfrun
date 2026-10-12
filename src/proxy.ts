@@ -96,7 +96,8 @@ export async function proxy(request: NextRequest) {
       const hostHeader = request.headers.get("host");
       const proto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() || request.nextUrl.protocol.replace(":", "");
       const to = (host: string, path: string) => NextResponse.redirect(new URL(path, `${proto}://${host}`));
-      if (action === "app-home" && hostHeader) return to(hostHeader, "/workspace");
+      // The product's own app host (SelfRun) opens on the Platform Panel; every company's panels host opens on its Workspace.
+      if (action === "app-home" && hostHeader) return to(hostHeader, isSaasAppHost(hostHeader) ? "/platform" : "/workspace");
       const target = action === "app-home" ? null : counterpartHost(hostHeader, action === "to-app" ? "site" : "app");
       if (target) return to(target, `${request.nextUrl.pathname}${request.nextUrl.search}`);
     }

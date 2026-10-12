@@ -214,13 +214,14 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
   );
 
   const navItems = (
-          <div className="flex items-center gap-x-0.5 relative h-full">
+          <div className={`flex items-center gap-x-0.5 h-full ${menuStyle === "tiles" ? "" : "relative"}`}>
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
               return (
               <div
                 key={item.name}
-                className="relative py-2"
+                // The tile bar spans the whole header, so it positions against the header, not against this one item.
+                className={`py-2 ${menuStyle === "tiles" ? "" : "relative"}`}
                 onMouseEnter={() => setActiveMenu(item.name)}
                 onMouseLeave={() => setActiveMenu(null)}
               >
@@ -358,28 +359,17 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
       {centered ? (
         <nav className="mx-auto flex h-full max-w-7xl flex-col px-6 lg:px-8" aria-label="Global">
           <div className="flex h-[88px] shrink-0 items-center justify-between xl:h-[76px]">
-            <div className="hidden flex-1 items-center gap-2 xl:flex">
-              {show.social && social.length > 0 && social.map((link) => {
-                const Icon = socialIconFor(link.name);
-                return (
-                  <a key={link.name} href={link.href} target="_blank" rel="noopener noreferrer" className="flex size-9 items-center justify-center rounded-full border border-border/50 bg-muted/30 text-muted-foreground transition-colors hover:border-primary hover:bg-primary hover:text-primary-foreground">
-                    <span className="sr-only">{link.name}</span>
-                    <Icon className="h-4 w-4" />
-                  </a>
-                );
-              })}
-            </div>
-            <div className="flex shrink-0 xl:justify-center">{logoLink}</div>
+            <div className="flex shrink-0">{logoLink}</div>
             {mobileControls}
-            <div className="hidden flex-1 items-center justify-end gap-3 xl:flex">{actions}</div>
+            <div className="ml-auto hidden items-center justify-end gap-3 xl:flex">{actions}</div>
           </div>
-          <div className="relative hidden h-[52px] flex-1 items-center justify-center border-t border-border/40 xl:flex">{navItems}</div>
+          <div className={`hidden h-[52px] flex-1 items-center justify-center border-t border-border/40 xl:flex ${menuStyle === "tiles" ? "" : "relative"}`}>{navItems}</div>
         </nav>
       ) : (
         <nav className={`mx-auto flex h-full max-w-7xl items-center justify-between ${floating ? "px-6" : "px-6 lg:px-8"}`} aria-label="Global">
           <div className="flex shrink-0">{logoLink}</div>
           {mobileControls}
-          <div className={`${menuOnly ? "hidden" : "hidden xl:flex"} xl:items-center xl:gap-x-3 ml-auto relative h-full`}>
+          <div className={`${menuOnly ? "hidden" : "hidden xl:flex"} xl:items-center xl:gap-x-3 ml-auto h-full ${menuStyle === "tiles" ? "" : "relative"}`}>
             {navItems}
             {actions}
           </div>

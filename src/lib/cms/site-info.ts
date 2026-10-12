@@ -2,6 +2,10 @@ import "server-only";
 import { companyCache } from "@/lib/platform/tenancy/cache";
 import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, CMS_SITE_TAG, expireSiteCache, updateStamp } from "@/lib/cms/db";
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
+import { defaultUiText } from "@/lib/cms/default-ui-text";
+import { getCompanyBrand } from "@/lib/platform/branding";
+import { OWNER_TEXT_DEFAULTS } from "@/lib/cms/owner-text-defaults";
 import { parseSiteInfo, type SiteInfo } from "@/lib/cms/site-info-shared";
 
 export type { SiteInfo } from "@/lib/cms/site-info-shared";
@@ -22,7 +26,10 @@ const cached = companyCache(getSiteInfoForEdit, ["cms-site-info-v1"], { tags: [C
 
 /** Public read. If the CMS is unreachable this throws, and Next.js keeps serving the last good render. */
 export async function getSiteInfo(): Promise<SiteInfo> {
-  return cached();
+  const info = await cached();
+  const [owner, brand] = await Promise.all([isPlatformOwnerContext(), getCompanyBrand()]);
+  // Layers, last wins: neutral wording for the chat widget, then the operator's own wording (operator only), then the company's CMS text.
+  return { ...info, text: { ...defaultUiText(brand.name), ...(owner ? OWNER_TEXT_DEFAULTS : {}), ...info.text } };
 }
 
 export async function saveSiteInfo(info: unknown, actorId: string): Promise<SiteInfo> {

@@ -7,6 +7,7 @@ import { provisionAccessibleSessions } from "@/lib/cross-module-sso";
 import { startLoginSession } from "@/lib/security/sessions";
 import { loginLanding } from "@/lib/platform/onboarding/state";
 import { getSessionHubUser } from "@/lib/hub-auth";
+import { ONBOARDING_PATH, WELCOME_PATH } from "@/lib/platform/onboarding/gate";
 
 /**
  * Signs a freshly signed-up owner in on their company's own host. The token
@@ -29,7 +30,9 @@ export async function GET(req: NextRequest) {
   // The plain Workspace home is not an explicit destination: a new owner lands on onboarding.
   const asked = handoff.next.startsWith("/") && !handoff.next.startsWith("//") && handoff.next !== "/workspace" ? handoff.next : null;
   const user = await getSessionHubUser(hubToken);
-  return NextResponse.redirect(onThisHost(req, await loginLanding(user?.roles ?? [], asked)));
+  const landing = await loginLanding(user?.roles ?? [], asked, user?.id);
+  // A new owner first sees their website and app addresses, and goes on to setup from there.
+  return NextResponse.redirect(onThisHost(req, landing === ONBOARDING_PATH ? WELCOME_PATH : landing));
 }
 
 /**

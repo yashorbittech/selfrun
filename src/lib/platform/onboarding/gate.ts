@@ -15,6 +15,8 @@
  *  Loops are impossible: the only redirect happens once, at sign-in.
  */
 export const ONBOARDING_PATH = "/workspace/onboarding";
+/** The screen right after registration: the company's website and app addresses, with a button on to the wizard. */
+export const WELCOME_PATH = "/workspace/welcome";
 export const WORKSPACE_HOME = "/workspace";
 
 export interface SetupFacts {

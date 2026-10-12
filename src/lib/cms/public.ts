@@ -4,6 +4,7 @@ import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, CMS_SITE_TAG } from "@/lib/cms/db";
 import type { PageSection } from "@/lib/cms/section-registry";
 import { parsePageFrame, type PageSeo, type PageJsonLd, type PageFrame } from "@/lib/cms/page-seo";
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getRenderThemeKey } from "@/lib/cms/theme-preview";
 
 /**
@@ -75,10 +76,12 @@ export interface PublicPage {
  * returned instead (the page's SEO is the same in every theme).
  */
 export async function getPublicPage(path: string): Promise<PublicPage | null> {
-  const [pages, themeKey] = await Promise.all([cachedPublishedPages(), getRenderThemeKey()]);
+  const [pages, themeKey, owner] = await Promise.all([cachedPublishedPages(), getRenderThemeKey(), isPlatformOwnerContext()]);
   const page = pages[path];
   if (!page) return null;
-  const variant = themeKey !== "default" ? page.themeVariants[themeKey] : undefined;
+  // A company's content is the same in every theme: switching theme changes colours and layout only. Per-theme page
+  // arrangements (`themeVariants`) are the platform operator's own site feature.
+  const variant = owner && themeKey !== "default" ? page.themeVariants[themeKey] : undefined;
   return {
     path,
     title: page.title,

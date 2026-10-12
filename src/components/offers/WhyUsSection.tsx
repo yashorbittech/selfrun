@@ -7,12 +7,20 @@ import { useText } from "@/components/cms/TextContext";
 
 // Same figures already shown on /about/our-mission and /about/success-stories —
 // reused verbatim here, never re-invented for this page.
+// The figures are CMS text ("12+", "100%", "24/7"), written by the company itself; a stat with no value is not shown.
+const parseStat = (raw: string): { value: number; suffix: string } | null => {
+  const m = raw.trim().match(/^(\d+(?:\.\d+)?)(.*)$/);
+  return m ? { value: Number(m[1]), suffix: m[2].trim() } : null;
+};
 const REAL_STATS = (tx: (key: string) => string) => ([
-  { value: 12, suffix: "+", label: tx("offers.whyBrandSection.projects-shipped"), icon: Rocket },
-  { value: 100, suffix: "%", label: tx("offers.whyBrandSection.client-satisfaction"), icon: Handshake },
-  { value: 4, suffix: "+", label: tx("offers.whyBrandSection.industries-served"), icon: Building2 },
-  { value: 24, suffix: "/7", label: tx("offers.whyBrandSection.support-availability"), icon: Headphones },
-]);
+  { n: 1, label: tx("offers.whyBrandSection.projects-shipped"), icon: Rocket },
+  { n: 2, label: tx("offers.whyBrandSection.client-satisfaction"), icon: Handshake },
+  { n: 3, label: tx("offers.whyBrandSection.industries-served"), icon: Building2 },
+  { n: 4, label: tx("offers.whyBrandSection.support-availability"), icon: Headphones },
+]).flatMap(({ n, label, icon }) => {
+  const stat = parseStat(tx(`offers.whyBrandSection.stat${n}.value`));
+  return stat && label ? [{ ...stat, label, icon }] : [];
+});
 
 const TRUST_ITEMS = (tx: (key: string) => string) => ([
   { title: tx("offers.whyBrandSection.experienced-engineering-team"), description: tx("offers.whyBrandSection.senior-engineers-not-a-rotating-pool-of-") },
@@ -27,7 +35,7 @@ export default function WhyUsSection() {
   const tx = useText();
   return (
     <>
-      <StatsBand title={tx("offers.whyBrandSection.why-brand")} description={tx("offers.whyBrandSection.a-festival-discount-is-only-worth-it-if-")} stats={REAL_STATS(tx)} />
+      {REAL_STATS(tx).length > 0 && <StatsBand title={tx("offers.whyBrandSection.why-brand")} description={tx("offers.whyBrandSection.a-festival-discount-is-only-worth-it-if-")} stats={REAL_STATS(tx)} />}
       <ChecklistGrid
         id="why-us"
         title={tx("offers.whyBrandSection.built-for-trust-not-just-discounts")}

@@ -1,6 +1,7 @@
 import "server-only";
 import { Collection, Document, ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { getLeadCategories } from "@/lib/lead-categories";
 import { CATEGORIES, collectionNameFor, getCategoryLabel, getSubServices, isValidCategory, type CategorySlug } from "@/lib/categories";
 import type { LeadRecord, LeadAttribution } from "@/lib/lead-validation";
 import type { Utm } from "@/lib/utm";
@@ -69,6 +70,12 @@ function buildLeadFilter(opts: BaseLeadFilterOptions): Record<string, unknown> {
     filter.createdAt = range;
   }
   return filter;
+}
+
+/** The categories whose leads the dashboards add up: the operator's built-in six, or a company's own (`lead-categories.ts`). */
+async function scopedCategories(): Promise<{ slug: CategorySlug }[]> {
+  const set = await getLeadCategories();
+  return set.categories.map((c) => ({ slug: c.slug as CategorySlug }));
 }
 
 async function getLeadsCollection(category: CategorySlug): Promise<Collection<Omit<Lead, "_id">>> {
@@ -288,7 +295,7 @@ function buildFunnel(byStatus: Record<string, number>, total: number): { stage: 
 }
 
 export async function getDashboardStats(filters: DashboardFilters = {}): Promise<DashboardStats> {
-  const targetCategories = filters.category ? [filters.category] : CATEGORIES.map((c) => c.slug);
+  const targetCategories = filters.category ? [filters.category] : (await scopedCategories()).map((c) => c.slug);
   const granularity = filters.granularity ?? "day";
   const dateFormat = dateFormatFor(granularity);
 
@@ -509,7 +516,7 @@ export async function getStaleLeadsSummary(): Promise<StaleLeadsSummary> {
   let items: Lead[] = [];
 
   await Promise.all(
-    CATEGORIES.map(async (c) => {
+    (await scopedCategories()).map(async (c) => {
       const collection = await getLeadsCollection(c.slug);
       const [result] = await collection
         .aggregate<{ count: { count: number }[]; items: Lead[] }>([
@@ -541,7 +548,7 @@ export async function getRecentLeadsSummary(days = 2): Promise<RecentLeadsSummar
   let items: Lead[] = [];
 
   await Promise.all(
-    CATEGORIES.map(async (c) => {
+    (await scopedCategories()).map(async (c) => {
       const collection = await getLeadsCollection(c.slug);
       const [result] = await collection
         .aggregate<{ count: { count: number }[]; items: Lead[] }>([
@@ -634,7 +641,7 @@ export async function aggregateAttributedLeads(opts: AttributedFilter = {}): Pro
   const prevMatch = prevRange ? attributedMatch({ ...opts, dateFrom: prevRange.from, dateTo: prevRange.to }) : null;
 
   const perCat = await Promise.all(
-    CATEGORIES.map(async (c) => {
+    (await scopedCategories()).map(async (c) => {
       const collection = await getLeadsCollection(c.slug);
       const [facet] = await collection
         .aggregate<AttributedFacet>([
@@ -739,7 +746,7 @@ export async function searchAttributedLeads(opts: SearchAttributedLeadsOptions =
 
   const fetchCount = page * pageSize;
   const perCat = await Promise.all(
-    CATEGORIES.map(async (c) => {
+    (await scopedCategories()).map(async (c) => {
       const collection = await getLeadsCollection(c.slug);
       const [items, count] = await Promise.all([
         collection.find(base).sort({ createdAt: dir }).limit(fetchCount).toArray(),
@@ -800,7 +807,7 @@ export async function attributeLeadsByContact(
   const byPhone = new Map<string, { category: CategorySlug; id: string }[]>();
 
   await Promise.all(
-    CATEGORIES.map(async (c) => {
+    (await scopedCategories()).map(async (c) => {
       const collection = await getLeadsCollection(c.slug);
       const docs = await collection
         .find({}, { projection: { email: 1, phone: 1 } })

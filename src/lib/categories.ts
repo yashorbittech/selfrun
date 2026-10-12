@@ -14,11 +14,12 @@ export function isValidCategory(value: string): value is CategorySlug {
 }
 
 export function getCategoryLabel(slug: CategorySlug): string {
-  return CATEGORIES.find((c) => c.slug === slug)!.label;
+  return CATEGORIES.find((c) => c.slug === slug)?.label ?? String(slug).replace(/-/g, " ").replace(/^./, (ch) => ch.toUpperCase());
 }
 
 export function collectionNameFor(slug: CategorySlug): string {
-  return CATEGORIES.find((c) => c.slug === slug)!.collection;
+  // A company's own lead category (`lead-categories.ts`) is not one of the built-in six: it gets its own collection by slug.
+  return CATEGORIES.find((c) => c.slug === slug)?.collection ?? `leads_${String(slug).replace(/[^a-z0-9]+/g, "_")}`;
 }
 
 const RESUME_CATEGORIES: readonly CategorySlug[] = ["industrial-training", "internship-program"];

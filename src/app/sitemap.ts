@@ -7,6 +7,8 @@ import type { BlogPostMeta } from "@/types/content";
 import type { Job } from "@/types/content";
 import type { EngagementCategory } from "@/types/content";
 import { getSeoSiteState } from "@/lib/seo-panel/public";
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
+import { listPublishedPaths } from "@/lib/cms/public";
 import { loadProducts } from "@/lib/products/server";
 import { isProductsHref, productHref } from "@/lib/products/shared";
 import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
@@ -58,13 +60,18 @@ function discoverRoutes(dir: string, base = ""): string[] {
  * crawl list. URLs are on the current company's own site origin.
  */
 export async function baseSitemap(): Promise<MetadataRoute.Sitemap> {
-  const [siteUrl, blogPosts, jobs, engagement, products] = await Promise.all([
+  const [siteUrl, blogPosts, jobs, engagement, products, owner, published] = await Promise.all([
     companySiteUrl(),
     getRuntimeRecords<BlogPostMeta>("blog"),
     getRuntimeRecords<Job>("jobs"),
     getRuntimeRecords<EngagementCategory>("engagement"),
     loadProducts(), // null off the platform owner's site: Products pages exist only there
+    isPlatformOwnerContext(),
+    listPublishedPaths(),
   ]);
+  // The operator's site keeps every page of the codebase. Any other company lists only the pages it has published in its CMS
+  // (plus the sign-in and sign-up pages, which always exist), so no route of the operator's is advertised on its site.
+  const live = new Set([...published, "/login", "/register"]);
   const recordRoutes = [
     ...(products ?? []).map((p) => productHref(p.slug)),
     ...blogPosts.map((p) => `/blog/${p.slug}`),
@@ -81,7 +88,7 @@ export async function baseSitemap(): Promise<MetadataRoute.Sitemap> {
       .map((job) => `/careers/${job.slug}`)
   );
 
-  const routes = Array.from(new Set([...discoverRoutes(APP_DIR), ...recordRoutes]))
+  const routes = Array.from(new Set([...discoverRoutes(APP_DIR).filter((r) => owner || live.has(r)), ...recordRoutes]))
     .filter((route) => !EXCLUDED_ROUTES.has(route) && !excludedJobRoutes.has(route))
     // /products is a real route folder, so it is discovered for every company — but it 404s off the owner's site.
     .filter((route) => products !== null || !isProductsHref(route))

@@ -26,7 +26,7 @@ export function useLeadSubmit() {
   const utm = useUtmParams();
   const referralCode = useReferralCode();
 
-  async function submit(category: CategorySlug, data: LeadFormData) {
+  async function submit(category: CategorySlug | (string & {}), data: LeadFormData) {
     setStatus("submitting");
     setError(null);
     setFieldErrors({});

@@ -1,6 +1,7 @@
 import CmsPageView from "@/components/cms/CmsPageView";
 import { cmsPageMetadata } from "@/lib/cms/page-route";
 import { getPublicPage, type PublicPage } from "@/lib/cms/public";
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
 import type { Metadata } from "next";
@@ -20,7 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const dynamic = "force-dynamic";
 
-function buildDefaultRegisterPage(name: string): PublicPage {
+/** The company's own /register page (CMS → Pages) wins. The wording about courses, interns and job seekers is the platform operator's only. */
+function buildDefaultRegisterPage(name: string, operator: boolean): PublicPage {
   return {
     path: "/register",
     title: "Create Account",
@@ -38,7 +40,7 @@ function buildDefaultRegisterPage(name: string): PublicPage {
           badge: "Create an Account",
           headingLead: "Start your journey with",
           headingHighlight: name,
-          description: `Join ${name} to access projects, courses, online tests, and career opportunities.`,
+          description: operator ? `Join ${name} to access projects, courses, online tests, and career opportunities.` : `Create your ${name} account.`,
         },
       },
       {
@@ -64,18 +66,18 @@ function buildDefaultRegisterPage(name: string): PublicPage {
           stepEarnTitle: "You both earn",
           stepEarnText: "Get reward credits directly to your wallet.",
           creditsNote: "Credits can be redeemed for discounts and rewards.",
-          earnMoreLabel: "Learn more about rewards",
-          earnMoreHref: "/rewards",
+          earnMoreLabel: operator ? "Learn more about rewards" : "",
+          earnMoreHref: operator ? "/rewards" : "",
           invitedText: "has invited you to join!",
           welcomeLead: "You'll receive a welcome bonus of",
           welcomeTail: "credits upon registration.",
           codeRejectedText: "This referral code is invalid or expired.",
           accountTypeLabel: "I am a",
           accountTypePlaceholder: "Select account type",
-          typeStudent: "Student",
-          typeIntern: "Intern",
+          typeStudent: operator ? "Student" : "",
+          typeIntern: operator ? "Intern" : "",
           typeClient: "Client",
-          typeJobSeeker: "Job Seeker",
+          typeJobSeeker: operator ? "Job Seeker" : "",
           nameLabel: "Full Name",
           namePlaceholder: "John Doe",
           emailLabel: "Email Address",
@@ -112,8 +114,9 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
   const rules = (await listRewardRules().catch(() => [])).filter((r) => r.isActive && r.amount > 0 && r.appliesToRole === "ALL" && !r.subKey);
   const amount = (t: string) => rules.find((r) => r.type === t)?.amount ?? 0;
   const resolution = await resolveCampaign("client");
+  // The refer-and-earn explainer shows only when the company really pays out something (both amounts zero = nothing to explain).
   const referral =
-    resolution.state === "inactive"
+    resolution.state === "inactive" || (amount("referral_referrer") <= 0 && amount("referral_referee") <= 0)
       ? null
       : {
           referrer: amount("referral_referrer"),
@@ -122,7 +125,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Pro
         };
 
   const brand = await getCompanyBrand();
-  const page = (await getPublicPage("/register")) ?? buildDefaultRegisterPage(brand.name);
+  const page = (await getPublicPage("/register")) ?? buildDefaultRegisterPage(brand.name, await isPlatformOwnerContext());
 
   return (
     <CmsPageView

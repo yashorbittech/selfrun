@@ -106,7 +106,18 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  allowedDevOrigins: ['viminal-susann-calorimetric.ngrok-free.dev'],
+  allowedDevOrigins: ['viminal-susann-calorimetric.ngrok-free.dev', '*.devtunnels.ms'],
+  // Development only: a tunnel (VS Code port forwarding, ngrok) sets x-forwarded-host to its own address while the browser's
+  // origin stays localhost, which Next rejects as "Invalid Server Actions request". Production keeps the strict same-origin check.
+  experimental: {
+    // The browser keeps a page it has already loaded, so opening it again (a panel from the Workspace, a sidebar item, the sign-up
+    // page) shows at once instead of the loading screen every time. By default pages that read cookies are never kept (0 s). Saving
+    // through a server action refreshes the page itself, so edits still show up; this is only how long a plain revisit may reuse the page.
+    staleTimes: { dynamic: 180, static: 300 },
+    ...(process.env.NODE_ENV !== "production" && {
+      serverActions: { allowedOrigins: ['localhost:3000', '*.localhost:3000', '*.devtunnels.ms', '*.ngrok-free.dev'] },
+    }),
+  },
 };
 
 export default nextConfig;

@@ -24,10 +24,8 @@ export default function OffersHero({
   onCampaignEnd?: () => void;
 }) {
   const tx = useText();
-  const headline = campaign?.theme.bannerHeadline ?? "Build More. Pay Less.";
-  const subheadline =
-    campaign?.theme.bannerSubheadline ??
-    "Exclusive limited-time offers on Software, AI, Training, Internships & Technology Talent.";
+  const headline = campaign?.theme.bannerHeadline ?? tx("offers.offersHero.headline");
+  const subheadline = campaign?.theme.bannerSubheadline ?? tx("offers.offersHero.subheadline");
   const preset = campaign ? getThemePreset(campaign.themePreset) : null;
   const primaryColor = campaign?.theme.primaryColor;
   const accentColor = campaign?.theme.accentColor;
@@ -47,15 +45,15 @@ export default function OffersHero({
             ) : (
               <Sparkles className="w-4 h-4 text-primary animate-pulse" />
             )}
-            <span>{campaign ? campaign.name : "Festival Offers"}</span>
+            <span>{campaign ? campaign.name : tx("offers.offersHero.badge")}</span>
           </motion.div>
 
-          <motion.h1 variants={fadeIn} className="text-4xl font-black tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-6xl lg:text-7xl">
+          {headline && <motion.h1 variants={fadeIn} className="text-4xl font-black tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-6xl lg:text-7xl">
             {headline}
-          </motion.h1>
-          <motion.p variants={fadeIn} className="mx-auto max-w-2xl text-lg leading-relaxed text-white/80">
+          </motion.h1>}
+          {subheadline && <motion.p variants={fadeIn} className="mx-auto max-w-2xl text-lg leading-relaxed text-white/80">
             {subheadline}
-          </motion.p>
+          </motion.p>}
 
           {!campaign && (
             <motion.p variants={fadeIn} className="text-sm text-white/70">

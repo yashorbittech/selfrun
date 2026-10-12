@@ -16,6 +16,8 @@ import { useStableCardHeight } from "@/lib/useStableCardHeight";
  */
 
 export interface HomeFinalCtaProps {
+  /** A company's own enquiry categories (`lib/lead-categories.ts`); absent = the operator's built-in services. */
+  leadCategories?: { slug: string; label: string; acceptsResume: boolean; subServices: { slug: string; label: string }[] }[];
   heading: string;
   description: string;
   checklist: string[];
@@ -51,9 +53,12 @@ export default function HomeFinalCta({
   submittingLabel,
   successTitle,
   successDescription,
+  leadCategories,
 }: HomeFinalCtaProps) {
-  const [heroCategory, setHeroCategory] = useState<CategorySlug>(CATEGORIES[0].slug);
-  const [heroSubService, setHeroSubService] = useState<string>(getSubServices(CATEGORIES[0].slug)[0].slug);
+  const options = leadCategories ?? CATEGORIES.map((c) => ({ slug: c.slug as string, label: c.label as string, acceptsResume: categoryAcceptsResume(c.slug), subServices: getSubServices(c.slug) }));
+  const subsOf = (slug: string) => options.find((o) => o.slug === slug)?.subServices ?? [];
+  const [heroCategory, setHeroCategory] = useState<string>(options[0].slug);
+  const [heroSubService, setHeroSubService] = useState<string>(subsOf(options[0].slug)[0]?.slug ?? "");
   const [heroName, setHeroName] = useState("");
   const [heroEmail, setHeroEmail] = useState("");
   const [heroPhone, setHeroPhone] = useState("");
@@ -61,11 +66,11 @@ export default function HomeFinalCta({
   const [heroResumeFile, setHeroResumeFile] = useState<File | null>(null);
   const heroLead = useLeadSubmit();
   const { ref: heroCardBodyRef, minHeight: heroCardMinHeight } = useStableCardHeight(heroLead.status === "success");
-  const heroWantsResume = categoryAcceptsResume(heroCategory);
+  const heroWantsResume = options.find((o) => o.slug === heroCategory)?.acceptsResume ?? false;
 
-  function handleHeroCategoryChange(next: CategorySlug) {
+  function handleHeroCategoryChange(next: string) {
     setHeroCategory(next);
-    setHeroSubService(getSubServices(next)[0].slug);
+    setHeroSubService(subsOf(next)[0]?.slug ?? "");
   }
 
   async function handleHeroSubmit(e: React.FormEvent) {
@@ -75,7 +80,7 @@ export default function HomeFinalCta({
       email: heroEmail,
       phone: heroPhone,
       message: heroWantsResume ? undefined : heroMessage,
-      subService: heroSubService,
+      subService: heroSubService || undefined,
       resume: heroWantsResume ? heroResumeFile : undefined,
       source: "homepage-hero",
     });
@@ -176,26 +181,26 @@ export default function HomeFinalCta({
                 />
               ) : (
               <form key="form" className="relative z-10 space-y-5" onSubmit={handleHeroSubmit} noValidate>
-                <select
+                {options.length > 1 && <select
                   value={heroCategory}
-                  onChange={(e) => handleHeroCategoryChange(e.target.value as CategorySlug)}
+                  onChange={(e) => handleHeroCategoryChange(e.target.value)}
                   aria-label="I'm interested in"
                   className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 >
-                  {CATEGORIES.map((c) => (
+                  {options.map((c) => (
                     <option key={c.slug} value={c.slug}>{c.label}</option>
                   ))}
-                </select>
-                <select
+                </select>}
+                {subsOf(heroCategory).length > 0 && <select
                   value={heroSubService}
                   onChange={(e) => setHeroSubService(e.target.value)}
                   aria-label="Specific service"
                   className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
                 >
-                  {getSubServices(heroCategory).map((s) => (
+                  {subsOf(heroCategory).map((s) => (
                     <option key={s.slug} value={s.slug}>{s.label}</option>
                   ))}
-                </select>
+                </select>}
                 {heroLead.fieldErrors.subService && <p className="text-xs text-red-500 -mt-3">{heroLead.fieldErrors.subService}</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>

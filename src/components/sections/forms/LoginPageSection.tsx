@@ -81,9 +81,11 @@ export default function LoginPageSection(c: LoginPageCopy) {
                 </div>
               ))}
             </motion.div>
-            <motion.p variants={fadeIn} className="mt-6 text-sm text-muted-foreground">
-              {c.rewardsLead}<Link href="/rewards" className="font-semibold text-primary underline">{c.rewardsLinkLabel}</Link>.
-            </motion.p>
+            {c.rewardsLinkLabel.trim() && (
+              <motion.p variants={fadeIn} className="mt-6 text-sm text-muted-foreground">
+                {c.rewardsLead}<Link href="/rewards" className="font-semibold text-primary underline">{c.rewardsLinkLabel}</Link>.
+              </motion.p>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>

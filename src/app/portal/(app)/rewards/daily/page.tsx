@@ -7,6 +7,7 @@ import { PortalPageHeader, PortalStat } from "@/components/portal/widgets";
 import { EarnNav, HowItWorks, RewardHistory } from "@/components/portal/rewards/parts";
 import { guardPortalPage } from "@/lib/portal/guard";
 import { getDailyRewards } from "@/lib/portal/rewards";
+import { getPublicPage } from "@/lib/cms/public";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export const generateMetadata = () => brandedMetadata("Daily rewards · {brand} 
 export default async function DailyRewardsPage() {
   const user = await guardPortalPage();
   const d = await getDailyRewards(user);
+  const guidePublished = Boolean(await getPublicPage("/rewards"));
 
   return (
     <div className="space-y-5">
@@ -69,7 +71,7 @@ export default async function DailyRewardsPage() {
       </div>
 
       <RewardHistory title="Daily reward history" rows={d.history} empty="Your daily rewards will appear here after your first visit." />
-      <p className="text-xs text-muted-foreground">Days count in India time. See the <Link href="/rewards" className="text-primary hover:underline">rewards guide</Link> for every way to earn.</p>
+      <p className="text-xs text-muted-foreground">Days count in India time. {guidePublished && <>See the <Link href="/rewards" className="text-primary hover:underline">rewards guide</Link> for every way to earn.</>}</p>
 </PanelListFilters>
     </div>
   );

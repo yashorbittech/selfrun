@@ -55,7 +55,7 @@ async function starterSiteInfo(name: string, namePrimary: string, nameAccent: st
         legalLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }],
         compactLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }],
       },
-      shareImage: { alt: name, tag: "", headline: `${name} — Software Development & IT Services`, subline: "Web, mobile, cloud and AI — built around your business.", domain: "", badges: [] },
+      shareImage: { alt: name, tag: "", headline: name, subline: fillName(pack.tagline, name), domain: "", badges: [] },
     }
   );
 }

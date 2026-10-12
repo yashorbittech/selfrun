@@ -7,6 +7,7 @@ import { syncSiteContact } from "@/lib/platform/website/starter";
 import { createDepartment, createDesignation, listDepartments, listDesignations } from "@/lib/hrms/departments";
 import { isOnboardingOwner, postLoginTarget, showSetupStrip } from "@/lib/platform/onboarding/gate";
 import { unavailablePanelKeys } from "@/lib/platform/panels/store";
+import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
 import { enqueueBuild } from "@/lib/apps/enqueue";
 import { COMPANY_SIZES, CURRENCIES, INDUSTRIES, MODULES, ONBOARDING_STEPS, type DepartmentTemplate, type Industry, type ModuleKey, type OnboardingStep } from "@/lib/platform/onboarding/catalog";
 
@@ -213,9 +214,11 @@ export async function enabledModules(): Promise<Set<string> | null> {
 }
 
 /** Landing path after a sign-in (see `gate.ts`), for the signed-in company's own data. Fails soft to the dashboard. */
-export async function loginLanding(roles: readonly string[], requestedNext: string | null): Promise<string> {
+export async function loginLanding(roles: readonly string[], requestedNext: string | null, userId?: string): Promise<string> {
   try {
     const { company, state } = await getOnboarding();
+    // The product's own staff (SelfRun) open on the Platform Panel; an explicit `next` still wins.
+    if (!requestedNext && company.isPlatformOwner && userId && (await getPlatformAccessForUser(userId))) return "/platform";
     return postLoginTarget({ isOwner: isOnboardingOwner(roles), isPlatformOwnerCompany: company.isPlatformOwner === true, state, requestedNext });
   } catch {
     return requestedNext ?? "/workspace";

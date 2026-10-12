@@ -47,7 +47,7 @@ function PreviewCard({ offer }: { offer: SerializedOffer }) {
         </ul>
       )}
       <p className="mt-4 flex flex-wrap gap-1.5">
-        {(offer.audience.includes("ALL") ? ["Open to everyone"] : offer.audience.slice(0, 2).map(getAudienceLabel)).map((a) => (
+        {(offer.audience.includes("ALL") ? [tx("offers.offersUpcoming.open-to-everyone")] : offer.audience.slice(0, 2).map(getAudienceLabel)).map((a) => (
           <span key={a} className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground"><Users className="size-3" />{a}</span>
         ))}
       </p>
@@ -105,7 +105,7 @@ export default function OffersUpcoming({
         <div className="relative z-10 mx-auto max-w-5xl space-y-6 px-6 text-center lg:px-8">
           <motion.span initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-md">
             {variant === "coming_soon" ? <span className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60" /><span className="relative inline-flex size-2.5 rounded-full bg-primary" /></span> : preset?.emoji ? <span aria-hidden="true">{preset.emoji}</span> : <Flag className="size-4 text-primary" />}
-            {variant === "coming_soon" ? "Coming soon" : `Scheduled campaign · ${daysAway} ${daysAway === 1 ? "day" : "days"} to go`}
+            {variant === "coming_soon" ? tx("offers.offersUpcoming.coming-soon") : tx("offers.offersUpcoming.scheduled").replace("{days}", `${daysAway} ${daysAway === 1 ? "day" : "days"}`)}
           </motion.span>
 
           <h1 className="text-4xl font-black tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-6xl lg:text-7xl">{campaign.theme.bannerHeadline ?? campaign.name}</h1>

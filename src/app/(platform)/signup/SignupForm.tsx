@@ -8,10 +8,10 @@ import { slugFormatError, slugFromName } from "@/lib/platform/tenancy/slug";
 import { checkSlugAction, startSignupAction, validateSignupAction, type SignupState } from "./actions";
 import type { SignupFieldErrors } from "@/lib/platform/signup";
 import CreatingWorkspace from "./CreatingWorkspace";
-import { BUSINESS_CATEGORIES, CUSTOM_PREFIX, MAX_BUSINESS_CATEGORIES, MAX_BUSINESS_SUBCATEGORIES, cleanCustomName } from "@/lib/platform/business-taxonomy";
+import { BUSINESS_CATEGORIES, categoryDescription, categoryKeywords, subDescription, CUSTOM_PREFIX, MAX_BUSINESS_CATEGORIES, MAX_BUSINESS_SUBCATEGORIES, cleanCustomName } from "@/lib/platform/business-taxonomy";
 import SearchMultiSelect, { type MultiOption } from "@/components/platform/SearchMultiSelect";
 
-const CATEGORY_OPTIONS: MultiOption[] = BUSINESS_CATEGORIES.map((c) => ({ value: c.code, label: c.name }));
+const CATEGORY_OPTIONS: MultiOption[] = BUSINESS_CATEGORIES.map((c) => ({ value: c.code, label: c.name, description: categoryDescription(c), keywords: categoryKeywords(c) }));
 
 const initialState: SignupState = {};
 type SlugCheck = { for: string; state: "idle" | "checking" | "ok" | "bad"; message: string | null };
@@ -30,7 +30,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
   const [categories, setCategories] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
   // Sub-categories of the chosen categories, grouped by category.
-  const subOptions: MultiOption[] = BUSINESS_CATEGORIES.filter((c) => categories.includes(c.code)).flatMap((c) => c.subs.map((x) => ({ value: x.code, label: x.name, group: c.name })));
+  const subOptions: MultiOption[] = BUSINESS_CATEGORIES.filter((c) => categories.includes(c.code)).flatMap((c) => c.subs.map((x) => ({ value: x.code, label: x.name, description: subDescription(x), group: c.name })));
   const ids = { company: useId(), slug: useId(), email: useId(), password: useId(), terms: useId(), category: useId(), sub: useId() };
 
   // The creation answered with something to fix (rate limit, address taken a moment ago…): back to the form.
@@ -106,7 +106,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
       <motion.div hidden={creating} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="mb-7">
           <h2 className="text-3xl font-black tracking-tight">Create your workspace</h2>
-          <p className="mt-1.5 text-muted-foreground">{approval ? "Free to start. New workspaces are approved by our team before they go live." : "Free to start. Set up takes about two minutes."}</p>
+          <p className="mt-1.5 text-muted-foreground">{approval ? "Free to start. New workspaces are approved by our team before they go live." : "Free to start. Set up takes a few seconds."}</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-5" noValidate>
           <div>
@@ -171,6 +171,9 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
               }}
               placeholder="Enter your business categories (up to 5)"
               searchPlaceholder="Enter your business category"
+              title="Business categories"
+              customLabel="category"
+              customExample="Flat broker"
               max={MAX_BUSINESS_CATEGORIES}
               customPrefix={CUSTOM_PREFIX}
               cleanCustom={cleanCustomName}
@@ -190,18 +193,20 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
               disabled={categories.length === 0}
               placeholder={categories.length === 0 ? "Choose a business category first" : "Enter your sub-categories (up to 25)"}
               searchPlaceholder="Enter your sub-category"
+              title="Sub-categories"
+              customLabel="sub-category"
+              customExample="Rental flats"
               max={MAX_BUSINESS_SUBCATEGORIES}
               customPrefix={CUSTOM_PREFIX}
               cleanCustom={cleanCustomName}
               invalid={!!errors.businessSubCategories}
             />
             {fieldError(errors.businessSubCategories)}
-            <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">Up to 5 categories and 25 sub-categories — and if yours isn&apos;t listed, type it and press Enter. Based on the UN&apos;s ISIC classification, extended for modern industries.</p>
           </div>
 
           <div>
-            <label htmlFor={ids.email} className="sr-label">Work email</label>
-            <input id={ids.email} name="email" type="email" required autoComplete="email" placeholder="Enter your work email" className="sr-input" style={{ ...inputStyle, ...(errors.email ? bad : null) }} aria-invalid={!!errors.email || undefined} />
+            <label htmlFor={ids.email} className="sr-label">Email address</label>
+            <input id={ids.email} name="email" type="email" required autoComplete="email" placeholder="Enter your email address" className="sr-input" style={{ ...inputStyle, ...(errors.email ? bad : null) }} aria-invalid={!!errors.email || undefined} />
             {fieldError(errors.email)}
           </div>
 

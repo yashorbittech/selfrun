@@ -49,7 +49,7 @@ export function parseInquiry(kind: InquiryKind, fd: FormData): { ok: true; value
     message: clip(fd.get("message"), 3000),
   };
   if (value.name.length < 2) return { ok: false, error: "Please enter your name.", field: "name" };
-  if (!EMAIL_RE.test(value.email)) return { ok: false, error: "Please enter a valid work email.", field: "email" };
+  if (!EMAIL_RE.test(value.email)) return { ok: false, error: "Please enter a valid email address.", field: "email" };
   if (kind === "demo" && value.company.length < 2) return { ok: false, error: "Please enter your company name.", field: "company" };
   if (kind === "contact" && value.message.length < 10) return { ok: false, error: "Please tell us a little more about how we can help.", field: "message" };
   return { ok: true, value };
