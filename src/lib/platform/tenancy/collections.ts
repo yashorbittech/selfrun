@@ -103,6 +103,8 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "billing_usage", // _id = <metric>:<yyyy-mm>
   "platform_payment_accounts", // _id = provider ("razorpay")
   "workspace_connections", // _id = provider key (Workspace → Settings → Integrations)
+  "website_generation", // _id = "ai-website" (the AI website's state and plan)
+  "lead_categories", // _id = "config" (the company's enquiry categories)
 ]);
 
 export const KEY_SEPARATOR = "::";

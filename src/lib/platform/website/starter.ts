@@ -13,6 +13,10 @@ import { getCompanyBrand } from "@/lib/platform/branding";
 import { starterFooter, starterNavigation, starterPages } from "@/lib/platform/website/starter-template";
 import { fillName, pickStarterPack, type StarterPack } from "@/lib/platform/website/starter-packs";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
+import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
+import { COMPANIES_COLLECTION } from "@/lib/platform/tenancy/companies";
+import type { BusinessSelection } from "@/lib/platform/business-taxonomy";
+import { categoryFallbackPack } from "@/lib/platform/website/ai/fallback";
 import { getActiveThemeKey, installThemePreset, setActiveTheme } from "@/lib/cms/theme";
 import { DEFAULT_DISPLAY } from "@/lib/cms/site-info-shared";
 
@@ -25,22 +29,22 @@ import { DEFAULT_DISPLAY } from "@/lib/cms/site-info-shared";
 
 const ACTOR = "system:starter-website";
 
-async function starterSiteInfo(name: string, namePrimary: string, nameAccent: string, pack: StarterPack): Promise<SiteInfo> {
+export async function starterSiteInfo(name: string, namePrimary: string, nameAccent: string, pack: StarterPack): Promise<SiteInfo> {
   const base = parseSiteInfo(STARTER_SITE_INFO_DEFAULTS);
   return (
     {
       ...base,
       brand: { namePrimary, nameAccent, subtitle: "", logoUrl: "", logoDarkUrl: "" },
-      header: { ...base.header, askAiLabel: base.header?.askAiLabel || "Ask AI", askAiHref: base.header?.askAiHref || "/ask" },
+      header: { ...base.header, askAiLabel: base.header?.askAiLabel || "Ask AI", askAiHref: base.header?.askAiHref || "/ask", ...(pack.structure?.headerCta ? { ctaLabel: pack.structure.headerCta, ctaHref: "/contact" } : {}) },
       floating: { ...base.floating, assistantLabel: "Ask AI" },
       // Filled in from the company profile (onboarding) — never guessed.
       contact: { email: "", phoneDisplay: "", phoneHref: "", whatsappHref: "", linkedinHref: "", mapsUrl: "", addressName: "", address: "" },
       social: [],
       display: {
-        header: { ...DEFAULT_DISPLAY.header, social: pack.display?.headerSocial ?? DEFAULT_DISPLAY.header.social },
+        header: { ...DEFAULT_DISPLAY.header, social: pack.display?.headerSocial ?? DEFAULT_DISPLAY.header.social, ...(pack.structure?.mode === "plan" ? { askAi: false, authLinks: pack.structure.accounts === true } : {}) },
         footer: { ...DEFAULT_DISPLAY.footer, bottomBar: pack.display?.footerBottomBar ?? DEFAULT_DISPLAY.footer.bottomBar },
         // Live chat appears only once the company adds its own widget (CMS → Settings → Tracking); WhatsApp only once it has a number.
-        floating: { ...DEFAULT_DISPLAY.floating },
+        floating: { ...DEFAULT_DISPLAY.floating, ...(pack.structure?.mode === "plan" ? { assistant: false } : {}) },
       },
       footer: {
         ...base.footer,
@@ -73,7 +77,22 @@ export interface StarterResult {
 export async function publishStarterWebsite(): Promise<StarterResult> {
   const brand = await getCompanyBrand();
   const name = brand.name;
-  const pack = pickStarterPack(await currentCompanyId());
+  const id = await currentCompanyId();
+  // A company that chose its business categories gets a plain site built only from those; the generic packs below are for companies that did not.
+  const company = (await (await getPlatformDb()).collection(COMPANIES_COLLECTION).findOne({ _id: id } as never)) as { slug?: string; business?: BusinessSelection } | null;
+  const cats = company?.business?.categories ?? [];
+  const catName = new Map(cats.map((c) => [c.code, c.name]));
+  const pack = cats.length || company?.business?.subCategories?.length
+    ? categoryFallbackPack({
+        name,
+        slug: company?.slug ?? id,
+        country: "",
+        categories: cats.map((c) => c.name),
+        subCategories: (company?.business?.subCategories ?? []).map((x) => ({ name: x.name, category: (x.categoryCode && catName.get(x.categoryCode)) || cats[0]?.name || "" })),
+        email: "",
+        phone: "",
+      })
+    : pickStarterPack(id);
   const result: StarterResult = { pack: pack.id, theme: null, pagesCreated: [], navigation: false, footer: false, siteInfo: false, contactForm: false };
 
   for (const page of starterPages({ name, email: "" }, pack)) {

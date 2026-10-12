@@ -36,12 +36,13 @@ export default function CreatingWorkspace({ companyName, host, approval = false 
         { title: "Creating your business", detail: companyName ? `Setting up ${companyName}` : "Setting up your business record", icon: Building2, at: 0 },
         { title: "Reserving your address", detail: host, icon: Globe, at: 1400 },
         { title: "Preparing your workspace", detail: "Roles, panels and your free plan", icon: PanelsTopLeft, at: 3200 },
-        { title: "Building your website", detail: "A starter site, ready to edit", icon: LayoutDashboard, at: 5600 },
-        { title: "Signing you in", detail: "Opening your workspace", icon: LogIn, at: 8200 },
+        { title: "Writing your website with AI", detail: "Pages, menu, colours and photos made for your kind of business", icon: LayoutDashboard, at: 5600 },
+        { title: "Signing you in", detail: "Opening your workspace", icon: LogIn, at: 95000 },
       ];
 
   const active = steps.reduce((acc, s, i) => (elapsed >= s.at ? i : acc), 0);
-  const percent = Math.min(96, Math.round(96 * (1 - Math.exp(-elapsed / 5200))));
+  // The website step takes the longest (AI writes the pages and makes the photos), so the ring is paced over a minute or two, not a few seconds.
+  const percent = Math.min(96, Math.round(96 * (1 - Math.exp(-elapsed / (approval ? 5200 : 40000)))));
   const initial = (companyName.trim()[0] ?? "W").toUpperCase();
   const R = 54;
   const C = 2 * Math.PI * R;

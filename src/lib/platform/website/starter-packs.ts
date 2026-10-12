@@ -32,6 +32,38 @@ export interface StarterPack {
   about: { intro: string; image: string; approachHeading: string; approachDescription: string; principles: StarterStep[] };
   /** Which home sections follow the hero, and in what order (varies the page structure). */
   home: ("why" | "steps" | "services" | "faq" | "cta")[];
+  /** The shape of the site itself (home blocks, extra pages, menu, footer): set by the AI generator, absent for the code-defined packs. */
+  structure?: StarterStructure;
+  /** Wording for the pages around the home page (about, contact, service pages, sign-in, sign-up). Absent = the neutral defaults in starter-template.ts. */
+  copy?: StarterCopy;
+}
+
+/** The kinds of content block a page can be composed of; each maps to one section type in the page builder. */
+export const BLOCK_KINDS = ["services-grid", "features", "checklist", "why", "steps", "faq", "text", "cta"] as const;
+export type StarterBlockKind = (typeof BLOCK_KINDS)[number];
+export interface StarterBlock { kind: StarterBlockKind; eyebrow: string; heading: string; text: string; items: { title: string; text: string; icon: string }[]; ctaLabel: string }
+export interface StarterExtraPage { slug: string; title: string; navLabel: string; intro: string; blocks: StarterBlock[] }
+export interface StarterStructure {
+  homeBlocks: StarterBlock[];
+  extraPages: StarterExtraPage[];
+  nav: { label: string; target: string }[];
+  footerColumns: { title: string; links: { label: string; target: string }[] }[];
+  headerCta: string;
+  /** "plan": the pages are exactly the ones planned for this business (no fixed Services / About / sign-in pages). */
+  mode?: "plan";
+  /** Whether customers of this business need sign-in and sign-up pages. */
+  accounts?: boolean;
+  /** URL word of the page of each single offering, and those pages (in plan mode every offering has its own detailed page). */
+  offeringBase?: string;
+  offeringPages?: { slug: string; title: string; intro: string; blocks: StarterBlock[] }[];
+}
+
+export interface StarterCopy {
+  about?: { ctaHeading: string; ctaDescription: string; ctaLabel: string; linkLabel: string };
+  contact?: { badge: string; headingLead: string; headingHighlight: string; headingTail: string; description: string; intro: string; emailText: string; callText: string; whatsappText: string; interestLabel: string; successDescription: string; badgeOne: [string, string]; badgeTwo: [string, string] };
+  detail?: { included: string; highlightText: string; ctaDescription: string };
+  login?: { badge: string; description: string; features: { title: string; body: string; icon: string }[] };
+  register?: { badge: string; headingLead: string; description: string; clientLabel: string };
 }
 
 const U = (id: string, w = 1400) => `https://images.unsplash.com/${id}?q=80&w=${w}&auto=format&fit=crop`;

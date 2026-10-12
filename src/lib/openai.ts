@@ -4,6 +4,7 @@ import { unstable_rethrow } from "next/navigation";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { assertAiAvailable, meterAiTokens } from "@/lib/platform/billing/enforce";
 import { connectionValues } from "@/lib/platform/connections/resolve";
+import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
 
 // One client per distinct credential set (the platform's own OpenAI key, used for every company),
 // reused across hot reloads and invocations. Created lazily, so a workspace without a key only gets a clear error when it
@@ -48,7 +49,7 @@ function streamEventUsage(event: unknown): Usage {
   return e.response?.usage ?? e.usage ?? null;
 }
 
-function meterStream<T extends object>(stream: T, companyId: string): T {
+function meterStream<T extends object>(stream: T, companyId: string, model: string, endpoint: string): T {
   let metered = false;
   return new Proxy(stream, {
     get(target, prop) {
@@ -63,6 +64,7 @@ function meterStream<T extends object>(stream: T, companyId: string): T {
                 if (tokens > 0) {
                   metered = true;
                   await meterAiTokens(tokens, companyId);
+                  await recordAiUsage({ usage: streamEventUsage(r.value), model, endpoint, companyId });
                 }
               }
               return r;
@@ -81,7 +83,7 @@ function meterStream<T extends object>(stream: T, companyId: string): T {
   });
 }
 
-function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown) {
+function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpoint: string) {
   return async (...args: unknown[]) => {
     let companyId: string | null = null;
     try {
@@ -92,20 +94,25 @@ function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown) {
     // Outside any company (scripts) there is no plan to check or meter against.
     if (companyId) await assertAiAvailable();
     const result = await fn.apply(owner, args);
+    const model = String((args[0] as { model?: string } | undefined)?.model ?? "");
     const streaming = Boolean((args[0] as { stream?: boolean } | undefined)?.stream);
-    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(result, companyId);
-    if (companyId) await meterAiTokens(tokensOf((result as { usage?: Usage } | null)?.usage), companyId);
+    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(result, companyId, model, endpoint);
+    if (companyId) {
+      const usage = (result as { usage?: Usage } | null)?.usage;
+      await meterAiTokens(tokensOf(usage), companyId);
+      await recordAiUsage({ usage, model, endpoint, companyId });
+    }
     return result;
   };
 }
 
 /** Wraps `resource[method]` (e.g. `responses.create`) with the check + meter; everything else is untouched. */
-function wrapResource<T extends object>(resource: T, methods: string[], children: Record<string, string[]> = {}): T {
+function wrapResource<T extends object>(resource: T, methods: string[], children: Record<string, string[]> = {}, path = ""): T {
   return new Proxy(resource, {
     get(target, prop) {
       const v = Reflect.get(target, prop, target);
-      if (typeof prop === "string" && methods.includes(prop) && typeof v === "function") return meteredMethod(target, v as (...args: unknown[]) => unknown);
-      if (typeof prop === "string" && prop in children && v && typeof v === "object") return wrapResource(v as object, children[prop]);
+      if (typeof prop === "string" && methods.includes(prop) && typeof v === "function") return meteredMethod(target, v as (...args: unknown[]) => unknown, `${path}${prop}`);
+      if (typeof prop === "string" && prop in children && v && typeof v === "object") return wrapResource(v as object, children[prop], {}, `${path}${prop}.`);
       return typeof v === "function" ? v.bind(target) : v;
     },
   });
@@ -123,7 +130,7 @@ function meteredClient(client: OpenAI): OpenAI {
       const v = Reflect.get(target, prop, target);
       if (typeof prop === "string" && prop in wrapped && v && typeof v === "object") {
         const [methods, children] = wrapped[prop];
-        return wrapResource(v as object, methods, children);
+        return wrapResource(v as object, methods, children, `${prop}.`);
       }
       return typeof v === "function" ? v.bind(target) : v;
     },

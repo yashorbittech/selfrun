@@ -128,6 +128,7 @@ export const ROUTE_PERMISSIONS: Record<string, PlatformPermission | null> = {
   "/platform/settings/billing": "tax.read",
   "/platform/revenue": "revenue.read",
   "/platform/usage": "usage.read",
+  "/platform/ai-usage": "usage.read",
   "/platform/support": "support.read",
   "/platform/support/help": "support.read",
   "/platform/support/settings": "support.read",

@@ -17,7 +17,9 @@ export default async function HubLoginPage({ searchParams }: { searchParams: Pro
   // Already signed in (including the moment right after the login action sets the cookie and this page
   // refreshes): the same landing rule as the login action, so an owner with open setup is never sent past
   // the onboarding wizard by this redirect.
-  if (user) redirect(user.mustChangePassword ? "/workspace/change-password" : await loginLanding(user.roles, next, user.id));
+  // (No user id here on purpose: only a fresh sign-in or hand-off lands on the Platform Panel. A signed-in person who opens this page is
+  // sent to the Workspace, so this page and /platform can never send each other back and forth.)
+  if (user) redirect(user.mustChangePassword ? "/workspace/change-password" : await loginLanding(user.roles, next));
 
   return (
     <div className="flex min-h-screen">

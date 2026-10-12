@@ -16,6 +16,7 @@ import CmsNotices from "@/components/cms/CmsNotices";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
 import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
+import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 
 export const generateMetadata = () => brandedMetadata("{brand} {panel:cms}", { robots: { index: false, follow: false } });
 
@@ -28,7 +29,7 @@ export default async function ProtectedCmsLayout({ children }: { children: React
   const viewer = await getViewer();
   if (!viewer) redirect("/cms/login");
 
-  const [pages, maintenance, activeTheme] = await Promise.all([listPages(), getMaintenanceMode(), getActiveThemeKey()]);
+  const [pages, maintenance, activeTheme, isOperator] = await Promise.all([listPages(), getMaintenanceMode(), getActiveThemeKey(), isPlatformOwnerContext()]);
   const flags: CmsNavFlags = {
     settings: can(viewer, "SETTINGS_MANAGE"),
     audit: can(viewer, "VIEW_AUDIT"),
@@ -56,7 +57,7 @@ export default async function ProtectedCmsLayout({ children }: { children: React
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-              <CmsTopbar roles={user.roles} flags={flags} />
+              <CmsTopbar roles={user.roles} flags={flags} aiAgent={!isOperator} />
             </div>
             <PanelBackBar />
             <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">

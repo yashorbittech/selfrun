@@ -10,6 +10,7 @@ import { loadIntegrationsDoc, resolvedRootDomain } from "@/lib/platform/integrat
 import { getPlatformSettings, reservedSlugError } from "@/lib/platform/settings";
 import { getDb } from "@/lib/mongodb";
 import { publishStarterWebsite } from "@/lib/platform/website/starter";
+import { generateAiWebsite } from "@/lib/platform/website/ai/apply";
 import { startTrial } from "@/lib/platform/billing/subscription";
 import { isSubdomainOfRoot, rootDomainFromHost } from "@/lib/platform/tenancy/root-domain";
 
@@ -91,6 +92,10 @@ export interface NewCompany {
   owner: { email: string; name: string; passwordHash: string; mustChangePassword: boolean; emailVerified?: boolean };
   /** The company's line of business (ISIC category + sub-category) chosen at registration. */
   business?: BusinessSelection;
+  /** Self-serve sign-up waits for the AI-written website (its progress screen has a step for it); every other path writes it in the background. */
+  aiWebsite?: "wait" | "background";
+  /** Where the owner is, from the sign-up request. */
+  hints?: { country?: string; languages?: string; timezone?: string };
 }
 
 export type ProvisionResult = { ok: true; companyId: string; adminId: string; host: string; hostingError: string | null } | { ok: false; error: string };
@@ -117,6 +122,7 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
     status: "active",
     isPlatformOwner: false,
     ...(input.business ? { business: input.business } : {}),
+    ...(input.hints && Object.values(input.hints).some(Boolean) ? { signupHints: input.hints } : {}),
     ...(defaults ? { locale: defaults.defaultLocale, timezone: defaults.defaultTimezone } : {}),
     createdAt: now,
     updatedAt: now,
@@ -167,6 +173,23 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
 
   // A working public site from minute one (neutral starter pages, editable in the CMS). Non-fatal.
   await runAsCompany(company._id, () => publishStarterWebsite()).catch((err) => console.error(`[provisioning] starter website for ${company.slug} failed`, err));
+
+  // Then its own site, written by AI from the business categories it chose, replaces the starter. During self-serve sign-up we wait for it
+  // (the sign-up progress screen has a "writing your website" step); elsewhere it is written in the background. The starter stays if AI
+  // is unavailable or takes too long, and the company can retry from CMS → AI Website.
+  if (process.env.AI_WEBSITE_ON_SIGNUP !== "0") {
+    const build = () => runAsCompany(company._id, () => generateAiWebsite()).catch((err) => console.error(`[provisioning] AI website for ${company.slug} failed`, err));
+    if (input.aiWebsite === "wait") {
+      await Promise.race([build(), new Promise<void>((resolve) => setTimeout(resolve, 240_000))]);
+    } else {
+      try {
+        const { after } = await import("next/server");
+        after(build);
+      } catch {
+        // Outside a request (scripts, seeders): no automatic AI spend. Use CMS → AI Website to generate.
+      }
+    }
+  }
 
   return { ok: true, companyId: company._id, adminId, host, hostingError: hostingError ?? appHostingError };
 }

@@ -9,6 +9,22 @@ import { renderEmail } from "@/lib/platform/email/template";
 import { hashPassword } from "@/lib/lms-auth";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { sendVerificationEmail } from "@/lib/platform/email-verification";
+import { headers } from "next/headers";
+
+/** Country, browser languages and time zone the sign-up request carries (when the host or CDN provides them). Used only to tailor the website. */
+async function requestHints(): Promise<{ country?: string; languages?: string; timezone?: string }> {
+  try {
+    const h = await headers();
+    const country = (h.get("x-vercel-ip-country") || h.get("cf-ipcountry") || h.get("cloudfront-viewer-country") || "").trim().toUpperCase();
+    return {
+      ...(/^[A-Z]{2}$/.test(country) && country !== "XX" ? { country } : {}),
+      ...(h.get("accept-language") ? { languages: h.get("accept-language")!.slice(0, 120) } : {}),
+      ...(h.get("x-vercel-ip-timezone") ? { timezone: h.get("x-vercel-ip-timezone")!.slice(0, 60) } : {}),
+    };
+  } catch {
+    return {};
+  }
+}
 
 /**
  * Self-serve company sign-up. Email verification does NOT gate it:
@@ -221,7 +237,7 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
     return { ok: true, kind: "awaiting_approval", email };
   }
 
-  const created = await createCompanyWithOwner({ name: companyName, slug: input.slug, owner: { email, name, passwordHash, mustChangePassword: false, emailVerified: false }, business });
+  const created = await createCompanyWithOwner({ name: companyName, slug: input.slug, owner: { email, name, passwordHash, mustChangePassword: false, emailVerified: false }, business, aiWebsite: "wait", hints: await requestHints() });
   // "Address just taken" (two sign-ups racing for it) belongs on the address field.
   if (!created.ok) return { ok: false, errors: /address/i.test(created.error) ? { slug: created.error } : { form: created.error } };
 

@@ -9,7 +9,7 @@ import { checkSlugAction, startSignupAction, validateSignupAction, type SignupSt
 import type { SignupFieldErrors } from "@/lib/platform/signup";
 import CreatingWorkspace from "./CreatingWorkspace";
 import { BUSINESS_CATEGORIES, categoryDescription, categoryKeywords, subDescription, CUSTOM_PREFIX, MAX_BUSINESS_CATEGORIES, MAX_BUSINESS_SUBCATEGORIES, cleanCustomName } from "@/lib/platform/business-taxonomy";
-import SearchMultiSelect, { type MultiOption } from "@/components/platform/SearchMultiSelect";
+import SearchMultiSelect, { type MultiOption, type SearchExtra } from "@/components/platform/SearchMultiSelect";
 
 const CATEGORY_OPTIONS: MultiOption[] = BUSINESS_CATEGORIES.map((c) => ({ value: c.code, label: c.name, description: categoryDescription(c), keywords: categoryKeywords(c) }));
 
@@ -30,7 +30,31 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
   const [categories, setCategories] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
   // Sub-categories of the chosen categories, grouped by category.
-  const subOptions: MultiOption[] = BUSINESS_CATEGORIES.filter((c) => categories.includes(c.code)).flatMap((c) => c.subs.map((x) => ({ value: x.code, label: x.name, description: subDescription(x), group: c.name })));
+  const subOptions: MultiOption[] = BUSINESS_CATEGORIES.filter((c) => categories.includes(c.code)).flatMap((c) => c.subs.map((x) => ({ value: x.code, label: x.name, description: subDescription(x, c.name), group: c.name })));
+  // Typing in the category field also finds individual business types ("halwai", "welder") inside any category; picking one selects both.
+  const categorySearchExtras = (q: string): SearchExtra[] => {
+    const out: SearchExtra[] = [];
+    for (const c of BUSINESS_CATEGORIES) {
+      for (const x of c.subs) {
+        if (!x.name.toLowerCase().includes(q)) continue;
+        out.push({
+          key: x.code,
+          label: x.name,
+          hint: c.name,
+          picked: categories.includes(c.code) && subCategories.includes(x.code),
+          onPick: () => {
+            if (!categories.includes(c.code)) {
+              if (categories.length >= MAX_BUSINESS_CATEGORIES) return;
+              setCategories([...categories, c.code]);
+            }
+            if (!subCategories.includes(x.code) && subCategories.length < MAX_BUSINESS_SUBCATEGORIES) setSubCategories((s) => [...s, x.code]);
+          },
+        });
+        if (out.length >= 40) return out;
+      }
+    }
+    return out;
+  };
   const ids = { company: useId(), slug: useId(), email: useId(), password: useId(), terms: useId(), category: useId(), sub: useId() };
 
   // The creation answered with something to fix (rate limit, address taken a moment ago…): back to the form.
@@ -173,6 +197,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
               searchPlaceholder="Enter your business category"
               title="Business categories"
               customLabel="category"
+              searchExtras={categorySearchExtras}
               customExample="Flat broker"
               max={MAX_BUSINESS_CATEGORIES}
               customPrefix={CUSTOM_PREFIX}
@@ -191,7 +216,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
               values={subCategories}
               onChange={setSubCategories}
               disabled={categories.length === 0}
-              placeholder={categories.length === 0 ? "Choose a business category first" : "Enter your sub-categories (up to 25)"}
+              placeholder={categories.length === 0 ? "Choose a business category first" : "Enter your sub-categories (up to 50)"}
               searchPlaceholder="Enter your sub-category"
               title="Sub-categories"
               customLabel="sub-category"

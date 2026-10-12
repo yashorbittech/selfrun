@@ -298,6 +298,7 @@ export async function getDashboardStats(filters: DashboardFilters = {}): Promise
   const targetCategories = filters.category ? [filters.category] : (await scopedCategories()).map((c) => c.slug);
   const granularity = filters.granularity ?? "day";
   const dateFormat = dateFormatFor(granularity);
+  const customCategories = new Map((await getLeadCategories()).categories.map((c) => [c.slug, c]));
 
   const matchFilter = buildLeadFilter(filters);
   const prevRange = previousPeriodRange(filters.dateFrom, filters.dateTo);
@@ -386,7 +387,7 @@ export async function getDashboardStats(filters: DashboardFilters = {}): Promise
       bySource[key] = (bySource[key] ?? 0) + s.count;
     }
 
-    const subServiceLabels = new Map(getSubServices(slug).map((s) => [s.slug, s.label]));
+    const subServiceLabels = new Map((customCategories.get(slug)?.subServices ?? getSubServices(slug)).map((s) => [s.slug, s.label]));
     const bySubService = (result?.bySubService ?? [])
       .map((s) => {
         const key = s._id ?? "Not specified";

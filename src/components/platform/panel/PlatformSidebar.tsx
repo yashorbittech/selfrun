@@ -26,6 +26,7 @@ import {
   BookOpen,
   SlidersHorizontal,
   Wrench,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -74,6 +75,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
     items: [
       { href: "/platform/revenue", label: "Revenue & subscriptions", icon: LineChart },
       { href: "/platform/usage", label: "Usage & limits", icon: Gauge },
+      { href: "/platform/ai-usage", label: "AI token history", icon: Sparkles },
     ],
   },
   {

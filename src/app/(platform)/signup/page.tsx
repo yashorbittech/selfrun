@@ -14,6 +14,9 @@ import { OfferTopBar } from "@/components/saas/OfferChrome";
 import MarketingShot from "@/components/saas/MarketingShot";
 import SignupForm from "./SignupForm";
 
+// Creating a workspace also starts writing its website in the background (AI), which can take a couple of minutes.
+export const maxDuration = 300;
+
 export const metadata: Metadata = {
   title: "Create your workspace",
   description: "Create your SelfRun AI workspace and run sales, HR, finance, projects and your website from one AI-powered platform. Free forever for one person.",

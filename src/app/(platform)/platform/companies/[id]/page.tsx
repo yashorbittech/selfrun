@@ -15,6 +15,7 @@ import { saasAppOrigin } from "@/lib/saas/hosts";
 import { requestOrigin } from "@/lib/platform/request";
 import StatusBadge from "../StatusBadge";
 import StatusControl from "./StatusControl";
+import DeleteCompanyControl from "./DeleteCompanyControl";
 import CompanyAddonsCard from "./CompanyAddonsCard";
 import { getCompanyAddons, listAddons } from "@/lib/platform/billing/addons";
 import { describeAddonEffect } from "@/lib/platform/billing/catalog-types";
@@ -81,6 +82,7 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
               <div className="flex flex-wrap items-start gap-2">
                 {company.status === "active" && <LoginAsCompanyButton companyId={company.id} companyName={company.name} variant="default" />}
                 <StatusControl companyId={company.id} companyName={company.name} status={company.status} />
+                {user.platform.permissions.includes("*") && <DeleteCompanyControl companyId={company.id} companyName={company.name} />}
               </div>
             )
           }

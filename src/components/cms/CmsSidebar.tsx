@@ -114,6 +114,7 @@ export default function CmsSidebar({ flags, onNavigate, collapsed = false }: { f
     {
       label: "Appearance",
       items: [
+        { href: "/cms/ai-website", label: "AI Website", icon: Sparkles },
         { href: "/cms/theme", label: "Themes", icon: Palette },
         { href: `/cms/customize/${flags.activeTheme ?? "default"}`, label: "Customize", icon: Paintbrush },
         { href: "/cms/navigation", label: "Menus", icon: MenuIcon },

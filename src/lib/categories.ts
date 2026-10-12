@@ -93,5 +93,6 @@ const SUB_SERVICES: Record<CategorySlug, SubService[]> = {
 };
 
 export function getSubServices(slug: CategorySlug): SubService[] {
-  return SUB_SERVICES[slug];
+  // A company's own category (lead-categories.ts) is not one of the built-in six and has no entry here.
+  return SUB_SERVICES[slug] ?? [];
 }

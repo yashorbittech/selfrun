@@ -1,5 +1,5 @@
 import type { PageSection } from "@/lib/cms/section-registry";
-import { fillName, type StarterPack } from "@/lib/platform/website/starter-packs";
+import { fillName, type StarterBlock, type StarterPack } from "@/lib/platform/website/starter-packs";
 
 /**
  * A neutral starter website for a new company — the pages the public site
@@ -31,8 +31,29 @@ const IMG = {
   privacy: "https://images.unsplash.com/photo-1633265486064-086b219458ec?q=80&w=1200&auto=format&fit=crop",
 };
 
+/** The URL word for one offering: its title in plain letters, or `item-N` when the title has none (another script). */
+export const offeringSlug = (title: string, index: number) => {
+  const s = title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+  return s || `item-${index + 1}`;
+};
+
 /** `/services/<slug>` for a service title. */
 export const serviceSlug = (title: string) => title.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+/** Whether a block has enough real content to be shown (a block without it is dropped, never published half-empty). */
+export function blockUsable(b: StarterBlock): boolean {
+  const items = b.items.filter((i) => i.title && i.text);
+  switch (b.kind) {
+    case "services-grid": return true;
+    case "features": return items.length >= 3;
+    case "checklist": return items.length >= 3 && !!b.heading;
+    case "why": return items.length >= 3;
+    case "steps": return items.length >= 3;
+    case "faq": return items.length >= 3;
+    case "text": return !!b.heading && b.text.length >= 80;
+    case "cta": return true;
+  }
+}
 
 let order = 0;
 function section(type: string, config: Record<string, unknown>): PageSection {
@@ -43,6 +64,14 @@ function section(type: string, config: Record<string, unknown>): PageSection {
 export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
   order = 0;
   const t = (text: string) => fillName(text, v.name);
+  const planMode = pack.structure?.mode === "plan";
+  /** Where "see what we offer" style links lead: the first page the plan made, else the contact page. */
+  const detailSlugs = new Set((pack.structure?.offeringPages ?? []).map((p) => p.slug));
+  const planDetailHref = (n: number): string | null => {
+    const slug = pack.services[n] ? offeringSlug(pack.services[n].title, n) : "";
+    return planMode && slug && detailSlugs.has(slug) ? `/${pack.structure?.offeringBase ?? "offerings"}/${slug}` : null;
+  };
+  const firstPlanPath = pack.structure?.extraPages[0] ? `/${pack.structure.extraPages[0].slug}` : "/contact";
   const servicesSection = () => section("listing-grid", { badge: "Services", badgeIcon: "Layers", sectionLabel: "What We Do", items: pack.services.map((s) => ({ ...s, href: `/services/${serviceSlug(s.title)}` })) });
   const homeSections: Record<string, () => PageSection> = {
     services: servicesSection,
@@ -51,6 +80,30 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     faq: () => section("faq-accordion", { title: "Frequently asked questions", faqs: pack.faqs.map((f) => ({ question: t(f.question), answer: f.answer })) }),
     cta: () => section("detail-cta", { heading: pack.cta.heading, description: pack.cta.description, ctaLabel: pack.cta.label, external: false, checklist: pack.cta.checklist }),
   };
+
+  const c = pack.copy ?? {};
+  const blockSection = (b: StarterBlock, n: number): PageSection | null => {
+    const items = b.items.filter((i) => i.title && i.text);
+    switch (b.kind) {
+      case "services-grid":
+        return section("listing-grid", { badge: b.eyebrow || "Services", badgeIcon: "Layers", sectionLabel: b.heading || "What we do", items: pack.services.map((s, n) => ({ ...s, href: planMode ? planDetailHref(n) ?? "/contact" : `/services/${serviceSlug(s.title)}` })) });
+      case "features":
+        return items.length >= 2 ? section("feature-highlights", { title: b.heading, features: items.slice(0, 6).map((i) => ({ name: t(i.title), desc: t(i.text) })) }) : null;
+      case "checklist":
+        return items.length >= 2 && b.heading ? section("checklist-grid", { id: `list-${n}`, title: t(b.heading), description: t(b.text), items: items.slice(0, 12).map((i) => ({ title: t(i.title), description: t(i.text) })), columns: items.length > 4 ? 3 : 2, tone: "default" }) : null;
+      case "why":
+        return items.length >= 3 ? section("home-why-choose-us", { eyebrow: t(b.eyebrow), headerIcon: items[0].icon || "BadgeCheck", heading: t(b.heading), description: t(b.text), reasons: items.slice(0, 4).map((i) => ({ name: t(i.title), desc: t(i.text), icon: i.icon || "BadgeCheck" })) }) : null;
+      case "steps":
+        return items.length >= 3 ? section("home-how-we-work", { eyebrow: t(b.eyebrow), headerIcon: "Route", heading: t(b.heading), accent: "", description: t(b.text), steps: items.slice(0, 4).map((i) => ({ title: t(i.title), description: t(i.text), icon: i.icon || "CheckCircle2" })), linkLabel: b.ctaLabel || pack.cta.label, linkHref: "/contact" }) : null;
+      case "faq":
+        return items.length >= 2 ? section("faq-accordion", { title: t(b.heading || "Frequently asked questions"), faqs: items.slice(0, 8).map((i) => ({ question: t(i.title), answer: t(i.text) })) }) : null;
+      case "text":
+        return b.heading && b.text ? section("text-panel", { title: t(b.heading), body: t(b.text) }) : null;
+      case "cta":
+        return section("detail-cta", { heading: t(b.heading || pack.cta.heading), description: t(b.text || pack.cta.description), ctaLabel: b.ctaLabel || pack.cta.label, external: false, checklist: items.slice(0, 4).map((i) => i.title) });
+    }
+  };
+  const blocks = (list: StarterBlock[]) => list.map((b, n) => blockSection(b, n)).filter((x): x is PageSection => x !== null);
 
   const h = pack.hero;
   const home: StarterPage = {
@@ -66,7 +119,7 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         primaryCtaLabel: h.primaryCta,
         primaryCtaHref: "/contact",
         secondaryCtaLabel: h.secondaryCta,
-        secondaryCtaHref: "/services",
+        secondaryCtaHref: planMode ? firstPlanPath : "/services",
         chipOne: h.chips[0],
         chipTwo: h.chips[1],
         chipThree: h.chips[2],
@@ -77,7 +130,7 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         scrollLabel: "Scroll to explore",
         image: h.image,
       }),
-      ...pack.home.map((key) => homeSections[key]()),
+      ...(pack.structure ? blocks(pack.structure.homeBlocks) : pack.home.map((key) => homeSections[key]())),
     ],
   };
 
@@ -105,10 +158,10 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         accent: "",
         description: pack.about.approachDescription,
         steps: pack.about.principles,
-        linkLabel: "Work with us",
+        linkLabel: c.about?.linkLabel ?? "Work with us",
         linkHref: "/contact",
       }),
-      section("detail-cta", { heading: "Let's build something together", description: "Tell us about your project and we'll take it from there.", ctaLabel: "Contact Us", external: false, checklist: [] }),
+      section("detail-cta", { heading: c.about?.ctaHeading ?? "Get in touch", description: c.about?.ctaDescription ?? "Tell us what you need and we'll take it from there.", ctaLabel: c.about?.ctaLabel ?? "Contact Us", external: false, checklist: [] }),
     ],
   };
 
@@ -118,32 +171,32 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     seo: { title: `Contact | ${v.name}`, description: `Get in touch with ${v.name}.` },
     sections: [
       section("contact-hero", {
-        badge: "Get in touch",
-        headingLead: "Let's build something ",
-        headingHighlight: "great",
-        headingTail: ".",
-        description: "Have a project in mind or a question? Send us a message and we'll get back to you.",
+        badge: c.contact?.badge ?? "Get in touch",
+        headingLead: c.contact?.headingLead ?? "We'd love to ",
+        headingHighlight: c.contact?.headingHighlight ?? "hear from you",
+        headingTail: c.contact?.headingTail ?? ".",
+        description: c.contact?.description ?? "Have a question or a request? Send us a message and we'll get back to you.",
         backgroundImage: IMG.contact,
         cardImage: IMG.contact,
-        badgeOneTitle: "Quick response",
-        badgeOneSubtitle: "Every enquiry answered",
-        badgeTwoTitle: "Free consultation",
-        badgeTwoSubtitle: "No commitment",
+        badgeOneTitle: c.contact?.badgeOne[0] ?? "Quick response",
+        badgeOneSubtitle: c.contact?.badgeOne[1] ?? "Every enquiry answered",
+        badgeTwoTitle: c.contact?.badgeTwo[0] ?? "Clear answers",
+        badgeTwoSubtitle: c.contact?.badgeTwo[1] ?? "No pressure",
       }),
       section("contact-form", {
         heading: "Get in Touch",
-        intro: "Fill out the form and we'll reach out to you.",
+        intro: c.contact?.intro ?? "Fill out the form and we'll reach out to you.",
         emailTitle: "Email us",
-        emailText: "For general enquiries and project proposals.",
+        emailText: c.contact?.emailText ?? "For general enquiries and requests.",
         callTitle: "Call us",
-        callText: "Available during business hours.",
+        callText: c.contact?.callText ?? "Available during business hours.",
         whatsappTitle: "Chat on WhatsApp",
-        whatsappText: "Message us directly.",
+        whatsappText: c.contact?.whatsappText ?? "Message us directly.",
         visitTitle: "Visit us",
-        successDescription: "Thanks for reaching out. We'll get back to you soon.",
+        successDescription: c.contact?.successDescription ?? "Thanks for reaching out. We'll get back to you soon.",
         submitLabel: "Send Message",
         submittingLabel: "Sending",
-        interestLabel: "I'm interested in",
+        interestLabel: c.contact?.interestLabel ?? "I'm interested in",
         subServiceLabel: "Specific Service",
         resumeLabel: "Resume / CV (PDF or Word, optional)",
         consentLead: "By submitting this form, you agree to our ",
@@ -178,31 +231,27 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     seo: { title: `${svc.title} | ${v.name}`, description: t(svc.description) },
     sections: [
       section("page-hero", { category: "services", categoryLabel: "services", title: svc.title, subtitle: svc.subtitle, description: t(svc.description), icon: svc.icon, image: svc.image, primaryCtaLabel: pack.cta.label, primaryCtaHref: "/contact" }),
-      section("feature-highlights", { title: "What's included", features: svc.highlights.slice(0, 6).map((h) => ({ name: h, desc: `${h} — planned, built and supported by the ${v.name} team.` })) }),
+      section("feature-highlights", { title: c.detail?.included ?? "What's included", features: svc.highlights.slice(0, 6).map((h) => ({ name: h, desc: (c.detail?.highlightText ?? "{h} — taken care of by the {name} team.").replaceAll("{h}", h).replaceAll("{name}", v.name) })) }),
       homeSections.steps(),
       section("faq-accordion", { title: `${svc.title} — questions`, faqs: pack.faqs.slice(0, 2).map((f) => ({ question: t(f.question), answer: f.answer })) }),
-      section("detail-cta", { heading: `Interested in ${svc.title}?`, description: "Tell us what you need and we'll reply with next steps.", ctaLabel: pack.cta.label, external: false, checklist: pack.cta.checklist }),
+      section("detail-cta", { heading: `Interested in ${svc.title}?`, description: c.detail?.ctaDescription ?? "Tell us what you need and we'll reply with next steps.", ctaLabel: pack.cta.label, external: false, checklist: pack.cta.checklist }),
     ],
   }));
 
   const login: StarterPage = {
     path: "/login",
     title: "Login",
-    seo: { title: `Login | ${v.name}`, description: `Sign in to access your ${v.name} client and student portal.` },
+    seo: { title: `Login | ${v.name}`, description: `Sign in to your ${v.name} account.` },
     sections: [
       section("login-page", {
-        badge: "Client & Student Portal",
+        badge: c.login?.badge ?? "Customer portal",
         headingLead: "Welcome ",
         headingHighlight: "back",
         headingTail: ".",
-        description: `Sign in to access your projects, courses, assignments, certificates, and rewards with ${v.name}.`,
-        features: [
-          { title: "Your Projects & Learning", body: "Track milestones, view progress, and access materials.", icon: "Layers" },
-          { title: "Certificates & Tests", body: "Take online assessments and download verified credentials.", icon: "ShieldCheck" },
-          { title: "Wallet & Rewards", body: "Earn credits and redeem rewards across our services.", icon: "Sparkles" },
-        ],
-        rewardsLead: "Learn about our rewards program on the ",
-        rewardsLinkLabel: "Rewards page",
+        description: c.login?.description ?? `Sign in to your ${v.name} account.`,
+        features: c.login?.features ?? [],
+        rewardsLead: "",
+        rewardsLinkLabel: "",
         formTitle: "Sign in to your account",
         formSubtitle: "Enter your credentials to access [[brand]]",
         emailLabel: "Email address",
@@ -227,10 +276,10 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     seo: { title: `Create Account | ${v.name}`, description: `Create an account to get started with ${v.name}.` },
     sections: [
       section("register-hero", {
-        badge: "Create an Account",
-        headingLead: "Start your journey with",
+        badge: c.register?.badge ?? "Create an Account",
+        headingLead: c.register?.headingLead ?? "Create your account with",
         headingHighlight: v.name,
-        description: `Join ${v.name} to access projects, courses, online tests, and career opportunities.`,
+        description: c.register?.description ?? `Create your ${v.name} account.`,
       }),
       section("register-form", {
         heading: "Create your account",
@@ -250,18 +299,18 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         stepEarnTitle: "You both earn",
         stepEarnText: "Get reward credits directly to your wallet.",
         creditsNote: "Credits can be redeemed for discounts and rewards.",
-        earnMoreLabel: "Learn more about rewards",
-        earnMoreHref: "/rewards",
+        earnMoreLabel: "",
+        earnMoreHref: "",
         invitedText: "has invited you to join!",
         welcomeLead: "You'll receive a welcome bonus of",
         welcomeTail: "credits upon registration.",
         codeRejectedText: "This referral code is invalid or expired.",
         accountTypeLabel: "I am a",
         accountTypePlaceholder: "Select account type",
-        typeStudent: "Student",
-        typeIntern: "Intern",
-        typeClient: "Client",
-        typeJobSeeker: "Job Seeker",
+        typeStudent: "",
+        typeIntern: "",
+        typeClient: c.register?.clientLabel ?? "Customer",
+        typeJobSeeker: "",
         nameLabel: "Full Name",
         namePlaceholder: "John Doe",
         emailLabel: "Email Address",
@@ -286,37 +335,111 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     ],
   };
 
-  return [home, services, about, contact, privacy, login, register, ...details];
+  // Pages only this kind of business needs (a menu, treatments, a process…), planned by the AI.
+  const extra: StarterPage[] = (pack.structure?.extraPages ?? []).map((pg) => ({
+    path: `/${pg.slug}`,
+    title: pg.title,
+    seo: { title: `${pg.title} | ${v.name}`, description: t(pg.intro) },
+    sections: [
+      section("listing-hero", { eyebrow: pg.slug, title: t(pg.title), description: t(pg.intro), icon: "BadgeCheck", image: pack.servicesImage }),
+      ...blocks(pg.blocks),
+      // Every page ends by inviting the visitor to act, unless its own last block already does.
+      ...(pg.blocks.some((b) => b.kind === "cta" && blockUsable(b)) ? [] : [section("detail-cta", { heading: pack.cta.heading, description: pack.cta.description, ctaLabel: pack.cta.label, external: false, checklist: [] })]),
+    ],
+  }));
+
+  // One detailed page for each offering (planned sites): what it is, what to know, common questions.
+  const offeringDetails: StarterPage[] = planMode
+    ? (pack.structure?.offeringPages ?? []).flatMap((pg) => {
+        const n = pack.services.findIndex((sv, i) => offeringSlug(sv.title, i) === pg.slug);
+        if (n < 0) return [];
+        const sv = pack.services[n];
+        return [{
+          path: `/${pack.structure?.offeringBase ?? "offerings"}/${pg.slug}`,
+          title: pg.title,
+          seo: { title: `${pg.title} | ${v.name}`, description: t(pg.intro || sv.description) },
+          sections: [
+            section("listing-hero", { eyebrow: pack.structure?.offeringBase ?? "offerings", title: t(pg.title), description: t(pg.intro || sv.description), icon: sv.icon || "BadgeCheck", image: pack.servicesImage }),
+            ...blocks(pg.blocks),
+            ...(pg.blocks.some((b) => b.kind === "cta" && blockUsable(b)) ? [] : [section("detail-cta", { heading: pack.cta.heading, description: pack.cta.description, ctaLabel: pack.cta.label, external: false, checklist: [] })]),
+          ],
+        }];
+      })
+    : [];
+
+  // A planned site has exactly the pages planned for the business: no fixed Services / About / per-service pages, and sign-in and
+  // sign-up only when its customers need accounts.
+  if (planMode) return [home, ...extra, ...offeringDetails, contact, privacy, ...(pack.structure?.accounts ? [login, register] : [])];
+  return [home, services, about, contact, privacy, login, register, ...extra, ...details];
 }
 
-export function starterNavigation(pack: StarterPack): { name: string; href: string; iconKey: string; featured: { title: string; description: string; image: string }; items: { name: string; href: string; description: string; iconKey: string }[] }[] {
-  return [
-    {
-      name: "Services",
-      href: "/services",
-      iconKey: "Layers",
-      featured: { title: "What We Do", description: pack.servicesIntro, image: pack.servicesImage },
-      items: [
-        ...pack.services.slice(0, 4).map((s) => ({ name: s.title, href: `/services/${serviceSlug(s.title)}`, description: s.subtitle, iconKey: s.icon })),
-        { name: "Start a Project", href: "/contact", description: "Tell us about your idea", iconKey: "Rocket" },
-      ],
-    },
-    {
-      name: "About",
-      href: "/about",
-      iconKey: "Compass",
-      featured: { title: "About Us", description: "Who we are and how we work.", image: pack.about.image },
-      items: [
-        { name: "About Us", href: "/about", description: "Our team and approach", iconKey: "Users" },
-        { name: "Contact", href: "/contact", description: "Get in touch", iconKey: "Mail" },
-      ],
-    },
-  ];
+type NavTop = { name: string; href: string; iconKey: string; featured: { title: string; description: string; image: string }; items: { name: string; href: string; description: string; iconKey: string }[] };
+
+/** Every path a generated site really has, so a menu or footer link can never point at a page that does not exist. */
+export function knownPaths(pack: StarterPack): Set<string> {
+  if (pack.structure?.mode === "plan") return new Set(["/", "/contact", "/privacy-policy", ...(pack.structure.accounts ? ["/login", "/register"] : []), ...pack.structure.extraPages.map((p) => `/${p.slug}`), ...(pack.structure.offeringPages ?? []).map((p) => `/${pack.structure!.offeringBase ?? "offerings"}/${p.slug}`)]);
+  return new Set(["/", "/services", "/about", "/contact", "/privacy-policy", ...(pack.structure?.extraPages ?? []).map((p) => `/${p.slug}`), ...pack.services.map((s) => `/services/${serviceSlug(s.title)}`)]);
 }
 
-export function starterFooter(): { title: string; viewAllHref?: string; viewAllLabel?: string; links: { label: string; href: string }[] }[] {
-  return [
-    { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Contact", href: "/contact" }] },
-    { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }] },
-  ];
+export function starterNavigation(pack: StarterPack): NavTop[] {
+  const services: NavTop = {
+    name: "Services",
+    href: "/services",
+    iconKey: "Layers",
+    featured: { title: "What We Do", description: pack.servicesIntro, image: pack.servicesImage },
+    items: [
+      ...pack.services.slice(0, 5).map((s) => ({ name: s.title, href: `/services/${serviceSlug(s.title)}`, description: s.subtitle, iconKey: s.icon })),
+      { name: pack.cta.label, href: "/contact", description: "Get in touch", iconKey: "Mail" },
+    ],
+  };
+  const about: NavTop = {
+    name: "About",
+    href: "/about",
+    iconKey: "Compass",
+    featured: { title: "About Us", description: pack.tagline, image: pack.about.image },
+    items: [
+      { name: "About Us", href: "/about", description: "Who we are", iconKey: "Users" },
+      { name: "Contact", href: "/contact", description: "Get in touch", iconKey: "Mail" },
+    ],
+  };
+  const st = pack.structure;
+  if (!st) return [services, about];
+  if (st.mode === "plan") {
+    // Only the pages that exist, named the way this business's customers say them.
+    const known = knownPaths(pack);
+    const plain = (label: string, href: string): NavTop => ({ name: label, href, iconKey: "Sparkles", featured: { title: "", description: "", image: "" }, items: [] });
+    const out: NavTop[] = [];
+    for (const item of st.nav) if (known.has(item.target) && item.label.trim() && !out.some((o) => o.href === item.target) && item.target !== "/privacy-policy") out.push(plain(item.label, item.target));
+    if (!out.some((o) => o.href === "/contact")) out.push(plain("Contact", "/contact"));
+    return out.slice(0, 7);
+  }
+  // The menu the AI planned for this business: only real pages, "Services" keeps its list of services under it.
+  const known = knownPaths(pack);
+  const out: NavTop[] = [];
+  for (const item of st.nav) {
+    if (!known.has(item.target) || out.some((o) => o.href === item.target) || !item.label.trim()) continue;
+    if (item.target === "/services") out.push({ ...services, name: item.label });
+    else if (item.target === "/about") out.push({ ...about, name: item.label });
+    else out.push({ name: item.label, href: item.target, iconKey: "Sparkles", featured: { title: "", description: "", image: "" }, items: [] });
+  }
+  if (!out.some((o) => o.href === "/services")) out.splice(Math.min(1, out.length), 0, services);
+  if (!out.some((o) => o.href === "/contact")) out.push({ name: "Contact", href: "/contact", iconKey: "Mail", featured: { title: "", description: "", image: "" }, items: [] });
+  return out.slice(0, 7);
+}
+
+export function starterFooter(pack?: StarterPack): { title: string; viewAllHref?: string; viewAllLabel?: string; links: { label: string; href: string }[] }[] {
+  const st = pack?.structure;
+  if (!pack || !st) {
+    return [
+      { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Contact", href: "/contact" }] },
+      { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }] },
+    ];
+  }
+  const known = knownPaths(pack);
+  const cols = st.footerColumns
+    .map((c) => ({ title: c.title, links: c.links.filter((l) => known.has(l.target) && l.label.trim()).map((l) => ({ label: l.label, href: l.target })) }))
+    .filter((c) => c.title.trim() && c.links.length)
+    .slice(0, 4);
+  if (!cols.some((c) => c.links.some((l) => l.href === "/privacy-policy"))) cols.push({ title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }] });
+  return cols;
 }

@@ -106,3 +106,23 @@ export async function deleteMedia(id: string): Promise<void> {
   await deleteObject(doc.storageKey);
   await c.deleteOne({ _id: id });
 }
+
+
+/** Stores an image the platform generated for this company's site (no browser upload involved) and returns its public URL. */
+export async function createCmsMediaFromBuffer(png: Buffer, name: string, altText: string, actorId: string): Promise<string> {
+  const { randomUUID } = await import("node:crypto");
+  const { putObject } = await import("@/lib/storage/blob");
+  const stored = await putObject("cms/uploads", `${randomUUID()}.png`, png, "image/png");
+  const doc: CmsMediaDoc = {
+    _id: newId(),
+    name: name.trim() || "Generated image",
+    altText,
+    tags: ["ai-generated"],
+    storageKey: stored.storageKey,
+    contentType: "image/png",
+    size: stored.size,
+    ...createStamp(actorId),
+  };
+  await (await col()).insertOne(doc);
+  return `/api/cms/media/${doc._id}`;
+}

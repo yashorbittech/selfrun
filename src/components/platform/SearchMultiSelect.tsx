@@ -12,6 +12,15 @@ function Highlight({ text, q }: { text: string; q: string }) {
   return <>{text.slice(0, i)}<mark className="rounded-sm bg-primary/20 px-0.5 text-foreground">{text.slice(i, i + q.length)}</mark>{text.slice(i + q.length)}</>;
 }
 
+/** A direct hit for what was typed that lives elsewhere (e.g. a sub-category found from the category field); picking it runs `onPick`. */
+export interface SearchExtra {
+  key: string;
+  label: string;
+  hint: string;
+  picked?: boolean;
+  onPick: () => void;
+}
+
 export interface MultiOption {
   value: string;
   label: string;
@@ -30,7 +39,7 @@ export interface MultiOption {
  */
 export default function SearchMultiSelect({
   name, options, values, onChange, placeholder, searchPlaceholder = "Search…", emptyText = "Nothing matches your search.", disabled, invalid, id,
-  max, customPrefix, cleanCustom, title, customLabel = "option", customExample = "",
+  max, customPrefix, cleanCustom, title, customLabel = "option", customExample = "", searchExtras,
 }: {
   name: string;
   options: MultiOption[];
@@ -54,6 +63,8 @@ export default function SearchMultiSelect({
   customLabel?: string;
   /** An example shown in the "add your own" form, e.g. "Flat broker". */
   customExample?: string;
+  /** Direct matches shown above the list while searching, e.g. business types found inside other categories. */
+  searchExtras?: (query: string) => SearchExtra[];
 }) {
   const auto = useId();
   const [open, setOpen] = useState(false);
@@ -158,6 +169,7 @@ export default function SearchMultiSelect({
     return [...map.entries()];
   }, [shown]);
 
+  const extras = useMemo(() => (q && searchExtras ? searchExtras(q) : []), [q, searchExtras]);
   const flat = useMemo(() => groups.flatMap(([, items]) => items), [groups]);
   const indexOf = useMemo(() => new Map(flat.map((o, i) => [o, i])), [flat]);
   useEffect(() => { setActive(-1); }, [q]);
@@ -370,7 +382,21 @@ export default function SearchMultiSelect({
             </div>
           )}
           <div className={cn("overflow-y-auto overscroll-contain py-1", "min-h-0 flex-1", adding && "hidden")}>
-            {groups.length === 0 && (
+            {extras.length > 0 && (
+              <div className="border-b border-border pb-1">
+                <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-primary">Matching business types</p>
+                {extras.map((x) => (
+                  <button key={x.key} type="button" onClick={() => { x.onPick(); setQuery(""); }} className={cn("flex w-full items-start gap-3 px-3 text-left hover:bg-muted/60", x.picked && "bg-primary/[0.06]", phone ? "py-3 text-base" : "py-1.5 text-sm")}>
+                    <span className={cn("mt-0.5 flex shrink-0 items-center justify-center rounded border", phone ? "size-5" : "size-4", x.picked ? "border-primary bg-primary text-primary-foreground" : "border-input")}>{x.picked && <Check className="size-3" />}</span>
+                    <span className="min-w-0">
+                      <span className="font-bold text-foreground"><Highlight text={x.label} q={q} /></span>
+                      <span className="block truncate text-xs font-normal text-muted-foreground">in {x.hint}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {groups.length === 0 && extras.length === 0 && (
               <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
                 <span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground"><Search className="size-5" /></span>
                 <p className="text-sm font-medium text-foreground">{emptyText}</p>
@@ -400,13 +426,13 @@ export default function SearchMultiSelect({
                         onClick={() => toggle(o.value)}
                         onMouseEnter={() => setActive(idx)}
                         disabled={!on && atMax}
-                        className={cn("flex w-full items-start gap-3 px-3 text-left hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-40", on && "bg-primary/[0.06] font-semibold", idx === active && "bg-muted/80 ring-1 ring-inset ring-primary/40", phone ? "py-3 text-base" : "gap-2 py-1.5 text-sm")}
+                        className={cn("flex w-full items-start gap-3 px-3 text-left hover:bg-muted/60 disabled:cursor-not-allowed disabled:opacity-40", on && "bg-primary/[0.06]", idx === active && "bg-muted/80 ring-1 ring-inset ring-primary/40", phone ? "py-3 text-base" : "gap-2 py-1.5 text-sm")}
                       >
                         <span className={cn("mt-0.5 flex shrink-0 items-center justify-center rounded border", phone ? "size-5" : "size-4", on ? "border-primary bg-primary text-primary-foreground" : "border-input")}>
                           {on && <Check className="size-3" />}
                         </span>
                         <span className="min-w-0">
-                          <Highlight text={o.label} q={q} />
+                          <span className="font-bold text-foreground"><Highlight text={o.label} q={q} /></span>
                           {o.description && !(q && !o.label.toLowerCase().includes(q) && o.keywords?.some((k) => k.toLowerCase().includes(q))) && (
                             <span className="line-clamp-2 block text-xs font-normal leading-snug text-muted-foreground">{o.description}</span>
                           )}

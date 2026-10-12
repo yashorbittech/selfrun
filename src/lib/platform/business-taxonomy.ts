@@ -2,7 +2,7 @@
  * Worldwide business classification for company registration. Built on the UN's ISIC Rev. 4 (the standard every
  * national scheme — NAICS, NACE, NIC, ANZSIC … — maps onto), regrouped into friendly categories and taken down to
  * ISIC "group" level, plus the modern industries ISIC predates (SaaS, AI, cybersecurity, fintech, e-commerce, renewable
- * energy, streaming, esports …). A company picks up to 5 categories and up to 25 sub-categories — and may type its own
+ * energy, streaming, esports …). A company picks up to 5 categories and up to 50 sub-categories — and may type its own
  * (custom entries count toward the 5), so nothing a business does can be left out.
  *
  * Codes are stable slugs (never shown to people): `<category>` and `<category>:<sub-category>`.
@@ -22,7 +22,7 @@ export interface BusinessCategory {
 
 const slug = (t: string) => t.toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60);
 export const MAX_BUSINESS_CATEGORIES = 5;
-export const MAX_BUSINESS_SUBCATEGORIES = 25;
+export const MAX_BUSINESS_SUBCATEGORIES = 50;
 export const CUSTOM_PREFIX = "custom:";
 
 /** Further sub-categories appended to categories above (kept apart so the base lists stay readable). */
@@ -1871,10 +1871,239 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Group-departure and fixed-departure tour operator", "Local sightseeing, city-tour and day-trip operator", "Hotel, cab and ticket bundle (DIY itinerary) planner", "Wildlife-safari and eco-tour operator", "Medical, wellness and spiritual-retreat tours",
     "Travel blogger-led and community trips",
   ]),
+  cat("Electricians & Electrical Workers", [
+    "Electrician (house wiring)", "Industrial and factory electrician", "Electrical contractor and wireman", "Electrical fitter and panel wirer", "Motor, transformer and generator repairer",
+    "Lineman and power-line worker", "Solar-panel and inverter installer", "Electrical shop and goods dealer", "Electrical engineer and supervisor", "CCTV, alarm and fire-alarm wiring technician",
+    "Elevator and escalator electrician", "Marine, auto and aircraft electrician", "Electric-vehicle charger installer", "Street-light and traffic-signal electrician", "Domestic-appliance electrician",
+  ]),
+  cat("Plumbers & Pipe Fitters", [
+    "Plumber (house and building)", "Pipe fitter and steam fitter", "Sanitary and bathroom-fittings installer", "Water-tank, pump and borewell plumber", "Drain and sewer-cleaning plumber",
+    "Gas-pipe and LPG-line fitter", "Solar-water-heater installer", "Fire-sprinkler and hydrant fitter", "Plumbing-material shop and dealer", "Irrigation and drip-line fitter",
+    "Industrial-pipe welder and fitter", "Boiler and heating engineer", "Water-purifier and RO installer", "Septic-tank and sanitation contractor",
+  ]),
+  cat("Carpenters, Joiners & Furniture Makers", [
+    "Carpenter (barhai)", "Furniture maker and cabinet-maker", "Door, window and frame maker", "Modular-kitchen and wardrobe carpenter", "Shuttering and formwork carpenter",
+    "Wood-turning and carving artisan", "Furniture polish and French-polish worker", "Upholsterer and sofa maker", "Boat and wooden-ship builder", "Timber merchant, sawmill and wood depot",
+    "Plywood, laminate and veneer worker", "Bamboo and cane furniture maker", "Interior carpenter and false-ceiling worker", "Carpentry-tool and machine dealer", "Wooden toy and craft maker",
+  ]),
+  cat("Painters, Plasterers & Finishers", [
+    "House painter and polisher", "Wall-putty, POP and plaster worker", "Textured, stencil and designer-wall painter", "Wall-paper and wall-panel installer", "Spray-paint and industrial painter",
+    "Vehicle painter and denting-painting worker", "Signboard and wall-lettering artist", "Waterproofing and coating applicator", "Tile, marble and floor-polishing worker", "False-ceiling and gypsum worker",
+    "Paint shop and colour-mixing centre", "Mural and artistic-wall painter", "Furniture and door painter", "Exterior and high-rise (rope-access) painter",
+  ]),
+  cat("Welders, Fabricators & Metal Workers", [
+    "Welder (arc, MIG, TIG)", "Gas cutter and brazier", "Steel fabricator and structural worker", "Gate, grill and shutter maker", "Sheet-metal and duct worker",
+    "Blacksmith (lohar) and forge worker", "Lathe, milling and machine-shop operator", "Boiler-maker and pressure-vessel welder", "Pipeline and underwater welder", "Metal-roofing and PEB erector",
+    "Scrap-metal and metal-recycling worker", "Aluminium and stainless-steel fabricator", "Powder-coating and galvanising worker", "Tool-and-die maker", "Welding-supplies and gas dealer",
+  ]),
+  cat("Masons, Bricklayers & Construction Workers", [
+    "Mason (rajmistri) and bricklayer", "Stone mason and stone-cutter", "Tile and marble layer", "Concrete finisher and plasterer", "Steel-fixer and bar-bender",
+    "Scaffolder and rigger", "Road, kerb and paving worker", "Roofer and thatcher", "Well-digger and excavator", "Demolition and dismantling worker",
+    "Construction helper and labourer", "Site supervisor and foreman", "Crane, JCB and mixer operator", "Waterproofing and insulation worker", "Tunnel, bridge and dam worker",
+  ]),
+  cat("Builders, Contractors & Thekedars", [
+    "Building contractor and builder", "Civil contractor and thekedar", "Sub-contractor and labour contractor", "Interior and fit-out contractor", "Road and infrastructure contractor",
+    "Government-works contractor (Class A, B, C)", "Plumbing and electrical contractor", "Renovation and repair contractor", "Housing-colony and apartment builder", "Prefab and low-cost housing builder",
+    "Demolition and earth-work contractor", "Landscape and garden contractor", "Painting and POP contractor", "Roofing and waterproofing contractor", "Architect-contractor and turnkey builder",
+    "Real-estate developer and promoter",
+  ]),
+  cat("Technicians & Repair Specialists", [
+    "AC and refrigerator technician", "Washing-machine and appliance technician", "TV, home-theatre and audio technician", "Mobile-phone repair technician", "Laptop, computer and printer technician",
+    "CCTV and security-system technician", "Inverter, UPS and battery technician", "Lift and elevator technician", "Medical-equipment and lab technician", "Industrial-machine and PLC technician",
+    "Auto and two-wheeler technician", "Network, internet and Wi-Fi technician", "Solar and wind technician", "Water-purifier and pump technician", "Genset, boiler and compressor technician",
+    "Dish, cable and set-top-box technician", "Biomedical and X-ray technician", "Photocopier and office-machine technician",
+  ]),
+  cat("Housekeeping, Cleaning & Maid Services", [
+    "Housekeeping staff (hotel, hospital, office)", "Domestic maid and house-help", "Janitor, sweeper and cleaner", "Deep-cleaning and sanitisation service", "Carpet, sofa and upholstery cleaner",
+    "Window, facade and high-rise cleaner", "Kitchen and chimney cleaner", "Post-construction and move-in cleaning", "Laundry and linen service", "Pest-control and fumigation",
+    "Industrial and factory cleaning", "School, college and hospital cleaning", "Housekeeping contractor and supplier", "Cleaning-supplies and machine dealer", "Gardener, mali and compound-care worker",
+    "Washroom and toilet-cleaning service",
+  ]),
+  cat("Homemade Food & Home-Based Producers", [
+    "Homemade pickle, papad and masala maker", "Home baker and cake maker", "Home-cooked tiffin and meal service", "Homemade sweets, namkeen and snacks", "Homemade jam, squash and chutney",
+    "Homemade ghee, butter and paneer", "Homemade chocolate and dessert maker", "Homemade soap, candle and incense maker", "Homemade cosmetics and herbal products", "Home tailoring, embroidery and knitting",
+    "Homemade handicraft and gift maker", "Home-based packing and assembly work", "Home-based tuition and craft classes", "Home-based beautician and mehendi artist", "Home-based online seller (reseller)",
+    "Homemade baby food and health food", "Homemade frozen and ready-to-cook food", "Homemade pet food and treats",
+  ]),
+  cat("Ice Cream, Kulfi & Dessert Businesses", [
+    "Ice-cream parlour and shop", "Ice-cream cart and bicycle vendor", "Kulfi and falooda maker", "Gelato, frozen-yoghurt and soft-serve", "Ice-cream manufacturer and brand",
+    "Ice-cream franchise outlet", "Ice-gola, ice-candy and ice-cream-stick maker", "Milkshake, sundae and dessert bar", "Cake, pastry and dessert shop", "Ice-cream distributor and cold-storage dealer",
+    "Ice-cream cone, cup and topping supplier", "Dairy-based dessert (rabri, rasmalai, shrikhand) maker", "Frozen-dessert truck and kiosk", "Home-made ice-cream seller",
+  ]),
+  cat("Dhaba, Highway Eateries & Roadside Restaurants", [
+    "Dhaba (roadside restaurant)", "Highway truck-stop eatery", "Family dhaba and rural restaurant", "Punjabi, Rajasthani and regional dhaba", "Tea and tiffin stall on the road",
+    "Rural mess and local canteen", "Tandoor, roti and parantha corner", "Sweet and snack shop on highway", "Food stall at bus stand and railway station", "Fuel-station restaurant and food court",
+    "Roadside biryani, kebab and tikka stall", "Fish, mutton and chicken curry point", "Local thali and bhojnalaya", "Cook, tandoor-master and dhaba helper",
+  ]),
+  cat("Restaurant Owners, Chefs & Cooks", [
+    "Restaurant owner and manager", "Executive chef and head cook", "Sous chef, line cook and commis", "Tandoor, grill and pizza chef", "Pastry chef and baker",
+    "Halwai (sweet-maker) and mithai chef", "Cook for hire and home chef", "Caterer and catering chef", "Waiter, captain and steward", "Bartender, barista and mixologist",
+    "Kitchen helper, dishwasher and steward", "Restaurant cashier and billing staff", "Food-delivery partner and rider", "Cloud-kitchen owner", "Restaurant supplier and kitchen-equipment dealer",
+    "Food stylist and food-blogger chef", "Culinary teacher and cooking-class host",
+  ]),
+  cat("Cricketers, Athletes & Professional Sportspeople", [
+    "Cricketer (professional, club, district)", "Footballer and hockey player", "Kabaddi and kho-kho player", "Wrestler (pehalwan) and boxer", "Badminton, tennis and table-tennis player",
+    "Athlete, runner and track-and-field", "Swimmer and water-sports player", "Shooter, archer and weightlifter", "Cyclist and motorsport driver", "Chess, carrom and indoor-game player",
+    "Esports and gaming professional", "Golf, polo and equestrian sportsperson", "Umpire, referee and match official", "Sports coach and fitness trainer", "Sports agent and manager",
+    "Sports commentator and sports journalist", "Groundsman, curator and turf manager", "Sports-academy and tournament organiser",
+  ]),
+  cat("Jewellers, Goldsmiths & Jewellery Shops", [
+    "Jewellery shop owner (sunar, jeweller)", "Goldsmith and gold-ornament maker", "Silversmith and silver-article maker", "Diamond cutter, polisher and trader", "Gemstone, pearl and coloured-stone dealer",
+    "Imitation and artificial-jewellery seller", "Bridal and traditional jewellery maker", "Jewellery designer and CAD artist", "Jewellery repair, polishing and hallmarking", "Gold-loan, pawn and gold buyer",
+    "Bullion dealer and gold trader", "Watch and jewellery retailer", "Jewellery manufacturer and karigar", "Lab-grown diamond and fashion-jewellery brand", "Online jewellery seller",
+  ]),
+  cat("Hardware & Building-Material Dealers", [
+    "Hardware shop owner", "Paint and putty dealer", "Plywood, laminate and board dealer", "Cement, steel and TMT dealer", "Pipe, fitting and sanitary dealer",
+    "Electrical goods and wire dealer", "Tile, marble and granite dealer", "Tools and power-tool dealer", "Lock, handle and fitting dealer", "Glass, aluminium and UPVC dealer",
+    "Roofing, sheet and tarpaulin dealer", "Fasteners, nuts and bolts dealer", "Bricks, sand, stone and aggregate supplier", "Safety and industrial-supplies dealer", "Wood, bamboo and timber depot",
+  ]),
+  cat("Farmers, Cultivators & Agricultural Producers", [
+    "Wheat, rice and cereal farmer", "Pulses, oilseed and millet farmer", "Sugarcane and cotton farmer", "Vegetable and fruit farmer", "Flower and herb farmer",
+    "Dairy and cattle farmer", "Poultry and egg farmer", "Goat, sheep and pig farmer", "Fish and shrimp farmer", "Organic and natural farmer",
+    "Greenhouse and hydroponic farmer", "Tea, coffee and spice planter", "Orchard and plantation owner", "Sharecropper and tenant farmer", "Contract and cooperative farmer",
+    "Beekeeper and honey producer", "Mushroom and sprouts grower", "Agricultural labourer and farm helper", "Farm-machinery owner and custom-hiring operator", "Agri-entrepreneur and FPO member",
+  ]),
+  cat("Sports Goods, Gyms & Fitness Businesses", [
+    "Gym and fitness-centre owner", "Sports-goods and equipment shop", "Cricket, football and badminton academy", "Sports-ground and turf owner", "Fitness trainer and gym instructor",
+    "Yoga and wellness studio", "Sports-nutrition and supplement seller", "Sports-apparel and shoe store", "Swimming-pool and club owner", "Sports-event organiser",
+    "Cycle shop and fitness-bike dealer", "Martial-arts and boxing academy", "Indoor-games and snooker parlour", "Adventure-sports and trekking operator",
+  ]),
+  cat("Occupations: Managers & Senior Officials", [
+    "Chief executive, managing director and president", "Senior government official and legislator", "Traditional chief and head of village", "Senior official of a special-interest organisation", "Finance manager",
+    "Human-resource manager", "Policy and planning manager", "Business-services and administration manager", "Sales, marketing and development manager", "Advertising and public-relations manager",
+    "Research and development manager", "Agricultural, forestry and fishery production manager", "Manufacturing manager", "Mining manager", "Construction manager",
+    "Supply, distribution and logistics manager", "ICT services manager", "Education manager and principal", "Health-services manager", "Social-welfare manager",
+    "Financial and insurance services branch manager", "Professional-services manager (legal, accounting, consulting)", "Hotel manager", "Restaurant manager", "Retail and wholesale manager",
+    "Sports, recreation and cultural centre manager", "Customer-services and call-centre manager", "Small-business owner and entrepreneur", "Shop owner and proprietor", "Farm owner and plantation manager",
+  ]),
+  cat("Occupations: Engineers & Scientists", [
+    "Physicist and astronomer", "Meteorologist and climate scientist", "Chemist", "Geologist and geophysicist", "Mathematician, actuary and statistician",
+    "Biologist, botanist and zoologist", "Agronomist, forestry and fisheries scientist", "Environmental protection professional", "Industrial and production engineer", "Civil engineer",
+    "Environmental engineer", "Mechanical engineer", "Chemical engineer", "Mining engineer, metallurgist and related", "Electrical engineer",
+    "Electronics engineer", "Telecommunications engineer", "Engineering professional (aerospace, marine, biomedical)", "Architect", "Landscape architect",
+    "Product and garment designer", "Town and traffic planner", "Cartographer and surveyor", "Graphic and multimedia designer", "Interior designer and decorator",
+  ]),
+  cat("Occupations: Doctors, Nurses & Health Professionals", [
+    "Generalist medical practitioner", "Specialist medical practitioner", "Surgeon and anaesthetist", "Nursing professional", "Midwifery professional",
+    "Traditional and complementary medicine professional", "Paramedical practitioner", "Veterinarian", "Dentist", "Pharmacist",
+    "Environmental and occupational health professional", "Physiotherapist", "Dietitian and nutritionist", "Audiologist and speech therapist", "Optometrist and ophthalmic optician",
+    "Psychologist and counsellor", "Medical radiographer and imaging technologist", "Medical laboratory technologist", "Dental assistant and therapist", "Community-health worker",
+    "Home-based personal-care worker", "Healthcare assistant and ward attendant", "Ambulance worker and emergency medical technician",
+  ]),
+  cat("Occupations: Teachers & Educators", [
+    "University and higher-education teacher", "Vocational-education teacher", "Secondary-education teacher", "Primary-school teacher", "Early-childhood educator",
+    "Special-needs teacher", "Language teacher and tutor", "Music, art and dance teacher", "Computer and IT trainer", "Driving and flying instructor",
+    "Education methods specialist and curriculum developer", "School inspector and education officer", "Teacher's aide and classroom assistant", "Private tutor and home teacher", "Coaching-centre teacher",
+    "Online and e-learning instructor", "Madrasa, gurukul and religious teacher", "Adult and literacy educator",
+  ]),
+  cat("Occupations: Business, Finance & Administration Professionals", [
+    "Accountant", "Financial and investment adviser", "Financial analyst", "Management and organisation analyst", "Policy administration professional",
+    "Personnel and careers professional", "Training and staff-development professional", "Advertising and marketing professional", "Public-relations professional", "Technical and medical sales professional",
+    "ICT sales professional", "Auditor and tax professional", "Credit and loans officer", "Insurance agent and underwriter", "Stock and securities broker",
+    "Real-estate agent and property manager", "Procurement and purchasing officer", "Customs and border inspector", "Government tax and licensing officer", "Social-security and welfare officer",
+    "Business-services agent and contract clerk", "Conference and event planner", "Employment agent and labour contractor",
+  ]),
+  cat("Occupations: Software, IT & Digital Professionals", [
+    "Systems analyst", "Software developer", "Web and multimedia developer", "Applications programmer", "Database designer and administrator",
+    "Systems administrator", "Computer-network professional", "Cybersecurity specialist", "ICT operations technician", "ICT user-support technician",
+    "Computer-network and systems technician", "Web technician", "Broadcasting and audio-visual technician", "Telecommunications engineering technician", "Data scientist and AI engineer",
+    "UX and UI designer", "DevOps and cloud engineer", "Game developer and animator", "IT freelancer and consultant",
+  ]),
+  cat("Occupations: Lawyers, Social & Cultural Professionals", [
+    "Judge and magistrate", "Lawyer, advocate and barrister", "Notary, solicitor and legal professional", "Archivist and curator", "Librarian and information professional",
+    "Economist", "Sociologist, anthropologist and historian", "Philosopher, political scientist and related", "Psychologist and social scientist", "Social-work and counselling professional",
+    "Religious minister, priest, imam, pandit and monk", "Author and writer", "Journalist and reporter", "Translator, interpreter and linguist", "Visual artist, painter and sculptor",
+    "Musician, singer and composer", "Dancer and choreographer", "Film, stage and theatre director", "Actor and performer", "Announcer, newsreader and presenter",
+    "Photographer and cinematographer", "Poet, playwright and screenwriter", "Community and development worker",
+  ]),
+  cat("Occupations: Technicians & Associate Professionals", [
+    "Physical and engineering-science technician", "Civil-engineering technician", "Electrical-engineering technician", "Electronics-engineering technician", "Mechanical-engineering technician",
+    "Chemical-engineering technician", "Mining and metallurgical technician", "Draughtsperson", "Physical-science technician", "Process-control technician",
+    "Ship, aircraft and railway controller and technician", "Ship's engineer, deck officer and pilot", "Air-traffic controller and safety technician", "Life-science technician", "Agricultural and forestry technician",
+    "Medical and pharmaceutical technician", "Medical-records technician", "Nursing and midwifery associate professional", "Traditional-medicine practitioner and faith healer", "Veterinary technician and assistant",
+    "Dental, optical and physiotherapy technician", "Securities and finance dealer and broker", "Insurance representative", "Commercial sales representative", "Buyer and merchandiser",
+    "Trade broker and agent", "Business-services agent", "Administrative and executive secretary", "Government regulatory associate professional", "Police inspector and detective",
+    "Social-work associate professional", "Sports coach, instructor and official", "Fitness and recreation instructor", "Photographer and gallery technician", "Chef",
+    "Religious associate professional",
+  ]),
+  cat("Occupations: Clerks, Secretaries & Office Support", [
+    "General office clerk", "Secretary (general)", "Data-entry clerk and typist", "Bank-teller and counter clerk", "Betting and gambling clerk",
+    "Contact-centre information clerk", "Telephone switchboard operator", "Receptionist", "Travel-agent and travel clerk", "Hotel and front-desk receptionist",
+    "Interviewer and survey clerk", "Library and filing clerk", "Accounting and bookkeeping clerk", "Statistical, finance and insurance clerk", "Payroll clerk",
+    "Stock and warehouse clerk", "Production clerk", "Transport and dispatch clerk", "Mail carrier and post-office clerk", "Coding, proofreading and related clerk",
+    "Scribe and document writer", "Personnel and HR clerk", "Peon, office boy and office helper",
+  ]),
+  cat("Occupations: Salespeople, Cashiers & Shop Assistants", [
+    "Shop salesperson and sales assistant", "Shopkeeper", "Street and market salesperson", "Door-to-door and telephone salesperson", "Fast-food counter worker",
+    "Cashier and ticket clerk", "Mobile-food vendor", "Newspaper and kiosk vendor", "Vending-machine and parking-meter attendant", "Insurance and finance sales agent",
+    "Rental and hire clerk", "Pawnbroker and money lender", "Stall and market-trader", "Fuel-station attendant", "Promoter and brand ambassador",
+    "Merchandiser and shelf-stocker", "Online and social-media seller",
+  ]),
+  cat("Occupations: Hospitality, Beauty & Personal Services", [
+    "Travel attendant and steward", "Cabin crew and flight attendant", "Conductor and ticket checker", "Travel guide and tour escort", "Cook",
+    "Waiter and waitress", "Bartender and barista", "Hairdresser and barber", "Beautician and make-up artist", "Manicurist and pedicurist",
+    "Spa and massage therapist", "Housekeeper and hotel housekeeper", "Building caretaker and janitor", "Domestic helper and house cleaner", "Launderer and dry-cleaner",
+    "Child-care worker and nanny", "Teacher's aide", "Home-based personal-care worker", "Pet groomer and animal caretaker", "Companion and valet",
+    "Undertaker and embalmer", "Astrologer, fortune-teller and related", "Driving instructor", "Wedding and event assistant", "Sauna, spa and bath attendant",
+  ]),
+  cat("Occupations: Protective Services & Security", [
+    "Firefighter", "Police officer", "Prison guard", "Security guard", "Bouncer and doorman",
+    "Private detective and bodyguard", "Lifeguard and rescue worker", "Armed-forces officer", "Armed-forces non-commissioned officer", "Armed-forces soldier and other ranks",
+    "Home-guard and civil-defence volunteer", "Border and coast-guard personnel", "Traffic warden and parking enforcer", "Forest guard and wildlife ranger",
+  ]),
+  cat("Occupations: Skilled Farmers, Foresters & Fishers", [
+    "Field-crop and vegetable grower", "Tree and shrub crop grower", "Gardener, horticulturist and nursery grower", "Mixed-crop grower", "Livestock and dairy producer",
+    "Poultry producer", "Apiarist and sericulturist", "Mixed-crop and animal producer", "Forestry worker", "Aquaculture worker",
+    "Inland and coastal waters fisher", "Deep-sea fisher", "Hunter and trapper", "Subsistence crop farmer", "Subsistence livestock farmer",
+    "Subsistence fisher, hunter and gatherer", "Farm hand and agricultural labourer", "Plantation worker and tea-leaf picker", "Date-palm, coconut and toddy tapper", "Shepherd and cowherd (gwala)",
+  ]),
+  cat("Occupations: Construction & Building Trades", [
+    "Building frame and related trades worker", "Bricklayer and related worker", "Stonemason, stone cutter and carver", "Concrete placer and finisher", "Carpenter and joiner",
+    "Building structure worker", "Roofer", "Floor and tile layer", "Plasterer", "Insulation worker",
+    "Glazier", "Plumber and pipe fitter", "Air-conditioning and refrigeration mechanic", "Building painter and related worker", "Structural-metal painter and varnisher",
+    "Chimney sweep and building cleaner", "Building electrician", "Shuttering and scaffolding worker", "Surveyor's helper and site assistant", "Waterproofing and damp-proofing worker",
+  ]),
+  cat("Occupations: Metal, Machine & Vehicle Trades", [
+    "Sheet-metal worker", "Structural-metal preparer and erector", "Welder and flame cutter", "Blacksmith, hammer-smith and forging press worker", "Toolmaker and related",
+    "Metal-working machine-tool setter and operator", "Machinery mechanic and fitter", "Motor-vehicle mechanic and repairer", "Aircraft engine mechanic", "Agricultural and industrial machinery mechanic",
+    "Bicycle and related repairer", "Precision-instrument maker and repairer", "Musical-instrument maker and tuner", "Jeweller and precious-metal worker", "Potter and glass-maker",
+    "Signwriter, decorative painter and engraver", "Handicraft worker in wood, textile, leather", "Printing pre-press, printer and binder",
+  ]),
+  cat("Occupations: Electrical, Electronics & Telecom Trades", [
+    "Electrical equipment installer and repairer", "Electrical line installer and repairer", "Electronics mechanic and servicer", "Information and communications technology installer and servicer", "Telephone and cable installer",
+    "Mobile-tower and fibre technician", "Lift and escalator installer", "Solar and wind installer", "Appliance repair technician", "Computer repair and hardware assembler",
+    "CCTV and security-system installer", "Biomedical-equipment technician",
+  ]),
+  cat("Occupations: Food, Garment & Craft Trades", [
+    "Butcher, fishmonger and related food preparer", "Baker, pastry-cook and confectionery maker", "Dairy-products maker", "Fruit, vegetable and related preserver", "Food and beverage tester and grader",
+    "Tobacco preparer and product maker", "Cabinet-maker and related", "Wood treater", "Woodworking-machine setter and operator", "Tailor, dressmaker, furrier and hatter",
+    "Garment and related pattern-maker and cutter", "Sewing, embroidery and related worker", "Upholsterer and related", "Leather and related trades", "Shoemaker and related",
+    "Weaver, knitter and spinner", "Dyer and textile finisher", "Basket, mat and bamboo weaver", "Potter, brick and tile maker", "Candle, incense and soap maker",
+  ]),
+  cat("Occupations: Plant, Machine & Factory Operators", [
+    "Mining-plant operator", "Mineral and stone-processing plant operator", "Metal-processing plant operator", "Glass, ceramics and related plant operator", "Wood-processing and papermaking plant operator",
+    "Chemical-processing plant operator", "Petroleum and natural-gas refining plant operator", "Power-production plant operator", "Water-treatment plant operator", "Incinerator and water-treatment plant operator",
+    "Metal-finishing, plating and coating machine operator", "Rubber-, plastic- and paper-products machine operator", "Textile, fur and leather products machine operator", "Food and related products machine operator", "Packing, bottling and labelling machine operator",
+    "Assembler (mechanical, electrical, electronic)", "Industrial robot and automation operator", "Laundry and dry-cleaning machine operator", "Printing and bookbinding machine operator",
+  ]),
+  cat("Occupations: Drivers & Mobile-Machine Operators", [
+    "Train driver and locomotive engine driver", "Railway brake, signal and points operator", "Motorcycle driver and delivery rider", "Car, taxi and van driver", "Bus and tram driver",
+    "Heavy-truck and lorry driver", "Mobile-plant (earth-moving, crane, forklift) operator", "Agricultural and forestry mobile-plant operator", "Ship's deck crew and related", "Ferry, boat and ropeway operator",
+    "Rickshaw, e-rickshaw and auto driver", "Tractor and harvester driver", "Water-tanker and garbage-truck driver", "Ambulance and school-bus driver", "Chauffeur and personal driver",
+    "Delivery and courier driver",
+  ]),
+  cat("Occupations: Labourers, Helpers & Elementary Workers", [
+    "Domestic, hotel and office cleaner and helper", "Vehicle, window and laundry washer", "Crop farm labourer", "Livestock farm labourer", "Mixed crop and livestock labourer",
+    "Garden and horticultural labourer", "Forestry labourer", "Fishery and aquaculture labourer", "Mining and quarrying labourer", "Civil-engineering labourer",
+    "Building construction labourer", "Manufacturing labourer", "Hand packer", "Freight handler, loader and unloader (hamal)", "Porter, coolie and head-load worker",
+    "Shelf filler and stock helper", "Food-preparation assistant and kitchen helper", "Fast-food preparer", "Street vendor of non-food products", "Street and market food seller",
+    "Garbage and recycling collector", "Sweeper and sanitation worker", "Odd-job, messenger and delivery person", "Meter reader and vending-machine collector", "Car-park and toll attendant",
+    "Door-to-door helper and canvasser", "Watchman and gatekeeper", "Water-carrier and well-worker",
+  ]),
   cat("Other / Not Listed", ["Diversified conglomerate", "Start-up (industry not decided yet)", "Holding or investment vehicle", "Franchise operations", "Social enterprise", "Not applicable"]),
 ];
 
-/** Selection stored on the company: up to 5 categories and 25 sub-categories, any of which may be typed by the company ("custom"). */
+/** Selection stored on the company: up to 5 categories and 50 sub-categories, any of which may be typed by the company ("custom"). */
 /** Everyday and regional words people type for their trade (Hindi / local names), so search finds the category without knowing its formal name. */
 const ALIASES: Record<string, string> = {
   "Vegetable, Fruit & Fresh Produce Sellers": "sabzi sabji sabziwala phal fal phalwala thela mandi",
@@ -1896,6 +2125,24 @@ const ALIASES: Record<string, string> = {
   "Artisans, Craftspeople & Home Producers": "kumhar lohar mochi julaha kaarigar karigar",
   "General Stores, Grocery & Daily Needs": "kirana grocery provision dukan",
   "Restaurants, Cafes & Eateries": "hotel dhaba restaurant khana",
+  "Electricians & Electrical Workers": "electrician bijli mistri wireman wiring electric",
+  "Plumbers & Pipe Fitters": "plumber nal mistri pipe fitter sanitary",
+  "Carpenters, Joiners & Furniture Makers": "carpenter barhai penter furniture woodwork lakdi",
+  "Painters, Plasterers & Finishers": "painter paint penter rangsaz putty pop plaster",
+  "Welders, Fabricators & Metal Workers": "welder welding belder fabricator lohar iron steel",
+  "Masons, Bricklayers & Construction Workers": "mason rajmistri raj mistri bricklayer construction labour",
+  "Builders, Contractors & Thekedars": "builder bulder contractor thekedar thekedari civil construction",
+  "Technicians & Repair Specialists": "technician repair mechanic ac fridge mobile",
+  "Housekeeping, Cleaning & Maid Services": "housekeeping cleaning maid bai safai jharu pocha",
+  "Homemade Food & Home-Based Producers": "homemade home made ghar ka khana home based gharelu",
+  "Ice Cream, Kulfi & Dessert Businesses": "ice cream icecream kulfi gola dessert",
+  "Dhaba, Highway Eateries & Roadside Restaurants": "dhaba dhana highway roadside restaurant",
+  "Restaurant Owners, Chefs & Cooks": "restaurant chef cook rasoiya hotel",
+  "Cricketers, Athletes & Professional Sportspeople": "cricketer cricket player khiladi sports athlete",
+  "Jewellers, Goldsmiths & Jewellery Shops": "jewellery jewelry jeweller sunar sona gold silver",
+  "Hardware & Building-Material Dealers": "hardware building material cement paint",
+  "Farmers, Cultivators & Agricultural Producers": "farmer former kisan kheti cultivator",
+  "Sports Goods, Gyms & Fitness Businesses": "sports gym fitness",
   "Bus, Cab & Trip Booking Services": "bus cab taxi booking ticket travels trip tour yatra tirth tempo traveller gadi",
   "Pilgrimage, Yatra & Tour Operators": "yatra tirth teerth pilgrimage darshan dham haj umrah tour bus booking",
   "Trip Planners, Holiday & Tour Package Sellers": "trip tour package holiday ghumna picnic honeymoon tourism",
@@ -1943,10 +2190,32 @@ const GLOSS: [RegExp, string][] = [
   [/\bSHG\b|self-help group/i, "SHG = women's savings and enterprise group"], [/\bFPO\b/, "FPO = farmer producer organisation"], [/\bMSME\b/, "MSME = micro, small and medium enterprise"],
 ];
 
+/** When a name gives no clue of its own, the kind of work its category stands for says what it is (every sub-category gets a line). */
+function categoryKindPhrase(category: string): string {
+  const c = category.toLowerCase();
+  if (/\bkids\b|\bchildren\b|toys, baby/.test(c)) return "A product, class or service for children and families";
+  if (c.startsWith("occupations:")) return "A person who works in this job, on a salary or on their own";
+  if (/(manufactur|textiles|wood, paper|chemicals|metals, machinery|electronics, computers|automotive|furniture & other|packaging|jewellery, gems|toys, baby)/.test(c)) return "Makes or processes this product in a workshop, unit or factory";
+  if (/(agriculture|farmers|farming|cattle|livestock|forestry|fishing|fisher|coastal|small farmers|dairy)/.test(c)) return "Grows, raises, catches or collects this produce";
+  if (/(mining|oil, gas|quarry)/.test(c)) return "Digs, extracts or processes this material from the ground";
+  if (/(retail|shops|stores|store|wholesale|dealers|vendors|sellers|trader|marketplaces|general stores|kirana|kiosk|hawker|second-hand|import)/.test(c)) return "Buys and sells this, to customers or to other businesses";
+  if (/(government|public administration|offices|ngo|association|cooperative|community|faith|religious|political|humanitarian|heritage|international|nonprofit|social care|local government)/.test(c)) return "An office, institution or group of this kind that serves the public or its members";
+  if (/(education|students|tuition|kids|school)/.test(c)) return "Teaching, learning or child-care activity of this kind";
+  if (/(health|medical|clinic|pharma|biotech|elder|seniors)/.test(c)) return "Health, medical or care activity of this kind";
+  if (/(transport|logistics|mobility|railways|\bports\b|shipping|aviation|postal|courier|bus, cab|drivers)/.test(c)) return "Moves people or goods in this way";
+  if (/(hospitality|restaurant|food service|tourism|travel|yatra|trip|hotel|dhaba|ice cream|sweet shops|tea stalls|catering|kitchen)/.test(c)) return "Offers food, stay, travel or tours of this kind";
+  if (/(finance|banking|insurance|real estate|brokers)/.test(c)) return "Money, property, insurance or brokerage service of this kind";
+  if (/(software|information technology|ai,|cyber|cloud|blockchain|vertical tech|telecom|digital|internet|space)/.test(c)) return "Technology, software or digital service of this kind";
+  if (/(recreation|sports|fitness|gyms|fairs|melas|amusements)/.test(c)) return "A sports, fitness, recreation or amusement activity of this kind";
+  if (/(media|music|arts|creator|performing|fine arts|writers|gaming|events|entertainment|reel|folk artists|band baja|photograph|dj,)/.test(c)) return "Creative, media or entertainment work of this kind";
+  return "A business or professional service of this kind";
+}
+
 /** What kind of business a sub-category is, in one plain sentence, so a name like "Dhol, tasha and nagada players" or "Kabadiwala" is clear at a glance. */
-export function subDescription(sub: BusinessSub): string {
+export function subDescription(sub: BusinessSub, categoryName = ""): string {
   const n = sub.name;
   const rules: [RegExp, string][] = [
+    [/\b(rental|renting|hire|leasing|lease)\b/i, "Rents out vehicles, equipment or space"],
     [/\b(manufactur|factory|mill|units?|production|maker|makers|fabricat|assembl|processing|foundry|printing press|workshop)\b/i, "Makes products in a workshop, unit or factory"],
     [/\b(wholesale|distribut|stockist|dealer|trader|importer|exporter|supplier|merchant)\b/i, "Buys and sells goods, often in bulk, to shops and businesses"],
     [/\b(broker|agent|dalal|commission|middlem|aggregator|facilitator|consultant for|booking|liaison)\b/i, "Arranges deals, bookings or paperwork for others, usually for a fee or commission"],
@@ -1962,12 +2231,10 @@ export function subDescription(sub: BusinessSub): string {
     [/\b(creator|influencer|vlogger|artist|singer|musician|band|dancer|dj\b|photograph|video|studio|film|media|news|reporter|publisher|writer|performer|troupe|orchestra|theatre|content)\b/i, "Creates content, art, music or entertainment"],
     [/\b(ngo|trust|association|society|cooperative|union|committee|club|foundation|organisation|office|department|panchayat|council|government|authority|party)\b/i, "An organisation, office or group that serves a community or the public"],
     [/\b(shop|store|stall|kiosk|showroom|outlet|mart|market|seller|vendor|hawker|retail|boutique|bazaar|counter)\b/i, "A shop, stall or seller that sells directly to customers"],
-    [/\b(rental|renting|hire|leasing|lease)\b/i, "Rents out vehicles, equipment or space"],
     [/\b(cleaning|laundry|pest|security|guard|housekeeping|facility|salon|parlour|spa|massage|beautician|barber|tailor|maid|cook|caretaker)\b/i, "Provides personal, household or facility services"],
   ];
-  const kind = rules.find(([re]) => re.test(n))?.[1] ?? "";
+  const kind = rules.find(([re]) => re.test(n))?.[1] ?? categoryKindPhrase(categoryName);
   const gloss = GLOSS.find(([re]) => re.test(n))?.[1];
-  if (!kind) return gloss ? `${gloss[0].toUpperCase()}${gloss.slice(1)}` : "";
   return gloss ? `${kind} (${gloss})` : kind;
 }
 

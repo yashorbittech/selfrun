@@ -217,6 +217,8 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
           <div className={`flex items-center gap-x-0.5 h-full ${menuStyle === "tiles" ? "" : "relative"}`}>
             {navigation.map((item) => {
               const isActive = pathname === item.href || pathname?.startsWith(item.href + "/");
+              // A menu item with nothing under it is a plain link: no arrow, no drop-down.
+              const hasMenu = item.items.length > 0;
               return (
               <div
                 key={item.name}
@@ -238,12 +240,12 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
                     />
                   )}
                   {item.name}
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${activeMenu === item.name ? "rotate-180" : ""}`} />
+                  {hasMenu && <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${activeMenu === item.name ? "rotate-180" : ""}`} />}
                 </Link>
 
                 <AnimatePresence>
-                  {activeMenu === item.name && menuStyle !== "default" && <NavDropdown style={menuStyle} nav={item} />}
-                  {activeMenu === item.name && menuStyle === "default" && (
+                  {hasMenu && activeMenu === item.name && menuStyle !== "default" && <NavDropdown style={menuStyle} nav={item} />}
+                  {hasMenu && activeMenu === item.name && menuStyle === "default" && (
                     <motion.div
                       initial={{ opacity: 0, y: 15, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -422,6 +424,19 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
                   {mobileNavigation.map((section) => {
                     const isSectionActive = pathname === section.href || pathname?.startsWith(section.href + "/");
                     const isOpen = openMobileSection === section.name;
+                    // A menu item with nothing under it is a plain link, not an accordion.
+                    if (section.items.length === 0) {
+                      return (
+                        <div key={section.name} className="border-t border-border/50 first:border-t-0">
+                          <Link href={section.href} onClick={() => setMobileMenuOpen(false)} className="flex w-full items-center gap-3 py-4">
+                            <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-lg border transition-colors ${isSectionActive ? "border-primary/30 bg-primary/5 text-primary" : "border-border/50 text-muted-foreground"}`}>
+                              <section.icon className="h-4 w-4" />
+                            </span>
+                            <span className={`text-base font-bold transition-colors ${isSectionActive ? "text-primary" : "text-foreground"}`}>{section.name}</span>
+                          </Link>
+                        </div>
+                      );
+                    }
                     return (
                       <div key={section.name} className="border-t border-border/50 first:border-t-0">
                         <button

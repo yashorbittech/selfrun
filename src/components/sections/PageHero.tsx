@@ -64,7 +64,7 @@ export default function PageHero({
     <section className="relative overflow-hidden bg-background pt-28 sm:pt-32 lg:pt-36 pb-20 sm:pb-24 border-b border-border/50">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        {image && <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" />}
         {/* Mobile / single-column: strong uniform scrim since text spans full width */}
         <div className="absolute inset-0 bg-background/90 lg:hidden"></div>
         {/* Desktop / two-column: solid on the text side, photo revealed on the visual side */}
