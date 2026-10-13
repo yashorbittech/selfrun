@@ -29,7 +29,7 @@ const motionProps = {
   transition: { duration: 0.16, ease: "easeOut" as const },
 };
 
-export default function NavDropdown({ style, nav }: { style: string; nav: DropdownNav }) {
+export default function NavDropdown({ style, nav, hideViewAll = false }: { style: string; nav: DropdownNav; hideViewAll?: boolean }) {
   if (style === "tiles") {
     return (
       <motion.div {...motionProps} className="absolute inset-x-0 top-full z-50 px-4 pt-2">
@@ -43,7 +43,7 @@ export default function NavDropdown({ style, nav }: { style: string; nav: Dropdo
               </Link>
             ))}
           </div>
-          <Link href={nav.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">View all {nav.name} <ArrowRight className="size-3.5" /></Link>
+          {!hideViewAll && <Link href={nav.href} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">View all {nav.name} <ArrowRight className="size-3.5" /></Link>}
         </div>
       </motion.div>
     );

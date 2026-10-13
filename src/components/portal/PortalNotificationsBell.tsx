@@ -12,5 +12,5 @@ export interface BellItem {
 
 /** Links to the panel's Notifications page (the dropdown was retired). `items` is kept so topbars need no change. */
 export default function PortalNotificationsBell({ unread }: { items: BellItem[]; unread: number }) {
-  return <PanelBellLink href="/portal/notifications" unread={unread} />;
+  return <PanelBellLink href="/portal/notifications" unread={unread} panel="portal" actor="portal" />;
 }

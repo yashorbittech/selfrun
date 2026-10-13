@@ -1,3 +1,4 @@
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import "server-only";
 import { domainBlockReason } from "@/lib/platform/billing/enforce";
 import { randomBytes } from "node:crypto";
@@ -302,6 +303,7 @@ export async function verifyCustomDomain(raw: string, resolver: TxtResolver = re
     forgetCompanyRouting();
     forgetCompanySiteUrls();
     if (res.modifiedCount === 0) return ok(`${d._id} is verified.`);
+    await workspaceEvents.domain(d._id, "verified");
     return ok(hosting.status?.dnsConfigured ? `${d._id} is verified and live.` : `${d._id} is verified. Traffic reaches your workspace once the routing record is in place.`);
   }
 

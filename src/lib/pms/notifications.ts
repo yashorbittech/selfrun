@@ -1,4 +1,5 @@
 import "server-only";
+import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { ObjectId } from "mongodb";
@@ -25,7 +26,8 @@ export type PmsNotificationType =
   | "project_status_changed"
   | "comment_added"
   | "timesheet_submitted"
-  | "timesheet_reviewed";
+  | "timesheet_reviewed"
+  | "added_to_project";
 
 export interface PmsNotification {
   _id: string;
@@ -101,6 +103,7 @@ export async function notify(input: NotifyInput): Promise<void> {
       createdAt: new Date(),
     });
     await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
+    await signalNew("pms", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
   } catch {
     // Notifications must never break the primary mutation.
   }

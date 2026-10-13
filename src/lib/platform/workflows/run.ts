@@ -1,3 +1,4 @@
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { getCompany } from "@/lib/platform/tenancy/companies";
@@ -108,6 +109,8 @@ export async function executeWorkflow(wf: WorkflowDoc, event: RunnableEvent, opt
   const { workflows, runs } = await workflowCollections();
   await runs.insertOne({ _id: randomUUID(), workflowId: wf._id, eventId: event.id, eventType: event.type, label: event.entity.label, status, error, results, test: env.test, at });
   await workflows.updateOne({ _id: wf._id }, { $set: { lastRun: { status, at, error } } });
+  // Tell the admins once when an automation starts failing (not on every failed run, and never for a test).
+  if (status === "failed" && !env.test && wf.lastRun?.status !== "failed") await workspaceEvents.automationFailed(wf.name, wf._id, error ?? "An action failed.");
   return { status, results };
 }
 

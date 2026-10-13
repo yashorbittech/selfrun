@@ -1,3 +1,5 @@
+import { runFmsSweep } from "@/lib/notify/sweeps";
+import { panelUnread } from "@/lib/notify";
 import { redirect } from "next/navigation";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { hasFmsAccess } from "@/lib/fms-roles";
@@ -18,6 +20,8 @@ export default async function ProtectedFmsLayout({ children }: { children: React
   if (!user) redirect("/fms/login");
   if (user.mustChangePassword) redirect("/fms/change-password");
   if (!hasFmsAccess(user.roles)) redirect("/fms/login");
+  // Overdue / due-soon alerts become real notifications (once a day per person); the bell then counts what is unread.
+  await runFmsSweep().catch(() => {});
 
   return (
     <TooltipProvider delay={200}>
@@ -38,7 +42,7 @@ export default async function ProtectedFmsLayout({ children }: { children: React
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-              <FmsTopbar roles={user.roles} permissionOverrides={user.permissionOverrides} />
+              <FmsTopbar roles={user.roles} permissionOverrides={user.permissionOverrides} unread={await panelUnread(user.id, "fms")} />
             </div>
             <PanelBackBar />
             <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">{children}</main>

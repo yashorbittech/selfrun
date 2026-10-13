@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BellOff, CheckCheck, Clock, Settings2 } from "lucide-react";
@@ -10,6 +10,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { usePanelMeta } from "@/components/platform/PanelsProvider";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import { cn } from "@/lib/utils";
+import { onNotifySignal, refreshNotifyCounts, setLocalUnread, useNotifyState } from "@/lib/notify/client";
+import type { NotifyPanel } from "@/lib/notify/panels";
 
 export interface PanelNotificationItem {
   id: string;
@@ -31,7 +33,7 @@ export default function GenericPanelNotificationsPage({
   shortCode: fallbackCode,
   description,
   initialNotifications,
-  live = false,
+  live: _live = false,
   onMarkRead,
   onMarkAllRead,
   unreadEvent,
@@ -42,7 +44,7 @@ export default function GenericPanelNotificationsPage({
   shortCode: string;
   description: string;
   initialNotifications?: PanelNotificationItem[];
-  /** Real data from the panel: an empty list shows the empty state instead of sample notifications. */
+  /** Kept for callers that still pass it; the page always shows the panel's real notifications (an empty list shows the empty state). */
   live?: boolean;
   /** Server actions that persist read state; without them read state is local to the page. */
   onMarkRead?: MarkRead;
@@ -54,55 +56,35 @@ export default function GenericPanelNotificationsPage({
   const meta = usePanelMeta(panel ?? "");
   const panelName = meta?.name ?? fallbackName;
   const shortCode = meta?.shortName ?? fallbackCode;
-  const defaultItems: PanelNotificationItem[] = live ? [] : [
-    {
-      id: "notif-1",
-      title: `${shortCode} System Update & Security Audit Complete`,
-      body: `Automated maintenance run completed successfully for ${panelName}. All signals normal.`,
-      createdAt: new Date(Date.now() - 3600000).toISOString(),
-      read: false,
-      priority: "high",
-    },
-    {
-      id: "notif-2",
-      title: `Daily Summary Report Generated for ${shortCode}`,
-      body: `Operational metrics and automated summary details are now ready for review.`,
-      createdAt: new Date(Date.now() - 14400000).toISOString(),
-      read: false,
-      priority: "normal",
-    },
-    {
-      id: "notif-3",
-      title: `Workspace Integration Sync Verified`,
-      body: `Cross-module sync between ${shortCode} and Workspace Hub is active.`,
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      read: true,
-      priority: "normal",
-    },
-  ];
-
-  const [items, setItems] = useState<PanelNotificationItem[]>(
-    live || (initialNotifications && initialNotifications.length > 0) ? (initialNotifications ?? []) : defaultItems
-  );
-
+  const livePanel = (panel ?? null) as NotifyPanel | null;
+  useNotifyState(livePanel === "portal" ? "portal" : "staff");
+  // What the server sent is the truth; this page only remembers what the person marked read since, so a refresh never fights it.
+  const [locallyRead, setLocallyRead] = useState<Set<string>>(new Set());
+  const items: PanelNotificationItem[] = (initialNotifications ?? []).map((n) => (locallyRead.has(n.id) ? { ...n, read: true } : n));
   const unreadCount = items.filter((n) => !n.read).length;
 
-  const announce = (list: PanelNotificationItem[]) => {
-    if (unreadEvent) window.dispatchEvent(new CustomEvent(unreadEvent, { detail: list.filter((n) => !n.read).length }));
+  // A new notification (or a read elsewhere) for this panel: re-render the server list at once.
+  useEffect(() => {
+    if (!livePanel) return;
+    const panels: NotifyPanel[] = livePanel === "platform" ? ["platform", "workspace"] : [livePanel];
+    return onNotifySignal(panels, () => router.refresh());
+  }, [livePanel, router]);
+
+  const announce = (nextUnread: number) => {
+    if (unreadEvent) window.dispatchEvent(new CustomEvent(unreadEvent, { detail: nextUnread }));
+    if (livePanel) { setLocalUnread(livePanel, nextUnread); setTimeout(refreshNotifyCounts, 600); }
   };
 
   const markAllRead = () => {
-    const next = items.map((n) => ({ ...n, read: true }));
-    setItems(next);
-    announce(next);
+    setLocallyRead(new Set(items.map((n) => n.id)));
+    announce(0);
     void onMarkAllRead?.()?.catch(() => {});
   };
 
   const openItem = (n: PanelNotificationItem) => {
     if (!n.read) {
-      const next = items.map((x) => (x.id === n.id ? { ...x, read: true } : x));
-      setItems(next);
-      announce(next);
+      setLocallyRead(new Set([...locallyRead, n.id]));
+      announce(Math.max(0, unreadCount - 1));
       void onMarkRead?.([{ id: n.id, meta: n.meta }])?.catch(() => {});
     }
     if (n.link) router.push(n.link);

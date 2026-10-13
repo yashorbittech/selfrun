@@ -1,3 +1,5 @@
+import { runLpmsSweep } from "@/lib/notify/sweeps";
+import { panelUnread } from "@/lib/notify";
 import { redirect } from 'next/navigation';
 import { getCurrentLpmsUser } from '@/lib/lpms-auth';
 import { hasLpmsAccess, lpmsCan } from '@/lib/lpms-roles';
@@ -44,6 +46,7 @@ export default async function ProtectedLpmsLayout({ children }: { children: Reac
     pendingApprovals,
   };
 
+  await runLpmsSweep().catch(() => {});
   return (
     <TooltipProvider delay={200}>
       <SidebarCollapseProvider>
@@ -63,7 +66,7 @@ export default async function ProtectedLpmsLayout({ children }: { children: Reac
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface lpms-print-hide relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-              <LpmsTopbar roles={user.roles} flags={flags} />
+              <LpmsTopbar roles={user.roles} flags={flags} unread={await panelUnread(user.id, "lpms")} />
             </div>
             <PanelBackBar />
             <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">{children}</main>

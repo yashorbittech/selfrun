@@ -7,6 +7,7 @@ import { aiBlockReason, moduleBlockReason } from "@/lib/platform/billing/enforce
 import { emitEvent } from "@/lib/platform/events";
 import type { IntelMessage } from "@/lib/intelligence/blocks";
 import { addMessage, consumeQuestion, createConversation, getConversation, historyForModel, MAX_QUESTION_CHARS, QUESTIONS_PER_HOUR, toView, type ConversationDoc } from "@/lib/intelligence/conversations";
+import { detectLanguage } from "@/lib/ai/policy";
 import { answerQuestion, friendlyTurnError } from "@/lib/intelligence/engine";
 
 /**
@@ -64,7 +65,7 @@ export async function executeTurn(user: CurrentIntelligenceUser, prep: Extract<P
     return { ok: true, message: toView(saved) };
   } catch (err) {
     const stopped = hooks.signal?.aborted === true;
-    const error = stopped ? "stopped" : friendlyTurnError(err);
+    const error = stopped ? "stopped" : friendlyTurnError(err, detectLanguage([...history.filter((h) => h.role === "user").map((h) => h.text), question]));
     if (!stopped) console.error("[intelligence] turn failed", err instanceof Error ? err.message : err);
     await addMessage({ conversationId: conversation._id, userId: user.id, role: "assistant", text: "", error }).catch(() => {});
     outcome = stopped ? "stopped" : "failed";

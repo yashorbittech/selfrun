@@ -1,3 +1,4 @@
+import { hrmsEvents } from "@/lib/notify/triggers/hrms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, notDeleted } from "@/lib/hrms/db";
@@ -379,6 +380,7 @@ export async function createRun(
   };
   await runs.insertOne(run);
   await payslips.insertMany(slips);
+  await hrmsEvents.payrollReady({ id: run._id, month, employees: slips.length });
   return { ok: true, run };
 }
 

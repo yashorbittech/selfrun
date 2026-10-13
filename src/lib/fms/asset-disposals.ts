@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/fms/db";
@@ -165,5 +166,6 @@ export async function disposeAsset(
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await fmsEvents.assetDisposed({ disposalNumber: doc.disposalNumber, assetName: (asset as { name?: string }).name ?? null }, actorId);
   return { ok: true, disposal: doc };
 }

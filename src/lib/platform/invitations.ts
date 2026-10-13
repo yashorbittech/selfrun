@@ -1,3 +1,4 @@
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import "server-only";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { ObjectId } from "mongodb";
@@ -208,5 +209,6 @@ export async function acceptInvitation(token: string, input: { name: string; pas
     ...(inv.platformRoleId ? { platformRoleId: inv.platformRoleId, platformGrantedAt: new Date(), platformGrantedBy: inv.invitedBy } : {}),
   });
   if (employee) await db.collection("hrms_employees").updateOne({ _id: employee._id as never }, { $set: { adminUserId: inv.email } });
+  await workspaceEvents.inviteAccepted(inv.email, name);
   return { ok: true, adminId };
 }

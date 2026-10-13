@@ -1,27 +1,17 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { usePathname, useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  Sparkles,
-  X,
-  Send,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
-  Bot,
-  User,
-  ArrowRight,
-  ShieldAlert,
-} from "lucide-react";
-import { usePanelMeta, usePanels } from "@/components/platform/PanelsProvider";
-import {
-  PANELS_CONFIG,
-  processPanelMessage,
-  type AgenticFlowState,
-  type MessageItem,
-} from "@/lib/ai/panel-agentic-engine";
+import { Check, FileText, Loader2, MonitorUp, Paperclip, RotateCcw, Send, Sparkles, TriangleAlert, X } from "lucide-react";
+import { toast } from "sonner";
+import { usePanelMeta } from "@/components/platform/PanelsProvider";
+import { Markdown } from "@/components/chat/Markdown";
+import { FALLBACK, QUICK, STRINGS, UI_LANGS, initialUiLang, saveUiLang, type UiLang } from "@/components/platform/askai/i18n";
+import ApprovalCard from "@/components/platform/askai/ApprovalCard";
+import { captureScreen, MAX_FILES, MAX_TOTAL_BYTES, pickFile, totalBytes, type Picked } from "@/components/platform/askai/files";
+import type { AgentResponse, Proposal } from "@/lib/ai/agent/types";
 
 export interface AskAiDrawerProps {
   open: boolean;
@@ -33,371 +23,247 @@ export interface AskAiDrawerProps {
   permissionOverrides?: Record<string, boolean>;
 }
 
-export default function AskAiDrawer({
-  open,
-  onClose,
-  panelId,
-  panelTitle,
-  panelDescription,
-  roles,
-}: AskAiDrawerProps) {
+interface ChatMsg {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  /** Files sent with this message (data is only kept in memory, never saved to the tab's storage). */
+  files?: Picked[];
+  steps?: { label: string; ok: boolean }[];
+  choices?: string[];
+  proposal?: Proposal & { state?: "open" | "approved" | "rejected" };
+  error?: boolean;
+}
+
+const KEY = (p: string) => `askai:agent:${p}`;
+function readStored(panelId: string): ChatMsg[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = sessionStorage.getItem(KEY(panelId));
+    return raw ? (JSON.parse(raw) as ChatMsg[]).map((m) => ({ ...m, files: undefined })) : [];
+  } catch {
+    return [];
+  }
+}
+const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random()).slice(2));
+
+/** Ask AI: a real agent for this panel. Reads the company's data, understands screenshots and files, and changes things only after the person approves. */
+export default function AskAiDrawer({ open, onClose, panelId, panelTitle, panelDescription }: AskAiDrawerProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const registry = usePanelMeta(panelId);
-  const allPanels = usePanels();
-  const panel = PANELS_CONFIG[panelId] || PANELS_CONFIG.pms;
-  // Names come from the Panel Registry so the assistant, headers and listings all agree.
-  const displayName = registry?.name ?? panel.name;
-  const displayCode = registry?.shortName ?? panel.shortCode;
-  const displayDescription = registry?.description ?? panelDescription;
+  const title = registry?.name ?? panelTitle;
+  const description = registry?.description ?? panelDescription;
 
-  const [mounted, setMounted] = useState(false);
-  const [messages, setMessages] = useState<MessageItem[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [flowState, setFlowState] = useState<AgenticFlowState | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // False while rendering on the server, true in the browser (the drawer is a portal, so it only exists there).
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const [messages, setMessages] = useState<ChatMsg[]>(() => readStored(panelId));
+  const [text, setText] = useState("");
+  const [files, setFiles] = useState<Picked[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [autoApprove, setAutoApprove] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [uiLang, setUiLang] = useState<UiLang>(initialUiLang);
+  const T = STRINGS[uiLang];
+  const scroller = useRef<HTMLDivElement>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
 
-  const storageKey = `askai:chat:${panelId}`;
-  const [restored, setRestored] = useState(false);
-
-  // Restore this tab's conversation so it survives page changes and panel switches.
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(storageKey);
-      if (raw) {
-        const saved = JSON.parse(raw) as { messages?: MessageItem[]; flowState?: AgenticFlowState | null };
-        if (saved.messages?.length) setMessages(saved.messages);
-        if (saved.flowState) setFlowState(saved.flowState);
+    if (!mounted) return;
+    try { sessionStorage.setItem(KEY(panelId), JSON.stringify(messages.slice(-30).map((m) => ({ ...m, files: m.files?.map((f) => ({ ...f, data: "", thumb: f.thumb })) })))); } catch { /* storage full or unavailable */ }
+    scroller.current?.scrollTo({ top: scroller.current.scrollHeight });
+  }, [messages, busy, mounted, panelId]);
+
+  const addFiles = useCallback(async (list: File[] | Picked[]) => {
+    for (const f of list) {
+      try {
+        const picked = "kind" in f ? (f as Picked) : await pickFile(f as File);
+        setFiles((cur) => {
+          if (cur.length >= MAX_FILES) { toast.error(`You can attach up to ${MAX_FILES} files at a time.`); return cur; }
+          if (totalBytes([...cur, picked]) > MAX_TOTAL_BYTES) { toast.error("These files are too large together. Attach fewer or smaller ones."); return cur; }
+          return [...cur, picked];
+        });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : "That file couldn't be attached.");
       }
-    } catch {
-      /* ignore unreadable storage */
     }
-    setRestored(true);
-    setMounted(true);
-  }, [storageKey]);
+  }, []);
 
-  useEffect(() => {
-    if (!restored) return;
+  async function call(body: Record<string, unknown>): Promise<AgentResponse & { error?: string; attachmentErrors?: string[] }> {
+    const res = await fetch("/api/ai/agent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ panel: panelId, page: pathname, autoApprove, ...body }) });
+    const json = (await res.json().catch(() => null)) as (AgentResponse & { error?: string; attachmentErrors?: string[] }) | null;
+    if (!res.ok || !json) throw new Error(json?.error ?? "Something went wrong. Please try again.");
+    return json;
+  }
+
+  function land(base: ChatMsg[], out: AgentResponse & { attachmentErrors?: string[] }) {
+    const reply: ChatMsg = { id: uid(), role: "assistant", content: out.reply + (out.attachmentErrors?.length ? `\n\n_Couldn't read: ${out.attachmentErrors.join("; ")}_` : ""), steps: out.steps, choices: out.choices, proposal: out.proposal?.calls.length ? { ...out.proposal, state: "open" } : undefined };
+    setMessages([...base, reply]);
+    if (out.changed) router.refresh();
+  }
+
+  async function send(raw?: string) {
+    const content = (raw ?? text).trim();
+    if ((!content && !files.length) || busy) return;
+    const closedOld = messages.map((m) => (m.proposal?.state === "open" ? { ...m, proposal: { ...m.proposal, state: "rejected" as const } } : m));
+    const mine: ChatMsg = { id: uid(), role: "user", content: content || "(see attached)", files: files.length ? files : undefined };
+    const next = [...closedOld, mine];
+    setMessages(next);
+    setText("");
+    setFiles([]);
+    setBusy(true);
     try {
-      sessionStorage.setItem(storageKey, JSON.stringify({ messages, flowState }));
-    } catch {
-      /* storage full or unavailable */
+      const out = await call({ action: "chat", messages: next.map((m) => ({ role: m.role, content: m.content, attachments: m.files?.map((f) => ({ name: f.name, mime: f.mime, kind: f.kind, data: f.data })) })) });
+      land(next, out);
+    } catch (e) {
+      setMessages([...next, { id: uid(), role: "assistant", content: e instanceof Error ? e.message : "I couldn't reach the server. Check your connection and try again.", error: true }]);
+    } finally {
+      setBusy(false);
     }
-  }, [restored, storageKey, messages, flowState]);
+  }
 
-  // Initialize initial greeting when drawer opens
-  useEffect(() => {
-    if (open && restored && messages.length === 0) {
-      setMessages([
-        {
-          id: "welcome-msg",
-          sender: "assistant",
-          text: `Hello! I am your context-aware **${displayName} (${displayCode}) AI Agent**.\n\nI can answer questions about panel data, handle automation, or guide you step-by-step through tasks like creating records, scheduling tasks, and managing workflows.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        },
-      ]);
+  async function decide(msgId: string, proposalId: string, decision: "approve" | "reject", confirmed: boolean) {
+    if (busy) return;
+    const marked = messages.map((m) => (m.id === msgId && m.proposal ? { ...m, proposal: { ...m.proposal, state: decision === "approve" ? ("approved" as const) : ("rejected" as const) } } : m));
+    setMessages(marked);
+    setBusy(true);
+    try {
+      const out = await call({ action: "decide", proposalId, decision, confirmed });
+      land(marked, out);
+    } catch (e) {
+      setMessages([...marked, { id: uid(), role: "assistant", content: e instanceof Error ? e.message : "That didn't go through. Please try again.", error: true }]);
+    } finally {
+      setBusy(false);
     }
-  }, [open, restored, panel, messages.length]);
+  }
 
-  // Auto-scroll on new message
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, flowState]);
+  function reset() {
+    setMessages([]);
+    setFiles([]);
+    setText("");
+    try { sessionStorage.removeItem(KEY(panelId)); } catch { /* ignore */ }
+  }
 
-  const handleSend = (textToSend?: string) => {
-    const query = (textToSend || inputValue).trim();
-    if (!query) return;
-
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-    const userMsg: MessageItem = {
-      id: `user-${Date.now()}`,
-      sender: "user",
-      text: query,
-      timestamp,
-    };
-
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    if (!textToSend) setInputValue("");
-
-    // Process via Panel Agentic Engine
-    const { nextState, assistantMessages } = processPanelMessage(query, panelId, flowState, roles, { name: registry?.name, shortName: registry?.shortName, description: registry?.description, names: Object.fromEntries(Object.values(allPanels).map((p) => [p.key, p.name])) });
-
-    setFlowState(nextState);
-    setMessages((prev) => [...prev, ...assistantMessages]);
-  };
-
-  const handleConfirmAction = () => {
-    handleSend("Confirm");
-  };
-
-  const handleCancelAction = () => {
-    handleSend("Cancel");
-  };
-
-  const handleReset = () => {
-    setFlowState(null);
-    setMessages([
-      {
-        id: `welcome-${Date.now()}`,
-        sender: "assistant",
-        text: `Conversation reset. Ask me anything or trigger a multi-step workflow in **${displayName}**!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      },
-    ]);
+  const onPaste = (e: React.ClipboardEvent) => {
+    const imgs = Array.from(e.clipboardData.files).filter((f) => f.type.startsWith("image/"));
+    if (imgs.length) { e.preventDefault(); void addFiles(imgs); }
   };
 
   if (!mounted) return null;
+  const quick = (QUICK[panelId] ?? FALLBACK)[uiLang];
 
   return createPortal(
     <AnimatePresence>
       {open && (
-        <>
-          {/* Right-Side AI Chat Panel Drawer */}
-          <motion.div
-            key="ask-ai-drawer"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="fixed inset-y-0 right-0 z-[1000] flex h-full w-full flex-col border-l border-border/80 bg-background/95 shadow-2xl backdrop-blur-2xl sm:w-[440px]"
-          >
-            {/* Drawer Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-border/60 bg-muted/20 px-4 py-3.5">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary via-indigo-600 to-brand-accent text-white shadow-md shadow-primary/20">
-                  <Sparkles className="size-4.5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-xs font-bold text-foreground">
-                      {displayName}
-                    </span>
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                      ⚡ {displayCode} Agent
-                    </span>
-                  </div>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {displayDescription || panel.description}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  title="Reset Conversation"
-                  aria-label="Reset Conversation"
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <RotateCcw className="size-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close Ask AI Panel"
-                  className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <X className="size-4" />
-                </button>
+        <motion.aside
+          key="ask-ai-drawer"
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", stiffness: 320, damping: 32 }}
+          className="fixed inset-y-0 right-0 z-[1000] flex h-full w-full flex-col border-l border-border/80 bg-background shadow-2xl sm:w-[480px]"
+          aria-label="Ask AI"
+          onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setDragging(true); } }}
+          onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
+          onDrop={(e) => { e.preventDefault(); setDragging(false); void addFiles(Array.from(e.dataTransfer.files)); }}
+        >
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border/60 bg-muted/20 px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-brand-accent text-white"><Sparkles className="size-4" /></span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold text-foreground">{title} · AI agent</p>
+                <p className="truncate text-[11px] text-muted-foreground">{description || "Ask, attach a screenshot, or tell me what to do."}</p>
               </div>
             </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <div role="group" aria-label={T.languageLabel} className="mr-1 flex overflow-hidden rounded-lg border border-border/70 text-[11px] font-semibold">{UI_LANGS.map((l) => <button key={l.key} type="button" onClick={() => { setUiLang(l.key); saveUiLang(l.key); }} aria-pressed={uiLang === l.key} className={`px-2 py-1 ${uiLang === l.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>{l.label}</button>)}</div>
+              <button type="button" onClick={reset} title={T.newChat} aria-label={T.newChat} className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"><RotateCcw className="size-3.5" /></button>
+              <button type="button" onClick={onClose} aria-label={T.close} className="flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"><X className="size-4" /></button>
+            </div>
+          </div>
 
-            {/* Agentic Multi-Step Workflow Progress Bar */}
-            {flowState && !flowState.isCompleted && (
-              <div className="border-b border-primary/20 bg-primary/5 px-4 py-2 text-xs shrink-0">
-                <div className="flex items-center justify-between font-medium text-primary mb-1">
-                  <span className="flex items-center gap-1.5">
-                    <Sparkles className="size-3.5 animate-pulse" />
-                    Agentic Workflow: {flowState.actionLabel}
-                  </span>
-                  <span>
-                    Step {Math.min(flowState.currentStepIndex + 1, flowState.fields.length)} of{" "}
-                    {flowState.fields.length}
-                  </span>
+          <div ref={scroller} className="relative min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+            {dragging && <div className="pointer-events-none absolute inset-2 z-10 flex items-center justify-center rounded-2xl border-2 border-dashed border-primary bg-primary/10 text-sm font-semibold text-primary">{T.drop}</div>}
+            {messages.length === 0 && (
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">{T.intro}</p>
+                <div className="flex flex-col gap-2">
+                  {quick.map((q) => <button key={q} type="button" onClick={() => void send(q)} className="rounded-xl border border-border/70 px-3 py-2 text-left text-sm hover:border-primary/50 hover:bg-primary/5">{q}</button>)}
                 </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/20">
-                  <div
-                    className="h-full bg-primary transition-all duration-300"
-                    style={{
-                      width: `${
-                        ((Math.min(flowState.currentStepIndex + 1, flowState.fields.length)) /
-                          flowState.fields.length) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
+                <p className="text-xs text-muted-foreground">{T.tip}</p>
               </div>
             )}
-
-            {/* Conversation Messages Container */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex gap-3 ${
-                    msg.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {msg.sender === "assistant" && (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                      <Bot className="size-4" />
+            {messages.map((m, idx) => (
+              <div key={m.id} className={m.role === "user" ? "flex justify-end" : "flex justify-start"}>
+                <div className={`max-w-[92%] space-y-2 rounded-2xl px-3.5 py-2.5 text-sm ${m.role === "user" ? "bg-primary text-primary-foreground" : m.error ? "border border-destructive/40 bg-destructive/5 text-foreground" : "bg-muted/60 text-foreground"}`}>
+                  {m.error && <p className="flex items-center gap-1.5 text-xs font-semibold text-destructive"><TriangleAlert className="size-3.5" />{T.couldntFinish}</p>}
+                  {m.files && m.files.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {m.files.map((f, i) => f.thumb ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img key={i} src={f.thumb} alt={f.name} className="size-14 rounded-lg object-cover ring-1 ring-white/30" />
+                      ) : <span key={i} className="inline-flex items-center gap-1 rounded-md bg-black/10 px-2 py-1 text-xs"><FileText className="size-3" />{f.name}</span>)}
                     </div>
                   )}
-
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed ${
-                      msg.sender === "user"
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "bg-muted/40 border border-border/50 text-foreground"
-                    }`}
-                  >
-                    {/* Plain Text or Markdown rendering */}
-                    <div className="whitespace-pre-wrap">{msg.text}</div>
-
-                    {/* Step Info Badge */}
-                    {msg.stepInfo && (
-                      <div className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
-                        <ArrowRight className="size-3" />
-                        Step {msg.stepInfo.current} of {msg.stepInfo.total}: {msg.stepInfo.fieldName}
-                      </div>
-                    )}
-
-                    {/* Warning Scope Notice */}
-                    {msg.warningNotice && (
-                      <div className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-amber-500">
-                        <ShieldAlert className="size-3.5" />
-                        {msg.warningNotice}
-                      </div>
-                    )}
-
-                    {/* Confirmation Summary Card */}
-                    {msg.confirmationCard && (
-                      <div className="mt-3 overflow-hidden rounded-xl border border-primary/30 bg-background/80 p-3 shadow-sm">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-foreground mb-2">
-                          <CheckCircle2 className="size-4 text-emerald-500" />
-                          Review &amp; Confirm: {msg.confirmationCard.actionLabel}
-                        </div>
-                        <div className="space-y-1.5 text-[11px]">
-                          {msg.confirmationCard.fields.map((f, i) => (
-                            <div key={i} className="flex justify-between border-b border-border/40 py-1 last:border-0">
-                              <span className="text-muted-foreground">{f.label}:</span>
-                              <span className="font-semibold text-foreground">{f.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 flex gap-2">
-                          <button
-                            type="button"
-                            onClick={handleConfirmAction}
-                            className="flex-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700"
-                          >
-                            Confirm &amp; Create
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleCancelAction}
-                            className="rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Success Action Card */}
-                    {msg.successCard && (
-                      <div className="mt-3 overflow-hidden rounded-xl border border-emerald-500/40 bg-emerald-500/5 p-3 dark:bg-emerald-950/20">
-                        <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2 mb-2">
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                            <CheckCircle2 className="size-4" />
-                            {msg.successCard.title}
-                          </div>
-                          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                            {msg.successCard.recordId}
-                          </span>
-                        </div>
-                        <div className="space-y-1 text-[11px] mb-2">
-                          {msg.successCard.details.map((d, i) => (
-                            <div key={i} className="flex justify-between text-muted-foreground">
-                              <span>{d.label}:</span>
-                              <span className="font-medium text-foreground">{d.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                          Status: {msg.successCard.status}
-                        </div>
-                      </div>
-                    )}
-
-                    <span className="mt-1 block text-right text-[10px] opacity-60">
-                      {msg.timestamp}
-                    </span>
-                  </div>
-
-                  {msg.sender === "user" && (
-                    <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <User className="size-4" />
+                  {m.role === "user" ? <p className="whitespace-pre-wrap">{m.content}</p> : <Markdown content={m.content} />}
+                  {m.steps && m.steps.length > 0 && (
+                    <ul className="flex flex-wrap gap-1.5 pt-0.5">
+                      {m.steps.map((s, i) => <li key={i} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${s.ok ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "bg-destructive/10 text-destructive"}`}>{s.ok ? <Check className="size-3" /> : <X className="size-3" />}{s.label}</li>)}
+                    </ul>
+                  )}
+                  {m.proposal?.state === "open" && idx === messages.length - 1 && (
+                    <ApprovalCard lang={uiLang} proposal={m.proposal} busy={busy} autoApprove={autoApprove} onAutoApprove={setAutoApprove} onDecide={(d, o) => void decide(m.id, m.proposal!.id, d, o.confirmed)} />
+                  )}
+                  {m.proposal && m.proposal.state !== "open" && <p className="text-xs text-muted-foreground">{m.proposal.state === "approved" ? T.approved : T.notApproved}</p>}
+                  {m.choices && m.choices.length > 0 && idx === messages.length - 1 && !busy && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {m.choices.map((c) => <button key={c} type="button" onClick={() => void send(c)} className="rounded-full border border-primary/40 bg-background px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10">{c}</button>)}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+            {busy && <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" />{T.working}</div>}
+          </div>
 
-            {/* Quick Action Suggestion Chips */}
-            {panel.quickPrompts.length > 0 && !flowState && (
-              <div className="border-t border-border/40 bg-muted/10 px-4 py-2 shrink-0">
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
-                  Suggested {displayCode} Actions:
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {panel.quickPrompts.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => handleSend(prompt)}
-                      className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
-                    >
-                      <Sparkles className="size-3 text-primary" />
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
+          <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="shrink-0 space-y-2 border-t border-border/60 p-3">
+            {files.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {files.map((f, i) => (
+                  <span key={i} className="group relative inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 py-1 pl-1 pr-2 text-xs">
+                    {f.thumb ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.thumb} alt="" className="size-8 rounded object-cover" />
+                    ) : <FileText className="ml-1 size-4 text-muted-foreground" />}
+                    <span className="max-w-[8rem] truncate">{f.name}</span>
+                    <button type="button" aria-label={`${T.remove} ${f.name}`} onClick={() => setFiles(files.filter((_, n) => n !== i))} className="rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"><X className="size-3" /></button>
+                  </span>
+                ))}
               </div>
             )}
-
-            {/* Input Composer Footer */}
-            <div className="border-t border-border/60 bg-background p-3 shrink-0">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
-                className="flex items-center gap-2"
-              >
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  placeholder={`Ask ${displayCode} AI or request action...`}
-                  className="flex-1 rounded-xl border border-border/60 bg-muted/30 px-3.5 py-2 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-primary focus:bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <button
-                  type="submit"
-                  disabled={!inputValue.trim()}
-                  className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-40"
-                >
-                  <Send className="size-4" />
-                </button>
-              </form>
+            <div className="flex items-end gap-1.5 rounded-2xl border border-border bg-background p-2 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+              <input ref={fileInput} type="file" multiple hidden accept="image/*,.pdf,.xlsx,.docx,.txt,.csv,.json,.md,.tsv" onChange={(e) => { void addFiles(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+              <button type="button" onClick={() => fileInput.current?.click()} title={T.attach} aria-label={T.attach} className="flex size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"><Paperclip className="size-4" /></button>
+              <button type="button" onClick={() => void captureScreen().then((p) => addFiles([p])).catch((e) => { if (e instanceof Error && !/denied|abort|cancel/i.test(e.message)) toast.error(e.message); })} title={T.capture} aria-label={T.capture} className="hidden size-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground sm:flex"><MonitorUp className="size-4" /></button>
+              <textarea
+                ref={textarea}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onPaste={onPaste}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); } }}
+                rows={1}
+                placeholder={T.placeholder}
+                aria-label={T.message}
+                className="max-h-32 min-h-9 flex-1 resize-none bg-transparent px-1.5 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+                style={{ outline: "none" }}
+              />
+              <button type="submit" disabled={busy || (!text.trim() && !files.length)} aria-label={T.send} className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground disabled:opacity-40"><Send className="size-4" /></button>
             </div>
-          </motion.div>
-        </>
+          </form>
+        </motion.aside>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

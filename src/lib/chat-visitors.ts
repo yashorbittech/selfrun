@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import type { Collection } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -106,6 +107,7 @@ export async function upsertVisitorProfile(
 ): Promise<void> {
   const collection = await getVisitorsCollection();
   const now = new Date();
+  const isNew = !(await collection.findOne({ _id: visitorId }, { projection: { _id: 1 } }));
   await collection.updateOne(
     { _id: visitorId },
     {
@@ -121,6 +123,7 @@ export async function upsertVisitorProfile(
     },
     { upsert: true }
   );
+  if (isNew) await cmsEvents.chatVisitor({ id: visitorId, name: data.name, service: data.service });
 }
 
 export async function getVisitorProfile(visitorId: string): Promise<ChatVisitorProfile | null> {

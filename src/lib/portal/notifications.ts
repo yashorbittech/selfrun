@@ -1,4 +1,5 @@
 import "server-only";
+import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { getDb } from "@/lib/mongodb";
@@ -64,6 +65,7 @@ export async function notifyPortalUser(input: {
       createdAt: new Date(),
     });
     await queuePush("portal", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
+    await signalNew("portal", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null }, "portal");
   } catch {
     /* dup dedupeKey / transient — ignore */
   }

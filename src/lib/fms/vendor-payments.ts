@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import {
@@ -93,6 +94,7 @@ export async function recordVendorPayment(
   if (data.status === "processed") {
     await postLinkedTransaction(res.id, actorId, actorEmail, fundAccountId, fundAccountType);
   }
+  await fmsEvents.vendorPayment({ id: res.id, amount: Number((data as { amount?: number }).amount ?? 0), vendorName: String((data as { vendorName?: string }).vendorName ?? "") || null, reference: String((data as { reference?: string }).reference ?? "") || null }, data.status === "processed" ? "processed" : "recorded", actorId);
   return { ok: true, paymentId: res.id };
 }
 
@@ -104,6 +106,7 @@ export async function markVendorPaymentProcessed(
   const res = await prmsMarkPaymentProcessed(id, actorId);
   if (!res.ok) return res;
   await postLinkedTransaction(id, actorId, actorEmail);
+  await fmsEvents.vendorPayment({ id, amount: 0 }, "processed", actorId);
   return { ok: true };
 }
 

@@ -1,3 +1,4 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
 import "server-only";
 import { resolveBusiness, type BusinessSelection } from "@/lib/platform/business-taxonomy";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -262,6 +263,7 @@ export async function confirmSignup(token: string, ctx: { hostHint: string | nul
 
   if ((await getSignupMode()) === "approval") {
     await pending.insertOne({ ...doc, status: "awaiting_approval", expiresAt: new Date(Date.now() + 30 * PENDING_TTL_MS) });
+    await platformEvents.signupAwaiting(doc.companyName, doc.email);
     return { ok: true, awaitingApproval: true };
   }
 
@@ -279,6 +281,7 @@ export async function confirmSignup(token: string, ctx: { hostHint: string | nul
 
   const base = companyAppBaseUrl(doc.slug, ctx.hostHint);
   void sendWorkspaceReadyEmail(doc, base);
+  await platformEvents.companyCreated(doc.companyName, doc.email, created.companyId);
 
   return { ok: true, redirectTo: await issueHandoff(created, base) };
 }
@@ -352,6 +355,7 @@ export async function approveSignup(id: string, ctx: { hostHint: string | null }
   const base = companyAppBaseUrl(doc.slug, ctx.hostHint);
   await sendOwnerVerification(created, base);
   const sent = await sendWorkspaceReadyEmail(doc, base, true);
+  await platformEvents.companyCreated(doc.companyName, doc.email, created.companyId);
   return { ok: true, companyId: created.companyId, host: created.host, emailed: sent.ok };
 }
 

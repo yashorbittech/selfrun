@@ -41,7 +41,7 @@ export async function deletePageAction(id: string, path: string): Promise<Result
   }
   if (!can(v, "PAGES_DELETE")) return { ok: false, error: NO_PERMISSION };
 
-  const res = await deletePage(id);
+  const res = await deletePage(id, v.userId);
   if (res.ok) {
     await recordAudit({ actorId: v.userId, actorEmail: v.email, action: "delete", entity: "page", entityId: id, entityLabel: path, path, summary: "Deleted" });
   }

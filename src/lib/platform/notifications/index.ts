@@ -1,6 +1,7 @@
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 
 /**
@@ -79,6 +80,7 @@ export async function notify(input: { to: NotifyTarget; title: string; body?: st
   const url = safeInternalUrl(input.url);
   await (await col()).insertMany(recipients.map((userId) => ({ _id: new ObjectId(), userId, title, body, url, readAt: null, createdAt: now })));
   await queuePush("staff", recipients, { category: "workflow", title, body, url });
+  await signalNew("workspace", recipients, { type: "workflow", title, body, link: url });
   return recipients.length;
 }
 

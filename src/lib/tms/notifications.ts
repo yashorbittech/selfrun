@@ -1,4 +1,5 @@
 import "server-only";
+import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { getDb } from "@/lib/mongodb";
@@ -81,6 +82,7 @@ export async function notify(input: NotifyInput): Promise<void> {
       createdAt: new Date(),
     } as TmsNotification);
     await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
+    await signalNew("tms", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
   } catch {
     // dup dedupeKey or transient error — ignore.
   }

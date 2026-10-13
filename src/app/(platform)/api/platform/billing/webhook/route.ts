@@ -1,3 +1,4 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/platform/billing/razorpay";
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ...outcome });
   } catch (err) {
     console.error(`[billing] webhook ${eventId} (${payload.event}) failed`, err);
+    await platformEvents.paymentWebhookFailed(`${payload.event}: ${err instanceof Error ? err.message : "processing failed"}`);
     return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { aibotsEvents } from "@/lib/notify/triggers/aibots";
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -255,6 +256,7 @@ export async function createBot(input: BotInput, actorId: string): Promise<BotDo
     // Best-effort now; uploading the first file retries it.
     await ensureBotVectorStore(doc).then((id) => (doc.vectorStoreId = id)).catch((err) => console.error("[aibots] vector store create failed", err instanceof Error ? err.message : err));
   }
+  await aibotsEvents.created({ id: doc._id, name: doc.name }, actorId);
   return doc;
 }
 
@@ -274,6 +276,7 @@ export async function setBotStatus(botId: string, status: BotStatus, actorId: st
   if (!bot) throw new NotFoundError();
   const col = await botsCollection();
   await col.updateOne({ _id: botId }, { $set: { status, ...updateStamp(actorId) } });
+  if (bot.status !== status) await aibotsEvents.status({ id: bot._id, name: bot.name }, status, actorId);
   return bot;
 }
 
@@ -288,6 +291,7 @@ export async function deleteBot(botId: string, actorId: string): Promise<BotDoc>
   await col.updateOne({ _id: botId }, { $set: { deletedAt: new Date(), status: "inactive", ...updateStamp(actorId) } });
   const { purgeBotFiles } = await import("@/lib/aibots/knowledge");
   await purgeBotFiles(bot).catch(() => {});
+  await aibotsEvents.deleted({ id: bot._id, name: bot.name }, actorId);
   return bot;
 }
 

@@ -1,12 +1,7 @@
-import GenericPanelNotificationsPage from "@/components/platform/panel/GenericPanelNotificationsPage";
+import UnifiedNotificationsPage from "@/components/platform/panel/UnifiedNotificationsPage";
+
+export const dynamic = "force-dynamic";
 
 export default function LmsNotificationsPage() {
-  return (
-    <GenericPanelNotificationsPage
-      panel="lms"
-      panelName="Lead Management System"
-      shortCode="LMS"
-      description="Track inbound lead activity, stale lead alerts & career application updates."
-    />
-  );
+  return <UnifiedNotificationsPage panel="lms" panelName="Lead Management System" shortCode="LMS" description="New leads, assignments, replies, stage changes and stale-lead alerts." />;
 }

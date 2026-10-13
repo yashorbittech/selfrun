@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { companyCache } from "@/lib/platform/tenancy/cache";
 import { getDb } from "@/lib/mongodb";
@@ -45,8 +46,10 @@ export async function getSettings(): Promise<CmsSettings> {
 
 export async function saveSettings(settings: CmsSettings, actorId: string): Promise<void> {
   const c = await col();
+  const before = (await c.findOne({ _id: "default" }))?.maintenanceMode?.enabled === true;
   await c.updateOne({ _id: "default" }, { $set: { ...settings, ...updateStamp(actorId) } }, { upsert: true });
   expireSiteCache();
+  if (before !== (settings.maintenanceMode?.enabled === true)) await cmsEvents.maintenance(settings.maintenanceMode?.enabled === true, actorId);
 }
 
 const cachedMaintenanceMode = companyCache(async () => (await getSettings()).maintenanceMode, ["cms-maintenance-v1"], { tags: [CMS_SITE_TAG], revalidate: 60 });

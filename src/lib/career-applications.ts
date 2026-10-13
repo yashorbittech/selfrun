@@ -1,3 +1,4 @@
+import { lmsEvents } from "@/lib/notify/triggers/lms";
 import "server-only";
 import { Collection, ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -199,6 +200,7 @@ export async function createApplication(
     updatedAt: now,
   };
   const result = await collection.insertOne(doc);
+  await lmsEvents.applicationReceived({ id: String(result.insertedId), name: doc.name, positionTitle: doc.positionTitle });
   return { _id: result.insertedId, ...doc };
 }
 

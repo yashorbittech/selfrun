@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import { createHash, randomUUID } from "node:crypto";
@@ -290,11 +291,13 @@ export async function generateAiWebsite(opts: { force?: boolean; ownerPrompt?: s
         },
       },
     );
+    await cmsEvents.aiWebsite(true, `${pages} pages were written. Review and publish them in the CMS.`);
     return { ok: true, pages };
   } catch (err) {
     const message = err instanceof Error ? err.message : "The website could not be generated.";
     console.error("[ai-website] failed", err);
     await col.updateOne({ _id: STATE_ID }, { $set: { status: "failed", finishedAt: new Date(), error: message.slice(0, 500) } });
+    await cmsEvents.aiWebsite(false, message);
     return { ok: false, error: message };
   }
 }

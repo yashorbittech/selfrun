@@ -13,10 +13,8 @@ import {
   getConversationHistory,
 } from "@/lib/chatbot-sessions";
 import { prepareAnswer, streamAnswer, resolveCitations } from "@/lib/chatbot-rag";
+import { checkScope, detectLanguage, refusalText } from "@/lib/ai/policy";
 import { getVisitorProfile } from "@/lib/chat-visitors";
-import { getCompanyBrand } from "@/lib/platform/branding";
-import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
-import { isDemoChat, answerDemoQuestion, streamDemoAnswer, DEMO_MODEL } from "@/lib/chat-demo";
 
 // Long-running streamed completion.
 export const maxDuration = 60;
@@ -24,9 +22,7 @@ export const maxDuration = 60;
 const GENERIC_ERROR = "Sorry — something went wrong generating a response. Please try again.";
 
 export async function POST(req: NextRequest) {
-  const demo = await isDemoChat();
-
-  if (!demo && !(await isOpenAIConfigured())) {
+  if (!(await isOpenAIConfigured())) {
     return NextResponse.json(
       { error: "The AI assistant is not configured yet. Please try again later." },
       { status: 503 }
@@ -89,50 +85,22 @@ export async function POST(req: NextRequest) {
   const encoder = new TextEncoder();
   const startedAt = Date.now();
 
-  // ---- Demo mode: scripted, locally-streamed answer -----------------------
-  if (demo) {
-    const answer = answerDemoQuestion(sanitized.text, { name: (await getCompanyBrand()).name, siteUrl: await companySiteUrl() });
+  // ---- Scope gate: this assistant speaks only for this company. Anything else gets a short, polite decline in the visitor's language. ----
+  const lang = detectLanguage([...priorHistory.filter((m) => m.role === "user").map((m) => m.content), sanitized.text]);
+  const lastAssistant = [...priorHistory].reverse().find((m) => m.role === "assistant")?.content;
+  if (!(await checkScope({ text: sanitized.text, previousAssistant: lastAssistant, kind: "website" }))) {
+    const text = refusalText(lang, "website");
     const readable = new ReadableStream<Uint8Array>({
       async start(controller) {
-        const send = (obj: unknown) =>
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
+        const send = (obj: unknown) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(obj)}\n\n`));
         send({ type: "session", sessionId: session.sessionId });
-
-        let full = "";
-        try {
-          for await (const chunk of streamDemoAnswer(answer.text)) {
-            full += chunk;
-            send({ type: "delta", text: chunk });
-          }
-          const assistantMsg = await recordAssistantMessage(session.sessionId, {
-            content: full,
-            citations: answer.citations,
-            model: DEMO_MODEL,
-            responseTimeMs: Date.now() - startedAt,
-            voice: isVoice,
-          });
-          send({
-            type: "done",
-            messageId: String(assistantMsg._id),
-            userMessageId: String(userMsg._id),
-            citations: answer.citations,
-          });
-        } catch (err) {
-          console.error("chat(demo): stream error", err);
-          send({ type: "error", message: GENERIC_ERROR });
-        } finally {
-          controller.close();
-        }
+        send({ type: "delta", text });
+        const assistantMsg = await recordAssistantMessage(session.sessionId, { content: text, citations: [], model: "scope-guard", responseTimeMs: Date.now() - startedAt, voice: isVoice });
+        send({ type: "done", messageId: String(assistantMsg._id), userMessageId: String(userMsg._id), citations: [] });
+        controller.close();
       },
     });
-
-    const res = new NextResponse(readable, {
-      headers: {
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Accel-Buffering": "no",
-      },
-    });
+    const res = new NextResponse(readable, { headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
     return applyChatCookies(res, cookiesToSet);
   }
 

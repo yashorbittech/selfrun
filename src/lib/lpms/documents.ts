@@ -1,3 +1,4 @@
+import { lpmsEvents } from "@/lib/notify/triggers/lpms";
 import 'server-only';
 import { getLpmsDocumentsCollection, getLpmsApprovalsCollection } from '@/lib/lpms/db';
 import { currentCompanyId } from '@/lib/platform/tenancy/context';
@@ -132,6 +133,7 @@ export async function submitForReview(id: string, viewer: LpmsViewer): Promise<{
   await collection.updateOne({ _id: new ObjectId(id) as any }, { $set: { status: 'review' } as any });
   
   await logLpmsEvent({ action: 'STATUS_CHANGE', entityType: 'DOCUMENT', entityId: id, data: { status: 'review' }, viewer });
+  await lpmsEvents.submittedForReview(id, viewer.userId);
   return { ok: true };
 }
 
@@ -150,6 +152,7 @@ export async function submitForApproval(id: string, viewer: LpmsViewer): Promise
   } as any);
 
   await logLpmsEvent({ action: 'STATUS_CHANGE', entityType: 'DOCUMENT', entityId: id, data: { status: 'pending_approval' }, viewer });
+  await lpmsEvents.submittedForApproval(id, viewer.userId);
   return { ok: true };
 }
 
@@ -164,6 +167,7 @@ export async function approveDocument(documentId: string, approvalId: string, no
   await collection.updateOne({ _id: new ObjectId(documentId) as any }, { $set: { status: 'approved' } as any });
 
   await logLpmsEvent({ action: 'APPROVE', entityType: 'DOCUMENT', entityId: documentId, viewer });
+  await lpmsEvents.decided(documentId, 'approved', notes, viewer.userId);
   return { ok: true };
 }
 
@@ -178,6 +182,7 @@ export async function rejectDocument(documentId: string, approvalId: string, not
   await collection.updateOne({ _id: new ObjectId(documentId) as any }, { $set: { status: 'rejected' } as any });
 
   await logLpmsEvent({ action: 'REJECT', entityType: 'DOCUMENT', entityId: documentId, viewer });
+  await lpmsEvents.decided(documentId, 'rejected', notes, viewer.userId);
   return { ok: true };
 }
 
@@ -185,6 +190,7 @@ export async function publishDocument(id: string, viewer: LpmsViewer): Promise<{
   const collection = await getLpmsDocumentsCollection();
   await collection.updateOne({ _id: new ObjectId(id) as any }, { $set: { status: 'published', publishedAt: new Date().toISOString(), publishedBy: viewer.userId } as any });
   await logLpmsEvent({ action: 'PUBLISH', entityType: 'DOCUMENT', entityId: id, viewer });
+  await lpmsEvents.published(id, viewer.userId);
   return { ok: true };
 }
 
@@ -192,6 +198,7 @@ export async function activateDocument(id: string, viewer: LpmsViewer): Promise<
   const collection = await getLpmsDocumentsCollection();
   await collection.updateOne({ _id: new ObjectId(id) as any }, { $set: { status: 'active', activeAt: new Date().toISOString() } as any });
   await logLpmsEvent({ action: 'ACTIVATE', entityType: 'DOCUMENT', entityId: id, viewer });
+  await lpmsEvents.stateChanged(id, 'activated', viewer.userId);
   return { ok: true };
 }
 
@@ -199,6 +206,7 @@ export async function archiveDocument(id: string, viewer: LpmsViewer): Promise<{
   const collection = await getLpmsDocumentsCollection();
   await collection.updateOne({ _id: new ObjectId(id) as any }, { $set: { status: 'archived', archivedAt: new Date().toISOString() } as any });
   await logLpmsEvent({ action: 'ARCHIVE', entityType: 'DOCUMENT', entityId: id, viewer });
+  await lpmsEvents.stateChanged(id, 'archived', viewer.userId);
   return { ok: true };
 }
 

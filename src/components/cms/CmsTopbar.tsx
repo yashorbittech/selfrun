@@ -1,21 +1,20 @@
 "use client";
 
+import PanelBellLink from "@/components/platform/PanelBellLink";
 import { PanelHeading } from "@/components/platform/PanelsProvider";
 import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, Sparkles, Bell } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
 import CmsMobileSidebar from "@/components/cms/CmsMobileSidebar";
 import CmsCommandSearch from "@/components/cms/CmsCommandSearch";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
-import CmsAiAgentDrawer from "@/components/cms/CmsAiAgentDrawer";
 import type { CmsNavFlags } from "@/components/cms/CmsSidebar";
 
-/** `aiAgent`: company websites get the real website assistant (edits the site); the platform operator keeps the guided Ask AI it always had. */
-export default function CmsTopbar({ roles: _roles, flags, aiAgent = false }: { roles: string[]; flags: CmsNavFlags; aiAgent?: boolean }) {
+/** Ask AI is the shared agent (attachments, approvals); in the CMS it edits the real website. `aiAgent` is kept for the layout and no longer changes the drawer. */
+export default function CmsTopbar({ roles: _roles, flags, unread = 0 }: { roles: string[]; flags: CmsNavFlags; aiAgent?: boolean; unread?: number }) {
   const [aiOpen, setAiOpen] = useAskAiOpen();
-  const [bellOpen, setBellOpen] = useState(false);
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <CmsMobileSidebar flags={flags} />
@@ -34,14 +33,7 @@ export default function CmsTopbar({ roles: _roles, flags, aiAgent = false }: { r
         >
           <Sparkles className="size-4" />
         </button>
-        <Link
-          href="/cms/notifications"
-          title="Notifications"
-          aria-label="Notifications"
-          className="flex size-9 items-center justify-center rounded-full border border-border/60 bg-muted/30 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-        >
-          <Bell className="size-4" />
-        </Link>
+        <PanelBellLink href="/cms/notifications" unread={unread} panel="cms" />
         <a
           href="/"
           target="_blank"
@@ -51,14 +43,14 @@ export default function CmsTopbar({ roles: _roles, flags, aiAgent = false }: { r
           <ExternalLink className="size-3.5" /> View website
         </a>
       </div>
-      {aiAgent ? <CmsAiAgentDrawer open={aiOpen} onClose={() => setAiOpen(false)} /> : <AskAiDrawer
+      <AskAiDrawer
         open={aiOpen}
         onClose={() => setAiOpen(false)}
         panelId="cms"
         panelTitle="Content Management System"
         panelDescription="Pages, blogs & website content"
         roles={_roles}
-      />}
+      />
     </header>
   );
 }

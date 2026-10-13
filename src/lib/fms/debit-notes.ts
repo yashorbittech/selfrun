@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -160,6 +161,7 @@ export async function issueDebitNote(id: string, actorId: string): Promise<{ ok:
     { _id: id, ...notDeleted },
     { $set: { status: "issued", issuedAt: new Date(), ...updateStamp(actorId) } }
   );
+  await fmsEvents.debitNote({ id: note._id, debitNoteNumber: note.debitNoteNumber, amount: note.amount }, "issued", actorId);
   return { ok: true };
 }
 
@@ -169,5 +171,6 @@ export async function cancelDebitNote(id: string, actorId: string): Promise<{ ok
   if (!note) return { ok: false, reason: "Debit note not found." };
   if (note.status !== "issued") return { ok: false, reason: "Only an issued debit note can be cancelled." };
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "cancelled", ...updateStamp(actorId) } });
+  await fmsEvents.debitNote({ id: note._id, debitNoteNumber: note.debitNoteNumber, amount: note.amount }, "cancelled", actorId);
   return { ok: true };
 }

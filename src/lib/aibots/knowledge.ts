@@ -1,3 +1,4 @@
+import { aibotsEvents } from "@/lib/notify/triggers/aibots";
 import "server-only";
 import { toFile } from "openai";
 import { getOpenAI } from "@/lib/openai";
@@ -261,6 +262,7 @@ export async function refreshProcessing(bot: BotDoc): Promise<void> {
         const status = statusFrom(vs.status);
         if (status !== "processing") {
           await col.updateOne({ _id: f._id }, { $set: { status, usageBytes: vs.usage_bytes ?? null, lastError: vs.last_error ? friendlyError(new Error(vs.last_error.message)) : null } });
+          await aibotsEvents.fileProcessed({ id: bot._id, name: bot.name }, { id: f._id, title: f.title }, status === "ready", vs.last_error?.message ?? null);
         }
       } catch (err) {
         if ((err as { status?: number }).status === 404) await col.updateOne({ _id: f._id }, { $set: { status: "failed", lastError: "No longer found in OpenAI — replace the file." } });

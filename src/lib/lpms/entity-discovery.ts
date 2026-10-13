@@ -3,6 +3,8 @@ import type { LpmsViewer } from '@/lib/lpms/types';
 import { currentCompanyId } from '@/lib/platform/tenancy/context';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { getCompany } from '@/lib/platform/tenancy/companies';
+import { getCurrentHubUser } from '@/lib/hub-auth';
 
 export interface EntityDefinition {
   key: string;
@@ -33,7 +35,7 @@ export interface PanelEntityAdapter {
   resolveField: (entityKey: string, recordId: string, fieldKey: string, companyId: string) => Promise<string | null>;
 }
 
-// Simulated workspace adapter
+// Workspace adapter: the company and the signed-in person
 const workspaceAdapter: PanelEntityAdapter = {
   panelKey: 'workspace',
   panelLabel: 'Workspace',
@@ -57,8 +59,21 @@ const workspaceAdapter: PanelEntityAdapter = {
     }
   ],
   fetchRecords: async () => [],
-  resolveField: async (entityKey, _recordId, fieldKey) => {
-    if (entityKey === 'workspace.company' && fieldKey === 'name') return 'Company Workspace';
+  resolveField: async (entityKey, _recordId, fieldKey, companyId) => {
+    if (entityKey === 'workspace.company') {
+      const company = await getCompany(companyId);
+      if (fieldKey === 'name') return company?.name ?? null;
+      if (fieldKey === 'legalName') return ((company as unknown as { legalName?: string } | null)?.legalName) || company?.name || null;
+    }
+    if (entityKey === 'workspace.user') {
+      const user = await getCurrentHubUser();
+      if (!user) return null;
+      if (fieldKey === 'email') return user.email;
+      if (fieldKey === 'name') {
+        const doc = await (await getDb()).collection('admin_users').findOne({ _id: new ObjectId(user.id) }, { projection: { name: 1 } });
+        return (doc as { name?: string } | null)?.name ?? null;
+      }
+    }
     return null;
   }
 };

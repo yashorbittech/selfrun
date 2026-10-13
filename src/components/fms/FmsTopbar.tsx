@@ -1,10 +1,11 @@
 "use client";
 
+import PanelBellLink from "@/components/platform/PanelBellLink";
 import { PanelHeading } from "@/components/platform/PanelsProvider";
 import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, Bell } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import FmsMobileSidebar from "@/components/fms/FmsMobileSidebar";
 import PanelSearch from "@/components/platform/PanelSearch";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
@@ -14,12 +15,13 @@ import type { FmsRole } from "@/lib/fms-roles";
 export default function FmsTopbar({
   roles,
   permissionOverrides,
+  unread = 0,
 }: {
   roles: FmsRole[];
   permissionOverrides?: Record<string, boolean>;
+  unread?: number;
 }) {
   const [aiOpen, setAiOpen] = useAskAiOpen();
-  const [bellOpen, setBellOpen] = useState(false);
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <FmsMobileSidebar roles={roles} permissionOverrides={permissionOverrides} />
@@ -38,14 +40,7 @@ export default function FmsTopbar({
         >
           <Sparkles className="size-4" />
         </button>
-        <Link
-          href="/fms/notifications"
-          title="Notifications"
-          aria-label="Notifications"
-          className="flex size-9 items-center justify-center rounded-full border border-border/60 bg-muted/30 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
-        >
-          <Bell className="size-4" />
-        </Link>
+        <PanelBellLink href="/fms/notifications" unread={unread} panel="fms" />
       </div>
       <AskAiDrawer
         open={aiOpen}

@@ -1,3 +1,4 @@
+import { tmsEvents } from "@/lib/notify/triggers/tms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -221,6 +222,7 @@ export async function createApplication(data: ApplicationWriteData, actorId: str
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await tmsEvents.applicationReceived({ id: doc._id, name: (doc as { name?: string }).name ?? "Applicant", programName: (doc as { programName?: string }).programName ?? null });
   return doc;
 }
 

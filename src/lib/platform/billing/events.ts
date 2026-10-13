@@ -1,3 +1,6 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
+import { runAsCompany } from "@/lib/platform/tenancy/context";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
@@ -98,6 +101,14 @@ export async function recordSubscriptionEvent(input: RecordSubscriptionEventInpu
       at: input.at ?? new Date(),
     };
     await (await collection()).insertOne(event);
+    try {
+      const plan = input.planId ? await getPlan(input.planId) : null;
+      const co = await db.collection<Company>(COMPANIES_COLLECTION).findOne({ _id: input.companyId }, { projection: { name: 1 } });
+      await platformEvents.subscription(co?.name ?? input.companyId, input.companyId, input.type, plan?.name ?? null);
+      await runAsCompany(input.companyId, () => workspaceEvents.billing(input.type, plan?.name ?? null));
+    } catch (err) {
+      console.error("[billing] could not notify about subscription event", err);
+    }
     return event;
   } catch (err) {
     if ((err as { code?: number })?.code !== 11000) console.error("[billing] recordSubscriptionEvent failed", err);

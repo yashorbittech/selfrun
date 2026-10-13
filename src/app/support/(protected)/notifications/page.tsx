@@ -1,34 +1,33 @@
 import { redirect } from "next/navigation";
 import GenericPanelNotificationsPage from "@/components/platform/panel/GenericPanelNotificationsPage";
 import { getCurrentHubUser } from "@/lib/hub-auth";
-import { listWorkspaceNotifications } from "@/lib/workspace/notifications";
-import { hubMarkAllReadAction, hubMarkReadAction } from "@/app/workspace/hub-actions";
+import { listPanelNotifications, markPanelRead } from "@/lib/notify";
 
 export const dynamic = "force-dynamic";
 
-/** Updates on this person's requests (SelfRun AI replies and status changes), from the same feed the Workspace bell reads. */
+/** Updates on this person's own requests (SelfRun AI replies and status changes). Each person sees only theirs. */
 export default async function SupportNotificationsPage() {
   const user = await getCurrentHubUser();
   if (!user) redirect("/workspace/login");
-  const items = (await listWorkspaceNotifications(user, 100)).filter((n) => n.url?.startsWith("/support"));
+  const items = await listPanelNotifications(user.id, "support", 100);
 
-  async function markRead(entries: { id: string; meta?: string }[]) {
+  async function markRead(entries: { id: string }[]) {
     "use server";
-    for (const e of entries) await hubMarkReadAction(e.id, e.meta);
+    const u = await getCurrentHubUser();
+    if (u) await markPanelRead(u.id, "support", entries.map((e) => e.id));
   }
   async function markAll() {
     "use server";
-    await hubMarkAllReadAction();
+    const u = await getCurrentHubUser();
+    if (u) await markPanelRead(u.id, "support");
   }
   return (
     <GenericPanelNotificationsPage
       panel="support"
-      live
       panelName="Help & Support"
       shortCode="HELP"
       description="Replies and status updates on your requests to SelfRun AI."
-      unreadEvent="hub:unread"
-      initialNotifications={items.map((n) => ({ id: n.id, meta: n.source, title: n.title, body: n.body ?? "", createdAt: new Date(n.createdAt).toISOString(), read: n.read, link: n.url ?? undefined }))}
+      initialNotifications={items.map((n) => ({ id: n.id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined, priority: n.priority === "high" ? "high" : "normal" }))}
       onMarkRead={markRead}
       onMarkAllRead={markAll}
     />

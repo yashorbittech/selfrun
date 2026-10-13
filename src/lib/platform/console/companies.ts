@@ -1,3 +1,4 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
 import "server-only";
 import type { Filter } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
@@ -180,6 +181,8 @@ export async function setCompanyStatus(id: string, status: CompanyStatus, actorI
   await companies.updateOne({ _id: id, isPlatformOwner: { $ne: true } }, { $set: { status, updatedAt: now, statusChangedAt: now, statusChangedBy: actorId } });
   // Other server instances pick the change up when their routing cache expires (about a minute).
   forgetCompanyRouting();
+  const named = await companies.findOne({ _id: id }, { projection: { name: 1 } });
+  await platformEvents.companyStatus(named?.name ?? id, id, status, actorId);
   return { ok: true };
 }
 

@@ -4,7 +4,11 @@ import { getSettings } from "@/lib/seo-panel/settings";
 import { runCrawl, latestCompletedRun, CrawlBusyError } from "@/lib/seo-panel/crawler";
 import { syncSearchConsole } from "@/lib/seo-panel/integrations/gsc";
 import { syncAnalytics } from "@/lib/seo-panel/integrations/ga4";
+import { movers } from "@/lib/seo-panel/rankings";
+import { allActiveKeywords } from "@/lib/seo-panel/keywords";
 import { verifyBacklinks } from "@/lib/seo-panel/backlinks";
+import { audienceUserIds } from "@/lib/notify/audience";
+import { notifySeoUsers } from "@/lib/seo-panel/notifications";
 import { forEachCompany } from "@/lib/platform/tenancy/context";
 
 export const maxDuration = 300;
@@ -47,6 +51,10 @@ async function runSeoHousekeeping(): Promise<Record<string, unknown>> {
     await attempt("audit", async () => {
       try {
         const run = await runCrawl({ trigger: "schedule", actorId: null, actorEmail: null });
+        const team = await audienceUserIds("seo", "admin");
+        await notifySeoUsers(team, run.status === "completed"
+          ? { type: "seo_audit_completed", title: `Scheduled audit finished — score ${run.scores?.overall ?? "—"}`, body: `${run.pagesCrawled} pages checked.`, link: "/seo/audits", dedupeKey: `seo-audit:${run._id}` }
+          : { type: "seo_audit_failed", title: "Scheduled website audit did not finish", body: "Open SEO → Audits to see why.", link: "/seo/audits", dedupeKey: `seo-audit:${run._id}` });
         return { runId: run._id, status: run.status, pages: run.pagesCrawled };
       } catch (err) {
         if (err instanceof CrawlBusyError) return { skipped: "audit already running" };
@@ -55,5 +63,13 @@ async function runSeoHousekeeping(): Promise<Record<string, unknown>> {
     });
   }
   if (s.schedule.verifyBacklinks && new Date().getDay() === 1) await attempt("backlinks", () => verifyBacklinks());
+  // Keywords that lost 5+ places over the last week → tell the SEO team once a day.
+  await attempt("rankingDrops", async () => {
+    const { dropped } = await movers(await allActiveKeywords(), 7);
+    const big = dropped.filter((m) => m.change <= -5).slice(0, 5);
+    if (big.length === 0) return { dropped: 0 };
+    await notifySeoUsers(await audienceUserIds("seo", "admin"), { type: "seo_ranking_drop", title: `${big.length} keyword${big.length === 1 ? "" : "s"} dropped 5+ places this week`, body: big.map((m) => `${m.keyword.keyword}: ${m.from ?? "–"} → ${m.to ?? "–"}`).join("; ").slice(0, 200), link: "/seo/keywords", dedupeKey: `seo-drop:${new Date().toISOString().slice(0, 10)}` });
+    return { dropped: big.length };
+  });
   return out;
 }

@@ -4,6 +4,7 @@ import { newId } from "@/lib/hrms/db";
 import type { CurrentHrmsUser } from "@/lib/hrms-auth";
 import { hasStaffRole } from "@/lib/hrms-roles";
 import { todayDateString } from "@/lib/hrms/time";
+import { signalNew } from "@/lib/notify/signals";
 import { queuePush, userIdsWithRoles } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 
@@ -26,7 +27,11 @@ export type NotificationType =
   | "document_expiring"
   | "birthday_today"
   | "probation_ending"
-  | "offer_status";
+  | "offer_status"
+  | "payroll_ready"
+  | "salary_paid"
+  | "payout_failed"
+  | "leave_cancelled";
 
 export interface HrmsNotification {
   _id: string;
@@ -100,6 +105,7 @@ export async function notify(input: NotifyInput): Promise<void> {
     });
     const recipients = input.recipientUserId ? [input.recipientUserId] : input.audience === "staff" ? await userIdsWithRoles(["super_admin", "hr", "manager"]) : [];
     await queuePush("staff", recipients, { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
+    await signalNew("hrms", recipients, { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
   } catch {
     // A duplicate-key race on dedupeKey, or any other failure — non-fatal.
   }

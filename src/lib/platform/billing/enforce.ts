@@ -1,3 +1,4 @@
+import { checkAiTokenUsage, checkStorageUsage } from "@/lib/notify/triggers/usage";
 import "server-only";
 import { notFound, redirect, unstable_rethrow } from "next/navigation";
 import { getDb } from "@/lib/mongodb";
@@ -159,7 +160,10 @@ export async function meterAiTokens(tokens: number, companyId?: string | null): 
   try {
     const id = companyId === undefined ? await currentCompanyIdOrNull() : companyId;
     if (!id) return;
-    await runAsCompany(id, () => recordUsage("ai_tokens", tokens));
+    await runAsCompany(id, async () => {
+      await recordUsage("ai_tokens", tokens);
+      await checkAiTokenUsage(tokens);
+    });
   } catch (err) {
     console.error("[billing] AI usage metering failed", err);
   }
@@ -199,11 +203,13 @@ export async function meterStorage(deltaBytes: number): Promise<void> {
   if (!Number.isFinite(deltaBytes) || deltaBytes === 0) return;
   try {
     if (!(await currentCompanyIdOrNull())) return;
+    const beforeBytes = await storageUsedBytes();
     await (await getDb()).collection<{ _id: string }>("billing_usage").updateOne(
       { _id: STORAGE_USAGE_ID },
       [{ $set: { metric: STORAGE_USAGE_ID, total: { $max: [0, { $add: [{ $ifNull: ["$total", 0] }, Math.round(deltaBytes)] }] }, updatedAt: "$$NOW" } }],
       { upsert: true },
     );
+    if (deltaBytes > 0) await checkStorageUsage(beforeBytes, beforeBytes + deltaBytes);
   } catch (err) {
     console.error("[billing] storage metering failed", err);
   }

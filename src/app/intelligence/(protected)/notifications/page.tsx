@@ -1,12 +1,7 @@
-import GenericPanelNotificationsPage from "@/components/platform/panel/GenericPanelNotificationsPage";
+import UnifiedNotificationsPage from "@/components/platform/panel/UnifiedNotificationsPage";
+
+export const dynamic = "force-dynamic";
 
 export default function IntelligenceNotificationsPage() {
-  return (
-    <GenericPanelNotificationsPage
-      panel="intelligence"
-      panelName="Business Intelligence"
-      shortCode="INTEL"
-      description="Track automated metric anomalies, executive report generation & cross-module data insights."
-    />
-  );
+  return <UnifiedNotificationsPage panel="intelligence" panelName="AI Intelligence" shortCode="AI" description="Usage and plan alerts for AI analysis." />;
 }

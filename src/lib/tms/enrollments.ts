@@ -1,3 +1,4 @@
+import { tmsEvents } from "@/lib/notify/triggers/tms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/tms/db";
@@ -148,6 +149,7 @@ export async function enrollStudent(
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await tmsEvents.enrolled(doc.studentId, String((batch as { name?: string }).name ?? "your batch"), doc._id);
   return { ok: true, enrollment: doc };
 }
 

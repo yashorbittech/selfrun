@@ -1,3 +1,4 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import type { Collection } from "mongodb";
@@ -455,6 +456,7 @@ export async function issueSaasInvoice(input: IssueSaasInvoiceInput): Promise<Sa
     details: { number, total: numbered.total, status: numbered.status, paymentRef: numbered.paymentRef },
   });
   if (company) await emailInvoice(numbered, company.slug).catch((err) => console.error("[saas-invoices] email failed", err));
+  await platformEvents.invoice("issued", numbered.number ?? null, (company as { name?: string } | null)?.name ?? numbered.companyId, Number((numbered as { total?: number }).total ?? 0), numbered._id);
   return ref(numbered);
 }
 

@@ -22,6 +22,7 @@ export default async function PlatformNotificationsPage() {
 
   return (
     <GenericPanelNotificationsPage
+      panel="platform"
       live
       panelName="Platform Administration"
       shortCode="ADMIN"

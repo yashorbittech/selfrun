@@ -1,3 +1,4 @@
+import { hrmsEvents } from "@/lib/notify/triggers/hrms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { emitEvent } from "@/lib/platform/events";
@@ -420,6 +421,7 @@ export async function cancelLeaveRequest(id: string, actorId: string): Promise<{
     await clearLeaveAttendance(req._id);
   }
   await collection.updateOne({ _id: id }, { $set: { status: "cancelled", ...updateStamp(actorId) } });
+  if (req.status === "approved") await hrmsEvents.leaveCancelled({ id: req._id, employeeId: req.employeeId, startDate: req.startDate, endDate: req.endDate, days: req.days });
   return { ok: true };
 }
 

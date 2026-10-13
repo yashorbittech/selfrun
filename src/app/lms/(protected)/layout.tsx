@@ -1,59 +1,23 @@
+import { panelUnread } from "@/lib/notify";
+import { runLmsSweep } from "@/lib/notify/sweeps";
 import { redirect } from "next/navigation";
 import { getCurrentLmsUser } from "@/lib/lms-auth";
-import { getStaleLeadsSummary, getRecentLeadsSummary, type Lead } from "@/lib/leads";
-import { getStaleApplicationsSummary, getRecentApplicationsSummary, type CareerApplication } from "@/lib/career-applications";
 import LmsSidebarShell from "@/components/lms/LmsSidebarShell";
 import LmsTopbar from "@/components/lms/LmsTopbar";
 import { SidebarCollapseProvider } from "@/components/lms/SidebarCollapseContext";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { SerializedLead, SerializedCareerApplication } from "@/components/lms/types";
 import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
-
-function serializeLead(lead: Lead): SerializedLead {
-  return {
-    ...lead,
-    _id: String(lead._id),
-    createdAt: new Date(lead.createdAt).toISOString(),
-    updatedAt: new Date(lead.updatedAt).toISOString(),
-  };
-}
-
-function serializeApplication(application: CareerApplication): SerializedCareerApplication {
-  return {
-    _id: String(application._id),
-    positionSlug: application.positionSlug,
-    positionTitle: application.positionTitle,
-    name: application.name,
-    email: application.email,
-    phone: application.phone,
-    coverNote: application.coverNote,
-    status: application.status,
-    notes: application.notes,
-    resume: application.resume,
-    source: application.source,
-    createdAt: new Date(application.createdAt).toISOString(),
-    updatedAt: new Date(application.updatedAt).toISOString(),
-  };
-}
 
 export default async function ProtectedLmsLayout({ children }: { children: React.ReactNode }) {
   await requireModule("lms");
   const lmsUser = await getCurrentLmsUser();
   if (!lmsUser) redirect("/lms/login");
 
-  const [staleLeadsSummary, staleApplicationsSummary, recentLeadsSummary, recentApplicationsSummary] = await Promise.all([
-    getStaleLeadsSummary(),
-    getStaleApplicationsSummary(),
-    getRecentLeadsSummary(),
-    getRecentApplicationsSummary(),
-  ]);
-
-  const staleLeads = staleLeadsSummary.items.map(serializeLead);
-  const staleApplications = staleApplicationsSummary.items.map(serializeApplication);
-  const recentLeads = recentLeadsSummary.items.map(serializeLead);
-  const recentApplications = recentApplicationsSummary.items.map(serializeApplication);
+  // Time-based alerts (stale leads / applications) become real notifications once a day; the bell counts what is unread for this person.
+  await runLmsSweep().catch(() => {});
+  const unread = await panelUnread(lmsUser.id, "lms");
 
   return (
     <TooltipProvider delay={200}>
@@ -81,16 +45,7 @@ export default async function ProtectedLmsLayout({ children }: { children: React
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-              <LmsTopbar
-                roles={lmsUser.roles}
-                userEmail={lmsUser.email}
-                staleLeads={staleLeads}
-                staleLeadsCount={staleLeadsSummary.count}
-                staleApplications={staleApplications}
-                staleApplicationsCount={staleApplicationsSummary.count}
-                recentLeads={recentLeads}
-                recentApplications={recentApplications}
-              />
+              <LmsTopbar roles={lmsUser.roles} userEmail={lmsUser.email} unread={unread} />
             </div>
             {/* The fixed .lms-ambient layer above is positioned to this
                 whole shell (not to main's scroll content), so it stays put

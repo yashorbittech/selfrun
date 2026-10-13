@@ -1,4 +1,5 @@
 import "server-only";
+import { detectLanguage, languageBlock, scopeBlock, type Lang } from "@/lib/ai/policy";
 import type OpenAI from "openai";
 import { getOpenAI, isUnsupportedParamError } from "@/lib/openai";
 import { getChatbotConfig, ensureVectorStore, type ChatbotConfig } from "@/lib/chatbot-config";
@@ -29,17 +30,19 @@ export interface PreparedAnswer {
   config: ChatbotConfig;
   vectorStoreId: string;
   input: ResponseInputItem[];
+  lang: Lang;
 }
 
 export async function prepareAnswer(
   history: ChatMessageDoc[],
   newUserText: string
 ): Promise<PreparedAnswer> {
+  const lang = detectLanguage([...history.filter((m) => m.role === "user").map((m) => m.content), newUserText]);
   const config = await getChatbotConfig();
   const vectorStoreId = await ensureVectorStore();
   const limit = Math.max(0, config.contextMessageLimit);
   const trimmed = limit > 0 ? history.slice(-limit) : [];
-  return { config, vectorStoreId, input: buildResponsesInput(trimmed, newUserText) };
+  return { config, vectorStoreId, input: buildResponsesInput(trimmed, newUserText), lang };
 }
 
 /**
@@ -51,11 +54,11 @@ export async function streamAnswer(
   prepared: PreparedAnswer
 ): Promise<AsyncIterable<OpenAI.Responses.ResponseStreamEvent>> {
   const openai = await getOpenAI();
-  const { config, vectorStoreId, input } = prepared;
+  const { config, vectorStoreId, input, lang } = prepared;
 
   const base: OpenAI.Responses.ResponseCreateParamsStreaming = {
     model: config.model,
-    instructions: config.systemPrompt,
+    instructions: `${config.systemPrompt}\n\n${scopeBlock("website")}\n- Answer only from the knowledge-base search results. If they do not contain the answer, say you do not have that information and suggest contacting the company; never guess prices, dates, policies or facts.\n\n${languageBlock(lang)}`,
     input,
     max_output_tokens: config.maxOutputTokens,
     store: false,

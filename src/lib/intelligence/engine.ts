@@ -7,6 +7,7 @@ import type { CatalogView } from "@/lib/intelligence/catalog/types";
 import { buildCatalogView } from "@/lib/intelligence/catalog/view";
 import { DESCRIBE_ENTITY_PARAMETERS, RUN_QUERY_PARAMETERS } from "@/lib/intelligence/query/plan";
 import { resultForModel, runPlan, type QueryResult } from "@/lib/intelligence/query/execute";
+import { checkScope, detectLanguage, languageBlock, refusalText, say, scopeBlock, type Lang } from "@/lib/ai/policy";
 import { describeEntityText, systemPrompt } from "@/lib/intelligence/prompt";
 import { FINAL_ANSWER_PARAMETERS, blocksToText, resolveBlocks, sanitizeMarkdown } from "@/lib/intelligence/answer";
 import type { Block, StoredQuery } from "@/lib/intelligence/blocks";
@@ -116,6 +117,10 @@ const stored = (r: QueryResult): StoredQuery => ({
 export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
   const status = input.onStatus ?? (() => {});
   status("Checking permissions…");
+  const lang = detectLanguage([...input.history.filter((h) => h.role === "user").map((h) => h.text), input.question]);
+  if (!(await checkScope({ text: input.question, previousAssistant: [...input.history].reverse().find((h) => h.role === "assistant")?.text, kind: "workspace" }))) {
+    return { text: refusalText(lang, "workspace"), blocks: [{ type: "text", markdown: refusalText(lang, "workspace") }], queries: [], tokens: 0, entities: [], rows: 0, outcome: "refused", error: null, notes: ["out of scope"] };
+  }
   const view = input.view ?? (await buildCatalogView(input.user));
   const openai = await getOpenAI();
 
@@ -129,7 +134,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
 
   const deadline = Date.now() + TURN_DEADLINE_MS;
   const modelInput: unknown[] = [...input.history.map((h) => ({ role: h.role, content: h.text })), { role: "user", content: input.question }];
-  const instructions = systemPrompt(view);
+  const instructions = `${systemPrompt(view)}\n\n${scopeBlock("workspace")}\n\n${languageBlock(lang)}`;
 
   const finish = (blocks: Block[], notes: string[], error: string | null = null): TurnOutput => {
     const rows = [...results.values()].reduce((n, r) => n + r.rowCount, 0);
@@ -148,7 +153,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     if (input.signal?.aborted) throw new Error("stopped");
-    if (Date.now() > deadline) throw new TurnError(TOO_SLOW);
+    if (Date.now() > deadline) throw new TurnError(say("analystSlow", lang));
     const forceFinal = round === MAX_ROUNDS - 1 || rejections >= MAX_REJECTIONS || queryCount >= MAX_QUERIES + 1;
     if (round > 0) status(forceFinal ? "Writing the answer…" : "Analysing the results…");
     const res = await callModel(
@@ -171,7 +176,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
     if (calls.length === 0) {
       // Plain text without final_answer: accept it as a text-only answer.
       const text = sanitizeMarkdown(textOf(output));
-      if (!text) return finish([{ type: "text", markdown: "I couldn't put together an answer to that. Please try rephrasing the question." }], ["empty reply"]);
+      if (!text) return finish([{ type: "text", markdown: say("analystNoAnswer", lang) }], ["empty reply"]);
       return finish([{ type: "text", markdown: text }], ["plain text reply"]);
     }
 
@@ -183,7 +188,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
       if (call.name === "final_answer") {
         status("Writing the answer…");
         const { blocks, notes } = parsed.ok ? resolveBlocks(parsed.value, results) : { blocks: [], notes: ["unparseable final_answer"] };
-        if (blocks.length === 0) return finish([{ type: "text", markdown: "I couldn't put together an answer to that. Please try rephrasing the question." }], notes);
+        if (blocks.length === 0) return finish([{ type: "text", markdown: say("analystNoAnswer", lang) }], notes);
         return finish(blocks, notes);
       }
 
@@ -243,18 +248,17 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
       reply({ error: `Unknown tool "${call.name}". Use run_query, describe_entity or final_answer.` });
     }
   }
-  return finish([{ type: "text", markdown: "I couldn't complete that analysis. Please try a simpler question." }], ["round limit"]);
+  return finish([{ type: "text", markdown: say("analystIncomplete", lang) }], ["round limit"]);
 }
 
-const TOO_SLOW = "This question is taking too long to answer. Try a narrower question, for example a shorter date range.";
 
 /** A short, safe message for an error thrown while answering (billing limits keep their own friendly text). */
-export function friendlyTurnError(err: unknown): string {
+export function friendlyTurnError(err: unknown, lang: Lang = "english"): string {
   if (isBillingLimitError(err)) return err.message;
   if (err instanceof TurnError) return err.message;
   const name = (err as { name?: string } | null)?.name ?? "";
-  if (name === "TimeoutError" || name === "APIConnectionTimeoutError" || name === "APIUserAbortError") return TOO_SLOW;
+  if (name === "TimeoutError" || name === "APIConnectionTimeoutError" || name === "APIUserAbortError") return say("analystSlow", lang);
   const msg = err instanceof Error ? err.message : "";
-  if (/OpenAI isn't connected/i.test(msg)) return "The AI assistant isn't set up for this workspace yet. Add your OpenAI key in Settings → Integrations.";
-  return "The analyst is unavailable right now. Please try again in a moment.";
+  if (/OpenAI isn't connected/i.test(msg)) return say("analystNotSetUp", lang);
+  return say("analystDown", lang);
 }

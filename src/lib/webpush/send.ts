@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { afterForCompany, currentCompanyIdOrNull, runAsCompany } from "@/lib/platform/tenancy/context";
@@ -104,6 +105,7 @@ export async function sendBroadcast(input: BroadcastInput): Promise<BroadcastRes
   const status: Broadcast["status"] = sent === 0 && failed > 0 ? "failed" : timedOut ? "partial" : "sent";
   const note = timedOut ? "Stopped early to stay within the time limit; some visitors were not reached." : null;
   await broadcasts.updateOne({ _id: base._id }, { $set: { status, sent, failed, note } });
+  await cmsEvents.broadcastDone({ id: base._id, title, status, sent, targeted, failed }, input.createdBy ?? null);
   return { ok: true, broadcast: { ...base, targeted, status, sent, failed, note } };
 }
 

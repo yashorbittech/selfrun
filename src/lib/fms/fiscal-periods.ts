@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/fms/db";
@@ -193,6 +194,7 @@ export async function closePeriod(
     entityLabel: period.name,
     summary: `closed — net ${pl.netProfit >= 0 ? "profit" : "loss"} ${Math.abs(pl.netProfit)} moved to Retained Earnings`,
   });
+  await fmsEvents.periodChanged({ id, label: period.name }, "closed", actorId);
   return { ok: true, period: updated };
 }
 
@@ -225,5 +227,6 @@ export async function reopenPeriod(
     entityLabel: period.name,
     summary: "reopened",
   });
+  await fmsEvents.periodChanged({ id, label: period.name }, "reopened", actorId);
   return { ok: true, period: updated };
 }

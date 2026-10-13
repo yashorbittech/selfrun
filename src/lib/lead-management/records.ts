@@ -1,3 +1,4 @@
+import { lmsEvents } from "@/lib/notify/triggers/lms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { emitEvent } from "@/lib/platform/events";
@@ -97,6 +98,7 @@ export async function createLeadRecord(input: CreateLeadInput): Promise<LeadReco
   };
   await c.insertOne(doc);
   await emitEvent("lead.created", { entity: { type: "lead", id: doc._id, label: doc.name, url: `/lms/leads/${doc._id}` }, actorId: input.actorId, data: { name: doc.name, email: doc.email, phone: doc.phone, code: doc.code, leadType: doc.type, leadSource: doc.source } });
+  await lmsEvents.leadCreated({ id: doc._id, code: doc.code, name: doc.name, type: doc.type, ownerStaffId: doc.ownerStaffId, source: doc.source, message: doc.message }, input.actorId ?? null);
   return doc;
 }
 
@@ -194,6 +196,7 @@ export async function advanceLeadStage(
     actorId,
     visibleToLead: true,
   });
+  await lmsEvents.stageChanged({ id: leadId, code: lead.code, name: lead.name, type: lead.type, ownerStaffId: lead.ownerStaffId }, meta.label, meta.terminal ?? null, actorId);
   await notifyPortalUser({
     recipientUserId: lead.externalUserId,
     type: "status_update",
@@ -271,6 +274,8 @@ export async function assignLeadOwner(leadId: string, ownerStaffId: string | nul
     actorId,
     visibleToLead: false,
   });
+  const assigned = await getLeadRecord(leadId);
+  if (assigned) await lmsEvents.leadAssigned({ id: assigned._id, code: assigned.code, name: assigned.name, type: assigned.type }, ownerStaffId, actorId);
 }
 
 /** A portal user replied in the Communication Center — flags it for staff attention on the leads list. */

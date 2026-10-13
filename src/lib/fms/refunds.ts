@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -147,6 +148,7 @@ export async function requestRefund(
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await fmsEvents.refundRequested({ id: doc._id, refundNumber: doc.refundNumber, customerName: doc.customerName, amount: doc.amount, currency: "INR" }, actorId);
   return { ok: true, refund: doc };
 }
 
@@ -199,5 +201,6 @@ export async function changeRefundStatus(
   }
 
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { ...patch, ...updateStamp(actorId) } });
+  await fmsEvents.refundStatus({ id: existing._id, refundNumber: existing.refundNumber, amount: existing.amount, currency: "INR" }, toStatus, actorId);
   return { ok: true };
 }

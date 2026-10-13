@@ -9,26 +9,8 @@ import PanelSearch from "@/components/platform/PanelSearch";
 import NotificationsBell from "@/components/lms/NotificationsBell";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
-import type { SerializedLead, SerializedCareerApplication } from "@/components/lms/types";
 
-export default function LmsTopbar({
-  roles,
-  staleLeads,
-  staleLeadsCount = 0,
-  staleApplications,
-  staleApplicationsCount = 0,
-  recentLeads,
-  recentApplications,
-}: {
-  roles: string[];
-  userEmail: string;
-  staleLeads: SerializedLead[];
-  staleLeadsCount: number;
-  staleApplications: SerializedCareerApplication[];
-  staleApplicationsCount: number;
-  recentLeads: SerializedLead[];
-  recentApplications: SerializedCareerApplication[];
-}) {
+export default function LmsTopbar({ roles, unread = 0 }: { roles: string[]; userEmail: string; unread?: number }) {
   const [aiOpen, setAiOpen] = useAskAiOpen();
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
@@ -48,14 +30,7 @@ export default function LmsTopbar({
         >
           <Sparkles className="size-4" />
         </button>
-        <NotificationsBell
-          staleLeads={staleLeads}
-          staleLeadsCount={staleLeadsCount}
-          staleApplications={staleApplications}
-          staleApplicationsCount={staleApplicationsCount}
-          recentLeads={recentLeads}
-          recentApplications={recentApplications}
-        />
+        <NotificationsBell unread={unread} />
       </div>
       <AskAiDrawer
         open={aiOpen}

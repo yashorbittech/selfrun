@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { countForCompany } from "@/lib/support/requests";
 import { getCompanyCaller } from "@/lib/support/caller";
-import { listWorkspaceNotifications } from "@/lib/workspace/notifications";
+import { panelUnread } from "@/lib/notify";
 import SupportSidebarShell from "@/components/support/SupportSidebarShell";
 import SupportTopbar from "@/components/support/SupportTopbar";
 import PanelBackBar from "@/components/hub/PanelBackBar";
@@ -27,8 +27,7 @@ export default async function ProtectedSupportLayout({ children }: { children: R
   if (!caller) redirect("/workspace/login");
   if (!(await isPanelAvailable(caller.companyId, "support"))) notFound();
 
-  const [counts, notifications] = await Promise.all([countForCompany(caller.companyId), listWorkspaceNotifications(user, 100).catch(() => [])]);
-  const unread = notifications.filter((n) => !n.read && n.url?.startsWith("/support")).length;
+  const [counts, unread] = await Promise.all([countForCompany(caller.companyId), panelUnread(user.id, "support").catch(() => 0)]);
 
   return (
     <TooltipProvider delay={200}>

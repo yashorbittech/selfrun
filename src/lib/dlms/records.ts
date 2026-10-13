@@ -1,3 +1,4 @@
+import { dlmsEvents } from "@/lib/notify/triggers/dlms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, createStamp, updateStamp, newId, escapeRegex, cleanIsoDate, addDaysIso, todayIso, str, strOrNull, type Stamps } from "@/lib/dlms/db";
@@ -466,6 +467,7 @@ export async function createCredential(viewer: DlmsViewer, input: Input): Promis
   };
   await (await getCollection<CredentialDoc>("credential")).insertOne(doc);
   await recordAudit({ actorId: viewer.userId, actorEmail: viewer.email, action: "create", entity: "credential", entityId: id, entityLabel: label(doc), scope: doc.scope, clientId: doc.clientId, summary: `Created credential "${doc.name}"${password ? " (password stored)" : ""}` });
+  await dlmsEvents.added("credential", id, doc.name, viewer.userId);
   return id;
 }
 
@@ -530,6 +532,7 @@ export async function revealCredential(viewer: DlmsViewer, id: string, purpose: 
     clientId: doc.clientId,
     summary: purpose === "copy" ? `Copied the password of "${doc.name}"` : `Revealed the password of "${doc.name}"`,
   });
+  await dlmsEvents.revealed(id, doc.name, purpose, viewer.userId, viewer.email);
   return plain;
 }
 
@@ -559,6 +562,7 @@ export async function createDocument(viewer: DlmsViewer, input: Input, file: Fil
   };
   await (await getCollection<DocumentDoc>("document")).insertOne(doc);
   await recordAudit({ actorId: viewer.userId, actorEmail: viewer.email, action: "upload", entity: "document", entityId: id, entityLabel: label(doc), scope: doc.scope, clientId: doc.clientId, summary: `Uploaded "${doc.name}" (${saved.stored.filename})` });
+  await dlmsEvents.added("document", id, doc.name, viewer.userId);
   return id;
 }
 
@@ -669,6 +673,7 @@ export async function setRecordStatus(viewer: DlmsViewer, type: RecordType, id: 
   if (!canWriteScope(viewer, existing.scope, existing.clientId)) throw new ForbiddenError();
   await (await getCollection<Base>(type)).updateOne({ _id: id }, { $set: { status, ...updateStamp(viewer.userId) } });
   await recordAudit({ actorId: viewer.userId, actorEmail: viewer.email, action: status === "archived" ? "archive" : "restore", entity: AUDIT_ENTITY[type], entityId: id, entityLabel: label(existing), scope: existing.scope, clientId: existing.clientId, summary: `${status === "archived" ? "Archived" : "Restored"} "${existing.name}"` });
+  await dlmsEvents.archived(type, id, existing.name, status === "archived", viewer.userId);
 }
 
 /** Soft delete: the row (and any stored file) is kept but disappears everywhere, and the deletion is logged. */
@@ -682,4 +687,5 @@ export async function deleteRecord(viewer: DlmsViewer, type: RecordType, id: str
     await (await getCollection<LinkDoc>("link")).updateMany({ credentialId: id }, { $set: { credentialId: null } });
   }
   await recordAudit({ actorId: viewer.userId, actorEmail: viewer.email, action: "delete", entity: AUDIT_ENTITY[type], entityId: id, entityLabel: label(existing), scope: existing.scope, clientId: existing.clientId, summary: `Deleted "${existing.name}"` });
+  await dlmsEvents.deleted(type, id, existing.name, viewer.userId, viewer.email);
 }

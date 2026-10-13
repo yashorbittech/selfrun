@@ -1,3 +1,4 @@
+import { tmsEvents } from "@/lib/notify/triggers/tms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import {
@@ -416,6 +417,7 @@ export async function addInstallment(
     /* non-blocking */
   }
 
+  await tmsEvents.paymentRecorded(plan.studentId, input.amount, invoiceNumber, plan.currency || "INR");
   return { ok: true, invoiceNumber };
 }
 

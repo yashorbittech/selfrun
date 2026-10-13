@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/fms/db";
@@ -197,5 +198,6 @@ export async function recordTransfer(
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await fmsEvents.fundTransfer({ transferNumber: doc.transferNumber, amount: doc.amount, currency: doc.currency }, actorId);
   return { ok: true, transfer: doc };
 }

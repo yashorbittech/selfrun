@@ -128,3 +128,23 @@ export async function overdueInvoices(): Promise<{ count: number; amount: number
   }
   return { count, amount };
 }
+
+/** Open invoices whose due date falls between today and `days` days ahead (still unpaid). */
+export async function invoicesDueWithin(days: number): Promise<{ count: number; amount: number }> {
+  const invoices = await openInvoices();
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start.getTime() + days * 86_400_000);
+  let count = 0;
+  let amount = 0;
+  for (const inv of invoices) {
+    const balance = balanceOf(inv);
+    if (balance <= 0.01) continue;
+    const due = new Date(`${inv.dueDate}T00:00:00`).getTime();
+    if (due >= start.getTime() && due <= end.getTime()) {
+      count += 1;
+      amount = round2(amount + balance);
+    }
+  }
+  return { count, amount };
+}

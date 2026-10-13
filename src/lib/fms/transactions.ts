@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -499,6 +500,9 @@ export async function changeTransactionStatus(
       entityLabel: updated.transactionNumber,
       summary: `status: ${existing.status} → ${toStatus}`,
     });
+    const tx = { id, transactionNumber: updated.transactionNumber, amount: updated.amount, currency: updated.currency, createdBy: existing.createdBy, type: String(updated.type), description: updated.description };
+    if (toStatus === "pending_approval") await fmsEvents.transactionNeedsApproval(tx, actorId);
+    else if (toStatus === "approved" || toStatus === "rejected" || toStatus === "failed" || toStatus === "cancelled") await fmsEvents.transactionDecided(tx, toStatus, actorId);
   }
   return updated;
 }

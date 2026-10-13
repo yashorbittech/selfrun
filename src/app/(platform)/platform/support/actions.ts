@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { checkPlatformPermission } from "@/lib/platform/console/access";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
-import { notify } from "@/lib/platform/notifications";
+import { notifyUsers } from "@/lib/notify";
 import { analyzeRequest } from "@/lib/support/ai";
 import { deleteArticle, saveArticle, type ArticleInput } from "@/lib/support/articles";
 import { getSupportConfig, saveSupportConfig, stateOf, statusOf } from "@/lib/support/config";
@@ -16,7 +16,7 @@ type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 /** Tells the person who sent the request, inside their own company's notifications. Never breaks the staff action. */
 async function notifyRequester(req: RequestView, title: string, body: string) {
   try {
-    await runAsCompany(req.companyId, () => notify({ to: { userId: req.createdBy.id }, title, body, url: `/support/requests/${req._id}` }));
+    await runAsCompany(req.companyId, () => notifyUsers("support", [req.createdBy.id], { type: "support_update", title, body, link: `/support/requests/${req._id}`, priority: "normal" }));
   } catch (err) {
     console.error("[support] requester notification failed", err);
   }

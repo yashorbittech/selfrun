@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { queueBroadcast } from "@/lib/webpush/send";
 import { companyCache } from "@/lib/platform/tenancy/cache";
@@ -192,6 +193,7 @@ export async function publishRecord(key: CollectionKey, slug: string, actorId: s
   expireSiteCache();
   // A blog post going live for the first time: tell the visitors who subscribed to news (no-op when website push is off).
   if (key === "blog" && !doc.live) await queueBroadcast({ topic: "updates", title: `New: ${def.titleOf(parsed)}`, body: "A new post was just published. Tap to read it.", url: def.pathOf ? def.pathOf(slug) : `/blog/${slug}`, trigger: "post" });
+  await cmsEvents.recordPublished(def.singular, def.titleOf(parsed), slug, key, actorId);
   return { ok: true, pageCreated };
 }
 

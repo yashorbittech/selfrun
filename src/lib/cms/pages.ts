@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, expireSiteCache, newId, createStamp, updateStamp, nextVersion, type Stamps } from "@/lib/cms/db";
@@ -252,6 +253,7 @@ export async function publishPage(
 
   expireSiteCache();
   revalidatePath(doc.path === "/" ? "/" : doc.path);
+  await cmsEvents.pagePublished({ id, path: doc.path, version }, actorId);
   return { ok: true, version };
 }
 
@@ -284,7 +286,7 @@ export async function restoreVersionToDraft(id: string, version: string, actorId
   return saveDraftContent(id, { sections: v.sections, ...(v.seo !== undefined ? { seo: v.seo, jsonLd: v.jsonLd ?? [], frame: v.frame ?? "default" } : {}) }, actorId);
 }
 
-export async function deletePage(id: string): Promise<Result> {
+export async function deletePage(id: string, actorId = ""): Promise<Result> {
   const { pages } = await cols();
   const doc = await pages.findOne({ _id: id });
   if (!doc) return { ok: false, error: "Page not found." };
@@ -293,6 +295,7 @@ export async function deletePage(id: string): Promise<Result> {
     expireSiteCache();
     revalidatePath(doc.path === "/" ? "/" : doc.path);
   }
+  await cmsEvents.pageDeleted({ path: doc.path }, actorId);
   return { ok: true };
 }
 

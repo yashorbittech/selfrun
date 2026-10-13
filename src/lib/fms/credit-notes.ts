@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -160,6 +161,7 @@ export async function issueCreditNote(id: string, actorId: string): Promise<{ ok
     { _id: id, ...notDeleted },
     { $set: { status: "issued", issuedAt: new Date(), ...updateStamp(actorId) } }
   );
+  await fmsEvents.creditNote({ id: note._id, creditNoteNumber: note.creditNoteNumber, amount: note.amount, currency: invoice.currency, invoiceNumber: invoice.invoiceNumber }, "issued", actorId);
   return { ok: true };
 }
 
@@ -171,5 +173,6 @@ export async function cancelCreditNote(id: string, actorId: string): Promise<{ o
 
   await applyCreditToInvoice(note.invoiceId, -note.amount, actorId);
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "cancelled", ...updateStamp(actorId) } });
+  await fmsEvents.creditNote({ id: note._id, creditNoteNumber: note.creditNoteNumber, amount: note.amount }, "cancelled", actorId);
   return { ok: true };
 }

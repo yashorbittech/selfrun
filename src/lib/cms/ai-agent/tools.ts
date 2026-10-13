@@ -15,8 +15,12 @@ import { FONT_OPTIONS } from "@/lib/cms/theme-shared";
 import { CARD_VARIANTS, DENSITY_VARIANTS, FOOTER_VARIANTS, HEADER_VARIANTS, IMAGE_VARIANTS, MENU_VARIANTS, WIDTH_VARIANTS } from "@/lib/cms/component-variants";
 import { buildThemeTokens, isHex } from "@/lib/platform/website/ai/tokens";
 import { generateAiWebsite } from "@/lib/platform/website/ai/apply";
-import { createCmsMediaFromBuffer } from "@/lib/cms/media";
+import { createCmsMediaFromBuffer, getMedia, listMedia, updateMedia } from "@/lib/cms/media";
+import { getFormDoc, saveFormFields, CONTACT_FORM_FIELD_NAMES } from "@/lib/cms/forms";
 import { getOpenAI } from "@/lib/openai";
+import { COLLECTIONS } from "@/lib/cms/collections/registry";
+import type { CollectionKey } from "@/lib/cms/collections/types";
+import { createRecord, getEditableRecord, listAdminRecords, publishRecord, revertRecord, saveRecordDraft, setRecordArchived } from "@/lib/cms/collections/store";
 
 /**
  * What the CMS "Ask AI" assistant can do: read the site and change any part of it (pages and their sections, menus, footer, site
@@ -38,6 +42,7 @@ interface Tool {
   run: (args: Json, v: CmsViewer) => Promise<Out>;
 }
 
+const isCollection = (k: unknown): k is CollectionKey => typeof k === "string" && k in COLLECTIONS;
 const s = (v: unknown, max = 2000) => (typeof v === "string" ? v.slice(0, max) : "");
 const normPath = (p: unknown) => { const t = s(p, 200).trim(); return t.startsWith("/") ? t : `/${t}`; };
 
@@ -276,7 +281,7 @@ const TOOLS: Tool[] = [
       const page = await pageOrError(a.path);
       if (!page) return err("No page at that path.");
       if (page.path === "/") return err("The home page can't be deleted.");
-      const done = await deletePage(page._id);
+      const done = await deletePage(page._id, v.userId);
       if (!done.ok) return err(done.error);
       await audit(v, "delete", "page", page._id, page.title, page.path);
       expireSiteCache();
@@ -454,6 +459,149 @@ const TOOLS: Tool[] = [
       return { ok: true, pages: res.pages };
     },
   },
+  {
+    name: "list_collections",
+    description: "The site's content collections (blog posts, jobs, engagement models, products): key, name, and the editable fields of one record, plus how many records exist.",
+    properties: {},
+    permission: "VIEW",
+    run: async () => ({ collections: await Promise.all((Object.keys(COLLECTIONS) as CollectionKey[]).map(async (key) => ({ key, label: COLLECTIONS[key].label, singular: COLLECTIONS[key].singular, records: (await listAdminRecords(key)).length, fields: fieldTree(COLLECTIONS[key].fields) }))) }),
+  },
+  {
+    name: "list_records",
+    description: "The records of one collection with slug, title, state (published / draft / archived) and whether there are unpublished changes.",
+    properties: { collection: { type: "string", description: "blog, jobs, engagement or products" } },
+    required: ["collection"],
+    permission: "VIEW",
+    run: async (a) => (isCollection(a.collection) ? { records: await listAdminRecords(a.collection) } : err("Unknown collection.")),
+  },
+  {
+    name: "get_record",
+    description: "One record's current draft content.",
+    properties: { collection: { type: "string" }, slug: { type: "string" } },
+    required: ["collection", "slug"],
+    permission: "VIEW",
+    run: async (a) => {
+      if (!isCollection(a.collection)) return err("Unknown collection.");
+      const rec = await getEditableRecord(a.collection, s(a.slug, 120));
+      return rec ? { slug: rec.doc.slug, state: rec.doc.archived ? "archived" : rec.doc.live ? "published" : "draft", unpublishedChanges: rec.doc.hasUnpublishedChanges, data: rec.data } : err("No such record.");
+    },
+  },
+  {
+    name: "save_record",
+    description: "Create a record (if the slug is new) or change an existing one. `data` holds the fields to set (see list_collections for the field keys; nested objects merge, arrays are replaced whole). It saves a draft; call publish_record to make it live.",
+    properties: { collection: { type: "string" }, slug: { type: "string", description: "URL slug, lowercase letters, digits and dashes" }, data: { type: "object", additionalProperties: true } },
+    required: ["collection", "slug", "data"],
+    permission: "COLLECTIONS_EDIT",
+    run: async (a, v) => {
+      if (!isCollection(a.collection)) return err("Unknown collection.");
+      const key = a.collection;
+      const slug = s(a.slug, 120).trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      if (!slug) return err("Give the record a slug.");
+      let rec = await getEditableRecord(key, slug);
+      let created = false;
+      if (!rec) {
+        const made = await createRecord(key, slug, v.userId);
+        if (!made.ok) return err(made.error);
+        created = true;
+        rec = await getEditableRecord(key, slug);
+        if (!rec) return err("Could not create the record.");
+      }
+      const merged = mergeDeep(rec.data, (a.data as Json) ?? {}) as Json;
+      const res = await saveRecordDraft(key, slug, merged, v.userId);
+      if (!res.ok) return err(res.error);
+      await audit(v, created ? "create" : "update", "collection", `${key}/${slug}`, `${COLLECTIONS[key].singular}: ${slug}`);
+      return { ok: true, slug, created, note: "Saved as a draft. Publish it to make it live." };
+    },
+  },
+  {
+    name: "publish_record",
+    description: "Publish a record's draft so it is live on the site.",
+    properties: { collection: { type: "string" }, slug: { type: "string" } },
+    required: ["collection", "slug"],
+    permission: "COLLECTIONS_PUBLISH",
+    run: async (a, v) => {
+      if (!isCollection(a.collection)) return err("Unknown collection.");
+      const res = await publishRecord(a.collection, s(a.slug, 120), v.userId);
+      if (!res.ok) return err(res.error);
+      await audit(v, "publish", "collection", `${a.collection}/${s(a.slug, 120)}`, `${COLLECTIONS[a.collection].singular}: ${s(a.slug, 120)}`);
+      return { ok: true, published: s(a.slug, 120) };
+    },
+  },
+  {
+    name: "archive_record",
+    description: "Hide a published record from the site (archive), or bring it back (archived: false).",
+    properties: { collection: { type: "string" }, slug: { type: "string" }, archived: { type: "boolean" } },
+    required: ["collection", "slug", "archived"],
+    permission: "COLLECTIONS_PUBLISH",
+    run: async (a, v) => {
+      if (!isCollection(a.collection)) return err("Unknown collection.");
+      const res = await setRecordArchived(a.collection, s(a.slug, 120), a.archived === true, v.userId);
+      if (!res.ok) return err(res.error);
+      await audit(v, "update", "collection", `${a.collection}/${s(a.slug, 120)}`, `${COLLECTIONS[a.collection].singular}: ${s(a.slug, 120)}`);
+      return { ok: true, archived: a.archived === true };
+    },
+  },
+  {
+    name: "discard_record_changes",
+    description: "Throw away a record's unpublished changes (a record that was never published is deleted).",
+    properties: { collection: { type: "string" }, slug: { type: "string" } },
+    required: ["collection", "slug"],
+    permission: "COLLECTIONS_PUBLISH",
+    run: async (a, v) => {
+      if (!isCollection(a.collection)) return err("Unknown collection.");
+      const res = await revertRecord(a.collection, s(a.slug, 120));
+      if (!res.ok) return err(res.error);
+      await audit(v, res.deleted ? "delete" : "restore", "collection", `${a.collection}/${s(a.slug, 120)}`, `${COLLECTIONS[a.collection].singular}: ${s(a.slug, 120)}`);
+      return { ok: true, deleted: res.deleted };
+    },
+  },
+  {
+    name: "list_media",
+    description: "The photos and files in the media library (id, name, url, alt text). Use a photo's url inside section content.",
+    properties: { q: { type: "string", description: "Optional search text" } },
+    permission: "VIEW",
+    run: async (a) => ({ media: (await listMedia(s(a.q, 100) || undefined)).slice(0, 60) }),
+  },
+  {
+    name: "update_media",
+    description: "Rename a library photo or set its alt text (for accessibility and SEO).",
+    properties: { id: { type: "string" }, name: { type: "string" }, altText: { type: "string" } },
+    required: ["id"],
+    permission: "MEDIA_UPLOAD",
+    run: async (a, v) => {
+      const m = await getMedia(s(a.id, 80));
+      if (!m) return err("No such media item.");
+      await updateMedia(m._id, { ...(typeof a.name === "string" ? { name: s(a.name, 200) } : {}), ...(typeof a.altText === "string" ? { altText: s(a.altText, 400) } : {}) }, v.userId);
+      await audit(v, "update", "media", m._id, m.name);
+      return { ok: true };
+    },
+  },
+  {
+    name: "get_contact_form",
+    description: "The contact form's fields (name, label, placeholder, help text, required, visible, order).",
+    properties: {},
+    permission: "VIEW",
+    run: async () => ({ fields: await getFormDoc("contact", CONTACT_FORM_FIELD_NAMES) }),
+  },
+  {
+    name: "update_contact_form",
+    description: "Change contact-form fields. Send only the fields to change, each identified by its `name` (system key from get_contact_form); label, placeholder, helpText, required, visible and orderKey can be set.",
+    properties: { fields: { type: "array", items: { type: "object", additionalProperties: true } } },
+    required: ["fields"],
+    permission: "FORMS_MANAGE",
+    run: async (a, v) => {
+      const cur = await getFormDoc("contact", CONTACT_FORM_FIELD_NAMES);
+      const patches = Array.isArray(a.fields) ? (a.fields as Json[]) : [];
+      const next = cur.map((f) => {
+        const p = patches.find((x) => x.name === f.name);
+        if (!p) return f;
+        return { ...f, ...(typeof p.label === "string" ? { label: s(p.label, 120) } : {}), ...(typeof p.placeholder === "string" ? { placeholder: s(p.placeholder, 200) } : {}), ...(typeof p.helpText === "string" ? { helpText: s(p.helpText, 300) } : {}), ...(typeof p.required === "boolean" ? { required: p.required } : {}), ...(typeof p.visible === "boolean" ? { visible: p.visible } : {}), ...(typeof p.orderKey === "number" ? { orderKey: p.orderKey } : {}) };
+      });
+      await saveFormFields("contact", next, v.userId);
+      await audit(v, "update", "form", "contact", "Contact form");
+      return { ok: true, fields: next };
+    },
+  },
 ];
 
 export const TOOL_SCHEMAS = TOOLS.map((t) => ({
@@ -476,4 +624,4 @@ export async function runTool(name: string, rawArgs: string, v: CmsViewer): Prom
 }
 
 /** Tools that change the site (the UI lists these as "changes made"). */
-export const MUTATING_TOOLS = new Set(TOOLS.filter((t) => !["site_overview", "section_types", "describe_section_type", "get_page"].includes(t.name)).map((t) => t.name));
+export const MUTATING_TOOLS = new Set(TOOLS.filter((t) => !["site_overview", "section_types", "describe_section_type", "get_page", "list_collections", "list_records", "get_record", "list_media", "get_contact_form"].includes(t.name)).map((t) => t.name));

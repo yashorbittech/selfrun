@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { companyCache } from "@/lib/platform/tenancy/cache";
 import { getDb } from "@/lib/mongodb";
@@ -237,6 +238,7 @@ export async function setActiveTheme(key: string, actorId: string): Promise<Resu
   const c = await settingsCol();
   await c.updateOne({ _id: "default" }, { $set: { activeThemeKey: key, updatedAt: new Date(), updatedBy: actorId } }, { upsert: true });
   expireSiteCache();
+  await cmsEvents.themeChanged("activated", theme.name ?? key, actorId);
   return { ok: true };
 }
 

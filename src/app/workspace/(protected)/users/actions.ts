@@ -1,5 +1,8 @@
 "use server";
 
+import { checkSeatUsage } from "@/lib/notify/triggers/usage";
+import { countSeatsUsed } from "@/lib/platform/billing/enforce";
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import { revalidatePath } from "next/cache";
 import { requireWorkspaceAction } from "@/lib/workspace/access";
 import {
@@ -44,7 +47,7 @@ export async function createAdminUserAction(
   const blocked = await delegatedManagerBlock(actor, { roles });
   if (blocked) return { ok: false, error: blocked };
   const result = await createAdminUser(email, sanitizeRoles(roles), userType, notes);
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.userAdded(email.trim().toLowerCase(), sanitizeRoles(roles), actor.id); await checkSeatUsage(await countSeatsUsed()); }
   return result;
 }
 
@@ -56,7 +59,7 @@ export async function updateAdminUserRolesAction(
   const blocked = await delegatedManagerBlock(admin, { targetId: id, roles });
   if (blocked) return { ok: false, error: blocked };
   const result = await updateAdminUserRoles(id, sanitizeRoles(roles), admin.id);
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.rolesChanged(id, sanitizeRoles(roles), admin.id); }
   return result;
 }
 
@@ -68,7 +71,7 @@ export async function updateAdminUserPermissionOverridesAction(
   const blocked = await delegatedManagerBlock(actor, { targetId: id, overrides: true });
   if (blocked) return { ok: false, error: blocked };
   const result = await updateAdminUserPermissionOverrides(id, sanitizeOverrides(overrides));
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.overridesChanged(id, actor.id); }
   return result;
 }
 
@@ -77,7 +80,7 @@ export async function resetAdminUserPasswordAction(id: string): Promise<ResetPas
   const blocked = await delegatedManagerBlock(actor, { targetId: id });
   if (blocked) return { ok: false, error: blocked };
   const result = await resetAdminUserPassword(id);
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.passwordReset(id, actor.id); }
   return result;
 }
 
@@ -86,7 +89,7 @@ export async function deactivateAdminUserAction(id: string): Promise<{ ok: boole
   const blocked = await delegatedManagerBlock(admin, { targetId: id });
   if (blocked) return { ok: false, error: blocked };
   const result = await deactivateAdminUser(id, admin.id);
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.deactivated(id, admin.id); }
   return result;
 }
 
@@ -98,7 +101,7 @@ export async function reactivateAdminUserAction(
   const blocked = await delegatedManagerBlock(actor, { targetId: id, roles: rolesToRestore });
   if (blocked) return { ok: false, error: blocked };
   const result = await reactivateAdminUser(id, rolesToRestore ? sanitizeRoles(rolesToRestore) : undefined);
-  if (result.ok) revalidate();
+  if (result.ok) { revalidate(); await workspaceEvents.reactivated(id, actor.id); }
   return result;
 }
 

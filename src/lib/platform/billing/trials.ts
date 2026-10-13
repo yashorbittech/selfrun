@@ -1,3 +1,4 @@
+import { platformEvents } from "@/lib/notify/triggers/platform";
 import "server-only";
 import type { Collection } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
@@ -9,6 +10,8 @@ import { getBillingSettings, type PlatformBillingSettings } from "@/lib/platform
 import { recordSubscriptionEvent } from "@/lib/platform/billing/events";
 import { resolveTrialDays } from "@/lib/platform/billing/pricing";
 import { effectiveSubscriptionStatus, neverPaid, trialDaysLeft } from "@/lib/platform/billing/lifecycle";
+import { runAsCompany } from "@/lib/platform/tenancy/context";
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 export { effectiveSubscriptionStatus, trialDaysLeft } from "@/lib/platform/billing/lifecycle";
 import type { CompanySubscription, SubscriptionStatus } from "@/lib/platform/billing/types";
@@ -242,12 +245,20 @@ export async function runTrialSweep(now: Date = new Date()): Promise<TrialSweepR
 
       const plan = await getPlan(sub.planId);
       const sent = await notify(result, company._id, reminderEmail(brand, company, plan?.name ?? brand, daysLeft));
+      await runAsCompany(company._id, () => workspaceEvents.trialReminder(daysLeft)).catch(() => {});
       if (sent) result.reminders[threshold] = (result.reminders[threshold] ?? 0) + 1;
       else await col.updateOne({ _id: company._id }, { $pullAll: { "subscription.trialRemindersSent": due } });
     } catch (err) {
       console.error(`[billing:trials] sweep failed for company ${company._id}`, err);
       result.errors++;
     }
+  }
+  // Tell the platform team once a day how many trials end within 3 days.
+  try {
+    const soon = await col.countDocuments({ isPlatformOwner: { $ne: true }, status: "active", "subscription.status": "trialing", "subscription.trialEndsAt": { $gt: now, $lte: new Date(now.getTime() + 3 * 86_400_000) } });
+    if (soon > 0) await platformEvents.trialsEnding(soon);
+  } catch (err) {
+    console.error("[billing:trials] could not notify the team", err);
   }
   return result;
 }

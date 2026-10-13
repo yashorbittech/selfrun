@@ -1,3 +1,5 @@
+import { workspaceEvents } from "@/lib/notify/triggers/workspace";
+import { forEachCompany, runAsCompany } from "@/lib/platform/tenancy/context";
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { recordPlatformAudit } from "@/lib/platform/audit";
@@ -38,6 +40,15 @@ export async function saveMaintenance(input: MaintenanceInput, actorId: string, 
   if (companyId) await db.collection("companies").updateOne({ _id: companyId as never }, { $set: { maintenance: window } });
   else await db.collection("platform_settings").updateOne({ _id: "maintenance" as never }, { $set: window }, { upsert: true });
   forgetMaintenanceState();
+  if (window.enabled) {
+    try {
+      const tell = () => workspaceEvents.maintenance(message, window.startsAt, window.endsAt, mode);
+      if (companyId) await runAsCompany(companyId, tell);
+      else await forEachCompany(tell);
+    } catch (err) {
+      console.error("[maintenance] could not notify companies", err);
+    }
+  }
   await recordPlatformAudit({ actorId, companyId: companyId ?? null, action: companyId ? "company.maintenance.update" : "settings.maintenance.update", target: companyId ? { type: "company", id: companyId } : { type: "platform_settings", id: "maintenance" }, details: { enabled: Boolean(input.enabled), mode, appliesTo, startsAt: new Date(start).toISOString(), hours } });
   return { ok: true, state: companyId ? await getCompanyMaintenance(companyId) : await getMaintenanceState() };
 }

@@ -1,6 +1,8 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/messenger/db";
+import { signalNew } from "@/lib/notify/signals";
+import { panelOfChatType, MESSENGER_ONLY_TYPE } from "@/lib/notify/panels";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 
@@ -82,6 +84,7 @@ export async function notify(input: NotifyInput): Promise<void> {
       createdAt: new Date(),
     });
     await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
+    await signalNew(panelOfChatType(String(input.type)), [input.recipientUserId], { type: String(input.type), title: input.title, body: input.body ?? null, link: input.link ?? null });
   } catch {
     // dup dedupeKey or transient error — ignore.
   }
@@ -97,23 +100,23 @@ export async function notifyMany(recipientIds: string[], n: Omit<NotifyInput, "r
 
 export async function listNotifications(recipientUserId: string, limit = 20): Promise<ChatNotification[]> {
   const collection = await getCollection();
-  return collection.find({ recipientUserId }).sort({ createdAt: -1 }).limit(limit).toArray();
+  return collection.find({ recipientUserId, type: MESSENGER_ONLY_TYPE }).sort({ createdAt: -1 }).limit(limit).toArray();
 }
 
 export async function unreadCount(recipientUserId: string): Promise<number> {
   const collection = await getCollection();
-  return collection.countDocuments({ recipientUserId, read: false });
+  return collection.countDocuments({ recipientUserId, type: MESSENGER_ONLY_TYPE, read: false });
 }
 
 export async function markRead(ids: string[], recipientUserId: string): Promise<void> {
   if (ids.length === 0) return;
   const collection = await getCollection();
-  await collection.updateMany({ _id: { $in: ids }, recipientUserId }, { $set: { read: true } });
+  await collection.updateMany({ _id: { $in: ids }, recipientUserId, type: MESSENGER_ONLY_TYPE }, { $set: { read: true } });
 }
 
 export async function markAllRead(recipientUserId: string): Promise<void> {
   const collection = await getCollection();
-  await collection.updateMany({ recipientUserId, read: false }, { $set: { read: true } });
+  await collection.updateMany({ recipientUserId, type: MESSENGER_ONLY_TYPE, read: false }, { $set: { read: true } });
 }
 
 export function serializeNotification(n: ChatNotification): SerializedChatNotification {

@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { emitEvent } from "@/lib/platform/events";
@@ -225,6 +226,7 @@ export async function createInvoice(data: InvoiceWriteData, actorId: string): Pr
   };
   await collection.insertOne(doc);
   await emitEvent("invoice.created", { entity: invoiceEntity(doc), actorId, data: { invoiceNumber: doc.invoiceNumber, customerName: doc.customerName, totalAmount: doc.totalAmount, currency: doc.currency, dueDate: doc.dueDate } });
+  await fmsEvents.invoiceCreated({ id: doc._id, invoiceNumber: doc.invoiceNumber, customerName: doc.customerName, totalAmount: doc.totalAmount, currency: doc.currency, dueDate: doc.dueDate }, actorId);
   return doc;
 }
 
@@ -236,6 +238,7 @@ function invoiceEntity(i: Invoice) {
 async function emitIfPaid(inv: Invoice, status: InvoiceStatus, actorId: string): Promise<void> {
   if (status !== "paid" || inv.status === "paid") return;
   await emitEvent("invoice.paid", { entity: invoiceEntity(inv), actorId, data: { invoiceNumber: inv.invoiceNumber, customerName: inv.customerName, totalAmount: inv.totalAmount, currency: inv.currency } });
+  await fmsEvents.invoicePaid({ id: inv._id, invoiceNumber: inv.invoiceNumber, customerName: inv.customerName, totalAmount: inv.totalAmount, currency: inv.currency }, actorId);
 }
 
 /** Blocked once money has moved against the invoice — correct via a credit note, not a silent edit. */

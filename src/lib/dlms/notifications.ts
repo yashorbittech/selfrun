@@ -10,7 +10,7 @@ import { notifyMany, NOTIFICATIONS_COLLECTION, type ChatNotification } from "@/l
  * Bodies carry record NAMES only — never a secret.
  */
 
-export type DlmsNotificationType = "dlms_expiry" | "dlms_access";
+export type DlmsNotificationType = "dlms_expiry" | "dlms_access" | "dlms_record_added" | "dlms_reveal" | "dlms_record_deleted" | "dlms_record_archived";
 
 export async function notifyDlmsUsers(userIds: string[], n: { type: DlmsNotificationType; title: string; body?: string; link: string; dedupeKey?: string }): Promise<void> {
   const ids = userIds.filter(Boolean);

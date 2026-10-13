@@ -1,3 +1,4 @@
+import { pmsEvents } from "@/lib/notify/triggers/pms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/pms/db";
@@ -200,6 +201,13 @@ export async function upsertMember(
     active: data.active,
     ...createStamp(actorId),
   });
+  try {
+    const { getProject } = await import("@/lib/pms/projects");
+    const project = await getProject(projectId);
+    if (project) await pmsEvents.addedToProject(data.employeeId, { id: projectId, name: project.name }, String(data.role ?? DEFAULT_MEMBER_ROLE));
+  } catch {
+    /* a notification must not fail adding a member */
+  }
   return { ok: true, created: true };
 }
 

@@ -1,3 +1,4 @@
+import { smmsEvents } from "@/lib/notify/triggers/smms";
 import "server-only";
 import { connectionValues } from "@/lib/platform/connections/resolve";
 import { randomBytes } from "node:crypto";
@@ -288,6 +289,7 @@ export async function completeOAuth(p: Provider, code: string, redirectUri: stri
 
 export async function disconnect(p: Provider): Promise<void> {
   await (await col()).deleteOne({ _id: p });
+  await smmsEvents.disconnected(PROVIDERS[p].label);
 }
 
 export async function selectTarget(p: Provider, platform: Platform, targetId: string): Promise<void> {
@@ -301,6 +303,7 @@ export async function selectTarget(p: Provider, platform: Platform, targetId: st
 
 export async function markIntegrationError(p: Provider, message: string): Promise<void> {
   await (await col()).updateOne({ _id: p }, { $set: { lastError: message.slice(0, 300), updatedAt: new Date() } });
+  await smmsEvents.error(PROVIDERS[p].label, message);
 }
 
 /** A usable access token for the provider, refreshing Google's when it's close to expiry. */

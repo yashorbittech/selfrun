@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/fms/db";
@@ -146,6 +147,7 @@ export async function requestAdvance(data: AdvanceWriteData, actorId: string): P
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await fmsEvents.advanceRequested({ id: doc._id, advanceNumber: doc.advanceNumber, employeeName: doc.employeeName, amount: doc.amount, currency: "INR" }, actorId);
   return doc;
 }
 
@@ -202,6 +204,7 @@ export async function changeAdvanceStatus(
   }
 
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { ...patch, ...updateStamp(actorId) } });
+  await fmsEvents.advanceStatus({ id: existing._id, advanceNumber: existing.advanceNumber, amount: existing.amount, currency: "INR" }, toStatus, actorId);
   return { ok: true };
 }
 

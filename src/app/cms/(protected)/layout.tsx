@@ -1,3 +1,5 @@
+import { runCmsSweep } from "@/lib/notify/sweeps";
+import { panelUnread } from "@/lib/notify";
 import { redirect } from "next/navigation";
 import { getCurrentCmsUser } from "@/lib/cms-auth";
 import { hasCmsAccess } from "@/lib/cms-roles";
@@ -37,6 +39,7 @@ export default async function ProtectedCmsLayout({ children }: { children: React
     activeTheme,
   };
 
+  await runCmsSweep().catch(() => {});
   return (
     <TooltipProvider delay={200}>
       <ConfirmProvider>
@@ -57,7 +60,7 @@ export default async function ProtectedCmsLayout({ children }: { children: React
 
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
             <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-              <CmsTopbar roles={user.roles} flags={flags} aiAgent={!isOperator} />
+              <CmsTopbar roles={user.roles} flags={flags} aiAgent={!isOperator} unread={await panelUnread(user.id, "cms")} />
             </div>
             <PanelBackBar />
             <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">

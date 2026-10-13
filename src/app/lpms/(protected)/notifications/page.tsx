@@ -1,12 +1,7 @@
-import GenericPanelNotificationsPage from "@/components/platform/panel/GenericPanelNotificationsPage";
+import UnifiedNotificationsPage from "@/components/platform/panel/UnifiedNotificationsPage";
+
+export const dynamic = "force-dynamic";
 
 export default function LpmsNotificationsPage() {
-  return (
-    <GenericPanelNotificationsPage
-      panel="lpms"
-      panelName="Legal & Process Management"
-      shortCode="LPMS"
-      description="Track legal workflow approvals, contract template changes & signature verification alerts."
-    />
-  );
+  return <UnifiedNotificationsPage panel="lpms" panelName="Legal & Process Management" shortCode="LPMS" description="Document reviews and approvals, signatures, publishing and expiry reminders." />;
 }

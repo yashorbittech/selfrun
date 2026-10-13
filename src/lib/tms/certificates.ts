@@ -1,3 +1,4 @@
+import { tmsEvents } from "@/lib/notify/triggers/tms";
 import "server-only";
 import { randomBytes } from "node:crypto";
 import { getDb } from "@/lib/mongodb";
@@ -244,6 +245,7 @@ export async function issueCertificate(data: CertificateIssueData, actorId: stri
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await tmsEvents.certificateIssued(String(doc.studentId ?? ""), String(doc.title ?? "Certificate"), doc._id);
   return doc;
 }
 

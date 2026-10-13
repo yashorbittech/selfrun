@@ -1,3 +1,4 @@
+import { lpmsEvents } from "@/lib/notify/triggers/lpms";
 import "server-only";
 import type { LpmsViewer } from "@/lib/lpms/types";
 
@@ -77,6 +78,7 @@ export async function requestSignatures(
     createdBy: viewer.userId,
   });
 
+  await lpmsEvents.signaturesRequested(opts.documentId, opts.signers.length, viewer.userId);
   return { ok: true, requestId: result.insertedId.toString() };
 }
 
@@ -121,6 +123,7 @@ export async function updateSignatureStatus(
         { $set: { status: allSigned ? "completed" : "declined" } }
       );
     }
+    await lpmsEvents.signatureUpdate(String(request.documentId), signerEmail, status, allSigned ? "completed" : anyDeclined ? "declined" : null);
   }
 
   return { ok: true };

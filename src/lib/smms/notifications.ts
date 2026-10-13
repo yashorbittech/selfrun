@@ -9,7 +9,7 @@ import { notifyMany, NOTIFICATIONS_COLLECTION, type ChatNotification } from "@/l
  * Delivery is best-effort and never blocks the action that triggered it.
  */
 
-export type SmmsNotificationType = "smms_publish_due" | "smms_publish_failed" | "smms_published" | "smms_approval_needed";
+export type SmmsNotificationType = "smms_publish_due" | "smms_publish_failed" | "smms_published" | "smms_approval_needed" | "smms_integration_disconnected" | "smms_integration_error";
 
 export async function notifySmmsUsers(userIds: string[], n: { type: SmmsNotificationType; title: string; body?: string; link: string; dedupeKey?: string }): Promise<void> {
   const ids = userIds.filter(Boolean);

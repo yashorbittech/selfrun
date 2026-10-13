@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { createHash } from "node:crypto";
 import * as cheerio from "cheerio";
@@ -421,10 +422,12 @@ export async function runWebsiteIndex(logger: KbRunLogger, opts: IndexWebsiteOpt
     }
 
     await logger.finish("completed");
+    await cmsEvents.indexFinished(true, "Your website was re-read; the chatbot answers from the latest pages.");
   } catch (err) {
     const message = err instanceof Error ? err.message : "Indexing failed";
     logger.log("error", message);
     await logger.finish("failed", message);
+    await cmsEvents.indexFinished(false, message);
   }
 }
 

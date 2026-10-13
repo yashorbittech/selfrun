@@ -9,7 +9,7 @@ import { notifyMany, NOTIFICATIONS_COLLECTION, type ChatNotification } from "@/l
  * Delivery is best-effort and never blocks the action that triggered it.
  */
 
-export type SeoNotificationType = "seo_task_assigned" | "seo_task_updated" | "seo_issue_assigned" | "seo_audit_completed";
+export type SeoNotificationType = "seo_task_assigned" | "seo_task_updated" | "seo_issue_assigned" | "seo_audit_completed" | "seo_audit_failed" | "seo_ranking_drop";
 
 export async function notifySeoUsers(userIds: string[], n: { type: SeoNotificationType; title: string; body?: string; link: string; dedupeKey?: string }): Promise<void> {
   const ids = userIds.filter(Boolean);

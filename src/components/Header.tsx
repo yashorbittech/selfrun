@@ -186,6 +186,15 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
 
   const mobileControls = (
         <div className={`${menuOnly ? "flex" : "flex xl:hidden"} gap-4 items-center ml-auto`}>
+          {show.themeToggle && (
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            className="p-2.5 rounded-full hover:bg-muted/80 backdrop-blur-sm transition-all"
+          >
+            {isDark ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
+          </button>
+          )}
           <button
             type="button"
             aria-label="Open main menu"
@@ -200,15 +209,6 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
           >
             <Menu className="h-6 w-6" aria-hidden="true" />
           </button>
-          {show.themeToggle && (
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            className="p-2.5 rounded-full hover:bg-muted/80 backdrop-blur-sm transition-all"
-          >
-            {isDark ? <Sun className="w-5 h-5 text-foreground" /> : <Moon className="w-5 h-5 text-foreground" />}
-          </button>
-          )}
         </div>
 
   );
@@ -326,7 +326,16 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
                 })}
               </div>
             )}
-            {show.authLinks && <PortalAuthLink variant="desktop" />}
+            {show.authLinks && <PortalAuthLink variant="desktop" menuStyle={menuStyle} />}
+            {show.themeToggle && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-2.5 rounded-full bg-muted/30 hover:bg-muted/80 backdrop-blur-sm transition-all border border-border/50"
+            >
+              {isDark ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
+            </button>
+            )}
             {showCta && (
             <Link
               href={header.ctaHref}
@@ -336,15 +345,6 @@ export default function Header({ cmsNavigation, variant = "default", menuStyle =
                 {header.ctaLabel} <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </Link>
-            )}
-            {show.themeToggle && (
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              className="p-2.5 rounded-full bg-muted/30 hover:bg-muted/80 backdrop-blur-sm transition-all border border-border/50"
-            >
-              {isDark ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
-            </button>
             )}
           </div>
   );

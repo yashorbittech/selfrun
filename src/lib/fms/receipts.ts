@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
@@ -240,6 +241,7 @@ export async function recordReceipt(
     /* non-blocking */
   }
 
+  await fmsEvents.receiptRecorded({ id: doc._id, receiptNumber: doc.receiptNumber, customerName: doc.customerName, amount: doc.amount, currency: doc.currency, method: String(doc.method ?? "") }, actorId);
   return { ok: true, receipt: doc };
 }
 
@@ -257,5 +259,6 @@ export async function voidReceipt(id: string, actorId: string): Promise<{ ok: bo
     await changeTransactionStatus(receipt.transactionId, "reversed", actorId, null);
   }
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "voided", ...updateStamp(actorId) } });
+  await fmsEvents.receiptVoided({ id: receipt._id, receiptNumber: receipt.receiptNumber, customerName: receipt.customerName, amount: receipt.amount, currency: receipt.currency }, actorId);
   return { ok: true };
 }

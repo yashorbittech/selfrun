@@ -1,3 +1,4 @@
+import { hrmsEvents } from "@/lib/notify/triggers/hrms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/hrms/db";
@@ -372,6 +373,8 @@ export async function recordManualResult(
     summary: result.status === "paid" ? `UTR ${result.utr}` : `Failed: ${result.failureReason}`,
   });
   await recomputeRunPaidState(payout.runId);
+  if (result.status === "paid") await hrmsEvents.salaryPaid({ id, employeeId: payout.employeeId, month: payout.month, amount: payout.paymentAmount, utr: result.utr });
+  else if (result.status === "failed") await hrmsEvents.payoutFailed({ id, employeeName: payout.employeeName, month: payout.month, reason: result.failureReason });
   return { ok: true };
 }
 
@@ -420,11 +423,13 @@ export async function applyWebhookResult(result: { providerPayoutId: string; sta
   if (result.status === "paid" && payout.status !== "paid") {
     await collection.updateOne({ _id: payout._id }, { $set: { status: "paid", utr: result.utr ?? payout.utr, paidAt: now, processedAt: now, updatedAt: now } });
     await recomputeRunPaidState(payout.runId);
+    await hrmsEvents.salaryPaid({ id: payout._id, employeeId: payout.employeeId, month: payout.month, amount: payout.paymentAmount, utr: result.utr ?? payout.utr });
   } else if ((result.status === "failed" || result.status === "reversed") && payout.status !== "failed") {
     await collection.updateOne(
       { _id: payout._id },
       { $set: { status: "failed", failureReason: result.failureReason ?? `Payout ${result.status}`, updatedAt: now } }
     );
     await recomputeRunPaidState(payout.runId);
+    await hrmsEvents.payoutFailed({ id: payout._id, employeeName: payout.employeeName, month: payout.month, reason: result.failureReason });
   }
 }

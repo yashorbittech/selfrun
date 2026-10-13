@@ -1,3 +1,4 @@
+import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/offers/db";
@@ -76,6 +77,7 @@ export async function createOfferClaim(data: CreateClaimInput): Promise<OfferCla
     createdAt: new Date(),
   };
   await collection.insertOne(doc);
+  await cmsEvents.offerClaimed({ id: doc._id, offerTitle: (doc as { offerTitle?: string }).offerTitle ?? null, name: (doc as { leadName?: string; name?: string }).leadName ?? (doc as { name?: string }).name ?? null });
   return doc;
 }
 

@@ -1,3 +1,4 @@
+import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/fms/db";
@@ -174,5 +175,6 @@ export async function flagStatementLine(
     entityLabel: line.description,
     summary: `Bank statement line flagged ${status}`,
   });
+  await fmsEvents.statementLineFlagged({ id: lineId, description: line.description, amount: (line as { amount?: number }).amount }, actorId);
   return { ok: true };
 }

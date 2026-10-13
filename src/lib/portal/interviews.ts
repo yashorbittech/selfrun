@@ -1,3 +1,4 @@
+import { lmsEvents } from "@/lib/notify/triggers/lms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/portal/db";
@@ -119,6 +120,13 @@ export async function createInterview(
     updatedAt: now,
   };
   await c.insertOne(doc);
+  try {
+    const { getLeadRecord } = await import("@/lib/lead-management/records");
+    const lead = leadId ? await getLeadRecord(leadId) : null;
+    await lmsEvents.interviewScheduled(lead ? { id: lead._id, name: lead.name, type: lead.type, ownerStaffId: lead.ownerStaffId } : null, doc.title, doc.scheduledAt, actorId);
+  } catch {
+    /* a notification must not fail the booking */
+  }
   if (leadId) {
     try {
       const { sendActivityChatMessage } = await import("@/lib/lead-management/activity-notifier");
