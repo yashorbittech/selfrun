@@ -45,6 +45,13 @@ export async function defaultFrom(): Promise<string> {
  * (and logged) so a flaky provider can't break the flow that triggered it —
  * callers decide whether the email was essential.
  */
+/** `jane@acme.com` → `acme.com` (the history shows where mail went, not the person's address). */
+function emailDomain(to: unknown): string {
+  const first = Array.isArray(to) ? to[0] : to;
+  const m = typeof first === "string" ? first.match(/@([^>\s,]+)/) : null;
+  return m ? m[1].toLowerCase() : "recipient";
+}
+
 export async function sendEmail(message: Omit<EmailMessage, "from"> & { from?: string }): Promise<EmailResult> {
   try {
     // A company's own monthly email allowance (never applied to the platform's own mail, which has no company).
@@ -55,7 +62,7 @@ export async function sendEmail(message: Omit<EmailMessage, "from"> & { from?: s
     const provider = own ? own.provider : providerFor(cfg!);
     const result = await provider.send({ ...message, from: message.from ?? own?.from ?? cfg!.from });
     if (!result.ok) console.error(`[email:${provider.id}] send failed`, result.error);
-    else await recordUsage("emails", 1).catch(() => {});
+    else await recordUsage("emails", 1, new Date(), { source: "Email sent", detail: `${String(message.subject ?? "").slice(0, 120)}${message.to ? ` → ${emailDomain(message.to)}` : ""}` }).catch(() => {});
     return result;
   } catch (err) {
     console.error("[email] send failed", err);

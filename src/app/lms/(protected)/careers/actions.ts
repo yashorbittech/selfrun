@@ -2,20 +2,21 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
+import type { LmsPermission } from "@/lib/lms-roles";
 import { deleteApplication, updateApplication } from "@/lib/career-applications";
 import { validateApplicationUpdate } from "@/lib/career-application-validation";
 
 // Every action here independently re-checks the session — render-time gating
 // on the page alone is not a security boundary for the action endpoint.
-async function requireLmsUser() {
-  const lmsUser = await getCurrentLmsUser();
-  if (!lmsUser) throw new Error("Unauthorized");
-  return lmsUser;
+async function requireLmsUser(permission: LmsPermission) {
+  const u = await requireLms(permission);
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 export async function updateApplicationStatusAction(id: string, status: string): Promise<{ error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
   const validation = validateApplicationUpdate({ status });
   if (!validation.valid) return { error: validation.errors.status ?? "Invalid status." };
 
@@ -29,7 +30,7 @@ export async function updateApplicationStatusAction(id: string, status: string):
 }
 
 export async function updateApplicationNotesAction(id: string, notes: string): Promise<{ error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
   const validation = validateApplicationUpdate({ notes });
   if (!validation.valid) return { error: validation.errors.notes ?? "Invalid notes." };
 
@@ -41,7 +42,7 @@ export async function updateApplicationNotesAction(id: string, notes: string): P
 }
 
 export async function bulkUpdateApplicationStatusAction(ids: string[], status: string): Promise<{ updated: number; error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
   const validation = validateApplicationUpdate({ status });
   if (!validation.valid) return { updated: 0, error: validation.errors.status ?? "Invalid status." };
 
@@ -57,7 +58,7 @@ export async function bulkUpdateApplicationStatusAction(ids: string[], status: s
 }
 
 export async function bulkDeleteApplicationsAction(ids: string[]): Promise<{ deleted: number; error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
 
   let deleted = 0;
   for (const id of ids) {
@@ -71,7 +72,7 @@ export async function bulkDeleteApplicationsAction(ids: string[]): Promise<{ del
 }
 
 export async function deleteApplicationAction(id: string): Promise<void> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
   await deleteApplication(id);
   revalidatePath("/lms/careers/applicants");
   revalidatePath("/lms/careers");
@@ -81,7 +82,7 @@ export async function deleteApplicationAction(id: string): Promise<void> {
 /** Same delete, but for callers already on the list (e.g. a row Sheet) that
  * want to refresh in place instead of being navigated. */
 export async function deleteApplicationInPlaceAction(id: string): Promise<{ error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("MANAGE_CAREERS");
   const deleted = await deleteApplication(id);
   if (!deleted) return { error: "Application not found." };
 

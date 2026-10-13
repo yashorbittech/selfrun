@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLmsOrCms } from "@/lib/lms-auth";
 import { listSubscriptions } from "@/lib/offers/subscriptions";
 import { toCsv } from "@/lib/csv";
 
 /** Route handlers aren't covered by the (protected) layout's guard, so this checks the LMS session itself. */
 export async function GET(req: NextRequest) {
-  const user = await getCurrentLmsUser();
+  const user = await requireLmsOrCms("EXPORT_DATA");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const campaign = req.nextUrl.searchParams.get("campaign") || undefined;

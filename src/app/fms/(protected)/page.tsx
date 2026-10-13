@@ -625,8 +625,8 @@ export default async function FmsDashboardPage({
             <GlassCard containerClassName="flex-1 min-h-0" className="p-3.5 flex flex-col justify-between">
               {stats.projectProfitability.length > 0 ? (
                 <div className="space-y-2.5">
-                  {stats.projectProfitability.slice(0, 5).map((proj) => (
-                    <div key={proj.label} className="space-y-0.5">
+                  {stats.projectProfitability.slice(0, 5).map((proj, i) => (
+                    <div key={`${proj.label}-${i}`} className="space-y-0.5">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground font-medium truncate max-w-[65%]">{proj.label}</span>
                         <span className={`font-bold tabular-nums ${proj.value >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}`}>

@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import { detectLanguage, languageBlock, scopeBlock, type Lang } from "@/lib/ai/policy";
 import type OpenAI from "openai";
@@ -53,6 +54,7 @@ export async function prepareAnswer(
 export async function streamAnswer(
   prepared: PreparedAnswer
 ): Promise<AsyncIterable<OpenAI.Responses.ResponseStreamEvent>> {
+  setAiFeature("Website chatbot");
   const openai = await getOpenAI();
   const { config, vectorStoreId, input, lang } = prepared;
 

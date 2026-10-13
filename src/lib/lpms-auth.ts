@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { cookies } from "next/headers";
 import { ObjectId } from "mongodb";
@@ -138,7 +139,7 @@ export async function getSessionLpmsUser(token: string | undefined | null): Prom
 export async function getLpmsUserForAccount(adminId: ObjectId): Promise<CurrentLpmsUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   const roles = user.roles ?? [];
   if (!hasLpmsAccess(roles)) return null;

@@ -1,3 +1,4 @@
+import { BillingLimitError, employeeBlockReason } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { emitEvent } from "@/lib/platform/events";
@@ -267,6 +268,9 @@ export async function createEmployee(
   actorId: string,
   extra?: { recruitment?: RecruitmentLink | null }
 ): Promise<Employee> {
+  // A one-person plan holds one employee record at most — enforced here so every path (form, import, AI, invitation) is covered.
+  const blocked = await employeeBlockReason();
+  if (blocked) throw new BillingLimitError("seats", blocked);
   const collection = await getCollection();
   const doc: Employee = {
     _id: newId(),

@@ -9,6 +9,7 @@ import OnboardingWizard from "./OnboardingWizard";
 import { listPanelChoices } from "@/lib/platform/panels/choices";
 import { getCompanyBrand, getStoredBranding } from "@/lib/platform/branding";
 import { listThemeOptions } from "@/lib/platform/branding/theme-options";
+import { listCustomRoles } from "@/lib/workspace/custom-roles";
 
 export const metadata: Metadata = { title: "Set up your workspace", robots: { index: false, follow: false } };
 
@@ -20,6 +21,7 @@ export default async function OnboardingPage() {
   const [{ company, state }, details, departments, invitations, stored, brand] = await Promise.all([getOnboarding(), getCompanyDetails(), listDepartments(), listPendingInvitations(), getStoredBranding(), getCompanyBrand()]);
   const { options: themes, activeKey, appliedKey } = await listThemeOptions();
   const panelChoices = await listPanelChoices();
+  const customRoles = await listCustomRoles();
 
   return (
     <OnboardingWizard
@@ -38,6 +40,7 @@ export default async function OnboardingPage() {
         phone: details.phone,
       }}
       existingDepartments={departments.map((d) => ({ id: d._id, name: d.name }))}
+      customRoles={customRoles.map((r) => ({ id: r.id, name: r.name }))}
       invitations={invitations.map((i) => ({ id: i._id, email: i.email, name: i.name, preset: i.preset }))}
       enabledModules={company.enabledModules ?? null}
       panelChoices={panelChoices}

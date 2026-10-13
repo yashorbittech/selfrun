@@ -14,6 +14,10 @@ export interface AgentUser {
   permissionOverrides?: Record<string, boolean>;
   /** Platform Panel only: the platform permissions of this person (e.g. "companies.read"; "*" = Platform Owner). */
   platformPermissions?: string[];
+  /** Panels this company can't use right now (not in the plan, switched off): the agent offers nothing from them. */
+  blockedPanels?: string[];
+  /** Subscription suspended / canceled: the agent can read but not change anything. */
+  readOnly?: boolean;
 }
 
 export type Level = "any" | "staff" | "admin";

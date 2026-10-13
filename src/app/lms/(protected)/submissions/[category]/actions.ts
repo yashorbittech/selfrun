@@ -1,13 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
+import type { LmsPermission } from "@/lib/lms-roles";
 import { deleteLead, isValidCategory, updateLead, validateLeadUpdate, type CategorySlug } from "@/lib/leads";
 
-async function requireLmsUser() {
-  const lmsUser = await getCurrentLmsUser();
-  if (!lmsUser) throw new Error("Unauthorized");
-  return lmsUser;
+async function requireLmsUser(permission: LmsPermission) {
+  const u = await requireLms(permission);
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 export async function bulkUpdateStatusAction(
@@ -15,7 +16,7 @@ export async function bulkUpdateStatusAction(
   ids: string[],
   status: string
 ): Promise<{ updated: number; error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("EDIT_LEADS");
   if (!isValidCategory(category)) return { updated: 0, error: "Invalid category." };
 
   const validation = validateLeadUpdate({ status });
@@ -33,7 +34,7 @@ export async function bulkUpdateStatusAction(
 }
 
 export async function bulkDeleteAction(category: string, ids: string[]): Promise<{ deleted: number; error?: string }> {
-  await requireLmsUser();
+  await requireLmsUser("DELETE_LEADS");
   if (!isValidCategory(category)) return { deleted: 0, error: "Invalid category." };
 
   let deleted = 0;

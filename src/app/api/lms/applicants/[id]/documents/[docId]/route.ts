@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { applicantDocument } from "@/lib/careers/applicant-profile";
 import { readPortalDocStream } from "@/lib/portal/documents";
 
@@ -11,7 +11,7 @@ type Context = { params: Promise<{ id: string; docId: string }> };
  * applicant's portal account — never served by id alone.
  */
 export async function GET(_req: Request, { params }: Context) {
-  const user = await getCurrentLmsUser();
+  const user = await requireLms("VIEW_CAREERS");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, docId } = await params;
   const doc = await applicantDocument(id, docId);

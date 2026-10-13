@@ -1,6 +1,8 @@
 import "server-only";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
+import { resolveUsageActor } from "@/lib/platform/billing/usage-actor";
+import type { UsageActor } from "@/lib/platform/billing/usage-actor-store";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 
 /**
@@ -21,6 +23,10 @@ export interface AiUsageEvent {
   outputTokens: number;
   totalTokens: number;
   at: Date;
+  /** Who made the request (absent on rows from before per-person history). */
+  actorKey?: string;
+  actorKind?: string;
+  actorLabel?: string;
 }
 
 type UsageLike = { total_tokens?: number; input_tokens?: number; output_tokens?: number; prompt_tokens?: number; completion_tokens?: number } | null | undefined;
@@ -37,6 +43,11 @@ export function setAiFeature(feature: string): void {
   featureStore.enterWith(feature);
 }
 
+async function actorFields(given?: UsageActor): Promise<{ actorKey: string; actorKind: string; actorLabel: string }> {
+  const a = given ?? (await resolveUsageActor());
+  return { actorKey: a.key, actorKind: a.kind, actorLabel: a.label };
+}
+
 let indexed = false;
 async function col() {
   const c = (await getPlatformDb()).collection<AiUsageEvent>(AI_USAGE_COLLECTION);
@@ -48,7 +59,7 @@ async function col() {
 }
 
 /** Records one AI call. Never throws — history must not break a reply. */
-export async function recordAiUsage(e: { usage: UsageLike; model?: string; endpoint?: string; feature?: string; companyId?: string | null }): Promise<void> {
+export async function recordAiUsage(e: { usage: UsageLike; model?: string; endpoint?: string; feature?: string; companyId?: string | null; actor?: UsageActor }): Promise<void> {
   try {
     const u = e.usage;
     if (!u) return;
@@ -68,6 +79,7 @@ export async function recordAiUsage(e: { usage: UsageLike; model?: string; endpo
       outputTokens: output,
       totalTokens: total,
       at: new Date(),
+      ...(await actorFields(e.actor)),
     });
   } catch (err) {
     console.error("[ai-usage] could not record", err);

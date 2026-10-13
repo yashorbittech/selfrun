@@ -10,6 +10,7 @@ import { ALL_KNOWN_ROLES } from "@/lib/workspace/role-catalog";
 import { Badge } from "@/components/ui/badge";
 import UsersFilterBar from "./UsersFilterBar";
 import UsersGrid from "./UsersGrid";
+import { listCustomRoles } from "@/lib/workspace/custom-roles";
 
 export default async function AdminUsersPage({
   searchParams,
@@ -49,6 +50,7 @@ export default async function AdminUsersPage({
   });
 
   const rows: AdminUserRow[] = items;
+  const customRoles = await listCustomRoles();
   // Seats against the plan — the same count and limit that creating a user is checked against.
   const [seatsUsed, entitlements] = await Promise.all([countSeatsUsed(), getEntitlements()]);
   const seatLimit = entitlements.limits.seats;
@@ -81,6 +83,12 @@ export default async function AdminUsersPage({
         </div></>}
       />
 
+      {seatLimit === 1 && (
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+          Your plan is for <strong>one person</strong>: no other users, employees or logins can be added. <Link href="/workspace/settings/billing" className="font-medium underline">Upgrade your plan</Link> to add your team.
+        </div>
+      )}
+
       <UsersGrid
         rows={rows}
         total={total}
@@ -90,6 +98,7 @@ export default async function AdminUsersPage({
         sortDir={sortDir}
         hasActiveFilters={hasActiveFilters}
         currentAdminId={admin.id}
+        customRoles={customRoles}
         filters={
           <UsersFilterBar
             initialSearch={sp.search ?? ""}

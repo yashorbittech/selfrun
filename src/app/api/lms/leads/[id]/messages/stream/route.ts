@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { getLeadRecord } from "@/lib/lead-management/records";
 import { latestSeq, pull, serializeEvent } from "@/lib/messenger/events";
 import { scopeKey } from "@/lib/messenger/event-key";
@@ -18,7 +18,7 @@ const POLL_INTERVAL_MS = 1500;
 const PING_INTERVAL_MS = 25_000;
 
 export async function GET(request: NextRequest, ctx: RouteContext<"/api/lms/leads/[id]/messages/stream">) {
-  const user = await getCurrentLmsUser();
+  const user = await requireLms("VIEW_LEADS");
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const { id } = await ctx.params;

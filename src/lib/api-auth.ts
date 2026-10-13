@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
+import { hasBearer } from "@/lib/security/bearer";
+import { hasPlanFlag } from "@/lib/platform/billing/enforce";
+import type { LmsPermission } from "@/lib/lms-roles";
 
 /**
  * Guards LMS-only endpoints (reading/editing/deleting stored lead PII) with
@@ -8,11 +11,10 @@ import { getCurrentLmsUser } from "@/lib/lms-auth";
  * (for external tooling/scripts). Public submission endpoints (POST) intentionally
  * skip this.
  */
-export async function isAuthorizedLmsRequest(req: NextRequest): Promise<boolean> {
-  const secret = process.env.LEADS_API_SECRET;
-  const authHeader = req.headers.get("authorization");
-  if (secret && authHeader === `Bearer ${secret}`) return true;
+export async function isAuthorizedLmsRequest(req: NextRequest, permission: LmsPermission = "VIEW_LEADS"): Promise<boolean> {
+  // Machine access with the shared secret is the plan's "API access" feature.
+  if (hasBearer(req, process.env.LEADS_API_SECRET) && (await hasPlanFlag("apiAccess"))) return true;
 
   // The panel session, or the Workspace session of an account with this panel's role.
-  return (await getCurrentLmsUser()) !== null;
+  return (await requireLms(permission)) !== null;
 }

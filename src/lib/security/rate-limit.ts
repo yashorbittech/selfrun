@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash } from "node:crypto";
+import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 
@@ -11,10 +12,9 @@ import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 const COLLECTION = "security_rate_limits";
 let indexed = false;
 
-/** The client's address. On Vercel `x-vercel-forwarded-for` is set by the platform and cannot be spoofed by the caller. */
+/** The client's address (only headers a trusted edge sets are believed — see ip.ts). */
 export function clientIp(req: Request): string {
-  const h = req.headers;
-  return (h.get("x-vercel-forwarded-for") || h.get("x-real-ip") || (h.get("x-forwarded-for") ?? "").split(",")[0] || "unknown").trim().slice(0, 64);
+  return clientIpFrom(req.headers);
 }
 
 export async function rateLimit(req: Request, bucket: string, limit: number, windowSeconds: number): Promise<{ ok: true } | { ok: false; retryAfter: number }> {

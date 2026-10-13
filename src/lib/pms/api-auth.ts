@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
+import { hasPmsStaffRole } from "@/lib/pms-roles";
+import { hasBearer } from "@/lib/security/bearer";
+import { hasPlanFlag } from "@/lib/platform/billing/enforce";
 
 /**
  * Guards PMS-only API routes (CSV exports). Accepts either a logged-in PMS
@@ -7,10 +10,10 @@ import { getCurrentPmsUser } from "@/lib/pms-auth";
  * Mirrors `src/lib/hrms/api-auth.ts`.
  */
 export async function isAuthorizedPmsRequest(req: NextRequest): Promise<boolean> {
-  const secret = process.env.PMS_API_SECRET;
-  const authHeader = req.headers.get("authorization");
-  if (secret && authHeader === `Bearer ${secret}`) return true;
+  // Machine access with the shared secret is the plan's "API access" feature.
+  if (hasBearer(req, process.env.PMS_API_SECRET) && (await hasPlanFlag("apiAccess"))) return true;
 
-  // The panel session, or the Workspace session of an account with this panel's role.
-  return (await getCurrentPmsUser()) !== null;
+  // The panel session — staff only: project members see their own projects, never the whole client / project book.
+  const user = await getCurrentPmsUser();
+  return user !== null && hasPmsStaffRole(user.roles);
 }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { XCircle, ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { iconForCategory } from "@/lib/category-icons";
 import ExportButton, { type ExportFilterParams } from "@/components/lms/ExportButton";
 
 export default function QuickActions({
@@ -18,7 +18,7 @@ export default function QuickActions({
     <div className="flex flex-wrap items-center gap-2">
       <ExportButton params={exportParams} label="Export current view" />
       {CATEGORIES.map((c) => {
-        const Icon = CATEGORY_ICONS[c.slug];
+        const Icon = iconForCategory(c.slug);
         return (
           <Link key={c.slug} href={`/lms/submissions/${c.slug}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
             <Icon className="size-3.5" data-icon="inline-start" />

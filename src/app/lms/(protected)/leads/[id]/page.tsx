@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,6 +31,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireLmsPage("VIEW_LEADS");
   const { id } = await params;
   const lead = await getLeadRecord(id);
   if (!lead) notFound();

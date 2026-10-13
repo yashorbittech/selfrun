@@ -18,15 +18,19 @@ import { getCampaignAnalytics, undoImport, isValidPlatform, campaignKeyFor } fro
 import { getStudent } from "@/lib/tms/students";
 import { getClient } from "@/lib/pms/clients";
 import { getProject } from "@/lib/pms/projects";
-import { canManageCampaigns, canViewLmsAnalytics } from "@/lib/lms-roles";
+import { canManageCampaigns, canViewLmsAnalytics, lmsCan, type LmsPermission } from "@/lib/lms-roles";
 import { check, fail, formInput, str } from "@/lib/ai/agent/entities/helpers";
 import { peek } from "@/lib/ai/agent/records";
-import type { ActionDef, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
+import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
  * Leads (LMS) for the agent. Two things live here, as in the panel: website enquiries by category (status, notes, deal value) and
  * managed leads run through a stage workflow with a portal account, owner, messages and interviews; plus job applications and campaigns.
  */
+
+const L = (p: LmsPermission) => (u: AgentUser) => lmsCan({ roles: u.roles, permissionOverrides: u.permissionOverrides }, p);
+const LEADS_OR_CAREERS = (u: AgentUser) => L("VIEW_LEADS")(u) || L("VIEW_CAREERS")(u);
+const EDIT_LEADS_OR_CAREERS = (u: AgentUser) => L("EDIT_LEADS")(u) || L("MANAGE_CAREERS")(u);
 
 const LEAD_STATUS: string[] = LEAD_STATUSES.map((s) => s.value);
 const APP_STATUS: string[] = CAREER_APPLICATION_STATUSES.map((s) => s.value);
@@ -40,7 +44,7 @@ async function categoryOfLead(id: string): Promise<CategorySlug | null> {
 
 const LEAD: EntityDef = {
   key: "lms.lead", panel: "lms", label: "Enquiry / lead", description: "Website enquiries by category (every lead category together): name, contact, message, status new/in_progress/completed/rejected, notes, deal value, source and campaign.",
-  collection: "leads", titleField: "name", search: ["name", "email", "phone", "message", "campaign", "notes"], read: "staff", write: "staff", canDelete: true, hide: ["resume", "attribution"],
+  collection: "leads", titleField: "name", search: ["name", "email", "phone", "message", "campaign", "notes"], read: "staff", allowRead: L("VIEW_LEADS"), allow: L("EDIT_LEADS"),  write: "staff", canDelete: true, hide: ["resume", "attribution"],
   collections: async () => (await getLeadCategories()).categories.map((c) => collectionNameFor(c.slug as CategorySlug)),
   fields: [
     { key: "name", label: "Name", type: "string" },
@@ -61,7 +65,8 @@ const LEAD: EntityDef = {
       const r = await updateLead(cat, id, c.data);
       return r ? { ok: true, id, record: r } : fail("Lead not found.");
     },
-    remove: async (id) => {
+    remove: async (id, u) => {
+      if (!L("DELETE_LEADS")(u)) return fail("You don't have permission to delete leads.");
       const cat = await categoryOfLead(id);
       if (!cat) return fail("Lead not found.");
       return (await deleteLead(cat, id)) ? { ok: true, id } : fail("Lead not found.");
@@ -71,7 +76,7 @@ const LEAD: EntityDef = {
 
 const MANAGED: EntityDef = {
   key: "lms.managed_lead", panel: "lms", label: "Managed lead", description: "Leads run through a stage workflow (job applicant, intern, trainee, client) with an owner, portal account, messages and timeline.", collection: "lead_records", idType: "string", baseFilter: { deletedAt: null },
-  titleField: "name", search: ["name", "email", "phone", "code"], read: "staff", write: "staff",
+  titleField: "name", search: ["name", "email", "phone", "code"], read: "staff", allowRead: L("VIEW_LEADS"), allow: L("EDIT_LEADS"),  write: "staff",
   fields: [
     { key: "name", label: "Name", type: "string", required: true },
     { key: "email", label: "Email", type: "email", required: true },
@@ -92,7 +97,7 @@ const MANAGED: EntityDef = {
 
 const APPLICATION: EntityDef = {
   key: "lms.career_application", panel: "lms", label: "Job application (careers)", description: "Applications from the careers page: candidate, position, status, notes.", collection: "career_applications", titleField: "name", search: ["name", "email", "positionTitle", "notes"],
-  read: "staff", write: "staff", canDelete: true, hide: ["resume"],
+  read: "staff", allowRead: L("VIEW_CAREERS"), allow: L("MANAGE_CAREERS"),  write: "staff", canDelete: true, hide: ["resume"],
   fields: [
     { key: "status", label: "Status", type: "enum", options: APP_STATUS },
     { key: "notes", label: "Notes", type: "text" },
@@ -112,9 +117,9 @@ export const LMS_ENTITIES: EntityDef[] = [
   LEAD,
   MANAGED,
   APPLICATION,
-  { key: "lms.lead_message", panel: "lms", label: "Lead message", description: "The conversation on a managed lead (internal notes and messages to the lead).", collection: "lead_messages", idType: "string", read: "staff" },
-  { key: "lms.lead_timeline", panel: "lms", label: "Lead timeline", description: "Stage changes, messages, interviews and documents on a managed lead.", collection: "lead_timeline", idType: "string", read: "staff" },
-  { key: "lms.interview", panel: "lms", label: "Interview", description: "Scheduled interviews for applicants.", collection: "portal_interviews", idType: "string", read: "staff" },
+  { key: "lms.lead_message", panel: "lms", label: "Lead message", description: "The conversation on a managed lead (internal notes and messages to the lead).", collection: "lead_messages", idType: "string", read: "staff", allowRead: L("VIEW_LEADS") },
+  { key: "lms.lead_timeline", panel: "lms", label: "Lead timeline", description: "Stage changes, messages, interviews and documents on a managed lead.", collection: "lead_timeline", idType: "string", read: "staff", allowRead: L("VIEW_LEADS") },
+  { key: "lms.interview", panel: "lms", label: "Interview", description: "Scheduled interviews for applicants.", collection: "portal_interviews", idType: "string", read: "staff", allowRead: LEADS_OR_CAREERS },
   { key: "lms.campaign", panel: "lms", label: "Campaign", description: "Ad campaigns imported or tracked, with platform and key.", collection: "campaigns", read: "staff", allowRead: canManageCampaigns },
   { key: "lms.campaign_import", panel: "lms", label: "Campaign import", description: "History of campaign performance and lead-list imports (can be undone).", collection: "campaign_imports", read: "staff", allowRead: canManageCampaigns },
 ];
@@ -133,7 +138,7 @@ const touchTimeline = (leadId: string, u: { id: string }, kind: string, title: s
 
 export const LMS_ACTIONS: ActionDef[] = [
   {
-    key: "lms.advance_stage", panel: "lms", label: "Move a managed lead to its next stage", description: "Advance a managed lead along its workflow (notifies the person in their portal). Stages differ by lead type; only reachable stages are accepted.", level: "staff",
+    key: "lms.advance_stage", panel: "lms", label: "Move a managed lead to its next stage", description: "Advance a managed lead along its workflow (notifies the person in their portal). Stages differ by lead type; only reachable stages are accepted.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id (lms.managed_lead)", type: "ref", ref: "lms.managed_lead", required: true }, { key: "stage", label: `Stage key (${ALL_STAGES.join(", ")})`, type: "string", required: true }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -143,7 +148,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.assign_owner", panel: "lms", label: "Assign (or clear) a managed lead's owner", description: "Give a managed lead to a staff member (admin_users id), or leave ownerId out to unassign.", level: "staff",
+    key: "lms.assign_owner", panel: "lms", label: "Assign (or clear) a managed lead's owner", description: "Give a managed lead to a staff member (admin_users id), or leave ownerId out to unassign.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "ownerId", label: "Staff user id (workspace.user); leave out to unassign", type: "ref", ref: "workspace.user" }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -153,7 +158,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.add_note", panel: "lms", label: "Add an internal note to a managed lead", description: "A staff-only note (not visible to the lead).", level: "staff",
+    key: "lms.add_note", panel: "lms", label: "Add an internal note to a managed lead", description: "A staff-only note (not visible to the lead).", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "body", label: "Note", type: "text", required: true }],
     run: async (v, u) => {
       if (!(await getLeadRecord(String(v.leadId)))) return fail("Lead not found.");
@@ -163,7 +168,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.send_lead_message", panel: "lms", label: "Send a message to a lead (they see it in their portal)", description: "A message the lead will receive in their portal. Use channel document_request to ask for documents.", level: "staff",
+    key: "lms.send_lead_message", panel: "lms", label: "Send a message to a lead (they see it in their portal)", description: "A message the lead will receive in their portal. Use channel document_request to ask for documents.", level: "staff", allow: L("MESSAGE_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "body", label: "Message", type: "text", required: true }, { key: "channel", label: "Kind", type: "enum", options: ["message", "document_request", "interview_reminder"] }],
     run: async (v, u) => {
       if (!(await getLeadRecord(String(v.leadId)))) return fail("Lead not found.");
@@ -173,7 +178,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.link_student", panel: "lms", label: "Link a managed lead to a TMS student", description: "So batch, attendance and assignments show in the lead's portal.", level: "staff",
+    key: "lms.link_student", panel: "lms", label: "Link a managed lead to a TMS student", description: "So batch, attendance and assignments show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "studentId", label: "Student id (tms.student)", type: "ref", ref: "tms.student", required: true }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -187,7 +192,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.link_client", panel: "lms", label: "Link a managed lead to a PMS client (and project)", description: "So milestones, meetings and invoices show in the lead's portal.", level: "staff",
+    key: "lms.link_client", panel: "lms", label: "Link a managed lead to a PMS client (and project)", description: "So milestones, meetings and invoices show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "clientId", label: "Client id (pms.client)", type: "ref", ref: "pms.client", required: true }, { key: "projectId", label: "Project id (pms.project, optional)", type: "ref", ref: "pms.project" }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -208,7 +213,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.schedule_interview", panel: "lms", label: "Schedule an interview for a job applicant lead", description: "Create the interview, notify the applicant in their portal and log it on the timeline. Only for job-applicant leads.", level: "staff",
+    key: "lms.schedule_interview", panel: "lms", label: "Schedule an interview for a job applicant lead", description: "Create the interview, notify the applicant in their portal and log it on the timeline. Only for job-applicant leads.", level: "staff", allow: EDIT_LEADS_OR_CAREERS,
     params: [{ key: "leadId", label: "Managed lead id (job applicant)", type: "ref", ref: "lms.managed_lead", required: true }, ...INTERVIEW_PARAMS],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -223,7 +228,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.schedule_application_interview", panel: "lms", label: "Schedule an interview for a careers application", description: "Interview for an application received through the careers page (notifies the applicant's portal).", level: "staff",
+    key: "lms.schedule_application_interview", panel: "lms", label: "Schedule an interview for a careers application", description: "Interview for an application received through the careers page (notifies the applicant's portal).", level: "staff", allow: L("MANAGE_CAREERS"),
     params: [{ key: "applicationId", label: "Application id (lms.career_application)", type: "ref", ref: "lms.career_application", required: true }, ...INTERVIEW_PARAMS],
     run: async (v, u) => {
       const app = await getApplication(String(v.applicationId));
@@ -238,7 +243,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.set_interview_status", panel: "lms", label: "Mark an interview scheduled / completed / cancelled", description: "Update an interview's status.", level: "staff",
+    key: "lms.set_interview_status", panel: "lms", label: "Mark an interview scheduled / completed / cancelled", description: "Update an interview's status.", level: "staff", allow: EDIT_LEADS_OR_CAREERS,
     params: [{ key: "interviewId", label: "Interview id (lms.interview)", type: "ref", ref: "lms.interview", required: true }, { key: "status", label: "Status", type: "enum", options: ["scheduled", "completed", "cancelled"], required: true }],
     run: async (v) => {
       await updateInterviewStatus(String(v.interviewId), String(v.status) as InterviewStatus);
@@ -246,7 +251,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.remove_interview", panel: "lms", label: "Delete an interview", description: "Remove an interview record.", level: "staff", destructive: true,
+    key: "lms.remove_interview", panel: "lms", label: "Delete an interview", description: "Remove an interview record.", level: "staff", allow: EDIT_LEADS_OR_CAREERS, destructive: true,
     params: [{ key: "interviewId", label: "Interview id (lms.interview)", type: "ref", ref: "lms.interview", required: true }],
     run: async (v) => {
       await deleteInterview(String(v.interviewId));
@@ -254,7 +259,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.bulk_update_lead_status", panel: "lms", label: "Change the status of many enquiries at once", description: "Set the same status on a list of enquiries (ids from lms.lead).", level: "staff",
+    key: "lms.bulk_update_lead_status", panel: "lms", label: "Change the status of many enquiries at once", description: "Set the same status on a list of enquiries (ids from lms.lead).", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "ids", label: "Lead ids (lms.lead)", type: "stringList", required: true }, { key: "status", label: "Status", type: "enum", options: LEAD_STATUS, required: true }],
     run: async (v) => {
       const c = check(validateLeadUpdate({ status: v.status } as never));
@@ -268,7 +273,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.bulk_delete_leads", panel: "lms", label: "Delete many enquiries", description: "Permanently delete enquiries (ids from lms.lead).", level: "staff", destructive: true,
+    key: "lms.bulk_delete_leads", panel: "lms", label: "Delete many enquiries", description: "Permanently delete enquiries (ids from lms.lead).", level: "staff", allow: L("DELETE_LEADS"), destructive: true,
     params: [{ key: "ids", label: "Lead ids (lms.lead)", type: "stringList", required: true }],
     run: async (v) => {
       let deleted = 0;
@@ -280,7 +285,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.bulk_update_application_status", panel: "lms", label: "Change the status of many job applications", description: "Set the same status on a list of careers applications.", level: "staff",
+    key: "lms.bulk_update_application_status", panel: "lms", label: "Change the status of many job applications", description: "Set the same status on a list of careers applications.", level: "staff", allow: L("MANAGE_CAREERS"),
     params: [{ key: "ids", label: "Application ids (lms.career_application)", type: "stringList", required: true }, { key: "status", label: "Status", type: "enum", options: APP_STATUS, required: true }],
     run: async (v) => {
       const c = check(validateApplicationUpdate({ status: v.status } as never));
@@ -318,9 +323,9 @@ export const LMS_REPORTS: ReportDef[] = [
     params: [{ key: "dateFrom", label: "From", type: "dateString" }, { key: "dateTo", label: "To", type: "dateString" }, { key: "status", label: "Status", type: "enum", options: LEAD_STATUS }, { key: "source", label: "Source", type: "string" }],
     run: async (v) => (await getDashboardStats({ dateFrom: v.dateFrom ? new Date(String(v.dateFrom)) : undefined, dateTo: v.dateTo ? new Date(`${String(v.dateTo)}T23:59:59`) : undefined, status: str(v.status) as never, source: str(v.source) ?? undefined })) as unknown as Json,
   },
-  { key: "lms.stale_leads", panel: "lms", label: "Leads nobody has touched", description: "Enquiries left untouched past the stale threshold (follow-ups at risk).", level: "staff", params: [], run: async () => (await getStaleLeadsSummary()) as unknown as Json },
-  { key: "lms.recent_leads", panel: "lms", label: "Recent enquiries", description: "Enquiries that arrived in the last few days.", level: "staff", params: [{ key: "days", label: "Days (default 2)", type: "number" }], run: async (v) => (await getRecentLeadsSummary(clampInt(v.days, 2))) as unknown as Json },
-  { key: "lms.managed_lead_stats", panel: "lms", label: "Managed lead pipeline", description: "Managed leads: total, open, by type and stage, unassigned.", level: "staff", params: [], run: async () => (await getLeadStats()) as unknown as Json },
+  { key: "lms.stale_leads", panel: "lms", label: "Leads nobody has touched", description: "Enquiries left untouched past the stale threshold (follow-ups at risk).", level: "staff", allow: L("VIEW_LEADS"), params: [], run: async () => (await getStaleLeadsSummary()) as unknown as Json },
+  { key: "lms.recent_leads", panel: "lms", label: "Recent enquiries", description: "Enquiries that arrived in the last few days.", level: "staff", allow: L("VIEW_LEADS"), params: [{ key: "days", label: "Days (default 2)", type: "number" }], run: async (v) => (await getRecentLeadsSummary(clampInt(v.days, 2))) as unknown as Json },
+  { key: "lms.managed_lead_stats", panel: "lms", label: "Managed lead pipeline", description: "Managed leads: total, open, by type and stage, unassigned.", level: "staff", allow: L("VIEW_LEADS"), params: [], run: async () => (await getLeadStats()) as unknown as Json },
   {
     key: "lms.campaign_analytics", panel: "lms", label: "Campaign performance", description: "Spend, impressions, clicks, leads, cost per lead and ROI per campaign and platform.", level: "staff", allow: canManageCampaigns,
     params: [{ key: "platform", label: "Platform", type: "string" }, { key: "campaignKey", label: "Campaign key", type: "string" }, { key: "dateFrom", label: "From", type: "dateString" }, { key: "dateTo", label: "To", type: "dateString" }],

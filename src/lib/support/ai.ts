@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
 import { getOpenAI, isOpenAIConfigured, isUnsupportedParamError } from "@/lib/openai";
@@ -38,6 +39,7 @@ async function withPlatformAi<T>(fn: (call: (params: Omit<OpenAI.Responses.Respo
   if (!ownerId) return null;
   return runAsCompany(ownerId, async () => {
     if (!(await isOpenAIConfigured())) return null;
+    setAiFeature("Help assistant");
     const openai = await getOpenAI();
     const call = async (params: Omit<OpenAI.Responses.ResponseCreateParamsNonStreaming, "model" | "store">) => {
       const base = { model: ASSISTANT_MODEL, store: false, ...params } as OpenAI.Responses.ResponseCreateParamsNonStreaming;
@@ -111,7 +113,7 @@ export async function askHelp(input: { messages: ChatTurn[]; context?: Partial<R
     if (!answer || answer.includes(NO_ANSWER)) return { ok: true, answer: noInfo, sources: [], needsRequest: true, ai: true };
     return { ok: true, answer: answer.slice(0, 2500), sources, needsRequest: false, ai: true };
   } catch (err) {
-    if (isBillingLimitError(err)) return { ok: false, error: say("helpBusy", lang) };
+    if (isBillingLimitError(err)) return { ok: false, error: say("helpAiLimit", lang) };
     console.error("[support] help answer failed", err);
     return { ok: false, error: say("helpDown", lang) };
   }

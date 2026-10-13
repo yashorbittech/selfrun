@@ -1,5 +1,6 @@
 "use client";
 
+import { useLmsCan } from "@/components/lms/LmsAccess";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
@@ -27,6 +28,7 @@ export default function DeleteButton({
   /** When provided (e.g. from the row Sheet), deletes in place instead of redirecting. */
   onDeleted?: () => void;
 }) {
+  const allowed = useLmsCan("DELETE_LEADS");
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
@@ -44,6 +46,8 @@ export default function DeleteButton({
       }
     });
   }
+
+  if (!allowed) return null;
 
   return (
     <AlertDialog>

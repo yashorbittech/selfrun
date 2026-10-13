@@ -11,7 +11,7 @@ import CategoryBarChart from "@/components/lms/CategoryBarChart";
 import StatusPieChart from "@/components/lms/StatusPieChart";
 import ConversionFunnel from "@/components/lms/ConversionFunnel";
 import TrendComparisonChart, { buildTrendComparisonData } from "@/components/lms/TrendComparisonChart";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { iconForCategory } from "@/lib/category-icons";
 import { CATEGORY_CHART_COLORS } from "@/lib/category-colors";
 import { LEAD_STATUSES } from "@/lib/lead-status";
 import { cn } from "@/lib/utils";
@@ -51,7 +51,7 @@ export default function CategoryTabs({ categories }: { categories: CategoryPanel
           active={activeCategory.slug}
           onSelect={(k) => setActive(k as CategorySlug)}
           tabs={categories.map((c) => {
-            const Icon = CATEGORY_ICONS[c.slug];
+            const Icon = iconForCategory(c.slug);
             const color = isDark ? CATEGORY_CHART_COLORS[c.slug].dark : CATEGORY_CHART_COLORS[c.slug].light;
             return { key: c.slug, label: c.label, count: c.total, icon: <Icon className="size-3.5" style={{ color: activeCategory.slug === c.slug ? color : undefined }} /> };
           })}

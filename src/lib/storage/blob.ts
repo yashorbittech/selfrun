@@ -49,7 +49,7 @@ export async function putObject(folder: string, filename: string, body: Buffer, 
     contentType: resolvedContentType,
     addRandomSuffix: false, // the key is already a random UUID — don't let Blob mangle it further
   });
-  await meterStorage(body.byteLength);
+  await meterStorage(body.byteLength, { source: folder, detail: `${contentType || "file"} · ${filename}` });
   return { storageKey, contentType: resolvedContentType, size: body.byteLength };
 }
 
@@ -68,5 +68,5 @@ export async function deleteObject(storageKey: string | null | undefined): Promi
   await del(storageKey).catch(() => {
     deleted = false;
   });
-  if (deleted && size > 0) await meterStorage(-size);
+  if (deleted && size > 0) await meterStorage(-size, { source: storageKey.split("/")[0] || "files", detail: `deleted ${storageKey.split("/").slice(1).join("/")}` });
 }

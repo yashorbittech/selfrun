@@ -35,13 +35,16 @@ export default function PermissionOverridesSheet({
   userEmail,
   userRoles,
   initialOverrides,
+  hasCustomRoles,
   open,
   onOpenChange,
 }: {
   userId: string | null;
   userEmail: string | null;
   userRoles: string[];
+  /** The rules set by hand — rules that come from custom roles are not repeated here. */
   initialOverrides: Record<string, boolean>;
+  hasCustomRoles?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -79,6 +82,11 @@ export default function PermissionOverridesSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-5 overflow-y-auto px-4 pb-4">
+          {hasCustomRoles && (
+            <p className="rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs text-muted-foreground">
+              This person also holds custom roles that carry permission rules. A rule you set here wins over theirs; anything left on “Default” follows the roles.
+            </p>
+          )}
           {isSuperAdmin && (
             <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-700 dark:text-amber-400">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />

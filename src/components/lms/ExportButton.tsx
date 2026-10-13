@@ -1,3 +1,6 @@
+"use client";
+
+import { useLmsCan } from "@/components/lms/LmsAccess";
 import { Download } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -14,6 +17,8 @@ export interface ExportFilterParams {
 }
 
 export default function ExportButton({ params, label = "Export CSV" }: { params: ExportFilterParams; label?: string }) {
+  const allowed = useLmsCan("EXPORT_DATA");
+  if (!allowed) return null;
   const query = new URLSearchParams();
   query.set("category", params.category ?? "all");
   if (params.search) query.set("search", params.search);

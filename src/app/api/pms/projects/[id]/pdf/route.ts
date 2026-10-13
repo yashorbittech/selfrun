@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
+import { hasPmsStaffRole } from "@/lib/pms-roles";
 import { getDb } from "@/lib/mongodb";
 import { getProject, getProjectByCode } from "@/lib/pms/projects";
 import { getClient } from "@/lib/pms/clients";
@@ -17,6 +18,8 @@ export async function GET(req: NextRequest, { params }: Context) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Invoices and receipts are billing documents: PMS staff only (a project member doesn't see the client's invoice).
+  if (!hasPmsStaffRole(user.roles)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;
   const searchParams = req.nextUrl.searchParams;

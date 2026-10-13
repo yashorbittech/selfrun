@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import { languageBlock, languageOf, type Lang } from "@/lib/ai/policy";
 import type OpenAI from "openai";
@@ -89,6 +90,7 @@ export async function buildUserContent(text: string, files: File[]): Promise<Use
   const total = files.reduce((n, f) => n + f.size, 0);
   if (total > MAX_UPLOAD_BYTES) throw new AibotsInputError(`Attachments must total ${MAX_UPLOAD_BYTES / 1024 / 1024} MB or less.`);
   const content: UserContent = [];
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   for (const file of files) {
     const ext = fileExtension(file.name);
@@ -139,6 +141,7 @@ export async function popLastTurn(conversationId: string): Promise<UserContent |
       content.push({ type: "input_image", detail: part.detail ?? "auto", ...(part.file_id ? { file_id: part.file_id } : { image_url: part.image_url! }) });
     }
   }
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   for (const it of items.slice(idx)) {
     if (it.id) await openai.conversations.items.delete(it.id, { conversation_id: conversationId });
@@ -163,6 +166,7 @@ export async function startResponse(params: {
   hasKnowledge: boolean;
   signal: AbortSignal;
 }) {
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   const { bot } = params;
   const base: OpenAI.Responses.ResponseCreateParamsStreaming = {

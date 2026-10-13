@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import "server-only";
 import { randomUUID, createHash } from "node:crypto";
 import type { NextRequest } from "next/server";
@@ -134,9 +135,8 @@ function hashIp(ip: string | null): string | null {
 }
 
 function getClientIp(req: NextRequest): string | null {
-  const xff = req.headers.get("x-forwarded-for");
-  if (xff) return xff.split(",")[0]?.trim() || null;
-  return req.headers.get("x-real-ip");
+  const ip = clientIpFrom(req.headers);
+  return ip === "unknown" ? null : ip;
 }
 
 function cookieOptions(maxAge: number) {
@@ -471,13 +471,16 @@ export async function activateVisitorSession(
   };
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** The visitor's id from their cookie — only ever a UUID we issued; anything else is treated as "no visitor". */
 export function getVisitorIdFromRequest(req: NextRequest): string | null {
-  return req.cookies.get(CHAT_VISITOR_COOKIE)?.value || null;
+  const v = req.cookies.get(CHAT_VISITOR_COOKIE)?.value;
+  return v && UUID.test(v) ? v : null;
 }
 
 /** Reads or mints just the long-lived visitor id (no chat session created). */
 export function ensureVisitorCookie(req: NextRequest): { visitorId: string; cookiesToSet: CookieToSet[] } {
-  const existing = req.cookies.get(CHAT_VISITOR_COOKIE)?.value;
+  const existing = getVisitorIdFromRequest(req);
   const visitorId = existing || randomUUID();
   return {
     visitorId,

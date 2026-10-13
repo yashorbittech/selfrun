@@ -48,6 +48,7 @@ import {
   bulkDeactivateAdminUsersAction,
   bulkReactivateAdminUsersAction,
 } from "./actions";
+import type { CustomRoleView } from "@/lib/workspace/custom-roles-shared";
 import RoleEditorSheet from "./RoleEditorSheet";
 import PermissionOverridesSheet from "./PermissionOverridesSheet";
 import CreateUserSheet from "./CreateUserSheet";
@@ -236,6 +237,7 @@ export default function UsersGrid({
   filters,
   hasActiveFilters,
   currentAdminId,
+  customRoles,
 }: {
   rows: AdminUserRow[];
   total: number;
@@ -246,6 +248,7 @@ export default function UsersGrid({
   filters?: React.ReactNode;
   hasActiveFilters?: boolean;
   currentAdminId: string;
+  customRoles: CustomRoleView[];
 }) {
   const [detailUser, setDetailUser] = useState<AdminUserRow | null>(null);
   const [editRolesFor, setEditRolesFor] = useState<AdminUserRow | null>(null);
@@ -410,7 +413,9 @@ export default function UsersGrid({
         key={`roles-${editRolesFor?._id ?? "none"}`}
         userId={editRolesFor?._id ?? null}
         userEmail={editRolesFor?.email ?? null}
-        initialRoles={editRolesFor?.roles ?? []}
+        initialRoles={editRolesFor?.manualRoles ?? []}
+        customRoles={customRoles}
+        initialCustomRoleIds={editRolesFor?.customRoleIds ?? []}
         currentAdminId={currentAdminId}
         open={editRolesFor !== null}
         onOpenChange={(open) => !open && setEditRolesFor(null)}
@@ -421,12 +426,14 @@ export default function UsersGrid({
         userId={editPermissionsFor?._id ?? null}
         userEmail={editPermissionsFor?.email ?? null}
         userRoles={editPermissionsFor?.roles ?? []}
-        initialOverrides={editPermissionsFor?.permissionOverrides ?? {}}
+        initialOverrides={editPermissionsFor?.manualOverrides ?? {}}
+        hasCustomRoles={(editPermissionsFor?.customRoleIds ?? []).length > 0}
         open={editPermissionsFor !== null}
         onOpenChange={(open) => !open && setEditPermissionsFor(null)}
       />
 
       <CreateUserSheet
+        customRoles={customRoles}
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(email, tempPassword) => setTempPasswordInfo({ email, tempPassword })}

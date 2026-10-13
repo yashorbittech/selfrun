@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import { aibotsEvents } from "@/lib/notify/triggers/aibots";
 import "server-only";
 import { toFile } from "openai";
@@ -130,6 +131,7 @@ async function prepare(file: File): Promise<{ upload: Awaited<ReturnType<typeof 
 
 /** Uploads to OpenAI Files and attaches to the bot's vector store WITHOUT waiting for indexing. */
 async function pushToOpenAI(bot: BotDoc, upload: Awaited<ReturnType<typeof toFile>>, meta: { fileDocId: string; title: string; category: string }) {
+  setAiFeature("AI Bots knowledge");
   const openai = await getOpenAI();
   const vectorStoreId = await ensureBotVectorStore(bot);
   const uploaded = await openai.files.create({ file: upload, purpose: "assistants" });
@@ -217,6 +219,7 @@ export async function setBotFileEnabled(bot: BotDoc, fileId: string, enabled: bo
   const f = await getFile(bot._id, fileId);
   if (f.enabled === enabled) return f;
   if (!f.openaiFileId) throw new AibotsInputError("This file never reached OpenAI — replace it with a new upload.");
+  setAiFeature("AI Bots knowledge");
   const openai = await getOpenAI();
   const col = await filesCollection();
   if (!enabled) {
@@ -253,6 +256,7 @@ export async function refreshProcessing(bot: BotDoc): Promise<void> {
   const col = await filesCollection();
   const pending = await col.find({ botId: bot._id, status: "processing", ...notDeleted }).limit(50).toArray();
   if (pending.length === 0) return;
+  setAiFeature("AI Bots knowledge");
   const openai = await getOpenAI();
   await Promise.all(
     pending.map(async (f) => {
@@ -294,6 +298,7 @@ export async function getBotFileText(bot: BotDoc, fileId: string): Promise<{ tex
 export async function purgeBotFiles(bot: BotDoc): Promise<void> {
   const col = await filesCollection();
   const files = await col.find({ botId: bot._id, ...notDeleted }).toArray();
+  setAiFeature("AI Bots knowledge");
   const openai = await getOpenAI();
   await Promise.all(files.map((f) => (f.openaiFileId ? openai.files.delete(f.openaiFileId).catch(() => {}) : null)));
   if (bot.vectorStoreId) await openai.vectorStores.delete(bot.vectorStoreId).catch(() => {});

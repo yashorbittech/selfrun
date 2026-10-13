@@ -1,5 +1,6 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
+import { resolveUsageActor } from "@/lib/platform/billing/usage-actor";
 import type { UsageMetric } from "@/lib/platform/billing/types";
 
 /**
@@ -14,8 +15,38 @@ export function usagePeriod(date = new Date()): string {
   return date.toISOString().slice(0, 7);
 }
 
-export async function recordUsage(metric: UsageMetric, amount: number, date = new Date()): Promise<void> {
+/** Where a use came from (shown in the usage history): a short label, plus an optional detail line (a subject, a file kind). */
+export interface UsageContext {
+  source: string;
+  detail?: string;
+}
+
+export const USAGE_EVENTS_COLLECTION = "usage_events";
+
+/**
+ * Appends one row to the company's usage history (`usage_events`): when, which meter, how much (negative = given back, storage only), and
+ * what for. AI calls have their own richer log (`ai_usage_events`). Never throws — history must not break the work it describes.
+ */
+export async function recordUsageEvent(metric: UsageMetric | "storage_bytes", amount: number, ctx: UsageContext, at = new Date()): Promise<void> {
+  try {
+    if (!Number.isFinite(amount) || amount === 0) return;
+    const db = await getDb();
+    const col = db.collection(USAGE_EVENTS_COLLECTION);
+    if (!eventsIndexed) {
+      eventsIndexed = true;
+      await col.createIndex({ metric: 1, at: -1 }).catch(() => {});
+    }
+    const actor = await resolveUsageActor();
+    await col.insertOne({ at, metric, amount, source: ctx.source.slice(0, 80), detail: (ctx.detail ?? "").slice(0, 200), actorKey: actor.key, actorKind: actor.kind, actorLabel: actor.label });
+  } catch (err) {
+    console.error("[usage] could not record history", err);
+  }
+}
+let eventsIndexed = false;
+
+export async function recordUsage(metric: UsageMetric, amount: number, date = new Date(), ctx?: UsageContext): Promise<void> {
   if (!Number.isFinite(amount) || amount <= 0) return;
+  if (ctx) await recordUsageEvent(metric, amount, ctx, date);
   const db = await getDb();
   await db
     .collection<{ _id: string; metric: UsageMetric; period: string; total: number; updatedAt: Date }>(COLLECTION)

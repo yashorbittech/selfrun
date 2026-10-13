@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canViewCommercialFinance } from "@/lib/fms-roles";
 import { getInvoiceByNumber } from "@/lib/fms/invoices";
 import { renderInvoicePdf } from "@/components/fms/InvoicePdf";
 
@@ -8,6 +9,7 @@ type Context = { params: Promise<{ invoiceNumber: string }> };
 export async function GET(_req: NextRequest, { params }: Context) {
   const user = await getCurrentFmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canViewCommercialFinance(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { invoiceNumber } = await params;
   const invoice = await getInvoiceByNumber(invoiceNumber);

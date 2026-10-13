@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
 import { getOpenAI, isUnsupportedParamError } from "@/lib/openai";
@@ -122,6 +123,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
     return { text: refusalText(lang, "workspace"), blocks: [{ type: "text", markdown: refusalText(lang, "workspace") }], queries: [], tokens: 0, entities: [], rows: 0, outcome: "refused", error: null, notes: ["out of scope"] };
   }
   const view = input.view ?? (await buildCatalogView(input.user));
+  setAiFeature("AI Intelligence");
   const openai = await getOpenAI();
 
   const results = new Map<string, QueryResult>();

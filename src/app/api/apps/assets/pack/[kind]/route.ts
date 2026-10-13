@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/push/rate-limit";
 import { onAppSurface } from "@/lib/saas/request";
@@ -15,7 +16,7 @@ const KINDS = new Set(["pwa", "android", "ios", "desktop", "all"]);
 
 export async function GET(req: Request, { params }: { params: Promise<{ kind: string }> }) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIpFrom(req.headers);
   if (!rateLimit(`pack:${ip}`, 10, 60_000)) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   const kind = (await params).kind.replace(/\.zip$/, "");
   if (!KINDS.has(kind)) return NextResponse.json({ error: "Not found" }, { status: 404 });

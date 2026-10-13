@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type { CmsViewer } from "@/lib/cms/viewer";
 import { can } from "@/lib/cms/viewer";
@@ -437,6 +438,7 @@ const TOOLS: Tool[] = [
     required: ["prompt"],
     permission: "MEDIA_UPLOAD",
     run: async (a, v) => {
+      setAiFeature("Website assistant");
       const client = await getOpenAI();
       const r = await client.images.generate({ model: process.env.WEBSITE_AI_IMAGE_MODEL || "gpt-image-1", prompt: `${s(a.prompt, 900)}. Photorealistic editorial photograph, natural light, no text, no logos, no watermark.`, size: "1536x1024", quality: "medium", n: 1 });
       const b64 = r.data?.[0]?.b64_json;

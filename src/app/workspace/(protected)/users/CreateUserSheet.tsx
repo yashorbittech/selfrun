@@ -23,6 +23,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { ROLE_GROUPS } from "@/lib/workspace/role-catalog";
 import { usePanels } from "@/components/platform/PanelsProvider";
+import type { CustomRoleView } from "@/lib/workspace/custom-roles-shared";
+import CustomRolePicker from "./CustomRolePicker";
 import { createAdminUserAction } from "./actions";
 
 const USER_TYPE_META = [
@@ -60,7 +62,9 @@ export default function CreateUserSheet({
   open,
   onOpenChange,
   onCreated,
+  customRoles,
 }: {
+  customRoles: CustomRoleView[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (email: string, tempPassword: string) => void;
@@ -69,6 +73,7 @@ export default function CreateUserSheet({
   const [userType, setUserType] = useState<"employee" | "contractor" | "partner" | "system">("employee");
   const [notes, setNotes] = useState("");
   const [roles, setRoles] = useState<string[]>([]);
+  const [customIds, setCustomIds] = useState<string[]>([]);
   const [moduleFilter, setModuleFilter] = useState<string>("all");
   // Panel names come from the Panel Registry, like every other listing.
   const panels = usePanels();
@@ -85,6 +90,7 @@ export default function CreateUserSheet({
     setUserType("employee");
     setNotes("");
     setRoles([]);
+    setCustomIds([]);
     setModuleFilter("all");
     setRoleSearch("");
     setError(null);
@@ -92,12 +98,12 @@ export default function CreateUserSheet({
 
   function handleCreate() {
     setError(null);
-    if (roles.length === 0) {
+    if (roles.length === 0 && customIds.length === 0) {
       setError("Please select at least one role to grant access.");
       return;
     }
     startTransition(async () => {
-      const result = await createAdminUserAction(email, roles, userType, notes);
+      const result = await createAdminUserAction(email, roles, userType, notes, customIds);
       if (!result.ok || !result.tempPassword) {
         setError(result.error ?? "Could not create user account.");
         return;
@@ -259,6 +265,10 @@ export default function CreateUserSheet({
                 </p>
               </div>
             </label>
+
+            {!superAdmin && (
+              <CustomRolePicker roles={customRoles} selected={customIds} onToggle={(id) => setCustomIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))} />
+            )}
 
             {!superAdmin && (
               <div className="space-y-3">

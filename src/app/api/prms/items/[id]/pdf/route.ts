@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
+import { hasPrmsStaffRole } from "@/lib/prms-roles";
 import { getDb } from "@/lib/mongodb";
 import { getPrmsSettings } from "@/lib/prms/settings";
 import { getPurchaseOrder, getPurchaseOrderByNumber } from "@/lib/prms/purchase-orders";
@@ -12,6 +13,8 @@ export async function GET(req: NextRequest, { params }: Context) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  // Purchase orders, vendor invoices and the like are procurement documents — staff only (employees have their own requisition pages).
+  if (!hasPrmsStaffRole(user.roles)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;
   const searchParams = req.nextUrl.searchParams;

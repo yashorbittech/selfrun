@@ -10,7 +10,8 @@ import { hashPassword } from "@/lib/lms-auth";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { ROLE_PRESETS, rolesForPreset } from "@/lib/platform/onboarding/catalog";
-import { rolesUseSeat, seatBlockReason } from "@/lib/platform/billing/enforce";
+import { computeEffective, getCustomRoles } from "@/lib/workspace/custom-roles";
+import { newAccountBlockReason, rollbackIfOverSeats } from "@/lib/platform/billing/enforce";
 
 /**
  * Team invitations. Company-scoped (`company_invitations` goes through the
@@ -30,6 +31,8 @@ export interface Invitation {
   name: string;
   preset: string;
   roles: string[];
+  /** Custom roles (`custom-roles.ts`) granted on top of the preset's roles on acceptance. */
+  customRoleIds?: string[];
   departmentId: string | null;
   designationId: string | null;
   /** Platform Panel role granted on acceptance (owner company only; see console/roles.ts). */
@@ -61,6 +64,8 @@ export interface InviteInput {
   designationId?: string | null;
   /** Also grant this Platform Panel role on acceptance (owner company only). */
   platformRoleId?: string | null;
+  /** Custom roles to grant on acceptance (the sender must be allowed to assign them — checked by the caller). */
+  customRoleIds?: string[];
 }
 
 export type InviteResult = { ok: true; email: string } | { ok: false; error: string };
@@ -77,9 +82,9 @@ export async function inviteTeammate(input: InviteInput, inviter: { id: string; 
   if (await db.collection("admin_users").findOne({ email }, { projection: { _id: 1 } })) return { ok: false, error: `${email} already has an account in this workspace.` };
 
   // Outstanding invitations count as promised seats (a re-invite replaces its own earlier one).
-  if (rolesUseSeat(roles)) {
+  {
     const reinvite = (await (await col()).countDocuments({ email, status: "pending", expiresAt: { $gt: new Date() } })) > 0;
-    const seatBlock = await seatBlockReason(reinvite ? 0 : 1, { countPendingInvites: true });
+    const seatBlock = await newAccountBlockReason(roles, { countPendingInvites: true, adding: reinvite ? 0 : 1 });
     if (seatBlock) return { ok: false, error: seatBlock };
   }
 
@@ -95,6 +100,7 @@ export async function inviteTeammate(input: InviteInput, inviter: { id: string; 
     name,
     preset: input.preset,
     roles,
+    customRoleIds: input.customRoleIds ?? [],
     departmentId: input.departmentId || null,
     designationId: input.designationId || null,
     platformRoleId: input.platformRoleId || null,
@@ -159,7 +165,7 @@ export async function acceptInvitation(token: string, input: { name: string; pas
   if (pending && (await users.findOne({ email: pending.email }, { projection: { _id: 1 } }))) return { ok: false, error: "An account with this email already exists — sign in instead." };
 
   const invRoles = pending ? ((await c.findOne({ tokenHash: sha256(token) }, { projection: { roles: 1 } }))?.roles ?? []) : [];
-  if (pending && rolesUseSeat(invRoles) && (await seatBlockReason(1))) {
+  if (pending && (await newAccountBlockReason(invRoles))) {
     return { ok: false, error: "This workspace has no free user seats right now. Ask your admin to free a seat or add seats, then try the link again." };
   }
 
@@ -190,13 +196,19 @@ export async function acceptInvitation(token: string, input: { name: string; pas
     : null;
 
   const adminId = new ObjectId();
+  // Roles = the preset's roles plus whatever the custom roles add (a custom role deleted since the invite is simply skipped).
+  const customFound = await getCustomRoles(inv.customRoleIds ?? []);
+  const eff = computeEffective(inv.roles, {}, customFound);
   await users.insertOne({
     _id: adminId,
     email: inv.email,
     name,
     passwordHash: hashPassword(input.password),
-    roles: inv.roles,
-    permissionOverrides: {},
+    roles: eff.roles,
+    permissionOverrides: eff.overrides,
+    manualRoles: inv.roles,
+    manualOverrides: {},
+    customRoleIds: customFound.map((r) => r.id),
     employeeId: employee?._id ?? null,
     mustChangePassword: false,
     // The invitation link was sent to this address, so it is verified by accepting.
@@ -208,6 +220,11 @@ export async function acceptInvitation(token: string, input: { name: string; pas
     lastLoginAt: null,
     ...(inv.platformRoleId ? { platformRoleId: inv.platformRoleId, platformGrantedAt: new Date(), platformGrantedBy: inv.invitedBy } : {}),
   });
+  const overSeats = await rollbackIfOverSeats(adminId);
+  if (overSeats) {
+    await c.updateOne({ _id: inv._id }, { $set: { status: "pending", acceptedAt: null } });
+    return { ok: false, error: overSeats };
+  }
   if (employee) await db.collection("hrms_employees").updateOne({ _id: employee._id as never }, { $set: { adminUserId: inv.email } });
   await workspaceEvents.inviteAccepted(inv.email, name);
   return { ok: true, adminId };

@@ -6,6 +6,7 @@ import { getCurrentHubUser } from "@/lib/hub-auth";
 import { saveBranding, type BrandingInput, type BrandingResult } from "@/lib/platform/branding";
 import { uploadCompanyLogo, type LogoUploadResult } from "@/lib/platform/branding/logo";
 import { applyTheme } from "@/lib/platform/branding/theme-options";
+import { flagBlockReason, writeBlockReason } from "@/lib/platform/billing/enforce";
 import { markOnboardingStep } from "@/lib/platform/onboarding/state";
 
 async function requireOwner() {
@@ -17,6 +18,8 @@ async function requireOwner() {
 
 export async function saveBrandingAction(input: BrandingInput): Promise<BrandingResult> {
   await requireOwner();
+  const planBlock = (await writeBlockReason()) ?? (await flagBlockReason("whiteLabel", "Your own brand name and logo"));
+  if (planBlock) return { ok: false, errors: { form: planBlock } };
   const res = await saveBranding({
     namePrimary: String(input?.namePrimary ?? ""),
     nameAccent: String(input?.nameAccent ?? ""),
@@ -32,6 +35,8 @@ export async function saveBrandingAction(input: BrandingInput): Promise<Branding
 
 export async function uploadLogoAction(form: FormData): Promise<LogoUploadResult> {
   await requireOwner();
+  const planBlock = (await writeBlockReason()) ?? (await flagBlockReason("whiteLabel", "Your own brand name and logo"));
+  if (planBlock) return { ok: false, error: planBlock } as LogoUploadResult;
   const file = form.get("logo");
   return file instanceof File ? uploadCompanyLogo(file) : { ok: false, error: "Choose an image file." };
 }

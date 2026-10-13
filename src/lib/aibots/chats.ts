@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
 import { getOpenAI } from "@/lib/openai";
@@ -82,6 +83,7 @@ export function autoTitle(message: string): string {
 
 /** Creates the chat row and its OpenAI Conversation (the per-chat context container). */
 export async function createChat(viewer: AibotsViewer, botId: string, firstMessage: string): Promise<ChatDoc> {
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   const conversation = await openai.conversations.create({ metadata: { app: "aibots", bot_id: botId, user_id: viewer.userId } });
   const now = new Date();
@@ -185,6 +187,7 @@ export function parseAttachmentPart(text: string): string | null {
 }
 
 export async function listConversationItems(conversationId: string): Promise<Item[]> {
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   const out: Item[] = [];
   for await (const item of openai.conversations.items.list(conversationId, { order: "asc", limit: 100 })) {

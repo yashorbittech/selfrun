@@ -1,3 +1,4 @@
+import { isBillingLimitError } from "@/lib/platform/billing/enforce";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
 import type OpenAI from "openai";
@@ -19,6 +20,8 @@ import { getVisitorProfile } from "@/lib/chat-visitors";
 // Long-running streamed completion.
 export const maxDuration = 60;
 
+/** What a website visitor sees when the company's AI allowance is used up. */
+const ASSISTANT_PAUSED = "Our assistant is unavailable right now. Please contact us directly, or try again a little later.";
 const GENERIC_ERROR = "Sorry — something went wrong generating a response. Please try again.";
 
 export async function POST(req: NextRequest) {
@@ -118,6 +121,8 @@ export async function POST(req: NextRequest) {
       model: config.model,
       voice: isVoice,
     });
+    // The company's AI allowance is used up (or AI isn't in its plan): the visitor sees a plain notice, never billing details.
+    if (isBillingLimitError(err)) return applyChatCookies(NextResponse.json({ error: ASSISTANT_PAUSED, paused: true }, { status: 503 }), cookiesToSet);
     const res = NextResponse.json({ error: GENERIC_ERROR }, { status: 502 });
     return applyChatCookies(res, cookiesToSet);
   }
@@ -182,7 +187,7 @@ export async function POST(req: NextRequest) {
           responseTimeMs: Date.now() - startedAt,
           voice: isVoice,
         });
-        send({ type: "error", message: GENERIC_ERROR });
+        send({ type: "error", message: isBillingLimitError(err) ? ASSISTANT_PAUSED : GENERIC_ERROR });
       } finally {
         controller.close();
       }

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { getLeadRecord } from "@/lib/lead-management/records";
 import { readLeadAttachmentStream } from "@/lib/lead-management/attachment-storage";
 import type { LeadMessage } from "@/lib/lead-management/types";
@@ -40,7 +40,7 @@ export async function GET(_req: NextRequest, ctx: RouteContext<"/api/lead-messag
     allowed = message.visibility === "portal" && !!lead && lead.externalUserId === portalUser.id;
   }
   if (!allowed) {
-    const lmsUser = await getCurrentLmsUser();
+    const lmsUser = await requireLms("VIEW_LEADS");
     allowed = !!lmsUser;
   }
   if (!allowed) return NextResponse.json({ error: "Forbidden" }, { status: 403 });

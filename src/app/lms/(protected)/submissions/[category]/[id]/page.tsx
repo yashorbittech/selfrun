@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import { notFound } from "next/navigation";
 import { Mail, Phone, Calendar, Tag, Download } from "lucide-react";
@@ -19,6 +20,7 @@ export default async function SubmissionDetailPage({
 }: {
   params: Promise<{ category: string; id: string }>;
 }) {
+  await requireLmsPage("VIEW_LEADS");
   const { category, id } = await params;
   if (!isValidCategory(category)) notFound();
 

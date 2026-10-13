@@ -243,6 +243,8 @@ export interface Entitlements {
   /** null = all panels. */
   modules: Set<string> | null;
   limits: PlanLimits;
+  /** Capability flags the plan includes (`PLAN_FLAGS`); null = every flag (platform owner, demo). */
+  flags: string[] | null;
   /** Suspended/canceled: data stays visible but nothing new can be created. */
   readOnly: boolean;
   /** Days left in the trial (trialing only). */

@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Breadcrumbs from "@/components/lms/Breadcrumbs";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -6,7 +7,8 @@ import NewLeadForm from "./NewLeadForm";
 
 export const metadata = { title: "New lead · Lead Management" };
 
-export default function NewLeadPage() {
+export default async function NewLeadPage() {
+  await requireLmsPage("CREATE_LEADS");
   return (
     <div className="space-y-4">
 <PanelPageHeader

@@ -136,6 +136,32 @@ export function canViewReports(user: RoleContext): boolean {
   );
 }
 
+/** Salary payments, payroll runs and the HR payroll view — HR pay data is for payroll / senior finance and auditors only. */
+export function canViewPayrollFinance(user: RoleContext): boolean {
+  return resolvePermission(user, "fms.canViewPayrollFinance", () =>
+    isFmsAdmin(user) ||
+    user.roles.includes("finance_manager") ||
+    user.roles.includes("accountant") ||
+    user.roles.includes("payroll_accountant") ||
+    user.roles.includes("auditor")
+  );
+}
+
+/** Customers, vendors, invoices, bills and payments — everyone in FMS except an account that only holds the payroll-only role. */
+export function canViewCommercialFinance(user: RoleContext): boolean {
+  return resolvePermission(user, "fms.canViewCommercialFinance", () => user.roles.some((r) => r !== "payroll_accountant" && (FMS_ROLES as readonly string[]).includes(r)));
+}
+
+/** Bank & cash reconciliation. */
+export function canViewBanking(user: RoleContext): boolean {
+  return resolvePermission(user, "fms.canViewBanking", () => canReconcile(user) || canManageBanking(user) || user.roles.includes("auditor"));
+}
+
+/** Financial statements and the ledger (P&L, balance sheet, cash flow, trial balance, general ledger). */
+export function canViewFinancialStatements(user: RoleContext): boolean {
+  return resolvePermission(user, "fms.canViewFinancialStatements", () => canViewReports(user) || user.roles.includes("accountant"));
+}
+
 /** Enter/match bank statement lines and record cash counts (§20/§21, FMS_RECONCILE). */
 export function canReconcile(user: RoleContext): boolean {
   return resolvePermission(user, "fms.canReconcile", () =>

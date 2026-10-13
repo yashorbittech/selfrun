@@ -27,7 +27,7 @@ export const getEntitlements = cache(async (): Promise<Entitlements> => entitlem
 export async function entitlementsFor(companyId: string): Promise<Entitlements> {
   const sub = await getCompanySubscription(companyId);
   if (!sub || sub.status === "internal") {
-    return { planId: null, planName: null, status: "internal", modules: null, limits: { ...UNLIMITED }, readOnly: false, trialDaysLeft: null };
+    return { planId: null, planName: null, status: "internal", modules: null, limits: { ...UNLIMITED }, flags: null, readOnly: false, trialDaysLeft: null };
   }
   const now = new Date();
   // Time-based transitions are applied on read, so an expired trial (→ grace for the
@@ -44,6 +44,8 @@ export async function entitlementsFor(companyId: string): Promise<Entitlements> 
     status,
     modules,
     limits: await effectiveLimitsFor(sub, plan),
+    // A plan that was deleted keeps its company running (no panel locked, no limits): flags follow the same rule.
+    flags: plan ? plan.flags ?? [] : null,
     readOnly: status === "suspended" || status === "canceled",
     trialDaysLeft: status === "trialing" && sub.trialEndsAt ? trialDaysLeft(sub.trialEndsAt, now) : null,
   };

@@ -1,3 +1,4 @@
+import { hasPlanFlag } from "@/lib/platform/billing/enforce";
 import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { companyScope, messagesCol, nextRequestNumber, requestsCol, type MessageDoc, type RequestDoc } from "@/lib/support/db";
@@ -84,6 +85,8 @@ export async function createRequest(caller: CompanyCaller, input: NewRequestInpu
 
   const pick = (list: { key: string; active: boolean }[], key: unknown) => (list.find((o) => o.key === key && o.active) ? String(key) : null);
   const priority = pick(cfg.priorities, input.priority) ?? cfg.priorities.find((p) => p.active)!.key;
+  // Plans with priority support are looked at first: the flag is stamped on the request for the support team.
+  const prioritySupport = await hasPlanFlag("prioritySupport").catch(() => false);
   const now = new Date();
   const number = await nextRequestNumber();
   const id = crypto.randomUUID();
@@ -103,6 +106,7 @@ export async function createRequest(caller: CompanyCaller, input: NewRequestInpu
     description,
     category: pick(cfg.categories, input.category),
     priority,
+    prioritySupport,
     severity: type.kind === "bug" ? pick(cfg.severities, input.severity) : null,
     status: initialStatus(cfg),
     team: null,
@@ -200,7 +204,7 @@ export async function listAllRequests(f: StaffFilters): Promise<{ rows: RequestV
   }
   const col = await requestsCol();
   const page = Math.max(1, Math.floor(f.page ?? 1));
-  const [total, rows] = await Promise.all([col.countDocuments(filter), col.find(filter).sort({ updatedAt: -1 }).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toArray()]);
+  const [total, rows] = await Promise.all([col.countDocuments(filter), col.find(filter).sort({ prioritySupport: -1, updatedAt: -1 }).skip((page - 1) * PAGE_SIZE).limit(PAGE_SIZE).toArray()]);
   return { rows: rows.map(viewRequest), total, page, totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }
 

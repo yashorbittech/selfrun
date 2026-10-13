@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
@@ -166,7 +167,7 @@ export async function getSessionChatUser(token: string | undefined | null): Prom
 export async function getChatUserForAccount(adminId: ObjectId): Promise<CurrentChatUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   const roles = normalizeChatRoles(user.roles);
   if (roles.length === 0) return null; // access revoked mid-session

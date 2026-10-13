@@ -12,6 +12,7 @@ import { INTELLIGENCE_ROLES, INTELLIGENCE_ROLE_META } from "@/lib/intelligence-r
 import { SMMS_ROLES, SMMS_ROLE_META } from "@/lib/smms-roles";
 import { OTS_ROLES, OTS_ROLE_META } from "@/lib/ots-roles";
 import { CMS_ROLES, CMS_ROLE_META } from "@/lib/cms-roles";
+import { LPMS_ROLES, LPMS_ROLE_META } from "@/lib/lpms-roles";
 
 /**
  * Every real role literal that can appear in `admin_users.roles`, grouped by
@@ -71,6 +72,7 @@ export const ROLE_GROUPS: RoleGroup[] = [
   group("Social Media (SMMS)", SMMS_ROLES, SMMS_ROLE_META, "smms"),
   group("Online Tests (OTS)", OTS_ROLES, OTS_ROLE_META, "ots"),
   group("Website CMS", CMS_ROLES, CMS_ROLE_META, "cms"),
+  group("Legal & Documents (LPMS)", LPMS_ROLES, LPMS_ROLE_META, "lpms"),
   {
     module: "LMS (CRM & Learning)",
     panel: "lms",

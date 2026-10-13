@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type { TemplateBlock, LpmsViewer } from "@/lib/lpms/types";
 import { getOpenAI } from "@/lib/openai";
@@ -24,6 +25,7 @@ export async function generateLpmsDocument(
 ): Promise<GenerateResult | { ok: false; error: string }> {
   let openai: any;
   try {
+    setAiFeature("Legal & document AI");
     openai = await getOpenAI();
   } catch (err: any) {
     return { ok: false, error: err?.message ?? "OpenAI client not configured" };

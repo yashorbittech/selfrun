@@ -1,5 +1,6 @@
 "use client";
 
+import { useLmsCan } from "@/components/lms/LmsAccess";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -68,6 +69,7 @@ function SectionLabel({ children, collapsed }: { children: React.ReactNode; coll
 }
 
 export default function LmsSidebar({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
+  const canCareers = useLmsCan("VIEW_CAREERS");
   return (
     <nav className="flex h-full flex-col gap-1 p-3">
       <NavLink href="/lms" label="Dashboard" icon={LayoutDashboard} exact collapsed={collapsed} onNavigate={onNavigate} />
@@ -75,7 +77,7 @@ export default function LmsSidebar({ onNavigate, collapsed = false }: { onNaviga
       <SectionLabel collapsed={collapsed}>Lead Management</SectionLabel>
       <NavLink href="/lms/leads" label="Leads" icon={Users} collapsed={collapsed} onNavigate={onNavigate} />
       <NavLink href="/lms/messages" label="Messages" icon={Inbox} collapsed={collapsed} onNavigate={onNavigate} />
-      <NavLink href="/lms/careers" label="Applicants" icon={Briefcase} collapsed={collapsed} onNavigate={onNavigate} />
+      {canCareers && <NavLink href="/lms/careers" label="Applicants" icon={Briefcase} collapsed={collapsed} onNavigate={onNavigate} />}
     </nav>
   );
 }

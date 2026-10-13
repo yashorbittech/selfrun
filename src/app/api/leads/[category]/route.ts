@@ -131,7 +131,7 @@ export async function POST(req: NextRequest, { params }: Context) {
 }
 
 export async function GET(req: NextRequest, { params }: Context) {
-  if (!(await isAuthorizedLmsRequest(req))) {
+  if (!(await isAuthorizedLmsRequest(req, "VIEW_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -11,24 +11,32 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { ROLE_GROUPS } from "@/lib/workspace/role-catalog";
 import { usePanels } from "@/components/platform/PanelsProvider";
+import type { CustomRoleView } from "@/lib/workspace/custom-roles-shared";
+import CustomRolePicker from "./CustomRolePicker";
 import { updateAdminUserRolesAction } from "./actions";
 
 export default function RoleEditorSheet({
   userId,
   userEmail,
   initialRoles,
+  customRoles,
+  initialCustomRoleIds,
   currentAdminId,
   open,
   onOpenChange,
 }: {
   userId: string | null;
   userEmail: string | null;
+  /** The built-in roles set by hand (custom roles' own roles are not repeated here). */
   initialRoles: string[];
+  customRoles: CustomRoleView[];
+  initialCustomRoleIds: string[];
   currentAdminId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const [roles, setRoles] = useState<string[]>(initialRoles);
+  const [customIds, setCustomIds] = useState<string[]>(initialCustomRoleIds);
   const [moduleFilter, setModuleFilter] = useState<string>("all");
   // Panel names come from the Panel Registry, like every other listing.
   const panels = usePanels();
@@ -45,7 +53,7 @@ export default function RoleEditorSheet({
   function handleSave() {
     if (!userId) return;
     startTransition(async () => {
-      const result = await updateAdminUserRolesAction(userId, roles);
+      const result = await updateAdminUserRolesAction(userId, roles, customIds);
       if (!result.ok) toast.error(result.error ?? "Could not update roles.");
       else {
         toast.success("Roles updated successfully!");
@@ -123,6 +131,10 @@ export default function RoleEditorSheet({
               </p>
             </div>
           </label>
+
+          {!superAdmin && (
+            <CustomRolePicker roles={customRoles} selected={customIds} onToggle={(id) => setCustomIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))} canManage />
+          )}
 
           {!superAdmin && (
             <div className="space-y-3">

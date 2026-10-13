@@ -1,8 +1,6 @@
 import "server-only";
-import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
+import { getOpenAI } from "@/lib/openai";
 import OpenAI from "openai";
-import { OPENAI_NOT_CONNECTED } from "@/lib/openai";
-import { connectionValues } from "@/lib/platform/connections/resolve";
 import { BLOCK_KINDS } from "@/lib/platform/website/starter-packs";
 import type { WebsiteBrief } from "@/lib/platform/website/ai/generate";
 
@@ -107,12 +105,8 @@ Decide, using the categories and sub-categories first, then the country and lang
 If the categories are unusual, custom-typed or broad, use the plain meaning of the words and plan a sensible general site for that kind of work. Several categories: build around the main one and mention the rest, do not list everything. Return minified JSON on a single line.`;
 
 async function client(): Promise<OpenAI> {
-  const creds = await connectionValues("openai");
-  if (!creds?.apiKey) {
-    console.error("[ai-website] OPENAI_API_KEY is not set on this server (add it to the environment and restart).");
-    throw new Error(OPENAI_NOT_CONNECTED);
-  }
-  return new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined, timeout: 90_000, maxRetries: 1 });
+  // The company's metered client: planning the site counts against its AI-token allowance like everything else.
+  return getOpenAI({ timeoutMs: 90_000, maxRetries: 1 });
 }
 
 const s = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim().slice(0, max) : "");
@@ -213,7 +207,6 @@ Plan its website. Return minified JSON on a single line.`;
         response_format: { type: "json_schema", json_schema: { name: "plan", strict: true, schema: SCHEMA as unknown as Record<string, unknown> } },
         messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
       });
-      await recordAiUsage({ usage: res.usage, model: a.model, endpoint: "chat.completions" });
       const plan = repair(JSON.parse(res.choices[0]?.message?.content ?? "null"), b, !!ownerPrompt);
       if (plan) return plan;
     } catch (err) {

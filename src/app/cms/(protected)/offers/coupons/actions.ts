@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLmsOrCms } from "@/lib/lms-auth";
 import { validateCouponInput, type CouponWriteInput } from "@/lib/offers/coupon-validation";
 import { createCoupon, updateCoupon, deleteCoupon, getCoupon } from "@/lib/offers/coupons";
 
 async function requireLmsUser() {
-  const user = await getCurrentLmsUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
+  const u = await requireLmsOrCms("MANAGE_OFFERS", "PAGES_EDIT");
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 function touch() {

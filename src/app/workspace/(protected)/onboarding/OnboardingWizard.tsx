@@ -39,6 +39,7 @@ interface Props {
   profile: ProfileInput;
   existingDepartments: { id: string; name: string }[];
   invitations: { id: string; email: string; name: string; preset: string }[];
+  customRoles: { id: string; name: string }[];
   enabledModules: string[] | null;
   /** The panels offered in step 4 — names and descriptions from the Panel Registry, minus any the platform switched off. */
   panelChoices: { key: string; label: string; description: string; core: boolean }[];
@@ -149,7 +150,7 @@ export default function OnboardingWizard(props: Props) {
           )}
           {step === 0 && <ProfileStep initial={props.profile} timezones={props.timezones} onIndustry={setIndustry} onDone={next} />}
           {step === 1 && <StructureStep industry={industry || "software_services"} existing={props.existingDepartments} onDone={next} />}
-          {step === 2 && <TeamStep departments={props.existingDepartments} invitations={props.invitations} onDone={next} />}
+          {step === 2 && <TeamStep departments={props.existingDepartments} invitations={props.invitations} customRoles={props.customRoles} onDone={next} />}
           {step === 3 && (
             <StepCard title="Branding & theme" description="Your logo, name and theme — applied to your website and every panel.">
               <BrandingThemeForm initial={props.branding} companyName={props.companyName} themes={props.themes} activeKey={props.activeThemeKey} appliedKey={props.appliedThemeKey} submitLabel="Save & continue" onSaved={next} />
@@ -357,9 +358,9 @@ function StructureStep({ industry, existing, onDone }: { industry: Industry; exi
 
 // ── Step 3 ───────────────────────────────────────────────────────────────────
 
-function TeamStep({ departments, invitations, onDone }: { departments: { id: string; name: string }[]; invitations: Props["invitations"]; onDone: () => void }) {
+function TeamStep({ departments, invitations, customRoles, onDone }: { departments: { id: string; name: string }[]; invitations: Props["invitations"]; customRoles: Props["customRoles"]; onDone: () => void }) {
   const router = useRouter();
-  const blank = (): InviteRow => ({ email: "", name: "", preset: "developer", departmentId: "" });
+  const blank = (): InviteRow => ({ email: "", name: "", preset: "developer", departmentId: "", customRoleId: "" });
   const [rows, setRows] = useState<InviteRow[]>([blank(), blank()]);
   const [result, setResult] = useState<{ sent: string[]; errors: string[] } | null>(null);
   const [pending, start] = useTransition();
@@ -369,7 +370,7 @@ function TeamStep({ departments, invitations, onDone }: { departments: { id: str
     <StepCard title="Invite your team" description="Each person gets an email to set their password. Their role decides which panels they see — you can fine-tune it later in Users & Roles.">
       <div className="space-y-2">
         {rows.map((row, i) => (
-          <div key={i} className="grid gap-2 sm:grid-cols-[1.4fr_1fr_1fr_1fr_auto]">
+          <div key={i} className={`grid gap-2 ${customRoles.length > 0 ? "sm:grid-cols-[1.4fr_1fr_1fr_1fr_1fr_auto]" : "sm:grid-cols-[1.4fr_1fr_1fr_1fr_auto]"}`}>
             <Input type="email" placeholder="email@company.com" aria-label="Email" value={row.email} onChange={(e) => update(i, { email: e.target.value })} />
             <Input placeholder="Name (optional)" aria-label="Name" value={row.name} onChange={(e) => update(i, { name: e.target.value })} />
             <select className={selectClass} aria-label="Role" value={row.preset} onChange={(e) => update(i, { preset: e.target.value })}>
@@ -379,6 +380,14 @@ function TeamStep({ departments, invitations, onDone }: { departments: { id: str
                 </option>
               ))}
             </select>
+            {customRoles.length > 0 && (
+              <select className={selectClass} aria-label="Custom role" value={row.customRoleId ?? ""} onChange={(e) => update(i, { customRoleId: e.target.value })}>
+                <option value="">No custom role</option>
+                {customRoles.map((r) => (
+                  <option key={r.id} value={r.id}>+ {r.name}</option>
+                ))}
+              </select>
+            )}
             <select className={selectClass} aria-label="Department" value={row.departmentId ?? ""} onChange={(e) => update(i, { departmentId: e.target.value })}>
               <option value="">No department</option>
               {departments.map((d) => (

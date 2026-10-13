@@ -2,7 +2,7 @@ import "server-only";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { enabledModules } from "@/lib/platform/onboarding/state";
 import type { EventArea } from "@/lib/platform/events/catalog";
-import { hasLmsAccess } from "@/lib/lms-roles";
+import { hasLmsAccess, lmsCan } from "@/lib/lms-roles";
 import { hasPmsStaffRole, normalizePmsRoles } from "@/lib/pms-roles";
 import { canViewAllEmployees } from "@/lib/hrms-roles";
 import { hasFmsAccess } from "@/lib/fms-roles";
@@ -34,7 +34,7 @@ function roleAllows(area: Area, user: Pick<AccessUser, "roles" | "permissionOver
   if (roles.includes("super_admin")) return true;
   switch (area) {
     case "leads":
-      return hasLmsAccess(roles);
+      return hasLmsAccess(roles) && lmsCan({ roles, permissionOverrides: user.permissionOverrides }, "VIEW_LEADS");
     case "clients":
     case "projects":
     case "tasks":

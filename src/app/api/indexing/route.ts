@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
+import { hasBearer } from "@/lib/security/bearer";
 import { notifyGoogleIndexing, IndexingNotificationType } from "@/lib/google-indexing";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 
 export async function POST(req: Request) {
-  const secret = process.env.INDEXING_API_SECRET;
-  
-  if (secret) {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader || authHeader !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  // Fail closed: with no secret configured nobody can call this (it used to be open), and the comparison is constant-time.
+  if (!hasBearer(req, process.env.INDEXING_API_SECRET)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const body = await req.json();
@@ -21,6 +16,14 @@ export async function POST(req: Request) {
     };
 
     const targetUrl = url || (slug ? `${await companySiteUrl()}/careers/${slug}` : null);
+    // Only this company's own site can be submitted — never an arbitrary address.
+    if (targetUrl) {
+      try {
+        if (new URL(targetUrl).host !== new URL(await companySiteUrl()).host) return NextResponse.json({ error: "That address is not part of this company's website." }, { status: 400 });
+      } catch {
+        return NextResponse.json({ error: "Invalid URL." }, { status: 400 });
+      }
+    }
 
     if (!targetUrl) {
       return NextResponse.json(

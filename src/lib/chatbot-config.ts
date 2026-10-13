@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type { Collection } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -427,6 +428,7 @@ export async function updateChatbotConfig(
  */
 export async function ensureVectorStore(): Promise<string> {
   const config = await getChatbotConfig();
+  setAiFeature("Chatbot knowledge base");
   const openai = await getOpenAI();
 
   if (config.vectorStoreId) {

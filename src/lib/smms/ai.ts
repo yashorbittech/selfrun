@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
 import { getOpenAI, isOpenAIConfigured, isUnsupportedParamError } from "@/lib/openai";
@@ -129,6 +130,7 @@ async function guard(userId: string, ai: AiSettings) {
 export async function generateStructured<T>(opts: { userId: string; schema: SchemaName; input: string; normalize: (v: unknown) => T }): Promise<AiResult<T>> {
   const { ai } = await getSettings();
   await guard(opts.userId, ai);
+  setAiFeature("Social media AI");
   const openai = await getOpenAI();
   const started = Date.now();
   const params: OpenAI.Responses.ResponseCreateParamsNonStreaming = {
@@ -164,6 +166,7 @@ export async function generateImage(opts: { userId: string; prompt: string; size
   await guard(opts.userId, ai);
   const prompt = opts.prompt.trim();
   if (prompt.length < 10) throw new SmmsInputError("Write (or generate) an image prompt first.");
+  setAiFeature("Social media AI");
   const openai = await getOpenAI();
   const started = Date.now();
   const res = await openai.images.generate({ model: ai.imageModel, prompt: prompt.slice(0, 4000), size: opts.size, quality: ai.imageQuality, n: 1 });

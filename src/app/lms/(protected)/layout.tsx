@@ -2,6 +2,8 @@ import { panelUnread } from "@/lib/notify";
 import { runLmsSweep } from "@/lib/notify/sweeps";
 import { redirect } from "next/navigation";
 import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { hasLmsAccess, lmsCan, LMS_PERMISSIONS } from "@/lib/lms-roles";
+import { LmsAccessProvider } from "@/components/lms/LmsAccess";
 import LmsSidebarShell from "@/components/lms/LmsSidebarShell";
 import LmsTopbar from "@/components/lms/LmsTopbar";
 import { SidebarCollapseProvider } from "@/components/lms/SidebarCollapseContext";
@@ -14,12 +16,17 @@ export default async function ProtectedLmsLayout({ children }: { children: React
   await requireModule("lms");
   const lmsUser = await getCurrentLmsUser();
   if (!lmsUser) redirect("/lms/login");
+  // A staff account with no CRM role (HR, projects, finance …) has nothing to open here.
+  if (!hasLmsAccess(lmsUser.roles)) redirect("/workspace");
 
   // Time-based alerts (stale leads / applications) become real notifications once a day; the bell counts what is unread for this person.
   await runLmsSweep().catch(() => {});
-  const unread = await panelUnread(lmsUser.id, "lms");
+  const unread = await panelUnread(lmsUser.id, "lms").catch(() => 0);
+
+  const allowed = LMS_PERMISSIONS.filter((p) => lmsCan(lmsUser, p));
 
   return (
+    <LmsAccessProvider allowed={allowed}>
     <TooltipProvider delay={200}>
       <SidebarCollapseProvider>
         <div className="relative flex h-screen gap-3 overflow-hidden bg-canvas p-3">
@@ -58,5 +65,6 @@ export default async function ProtectedLmsLayout({ children }: { children: React
       </SidebarCollapseProvider>
       <Toaster position="top-right" richColors closeButton />
     </TooltipProvider>
+    </LmsAccessProvider>
   );
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { runExpirySweep } from "@/lib/wallet/expiry";
 import { forEachCompany } from "@/lib/platform/tenancy/context";
 
@@ -20,7 +20,7 @@ function isScheduler(req: NextRequest): boolean {
 export async function POST(req: NextRequest) {
   // The scheduler sweeps every company; a signed-in LMS user sweeps only their own.
   if (isScheduler(req)) return NextResponse.json({ companies: await forEachCompany(() => runExpirySweep()) });
-  if (!(await getCurrentLmsUser())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await requireLms("MANAGE_WALLET"))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json(await runExpirySweep());
 }
 export const GET = POST;

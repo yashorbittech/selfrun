@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
 import { validateSubscription } from "@/lib/offers/subscription-validation";
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   // Honeypot: real users never fill this hidden field.
   if (typeof body.website === "string" && body.website.trim() !== "") return NextResponse.json({ ok: true });
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = clientIpFrom(req.headers);
   if (tooMany(ip)) return NextResponse.json({ error: "Too many requests. Please try again in a few minutes." }, { status: 429 });
 
   const v = validateSubscription(body);

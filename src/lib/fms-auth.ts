@@ -1,6 +1,8 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { WORKSPACE_SESSION_COOKIE, workspaceSessionAccountId } from "@/lib/workspace-session";
 import { getDb } from "@/lib/mongodb";
@@ -156,7 +158,7 @@ export async function getSessionFmsUser(token: string | undefined | null): Promi
 export async function getFmsUserForAccount(adminId: ObjectId): Promise<CurrentFmsUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   const roles = normalizeFmsRoles(user.roles);
   // Access can be revoked mid-session by clearing the roles array.
@@ -240,3 +242,11 @@ export async function changeOwnFmsPassword(
 }
 
 export { FMS_ROLES };
+
+/** Page guard for a section of FMS: the signed-in user when `allowed(user)`, else back to the FMS home (or sign-in). */
+export async function requireFmsPage(allowed: (user: { roles: readonly string[]; permissionOverrides?: Record<string, boolean> | null }) => boolean): Promise<CurrentFmsUser> {
+  const user = await getCurrentFmsUser();
+  if (!user) redirect("/fms/login");
+  if (!allowed(user)) redirect("/fms");
+  return user;
+}

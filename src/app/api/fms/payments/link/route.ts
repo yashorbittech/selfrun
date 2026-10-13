@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { createPaymentLink, CreatePaymentLinkInput } from "@/lib/fms/payments/links";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canManagePaymentLinks } from "@/lib/fms-roles";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
 export async function POST(req: Request) {
   // Creating a payment link (and stamping a transaction) is a finance-staff action — never public.
   const staff = await getCurrentFmsUser();
   if (!staff) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+  if (!canManagePaymentLinks(staff)) return NextResponse.json({ ok: false, error: "You don't have permission to create payment links." }, { status: 403 });
   try {
     let body: Record<string, unknown>;
     try {

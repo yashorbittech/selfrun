@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
+import type { LmsPermission } from "@/lib/lms-roles";
 import {
   createInterview,
   deleteInterview,
@@ -15,9 +16,9 @@ import { getApplication } from "@/lib/career-applications";
 import { notifyPortalUser } from "@/lib/portal/notifications";
 import { externalUsers } from "@/lib/portal-auth";
 
-async function requireLms() {
-  const u = await getCurrentLmsUser();
-  if (!u) throw new Error("Unauthorized");
+async function requireLmsUser(permission: LmsPermission) {
+  const u = await requireLms(permission);
+  if (!u) throw new Error("Forbidden");
   return u;
 }
 
@@ -30,7 +31,7 @@ export async function addInterviewAction(
   applicationId: string,
   input: { title: string; mode: InterviewMode; scheduledAt: string; durationMins: number; round?: string; location?: string; meetingLink?: string; panel?: string; notes?: string }
 ): Promise<{ error?: string }> {
-  const u = await requireLms();
+  const u = await requireLmsUser("MANAGE_CAREERS");
   if (!input.title.trim() || !input.scheduledAt) return { error: "Title and date/time are required." };
   const app = await getApplication(applicationId);
   if (!app) return { error: "Application not found." };
@@ -56,20 +57,20 @@ export async function addInterviewAction(
 }
 
 export async function setInterviewStatusAction(applicationId: string, interviewId: string, status: InterviewStatus): Promise<{ error?: string }> {
-  await requireLms();
+  await requireLmsUser("MANAGE_CAREERS");
   await updateInterviewStatus(interviewId, status);
   revalidatePath(`/lms/careers/applicants/${applicationId}`);
   return {};
 }
 
 export async function removeInterviewAction(applicationId: string, interviewId: string): Promise<{ error?: string }> {
-  await requireLms();
+  await requireLmsUser("MANAGE_CAREERS");
   await deleteInterview(interviewId);
   revalidatePath(`/lms/careers/applicants/${applicationId}`);
   return {};
 }
 
 export async function listInterviewsAction(applicationId: string): Promise<SerializedInterview[]> {
-  await requireLms();
+  await requireLmsUser("VIEW_CAREERS");
   return listInterviewsForApplication(applicationId);
 }

@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelListFilters from "@/components/platform/panel/PanelListFilters";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Link from "next/link";
@@ -23,6 +24,7 @@ const TYPE_LABEL: Record<LeadType, string> = {
 };
 
 export default async function LeadsDashboardPage() {
+  await requireLmsPage("VIEW_LEADS");
   const [stats, recent] = await Promise.all([getLeadStats(), listLeadRecords({ limit: 12 })]);
 
   return (

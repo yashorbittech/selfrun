@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { headers, cookies } from "next/headers";
@@ -135,8 +136,8 @@ function digits(phone: string): string {
 async function requestIpHash(): Promise<string | null> {
   try {
     const h = await headers();
-    const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "";
-    if (!ip) return null;
+    const ip = clientIpFrom(h);
+    if (!ip || ip === "unknown") return null;
     return createHash("sha256").update(`yo-referral:${ip}`).digest("hex").slice(0, 32);
   } catch {
     return null; // called outside a request scope (script/test) — no signal, never an error

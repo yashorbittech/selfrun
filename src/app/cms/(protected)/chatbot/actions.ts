@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { aiBlockReason, isBillingLimitError } from "@/lib/platform/billing/enforce";
+import { requireLmsOrCms } from "@/lib/lms-auth";
 import { deleteConversation, bulkDeleteConversations } from "@/lib/chat-conversations";
 import {
   updateChatbotConfig,
@@ -19,9 +20,9 @@ import { afterForCompany } from "@/lib/platform/tenancy/context";
 // Every action re-checks the session — render-time gating on the page alone
 // is not a security boundary for the action endpoint.
 async function requireLmsUser() {
-  const lmsUser = await getCurrentLmsUser();
-  if (!lmsUser) throw new Error("Unauthorized");
-  return lmsUser;
+  const u = await requireLmsOrCms("MANAGE_CHATBOT");
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 async function crawlBaseUrl(): Promise<string> {
@@ -64,6 +65,8 @@ export async function bulkDeleteConversationsAction(ids: string[]): Promise<{ de
 export async function triggerWebsiteIndexAction(mode: "full" | "incremental"): Promise<{ runId?: string; error?: string }> {
   const lmsUser = await requireLmsUser();
   if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
+  const aiBlock = await aiBlockReason();
+  if (aiBlock) return { error: aiBlock };
   const incremental = mode === "incremental";
   const { runId, logger } = await beginWebsiteIndex({ triggeredBy: lmsUser.email, incremental });
   const baseUrl = await crawlBaseUrl();
@@ -75,6 +78,8 @@ export async function triggerWebsiteIndexAction(mode: "full" | "incremental"): P
 export async function reindexPagesAction(pageIds: string[]): Promise<{ runId?: string; error?: string }> {
   const lmsUser = await requireLmsUser();
   if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
+  const aiBlock = await aiBlockReason();
+  if (aiBlock) return { error: aiBlock };
   const urls = await urlsForPageIds(pageIds);
   if (urls.length === 0) return { error: "No matching pages selected." };
   const { runId, logger } = await beginWebsiteIndex({ triggeredBy: lmsUser.email, onlyUrls: urls });
@@ -89,7 +94,15 @@ export async function reindexPagesAction(pageIds: string[]): Promise<{ runId?: s
 export async function reindexPdfAction(id: string): Promise<{ error?: string }> {
   const lmsUser = await requireLmsUser();
   if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
-  const ok = await reindexPdf(id, lmsUser.email);
+  const aiBlock = await aiBlockReason();
+  if (aiBlock) return { error: aiBlock };
+  let ok = false;
+  try {
+    ok = await reindexPdf(id, lmsUser.email);
+  } catch (err) {
+    if (isBillingLimitError(err)) return { error: err.message };
+    throw err;
+  }
   if (!ok) return { error: "Document not found." };
   revalidatePath("/cms/chatbot/knowledge-base");
   return {};

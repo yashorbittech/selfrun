@@ -8,6 +8,7 @@ import { enabledModules } from "@/lib/platform/onboarding/state";
 import { currentCompanyId, isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
+import { writeBlockReason } from "@/lib/platform/billing/enforce";
 import { navAllows, resolveNav, type NavContext, type ResolvedNav } from "@/lib/workspace/nav";
 
 /**
@@ -80,8 +81,15 @@ export async function requireWorkspaceAction(key: string): Promise<CurrentHubUse
   const user = await getCurrentHubUser();
   if (!user) throw new Error("Unauthorized");
   if (user.mustChangePassword || !(await checkWorkspaceAccess(user, key))) throw new Error("Forbidden");
+  // A suspended / canceled subscription is read-only everywhere — except the pages that exist to fix it (plan, invoices, usage, security).
+  if (!READ_ONLY_OK.has(key)) {
+    const readOnly = await writeBlockReason();
+    if (readOnly) throw new Error(readOnly);
+  }
   return user;
 }
+
+const READ_ONLY_OK = new Set(["company.billing", "company.invoices", "company.usage", "company.security"]);
 
 /** Route-handler guard: the user, or the 401 / 403 response to return. */
 export async function authorizeWorkspaceApi(key: string): Promise<{ ok: true; user: CurrentHubUser } | { ok: false; response: NextResponse }> {

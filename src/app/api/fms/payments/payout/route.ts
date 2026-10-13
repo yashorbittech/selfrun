@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canApproveTransactions } from "@/lib/fms-roles";
 
 export async function POST(req: Request) {
   try {
@@ -8,6 +9,8 @@ export async function POST(req: Request) {
     if (!currUser) {
       return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
     }
+    // Money leaves the company here: only roles that may approve transactions can start a payout.
+    if (!canApproveTransactions(currUser)) return NextResponse.json({ ok: false, error: "You don't have permission to make payouts." }, { status: 403 });
 
     const body = await req.json();
     const { payeeName, payeeAccount, amount, channel, sourceModule, refNotes, sourceTransactionId } = body;

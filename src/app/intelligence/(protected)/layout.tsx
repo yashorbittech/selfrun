@@ -44,7 +44,7 @@ export default async function ProtectedIntelligenceLayout({ children }: { childr
 
             <div className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3">
               <div className="lms-surface relative z-30 shrink-0 rounded-3xl border border-border/40 bg-background/95 shadow-none backdrop-blur-md dark:bg-card/85">
-                <IntelligenceTopbar roles={user.roles} unread={await panelUnread(user.id, "intelligence")} />
+                <IntelligenceTopbar roles={user.roles} unread={await panelUnread(user.id, "intelligence").catch(() => 0)} />
               </div>
               <PanelBackBar />
               <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">{children}</main>

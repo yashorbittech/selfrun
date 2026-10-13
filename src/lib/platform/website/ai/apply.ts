@@ -1,3 +1,4 @@
+import { aiBlockReason, isBillingLimitError, writeBlockReason } from "@/lib/platform/billing/enforce";
 import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
@@ -163,6 +164,10 @@ export interface AiWebsiteVersion {
   content: Content;
 }
 
+const MAX_REGENERATIONS_PER_DAY = 5;
+/** Room the AI allowance must have to start writing a website (a full generation uses roughly 100–200K tokens; a rewrite about 80K). */
+const WEBSITE_MIN_TOKENS = Math.max(1, Number(process.env.WEBSITE_AI_MIN_TOKENS) || 80_000);
+
 async function versionsCol() {
   return (await getDb()).collection<AiWebsiteVersion>("website_versions");
 }
@@ -216,6 +221,15 @@ export async function generateAiWebsite(opts: { force?: boolean; ownerPrompt?: s
   const prev = await col.findOne({ _id: STATE_ID });
   if (prev?.status === "running" && Date.now() - new Date(prev.startedAt).getTime() < STALE_MS) return { ok: false, error: "A website is already being generated. Give it a few minutes." };
   if (prev?.status === "done" && !opts.force) return { ok: false, error: "This company's website was already generated." };
+  // The generation is paid for by the platform, so it is capped per company: a few rewrites a day, none while the subscription is suspended.
+  const readOnly = await writeBlockReason();
+  if (readOnly) return { ok: false, error: readOnly };
+  const today = await (await versionsCol()).countDocuments({ source: "generated", createdAt: { $gt: new Date(Date.now() - 24 * 3600 * 1000) } });
+  if (today >= MAX_REGENERATIONS_PER_DAY) return { ok: false, error: `You can generate the website up to ${MAX_REGENERATIONS_PER_DAY} times a day. Try again tomorrow, or edit the pages in the builder.` };
+
+  // The website draws on the company's AI-token allowance like every other AI feature: refuse up front when it can't be finished.
+  const aiBlock = await aiBlockReason(WEBSITE_MIN_TOKENS);
+  if (aiBlock) return { ok: false, error: aiBlock };
 
   const startedAt = new Date();
   await col.updateOne({ _id: STATE_ID }, { $set: { status: "running", startedAt, model: WEBSITE_MODEL() }, $unset: { error: "", finishedAt: "" } }, { upsert: true });
@@ -294,7 +308,7 @@ export async function generateAiWebsite(opts: { force?: boolean; ownerPrompt?: s
     await cmsEvents.aiWebsite(true, `${pages} pages were written. Review and publish them in the CMS.`);
     return { ok: true, pages };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "The website could not be generated.";
+    const message = isBillingLimitError(err) ? `${err.message} Your existing website was not changed.` : err instanceof Error ? err.message : "The website could not be generated.";
     console.error("[ai-website] failed", err);
     await col.updateOne({ _id: STATE_ID }, { $set: { status: "failed", finishedAt: new Date(), error: message.slice(0, 500) } });
     await cmsEvents.aiWebsite(false, message);

@@ -1,5 +1,8 @@
 import { NextRequest } from "next/server";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
+import { canViewAllEmployees } from "@/lib/hrms-roles";
+import { hasBearer } from "@/lib/security/bearer";
+import { hasPlanFlag } from "@/lib/platform/billing/enforce";
 
 /**
  * Guards HRMS-only API routes (e.g. the employee CSV export). Accepts either a
@@ -7,10 +10,10 @@ import { getCurrentHrmsUser } from "@/lib/hrms-auth";
  * cron / external tooling. Mirrors `src/lib/api-auth.ts`.
  */
 export async function isAuthorizedHrmsRequest(req: NextRequest): Promise<boolean> {
-  const secret = process.env.HRMS_API_SECRET;
-  const authHeader = req.headers.get("authorization");
-  if (secret && authHeader === `Bearer ${secret}`) return true;
+  // Machine access with the shared secret is the plan's "API access" feature.
+  if (hasBearer(req, process.env.HRMS_API_SECRET) && (await hasPlanFlag("apiAccess"))) return true;
 
-  // The panel session, or the Workspace session of an account with this panel's role.
-  return (await getCurrentHrmsUser()) !== null;
+  // The panel session — and only someone who may see EVERY employee: the export is the whole roster (personal details, contacts).
+  const user = await getCurrentHrmsUser();
+  return user !== null && canViewAllEmployees(user);
 }

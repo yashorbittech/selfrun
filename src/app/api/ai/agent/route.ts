@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { detectLanguage, say } from "@/lib/ai/policy";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { BillingLimitError } from "@/lib/platform/billing/enforce";
-import { currentAgentUser, hasLevel, PANEL_ROLES } from "@/lib/ai/agent/access";
+import { agentPlanState, currentAgentUser, hasLevel, PANEL_ROLES } from "@/lib/ai/agent/access";
 import { decideProposal, runAgent } from "@/lib/ai/agent/engine";
 import { MAX_ATTACHMENTS } from "@/lib/ai/agent/attachments";
 import type { AgentUser, Attachment, ClientMessage } from "@/lib/ai/agent/types";
@@ -56,6 +56,13 @@ export async function POST(req: NextRequest) {
     user = await currentAgentUser();
   }
   if (!user) return NextResponse.json({ error: say("signIn", lang) }, { status: 401 });
+
+  if (panel !== "platform" && panel !== "portal") {
+    const plan = await agentPlanState();
+    user.blockedPanels = plan.blockedPanels;
+    user.readOnly = plan.readOnly;
+    if (plan.blockedPanels.includes(panel)) return NextResponse.json({ error: "This panel isn't included in your plan. Upgrade in Settings → Billing to use it." }, { status: 403 });
+  }
 
   if (panel === "platform") {
     if (!(await isPlatformOwnerContext())) return NextResponse.json({ error: "This assistant is for the platform team." }, { status: 403 });

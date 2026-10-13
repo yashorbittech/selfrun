@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLmsOrCms } from "@/lib/lms-auth";
 import { validateUsageRuleInput, type UsageRuleWriteInput } from "@/lib/wallet/usage-rule-validation";
 import { createUsageRule, updateUsageRule, deleteUsageRule, getUsageRule } from "@/lib/wallet/usage-rules";
 
 async function requireLmsUser() {
-  const user = await getCurrentLmsUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
+  const u = await requireLmsOrCms("MANAGE_WALLET");
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 export async function saveUsageRuleAction(id: string | null, input: Partial<UsageRuleWriteInput>): Promise<{ error?: string; fieldErrors?: Record<string, string> }> {

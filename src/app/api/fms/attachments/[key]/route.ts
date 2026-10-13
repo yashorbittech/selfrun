@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canViewCommercialFinance, canViewPayrollFinance } from "@/lib/fms-roles";
 import { readAttachmentStream } from "@/lib/fms/attachment-storage";
 import { getDb } from "@/lib/mongodb";
 
@@ -13,6 +14,7 @@ type Context = { params: Promise<{ key: string }> };
 export async function GET(_req: NextRequest, { params }: Context) {
   const user = await getCurrentFmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!canViewCommercialFinance(user) && !canViewPayrollFinance(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { key } = await params;
 

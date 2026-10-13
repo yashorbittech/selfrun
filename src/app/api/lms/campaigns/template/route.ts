@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { isValidImportKind, isValidPlatform } from "@/lib/campaign-platforms";
 import { templateHeadersFor } from "@/lib/campaign-csv";
 
 export async function GET(req: NextRequest) {
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("MANAGE_CAMPAIGNS");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const sp = req.nextUrl.searchParams;

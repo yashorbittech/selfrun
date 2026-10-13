@@ -502,6 +502,7 @@ export const PANEL_ROUTES: Record<string, { path: string; name: string }[]> = {
     { path: "/workspace/prms/rfqs", name: "Prms \u203a Rfqs" },
     { path: "/workspace/prms/subscriptions", name: "Prms \u203a Subscriptions" },
     { path: "/workspace/prms/vendors", name: "Prms \u203a Vendors" },
+    { path: "/workspace/roles", name: "Roles" },
     { path: "/workspace/settings", name: "Company settings" },
     { path: "/workspace/settings/app", name: "Settings \u203a App" },
     { path: "/workspace/settings/apps", name: "Apps" },

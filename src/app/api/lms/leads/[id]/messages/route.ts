@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { listLeadMessages } from "@/lib/lead-management/messages";
 import { clearLeadPortalUnread } from "@/lib/lead-management/records";
 
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * is the same "staff has now seen this" moment as opening the full lead page.
  */
 export async function GET(_req: Request, ctx: RouteContext<"/api/lms/leads/[id]/messages">) {
-  const user = await getCurrentLmsUser();
+  const user = await requireLms("VIEW_LEADS");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;

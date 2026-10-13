@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { repairPortalAccounts, type RepairResult } from "@/lib/portal/repair";
 
 /** Staff: put back the portal accounts of everyone already on file (leads / applications) who can't sign in. */
 export async function repairPortalAccountsAction(): Promise<{ ok: true; result: RepairResult } | { ok: false; error: string }> {
-  const user = await getCurrentLmsUser();
+  const user = await requireLms("MANAGE_CAREERS");
   if (!user) return { ok: false, error: "Unauthorized" };
   try {
     const result = await repairPortalAccounts();

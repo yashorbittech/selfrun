@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import { notFound } from "next/navigation";
 import Breadcrumbs from "@/components/lms/Breadcrumbs";
@@ -28,6 +29,7 @@ export default async function SubmissionsListPage({
     sortDir?: string;
   }>;
 }) {
+  await requireLmsPage("VIEW_LEADS");
   const { category } = await params;
   if (!isValidCategory(category)) notFound();
 

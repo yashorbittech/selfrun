@@ -83,7 +83,7 @@ export default function UserDetailDrawer({
 
       const initial: Record<string, OverrideState> = {};
       for (const g of PERMISSION_GROUPS) {
-        for (const p of g.permissions) initial[p.key] = toState(user.permissionOverrides[p.key]);
+        for (const p of g.permissions) initial[p.key] = toState(user.manualOverrides[p.key]);
       }
       setOverrideState(initial);
     }

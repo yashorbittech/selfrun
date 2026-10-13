@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -17,6 +18,7 @@ export default async function AttributedLeadsPage({
 }: {
   searchParams: Promise<CampaignSearchParams & { page?: string; search?: string; leadStatus?: string }>;
 }) {
+  await requireLmsPage("VIEW_ANALYTICS");
   const sp = await searchParams;
   const f = resolveCampaignFilters(sp);
   const page = Math.max(Number(sp.page) || 1, 1);

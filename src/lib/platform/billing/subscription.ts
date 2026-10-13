@@ -39,9 +39,9 @@ const INTERNAL: CompanySubscription = {
  * date — nothing is written until something changes it.
  */
 export async function getCompanySubscription(companyId: string): Promise<CompanySubscription | null> {
-  const company = await (await companies()).findOne({ _id: companyId }, { projection: { isPlatformOwner: 1, subscription: 1, createdAt: 1 } });
+  const company = await (await companies()).findOne({ _id: companyId }, { projection: { isPlatformOwner: 1, isDemo: 1, subscription: 1, createdAt: 1 } });
   if (!company) return null;
-  if (company.isPlatformOwner) return INTERNAL;
+  if (company.isPlatformOwner || company.isDemo === true) return INTERNAL;
   if (company.subscription) return company.subscription;
   const plan = await getDefaultPlan();
   // A free-for-life default plan is simply active, with no trial and no end.

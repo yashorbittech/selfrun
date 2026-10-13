@@ -1,9 +1,13 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
 import { WORKSPACE_SESSION_COOKIE, workspaceSessionAccountId } from "@/lib/workspace-session";
 import { getDb } from "@/lib/mongodb";
+import { hasLmsAccess, lmsCan, type LmsPermission } from "@/lib/lms-roles";
+import { cmsCan, hasCmsAccess, type CmsPermission } from "@/lib/cms-roles";
 
 // NOTE: was literally `admin_session` — an accidental exact collision with
 // the separate Super Admin Command Center's own cookie of the same name
@@ -27,6 +31,7 @@ interface LmsUserDoc {
   lastLoginAt: Date | null;
   /** HRMS panel access — empty/absent means no HRMS access. See `hrms-roles.ts`. */
   roles?: string[];
+  permissionOverrides?: Record<string, boolean>;
   /** Links this login to an `hrms_employees` record, when applicable. */
   employeeId?: string | null;
 }
@@ -46,6 +51,8 @@ export interface CurrentLmsUser {
    * role literals (notably `super_admin`) still show up here since identity is
    * shared. Used e.g. to conditionally show a "Back to Admin" link. */
   roles: string[];
+  /** The Super Admin's per-user capability overrides (`permission-overrides.ts`). */
+  permissionOverrides: Record<string, boolean>;
   createdAt: Date;
   lastLoginAt: Date | null;
 }
@@ -151,12 +158,13 @@ export async function getSessionLmsUser(token: string | undefined | null): Promi
 export async function getLmsUserForAccount(adminId: ObjectId): Promise<CurrentLmsUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   return {
     id: user._id.toString(),
     email: user.email,
     roles: user.roles ?? [],
+    permissionOverrides: user.permissionOverrides ?? {},
     createdAt: user.createdAt,
     lastLoginAt: user.lastLoginAt,
   };
@@ -185,4 +193,44 @@ export async function getCurrentLmsUser(): Promise<CurrentLmsUser | null> {
   // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getLmsUserForAccount(accountId) : null;
+}
+
+/**
+ * The signed-in person ONLY if they may use the CRM (an LMS role, or Super Admin) — and, when `permission` is given,
+ * hold that capability. `getCurrentLmsUser()` alone is just "a signed-in staff account": other panels' roles reach it too,
+ * so every CRM page, action and route calls this instead.
+ */
+export async function requireLms(permission?: LmsPermission): Promise<CurrentLmsUser | null> {
+  const user = await getCurrentLmsUser();
+  if (!user || !hasLmsAccess(user.roles)) return null;
+  if (permission && !lmsCan(user, permission)) return null;
+  return user;
+}
+
+/**
+ * For the website-growth tools that live in the CMS panel (offers, wallets, chatbot): allowed for someone holding the CRM
+ * capability, or a CMS user holding the matching CMS permission (settings by default; editors for offers). Anyone else — an HR employee, a project member — is refused.
+ */
+export async function requireLmsOrCms(permission: LmsPermission, cmsPermission: CmsPermission = "SETTINGS_MANAGE"): Promise<CurrentLmsUser | null> {
+  const user = await getCurrentLmsUser();
+  if (!user) return null;
+  if (hasLmsAccess(user.roles) && lmsCan(user, permission)) return user;
+  if (hasCmsAccess(user.roles) && cmsCan(user, cmsPermission)) return user;
+  return null;
+}
+
+/** Page guard: the user with that capability, or a redirect (sign-in when signed out, the CRM home when the capability is missing). */
+export async function requireLmsPage(permission: LmsPermission): Promise<CurrentLmsUser> {
+  const user = await getCurrentLmsUser();
+  if (!user) redirect("/lms/login");
+  if (!hasLmsAccess(user.roles)) redirect("/workspace");
+  if (!lmsCan(user, permission)) redirect(permission === "VIEW_LEADS" ? "/workspace" : "/lms");
+  return user;
+}
+
+/** Page guard for the growth tools inside the CMS (offers, wallets, chatbot): the capability via the CRM roles or a CMS administrator, else back to the CMS home. */
+export async function requireLmsOrCmsPage(permission: LmsPermission, cmsPermission: CmsPermission = "SETTINGS_MANAGE"): Promise<CurrentLmsUser> {
+  const user = await requireLmsOrCms(permission, cmsPermission);
+  if (!user) redirect("/cms");
+  return user;
 }

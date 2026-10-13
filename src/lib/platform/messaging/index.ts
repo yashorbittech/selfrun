@@ -1,3 +1,6 @@
+import { smsBlockReason } from "@/lib/platform/billing/enforce";
+import { recordUsage } from "@/lib/platform/billing/usage";
+import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import "server-only";
 import { connectionValues } from "@/lib/platform/connections/resolve";
 
@@ -23,14 +26,27 @@ async function twilioSend(v: Record<string, string>, form: Record<string, string
   return res.ok ? { ok: true, id: body.sid ?? null } : { ok: false, error: `Twilio ${res.status}: ${body.message ?? "request failed"}` };
 }
 
+/** Counts one sent message against the company's monthly SMS allowance. Never throws. */
+async function meterSms(kind: "sms" | "whatsapp" = "sms"): Promise<void> {
+  try {
+    if (await currentCompanyIdOrNull()) await recordUsage("sms", 1, new Date(), { source: kind === "whatsapp" ? "WhatsApp message" : "SMS" });
+  } catch (err) {
+    console.error("[billing] SMS metering failed", err);
+  }
+}
+
 export async function sendSms(to: string, body: string): Promise<MessageResult> {
   try {
     if (!isPhoneNumber(to)) return { ok: false, error: "That isn't a phone number." };
+    const planBlock = await smsBlockReason();
+    if (planBlock) return { ok: false, error: planBlock };
     const v = await connectionValues("twilio");
     if (!v?.accountSid || !v.authToken) return { ok: false, error: "SMS isn't available right now. Please contact support." };
     if (!v.smsFrom) return { ok: false, error: "SMS isn't available right now. Please contact support." };
     const sender: Record<string, string> = /^MG/i.test(v.smsFrom) ? { MessagingServiceSid: v.smsFrom } : { From: v.smsFrom };
-    return await twilioSend(v, { To: E164(to), Body: body.slice(0, 1500), ...sender });
+    const sent = await twilioSend(v, { To: E164(to), Body: body.slice(0, 1500), ...sender });
+    if (sent.ok) await meterSms();
+    return sent;
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "SMS failed" };
   }
@@ -39,10 +55,14 @@ export async function sendSms(to: string, body: string): Promise<MessageResult> 
 export async function sendWhatsApp(to: string, body: string): Promise<MessageResult> {
   try {
     if (!isPhoneNumber(to)) return { ok: false, error: "That isn't a phone number." };
+    const planBlock = await smsBlockReason();
+    if (planBlock) return { ok: false, error: planBlock };
     const twilio = await connectionValues("twilio");
     if (twilio?.accountSid && twilio.authToken && twilio.whatsappFrom) {
       const from = twilio.whatsappFrom.startsWith("whatsapp:") ? twilio.whatsappFrom : `whatsapp:${twilio.whatsappFrom}`;
-      return await twilioSend(twilio, { To: `whatsapp:${E164(to)}`, From: from, Body: body.slice(0, 1500) });
+      const sent = await twilioSend(twilio, { To: `whatsapp:${E164(to)}`, From: from, Body: body.slice(0, 1500) });
+      if (sent.ok) await meterSms("whatsapp");
+      return sent;
     }
     const cloud = await connectionValues("whatsapp-cloud");
     if (cloud?.phoneNumberId && cloud.accessToken) {
@@ -53,6 +73,7 @@ export async function sendWhatsApp(to: string, body: string): Promise<MessageRes
         signal: AbortSignal.timeout(15_000),
       });
       const data = (await res.json().catch(() => ({}))) as { messages?: { id?: string }[]; error?: { message?: string } };
+      if (res.ok) await meterSms("whatsapp");
       return res.ok ? { ok: true, id: data.messages?.[0]?.id ?? null } : { ok: false, error: `WhatsApp ${res.status}: ${data.error?.message ?? "request failed"}` };
     }
     return { ok: false, error: "WhatsApp isn't connected. Add WhatsApp Business in Workspace → Settings → Integrations." };

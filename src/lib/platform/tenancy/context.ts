@@ -1,3 +1,5 @@
+import { resolveUsageActor } from "@/lib/platform/billing/usage-actor";
+import { withUsageActor } from "@/lib/platform/billing/usage-actor-store";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { headers } from "next/headers";
 import { notFound, unstable_rethrow } from "next/navigation";
@@ -105,5 +107,7 @@ export async function forEachCompany<T>(fn: (companyId: string) => Promise<T>): 
 export async function afterForCompany(fn: () => unknown): Promise<void> {
   const { after } = await import("next/server");
   const companyId = await currentCompanyId();
-  after(() => runAsCompany(companyId, fn));
+  // The person who started the work keeps it in the usage history (it runs after the response, when the request is gone).
+  const actor = await resolveUsageActor().catch(() => undefined);
+  after(() => runAsCompany(companyId, () => (actor ? withUsageActor(actor, fn) : fn())));
 }

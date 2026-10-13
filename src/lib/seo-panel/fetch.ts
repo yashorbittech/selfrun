@@ -1,6 +1,7 @@
 import "server-only";
 import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
+import { safeFetch } from "@/lib/security/safe-fetch";
 
 /**
  * HTTP fetching for the crawler, sitemap/robots readers and backlink checks.
@@ -108,13 +109,11 @@ export async function fetchUrl(
   try {
     for (let hop = 0; hop < 10; hop++) {
       if (guard) await assertPublicUrl(current);
-      const res = await fetch(current, {
-        method,
-        redirect: "manual",
-        signal: controller.signal,
-        cache: "no-store",
-        headers: { "user-agent": SEO_USER_AGENT, accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" },
-      });
+      const headers = { "user-agent": SEO_USER_AGENT, accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" };
+      // Guarded hops connect only to the public address they were checked against (no DNS rebinding); the trusted site origin uses plain fetch.
+      const res = guard
+        ? await safeFetch(current, { method, headers, signal: controller.signal })
+        : await fetch(current, { method, redirect: "manual", signal: controller.signal, cache: "no-store", headers });
       if (res.status >= 300 && res.status < 400 && res.headers.get("location")) {
         chain.push({ url: current, status: res.status });
         await res.body?.cancel().catch(() => {});

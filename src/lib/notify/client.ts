@@ -78,7 +78,8 @@ function start(actor: "staff" | "portal") {
 
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
 const snapshot = () => state;
-const serverSnapshot = (): State => ({ counts: {}, connected: false, toasts: [] });
+const SERVER_STATE: State = { counts: {}, connected: false, toasts: [] };
+const serverSnapshot = (): State => SERVER_STATE; // one stable object: React compares snapshots by identity
 
 /** The live state; mounting this anywhere starts the shared stream. */
 export function useNotifyState(actor: "staff" | "portal" = "staff"): State {

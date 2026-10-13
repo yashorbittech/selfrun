@@ -4,7 +4,7 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
 import { hashPassword } from "@/lib/lms-auth";
-import { rolesUseSeat, seatBlockReason } from "@/lib/platform/billing/enforce";
+import { newAccountBlockReason, rollbackIfOverSeats, rolesUseSeat, seatBlockReason } from "@/lib/platform/billing/enforce";
 
 /**
  * Super Admin management of the shared `admin_users` collection — the
@@ -15,7 +15,9 @@ import { rolesUseSeat, seatBlockReason } from "@/lib/platform/billing/enforce";
  * every write here changes who can access what, across the whole ERP.
  */
 
+import { ROLE_GROUPS } from "@/lib/workspace/role-catalog";
 import { destroySessionsEverywhere } from "@/lib/cross-module-sso";
+import { computeEffective, effectiveUpdate, getCustomRoles, resolveAssignableIds } from "@/lib/workspace/custom-roles";
 import { type AdminUserRow, type PanelAccessSummaryItem, getPanelAccessSummary } from "@/lib/workspace/admin-users-shared";
 
 export type { AdminUserRow, PanelAccessSummaryItem };
@@ -43,6 +45,10 @@ export interface AdminUserDoc {
   createdAt: Date;
   lastLoginAt?: Date | null;
   savedRoles?: string[];
+  /** Inputs of the computed `roles` / `permissionOverrides` — see `custom-roles.ts`. */
+  manualRoles?: string[];
+  manualOverrides?: Record<string, boolean>;
+  customRoleIds?: string[];
   userType?: "employee" | "contractor" | "partner" | "system";
   notes?: string;
 }
@@ -54,6 +60,9 @@ function serialize(u: AdminUserDoc): AdminUserRow {
     email: u.email,
     roles,
     permissionOverrides: u.permissionOverrides ?? {},
+    customRoleIds: u.customRoleIds ?? [],
+    manualRoles: u.manualRoles ?? ((u.customRoleIds ?? []).length === 0 ? roles : []),
+    manualOverrides: u.manualOverrides ?? ((u.customRoleIds ?? []).length === 0 ? u.permissionOverrides ?? {} : {}),
     employeeId: u.employeeId ?? null,
     mustChangePassword: u.mustChangePassword === true,
     locked: Boolean(u.lockedUntil && u.lockedUntil > new Date()),
@@ -86,24 +95,11 @@ export interface AdminUserFilter {
 function getRolesForPanel(panel: string): string[] {
   const p = panel.toLowerCase();
   if (p === "admin") return ["super_admin"];
-  if (p === "hrms") return ["super_admin", "hr", "manager", "employee"];
-  if (p === "pms") return ["super_admin", "pms_admin", "pms_manager", "pms_employee"];
-  if (p === "prms") return ["super_admin", "prms_admin", "procurement_manager", "finance", "dept_manager", "prms_employee"];
-  if (p === "tms") return ["super_admin", "tms_admin", "tms_instructor", "tms_coordinator"];
-  if (p === "fms") return ["super_admin", "fms_admin", "fms_accountant", "fms_auditor"];
-  if (p === "sop") return ["super_admin", "sop_admin", "sop_manager", "sop_author", "sop_employee"];
-  if (p === "seo") return ["super_admin", "seo_admin", "seo_manager", "seo_specialist", "seo_employee"];
-  if (p === "dlms") return ["super_admin", "dlms_admin", "dlms_manager", "dlms_employee"];
-  if (p === "aibots") return ["super_admin", "aibots_admin", "aibots_manager", "aibots_user"];
-  if (p === "intelligence") return ["super_admin", "intelligence_admin", "intelligence_user"];
-  if (p === "smms") return ["super_admin", "smms_admin", "smms_manager", "smms_specialist", "smms_employee"];
   // OTS access is also implied by HRMS employee/hr and TMS roles (see `ots-roles.ts`).
-  if (p === "ots") return ["super_admin", "ots_admin", "ots_manager", "ots_author", "ots_evaluator", "ots_candidate", "employee", "hr", "training_student", "tms_admin", "tms_manager", "mentor"];
-  if (p === "messenger") return ["super_admin", "chat_admin", "chat_moderator"];
-  if (p === "lms") return ["super_admin", "lms_admin", "lms_manager", "lms_agent"];
-  if (p === "portal") return ["super_admin", "portal_admin", "portal_manager"];
-  if (p === "workspace") return ["super_admin", "workspace_admin", "workspace_member"];
-  return ["super_admin"];
+  const extra = p === "ots" ? ["employee", "hr", "training_student", "tms_admin", "tms_manager", "mentor"] : [];
+  // Derived from the role catalog (the roles each panel really checks) so a panel can never be left out of the filter.
+  const group = ROLE_GROUPS.find((g) => g.panel === p);
+  return group ? ["super_admin", ...group.roles.map((r) => r.value), ...extra] : ["super_admin"];
 }
 
 function buildFilter(opts: AdminUserFilter): Record<string, unknown> {
@@ -205,10 +201,15 @@ export async function getAdminUserRow(id: string): Promise<AdminUserRow | null> 
  * or null when the action is allowed. Super Admins are never limited.
  */
 export async function delegatedManagerBlock(
-  actor: { roles: readonly string[] },
+  actor: { id?: string; roles: readonly string[] },
   action: { targetId?: string; roles?: readonly string[]; overrides?: boolean }
 ): Promise<string | null> {
   if (actor.roles.includes("super_admin")) return null;
+  // Nobody raises their own access: a delegated manager can't change their own account's roles or permissions.
+  if (actor.id && action.targetId && action.targetId === actor.id && (action.roles || action.overrides)) return "You can't change your own access.";
+  // An admin-tier role can only be handed on by someone who holds it themselves.
+  const escalating = (action.roles ?? []).filter((r) => /_admin$/.test(r) && !actor.roles.includes(r));
+  if (escalating.length > 0) return "You can only grant an admin role that you hold yourself.";
   if (action.overrides) return "Only a Super Admin can change permission overrides.";
   if (action.roles?.includes("super_admin")) return "Only a Super Admin can grant the Super Admin role.";
   if (action.targetId) {
@@ -229,7 +230,8 @@ export async function createAdminUser(
   email: string,
   roles: string[],
   userType?: "employee" | "contractor" | "partner" | "system",
-  notes?: string
+  notes?: string,
+  customRoleIds: string[] = [],
 ): Promise<CreateAdminUserResult> {
   const normalizedEmail = email.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) return { ok: false, error: "Enter a valid email address." };
@@ -237,7 +239,12 @@ export async function createAdminUser(
   const col = await collection();
   const existing = await col.findOne({ email: normalizedEmail });
   if (existing) return { ok: false, error: "An account with this email already exists." };
-  const seatBlock = rolesUseSeat(roles) ? await seatBlockReason(1) : null;
+  const assigned = await resolveAssignableIds(customRoleIds);
+  if (!assigned.ok) return { ok: false, error: assigned.error };
+  const custom = await getCustomRoles(assigned.ids);
+  const eff = computeEffective(roles, {}, custom);
+  if (eff.roles.length === 0) return { ok: false, error: "Choose at least one role." };
+  const seatBlock = await newAccountBlockReason(eff.roles);
   if (seatBlock) return { ok: false, error: seatBlock };
 
   const tempPassword = generateTempPassword();
@@ -245,7 +252,11 @@ export async function createAdminUser(
     _id: new ObjectId(),
     email: normalizedEmail,
     passwordHash: hashPassword(tempPassword),
-    roles,
+    roles: eff.roles,
+    permissionOverrides: eff.overrides,
+    manualRoles: roles,
+    manualOverrides: {},
+    customRoleIds: assigned.ids,
     userType: userType ?? "employee",
     notes: notes?.trim() || undefined,
     employeeId: null,
@@ -256,6 +267,8 @@ export async function createAdminUser(
     lastLoginAt: null,
   };
   await col.insertOne(doc);
+  const rolledBack = await rollbackIfOverSeats(doc._id);
+  if (rolledBack) return { ok: false, error: rolledBack };
   return { ok: true, id: doc._id.toString(), tempPassword };
 }
 
@@ -267,19 +280,29 @@ export async function createAdminUser(
 export async function updateAdminUserRoles(
   id: string,
   roles: string[],
-  actorId: string
+  actorId: string,
+  customRoleIds?: string[],
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ObjectId.isValid(id)) return { ok: false, error: "Unknown account." };
   if (id === actorId && !roles.includes("super_admin")) {
     return { ok: false, error: "You can't remove your own Super Admin role." };
   }
   const col = await collection();
-  if (rolesUseSeat(roles)) {
-    const current = await col.findOne({ _id: new ObjectId(id) }, { projection: { roles: 1 } });
-    const seatBlock = current && !rolesUseSeat(current.roles) ? await seatBlockReason(1) : null;
+  const current = await col.findOne({ _id: new ObjectId(id) });
+  if (!current) return { ok: false, error: "Unknown account." };
+  let ids = current.customRoleIds ?? [];
+  if (customRoleIds) {
+    const assigned = await resolveAssignableIds(customRoleIds);
+    if (!assigned.ok) return { ok: false, error: assigned.error };
+    ids = assigned.ids;
+  }
+  const update = await effectiveUpdate(current, { manualRoles: roles, customRoleIds: ids });
+  const effective = (update.roles as string[] | undefined) ?? [];
+  if (effective.length > 0 && !rolesUseSeat(current.roles) && rolesUseSeat(effective)) {
+    const seatBlock = await seatBlockReason(1);
     if (seatBlock) return { ok: false, error: seatBlock };
   }
-  const res = await col.updateOne({ _id: new ObjectId(id) }, { $set: { roles } });
+  const res = await col.updateOne({ _id: new ObjectId(id) }, { $set: update });
   return { ok: res.matchedCount === 1 };
 }
 
@@ -299,7 +322,9 @@ export async function updateAdminUserPermissionOverrides(
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ObjectId.isValid(id)) return { ok: false, error: "Unknown account." };
   const col = await collection();
-  const res = await col.updateOne({ _id: new ObjectId(id) }, { $set: { permissionOverrides: overrides } });
+  const current = await col.findOne({ _id: new ObjectId(id) });
+  if (!current) return { ok: false, error: "Unknown account." };
+  const res = await col.updateOne({ _id: new ObjectId(id) }, { $set: await effectiveUpdate(current, { manualOverrides: overrides }) });
   return { ok: res.matchedCount === 1 };
 }
 
@@ -365,19 +390,25 @@ export async function reactivateAdminUser(
   const existing = await col.findOne({ _id: new ObjectId(id) });
   if (!existing) return { ok: false, error: "Account not found." };
 
-  const roles =
-    rolesToRestore && rolesToRestore.length > 0
-      ? rolesToRestore
-      : existing.savedRoles && existing.savedRoles.length > 0
-      ? existing.savedRoles
-      : ["employee"];
+  const inputsRoles = existing.manualRoles ?? ((existing.customRoleIds ?? []).length === 0 ? existing.savedRoles ?? [] : []);
+  let roles: string[];
+  let manualRoles = inputsRoles;
+  if (rolesToRestore && rolesToRestore.length > 0) {
+    manualRoles = rolesToRestore;
+    roles = computeEffective(rolesToRestore, {}, await getCustomRoles(existing.customRoleIds ?? [])).roles;
+  } else if (existing.savedRoles && existing.savedRoles.length > 0) {
+    roles = existing.savedRoles;
+  } else {
+    roles = ["employee"];
+    manualRoles = ["employee"];
+  }
   const seatBlock = rolesUseSeat(roles) && !rolesUseSeat(existing.roles) ? await seatBlockReason(1) : null;
   if (seatBlock) return { ok: false, error: seatBlock };
 
   const res = await col.updateOne(
     { _id: new ObjectId(id) },
     {
-      $set: { roles },
+      $set: { roles, manualRoles },
       $unset: { savedRoles: "" },
     }
   );

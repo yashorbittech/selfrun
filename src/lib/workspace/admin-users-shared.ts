@@ -13,6 +13,7 @@ import { effectiveOtsRoles, hasOtsAccess } from "@/lib/ots-roles";
 import { normalizeTmsRoles } from "@/lib/tms-roles";
 import { normalizeChatRoles } from "@/lib/messenger-roles";
 import { normalizeLmsRoles } from "@/lib/lms-roles";
+import { normalizeLpmsRoles } from "@/lib/lpms-roles";
 import { normalizeWorkspaceRoles } from "@/lib/workspace-roles";
 
 export interface AdminUserRow {
@@ -20,6 +21,10 @@ export interface AdminUserRow {
   email: string;
   roles: string[];
   permissionOverrides: Record<string, boolean>;
+  /** What the Super Admin set by hand; `roles` / `permissionOverrides` also include everything custom roles add. */
+  manualRoles: string[];
+  manualOverrides: Record<string, boolean>;
+  customRoleIds: string[];
   employeeId: string | null;
   mustChangePassword: boolean;
   locked: boolean;
@@ -151,6 +156,13 @@ export function getPanelAccessSummary(user: AdminUserRow): PanelAccessSummaryIte
       roles: normalizeLmsRoles(roles).length > 0
         ? normalizeLmsRoles(roles)
         : (user.status === "active" ? ["lms_user"] : []),
+      isSuperAdmin,
+    },
+    {
+      key: "lpms",
+      name: "Legal & Documents",
+      hasAccess: isSuperAdmin || normalizeLpmsRoles(roles).length > 0,
+      roles: normalizeLpmsRoles(roles),
       isSuperAdmin,
     },
     {

@@ -6,6 +6,7 @@ import { getCurrentHubUser } from "@/lib/hub-auth";
 import { applyStructure, completeTeamStep, markOnboardingStep, saveModules, saveProfile, skipOnboarding, type ProfileInput, type StepResult } from "@/lib/platform/onboarding/state";
 import { ONBOARDING_STEPS, type OnboardingStep } from "@/lib/platform/onboarding/catalog";
 import { inviteTeammate, revokeInvitation } from "@/lib/platform/invitations";
+import { resolveAssignableIds } from "@/lib/workspace/custom-roles";
 import { requestOrigin } from "@/lib/platform/request";
 import type { DepartmentTemplate } from "@/lib/platform/onboarding/catalog";
 
@@ -41,6 +42,8 @@ export interface InviteRow {
   name: string;
   preset: string;
   departmentId?: string | null;
+  /** Optional custom role (Workspace → Custom roles) given on top of the preset when they accept. */
+  customRoleId?: string | null;
 }
 
 export async function inviteAction(rows: InviteRow[]): Promise<{ sent: string[]; errors: string[] }> {
@@ -50,7 +53,13 @@ export async function inviteAction(rows: InviteRow[]): Promise<{ sent: string[];
   const errors: string[] = [];
   for (const row of (Array.isArray(rows) ? rows : []).slice(0, 50)) {
     if (!row?.email?.trim()) continue;
-    const res = await inviteTeammate({ email: row.email, name: row.name ?? "", preset: row.preset, departmentId: row.departmentId ?? null }, { id: user.id, email: user.email }, origin);
+    let customRoleIds: string[] = [];
+    if (row.customRoleId) {
+      const ok = await resolveAssignableIds([String(row.customRoleId)]);
+      if (!ok.ok) { errors.push(`${row.email}: ${ok.error}`); continue; }
+      customRoleIds = ok.ids;
+    }
+    const res = await inviteTeammate({ email: row.email, name: row.name ?? "", preset: row.preset, departmentId: row.departmentId ?? null, customRoleIds }, { id: user.id, email: user.email }, origin);
     if (res.ok) sent.push(res.email);
     else errors.push(res.error);
   }

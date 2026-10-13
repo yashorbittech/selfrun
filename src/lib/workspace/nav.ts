@@ -244,7 +244,7 @@ const MANAGE: NavItemDef[] = MANAGE_PAGES.map(([group, path, label, icon, permis
 
 // ── Company: the company managing itself ────────────────────────────────────
 const COMPANY_GROUPS: Record<string, string> = {
-  setup: "Organization", profile: "Organization", users: "Organization",
+  setup: "Organization", profile: "Organization", users: "Organization", roles: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
   branding: "Branding & domains", "website-domain": "Branding & domains", "app-domain": "Branding & domains", domains: "Branding & domains", app: "Branding & domains",
   payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation",
@@ -255,6 +255,7 @@ const COMPANY: NavItemDef[] = [
   company("setup", "/workspace/onboarding", "building", "Company setup", "Profile, departments, invitations and which panels your team uses."),
   company("profile", "/workspace/settings/profile", "building", "Organization profile", "Company name, legal name, industry, country, currency, time zone and contact details."),
   { ...company("users", "/workspace/users", "users", "Users, roles & seats", "Who can sign in, which panels and permissions each person has, and seats used.", "Users & roles"), allow: may(P.users) },
+  company("roles", "/workspace/roles", "users", "Custom roles", "Build roles of your own: choose the panels and the exact permissions, then give them to people.", "Custom roles"),
   company("billing", "/workspace/settings/billing", "card", "Plan & billing", "Your plan, payments, coupon codes and GST billing details."),
   company("invoices", "/workspace/settings/billing/invoices", "receipt", "Invoices & payments", "Tax invoices, credit notes and every payment made for your subscription."),
   company("usage", "/workspace/settings/usage", "gauge", "Usage", "Seats, AI tokens and file storage used against your plan's limits."),

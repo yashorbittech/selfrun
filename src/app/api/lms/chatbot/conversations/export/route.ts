@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { exportConversations } from "@/lib/chat-conversations";
 import { toCsv } from "@/lib/csv";
 
@@ -10,7 +10,7 @@ function parseDateParam(value: string | null, endOfDay = false): Date | undefine
 }
 
 export async function GET(req: NextRequest) {
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("EXPORT_DATA");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const sp = req.nextUrl.searchParams;

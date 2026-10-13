@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import DashboardSection from "@/components/platform/panel/DashboardSection";
 import Link from "next/link";
@@ -25,6 +26,7 @@ export default async function CampaignAnalyticsPage({
 }: {
   searchParams: Promise<CampaignSearchParams>;
 }) {
+  await requireLmsPage("VIEW_ANALYTICS");
   const sp = await searchParams;
   const f = resolveCampaignFilters(sp);
 

@@ -1,3 +1,4 @@
+import { studentLoginBlockReason } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, scryptSync } from "node:crypto";
 import { ObjectId } from "mongodb";
@@ -81,6 +82,9 @@ export async function createStudentLogin(
   if (await col.findOne({ email })) {
     return { ok: false, error: "That email is already in use by another account." };
   }
+
+  const planBlock = await studentLoginBlockReason();
+  if (planBlock) return { ok: false, error: planBlock };
 
   await col.insertOne({
     _id: new ObjectId(),

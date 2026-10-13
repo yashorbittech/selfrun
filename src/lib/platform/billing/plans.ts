@@ -34,6 +34,14 @@ const ALL_FLAGS = ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"]
  * means the next plan. `listPrices` are the "usual" prices shown struck through; `prices` are what is charged (about 75% off, monthly and
  * yearly; yearly = 10 × monthly, two months free). Editable in the Platform Panel at any time.
  */
+/**
+ * The Free plan's monthly AI tokens. Sized so the AI-written website made at sign-up (planning, about eight pages, an offering page each,
+ * a repair pass and three photos: roughly 100–200K tokens) always finishes, with room left over for the assistants afterwards.
+ */
+export const FREE_AI_TOKENS = 250_000;
+/** What the Free plan allowed before: a company still on exactly this number was never edited by the operator and is raised once. */
+const OLD_FREE_AI_TOKENS = 20_000;
+
 export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "free",
@@ -48,7 +56,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     highlights: ["Free for life, no card needed"],
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 1, aiTokensPerMonth: 20_000, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 10, customDomains: 1, smsPerMonth: 0 },
+    limits: { seats: 1, aiTokensPerMonth: FREE_AI_TOKENS, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 10, customDomains: 1, smsPerMonth: 0 },
     trialDays: 0,
     active: true,
     isDefault: true,
@@ -597,6 +605,13 @@ export async function getStandardPlans(): Promise<Plan[]> {
     upgrading ??= applySimplePricing("system").finally(() => { upgrading = null; });
     await upgrading.catch(() => {});
     stored = await col.find({ _id: { $in: STANDARD_PLAN_IDS } }).toArray();
+  }
+  // The Free plan used to carry 20,000 AI tokens — too few to even finish the sign-up website. A stored Free plan still on exactly that
+  // number (never edited) is raised once; any other value was chosen by the operator and is left alone.
+  const freeLive = stored.find((p) => p._id === "free");
+  if (freeLive && freeLive.limits.aiTokensPerMonth === OLD_FREE_AI_TOKENS) {
+    await col.updateOne({ _id: "free", "limits.aiTokensPerMonth": OLD_FREE_AI_TOKENS }, { $set: { "limits.aiTokensPerMonth": FREE_AI_TOKENS, updatedAt: new Date() } });
+    freeLive.limits = { ...freeLive.limits, aiTokensPerMonth: FREE_AI_TOKENS };
   }
   const byId = new Map(stored.map((p) => [p._id, p]));
   const missing = DEFAULT_PLANS.filter((p) => !byId.has(p._id));

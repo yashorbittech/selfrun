@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import DashboardSection from "@/components/platform/panel/DashboardSection";
 import Link from "next/link";
@@ -46,6 +47,7 @@ export default async function CareersDashboardPage({
     granularity?: string;
   }>;
 }) {
+  await requireLmsPage("VIEW_CAREERS");
   const sp = await searchParams;
 
   const status = sp.status && isValidCareerApplicationStatus(sp.status) ? sp.status : undefined;

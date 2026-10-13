@@ -1,6 +1,6 @@
 "use server";
 
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { createPortalSession, setPortalSessionCookie, externalUsers } from "@/lib/portal-auth";
 import { setActivePortalLead } from "@/lib/portal/lead";
 
@@ -10,7 +10,7 @@ import { setActivePortalLead } from "@/lib/portal/lead";
  * so the LMS admin is immediately signed in as that portal user.
  *
  * Security:
- *  - Requires a valid LMS session (`getCurrentLmsUser`). Unauthenticated
+ *  - Requires a valid LMS session (`requireLms('IMPERSONATE')`). Unauthenticated
  *    callers get { ok: false, error: "Unauthorized" }.
  *  - Only active accounts can be impersonated. Suspended accounts are blocked.
  *  - If leadId is passed, sets activeLeadId and account role to match that lead.
@@ -33,7 +33,7 @@ export async function loginAsPortalUserAction(
   leadIdParam?: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   // 1. Guard — must be a signed-in LMS user.
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("IMPERSONATE");
   if (!lmsUser) return { ok: false, error: "Unauthorized" };
 
   const opts: ImpersonateTargetOptions =

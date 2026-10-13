@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 /**
  * What can be told about whoever made a request: network address, browser / system / device from the User-Agent, and an approximate place
  * from the hosting platform's geo headers (Vercel sets them; nothing is looked up anywhere else, so no address leaves the server and nothing
@@ -96,7 +97,8 @@ export function flagEmoji(code: string | null): string {
 
 export function readClient(h: Headers): ClientInfo {
   const userAgent = (h.get("user-agent") ?? "").slice(0, 400);
-  const ip = (h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || null)?.slice(0, 64) ?? null;
+  const ipRaw = clientIpFrom(h);
+  const ip = ipRaw === "unknown" ? null : ipRaw;
   const countryCode = (h.get("x-vercel-ip-country") || h.get("cf-ipcountry") || "").toUpperCase() || null;
   const city = decode(h.get("x-vercel-ip-city") || h.get("cf-ipcity"));
   const region = decode(h.get("x-vercel-ip-country-region") || h.get("cf-region"));

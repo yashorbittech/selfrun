@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import { getOpenAI, isOpenAIConfigured } from "@/lib/openai";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
@@ -98,6 +99,7 @@ export async function askBusiness(user: AccessUser, rawQuestion: unknown): Promi
   if (!(await checkScope({ text: q.text, kind: "workspace" }))) return { ok: true, answer: refusalText(lang, "workspace") };
 
   try {
+    setAiFeature("Workspace assistant");
     const openai = await getOpenAI();
     // The conversation lives only in this array for the length of the request.
     const input: unknown[] = [{ role: "user", content: q.text }];

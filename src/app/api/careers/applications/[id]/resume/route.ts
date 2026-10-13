@@ -5,7 +5,7 @@ import { getApplication, openResumeDownloadStream } from "@/lib/career-applicati
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Context) {
-  if (!(await isAuthorizedLmsRequest(req))) {
+  if (!(await isAuthorizedLmsRequest(req, "VIEW_CAREERS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

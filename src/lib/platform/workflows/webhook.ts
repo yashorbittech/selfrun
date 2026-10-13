@@ -100,7 +100,7 @@ export function parseWebhookUrl(raw: string): URL {
 type LookupCallback = (err: NodeJS.ErrnoException | null, address: string | dns.LookupAddress[], family?: number) => void;
 
 /** A DNS lookup that refuses to hand back anything but public addresses — used as the socket's `lookup`. */
-function publicOnlyLookup(hostname: string, options: dns.LookupOptions, callback: LookupCallback): void {
+export function publicOnlyLookup(hostname: string, options: dns.LookupOptions, callback: LookupCallback): void {
   dns.lookup(hostname, { ...options, all: true }, (err, addresses) => {
     if (err) return callback(err, "");
     const list = addresses as dns.LookupAddress[];

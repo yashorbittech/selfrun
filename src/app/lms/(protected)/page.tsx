@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import DashboardSection from "@/components/platform/panel/DashboardSection";
 import PanelDashboardHeader from "@/components/platform/panel/PanelDashboardHeader";
 import Link from "next/link";
@@ -38,7 +39,7 @@ import { getCurrentLmsUser } from "@/lib/lms-auth";
 import { listSavedFilters } from "@/lib/saved-filters";
 import { formatDateTime } from "@/lib/utils";
 import { isValidDateRangePreset, resolveDateRangePreset, type DateRangePreset } from "@/lib/date-ranges";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { iconForCategory } from "@/lib/category-icons";
 import { getCampaignAnalytics } from "@/lib/campaigns";
 import type { SerializedLead } from "@/components/lms/types";
 
@@ -65,6 +66,7 @@ export default async function LmsDashboardPage({
     platform?: string;
   }>;
 }) {
+  await requireLmsPage("VIEW_LEADS");
   const sp = await searchParams;
   const lmsUser = await getCurrentLmsUser();
 
@@ -297,7 +299,7 @@ export default async function LmsDashboardPage({
         <h2 className="text-lg font-semibold text-foreground">Category Performance</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {perCategoryStats.map((cat) => {
-            const Icon = CATEGORY_ICONS[cat.slug];
+            const Icon = iconForCategory(cat.slug);
             return (
               <KpiCard
                 key={cat.slug}

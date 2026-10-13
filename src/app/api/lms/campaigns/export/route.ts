@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { getCampaignAnalytics } from "@/lib/campaigns";
 import { resolveCampaignFilters } from "@/lib/campaign-filters";
 import { getPlatformMeta } from "@/lib/campaign-platforms";
 import { toCsv } from "@/lib/csv";
 
 export async function GET(req: NextRequest) {
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("EXPORT_DATA");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const sp = req.nextUrl.searchParams;

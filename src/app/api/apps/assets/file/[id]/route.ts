@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { onAppSurface } from "@/lib/saas/request";
 import { renderAsset } from "@/lib/apps/assets";
@@ -12,7 +13,7 @@ export const maxDuration = 30;
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIpFrom(req.headers);
   if (!rateLimit(`asset:${ip}`, 120, 60_000)) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   const id = (await params).id.replace(/\.png$/, "");
   const out = await renderAsset(id).catch(() => null);

@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -78,6 +79,7 @@ function Section({ title, description, icon, action, children }: { title: string
 
 /** Complete applicant profile: every piece of data the platform holds about this applicant, read live from its owner. */
 export default async function ApplicantDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+  await requireLmsPage("VIEW_CAREERS");
   const { id } = await params;
   const { tab } = await searchParams;
   const [profile, viewer] = await Promise.all([getApplicantProfile(id), getCurrentLmsUser()]);

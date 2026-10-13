@@ -2,14 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLmsOrCms } from "@/lib/lms-auth";
 import { validateRewardRuleInput, type RewardRuleWriteInput } from "@/lib/wallet/reward-rule-validation";
 import { createRewardRule, updateRewardRule, deleteRewardRule, getRewardRule } from "@/lib/wallet/reward-rules";
 
 async function requireLmsUser() {
-  const user = await getCurrentLmsUser();
-  if (!user) throw new Error("Unauthorized");
-  return user;
+  const u = await requireLmsOrCms("MANAGE_WALLET");
+  if (!u) throw new Error("Forbidden");
+  return u;
 }
 
 export async function saveRewardRuleAction(

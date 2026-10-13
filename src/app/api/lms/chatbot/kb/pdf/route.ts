@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { isBillingLimitError } from "@/lib/platform/billing/enforce";
+import { requireLms } from "@/lib/lms-auth";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { addPdf, replacePdf, validateKbFile } from "@/lib/kb-pdf";
 
@@ -7,7 +8,7 @@ import { addPdf, replacePdf, validateKbFile } from "@/lib/kb-pdf";
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("MANAGE_CHATBOT");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   if (!(await isOpenAIConfigured())) {
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
     const id = await addPdf(file, title || file.name, lmsUser.email);
     return NextResponse.json({ ok: true, id }, { status: 201 });
   } catch (err) {
+    if (isBillingLimitError(err)) return NextResponse.json({ error: err.message }, { status: 402 });
     console.error("KB pdf upload failed", err);
     return NextResponse.json({ error: "Failed to index the document. Please try again." }, { status: 500 });
   }

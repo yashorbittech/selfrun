@@ -5,6 +5,8 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { assertAiAvailable, meterAiTokens } from "@/lib/platform/billing/enforce";
 import { connectionValues } from "@/lib/platform/connections/resolve";
 import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
+import { resolveUsageActor } from "@/lib/platform/billing/usage-actor";
+import { SYSTEM_ACTOR, type UsageActor } from "@/lib/platform/billing/usage-actor-store";
 
 // One client per distinct credential set (the platform's own OpenAI key, used for every company),
 // reused across hot reloads and invocations. Created lazily, so a workspace without a key only gets a clear error when it
@@ -13,14 +15,14 @@ const globalForOpenAI = globalThis as unknown as { _openAIClients?: Map<string, 
 
 export const OPENAI_NOT_CONNECTED = "AI isn't available right now. Please contact support.";
 
-export async function getOpenAI(): Promise<OpenAI> {
+export async function getOpenAI(opts: { timeoutMs?: number; maxRetries?: number } = {}): Promise<OpenAI> {
   const creds = await connectionValues("openai");
   if (!creds?.apiKey) throw new Error(OPENAI_NOT_CONNECTED);
   const clients = (globalForOpenAI._openAIClients ??= new Map());
-  const id = `${creds.apiKey}|${creds.organization ?? ""}|${creds.project ?? ""}`;
+  const id = `${creds.apiKey}|${creds.organization ?? ""}|${creds.project ?? ""}|${opts.timeoutMs ?? ""}|${opts.maxRetries ?? ""}`;
   let metered = clients.get(id);
   if (!metered) {
-    metered = meteredClient(new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined }));
+    metered = meteredClient(new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined, ...(opts.timeoutMs ? { timeout: opts.timeoutMs } : {}), ...(opts.maxRetries !== undefined ? { maxRetries: opts.maxRetries } : {}) }));
     clients.set(id, metered);
   }
   return metered;
@@ -49,8 +51,24 @@ function streamEventUsage(event: unknown): Usage {
   return e.response?.usage ?? e.usage ?? null;
 }
 
-function meterStream<T extends object>(stream: T, companyId: string, model: string, endpoint: string): T {
+/** About 3.5 characters to a token: used only when the provider never reports usage (a stream cut short, an image endpoint without usage). */
+const estimateTokens = (chars: number) => Math.ceil(chars / 3.5);
+/** A generated image bills as image tokens; when the response carries no usage, count this much per image so it is never free. */
+const IMAGE_FALLBACK_TOKENS = 4000;
+
+function meterStream<T extends object>(stream: T, companyId: string, model: string, endpoint: string, promptChars: number, actor: UsageActor): T {
   let metered = false;
+  let chars = 0;
+  // A reply that ends without the final usage event (the visitor closed the tab, a network cut) still cost tokens: count an estimate.
+  const settle = async () => {
+    if (metered) return;
+    metered = true;
+    if (chars > 0) {
+      const tokens = estimateTokens(promptChars + chars);
+      await meterAiTokens(tokens, companyId);
+      await recordAiUsage({ usage: { total_tokens: tokens }, model, endpoint: `${endpoint} (estimated)`, companyId, actor });
+    }
+  };
   return new Proxy(stream, {
     get(target, prop) {
       if (prop === Symbol.asyncIterator) {
@@ -59,17 +77,30 @@ function meterStream<T extends object>(stream: T, companyId: string, model: stri
           return {
             async next() {
               const r = await it.next();
-              if (!r.done && !metered) {
-                const tokens = tokensOf(streamEventUsage(r.value));
-                if (tokens > 0) {
-                  metered = true;
-                  await meterAiTokens(tokens, companyId);
-                  await recordAiUsage({ usage: streamEventUsage(r.value), model, endpoint, companyId });
+              if (!r.done) {
+                const delta = (r.value as { delta?: unknown } | null)?.delta;
+                if (typeof delta === "string") chars += delta.length;
+                else {
+                  const c = (r.value as { choices?: { delta?: { content?: unknown } }[] } | null)?.choices?.[0]?.delta?.content; // Chat Completions chunks
+                  if (typeof c === "string") chars += c.length;
                 }
+                if (!metered) {
+                  const tokens = tokensOf(streamEventUsage(r.value));
+                  if (tokens > 0) {
+                    metered = true;
+                    await meterAiTokens(tokens, companyId);
+                    await recordAiUsage({ usage: streamEventUsage(r.value), model, endpoint, companyId, actor });
+                  }
+                }
+              } else {
+                await settle();
               }
               return r;
             },
-            return: it.return ? (v?: unknown) => it.return!(v) : undefined,
+            return: async (v?: unknown) => {
+              await settle();
+              return it.return ? it.return(v) : { done: true as const, value: v };
+            },
             throw: it.throw ? (e?: unknown) => it.throw!(e) : undefined,
             [Symbol.asyncIterator]() {
               return this;
@@ -93,14 +124,22 @@ function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpo
     }
     // Outside any company (scripts) there is no plan to check or meter against.
     if (companyId) await assertAiAvailable();
+    // Who is asking, captured now (a streamed reply finishes after the request context is gone).
+    const actor = companyId ? await resolveUsageActor() : SYSTEM_ACTOR;
     const result = await fn.apply(owner, args);
     const model = String((args[0] as { model?: string } | undefined)?.model ?? "");
     const streaming = Boolean((args[0] as { stream?: boolean } | undefined)?.stream);
-    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(result, companyId, model, endpoint);
+    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(result, companyId, model, endpoint, JSON.stringify((args[0] as { input?: unknown; messages?: unknown } | undefined)?.input ?? (args[0] as { messages?: unknown } | undefined)?.messages ?? "").length, actor);
     if (companyId) {
-      const usage = (result as { usage?: Usage } | null)?.usage;
-      await meterAiTokens(tokensOf(usage), companyId);
-      await recordAiUsage({ usage, model, endpoint, companyId });
+      let usage = (result as { usage?: Usage } | null)?.usage;
+      let tokens = tokensOf(usage);
+      if (tokens === 0 && endpoint.startsWith("images.")) {
+        const n = Math.max(1, Number((args[0] as { n?: number } | undefined)?.n ?? 1));
+        tokens = IMAGE_FALLBACK_TOKENS * n;
+        usage = { total_tokens: tokens };
+      }
+      await meterAiTokens(tokens, companyId);
+      await recordAiUsage({ usage, model, endpoint, companyId, actor });
     }
     return result;
   };

@@ -2,7 +2,10 @@ import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { getCurrentHubUser } from "@/lib/hub-auth";
-import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
+import { currentCompanyIdOrNull, isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
+import { getEntitlements } from "@/lib/platform/billing/entitlements";
+import { enabledModules } from "@/lib/platform/onboarding/state";
+import { unavailablePanelKeys } from "@/lib/platform/panels/store";
 import type { AgentUser, Level } from "@/lib/ai/agent/types";
 
 /**
@@ -70,4 +73,16 @@ export async function onPlatformOwnerHost(): Promise<boolean> {
 /** Row filter for people who can open a panel but aren't staff: only rows tied to their own employee record. */
 export function ownRows(field: string) {
   return (user: AgentUser): Record<string, unknown> | null => (user.employeeId ? { [field]: user.employeeId } : null);
+}
+
+/**
+ * What the company's subscription lets the agent touch: panels outside the plan (or switched off) are blocked, and a suspended /
+ * canceled subscription is read-only. The agent is one more way to use the panels, so it follows the same rules as their pages.
+ */
+export async function agentPlanState(): Promise<{ blockedPanels: string[]; readOnly: boolean }> {
+  const companyId = await currentCompanyIdOrNull();
+  if (!companyId) return { blockedPanels: [], readOnly: false };
+  const [e, enabled, unavailable] = await Promise.all([getEntitlements(), enabledModules(), unavailablePanelKeys(companyId)]);
+  const blocked = [...DATA_PANELS, "cms"].filter((p) => (e.modules !== null && !e.modules.has(p)) || (enabled !== null && !enabled.has(p)) || unavailable.has(p));
+  return { blockedPanels: blocked, readOnly: e.readOnly };
 }

@@ -3,7 +3,7 @@ import { randomBytes, scryptSync } from "node:crypto";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { getEmployee } from "@/lib/hrms/employees";
-import { seatBlockReason } from "@/lib/platform/billing/enforce";
+import { newAccountBlockReason, rollbackIfOverSeats } from "@/lib/platform/billing/enforce";
 
 /**
  * Employee self-service login provisioning. An employee login is an
@@ -100,11 +100,12 @@ export async function createEmployeeLogin(
   if (existingForEmployee) return { ok: false, error: "This employee already has a login." };
   const existingEmail = await col.findOne({ email });
   if (existingEmail) return { ok: false, error: "That email is already in use by another account." };
-  const seatBlock = await seatBlockReason(1);
+  const seatBlock = await newAccountBlockReason(["employee"]);
   if (seatBlock) return { ok: false, error: seatBlock };
 
+  const newId = new ObjectId();
   await col.insertOne({
-    _id: new ObjectId(),
+    _id: newId,
     email,
     passwordHash: hashPassword(tempPassword),
     failedLoginAttempts: 0,
@@ -115,6 +116,10 @@ export async function createEmployeeLogin(
     employeeId,
     mustChangePassword: true,
   });
+  {
+    const overSeats = await rollbackIfOverSeats(newId);
+    if (overSeats) return { ok: false, error: overSeats };
+  }
   // Keep the reverse link on the employee record too.
   const db = await getDb();
   await db.collection<{ _id: string; adminUserId: string | null }>("hrms_employees").updateOne(

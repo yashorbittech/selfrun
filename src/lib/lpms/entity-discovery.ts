@@ -3,6 +3,7 @@ import type { LpmsViewer } from '@/lib/lpms/types';
 import { currentCompanyId } from '@/lib/platform/tenancy/context';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import { canViewAllEmployees } from '@/lib/hrms-roles';
 import { getCompany } from '@/lib/platform/tenancy/companies';
 import { getCurrentHubUser } from '@/lib/hub-auth';
 
@@ -82,7 +83,8 @@ const workspaceAdapter: PanelEntityAdapter = {
 const hrmsAdapter: PanelEntityAdapter = {
   panelKey: 'hrms',
   panelLabel: 'Human Resources',
-  canAccess: (viewer) => viewer.roles.some(r => r.startsWith('hrms_') || r.startsWith('lpms_')),
+  // Employee records (names, e-mails, pay, IDs) are HR data: only people who may see every employee can pull them into a document.
+  canAccess: (viewer) => canViewAllEmployees({ roles: viewer.roles, permissionOverrides: viewer.overrides }),
   getEntities: () => [
     {
       key: 'hrms.employee',

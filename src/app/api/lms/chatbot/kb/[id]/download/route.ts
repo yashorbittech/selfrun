@@ -6,7 +6,7 @@ import { readKbFileStream } from "@/lib/kb-storage";
 type Context = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Context) {
-  if (!(await isAuthorizedLmsRequest(req))) {
+  if (!(await isAuthorizedLmsRequest(req, "VIEW_CHATBOT"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

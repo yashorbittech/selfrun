@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
@@ -157,7 +158,7 @@ export async function getSessionPrmsUser(token: string | undefined | null): Prom
 export async function getPrmsUserForAccount(adminId: ObjectId): Promise<CurrentPrmsUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   const roles = normalizePrmsRoles(user.roles);
   // Access can be revoked mid-session by clearing the roles array.

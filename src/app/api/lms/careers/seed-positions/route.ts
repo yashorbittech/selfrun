@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { getRuntimeRecords } from "@/lib/cms/collections/store";
 import type { Job } from "@/types/content";
 import { getDb } from "@/lib/mongodb";
@@ -15,7 +15,7 @@ import { getDb } from "@/lib/mongodb";
  * remaining resolvable for historical applications.
  */
 export async function POST() {
-  const lmsUser = await getCurrentLmsUser();
+  const lmsUser = await requireLms("MANAGE_CAREERS");
   if (!lmsUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

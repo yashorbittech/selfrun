@@ -1,3 +1,4 @@
+import { requireLmsPage } from "@/lib/lms-auth";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import Breadcrumbs from "@/components/lms/Breadcrumbs";
 import CareerApplicationsDataTable from "@/components/lms/CareerApplicationsDataTable";
@@ -27,6 +28,7 @@ export default async function ApplicantsListPage({
     sortDir?: string;
   }>;
 }) {
+  await requireLmsPage("VIEW_CAREERS");
   const sp = await searchParams;
   const page = Math.max(Number(sp.page) || 1, 1);
   const status = sp.status && isValidCareerApplicationStatus(sp.status) ? sp.status : undefined;

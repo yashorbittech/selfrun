@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       const audio = Buffer.concat(chunks.map((c) => Buffer.from(c)));
       const ttsMs = Date.now() - startedAt;
       const assistantDurationMs = Math.round((audio.byteLength / MP3_BYTES_PER_SEC) * 1000);
-      await recordUsage("voice_seconds", assistantDurationMs / 1000).catch(() => {});
+      await recordUsage("voice_seconds", assistantDurationMs / 1000, new Date(), { source: "Voice reply (assistant speaking)" }).catch(() => {});
 
       const stored = await saveVoiceAudio(audio, "mp3");
       const conversationId = await ensureVoiceConversation(session, voice.voiceId);

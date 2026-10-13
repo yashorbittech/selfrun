@@ -26,6 +26,7 @@ import { SMMS_PERMISSIONS, SMMS_PERMISSION_KEY, SMMS_PERMISSION_META } from "@/l
 import { OTS_PERMISSIONS, OTS_PERMISSION_KEY, OTS_PERMISSION_META } from "@/lib/ots-roles";
 import { SEO_PERMISSIONS, SEO_PERMISSION_KEY, SEO_PERMISSION_META } from "@/lib/seo-roles";
 import { CMS_PERMISSIONS, CMS_PERMISSION_KEY, CMS_PERMISSION_META } from "@/lib/cms-roles";
+import { LMS_PERMISSIONS, LMS_PERMISSION_KEY, LMS_PERMISSION_META } from "@/lib/lms-roles";
 import { LPMS_PERMISSIONS, LPMS_PERMISSION_KEY, LPMS_PERMISSION_META } from "@/lib/lpms-roles";
 
 export interface PermissionOption {
@@ -328,32 +329,36 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         label: "Manage fiscal periods",
         description: "Define fiscal periods and close/reopen them — closing posts a real journal entry.",
       },
+      {
+        key: "fms.canViewPayrollFinance",
+        label: "View payroll finance",
+        description: "Open salary payments, payroll runs and the HR payroll view inside FMS.",
+      },
+      {
+        key: "fms.canViewFinancialStatements",
+        label: "View financial statements",
+        description: "Open P&L, balance sheet, cash flow, trial balance and the general ledger.",
+      },
+      {
+        key: "fms.canViewCommercialFinance",
+        label: "View customers, vendors & payments",
+        description: "Open customers, vendors, invoices, bills, receipts, refunds and payment links.",
+      },
+      {
+        key: "fms.canViewBanking",
+        label: "View banking & reconciliation",
+        description: "Open bank and cash accounts, transfers and reconciliation.",
+      },
     ],
   },
   {
     module: "LMS (CRM & Learning)",
-    permissions: [
-      {
-        key: "lms.isLmsAdmin",
-        label: "LMS admin actions",
-        description: "Everything an LMS Admin can do — full control over leads, campaigns, and courses.",
-      },
-      {
-        key: "lms.canManageLeads",
-        label: "Manage leads & sales pipeline",
-        description: "Create, edit, assign, and update status of leads across campaigns.",
-      },
-      {
-        key: "lms.canManageCampaigns",
-        label: "Manage marketing campaigns",
-        description: "Create, edit, and launch marketing lead campaigns and import leads.",
-      },
-      {
-        key: "lms.canViewAnalytics",
-        label: "View sales & lead analytics",
-        description: "Access conversion rates, pipeline velocity, and team performance reports.",
-      },
-    ],
+    // Derived from the LMS role model so the catalog can never drift from the permissions `lmsCan()` actually checks.
+    permissions: LMS_PERMISSIONS.map((p) => ({
+      key: LMS_PERMISSION_KEY[p],
+      label: LMS_PERMISSION_META[p].label,
+      description: LMS_PERMISSION_META[p].description,
+    })),
   },
   {
     module: "External Portal",

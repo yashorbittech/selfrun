@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { voiceBlockReason } from "@/lib/platform/billing/enforce";
+import { recordUsage } from "@/lib/platform/billing/usage";
 import { getChatbotConfig } from "@/lib/chatbot-config";
 import { isElevenLabsConfigured, transcribeAudio } from "@/lib/elevenlabs";
 import { checkRateLimit } from "@/lib/chatbot-rate-limit";
@@ -33,6 +35,10 @@ export async function POST(req: NextRequest) {
   if (audio.size > MAX_AUDIO_BYTES) {
     return NextResponse.json({ error: "That recording is too long — keep it under ~2 minutes." }, { status: 413 });
   }
+
+  // The plan's voice minutes (and whether voice is in the plan at all) apply to listening as much as to speaking.
+  const voiceBlocked = await voiceBlockReason().catch(() => null);
+  if (voiceBlocked) return NextResponse.json({ error: "Voice is unavailable right now." }, { status: 402 });
 
   const { session, cookiesToSet } = await resolveSession(req);
 
@@ -75,6 +81,7 @@ export async function POST(req: NextRequest) {
     return applyChatCookies(res, cookiesToSet);
   }
 
+  if (result.audioDurationSecs) await recordUsage("voice_seconds", result.audioDurationSecs, new Date(), { source: "Voice input (visitor speaking)" }).catch(() => {});
   await ensureVoiceConversation(session, config.voice.voiceId);
   const transcriptId = await recordVoiceTranscript({
     sessionId: session.sessionId,

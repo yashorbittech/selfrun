@@ -46,6 +46,7 @@ async function resolve(user: AgentUser, e: EntityDef): Promise<EntityDef | null>
 }
 
 async function resolveLevels(user: AgentUser, e: EntityDef): Promise<EntityDef | null> {
+  if (user.blockedPanels?.includes(e.panel)) return null;
   if (hasLevel(user.roles, e.panel, need(e.read, "staff")) && (e.allowRead ? e.allowRead(user) : true)) return e;
   if (!e.self || !hasLevel(user.roles, e.panel, "any")) return null;
   const mine = await e.self(user);
@@ -66,16 +67,17 @@ export async function entitiesFor(user: AgentUser, panel: string): Promise<Entit
 
 export function actionsFor(user: AgentUser, panel: string): ActionDef[] {
   const panels = new Set(scopePanels(panel));
-  return ACTIONS.filter((a) => panels.has(a.panel) && hasLevel(user.roles, a.panel, a.level) && (a.allow ? a.allow(user) : true));
+  if (user.readOnly) return [];
+  return ACTIONS.filter((a) => panels.has(a.panel) && !user.blockedPanels?.includes(a.panel) && hasLevel(user.roles, a.panel, a.level) && (a.allow ? a.allow(user) : true));
 }
 
 export function canWrite(user: AgentUser, e: EntityDef): boolean {
-  return !!e.write && hasLevel(user.roles, e.panel, e.write) && (e.allow ? e.allow(user) : true);
+  return !user.readOnly && !user.blockedPanels?.includes(e.panel) && !!e.write && hasLevel(user.roles, e.panel, e.write) && (e.allow ? e.allow(user) : true);
 }
 
 export function reportsFor(user: AgentUser, panel: string): ReportDef[] {
   const panels = new Set(scopePanels(panel));
-  return REPORTS.filter((r) => panels.has(r.panel) && hasLevel(user.roles, r.panel, r.level) && (r.allow ? r.allow(user) : true));
+  return REPORTS.filter((r) => panels.has(r.panel) && !user.blockedPanels?.includes(r.panel) && hasLevel(user.roles, r.panel, r.level) && (r.allow ? r.allow(user) : true));
 }
 
 export const actionByKey = (user: AgentUser, panel: string, key: string) => actionsFor(user, panel).find((a) => a.key === key);

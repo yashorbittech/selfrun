@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isMaintenanceOn, isPublicSitePath } from "@/lib/cms/maintenance-gate";
-import { resolveCompanyIdByHost, resolveHostInfo, type HostInfo } from "@/lib/platform/tenancy/companies";
+import { resolveCompanyIdByHost, resolveHostInfo, normalizeHost, type HostInfo } from "@/lib/platform/tenancy/companies";
+import { gateApi, gatePage, hardenApiResponse, isAssetPath } from "@/lib/security/gate";
+import { gateSessionBinding } from "@/lib/security/session-bind";
 import { counterpartHost, surfaceRedirect } from "@/lib/platform/tenancy/surfaces";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { isSaasAppHost, isSaasHost } from "@/lib/saas/hosts";
 import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
 import { isTakeoverNow } from "@/lib/platform/maintenance-shared";
 import { isSaasPagePath } from "@/lib/saas/routes";
+import { entitlementsFor } from "@/lib/platform/billing/entitlements";
+import type { Entitlements } from "@/lib/platform/billing/types";
 
 /**
  * First-touch referral capture, server side. A `?ref=CODE` on any page view
@@ -53,16 +57,72 @@ async function panelGate(request: NextRequest, companyId: string | null | undefi
   }
 }
 
+
+/**
+ * Subscription gate for the business panels, applied to every API call and every Server Action (page views are
+ * covered by each panel's layout, which sends people to the upgrade page):
+ *  - a panel that is not in the company's plan answers 403, whatever the caller tries;
+ *  - while the subscription is suspended or canceled (read-only) nothing can be created, changed or deleted in a panel.
+ * Sign-in and password pages stay open. Fails open on a lookup error (each panel still checks its own entitlements).
+ */
+const PLAN_PANELS = new Set(["hrms", "pms", "lms", "fms", "prms", "tms", "ots", "sop", "lpms", "dlms", "cms", "seo", "smms", "aibots", "intelligence", "portal"]);
+const OPEN_IN_READ_ONLY = /\/(login|logout|signin|change-password|forgot-password|reset-password|verify-email|handoff)(\/|$)/i;
+const entCache = new Map<string, { at: number; ent: Entitlements }>();
+
+async function planGate(request: NextRequest, companyId: string | null | undefined): Promise<NextResponse | null> {
+  if (!companyId) return null;
+  const pathname = request.nextUrl.pathname;
+  const parts = pathname.split("/").filter(Boolean);
+  const isApi = parts[0] === "api";
+  const segment = isApi ? parts[1] : parts[0];
+  if (!segment || !PLAN_PANELS.has(segment)) return null;
+  const mutating = !["GET", "HEAD"].includes(request.method.toUpperCase());
+  if (!isApi && !mutating) return null;
+  try {
+    let hit = entCache.get(companyId);
+    if (!hit || Date.now() - hit.at > 20_000) {
+      hit = { at: Date.now(), ent: await entitlementsFor(companyId) };
+      if (entCache.size > 2000) entCache.clear();
+      entCache.set(companyId, hit);
+    }
+    const { ent } = hit;
+    const deny = (status: number, error: string) => (isApi ? NextResponse.json({ error }, { status, headers: { "Cache-Control": "no-store" } }) : new NextResponse(error, { status, headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" } }));
+    if (ent.modules !== null && !ent.modules.has(segment)) return deny(403, "This panel isn't included in your plan. Upgrade in Settings → Billing to unlock it.");
+    if (ent.readOnly && mutating && !OPEN_IN_READ_ONLY.test(pathname)) return deny(402, "Your workspace is read-only because its subscription is suspended or has ended. You can still view everything; renew in Settings → Billing to make changes.");
+  } catch (err) {
+    console.error("[plan] gate lookup failed in proxy", err);
+  }
+  return null;
+}
+
 export async function proxy(request: NextRequest) {
   // API calls: only the panel gate applies (everything below is about page views).
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  const hostHeader0 = request.headers.get("host") ?? "";
+  const onSaasHost0 = (() => {
+    const h = normalizeHost(hostHeader0);
+    return !!h && (isSaasHost(h) || isSaasAppHost(h));
+  })();
+  const isApi = request.nextUrl.pathname.startsWith("/api/");
+  // Anything that changes data — a Server Action, a form post, any non-GET route — goes through the same front door as the API.
+  const mutating = !["GET", "HEAD"].includes(request.method.toUpperCase());
+  if (isApi || mutating) {
     let apiCompany: string | null | undefined;
     try {
-      apiCompany = await resolveCompanyIdByHost(request.headers.get("host"));
+      apiCompany = await resolveCompanyIdByHost(hostHeader0);
     } catch {
       apiCompany = undefined;
     }
-    return (await panelGate(request, apiCompany)) ?? NextResponse.next();
+    const blocked = await gateApi(request, hostHeader0, apiCompany ?? null, onSaasHost0);
+    if (blocked) return blocked;
+    const planBlocked = await planGate(request, apiCompany);
+    if (planBlocked) return planBlocked;
+    if (!isAssetPath(request.nextUrl.pathname, request.method)) {
+      const copied = await gateSessionBinding(request, true);
+      if (copied) return copied;
+    }
+    if (!isApi) return NextResponse.next();
+    const out = (await panelGate(request, apiCompany)) ?? NextResponse.next();
+    return hardenApiResponse(out, isAssetPath(request.nextUrl.pathname, request.method) ? "asset" : "other");
   }
 
   // The SaaS product's own website: its public pages live under /saas and need no company.
@@ -86,6 +146,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL("/workspace-not-found", request.url), { status: 404 });
   }
   const companyId = info?.companyId;
+
+  // Page views: scanner traps, scripted scrapers and floods (crawlers are kept off the signed-in panels altogether).
+  const appSurface = info ? info.surface === "app" : isSaasAppHost(normalizeHost(hostHeader0) ?? "");
+  const pageBlocked = await gatePage(request, appSurface);
+  if (pageBlocked) return pageBlocked;
+  const copiedSession = await gateSessionBinding(request, false);
+  if (copiedSession) return copiedSession;
 
   // A company's website and its panels live on different hosts: a page of the other side is sent to its own host
   // (so a link to /workspace from the website, or to / from a panel, still lands somewhere right).
@@ -136,10 +203,13 @@ export async function proxy(request: NextRequest) {
   if (!request.cookies.get("yo_did")) {
     response.cookies.set("yo_did", crypto.randomUUID(), { maxAge: 365 * 24 * 60 * 60, path: "/", sameSite: "lax", httpOnly: true, secure: process.env.NODE_ENV === "production" });
   }
+  // A signed-in page is for that person only: no browser, shared or CDN cache may keep a copy of it.
+  if (appSurface) response.headers.set("Cache-Control", "private, no-store, max-age=0");
   return response;
 }
 
 export const config = {
   // Page views and API calls (API calls only get the panel gate) — skip Next internals and static files.
-  matcher: ["/((?!_next/static|_next/image|.*\\..*).*)"],
+  // Everything except Next internals and plain static assets. (Paths with other dots — /.env, /wp-login.php, /backup.sql — DO come through, so the scanner traps in the gate see them.)
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|css|js|map|woff2?|ttf|otf|mp4|webm|mp3|wav|pdf|txt|xml|json|webmanifest)$).*)"],
 };

@@ -79,6 +79,16 @@ const nextConfig: NextConfig = {
           { key: "Service-Worker-Allowed", value: "/" },
         ],
       },
+      // Uploaded files / API responses are never pages: nothing in them may run script, and only this site may frame them.
+      {
+        source: "/api/:path*",
+        headers: [{ key: "Content-Security-Policy", value: "script-src 'none'; frame-ancestors 'self'; base-uri 'none'" }],
+      },
+      // Pages: no <base> hijack, no plugins, framed only by this site (same intent as X-Frame-Options, which old browsers use).
+      {
+        source: "/((?!api/).*)",
+        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; form-action 'self' https:" }],
+      },
       {
         source: "/:path*",
         headers: [
@@ -87,7 +97,11 @@ const nextConfig: NextConfig = {
           // Only this site may frame itself (the theme customizer previews the site in a same-origin frame).
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(self), microphone=(self)" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          // Other windows (another site that opened this one) get no handle on it; payment / OAuth popups still work.
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+          { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+          { key: "Origin-Agent-Cluster", value: "?1" },
           { key: "X-DNS-Prefetch-Control", value: "on" },
         ],
       },

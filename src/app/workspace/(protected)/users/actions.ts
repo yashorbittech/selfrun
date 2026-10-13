@@ -20,6 +20,16 @@ import {
 import { ALL_KNOWN_ROLES } from "@/lib/workspace/role-catalog";
 import { ALL_PERMISSION_KEYS } from "@/lib/workspace/permission-catalog";
 import { searchActivityLog, type AdminActivityRow } from "@/lib/workspace/activity-log";
+import { customRolesCarryPermissions, getCustomRoles, recordAccessAudit } from "@/lib/workspace/custom-roles";
+
+/** Why `actor` may not hand out these custom roles, or null. Roles that carry permission grants are Super-Admin-only; plain bundles follow the same escalation rules as built-in roles. */
+async function customRoleBlock(actor: { id?: string; roles: readonly string[] }, targetId: string | undefined, ids: string[] | undefined): Promise<string | null> {
+  if (!ids || ids.length === 0) return null;
+  if (actor.roles.includes("super_admin")) return null;
+  if (await customRolesCarryPermissions(ids)) return "Only a Super Admin can give a custom role that carries permission rules.";
+  const roles = (await getCustomRoles(ids)).flatMap((r) => r.baseRoles);
+  return delegatedManagerBlock(actor, { targetId, roles });
+}
 
 function revalidate() {
   revalidatePath("/workspace/users");
@@ -41,25 +51,29 @@ export async function createAdminUserAction(
   email: string,
   roles: string[],
   userType?: "employee" | "contractor" | "partner" | "system",
-  notes?: string
+  notes?: string,
+  customRoleIds?: string[],
 ): Promise<CreateAdminUserResult> {
   const actor = await requireWorkspaceAction("company.users");
-  const blocked = await delegatedManagerBlock(actor, { roles });
+  const blocked = (await delegatedManagerBlock(actor, { roles })) ?? (await customRoleBlock(actor, undefined, customRoleIds));
   if (blocked) return { ok: false, error: blocked };
-  const result = await createAdminUser(email, sanitizeRoles(roles), userType, notes);
-  if (result.ok) { revalidate(); await workspaceEvents.userAdded(email.trim().toLowerCase(), sanitizeRoles(roles), actor.id); await checkSeatUsage(await countSeatsUsed()); }
+  const result = await createAdminUser(email, sanitizeRoles(roles), userType, notes, customRoleIds ?? []);
+  if (result.ok) {
+    await recordAccessAudit({ actorId: actor.id, action: "user.created", target: email.trim().toLowerCase(), detail: `roles: ${sanitizeRoles(roles).join(", ") || "none"}; custom roles: ${(customRoleIds ?? []).length}` }); revalidate(); await workspaceEvents.userAdded(email.trim().toLowerCase(), sanitizeRoles(roles), actor.id); await checkSeatUsage(await countSeatsUsed()); }
   return result;
 }
 
 export async function updateAdminUserRolesAction(
   id: string,
-  roles: string[]
+  roles: string[],
+  customRoleIds?: string[],
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireWorkspaceAction("company.users");
-  const blocked = await delegatedManagerBlock(admin, { targetId: id, roles });
+  const blocked = (await delegatedManagerBlock(admin, { targetId: id, roles })) ?? (await customRoleBlock(admin, id, customRoleIds));
   if (blocked) return { ok: false, error: blocked };
-  const result = await updateAdminUserRoles(id, sanitizeRoles(roles), admin.id);
-  if (result.ok) { revalidate(); await workspaceEvents.rolesChanged(id, sanitizeRoles(roles), admin.id); }
+  const result = await updateAdminUserRoles(id, sanitizeRoles(roles), admin.id, customRoleIds);
+  if (result.ok) {
+    await recordAccessAudit({ actorId: admin.id, action: "user.roles_changed", target: id, detail: `roles: ${sanitizeRoles(roles).join(", ") || "none"}${customRoleIds ? `; custom roles: ${customRoleIds.length}` : ""}` }); revalidate(); await workspaceEvents.rolesChanged(id, sanitizeRoles(roles), admin.id); }
   return result;
 }
 
@@ -71,7 +85,8 @@ export async function updateAdminUserPermissionOverridesAction(
   const blocked = await delegatedManagerBlock(actor, { targetId: id, overrides: true });
   if (blocked) return { ok: false, error: blocked };
   const result = await updateAdminUserPermissionOverrides(id, sanitizeOverrides(overrides));
-  if (result.ok) { revalidate(); await workspaceEvents.overridesChanged(id, actor.id); }
+  if (result.ok) {
+    await recordAccessAudit({ actorId: actor.id, action: "user.permissions_changed", target: id, detail: `${Object.keys(sanitizeOverrides(overrides)).length} individual rule(s)` }); revalidate(); await workspaceEvents.overridesChanged(id, actor.id); }
   return result;
 }
 
@@ -89,7 +104,8 @@ export async function deactivateAdminUserAction(id: string): Promise<{ ok: boole
   const blocked = await delegatedManagerBlock(admin, { targetId: id });
   if (blocked) return { ok: false, error: blocked };
   const result = await deactivateAdminUser(id, admin.id);
-  if (result.ok) { revalidate(); await workspaceEvents.deactivated(id, admin.id); }
+  if (result.ok) {
+    await recordAccessAudit({ actorId: admin.id, action: "user.deactivated", target: id }); revalidate(); await workspaceEvents.deactivated(id, admin.id); }
   return result;
 }
 

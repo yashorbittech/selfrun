@@ -68,7 +68,7 @@ export default async function SupportInboxPage({ searchParams }: { searchParams:
               <span className="w-14 shrink-0 text-xs font-semibold text-muted-foreground">#{r.number}</span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium text-foreground">{r.title}</span>
-                <span className="block truncate text-xs text-muted-foreground">{r.companyName} · {labelOf(cfg.types, r.type)} · {r.createdBy.email} · {formatDateTime(r.updatedAt)}{r.assignee ? ` · ${r.assignee.email}` : " · unassigned"}</span>
+                <span className="block truncate text-xs text-muted-foreground">{r.prioritySupport ? "★ Priority · " : ""}{r.companyName} · {labelOf(cfg.types, r.type)} · {r.createdBy.email} · {formatDateTime(r.updatedAt)}{r.assignee ? ` · ${r.assignee.email}` : " · unassigned"}</span>
               </span>
               {r.lastActor === "company" && stateOf(cfg, r.status) === "open" && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">Awaiting us</span>}
               <PriorityBadge label={labelOf(cfg.priorities, r.priority)} />

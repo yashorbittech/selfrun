@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { cookies } from "next/headers";
 import type { ObjectId } from "mongodb";
@@ -30,7 +31,7 @@ export async function getIntelligenceUserForAccount(adminId: ObjectId): Promise<
   const user = await (await getDb())
     .collection<{ _id: ObjectId; email: string; roles?: string[]; permissionOverrides?: Record<string, boolean>; employeeId?: string | null; mustChangePassword?: boolean; createdAt: Date; lastLoginAt: Date | null }>("admin_users")
     .findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
   const roles = user.roles ?? [];
   if (!hasIntelligenceAccess(roles)) return null;
   return {

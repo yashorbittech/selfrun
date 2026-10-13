@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
@@ -121,6 +122,11 @@ export async function verifyHubCredentials(
     return { ok: false, error: GENERIC };
   }
 
+  if (!(await accountWithinSeats(user))) {
+    await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: "over_seat_limit" });
+    return { ok: false, error: "Your company's plan has fewer user seats than accounts, and this account isn't one of them. Ask your admin to upgrade the plan." };
+  }
+
   // No role check — Hub accepts any valid admin_users login, mirroring LMS.
   await users.updateOne(
     { _id: user._id },
@@ -155,7 +161,7 @@ export async function getSessionHubUser(token: string | undefined | null): Promi
 
   const users = await getHubUsersCollection();
   const user = await users.findOne({ _id: session.adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   return {
     id: user._id.toString(),

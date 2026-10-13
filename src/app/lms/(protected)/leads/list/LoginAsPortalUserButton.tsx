@@ -1,5 +1,6 @@
 "use client";
 
+import { useLmsCan } from "@/components/lms/LmsAccess";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ export default function LoginAsPortalUserButton({
   displayName,
   variant = "icon",
 }: LoginAsPortalUserButtonProps) {
+  const allowed = useLmsCan("IMPERSONATE");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [clicked, setClicked] = useState(false);
@@ -65,7 +67,9 @@ export default function LoginAsPortalUserButton({
   const elemId = `login-as-portal-user-${externalUserId || leadId || applicationId || studentId || clientId || email || "target"}`;
 
   if (variant === "dropdown-item") {
-    return (
+    if (!allowed) return null;
+
+  return (
       <DropdownMenuItem onClick={handleClick} disabled={isPending || clicked}>
         {isPending || clicked ? (
           <Loader2 className="size-3.5 animate-spin" />

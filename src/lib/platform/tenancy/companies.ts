@@ -33,6 +33,8 @@ export interface Company {
   status: CompanyStatus;
   /** The company that owns and runs the platform itself (the platform operator). Exactly one. */
   isPlatformOwner: boolean;
+  /** The public demo company: unlimited like the platform owner (no seat / module / storage limits, never read-only) so anyone can explore the whole product. Set only by the platform operator (scripts/mark-demo-company.mjs), never by sign-up. */
+  isDemo?: boolean;
   /** Defaults from Platform settings at creation (BCP 47 locale, IANA time zone); onboarding can change the time zone. */
   locale?: string;
   timezone?: string;

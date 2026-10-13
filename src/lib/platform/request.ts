@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import "server-only";
 import { createHash } from "node:crypto";
 import { headers } from "next/headers";
@@ -18,6 +19,6 @@ export async function requestOrigin(): Promise<{ origin: string; host: string | 
 /** A stable, non-reversible key for the caller's IP — for rate limiting without storing addresses. */
 export async function clientKey(): Promise<string> {
   const h = await headers();
-  const ip = (h.get("x-forwarded-for") ?? "").split(",")[0].trim() || h.get("x-real-ip") || "unknown";
+  const ip = clientIpFrom(h);
   return createHash("sha256").update(ip).digest("hex").slice(0, 32);
 }

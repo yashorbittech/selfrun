@@ -1,3 +1,6 @@
+"use client";
+
+import { useLmsCan } from "@/components/lms/LmsAccess";
 import { Download } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -17,6 +20,8 @@ export default function ChatbotExportButton({
   params: ChatbotExportParams;
   label?: string;
 }) {
+  const allowed = useLmsCan("EXPORT_DATA");
+  if (!allowed) return null;
   const query = new URLSearchParams();
   if (params.search) query.set("search", params.search);
   if (params.device) query.set("device", params.device);

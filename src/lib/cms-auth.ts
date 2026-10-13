@@ -1,3 +1,4 @@
+import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
@@ -158,7 +159,7 @@ export async function getSessionCmsUser(token: string | undefined | null): Promi
 export async function getCmsUserForAccount(adminId: ObjectId): Promise<CurrentCmsUser | null> {
   const users = await getAdminUsersCollection();
   const user = await users.findOne({ _id: adminId });
-  if (!user) return null;
+  if (!user || !(await accountWithinSeats(user))) return null;
 
   const roles = user.roles ?? [];
   // Access can be revoked mid-session by clearing the roles array.

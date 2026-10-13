@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { getLeadRecord } from "@/lib/lead-management/records";
 import { saveLeadAttachment } from "@/lib/lead-management/attachment-storage";
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ attachment });
     }
 
-    const lmsUser = await getCurrentLmsUser();
+    const lmsUser = await requireLms("MESSAGE_LEADS");
     if (lmsUser) {
       const leadId = form.get("leadId");
       if (typeof leadId !== "string" || !leadId) return NextResponse.json({ error: "leadId is required." }, { status: 400 });

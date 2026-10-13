@@ -1,3 +1,4 @@
+import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import { aibotsEvents } from "@/lib/notify/triggers/aibots";
 import "server-only";
 import { ObjectId } from "mongodb";
@@ -225,6 +226,7 @@ async function clean(input: BotInput) {
 
 /** Creates the bot's private OpenAI vector store (lazily — a bot can exist before OpenAI is configured). */
 export async function ensureBotVectorStore(bot: Pick<BotDoc, "_id" | "name" | "vectorStoreId">): Promise<string> {
+  setAiFeature("AI Bots");
   const openai = await getOpenAI();
   if (bot.vectorStoreId) {
     try {

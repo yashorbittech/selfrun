@@ -1,5 +1,6 @@
 "use server";
 
+import { employeeBlockReason } from "@/lib/platform/billing/enforce";
 import { revalidatePath } from "next/cache";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { canManageEmployees, type HrmsRole } from "@/lib/hrms-roles";
@@ -67,6 +68,8 @@ export async function createEmployeeAction(
     };
   }
 
+  const planBlock = await employeeBlockReason();
+  if (planBlock) return { ok: false, error: planBlock };
   const employee = await createEmployee(validation.data, user.id, { recruitment });
   await rebuildHierarchyFor(employee._id);
 

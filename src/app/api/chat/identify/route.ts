@@ -1,3 +1,4 @@
+import { limitOr429 } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
 import { getChatbotConfig } from "@/lib/chatbot-config";
@@ -17,6 +18,9 @@ import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
  * header picks up the new session on its own (see `portal:session-changed`).
  */
 export async function POST(req: NextRequest) {
+  // This can create a lead and a portal account: a shared, exact limit per address (the front door adds a coarser one).
+  const limited = await limitOr429(req, "chat-identify", 10, 3600);
+  if (limited) return limited;
   const config = await getChatbotConfig();
 
   let body: Record<string, unknown>;

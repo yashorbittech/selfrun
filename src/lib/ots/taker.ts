@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import "server-only";
 import { headers } from "next/headers";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
@@ -41,7 +42,8 @@ export async function resolveTaker(channel: Channel): Promise<Taker | null> {
 
 export async function clientInfo(): Promise<{ ip: string | null; userAgent: string | null }> {
   const h = await headers();
-  const fwd = h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
+  const fwdRaw = clientIpFrom(h);
+  const fwd = fwdRaw === "unknown" ? null : fwdRaw;
   return { ip: fwd ? fwd.slice(0, 64) : null, userAgent: h.get("user-agent")?.slice(0, 300) ?? null };
 }
 

@@ -1,5 +1,6 @@
+import { hasBearer } from "@/lib/security/bearer";
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentLmsUser } from "@/lib/lms-auth";
+import { requireLms } from "@/lib/lms-auth";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { beginWebsiteIndex, chatbotCrawlBaseOverride, runWebsiteIndex } from "@/lib/kb-website";
 import { listKbRuns, reapStaleRuns } from "@/lib/kb-runs";
@@ -8,9 +9,8 @@ import { afterForCompany } from "@/lib/platform/tenancy/context";
 
 async function authorize(req: NextRequest): Promise<string | null> {
   const secret = process.env.CHATBOT_ADMIN_API_SECRET;
-  const authHeader = req.headers.get("authorization");
-  if (secret && authHeader === `Bearer ${secret}`) return "api";
-  const lmsUser = await getCurrentLmsUser();
+  if (hasBearer(req, secret)) return "api";
+  const lmsUser = await requireLms("MANAGE_CHATBOT");
   return lmsUser ? lmsUser.email : null;
 }
 
@@ -46,8 +46,19 @@ export async function POST(req: NextRequest) {
     // no body — default to a full re-index
   }
 
+  // The crawl may only start from this company's own site (or the platform's configured override) — never an address the caller picks.
+  const site = await companySiteUrl();
+  let requested: string | null = null;
+  if (typeof body.baseUrl === "string" && body.baseUrl) {
+    try {
+      requested = new URL(body.baseUrl).host === new URL(site).host ? body.baseUrl : null;
+    } catch {
+      requested = null;
+    }
+    if (!requested) return NextResponse.json({ error: "The address must be this company's own website." }, { status: 400 });
+  }
   const baseUrl =
-    (typeof body.baseUrl === "string" && body.baseUrl) ||
+    requested ||
     (await chatbotCrawlBaseOverride()) ||
     req.nextUrl.origin ||
     (await companySiteUrl());

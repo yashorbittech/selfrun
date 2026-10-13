@@ -29,7 +29,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { FmsRole } from "@/lib/fms-roles";
-import { canManageAccounts, canViewAuditLog } from "@/lib/fms-roles";
+import { canManageAccounts, canViewAuditLog, canViewCommercialFinance, canViewFinancialStatements, canViewPayrollFinance } from "@/lib/fms-roles";
 
 function NavLink({
   href,
@@ -132,18 +132,18 @@ export default function FmsSidebar({
       <SectionLabel collapsed={collapsed}>Panels</SectionLabel>
       {panels.prms?.available !== false && nav({ href: "/fms/panels/prms", label: panelLabel("prms", "PRMS Panel"), icon: ShoppingCart })}
       {panels.pms?.available !== false && nav({ href: "/fms/panels/pms", label: panelLabel("pms", "PMS Panel"), icon: FolderKanban })}
-      {panels.hrms?.available !== false && nav({ href: "/fms/panels/hrms", label: panelLabel("hrms", "HRMS Panel"), icon: Users })}
+      {canViewPayrollFinance(roleCtx) && panels.hrms?.available !== false && nav({ href: "/fms/panels/hrms", label: panelLabel("hrms", "HRMS Panel"), icon: Users })}
       {panels.tms?.available !== false && nav({ href: "/fms/panels/tms", label: panelLabel("tms", "TMS Panel"), icon: GraduationCap })}
 
       {/* ── FINANCE DESK ── */}
       <SectionLabel collapsed={collapsed}>Finance Desk</SectionLabel>
-      {nav({ href: "/fms/receivables", label: "Receivables", icon: ArrowDownLeft })}
-      {nav({ href: "/fms/payouts", label: "Payouts", icon: Send })}
-      {nav({ href: "/fms/beneficiaries", label: "Bank Directory", icon: Building2 })}
+      {canViewCommercialFinance(roleCtx) && nav({ href: "/fms/receivables", label: "Receivables", icon: ArrowDownLeft })}
+      {canViewCommercialFinance(roleCtx) && nav({ href: "/fms/payouts", label: "Payouts", icon: Send })}
+      {canViewCommercialFinance(roleCtx) && nav({ href: "/fms/beneficiaries", label: "Bank Directory", icon: Building2 })}
       {nav({ href: "/fms/transactions", label: "Transactions", icon: ArrowLeftRight })}
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
-      {nav({ href: "/fms/reports/financial-summary", label: "Analytics", icon: BarChart3 })}
+      {canViewFinancialStatements(roleCtx) && nav({ href: "/fms/reports/financial-summary", label: "Analytics", icon: BarChart3 })}
       {canManageAccounts(roleCtx) && nav({ href: "/fms/settings/accounts", label: "Settings", icon: Settings })}
     </nav>
   );

@@ -1,9 +1,8 @@
 import "server-only";
-import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
+import { getOpenAI } from "@/lib/openai";
+import { isBillingLimitError } from "@/lib/platform/billing/enforce";
 import OpenAI from "openai";
 import { randomUUID } from "node:crypto";
-import { OPENAI_NOT_CONNECTED } from "@/lib/openai";
-import { connectionValues } from "@/lib/platform/connections/resolve";
 import { FONT_OPTIONS } from "@/lib/cms/theme-shared";
 import type { ThemeComponentSelections } from "@/lib/cms/component-variants";
 import { CARD_VARIANTS, DENSITY_VARIANTS, FOOTER_VARIANTS, HEADER_VARIANTS, IMAGE_VARIANTS, MENU_VARIANTS, SECTION_VARIANTS, WIDTH_VARIANTS } from "@/lib/cms/component-variants";
@@ -35,15 +34,18 @@ export interface WebsiteBrief {
   hints?: { country?: string; languages?: string; timezone?: string };
 }
 
-/** A client for the platform's own OpenAI account (the same key as everywhere else) that is NOT charged to the company's AI allowance. */
+/**
+ * The website is written with the company's own metered OpenAI client: every call counts against its monthly AI-token allowance (from the
+ * very first generation at sign-up) and stops with a plain message once the allowance is used up.
+ */
 async function platformClient(): Promise<OpenAI> {
-  const creds = await connectionValues("openai");
-  if (!creds?.apiKey) {
-    // For the operator's logs; the company sees the plain message below.
-    console.error("[ai-website] OPENAI_API_KEY is not set on this server (add it to the environment and restart).");
-    throw new Error(OPENAI_NOT_CONNECTED);
+  try {
+    return await getOpenAI({ timeoutMs: 170_000, maxRetries: 1 });
+  } catch (err) {
+    // For the operator's logs; the company sees the plain message.
+    console.error("[ai-website] OpenAI is not connected on this server (add the key under Platform → Connections).");
+    throw err;
   }
-  return new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined, timeout: 170_000, maxRetries: 1 });
 }
 
 // ── What the model may choose from ──────────────────────────────────────────────────────────────────────────────────────────────────
@@ -327,10 +329,11 @@ async function callJson<T>(client: OpenAI, system: string, user: string, schemaO
         // The model now and then writes blank space forever instead of closing the JSON; stop waiting for the token limit.
         if (text.length > 200 && /\s{60}$/.test(text)) { stalled = true; break; }
       }
-      if (usage) await recordAiUsage({ usage, model: a.model, endpoint: "chat.completions" });
       if (stalled) { stream.controller.abort(); lastError = "The AI stalled while writing the website."; continue; }
       return JSON.parse(text) as T;
     } catch (err) {
+      // The AI allowance being used up is not a model hiccup: retrying (or a smaller model) would only fail the same way.
+      if (isBillingLimitError(err)) throw err;
       lastError = err instanceof Error ? err.message : lastError;
     }
   }
@@ -451,7 +454,6 @@ export async function makeImages(prompts: { hero: string; about: string; service
   const one = async (text: string, name: string): Promise<string> => {
     try {
       const r = await client.images.generate({ model: IMAGE_MODEL(), prompt: `${text}. Photorealistic editorial photograph, natural light, no text, no logos, no watermark.`, size: "1536x1024", quality: "low", n: 1 });
-      await recordAiUsage({ usage: r.usage, model: IMAGE_MODEL(), endpoint: "images.generate" });
       const b64 = r.data?.[0]?.b64_json;
       return b64 ? await store(Buffer.from(b64, "base64"), name) : "";
     } catch (err) {

@@ -22,6 +22,8 @@ export interface RequestDoc {
   number: number;
   companyId: string;
   companyName: string;
+  /** The company's plan includes priority support when it was raised. */
+  prioritySupport?: boolean;
   createdBy: { id: string; email: string };
   type: string;
   title: string;

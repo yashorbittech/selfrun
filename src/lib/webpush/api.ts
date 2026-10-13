@@ -1,3 +1,4 @@
+import { clientIpFrom } from "@/lib/security/ip";
 import "server-only";
 import { NextResponse } from "next/server";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
@@ -10,7 +11,7 @@ import { rateLimit } from "@/lib/push/rate-limit";
  */
 export async function siteGuard(req: Request, bucket: string, max: number): Promise<NextResponse | null> {
   if ((await onAppSurface()) || (await onSaasHost()) || (await currentCompanyIdOrNull()) === null) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip = clientIpFrom(req.headers);
   if (!rateLimit(`${bucket}:${ip}`, max, 60_000)) return NextResponse.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
   return null;
 }
