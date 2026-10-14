@@ -6,7 +6,9 @@ const nextConfig: NextConfig = {
   // parallel RSC requests, which trips Node's MaxListenersExceededWarning. Production (Vercel) compresses at the edge.
   compress: process.env.NODE_ENV === "production",
   // Node-only libs used inside route handlers — keep them out of the bundler.
-  serverExternalPackages: ["exceljs"],
+  // Big server-only libraries are loaded at run time from node_modules instead of being bundled: far less for the build to parse
+  // and bundle (the build of this app is large and slow), with no change in behaviour.
+  serverExternalPackages: ["exceljs", "mongodb", "openai", "cheerio", "@react-pdf/renderer", "jszip", "nodemailer", "web-push", "qrcode"],
   images: {
     remotePatterns: [
       {
@@ -133,6 +135,10 @@ const nextConfig: NextConfig = {
     // module of the server and the browser), scope hoisting (a whole-graph optimisation) and one static-generation worker per CPU are the
     // parts that cost the most memory for the least benefit; the bundle is still minified. Re-enable `turbopackSourceMaps` only on a
     // build machine with memory to spare (or when you need readable server stack traces from production).
+    // Barrel packages: only the icons / charts / components actually imported are compiled, not the whole package.
+    optimizePackageImports: ["lucide-react", "recharts", "framer-motion", "@base-ui/react"],
+    // The build cache is only useful once a build has finished and Vercel has kept it; until then writing it costs memory and time.
+    turbopackFileSystemCacheForBuild: false,
     turbopackSourceMaps: false,
     turbopackInputSourceMaps: false,
     turbopackScopeHoisting: false,
