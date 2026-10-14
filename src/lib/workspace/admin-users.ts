@@ -207,11 +207,11 @@ export async function delegatedManagerBlock(
   if (actor.roles.includes("super_admin")) return null;
   // Nobody raises their own access: a delegated manager can't change their own account's roles or permissions.
   if (actor.id && action.targetId && action.targetId === actor.id && (action.roles || action.overrides)) return "You can't change your own access.";
+  if (action.roles?.includes("super_admin")) return "Only a Super Admin can grant the Super Admin role.";
   // An admin-tier role can only be handed on by someone who holds it themselves.
   const escalating = (action.roles ?? []).filter((r) => /_admin$/.test(r) && !actor.roles.includes(r));
   if (escalating.length > 0) return "You can only grant an admin role that you hold yourself.";
   if (action.overrides) return "Only a Super Admin can change permission overrides.";
-  if (action.roles?.includes("super_admin")) return "Only a Super Admin can grant the Super Admin role.";
   if (action.targetId) {
     const target = ObjectId.isValid(action.targetId) ? await (await collection()).findOne({ _id: new ObjectId(action.targetId) }, { projection: { roles: 1, savedRoles: 1 } }) : null;
     if (target?.roles?.includes("super_admin") || target?.savedRoles?.includes("super_admin")) return "Only a Super Admin can change a Super Admin's account.";

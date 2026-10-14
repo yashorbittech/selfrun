@@ -14,7 +14,7 @@ import { METRICS, USAGE_METRIC_KEYS, type Level, type MetricDetail, type MetricO
 
 const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 const nf = (n: number, dp = 2) => n.toLocaleString("en-IN", { maximumFractionDigits: dp });
-const fmtValue = (key: UsageMetricKey, n: number) => (key === "ai" || key === "emails" || key === "sms" || key === "seats" || key === "domains" ? nf(n, 0) : nf(n, 2));
+const fmtValue = (key: UsageMetricKey, n: number) => (key === "ai" || key === "emails" || key === "seats" || key === "domains" ? nf(n, 0) : nf(n, 2));
 const LEVEL: Record<Level, { label: string; bar: string; chip: string; icon: typeof CheckCircle2 }> = {
   ok: { label: "Within limit", bar: "bg-[var(--viz-1)]", chip: "text-emerald-700 dark:text-emerald-400 border-emerald-500/40", icon: CheckCircle2 },
   near: { label: "Close to the limit", bar: "bg-[var(--viz-warn)]", chip: "text-amber-700 dark:text-amber-400 border-amber-500/50", icon: AlertTriangle },
@@ -27,7 +27,7 @@ export function OverviewCards({ overview, selected, period }: { overview: UsageO
   return (
     <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" role="list" aria-label="Usage against your plan">
       {overview.metrics.map((m) => (
-        <MeterCard key={m.key} m={m} active={m.key === selected} href={`?metric=${m.key}${period !== overview.period.key ? `&period=${period}` : ""}#details`} resetsOn={overview.period.resetsOn} />
+        <MeterCard key={m.key} m={m} active={m.key === selected} href={`/workspace/settings/usage?metric=${m.key}${period !== overview.period.key ? `&period=${period}` : ""}#details`} resetsOn={overview.period.resetsOn} />
       ))}
     </div>
   );
@@ -285,7 +285,7 @@ export function DetailView({ detail, overview }: { detail: MetricDetail; overvie
               {detail.byPerson.slice(0, 12).map((r) => (
                 <li key={r.key} className="text-xs">
                   <div className="mb-0.5 flex items-baseline justify-between gap-2">
-                    <Link href={`?metric=${detail.key}&period=${detail.period}&person=${encodeURIComponent(r.key)}#person`} scroll={false} className="flex min-w-0 items-center gap-1.5 font-medium hover:underline"><ActorIcon kind={r.kind} /><span className="truncate">{r.label}</span></Link>
+                    <Link href={`/workspace/settings/usage?metric=${detail.key}&period=${detail.period}&person=${encodeURIComponent(r.key)}#person`} scroll={false} className="flex min-w-0 items-center gap-1.5 font-medium hover:underline"><ActorIcon kind={r.kind} /><span className="truncate">{r.label}</span></Link>
                     <span className="shrink-0 tabular-nums text-muted-foreground"><span className="font-semibold text-foreground">{fmtValue(detail.key, r.value)}</span> {detail.unit} · {r.share}%</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${Math.max(2, r.share)}%` }} /></div>
@@ -413,7 +413,7 @@ function EventLog({ detail }: { detail: MetricDetail }) {
                 <tr key={`${e.at}-${i}`} className="border-t border-border/40 align-top">
                   <td suppressHydrationWarning className="whitespace-nowrap py-1.5 pr-3 text-muted-foreground">{when(e.at)}</td>
                   <td className="py-1.5 pr-3 font-medium">{e.source}{e.estimated && <Badge variant="outline" className="ml-1.5 text-[9px]" title="The provider didn't report exact tokens for this request, so an estimate was counted">estimated</Badge>}</td>
-                  <td className="max-w-[14rem] truncate py-1.5 pr-3" title={e.by}>{e.byKey ? <Link href={`?metric=${detail.key}&period=${detail.period}&person=${encodeURIComponent(e.byKey)}#person`} scroll={false} className="hover:underline">{e.by}</Link> : "—"}</td>
+                  <td className="max-w-[14rem] truncate py-1.5 pr-3" title={e.by}>{e.byKey ? <Link href={`/workspace/settings/usage?metric=${detail.key}&period=${detail.period}&person=${encodeURIComponent(e.byKey)}#person`} scroll={false} className="hover:underline">{e.by}</Link> : "—"}</td>
                   <td className="max-w-xs truncate py-1.5 pr-3 text-muted-foreground" title={e.detail}>{e.detail || "—"}</td>
                   {ai && <td className="py-1.5 pr-3 text-right tabular-nums">{nf(e.inputTokens ?? 0, 0)}</td>}
                   {ai && <td className="py-1.5 pr-3 text-right tabular-nums">{nf(e.outputTokens ?? 0, 0)}</td>}
@@ -447,7 +447,7 @@ function ActorIcon({ kind }: { kind: string }) {
 
 const KIND_LABEL: Record<string, string> = { user: "Team member", portal: "Portal user", visitor: "Website visitors", system: "Automatic", unknown: "Not recorded" };
 
-type SortKey = "ai" | "emails" | "voiceMinutes" | "sms" | "storageMb" | "label";
+type SortKey = "ai" | "emails" | "voiceMinutes" | "storageMb" | "label";
 
 /** Every person's use of every meter this month, side by side. Each row opens that person's own page. */
 export function PeoplePanel({ people, metric }: { people: PeopleUsage; metric: UsageMetricKey }) {
@@ -474,27 +474,26 @@ export function PeoplePanel({ people, metric }: { people: PeopleUsage; metric: U
           <a href={`/api/workspace/usage/export?metric=people&period=${people.period}`} className={`${buttonVariants({ variant: "outline", size: "sm" })} h-8 gap-1 text-xs`}><Download className="size-3.5" />Download CSV</a>
         </div>
       </div>
-      {people.rows.length === 0 ? <p className="rounded-xl border border-dashed border-border/70 p-6 text-center text-xs text-muted-foreground">Nobody has used AI, email, voice, SMS or uploads in {people.periodLabel} yet. Each person's use will be listed here as it happens.</p> : (
+      {people.rows.length === 0 ? <p className="rounded-xl border border-dashed border-border/70 p-6 text-center text-xs text-muted-foreground">Nobody has used AI, email, voice or uploads in {people.periodLabel} yet. Each person's use will be listed here as it happens.</p> : (
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-xs">
             <caption className="sr-only">Use of each meter by person</caption>
-            <thead><tr className="text-left text-muted-foreground">{th("label", "Person", false)}{th("ai", "AI tokens")}<th className="py-1.5 pr-3 font-medium">Share of AI</th><th className="py-1.5 pr-3 font-medium">Mostly used for</th>{th("emails", "Emails")}{th("voiceMinutes", "Voice min")}{th("sms", "SMS")}{th("storageMb", "Uploaded MB")}<th className="py-1.5 font-medium">Last active</th></tr></thead>
+            <thead><tr className="text-left text-muted-foreground">{th("label", "Person", false)}{th("ai", "AI tokens")}<th className="py-1.5 pr-3 font-medium">Share of AI</th><th className="py-1.5 pr-3 font-medium">Mostly used for</th>{th("emails", "Emails")}{th("voiceMinutes", "Voice min")}{th("storageMb", "Uploaded MB")}<th className="py-1.5 font-medium">Last active</th></tr></thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.key} className={`border-t border-border/40 align-middle tabular-nums ${r.key === "unknown" ? "text-muted-foreground" : ""}`}>
-                  <td className="py-2 pr-3"><Link href={`?metric=${metric}&period=${people.period}&person=${encodeURIComponent(r.key)}#person`} scroll={false} className="flex items-center gap-1.5 font-medium hover:underline"><ActorIcon kind={r.kind} /><span className="max-w-[16rem] truncate">{r.label}</span><Badge variant="outline" className="text-[9px]">{KIND_LABEL[r.kind] ?? r.kind}</Badge></Link></td>
+                  <td className="py-2 pr-3"><Link href={`/workspace/settings/usage?metric=${metric}&period=${people.period}&person=${encodeURIComponent(r.key)}#person`} scroll={false} className="flex items-center gap-1.5 font-medium hover:underline"><ActorIcon kind={r.kind} /><span className="max-w-[16rem] truncate">{r.label}</span><Badge variant="outline" className="text-[9px]">{KIND_LABEL[r.kind] ?? r.kind}</Badge></Link></td>
                   <td className="py-2 pr-3 text-right font-semibold">{nf(r.ai, 0)}<span className="ml-1 font-normal text-muted-foreground">({nf(r.aiCalls, 0)}×)</span></td>
                   <td className="py-2 pr-3"><div className="flex items-center gap-2"><div className="h-2 w-20 overflow-hidden rounded-full bg-muted" role="img" aria-label={`${r.aiShare}% of the AI tokens`}><div className="h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${r.ai > 0 ? Math.max(3, r.aiShare) : 0}%` }} /></div><span className="w-10 text-muted-foreground">{r.aiShare}%</span></div></td>
                   <td className="max-w-[10rem] truncate py-2 pr-3 text-muted-foreground" title={r.topFeature ?? ""}>{r.topFeature ?? "—"}</td>
                   <td className="py-2 pr-3 text-right">{nf(r.emails, 0)}</td>
                   <td className="py-2 pr-3 text-right">{nf(r.voiceMinutes, 2)}</td>
-                  <td className="py-2 pr-3 text-right">{nf(r.sms, 0)}</td>
                   <td className="py-2 pr-3 text-right">{nf(r.storageMb, 2)}</td>
                   <td className="whitespace-nowrap py-2 text-muted-foreground" suppressHydrationWarning>{r.lastAt ? new Date(r.lastAt).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot><tr className="border-t border-border font-semibold tabular-nums"><td className="py-2 pr-3">Everyone</td><td className="py-2 pr-3 text-right">{nf(people.totals.ai, 0)}</td><td /><td /><td className="py-2 pr-3 text-right">{nf(people.totals.emails, 0)}</td><td className="py-2 pr-3 text-right">{nf(people.totals.voiceMinutes, 2)}</td><td className="py-2 pr-3 text-right">{nf(people.totals.sms, 0)}</td><td className="py-2 pr-3 text-right">{nf(people.totals.storageMb, 2)}</td><td /></tr></tfoot>
+            <tfoot><tr className="border-t border-border font-semibold tabular-nums"><td className="py-2 pr-3">Everyone</td><td className="py-2 pr-3 text-right">{nf(people.totals.ai, 0)}</td><td /><td /><td className="py-2 pr-3 text-right">{nf(people.totals.emails, 0)}</td><td className="py-2 pr-3 text-right">{nf(people.totals.voiceMinutes, 2)}</td><td className="py-2 pr-3 text-right">{nf(people.totals.storageMb, 2)}</td><td /></tr></tfoot>
           </table>
         </div>
       )}
@@ -525,7 +524,7 @@ export function PersonView({ person, metric, backHref }: { person: PersonDetail;
           <div key={m.key} className="rounded-xl border border-border/70 bg-card p-3">
             <p className="text-xs text-muted-foreground">{m.label}</p>
             <p className="mt-1 text-lg font-semibold tabular-nums">{fmtValue(m.key, m.value)} <span className="text-xs font-normal text-muted-foreground">{m.unit}</span></p>
-            {m.companyTotal > 0 ? <><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${Math.max(m.value > 0 ? 3 : 0, m.share)}%` }} /></div><p className="mt-1 text-[11px] text-muted-foreground">{m.share}% of the workspace's {fmtValue(m.key, m.companyTotal)}</p></> : <p className="mt-1 text-[11px] text-muted-foreground">uploaded this month</p>}
+            {m.companyTotal > 0 ? <><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-[var(--viz-1)]" style={{ width: `${Math.max(m.value > 0 ? 3 : 0, m.share)}%` }} /></div><p className="mt-1 text-[11px] text-muted-foreground">{m.share}% of the workspace's {fmtValue(m.key, m.companyTotal)}</p></> : <p className="mt-1 text-[11px] text-muted-foreground">{m.key === "storage" ? "uploaded this month" : "no workspace total yet"}</p>}
           </div>
         ))}
       </div>
@@ -590,7 +589,7 @@ export function PersonView({ person, metric, backHref }: { person: PersonDetail;
           </>
         )}
       </Panel>
-      <p className="text-xs text-muted-foreground">Metric you came from: {METRICS[metric].label}. Amounts are tokens for AI, MB for files, emails, minutes for voice and messages for SMS.</p>
+      <p className="text-xs text-muted-foreground">Metric you came from: {METRICS[metric].label}. Amounts are tokens for AI, MB for files, emails, minutes for voice.</p>
     </section>
   );
 }

@@ -93,8 +93,9 @@ async function main() {
   const grace = randomUUID();
   const company = (id: string, slug: string, isPlatformOwner = false) => ({ _id: id as never, slug, name: slug[0].toUpperCase() + slug.slice(1), status: "active", isPlatformOwner, createdAt: now, updatedAt: now });
   await db.collection("companies").insertMany([company(owner, "owner", true), company(starter, "starter"), company(tiny, "tiny"), company(susp, "susp"), company(trial, "trial"), company(grace, "grace")]);
-
   await listPlans(); // seeds the default catalogue
+  // Every real plan has every panel; this test needs one with a smaller set, so Starter is narrowed here (test database only).
+  await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms"] } });
   await db.collection("billing_plans").insertOne({
     _id: "tiny" as never,
     name: "Tiny",
@@ -232,7 +233,7 @@ async function main() {
     ]);
     await db.collection("companies").updateOne({ _id: tiny as never }, { $set: { "subscription.addons": [{ addonId: "seats5", quantity: 2 }] } });
     assert.deepEqual(await getEffectiveLimits(tiny), { seats: 12, aiTokensPerMonth: 1000, storageMb: 1 });
-    assert.deepEqual(await getEffectiveLimits(owner), { seats: null, aiTokensPerMonth: null, storageMb: null });
+    assert.deepEqual(await getEffectiveLimits(owner), { seats: null, aiTokensPerMonth: null, storageMb: null, emailsPerMonth: null, voiceMinutesPerMonth: null, customDomains: null });
     await runAsCompany(tiny, async () => {
       assert.ok((await createAdminUser("three@tiny.test", ["employee"])).ok, "extra seats unblock creation");
     });
@@ -245,7 +246,7 @@ async function main() {
     await meterAiTokens(5, tiny);
     assert.equal(await runAsCompany(tiny, () => getUsage("ai_tokens")), 1004);
     const reason = await runAsCompany(tiny, () => aiBlockReason());
-    assert.match(reason ?? "", /used this month's 1,000 AI tokens/);
+    assert.match(reason ?? "", /used all 1,000 AI tokens/);
     await rejectsWith(runAsCompany(tiny, () => assertAiAvailable()), (e) => isBillingLimitError(e) && (e as BillingLimitError).code === "ai_tokens", "ai_tokens error");
   });
   await check("AI add-on raises the limit", async () => {

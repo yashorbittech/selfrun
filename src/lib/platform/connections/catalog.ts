@@ -24,7 +24,7 @@ export type ConnectionGroup = "email" | "messaging" | "ai" | "social" | "search"
 
 export const GROUP_LABELS: Record<ConnectionGroup, { title: string; description: string }> = {
   email: { title: "Email", description: "How your workspace sends emails — invitations, notifications, reports and automations." },
-  messaging: { title: "SMS & WhatsApp", description: "Text and WhatsApp messages from your automations and panels." },
+  messaging: { title: "WhatsApp", description: "WhatsApp messages from your automations and panels." },
   ai: { title: "AI & Voice", description: "Your own AI keys. Powers the assistants, chatbots, content generation and voice in every panel." },
   social: { title: "Social & Advertising", description: "App credentials for publishing to Facebook, Instagram, LinkedIn, YouTube and Google Business." },
   search: { title: "Search & Analytics", description: "Google Search Console, Analytics, Indexing and PageSpeed for your SEO panel." },
@@ -81,14 +81,13 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     usedBy: ["Invitations", "Notifications", "Automations", "Reports"],
     fields: [secret("apiKey", "API key", "Starts with SG."), text("from", "From address", "no-reply@yourcompany.com", "Must be a verified sender in SendGrid.")],
   },
-  // ── SMS & WhatsApp ───────────────────────────────────────────────────
+  // ── WhatsApp ───────────────────────────────────────────────────
   {
     key: "twilio", name: "Twilio", group: "messaging", testable: true, docsUrl: "https://www.twilio.com/docs",
-    description: "Send SMS and WhatsApp messages from automations (and any panel that notifies by text).",
-    usedBy: ["Automations", "Notifications", "OTPs & reminders"],
+    description: "Send WhatsApp messages from automations (and any panel that notifies by message).",
+    usedBy: ["Automations", "Notifications", "Reminders"],
     fields: [
       text("accountSid", "Account SID", "AC…"), secret("authToken", "Auth token"),
-      text("smsFrom", "SMS sender number / Messaging Service SID", "+14155550123", "Used for SMS.", false),
       text("whatsappFrom", "WhatsApp sender", "whatsapp:+14155550123", "Your approved WhatsApp sender, if you use WhatsApp.", false),
     ],
   },
@@ -172,7 +171,7 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     fields: [], managedElsewhere: { href: "/workspace/settings/domains", label: "Domains" },
   },
   {
-    key: "webhooks", name: "Webhooks & automations", group: "other", description: "Send signed webhooks and run email, in-app and SMS actions when something happens.", usedBy: ["Automations"],
+    key: "webhooks", name: "Webhooks & automations", group: "other", description: "Send signed webhooks and run email, in-app and WhatsApp actions when something happens.", usedBy: ["Automations"],
     fields: [], managedElsewhere: { href: "/workspace/settings/automations", label: "Automations" },
   },
   {
@@ -185,7 +184,7 @@ export const providerByKey = new Map(CONNECTION_PROVIDERS.map((p) => [p.key, p])
 
 
 /**
- * Services the PLATFORM provides to every company (email, SMS, AI, voice): companies never bring their own keys, so they are not shown in a
+ * Services the PLATFORM provides to every company (email, AI, voice): companies never bring their own keys, so they are not shown in a
  * company's Integrations and anything saved for them earlier is ignored. They use the deployment's own credentials and count against the
  * company's plan allowance.
  */

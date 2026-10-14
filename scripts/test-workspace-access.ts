@@ -74,6 +74,9 @@ async function main() {
   const company = (id: string, slug: string, isPlatformOwner = false) => ({ _id: id as never, slug, name: slug[0].toUpperCase() + slug.slice(1), status: "active", isPlatformOwner, createdAt: now, updatedAt: now });
   await db.collection("companies").insertMany([company(owner, "owner", true), company(acme, "acme"), company(small, "small"), company(beta, "beta")]);
   await listPlans(); // seeds the default catalogue
+  // Every real plan has every panel; these checks cover plans with fewer, so Starter and Growth are narrowed here (test database only).
+  await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms", "lms", "sop", "cms"] } });
+  await db.collection("billing_plans").updateOne({ _id: "growth" as never }, { $set: { modules: ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"] } });
   const sub = (planId: string) => ({ planId, status: "active", interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now });
   for (const [id, plan] of [[acme, "growth"], [small, "starter"], [beta, "growth"]] as const) await db.collection("companies").updateOne({ _id: id as never }, { $set: { subscription: sub(plan) } });
 
@@ -159,7 +162,7 @@ async function main() {
     assert.ok(!a.has("platform.panel"), "tenant never sees the Platform link");
     const nav = await navOf(acme, admin);
     assert.deepEqual(nav.sections.map((s) => s.key), ["dashboard", "panels", "analytics", "manage", "company", "account"]);
-    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "analytics", "manage", "company", "account"], "the sidebar lists everything but the panels");
+    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "company"], "the sidebar lists everything but the panels");
     // Growth has no Training / Social / AI Bots: locked on the hub, absent from the nav.
     assert.ok(!a.has("panel.tms") && nav.lockedPanels.includes("tms"));
     assert.ok(!a.has("analytics.tms"));
@@ -169,7 +172,7 @@ async function main() {
     for (const k of ["panel.hrms", "panel.lms", "panel.messenger", "panel.sop", "panel.ots", "analytics.hrms", "analytics.messenger", "analytics.workspace"]) assert.ok(a.has(k), k);
     for (const k of [...COMPANY_KEYS, ...MANAGE_KEYS, "panel.pms", "panel.fms", "analytics.fms", "analytics.pms", "analytics.lms", "analytics.portal", "platform.panel"]) assert.ok(!a.has(k), k);
     assert.deepEqual((await navOf(acme, hr)).sections.map((s) => s.key), ["dashboard", "panels", "analytics", "account"]);
-    assert.deepEqual((await navOf(acme, hr)).sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "analytics", "account"]);
+    assert.deepEqual((await navOf(acme, hr)).sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard"]);
   });
   await check("PMS employee: own panels only; lead and portal analytics are not theirs", async () => {
     const a = await allowed(acme, dev);
@@ -195,7 +198,7 @@ async function main() {
   });
   await check("an account without roles gets the dashboard, the open CRM and its own account pages", async () => {
     const a = await allowed(acme, noRoles);
-    assert.deepEqual([...a].sort(), ["account.notifications", "account.password", "dashboard", "panel.lms"]);
+    assert.deepEqual([...a].sort(), ["account.notifications", "account.password", "account.sessions", "dashboard", "panel.lms", "panel.support", "panel.website"]);
   });
   await check("plan without Finance: the panel is locked, its analytics hidden — for the finance user and the super admin", async () => {
     for (const u of [smallFinance, smallAdmin]) {
@@ -220,7 +223,7 @@ async function main() {
   const NEW_ANALYTICS = ["sop", "dlms", "ots", "aibots", "smms", "seo", "cms"];
   await check("the Panels section is never in the sidebar, yet every panel.* key still resolves and guards", async () => {
     assert.equal(NAV_SECTIONS.find((s) => s.key === "panels")?.sidebar, false);
-    assert.deepEqual(NAV_SECTIONS.filter((s) => s.sidebar === false).map((s) => s.key), ["panels"], "only the panels are left out");
+    assert.deepEqual(NAV_SECTIONS.filter((s) => s.sidebar === false).map((s) => s.key), ["panels", "analytics", "manage", "account"], "the Staff Hub tiles and the Workspace settings replace these in the sidebar");
     for (const [name, companyId, u] of everyone) {
       const nav = await navOf(companyId, u);
       const sidebar = nav.sections.filter((s) => s.sidebar);
@@ -238,14 +241,14 @@ async function main() {
   await check("every panel has an analytics item, in the section's alphabetical order", async () => {
     const keys = NAV_KEYS.filter((k) => k.startsWith("analytics."));
     assert.deepEqual(keys, [...keys].sort(), "ordered by panel key");
-    // AI Intelligence is a conversation, not a register: it deliberately has no company-wide analytics page.
-    const NO_ANALYTICS = ["panel.intelligence"];
+    // AI Intelligence is a conversation and Help & Support a help desk, not registers: they deliberately have no company-wide analytics page.
+    const NO_ANALYTICS = ["panel.intelligence", "panel.support", "panel.website"]; // the website panel is analysed under analytics.cms
     for (const p of NAV_KEYS.filter((k) => k.startsWith("panel.") && !NO_ANALYTICS.includes(k))) assert.ok(keys.includes(p.replace("panel.", "analytics.")), `${p} has no analytics`);
     assert.ok(!keys.includes("analytics.intelligence"));
     const labels = Object.fromEntries((await navOf(owner, ownerAdmin)).sections.find((s) => s.key === "analytics")!.items.map((i) => [i.key, [i.label, i.href]]));
     assert.deepEqual(
       NEW_ANALYTICS.map((p) => labels[`analytics.${p}`]),
-      [["SOP Analytics", "/workspace/analytics/sop"], ["Digi Locker Analytics", "/workspace/analytics/dlms"], ["Online Tests Analytics", "/workspace/analytics/ots"], ["AI Bots Analytics", "/workspace/analytics/aibots"], ["Social Media Analytics", "/workspace/analytics/smms"], ["SEO Analytics", "/workspace/analytics/seo"], ["Website Analytics", "/workspace/analytics/cms"]],
+      [["SOPs & Policies Analytics", "/workspace/analytics/sop"], ["Digi Locker Analytics", "/workspace/analytics/dlms"], ["Online Tests Analytics", "/workspace/analytics/ots"], ["AI Assistants Analytics", "/workspace/analytics/aibots"], ["Social Media Analytics", "/workspace/analytics/smms"], ["SEO Analytics", "/workspace/analytics/seo"], ["Website Analytics", "/workspace/analytics/cms"]],
     );
   });
   await check("AI Intelligence: a panel tile for its own roles only, gated by plan, no analytics, and it grants no data by itself", async () => {
@@ -362,6 +365,8 @@ async function main() {
     const [a, b] = rel.split(path.sep);
     if (a === "users") return "company.users";
     if (a === "documents" || (a === "account" && b === "documents")) return "account.documents";
+    if (a === "usage") return "company.usage";
+    if (a === "account" && b === "sessions") return "account.sessions";
     if (a === "activity-log") return "company.audit";
     return `manage.${a}.${b}`;
   };
@@ -375,7 +380,7 @@ async function main() {
         pages++;
       }
     }
-    assert.equal(pages, 31);
+    assert.equal(pages, 32);
   });
   await check("every server action of a moved page calls requireWorkspaceAction with that key", () => {
     let actions = 0;
@@ -393,7 +398,7 @@ async function main() {
   });
   await check("every /api/workspace route authorizes with the key of its page; no /api/admin left", () => {
     const routes = walk(path.join(ROOT, "api/workspace")).filter((f) => f.endsWith("route.ts"));
-    assert.equal(routes.length, 33);
+    assert.equal(routes.length, 34);
     for (const file of routes) {
       const key = keyOf(path.relative(path.join(ROOT, "api/workspace"), file));
       assert.ok(NAV_KEYS.includes(key), `${file}: ${key}`);
@@ -577,16 +582,16 @@ async function main() {
     assert.equal(u.planName, "Growth");
     assert.deepEqual([u.seats.used, u.seats.limit], [6, 50], "six accounts with roles");
     assert.deepEqual([u.aiTokens.used, u.aiTokens.limit], [1234, 1_000_000]);
-    assert.deepEqual([u.storageMb.used, u.storageMb.limit], [3, 25_000]);
+    assert.deepEqual([u.storageMb.used, u.storageMb.limit], [3, 10_000]);
     const b = await runAsCompany(beta, () => getCompanyUsage());
     assert.deepEqual([b.seats.used, b.aiTokens.used, b.storageMb.used], [1, 0, 0], "the second company sees only its own usage");
     const o = await runAsCompany(owner, () => getCompanyUsage());
     assert.deepEqual([o.status, o.seats.limit, o.aiTokens.limit, o.storageMb.limit], ["internal", null, null, null]);
   });
   await check("usage levels: near and over the limit", async () => {
-    await runAsCompany(small, () => recordUsage("ai_tokens", 170_000));
+    await runAsCompany(small, () => recordUsage("ai_tokens", 330_000));
     assert.equal((await runAsCompany(small, () => getCompanyUsage())).aiTokens.level, "near");
-    await runAsCompany(small, () => recordUsage("ai_tokens", 40_000));
+    await runAsCompany(small, () => recordUsage("ai_tokens", 80_000));
     assert.equal((await runAsCompany(small, () => getCompanyUsage())).aiTokens.level, "over");
   });
   await check("payments: paid invoices and credit notes of this company only", async () => {
@@ -632,6 +637,7 @@ async function main() {
       ["account.documents", "/workspace/account/documents"],
       ["account.notifications", "/workspace/notifications"],
       ["account.password", "/workspace/change-password"],
+      ["account.sessions", "/workspace/account/sessions"],
     ]);
     const audit = items.filter((i) => i.section === "company" && /audit/i.test(i.label));
     assert.deepEqual(audit.map((i) => [i.key, i.label, i.href]), [["company.audit", "Audit log", "/workspace/settings/audit-log"]]);
@@ -641,11 +647,11 @@ async function main() {
     const nav = await navOf(owner, ownerAdmin);
     const PROTECTED = path.join(ROOT, "workspace/(protected)");
     for (const i of nav.sections.flatMap((s) => s.items)) {
-      if (i.external || i.href === "/platform") continue;
+      if (i.external || i.href === "/platform" || i.key.startsWith("panel.")) continue;
       assert.ok(i.href === "/workspace" || i.href.startsWith("/workspace/"), `${i.key}: ${i.href}`);
       assert.ok(!/^\/(settings|onboarding|upgrade)/.test(i.href), i.href);
       const rel = i.href.replace(/^\/workspace\/?/, "");
-      const candidates = [path.join(PROTECTED, rel, "page.tsx"), path.join(ROOT, "workspace", rel, "page.tsx"), path.join(PROTECTED, rel.replace(/\/[^/]+$/, ""), "[panel]", "page.tsx")];
+      const candidates = [path.join(PROTECTED, rel, "page.tsx"), path.join(ROOT, "workspace", rel, "page.tsx"), path.join(PROTECTED, rel.replace(/\/[^/]+$/, ""), "[panel]", "page.tsx"), path.join(PROTECTED, rel.replace(/\/[^/]+$/, ""), "[kind]", "page.tsx")];
       assert.ok(candidates.some((f) => fs.existsSync(f)), `${i.key}: no page for ${i.href}`);
     }
     for (const old of ["command-center", "activity-log", "documents"]) assert.ok(!fs.existsSync(path.join(PROTECTED, old)), `old page /workspace/${old} is gone`);
@@ -715,7 +721,8 @@ async function main() {
       assert.equal(r!.permanent, true, `${src} is permanent`);
     }
     assert.ok(rules.findIndex((r) => r.source === "/settings/activity") < rules.findIndex((r) => r.source === "/settings/:path*"), "activity before the catch-all");
-    for (const r of rules) assert.ok(!/^\/(api|platform|hrms|pms|prms|tms|fms|lms|cms|portal)\b/.test(r.source), `${r.source} must not capture /api, /platform or a panel`);
+    // Moved pages in panels (e.g. /fms/audit-logs, /lms/offers) have their own redirects; none may swallow /api, /platform or a whole panel.
+    for (const r of rules) assert.ok(!/^\/(api|platform)\b/.test(r.source) && !/^\/(hrms|pms|prms|tms|fms|lms|cms|portal)(\/:path\*)?$/.test(r.source), `${r.source} must not capture /api, /platform or a whole panel`);
   });
 
   console.log(`workspace access: all ${passed} checks passed`);

@@ -94,7 +94,7 @@ export const RazorpayProvider: PaymentProvider = {
             contact: params.customerPhone,
           },
           notify: {
-            sms: true,
+            sms: false,
             email: true,
           },
           reminder_enable: true,

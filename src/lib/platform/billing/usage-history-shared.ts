@@ -1,6 +1,6 @@
 /** Types and labels for the Usage & limits page (shared by the server loaders and the client charts). */
 
-export const USAGE_METRIC_KEYS = ["ai", "storage", "emails", "voice", "sms", "seats", "domains"] as const;
+export const USAGE_METRIC_KEYS = ["ai", "storage", "emails", "voice", "seats", "domains"] as const;
 export type UsageMetricKey = (typeof USAGE_METRIC_KEYS)[number];
 export const isUsageMetricKey = (v: unknown): v is UsageMetricKey => typeof v === "string" && (USAGE_METRIC_KEYS as readonly string[]).includes(v);
 
@@ -45,12 +45,6 @@ export const METRICS: Record<UsageMetricKey, MetricMeta> = {
     counts: "Time spent on the website voice assistant: visitors speaking to it and the assistant speaking back.",
     atLimit: "Voice mode pauses until the 1st of next month; text chat is not affected.",
     fix: "Upgrade your plan for more voice minutes.",
-  },
-  sms: {
-    key: "sms", label: "SMS & WhatsApp", short: "SMS", unit: "messages", limitKey: "smsPerMonth", kind: "monthly", provider: "SMS provider",
-    counts: "Every SMS or WhatsApp message your automations and panels send through your connected account.",
-    atLimit: "Messages are not sent until the 1st of next month.",
-    fix: "Upgrade your plan to include or increase SMS / WhatsApp messages.",
   },
   seats: {
     key: "seats", label: "Users (seats)", short: "Seats", unit: "users", limitKey: "seats", kind: "stock", provider: null,
@@ -131,7 +125,6 @@ export interface PeopleUsageRow {
   topFeature: string | null;
   emails: number;
   voiceMinutes: number;
-  sms: number;
   /** MB uploaded (removals aren't counted against the person who uploaded). */
   storageMb: number;
   lastAt: string | null;
@@ -143,7 +136,7 @@ export interface PeopleUsage {
   period: string;
   periodLabel: string;
   rows: PeopleUsageRow[];
-  totals: { ai: number; emails: number; voiceMinutes: number; sms: number; storageMb: number };
+  totals: { ai: number; emails: number; voiceMinutes: number; storageMb: number };
 }
 
 export interface PersonDetail {

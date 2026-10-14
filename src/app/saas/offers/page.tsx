@@ -1,3 +1,4 @@
+import StackCompare from "@/components/saas/StackCompare";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BadgePercent, Check, Gift, Infinity as InfinityIcon, Layers, PiggyBank, Sparkles, Star } from "lucide-react";
@@ -14,14 +15,14 @@ import Reveal from "@/components/saas/Reveal";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Offers",
-  description: "Current SelfRun AI offers: launch prices on every paid plan, yearly savings, and a free plan that is free forever — every panel and every feature on every plan.",
+  description: "Current SelfRun AI offers: the free plan that is free forever, yearly savings and the price of every paid plan — every panel and every feature on every plan.",
   alternates: { canonical: "/offers" },
 };
 
 export default async function OffersPage() {
   const [o, modules] = await Promise.all([getOffers(), getFeatureModules()]);
   const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
-  const yearly = o.plans.filter((p) => p.yearly);
+  const yearly = o.yearly;
   const topYearly = yearly.reduce<(typeof yearly)[number] | null>((a, b) => (!a || (b.yearly?.pct ?? 0) > (a.yearly?.pct ?? 0) ? b : a), null);
   return (
     <>
@@ -30,7 +31,7 @@ export default async function OffersPage() {
         eyebrow={o.topPct > 0 ? o.label : "Offers"}
         title={o.topPct > 0 ? `Save up to ${o.topPct}%` : "Free forever."}
         accent={o.topPct > 0 ? "on every paid plan." : "Pay only as your team grows."}
-        lead={`Every plan includes every one of the ${modules.length} panels and ${total}+ features. The prices below are the prices you pay — plus a free plan that is free forever for one person.`}
+        lead={`Every plan includes every one of the ${modules.length} panels and ${total}+ features. The prices below are the prices you pay — plus a free plan that is free forever.`}
         photo="success" shot="fms" shotName="Finance"
       >
         {o.endsAt && (
@@ -39,7 +40,7 @@ export default async function OffersPage() {
             <Countdown endsAt={o.endsAt} />
           </div>
         )}
-        <HeroCtas primary={{ label: "Claim the offer — start free", href: "/signup" }} secondary={{ label: "Compare plans", href: "/pricing" }} />
+        <HeroCtas primary={{ label: o.topPct > 0 ? "Claim the offer — start free" : "Start free", href: "/signup" }} secondary={{ label: "Compare plans", href: "/pricing" }} />
       </PageHero>
 
       {/* the four kinds of offer */}
@@ -52,16 +53,16 @@ export default async function OffersPage() {
               <div className="sr-band relative h-full overflow-hidden rounded-[2.25rem] p-8 shadow-2xl shadow-primary/30 sm:p-10">
                 <div className="relative flex h-full flex-col justify-between gap-8">
                   <div>
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-black uppercase tracking-[0.16em] ring-1 ring-white/30"><BadgePercent className="h-4 w-4" />{o.label}</span>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-black uppercase tracking-[0.16em] ring-1 ring-white/30"><BadgePercent className="h-4 w-4" />{o.topPct > 0 ? o.label : "Simple pricing"}</span>
                     {o.topPct > 0 ? (
                       <p className="mt-5 text-8xl font-black leading-none tracking-tighter sm:text-9xl">{o.topPct}<span className="text-5xl sm:text-6xl">% off</span></p>
                     ) : (
-                      <p className="mt-5 text-5xl font-black tracking-tight">Launch prices</p>
+                      <p className="mt-5 text-5xl font-black tracking-tight">{o.from ? <>From {o.from.price}<span className="text-2xl font-bold text-white/75"> / month</span></> : "Simple pricing"}</p>
                     )}
-                    <p className="mt-4 max-w-md text-lg text-white/85">{o.topPct > 0 ? `The most you save is on ${o.topPlan}. Every paid plan is below its list price.` : "Plans start at a launch price."} Nothing is held back: every panel and every feature is in.</p>
+                    <p className="mt-4 max-w-md text-lg text-white/85">{o.topPct > 0 ? `The most you save is on ${o.topPlan}. Every paid plan is below its list price.` : (o.from ? `Paid plans start at ${o.from.price} a month (${o.from.name}), and the price you see is the price you pay.` : "The price you see is the price you pay.")} Nothing is held back: every panel and every feature is in.</p>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Link href="/signup" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black shadow-xl transition-transform hover:scale-105">Claim this offer <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+                    <Link href="/signup" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-black text-black shadow-xl transition-transform hover:scale-105">{o.topPct > 0 ? "Claim this offer" : "Start free"} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
                     <Link href="/pricing" className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-7 py-3.5 text-sm font-bold backdrop-blur hover:bg-white/20">See every plan</Link>
                   </div>
                 </div>
@@ -73,7 +74,7 @@ export default async function OffersPage() {
                 <Gift className="pointer-events-none absolute -bottom-6 -right-6 h-40 w-40 text-emerald-500/10" />
                 <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-black uppercase tracking-wider text-emerald-600"><InfinityIcon className="h-4 w-4" />Free forever</span>
                 <p className="mt-5 text-6xl font-black tracking-tighter">₹0</p>
-                <p className="mt-2 font-semibold">For one person — no card needed.</p>
+                <p className="mt-2 font-semibold">Full access, AI built in — no card needed.</p>
                 <p className="mt-2 text-sm text-muted-foreground">{o.free?.description || "Every panel and every feature, free for life."}</p>
                 <Link href="/signup" className="group relative mt-6 inline-flex items-center gap-2 text-sm font-black text-emerald-600">Start free <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               </div>
@@ -107,6 +108,20 @@ export default async function OffersPage() {
           </div>
         </div>
       </section>
+
+      {/* separate tools vs one platform */}
+      {(() => {
+        const st = o.allPlans.find((p) => p.id === "starter");
+        const m = st?.offer.monthly ?? 0;
+        return st && m > 0 ? (
+          <section className="sr-section">
+            <div className="sr-container">
+              <SectionHead center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
+              <StackCompare plan={{ name: st.name, price: `₹${(m / 100).toLocaleString("en-IN")}`, monthly: m / 100 }} />
+            </div>
+          </section>
+        ) : null;
+      })()}
 
       {/* plan by plan */}
       {o.plans.length > 0 && (
@@ -152,13 +167,13 @@ export default async function OffersPage() {
       {/* how */}
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead icon="rocket" eyebrow="How to claim it" title="Three steps," accent="no card needed." />
+          <SectionHead icon="rocket" eyebrow={o.topPct > 0 ? "How to claim it" : "How to start"} title="Three steps," accent="no card needed." />
           <TimelineSteps cols={3} items={[
-            { title: "Create your workspace", text: "Register free — one person, every panel and every feature, with no card needed.", icon: "rocket" },
+            { title: "Create your workspace", text: "Register free — every panel and every feature, with no card needed.", icon: "rocket" },
             { title: "Set up your business", text: "Add your team, switch on the panels you need and put your own brand on the workspace.", icon: "building" },
             { title: "Move to a plan when you grow", text: "When your team grows, choose a plan: the price you see on the plan is the price you pay.", icon: "wallet" },
           ]} />
-          <div className="mt-14 flex justify-center"><HeroCtas primary={{ label: "Start free — claim the offer", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} /></div>
+          <div className="mt-14 flex justify-center"><HeroCtas primary={{ label: o.topPct > 0 ? "Start free — claim the offer" : "Start free", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} /></div>
         </div>
       </section>
 
@@ -172,7 +187,7 @@ export default async function OffersPage() {
         </section>
       )}
 
-      <CtaBand title="Claim the offer. Start free." lead="Free forever for one person — with every panel and every feature." />
+      <CtaBand title={o.topPct > 0 ? "Claim the offer. Start free." : "Start free."} lead="Free forever — with every panel and every feature." />
       <FaqSection topics={["Plans & pricing", "Setup", "General"]} limit={6} />
     </>
   );

@@ -135,7 +135,7 @@ SPECS.pricing = () => {
       <div style="margin-top:26px;height:50px;border-radius:999px;background:${dark ? "#fff" : INK};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:${dark ? INK : "#fff"}">Get started</div>
     </div></div>`;
   return page(`${bgGlows(1)}${plan(110, 330, "Free", "₹0", false, -7)}${plan(430, 230, "Growth", "Best", true, -1)}${plan(760, 330, "Business", "Scale", false, 6)}
-  ${chip(930, 90, "Check", "Free forever", "For one person · every panel", 3)}${chip(60, 120, "Zap", "Launch offer", "Clear savings, shown up front", -3)}${badge(1180, 790, "Rocket", 10)}`);
+  ${chip(930, 90, "Check", "Free forever", "No card needed · every panel", 3)}${chip(60, 120, "Zap", "Simple pricing", "The price you see is the price you pay", -3)}${badge(1180, 790, "Rocket", 10)}`);
 };
 for (const plan of ["free", "starter", "growth", "business", "enterprise"]) {
   SPECS[`plan-${plan}`] = () => SPECS.pricing().replace(/Best<\/div>/, `${plan[0].toUpperCase()}${plan.slice(1)}</div>`);

@@ -269,7 +269,7 @@ export interface Faq {
 export const FAQS: Faq[] = [
   { q: "What is SelfRun AI?", a: "SelfRun AI is a cloud platform that brings your sales, HR, finance, projects, procurement, training, documents, website and team communication into one system, with AI and workflow automation running through all of it." },
   { q: "Do I need to use every module?", a: "No. Each plan includes a set of modules and you switch on only what you need during setup. You can turn modules on or off later from your workspace settings." },
-  { q: "Is there a free plan?", a: "Yes. The Free plan is free forever for one person and includes every panel and every feature — no card needed. Paid plans add more people and bigger storage, AI, email and voice allowances." },
+  { q: "Is there a free plan?", a: "Yes. The Free plan is free forever and includes every panel and every feature — no card needed. Paid plans add more people and bigger storage, AI, email and voice allowances." },
   { q: "How long does setup take?", a: "A guided setup takes a few minutes: company details, departments, team invitations and the modules you want. Importing existing leads, clients or employees from CSV is built in." },
   { q: "Can I use my own domain for my website?", a: "Yes. Plans that include a custom domain let you connect your own domain with automatic SSL. Every workspace also gets its own address on our domain from the start." },
   { q: "How does the AI use my data?", a: "AI features run only against your own workspace, with the permissions of the person asking. Answers show how they were calculated, and AI usage is metered per plan so there are no surprises." },
@@ -284,7 +284,7 @@ export const FAQS: Faq[] = [
 
 /** More answers, grouped by topic on the FAQ page. */
 export const FAQS_MORE: Faq[] = [
-  { topic: "Plans & pricing", q: "What does the Free plan include?", a: "Every panel and every feature, free forever, for one person. Paid plans add more people and bigger storage, AI, email and voice allowances." },
+  { topic: "Plans & pricing", q: "What does the Free plan include?", a: "Every panel and every feature, free forever. Paid plans add more people and bigger storage, AI, email and voice allowances." },
   { topic: "Plans & pricing", q: "Are any features locked behind a higher plan?", a: "No. Every plan includes every panel and every feature. Plans differ only by team size and by allowances." },
   { topic: "Plans & pricing", q: "Can I change plans later?", a: "Yes. You can upgrade as your team grows or move down when you need less. Your data stays in place." },
   { topic: "Plans & pricing", q: "Are prices shown with tax?", a: "No. Prices exclude applicable taxes, and invoices show the tax separately." },

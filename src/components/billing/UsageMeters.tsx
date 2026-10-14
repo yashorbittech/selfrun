@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { formatLimitValue } from "@/lib/platform/billing/types";
 import type { UsageRow } from "@/lib/platform/billing/usage-summary";
 
-const ICON: Record<string, LucideIcon> = { seats: Users, storageMb: HardDrive, aiTokensPerMonth: Bot, emailsPerMonth: Mail, voiceMinutesPerMonth: Mic, customDomains: Globe, smsPerMonth: MessageSquare };
+const ICON: Record<string, LucideIcon> = { seats: Users, storageMb: HardDrive, aiTokensPerMonth: Bot, emailsPerMonth: Mail, voiceMinutesPerMonth: Mic, customDomains: Globe };
 
 /** A count in the service's own unit; zero is just "0", never "Not included". */
 const fmtUsed = (key: string, v: number) => (v === 0 ? "0" : key === "seats" || key === "customDomains" ? String(v) : formatLimitValue(key, v));

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
+import { getOffers } from "@/lib/saas/offers";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { FAQS, FAQS_MORE } from "@/lib/saas/content";
@@ -9,6 +10,7 @@ import { featureCount } from "@/lib/saas/feature-lists";
 import { CtaBand, EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/saas/blocks";
 import PricingPlans from "@/components/saas/PricingPlans";
 import FaqSection from "@/components/saas/FaqSection";
+import StackCompare from "@/components/saas/StackCompare";
 import SavingsCalculator from "@/components/saas/SavingsCalculator";
 import Icon from "@/components/saas/Icon";
 import Reveal from "@/components/saas/Reveal";
@@ -17,12 +19,13 @@ import { jsonForScript } from "@/lib/security/json-script";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Free forever for one person. Every plan includes every panel and every feature; plans differ only by team size and by storage, AI, email and voice allowances.",
+  description: "Start free, no card needed. Every plan includes every panel and every feature; plans differ only by team size and by storage, AI, email and voice allowances.",
   alternates: { canonical: "/pricing" },
 };
 
 export default async function PricingPage() {
   const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules()]);
+  const endsAt = (await getOffers().catch(() => null))?.endsAt ?? null;
   const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   const faqs = [...FAQS, ...FAQS_MORE];
   const ld = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
@@ -36,7 +39,7 @@ export default async function PricingPage() {
 
       <section className="sr-section">
         <div className="sr-container">
-          {plans.length ? <PricingPlans plans={plans} /> : <EmptyState title="Plans are being updated" body="Pricing isn't available right now. Contact us and we'll share the current plans."><Link href="/contact" className="sr-btn sr-btn-primary">Contact us</Link></EmptyState>}
+          {plans.length ? <PricingPlans plans={plans} endsAt={endsAt} /> : <EmptyState title="Plans are being updated" body="Pricing isn't available right now. Contact us and we'll share the current plans."><Link href="/contact" className="sr-btn sr-btn-primary">Contact us</Link></EmptyState>}
         </div>
       </section>
 
@@ -92,6 +95,15 @@ export default async function PricingPage() {
       </section>
 
       {plans.length > 0 && (
+        <section className="sr-section bg-muted/10">
+          <div className="sr-container">
+            <SectionHead center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
+            <StackCompare plan={(() => { const st = plans.find((p) => p.id === "starter"); return st ? { name: st.name, price: st.offer.monthly ? `₹${(st.offer.monthly / 100).toLocaleString("en-IN")}` : "", monthly: (st.offer.monthly ?? 0) / 100 } : null; })()} />
+          </div>
+        </section>
+      )}
+
+      {plans.length > 0 && (
         <section className="sr-band sr-section">
           <div className="sr-container relative">
             <SectionHead tone="dark" center icon="wallet" eyebrow="Cut your costs" title="What would you save?" accent="Do the maths." lead="Enter your own numbers: how many people, how many tools you pay for today and what they cost." />
@@ -100,7 +112,7 @@ export default async function PricingPage() {
         </section>
       )}
 
-      <CtaBand title="Start free. Grow when you're ready." lead="Free forever for one person — with every panel and every feature." />
+      <CtaBand title="Start free. Grow when you're ready." lead="Free forever — with every panel and every feature." />
       <FaqSection all limit={60} lead={`${faqs.length} answers about plans, your own brand and apps, AI and automation, devices, data and setup.`} />
     </>
   );

@@ -19,6 +19,7 @@ import PanelOrbit from "@/components/saas/PanelOrbit";
 import PanelShot from "@/components/saas/PanelShot";
 import MarketingShot from "@/components/saas/MarketingShot";
 import FaqSection from "@/components/saas/FaqSection";
+import StackCompare from "@/components/saas/StackCompare";
 import WhyCompare from "@/components/saas/WhyCompare";
 import BrandShowcase from "@/components/saas/BrandShowcase";
 import ProductShowcase from "@/components/saas/ProductShowcase";
@@ -61,7 +62,7 @@ export default async function SaasHome() {
         photo="team-desk"
         shot="workspace"
         chip={{ title: "Deal won", text: "Client created · team notified — automatically" }}
-        notes={["Free forever for one person", "No card needed", "Every feature included"]}
+        notes={["Full access, free forever", "AI built in", "No card needed"]}
       >
         <HeroCtas />
       </PageHero>
@@ -73,7 +74,7 @@ export default async function SaasHome() {
             { v: `${REPLACES.length} → 1`, l: "kinds of software, one subscription" },
             { v: `${totalFeatures}+`, l: "features — all on every plan" },
             { v: `${platforms}`, l: "platforms, your own apps" },
-            { v: "₹0", l: "forever for one person" },
+            { v: "₹0", l: "free forever" },
           ]} />
         </div>
         <div className="pb-8"><ModuleMarquee items={modules.map((m) => ({ name: m.name, icon: m.icon }))} /></div>
@@ -167,7 +168,7 @@ export default async function SaasHome() {
       {freePlan && (
         <section className="sr-section">
           <div className="sr-container">
-            <SectionHead icon="wallet" eyebrow="Free forever" title="Every panel. Every feature." accent="₹0, forever." lead={`${freePlan.description} Not a trial that runs out — start running your business today, and pay only when your team grows.`} />
+            <SectionHead icon="wallet" eyebrow="Free forever" title="Every panel. Every feature." accent="₹0, forever." lead={`Every panel and every feature, free. Not a trial that runs out — start running your business today, and pay only when your team grows.`} />
             <div className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-background p-8 shadow-2xl sm:p-14">
               <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-accent/15 blur-3xl" />
@@ -299,7 +300,7 @@ export default async function SaasHome() {
               { icon: "brain" as const, t: "AI that respects permissions", b: "It reads your live records, writes your content and works inside your automations — always within each person's access, and showing its working." },
               { icon: "target" as const, t: "Your brand, not ours", b: "Your logo, domain, apps and notifications — SelfRun stays in the background for your team, clients and visitors." },
               { icon: "rocket" as const, t: "Every device", b: "Web, an installable app, Android, iOS, Windows, macOS and Linux — the same workspace everywhere." },
-              { icon: "wallet" as const, t: "Free forever to start", b: "Every panel and every feature for one person. Pay only when your team grows." },
+              { icon: "wallet" as const, t: "Free forever to start", b: "Every panel and every feature, free. Pay only when you grow." },
             ].map((x, i) => (
               <Reveal key={x.t} delay={(i + 1) * 70}>
                 <div className="group relative h-full overflow-hidden rounded-[2rem] border border-border/60 bg-background p-7 shadow-sm">
@@ -332,6 +333,20 @@ export default async function SaasHome() {
           <WhyCompare rows={COMPARISON} brand={SAAS_BRAND.name} />
         </div>
       </section>
+
+      {/* The same jobs, priced on separate tools */}
+      {(() => {
+        const st = plans.find((p) => p.id === "starter");
+        const m = (st?.offer.monthly ?? 0) / 100;
+        return st && m > 0 ? (
+          <section className="sr-section bg-gradient-to-b from-muted/20 to-transparent">
+            <div className="sr-container">
+              <SectionHead center icon="wallet" eyebrow="What it costs" title="Sixteen tools. Sixteen bills." accent="Or one platform." lead="Add up what a team of ten pays for chat, HR, CRM, projects, accounting, purchasing, training, tests, website, SEO, social media, AI, document storage, a policy wiki and a help desk — then compare it with SelfRun." />
+              <StackCompare plan={{ name: st.name, price: `₹${m.toLocaleString("en-IN")}`, monthly: m }} />
+            </div>
+          </section>
+        ) : null;
+      })()}
 
       {/* Connected */}
       <section className="sr-section bg-muted/10">

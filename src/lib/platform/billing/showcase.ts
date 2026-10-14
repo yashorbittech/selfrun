@@ -30,7 +30,6 @@ const SHORT: Record<string, { label: string; fmt: (v: number) => string }> = {
   emailsPerMonth: { label: "Emails", fmt: (v) => v.toLocaleString("en-IN") },
   voiceMinutesPerMonth: { label: "Voice", fmt: (v) => `${v} min` },
   customDomains: { label: "Domains", fmt: (v) => String(v) },
-  smsPerMonth: { label: "SMS", fmt: (v) => v.toLocaleString("en-IN") },
 };
 
 export function buildShowcase(plans: Plan[]): ShowcasePlan[] {

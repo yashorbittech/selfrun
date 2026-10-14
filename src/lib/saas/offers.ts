@@ -31,18 +31,19 @@ export interface Offers {
   /** The label the catalogue gives the offer ("Launch offer"), or a generic one. */
   label: string;
   free: ShowcasePlan | null;
-  /** Epoch ms of the offer's end (always in the future): `SAAS_OFFER_ENDS_AT` when set, otherwise the end of the current month. */
+  /** Epoch ms of the offer's end: only when a price offer exists AND `SAAS_OFFER_ENDS_AT` is set to a future date — never an invented deadline. */
   endsAt: number | null;
+  /** Paying yearly instead of twelve months, for every paid plan whose yearly price is below twelve monthly ones (real prices, no list price needed). */
+  yearly: { id: string; name: string; price: string; /** Twelve months paid monthly. */ twelve: string; yearly: NonNullable<PlanOffer["yearly"]> }[];
+  /** The cheapest paid plan's monthly price, e.g. "₹499" (null when no plan is sold online). */
+  from: { name: string; price: string } | null;
   allPlans: ShowcasePlan[];
 }
 
-const IST = 5.5 * 3600_000;
-/** The configured end date while it is in the future; otherwise the last moment of the current month (India time), so the offer runs in monthly cycles. */
-function offerEnd(): number {
+/** The configured end date while it is in the future; otherwise none. */
+function offerEnd(): number | null {
   const set = SAAS_BRAND.offerEndsAt ? Date.parse(SAAS_BRAND.offerEndsAt) : NaN;
-  if (Number.isFinite(set) && set > Date.now()) return set;
-  const d = new Date(Date.now() + IST);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1) - 1 - IST;
+  return Number.isFinite(set) && set > Date.now() ? set : null;
 }
 
 export async function getOffers(): Promise<Offers> {
@@ -62,14 +63,22 @@ export async function getOffers(): Promise<Offers> {
     }];
   });
   const top = plans.reduce<PlanOffer | null>((a, b) => (!a || b.pct > a.pct ? b : a), null);
-  const end = offerEnd();
+  const yearly = paid.flatMap((p) => {
+    const m = p.offer.monthly;
+    const y = p.offer.yearly;
+    if (!m || !y || m * 12 <= y) return [];
+    return [{ id: p.id, name: p.name, price: formatMoney(m, p.currency), twelve: formatMoney(m * 12, p.currency), yearly: { price: formatMoney(y, p.currency), vsMonthly: formatMoney(m * 12 - y, p.currency), perMonth: formatMoney(Math.round(y / 12), p.currency), pct: Math.round((1 - y / (m * 12)) * 100) } }];
+  });
+  const cheapest = paid.filter((p) => p.offer.monthly).reduce<(typeof paid)[number] | null>((a, b) => (!a || (b.offer.monthly ?? 0) < (a.offer.monthly ?? 0) ? b : a), null);
   return {
     plans,
     topPct: top?.pct ?? 0,
     topPlan: top?.name ?? "",
     label: plans.find((p) => p.label !== "Offer")?.label ?? "Launch offer",
     free: all.find((p) => p.kind === "free") ?? null,
-    endsAt: end,
+    endsAt: top ? offerEnd() : null,
+    yearly,
+    from: cheapest ? { name: cheapest.name, price: formatMoney(cheapest.offer.monthly ?? 0, cheapest.currency) } : null,
     allPlans: all,
   };
 }

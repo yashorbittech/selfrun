@@ -1,7 +1,9 @@
 import "server-only";
+import type { Collection } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION } from "@/lib/platform/tenancy/companies";
 import { MODULES, type ModuleKey } from "@/lib/platform/onboarding/catalog";
+import { SAAS_BRAND } from "@/lib/saas/brand";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 import { currentPriceVersion, planIntervals, planPrice } from "@/lib/platform/billing/pricing";
 import {
@@ -18,8 +20,8 @@ import {
 /**
  * The plans catalogue (platform-level `billing_plans`), managed in the
  * Platform Panel. The list below only seeds an empty catalogue on first use
- * (Starter ₹999, Growth ₹1,999, Business ₹4,999 per month; yearly = 10×
- * monthly; 30-day trial) — after that, the database is the only source.
+ * (Starter ₹499, Growth ₹999, Business ₹1,999 per month; yearly = 10×
+ * monthly) — after that, the database is the only source.
  */
 
 export const PLANS_COLLECTION = "billing_plans";
@@ -31,8 +33,13 @@ const ALL_FLAGS = ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"]
 /**
  * The five plans, always. Every plan has every panel and every feature; the only things that change are how many people, and the allowance
  * of each paid third-party service (storage, AI, email, voice, domains — see `USAGE_SERVICES`). Nothing is sold separately: more of anything
- * means the next plan. `listPrices` are the "usual" prices shown struck through; `prices` are what is charged (about 75% off, monthly and
- * yearly; yearly = 10 × monthly, two months free). Editable in the Platform Panel at any time.
+ * means the next plan. `prices` are what is charged (monthly and yearly = 10 × monthly, two months free). No invented "usual" price is shown struck through: a plan shows an offer only if the operator sets a real list price.
+ */
+/**
+ * The paid plans' limits are what their price pays for at FULL use, worked out in the Platform Panel → Costs & pricing calculator from the
+ * providers' official prices (shared bills spread over 50 paying companies, 200 free ones, Razorpay's 4.16% and a 10% buffer): a company that
+ * uses every limit to the last unit still leaves the platform a little money. Every paid plan gives clearly more than Free (AI tokens, files, email), and Free keeps
+ * enough AI tokens for the sign-up website to be written. Re-run the calculator when a provider changes a price.
  */
 /**
  * The Free plan's monthly AI tokens. Sized so the AI-written website made at sign-up (planning, about eight pages, an offering page each,
@@ -56,7 +63,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     highlights: ["Free for life, no card needed"],
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 1, aiTokensPerMonth: FREE_AI_TOKENS, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 10, customDomains: 1, smsPerMonth: 0 },
+    limits: { seats: 1, aiTokensPerMonth: FREE_AI_TOKENS, storageMb: 500, emailsPerMonth: 100, voiceMinutesPerMonth: 5, customDomains: 1 },
     trialDays: 0,
     active: true,
     isDefault: true,
@@ -71,12 +78,12 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     priceYearly: 499_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 49_900, yearly: 499_000 },
-    listPrices: { monthly: 199_900, yearly: 2_398_800 },
-    offerLabel: "Launch offer",
     highlights: [],
+    listPrices: { monthly: 199_900, yearly: 1_999_000 },
+    offerLabel: "Launch offer",
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 10, aiTokensPerMonth: 300_000, storageMb: 5_120, emailsPerMonth: 1_000, voiceMinutesPerMonth: 30, customDomains: 2, smsPerMonth: 0 },
+    limits: { seats: 10, aiTokensPerMonth: 400_000, storageMb: 1_500, emailsPerMonth: 300, voiceMinutesPerMonth: 10, customDomains: 2 },
     trialDays: 0,
     active: true,
     isDefault: false,
@@ -91,12 +98,12 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     priceYearly: 999_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 99_900, yearly: 999_000 },
-    listPrices: { monthly: 399_900, yearly: 4_798_800 },
-    offerLabel: "Launch offer",
     highlights: [],
+    listPrices: { monthly: 399_900, yearly: 3_999_000 },
+    offerLabel: "Launch offer",
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 50, aiTokensPerMonth: 1_500_000, storageMb: 25_600, emailsPerMonth: 5_000, voiceMinutesPerMonth: 120, customDomains: 3, smsPerMonth: 0 },
+    limits: { seats: 50, aiTokensPerMonth: 1_000_000, storageMb: 10_000, emailsPerMonth: 2_000, voiceMinutesPerMonth: 40, customDomains: 3 },
     trialDays: 0,
     active: true,
     isDefault: false,
@@ -111,12 +118,12 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     priceYearly: 1_999_000,
     intervals: ["monthly", "yearly"],
     prices: { monthly: 199_900, yearly: 1_999_000 },
-    listPrices: { monthly: 799_900, yearly: 9_598_800 },
-    offerLabel: "Launch offer",
     highlights: [],
+    listPrices: { monthly: 799_900, yearly: 7_999_000 },
+    offerLabel: "Launch offer",
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 200, aiTokensPerMonth: 6_000_000, storageMb: 102_400, emailsPerMonth: 25_000, voiceMinutesPerMonth: 600, customDomains: 5, smsPerMonth: 0 },
+    limits: { seats: 200, aiTokensPerMonth: 2_000_000, storageMb: 25_000, emailsPerMonth: 6_000, voiceMinutesPerMonth: 120, customDomains: 5 },
     trialDays: 0,
     active: true,
     isDefault: false,
@@ -135,13 +142,36 @@ export const DEFAULT_PLANS: PlanSeed[] = [
     highlights: ["Dedicated onboarding and support"],
     flags: ALL_FLAGS,
     modules: "all",
-    limits: { seats: 500, aiTokensPerMonth: 20_000_000, storageMb: 512_000, emailsPerMonth: 100_000, voiceMinutesPerMonth: 3_000, customDomains: 20, smsPerMonth: 10_000 },
+    limits: { seats: 500, aiTokensPerMonth: 20_000_000, storageMb: 512_000, emailsPerMonth: 100_000, voiceMinutesPerMonth: 3_000, customDomains: 20 },
     trialDays: 0,
     active: true,
     isDefault: false,
     sortOrder: 50,
   },
 ];
+
+/** Bump when DEFAULT_PLANS changes (prices or limits): every catalogue still on an older revision is moved to it once. */
+const PRICING_REV = 3;
+
+/**
+ * The launch offer. The paid plans carry a NORMAL price (`listPrices`) above the price they are sold at now (`prices`). Until the deadline
+ * (`SAAS_BRAND.offerEndsAt`) the lower price is charged and the normal one is shown struck through; when the deadline passes
+ * `endOfferIfDue` makes the normal price the real one, for every new subscription. Whoever bought during the offer keeps the price they bought.
+ */
+export function offerEndMs(): number | null {
+  const t = SAAS_BRAND.offerEndsAt ? Date.parse(SAAS_BRAND.offerEndsAt) : NaN;
+  return Number.isFinite(t) ? t : null;
+}
+export function offerActive(now = Date.now()): boolean {
+  const end = offerEndMs();
+  return end !== null && now < end;
+}
+/** A seed as it should be stored right now: with the offer running as written; once it has ended, the normal price is the price and the offer is gone. */
+function effectiveSeed(seed: PlanSeed): PlanSeed {
+  if (offerActive() || !seed.listPrices) return seed;
+  const prices = { ...(seed.prices ?? {}), ...seed.listPrices };
+  return { ...seed, prices, priceMonthly: prices.monthly ?? seed.priceMonthly, priceYearly: prices.yearly ?? seed.priceYearly, listPrices: undefined, offerLabel: undefined };
+}
 
 export const STANDARD_PLAN_IDS = DEFAULT_PLANS.map((p) => p._id);
 
@@ -154,7 +184,7 @@ async function collection() {
       const now = new Date();
       await col
         .insertMany(
-          DEFAULT_PLANS.map((p) => {
+          DEFAULT_PLANS.map(effectiveSeed).map((p) => {
             const prices = p.prices ?? { monthly: p.priceMonthly, yearly: p.priceYearly };
             const intervals: BillingInterval[] = p.intervals ?? ["monthly", "yearly"];
             return { ...p, intervals, prices, priceVersion: 1, priceHistory: [{ version: 1, currency: p.currency, intervals, prices, effectiveFrom: now, createdBy: "seed" }], createdAt: now, updatedAt: now };
@@ -163,7 +193,37 @@ async function collection() {
         .catch(() => {});
     }
   }
+  await endOfferIfDue(col);
   return col;
+}
+
+let offerCheckedAt = 0;
+let endingOffer = false;
+/** After the deadline: every plan that still carries a normal price above its sold price is moved to the normal price, once. */
+async function endOfferIfDue(col: Collection<Plan>): Promise<void> {
+  const end = offerEndMs();
+  if (end === null || Date.now() < end || endingOffer || Date.now() - offerCheckedAt < 60_000) return;
+  offerCheckedAt = Date.now();
+  const meta = (await getPlatformDb()).collection<{ _id: string; endsAt: number }>("platform_meta");
+  if ((await meta.findOne({ _id: "offer-ended" }))?.endsAt === end) return;
+  endingOffer = true;
+  try {
+    for (const live of await col.find({ "listPrices.monthly": { $gt: 0 } }).toArray()) {
+      const prices = { monthly: live.priceMonthly, yearly: live.priceYearly, ...(live.prices ?? {}), ...(live.listPrices ?? {}) };
+      const res = await savePlan(
+        { _id: live._id, name: live.name, description: live.description, currency: live.currency, intervals: planIntervals(live), prices, modules: live.modules, highlights: live.highlights ?? [], flags: live.flags ?? [], limits: live.limits, trialDays: live.trialDays ?? null, active: live.active, isDefault: live.isDefault, listPrices: {}, offerLabel: "", lifetimeFree: live.lifetimeFree === true, contactSales: live.contactSales === true },
+        "update",
+        "system:offer-ended",
+      );
+      if (!res.ok) throw new Error(`offer end: ${live._id}: ${res.error}`);
+    }
+    await meta.updateOne({ _id: "offer-ended" }, { $set: { endsAt: end } }, { upsert: true });
+  } catch (err) {
+    console.error("[plans] could not end the offer", err);
+    offerCheckedAt = 0;
+  } finally {
+    endingOffer = false;
+  }
 }
 
 export async function listPlans(opts: { activeOnly?: boolean } = {}): Promise<Plan[]> {
@@ -547,7 +607,7 @@ export async function applySimplePricing(actorId: string): Promise<{ ok: true; c
   const created: string[] = [];
   const updated: string[] = [];
   // Free first, so it takes the default flag before the old default is edited.
-  for (const seed of DEFAULT_PLANS) {
+  for (const seed of DEFAULT_PLANS.map(effectiveSeed)) {
     const exists = Boolean(await col.findOne({ _id: seed._id }, { projection: { _id: 1 } }));
     const res = await savePlan(
       {
@@ -585,7 +645,7 @@ export async function applySimplePricing(actorId: string): Promise<{ ok: true; c
  * or the built-in one when it is missing or switched off. Missing plans are also written to the catalogue (existing ones are never
  * touched), so a fresh database sells the five plans from the first request. Never returns fewer than five.
  */
-let upgrading: Promise<unknown> | null = null;
+let upgrading: Promise<{ ok: boolean }> | null = null;
 
 /** A stored plan from before the five-plan pricing (no list prices / plan kind / new limits): it is brought up to date once. */
 function isLegacyStandardPlan(live: Plan, seed: PlanSeed): boolean {
@@ -606,6 +666,15 @@ export async function getStandardPlans(): Promise<Plan[]> {
     await upgrading.catch(() => {});
     stored = await col.find({ _id: { $in: STANDARD_PLAN_IDS } }).toArray();
   }
+  // The final pricing (prices and limits worked out in the Costs & pricing calculator) is loaded once into any catalogue still on an
+  // older revision; after that the operator's edits are never overwritten.
+  const meta = (await getPlatformDb()).collection<{ _id: string; rev: number }>("platform_meta");
+  if (((await meta.findOne({ _id: "pricing-rev" }))?.rev ?? 0) < PRICING_REV) {
+    upgrading ??= applySimplePricing("system:pricing-rev").finally(() => { upgrading = null; });
+    const done = await upgrading.catch(() => ({ ok: false }));
+    if (done.ok) await meta.updateOne({ _id: "pricing-rev" }, { $set: { rev: PRICING_REV } }, { upsert: true });
+    stored = await col.find({ _id: { $in: STANDARD_PLAN_IDS } }).toArray();
+  }
   // The Free plan used to carry 20,000 AI tokens — too few to even finish the sign-up website. A stored Free plan still on exactly that
   // number (never edited) is raised once; any other value was chosen by the operator and is left alone.
   const freeLive = stored.find((p) => p._id === "free");
@@ -619,7 +688,7 @@ export async function getStandardPlans(): Promise<Plan[]> {
     const now = new Date();
     await col
       .insertMany(
-        missing.map((p) => {
+        missing.map(effectiveSeed).map((p) => {
           const prices = p.prices ?? { monthly: p.priceMonthly, yearly: p.priceYearly };
           const intervals: BillingInterval[] = p.intervals ?? ["monthly", "yearly"];
           return { ...p, intervals, prices, priceVersion: 1, priceHistory: [{ version: 1, currency: p.currency, intervals, prices, effectiveFrom: now, createdBy: "seed" }], createdAt: now, updatedAt: now };
@@ -629,7 +698,7 @@ export async function getStandardPlans(): Promise<Plan[]> {
       .catch(() => {});
   }
   const now = new Date();
-  return DEFAULT_PLANS.map((seed) => {
+  return DEFAULT_PLANS.map(effectiveSeed).map((seed) => {
     const live = byId.get(seed._id);
     return live && live.active ? live : { ...seed, createdAt: now, updatedAt: now };
   });

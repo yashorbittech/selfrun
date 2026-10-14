@@ -9,6 +9,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { clientPromise, getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { listPlans } from "@/lib/platform/billing/plans";
+import { startTrial } from "@/lib/platform/billing/subscription";
 import { updateCompanySubscription, getCompanySubscription } from "@/lib/platform/billing/subscription";
 import {
   computeCouponDiscount,
@@ -80,7 +81,10 @@ async function main() {
     { _id: owner as never, slug: "owner", name: "Owner", status: "active", isPlatformOwner: true, createdAt: now, updatedAt: now },
     ...companies.map((id, i) => ({ _id: id as never, slug: `co${i}`, name: `Company ${i}`, status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now })),
   ]);
-  await listPlans(); // seed starter/growth/business
+  await listPlans(); // seed the catalogue
+  // These checks were written for a ₹1,999 Growth plan; this test database's Growth gets that price (the real one is ₹999).
+  await db.collection("billing_plans").updateOne({ _id: "free" as never }, { $unset: { trialDays: "" } }); // the checks need the implicit trial of a company with no subscription
+  await db.collection("billing_plans").updateOne({ _id: "growth" as never }, { $set: { priceMonthly: 199_900, priceYearly: 1_999_000, "prices.monthly": 199_900, "prices.yearly": 1_999_000 } });
 
   // --- discount math -------------------------------------------------------
   eq(computeCouponDiscount({ kind: "percent", percentOff: 20, amountOff: null }, 199_900), 39_980, "20% of ₹1,999");
@@ -234,6 +238,8 @@ async function main() {
   eq(q4?.gstRatePercent, 18, "gst rate from settings");
 
   // company add-ons
+  await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $unset: { trialDays: "" } });
+  await startTrial(e, "starter"); // the real catalogue starts on Free (no trial); the checks need a trialing company
   const addSeats = await setCompanyAddon(e, seats.id, 3, { actorId: "tester" });
   ok(addSeats.ok, "add seats to a company with an implicit trial");
   eq((await getCompanySubscription(e))?.status, "trialing", "implicit trial materialised intact");

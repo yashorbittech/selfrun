@@ -59,6 +59,8 @@ async function main() {
   const company = (id: string, slug: string, extra: Record<string, unknown> = {}) => ({ _id: id as never, slug, name: slug, status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now, ...extra });
   await db.collection("companies").insertMany([company(A, "alpha"), company(B, "beta"), company(STARTER, "starter"), company(NOPMS, "nopms", { enabledModules: ["hrms", "lms", "fms"] }), company(REAL, "real")]);
   await listPlans();
+  // Every real plan has every panel; this test needs a plan without Finance and Procurement, so Starter is narrowed here (test database only).
+  await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms", "lms", "sop", "cms"] } });
   await db.collection("companies").updateOne({ _id: STARTER as never }, { $set: { subscription: { planId: "starter", status: "active", interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now } } });
 
   const fa = await runAsCompany(A, () => seed("A", { amount: 1, extraActive: 0 }));

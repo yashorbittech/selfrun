@@ -21,7 +21,7 @@ export default async function IntegrationsPage() {
   const trackingOn = !!tracking && (tracking.ga4Ids.length + tracking.gtmIds.length + tracking.clarityIds.length + tracking.metaPixelIds.length + tracking.scripts.length > 0 || !!tracking.tawkId);
 
   const providers: HubProvider[] = [];
-  // Email, SMS, AI & voice and automations are provided by the platform: they are not set up here.
+  // Email, AI & voice and automations are provided by the platform: they are not set up here.
   for (const p of CONNECTION_PROVIDERS.filter((x) => !HIDDEN_FROM_COMPANIES.includes(x.key))) {
     const view = views[p.key];
     let environment = false;
@@ -53,7 +53,7 @@ export default async function IntegrationsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: "Integrations" }]}
           title={<>Integrations</>}
-          description={<>Connect your own accounts once — social, Google, payments and more. Email, SMS, AI and voice are already included in your plan, so there is nothing to set up for them. Keys are encrypted and are never shown again.</>}
+          description={<>Connect your own accounts once — social, Google, payments and more. Email, AI and voice are already included in your plan, so there is nothing to set up for them. Keys are encrypted and are never shown again.</>}
         />
 <div className="space-y-6">
         <ConnectionsHub providers={providers} encryptionReady={isPlatformEncryptionConfigured()} />

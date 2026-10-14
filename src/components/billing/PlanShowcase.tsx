@@ -26,7 +26,7 @@ export interface PlanShowcaseProps {
 }
 
 const PLAN_ICON: Record<string, LucideIcon> = { free: Gift, starter: Sparkles, growth: Rocket, business: Building2, enterprise: Crown };
-const SERVICE_ICON: Record<string, LucideIcon> = { storageMb: HardDrive, aiTokensPerMonth: Bot, emailsPerMonth: Mail, voiceMinutesPerMonth: Mic, customDomains: Globe, smsPerMonth: MessageSquare };
+const SERVICE_ICON: Record<string, LucideIcon> = { storageMb: HardDrive, aiTokensPerMonth: Bot, emailsPerMonth: Mail, voiceMinutesPerMonth: Mic, customDomains: Globe };
 
 const money = (paise: number, currency: string) => formatMoney(paise, currency);
 

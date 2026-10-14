@@ -207,7 +207,7 @@ export function CtaBand({ title = "Your business, running itself — starting to
             <Link href="/demo" className="inline-flex items-center gap-2 rounded-full border border-white/30 px-8 py-4 text-sm font-bold text-white transition-all hover:bg-white/10">Request a demo</Link>
           </div>
           <div className="flex flex-wrap justify-center gap-6 pt-2 text-sm text-white/80">
-            {["Free forever for one person", "No card needed", "Every panel and feature included"].map((t) => (
+            {["Full access, free forever", "AI built in", "No card needed"].map((t) => (
               <span key={t} className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-white" />{t}</span>
             ))}
           </div>

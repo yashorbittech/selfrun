@@ -6,8 +6,8 @@ import OfferAd, { type AdSlide } from "@/components/saas/OfferAd";
 /** The strip above the header (`bar`) and the pop-up (`popup`), both drawn from the live plan catalogue. */
 export async function OfferTopBar() {
   const o = await getOffers();
-  const headline = o.topPct > 0 ? `${o.label}: save up to ${o.topPct}% on every paid plan` : "Free forever for one person";
-  const sub = o.topPct > 0 ? "Every panel and every feature on every plan." : "Every panel and every feature — no card needed.";
+  const headline = o.topPct > 0 ? `${o.label}: save up to ${o.topPct}% on every paid plan` : "Free forever — full access, every feature unlocked";
+  const sub = o.topPct > 0 ? "Every panel and every feature on every plan." : "AI built in. Every panel included. Set up in minutes — no card needed.";
   return <OfferBar headline={headline} sub={sub} endsAt={o.endsAt} cta={o.topPct > 0 ? "Claim offer" : "Get started free"} href={o.topPct > 0 ? "/offers" : "/signup"} />;
 }
 
@@ -19,7 +19,7 @@ export async function OfferPopupHost() {
       topPct={o.topPct}
       plans={o.plans.map((p) => ({ name: p.name, price: p.price, list: p.list, pct: p.pct }))}
       endsAt={o.endsAt}
-      freeLine="Every panel and every feature for one person — no card needed."
+      freeLine={"Full access to every panel and feature, AI included — start in minutes, no card needed."}
     />
   );
 }
@@ -31,8 +31,8 @@ export async function OfferAdHost() {
   if (o.topPct > 0) slides.push({ kind: "launch", label: o.label, pct: o.topPct, plan: o.topPlan, plans: o.plans.map((p) => ({ name: p.name, price: p.price, list: p.list, pct: p.pct })) });
   const spot = o.plans.find((p) => p.popular) ?? o.plans[0];
   if (spot) slides.push({ kind: "plan", name: spot.name, price: spot.price, list: spot.list, save: spot.save, pct: spot.pct, seats: spot.seats, popular: spot.popular });
-  const y = o.plans.filter((p) => p.yearly).sort((a, b) => (b.yearly?.pct ?? 0) - (a.yearly?.pct ?? 0))[0];
-  if (y?.yearly) slides.push({ kind: "yearly", plan: y.name, save: y.yearly.vsMonthly, perMonth: y.yearly.perMonth, monthly: y.price });
-  slides.push({ kind: "free", line: "Free forever for one person — every panel and every feature, no card needed." });
+  const y = [...o.yearly].sort((a, b) => b.yearly.pct - a.yearly.pct)[0];
+  if (y) slides.push({ kind: "yearly", plan: y.name, save: y.yearly.vsMonthly, perMonth: y.yearly.perMonth, monthly: y.price });
+  slides.push({ kind: "free", line: "Free forever · full access · AI built in · every feature unlocked. No card needed." });
   return <OfferAd slides={slides} endsAt={o.endsAt} />;
 }

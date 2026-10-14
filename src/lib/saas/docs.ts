@@ -222,7 +222,7 @@ const added: Doc[] = [
   d({
     slug: "plans-and-billing", title: "Plans, usage and billing", summary: "How plans work, what is included and how to change.", category: "Security & admin", readMinutes: 4, shot: "workspace", panel: "workspace",
     sections: [
-      { heading: "What a plan sets", body: ["Every plan includes every panel and every feature. A plan sets the number of people and the allowances for storage, AI, email and voice. The Free plan is free forever for one person."] },
+      { heading: "What a plan sets", body: ["Every plan includes every panel and every feature. A plan sets the number of people and the allowances for storage, AI, email and voice. The Free plan is free forever."] },
       { heading: "See what you use", body: ["Workspace → Usage shows seats, AI, email, voice and storage against your plan."] },
       { heading: "Change plan or cancel", body: ["Upgrade or move down at any time from Plan & billing. Invoices, credit notes and payments for your subscription are under Invoices & payments."] },
     ],

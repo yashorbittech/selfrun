@@ -9,6 +9,7 @@ import {
   UserPlus,
   Globe,
   Package,
+  Calculator,
   Repeat,
   FileText,
   TicketPercent,
@@ -62,6 +63,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
     label: "Billing",
     items: [
       { href: "/platform/plans", label: "Plans & pricing", icon: Package },
+      { href: "/platform/costs", label: "Costs & pricing calculator", icon: Calculator },
       { href: "/platform/subscriptions", label: "Subscriptions", icon: Repeat },
       { href: "/platform/invoices", label: "SaaS invoices", icon: FileText },
       { href: "/platform/coupons", label: "Coupons & discounts", icon: TicketPercent },

@@ -56,7 +56,7 @@ plans and prices.
 | **External users** | Client & Student Portal for clients, students, interns and applicants |
 | **Help** | Help & Support: AI help chatbot, help center and support requests to the platform team |
 
-Customer self-service: sign-up with email confirmation, a 30-day trial, plan upgrade and billing, add-ons, coupons, custom
+Customer self-service: sign-up with email confirmation, a free plan for life (no trial), plan upgrade and billing, add-ons, coupons, custom
 domains with automatic TLS, and a starter website that is live from the first minute.
 
 Platform staff: company registry, plans and prices, subscriptions, revenue metrics, invoices, coupons, add-ons, usage,
@@ -126,7 +126,6 @@ Prices change, so none are listed: the last column says how each one is billed. 
 | 7 | **Customers' custom domains** (e.g. `acme.com`) | A company's own address | When a company wants one | Paid by the customer | The customer's registrar fee. Your side: adding domains to the Vercel project (included in Pro) |
 | 8 | **OpenAI** | AI chatbot, assistants, Intelligence, SOP and social-post generation, file search | When AI is used | Paid | Per token, plus vector-store storage |
 | 9 | **ElevenLabs** | Voice / text to speech | When voice is used | Paid | Monthly plan or per character |
-| 10 | **SMS provider** (MSG91, Twilio, Fast2SMS) | OTP and alerts | Not built in yet | Paid | Per SMS, once added |
 | 11 | **RazorpayX** (payouts) | Direct payouts from Finance | Only for payouts | Paid | Per payout fee plus account |
 | 12 | **GitHub Actions** | Desktop and mobile app builds | Only for apps | Free minutes, then paid | Private repositories get limited free minutes; Windows and macOS minutes count extra |
 | 13 | **Apple Developer** | iOS app and macOS signing | Only for iOS / macOS apps | Paid | Yearly |
@@ -221,12 +220,27 @@ On the first start the server creates the operator company and the staff account
 
 ---
 
+### Plans and limits
+
+Every plan has every panel and feature; only the number of people and the allowance of each paid service change. The numbers come from
+`DEFAULT_PLANS` in `src/lib/platform/billing/plans.ts`, were worked out in Platform Panel → Costs & pricing calculator from the providers'
+official prices, and are loaded into an older catalogue once (revision `PRICING_REV`); later edits in the Platform Panel are kept. Prices are
+monthly, before GST; yearly is 10 × monthly.
+
+| Plan | Price | People | AI tokens / month | Files | Emails / month | Voice min / month | Domains |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Free | ₹0 | 1 | 250,000 | 500 MB | 100 | 5 | 1 |
+| Starter | ₹499 | 10 | 400,000 | 1.5 GB | 300 | 10 | 2 |
+| Growth | ₹999 | 50 | 1,000,000 | 10 GB | 2,000 | 40 | 3 |
+| Business | ₹1,999 | 200 | 2,000,000 | 25 GB | 6,000 | 120 | 5 |
+| Enterprise | Contact support | 500 | 20,000,000 | 500 GB | 100,000 | 3,000 | 20 |
+
 ## Register a company
 
 1. Open `/signup`.
 2. Enter the company name, workspace address (slug), work email, password and business categories, and accept the terms.
 3. Confirm the email (in development with `EMAIL_PROVIDER=console`, the link is printed in the server log).
-4. The company is created with a Super Admin account, a 30-day trial, its panels and a starter website.
+4. The company is created with a Super Admin account on the Free plan, its panels and a starter website.
 
 Its website is `http://<slug>.localhost:3000` in development and `https://<slug>.<PLATFORM_ROOT_DOMAIN>` in production; its
 panels are at `http://<slug>-app.localhost:3000` and `https://<slug>-app.<PLATFORM_ROOT_DOMAIN>`. After sign-up the owner is

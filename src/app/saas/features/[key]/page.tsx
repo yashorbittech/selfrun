@@ -301,7 +301,7 @@ export default async function FeatureDetailPage({ params }: { params: Promise<{ 
       </section>
 
 
-      <CtaBand title={`Run ${m.name} — and every other panel — free.`} lead="Every panel and every feature is included in every plan, starting free forever for one person." />
+      <CtaBand title={`Run ${m.name} — and every other panel — free.`} lead="Every panel and every feature is included in every plan, starting free, no card needed." />
       <FaqSection topics={["AI & automation", "Data & security", "Setup"]} limit={5} />
     </>
   );

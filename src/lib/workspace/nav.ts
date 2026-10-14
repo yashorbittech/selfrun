@@ -137,6 +137,7 @@ const ANALYTICS: NavItemDef[] = (
     ["fms", "Finance Analytics", "finance", orAdmin(has(normalizeFmsRoles))],
     ["hrms", "HR Analytics", "users", orAdmin(has(normalizeRoles))],
     ["lms", "Lead Analytics", "grid", canViewLmsAnalytics],
+    ["lpms", "LPMS Analytics", "file", (u) => hasLpmsAccess(u.roles) && isLpmsManagerTier(u)],
     ["messenger", "Messenger Analytics", "chat", orAdmin(has(normalizeChatRoles))],
     ["ots", "Online Tests Analytics", "test", (u) => hasOtsAccess(u.roles) && otsCan(u, "VIEW_REPORTS")],
     ["pms", "Project Analytics", "projects", orAdmin(has(normalizePmsRoles))],
@@ -145,7 +146,6 @@ const ANALYTICS: NavItemDef[] = (
     ["seo", "SEO Analytics", "search", (u) => hasSeoAccess(u.roles) && seoCan(u, "VIEW")],
     ["smms", "Social Media Analytics", "megaphone", (u) => hasSmmsAccess(u.roles) && smmsCan(u, "VIEW_ANALYTICS")],
     ["sop", "SOP Analytics", "book", (u) => hasSopAccess(u.roles) && sopCan(u, "EXPORT")],
-    ['lpms', 'LPMS Analytics', 'file', (u) => hasLpmsAccess(u.roles) && isLpmsManagerTier(u)],
     ["tms", "Training Analytics", "training", orAdmin(has(normalizeTmsRoles))],
     ["workspace", "Workspace Analytics", "chart", canViewWorkspaceAnalytics],
   ] as [string, string, NavIcon, NavItemDef["allow"]][]

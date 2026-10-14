@@ -215,7 +215,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
           </div>
           <div className="sr-band rounded-3xl p-5 shadow-xl shadow-primary/20">
             <p className="font-black leading-snug">Use {f.name} in your own workspace.</p>
-            <p className="mt-1 text-sm text-white/75">Free forever for one person — every panel included.</p>
+            <p className="mt-1 text-sm text-white/75">Free to start — every panel included.</p>
             <Link href="/signup" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-105">Get started free <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>

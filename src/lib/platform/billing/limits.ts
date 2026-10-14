@@ -12,11 +12,11 @@ import type { CompanySubscription, Plan, PlanLimits } from "@/lib/platform/billi
  * `null` (unlimited) stays unlimited whatever is added.
  */
 
-export const UNLIMITED_LIMITS: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null, emailsPerMonth: null, voiceMinutesPerMonth: null, customDomains: null, smsPerMonth: null };
+export const UNLIMITED_LIMITS: PlanLimits = { seats: null, aiTokensPerMonth: null, storageMb: null, emailsPerMonth: null, voiceMinutesPerMonth: null, customDomains: null };
 export const ADDONS_COLLECTION = "billing_addons";
 
 export type LimitKey = keyof PlanLimits;
-const LIMIT_KEYS: LimitKey[] = ["seats", "aiTokensPerMonth", "storageMb", "emailsPerMonth", "voiceMinutesPerMonth", "customDomains", "smsPerMonth"];
+const LIMIT_KEYS: LimitKey[] = ["seats", "aiTokensPerMonth", "storageMb", "emailsPerMonth", "voiceMinutesPerMonth", "customDomains"];
 
 export interface SubscriptionAddon {
   addonId: string;

@@ -29,10 +29,15 @@ async function main() {
   ]);
 
   const plans = await listPlans();
-  assert.deepEqual(plans.map((p) => p._id), ["starter", "growth", "business"], "default plans seeded in order");
-  assert.equal((await getDefaultPlan())?._id, "growth");
-  assert.deepEqual(plans.map((p) => p.priceMonthly), [99_900, 199_900, 499_900], "decided monthly prices (paise)");
-  assert.ok(plans.every((p) => p.trialDays === 30), "30-day trial");
+  assert.deepEqual(plans.map((p) => p._id), ["free", "starter", "growth", "business", "enterprise"], "default plans seeded in order");
+  assert.equal((await getDefaultPlan())?._id, "free");
+  assert.deepEqual(plans.map((p) => p.priceMonthly), [0, 49_900, 99_900, 199_900, 0], "decided monthly prices (paise)");
+  assert.ok(plans.every((p) => p.trialDays === 0), "no trial: Free is the start");
+  // The rest checks trials and panel sets, which the real catalogue does not have (every plan has every panel; Free is the start), so this
+  // test database gets an older-style catalogue: Growth is the default, with a 30-day trial and without Social Media.
+  const col = (await getPlatformDb()).collection("billing_plans");
+  await col.updateMany({}, { $set: { trialDays: 30, isDefault: false } });
+  await col.updateOne({ _id: "growth" as never }, { $set: { isDefault: true, modules: ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"] } });
   const settings = await getBillingSettings();
   assert.equal(settings.billing.defaultTrialDays, 30);
   assert.equal(settings.tax.gstRatePercent, 18);

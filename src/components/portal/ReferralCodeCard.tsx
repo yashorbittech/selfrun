@@ -53,7 +53,6 @@ export default function ReferralCodeCard({ code, link }: { code: string; link: s
     { label: "Facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${msg}`, icon: <FacebookIcon className="size-3.5" /> },
     { label: "X", href: `https://twitter.com/intent/tweet?text=${msg}&url=${url}`, icon: <XIcon className="size-3.5" /> },
     { label: "LinkedIn", href: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`, icon: <LinkedinIcon className="size-3.5" /> },
-    { label: "SMS", href: `sms:?&body=${text}`, icon: <MessageSquare className="size-3.5" />, sameTab: true },
     { label: "Email", href: `mailto:?subject=${encodeURIComponent(`Join me on ${brand.name}`)}&body=${text}`, icon: <Mail className="size-3.5" />, sameTab: true },
   ];
 

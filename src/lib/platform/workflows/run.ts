@@ -12,7 +12,7 @@ import { eventDef, eventLabel, type EventType } from "@/lib/platform/events/cata
 import { workflowCollections, type WorkflowDoc } from "@/lib/platform/workflows";
 import { isEmailAddress, matchesAll, renderTemplate, type EventContext, type WorkflowAction } from "@/lib/platform/workflows/shared";
 import { deliverWebhook } from "@/lib/platform/workflows/webhook";
-import { isPhoneNumber, sendSms, sendWhatsApp } from "@/lib/platform/messaging";
+import { isPhoneNumber, sendWhatsApp } from "@/lib/platform/messaging";
 
 /** Executes workflows for an event. Called by the event bus after the response; never throws. */
 
@@ -61,11 +61,11 @@ async function runAction(action: WorkflowAction, wf: Pick<WorkflowDoc, "_id" | "
       const sent = await sendEmail({ to: mail.to, subject: mail.subject, html: mail.html, text: mail.text });
       return sent.ok ? { action: "email", ok: true, detail: `Sent to ${mail.to}` } : { action: "email", ok: false, detail: "The email couldn't be sent." };
     }
-    if (action.type === "sms" || action.type === "whatsapp") {
+    if (action.type === "whatsapp") {
       const to = renderTemplate(action.to, event.ctx).trim();
       if (!isPhoneNumber(to)) return { action: action.type, ok: false, detail: to ? `"${to.slice(0, 40)}" isn't a phone number.` : "No phone number: the field is empty for this event." };
       const text = renderTemplate(action.body, event.ctx).slice(0, 1000);
-      const sent = action.type === "sms" ? await sendSms(to, text) : await sendWhatsApp(to, text);
+      const sent = await sendWhatsApp(to, text);
       return sent.ok ? { action: action.type, ok: true, detail: `Sent to ${to}` } : { action: action.type, ok: false, detail: sent.error.slice(0, 200) };
     }
     if (action.type === "notify") {

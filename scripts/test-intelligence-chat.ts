@@ -45,6 +45,8 @@ async function main() {
   const company = (id: string, slug: string) => ({ _id: id as never, slug, name: slug, status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now });
   await db.collection("companies").insertMany([company(A, "alpha"), company(B, "beta"), company(TINY, "tiny"), company(STARTER, "starter"), company(SUSP, "susp")]);
   await listPlans();
+  // Every real plan has every panel; this test needs a plan without the panel, so Starter is narrowed here (test database only).
+  await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms"] } });
   await db.collection("billing_plans").insertOne({ _id: "tiny" as never, name: "Tiny", description: "t", currency: "INR", priceMonthly: 1, priceYearly: 1, modules: "all", limits: { seats: 5, aiTokensPerMonth: 100, storageMb: 10 }, trialDays: 30, active: true, isDefault: false, sortOrder: 99, createdAt: now, updatedAt: now });
   const sub = (planId: string, status = "active") => ({ $set: { subscription: { planId, status, interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now } } });
   await db.collection("companies").updateOne({ _id: TINY as never }, sub("tiny"));
@@ -124,7 +126,7 @@ async function main() {
       assert.ok(res.ok);
       return res.message;
     });
-    assert.equal(mock.hits() - hits, 2, "one query round, one answer round");
+    assert.equal(mock.hits() - hits, 3, "scope check, one query round, one answer round");
     assert.deepEqual(statuses.slice(0, 2), ["Checking permissions…", "Querying Clients…"]);
     assert.ok(statuses.includes("Writing the answer…"));
     assert.equal(r.role, "assistant");
@@ -134,7 +136,7 @@ async function main() {
     assert.match(r.text, /2 active clients/);
     assert.equal(r.queries.length, 1);
     assert.deepEqual(r.queries[0], { queryId: "q1", entity: "clients", entityLabel: "Clients", measures: ["Number of records"], groupedBy: [], filters: ["Status is active"], joins: [], rowCount: 1, truncated: false });
-    assert.equal(await runAsCompany(A, () => getUsage("ai_tokens")), before + 300, "metered through the OpenAI wrapper: 2 calls x 150 tokens");
+    assert.equal(await runAsCompany(A, () => getUsage("ai_tokens")), before + 450, "metered through the OpenAI wrapper: 3 calls x 150 tokens (scope check, query, answer)");
     const stored = await runAsCompany(A, async () => (await getDb()).collection("intel_messages").find({ conversationId: firstConv }).sort({ createdAt: 1 }).toArray());
     assert.deepEqual(stored.map((m) => m.role), ["user", "assistant"]);
     assert.equal(stored[1].tokens, 300);
@@ -217,11 +219,11 @@ async function main() {
   await check("describe_entity returns the user's fields only", async () => {
     const before = mock.hits();
     await answered(A, pm, "DESCRIBE it");
-    const out = (mock.requests[before + 1].input as { type?: string; output?: string }[]).find((i) => i.type === "function_call_output")!;
+    const out = (mock.requests[before + 2].input as { type?: string; output?: string }[]).find((i) => i.type === "function_call_output")!;
     assert.match(String(out.output), /Unknown entity|not available/, "a PMS user cannot describe invoices");
     const b2 = mock.hits();
     await answered(A, owner, "DESCRIBE it");
-    const ok = JSON.parse(String((mock.requests[b2 + 1].input as { type?: string; output?: string }[]).find((i) => i.type === "function_call_output")!.output));
+    const ok = JSON.parse(String((mock.requests[b2 + 2].input as { type?: string; output?: string }[]).find((i) => i.type === "function_call_output")!.output));
     assert.equal(ok.entity, "invoices");
     assert.ok(ok.fields.some((f: { key: string; type: string }) => f.key === "totalAmount" && f.type === "money_rupees"));
     assert.ok(!ok.fields.some((f: { key: string }) => f.key === "bankAccountNumber"));
@@ -231,8 +233,8 @@ async function main() {
   await check("a rejected plan is explained to the model once and the repaired plan runs", async () => {
     const before = mock.hits();
     const { message } = await answered(A, owner, "REPAIR the plan");
-    assert.equal(mock.hits() - before, 3);
-    const toolOut = (mock.requests[before + 1].input as { type?: string; output?: string }[]).filter((i) => i.type === "function_call_output");
+    assert.equal(mock.hits() - before, 4);
+    const toolOut = (mock.requests[before + 2].input as { type?: string; output?: string }[]).filter((i) => i.type === "function_call_output");
     assert.match(JSON.parse(String(toolOut[0].output)).error, /Field "statuss" is not available on "clients"\. Available fields: .*status/);
     assert.deepEqual(message.queries.map((q) => [q.queryId, Boolean(q.error)]), [["q1", true], ["q2", false]]);
     assert.match(message.text, /Active clients: 2/);
@@ -240,8 +242,8 @@ async function main() {
   await check("a second rejection ends planning: the model is forced to answer", async () => {
     const before = mock.hits();
     const { message } = await answered(A, owner, "TWICE bad plans");
-    assert.equal(mock.hits() - before, 3, "rejected, rejected, then a forced final_answer");
-    assert.deepEqual(mock.requests[before + 2].tool_choice, { type: "function", name: "final_answer" });
+    assert.equal(mock.hits() - before, 4, "rejected, rejected, then a forced final_answer");
+    assert.deepEqual(mock.requests[before + 3].tool_choice, { type: "function", name: "final_answer" });
     assert.equal(message.queries.filter((q) => q.error).length, 2);
     assert.ok(message.blocks.length > 0);
   });
@@ -250,7 +252,7 @@ async function main() {
     const { message } = await answered(A, owner, "LOOP forever");
     const ran = message.queries.filter((q) => !q.error).length;
     assert.equal(ran, 6);
-    assert.ok(mock.hits() - before <= 9, `${mock.hits() - before} model calls`);
+    assert.ok(mock.hits() - before <= 10, `${mock.hits() - before} model calls`);
   });
   await check("a model/API failure becomes a friendly stored error, not a crash", async () => {
     const r = await ask(A, owner, "BROKEN please");
@@ -258,7 +260,7 @@ async function main() {
     assert.match(r.result.error, /unavailable right now/);
     const last = await runAsCompany(A, async () => (await getDb()).collection("intel_messages").find({ conversationId: r.prep.ok ? r.prep.conversation._id : "" }).sort({ createdAt: -1 }).limit(1).toArray());
     assert.match(String(last[0].error), /unavailable right now/);
-    assert.match(friendlyTurnError(new Error("OPENAI_API_KEY is not set")), /isn't set up/);
+    assert.match(friendlyTurnError(new Error("OpenAI isn't connected for this workspace")), /isn't set up/);
   });
   await check("timeouts become friendly errors: a query over its 10 s limit, a slow model call, a slow turn", async () => {
     const { isTimeout } = await import("@/lib/intelligence/query/execute");
@@ -305,7 +307,7 @@ async function main() {
     const before = mock.hits();
     const { message } = await answered(A, outsider, "How many active clients do we have?");
     assert.match(message.text, /isn't available to you because of your access permissions/);
-    assert.match(String(mock.requests[before].instructions), /no data is available to this user/);
+    assert.match(String(mock.requests[before + 1].instructions), /no data is available to this user/);
   });
   await check("greetings and outside-data questions run no queries", async () => {
     const hello = (await answered(A, owner, "hi there")).message;
@@ -342,7 +344,7 @@ async function main() {
     const before = mock.hits();
     const r = await ask(TINY, mkUser(["super_admin"]), "hi");
     assert.ok(!r.prep.ok && r.prep.status === 402);
-    assert.match(r.prep.ok ? "" : r.prep.error, /used this month's 100 AI tokens/);
+    assert.match(r.prep.ok ? "" : r.prep.error, /used all 100 AI tokens/);
     assert.equal(mock.hits(), before);
   });
   await check("a suspended (read-only) workspace is treated exactly as the Ask box and AI Bots treat AI: blocked with the read-only message", async () => {

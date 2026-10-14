@@ -8,6 +8,7 @@ import { onSaasHost, requestHostOrNull, saasOrigin } from "@/lib/saas/request";
 import { saasCanonicalHost } from "@/lib/saas/hosts";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { jsonForScript } from "@/lib/security/json-script";
+import FreeForeverToast from "@/components/saas/FreeForeverToast";
 import SrRoot from "@/components/saas/SrRoot";
 
 
@@ -37,6 +38,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
       <Footer host={host} />
       <OfferAdHost />
       <OfferPopupHost />
+      <FreeForeverToast />
     </SrRoot>
   );
 }

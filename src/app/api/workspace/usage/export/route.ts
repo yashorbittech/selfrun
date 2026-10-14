@@ -5,7 +5,7 @@ import { isUsageMetricKey } from "@/lib/platform/billing/usage-history-shared";
 
 export const dynamic = "force-dynamic";
 
-/** GET /api/workspace/usage/export?metric=ai|storage|emails|voice|sms|seats|domains&period=YYYY-MM — the itemised history as CSV. */
+/** GET /api/workspace/usage/export?metric=ai|storage|emails|voice|seats|domains&period=YYYY-MM — the itemised history as CSV. */
 export async function GET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("company.usage");
   if (!auth.ok) return auth.response;

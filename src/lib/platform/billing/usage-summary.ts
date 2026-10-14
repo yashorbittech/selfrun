@@ -23,14 +23,13 @@ export interface UsageRow {
 /** This month's use of every paid service against the company's limits (plan + add-ons + top-ups). Runs inside the company's context. */
 export async function getUsageSummary(): Promise<UsageRow[]> {
   const companyId = await currentCompanyId();
-  const [e, seats, storageBytes, tokens, emails, voiceSeconds, sms, domains] = await Promise.all([
+  const [e, seats, storageBytes, tokens, emails, voiceSeconds, domains] = await Promise.all([
     getEntitlements(),
     countSeatsUsed().catch(() => 0),
     storageUsedBytes().catch(() => 0),
     getUsage("ai_tokens").catch(() => 0),
     getUsage("emails").catch(() => 0),
     getUsage("voice_seconds").catch(() => 0),
-    getUsage("sms").catch(() => 0),
     (await getPlatformDb()).collection("company_domains").countDocuments({ companyId, kind: "custom" }).catch(() => 0),
   ]);
   const used: Record<string, number> = {
@@ -40,7 +39,6 @@ export async function getUsageSummary(): Promise<UsageRow[]> {
     emailsPerMonth: emails,
     voiceMinutesPerMonth: Math.round(voiceSeconds / 60),
     customDomains: domains,
-    smsPerMonth: sms,
   };
   return USAGE_SERVICES.map((u) => {
     const limit = e.limits[u.limitKey] ?? null;

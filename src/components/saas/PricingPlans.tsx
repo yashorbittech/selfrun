@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, BadgePercent, Building2, Check, Crown, Rocket, Sparkles, Sprout, Zap, type LucideIcon } from "lucide-react";
 import { formatMoney, type BillingInterval } from "@/lib/platform/billing/types";
+import Countdown from "@/components/saas/Countdown";
 import type { ShowcasePlan } from "@/lib/platform/billing/showcase";
 
 const PLAN_ICON: LucideIcon[] = [Sprout, Rocket, Zap, Building2, Crown];
 
 /** The pricing cards. Only the plans, prices, limits and features the catalogue actually holds are shown. `compact` hides the allowance lists. */
-export default function PricingPlans({ plans, compact = false }: { plans: ShowcasePlan[]; compact?: boolean }) {
+export default function PricingPlans({ plans, compact = false, endsAt = null }: { plans: ShowcasePlan[]; compact?: boolean; endsAt?: number | null }) {
   const [interval, setInterval] = useState<BillingInterval>("monthly");
   const hasYearly = plans.some((p) => p.kind === "paid" && p.offer.yearly);
   const price = (p: ShowcasePlan) => {
@@ -58,8 +59,18 @@ export default function PricingPlans({ plans, compact = false }: { plans: Showca
             <div key={p.id} className={`group relative flex flex-col overflow-hidden rounded-[2rem] transition-all duration-500 ${pop ? "sr-band text-white shadow-[0_40px_90px_-30px] shadow-primary/70 xl:-my-5" : "border border-border/60 bg-background shadow-sm hover:-translate-y-2 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/15"}`}>
               {/* the offer, stated first and plainly */}
               {offer ? (
-                <div className={`relative flex items-center justify-center gap-2 whitespace-nowrap px-3 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] ${pop ? "bg-white text-[var(--primary)]" : "bg-gradient-to-r from-primary to-brand-accent text-white"}`}>
-                  <BadgePercent className="h-4 w-4 flex-none" />{p.offerLabel || "Offer"} · Save {pr.pct}%
+                <div className={`sr-strip group/strip relative flex overflow-hidden whitespace-nowrap py-2.5 text-[11px] font-black uppercase tracking-[0.1em] ${pop ? "bg-white text-[var(--primary)]" : "bg-gradient-to-r from-primary to-brand-accent text-white"}`}>
+                  <style>{`@keyframes sr-strip{from{transform:translateX(0)}to{transform:translateX(-50%)}}.sr-strip-track{animation:sr-strip 22s linear infinite}.group\\/strip:hover .sr-strip-track{animation-play-state:paused}@media (prefers-reduced-motion:reduce){.sr-strip-track{animation:none}.sr-strip-dup{display:none}}`}</style>
+                  <div className="sr-strip-track flex flex-none items-center">
+                    {[0, 1].map((k) => (
+                      <div key={k} className={`flex flex-none items-center gap-3 pr-6 ${k === 1 ? "sr-strip-dup" : ""}`} aria-hidden={k === 1}>
+                        <span className="inline-flex items-center gap-1.5"><BadgePercent className="h-4 w-4 flex-none" />{p.offerLabel || "Offer"}</span>
+                        <span className="rounded-full bg-current/15 px-2 py-0.5">Save {pr.pct}%</span>
+                        {endsAt && <span className="inline-flex items-center gap-1.5"><span className="text-[10px] opacity-80">Ends in</span><Countdown endsAt={endsAt} variant="mini" /></span>}
+                        <span className="opacity-60">✦</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : pop ? (
                 <div className="relative flex items-center justify-center gap-2 bg-white px-4 py-2.5 text-[12px] font-black uppercase tracking-[0.14em] text-[var(--primary)]"><Sparkles className="h-4 w-4" />Most chosen</div>

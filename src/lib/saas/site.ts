@@ -72,7 +72,6 @@ export interface RoadmapItem {
 }
 /** Only genuine roadmap information: items the product itself marks as upcoming. */
 export const ROADMAP: RoadmapItem[] = [
-  { status: "Planned", title: "SMS for OTP and alerts", body: "SMS is listed as a plan allowance in the product and marked “coming soon”." },
 ];
 
 export interface ChangelogEntry {
@@ -223,7 +222,7 @@ export const COMPARISON: { row: string; us: string; them: string }[] = [
   { row: "Audit", us: "One audit log and sign-in history for everything", them: "Scattered logs, if available" },
   { row: "Client portal", us: "Built in for clients, students and applicants", them: "Another product to buy" },
   { row: "Features", us: "Every panel and every feature on every plan", them: "Features locked behind higher tiers per tool" },
-  { row: "Pricing", us: "Free forever for one; one plan by team size after", them: "Many subscriptions to track and renew" },
+  { row: "Pricing", us: "Free forever to start; one plan by team size after", them: "Many subscriptions to track and renew" },
   { row: "Setup", us: "Guided setup in minutes, CSV import built in", them: "Separate setup, training and support for each" },
 ];
 

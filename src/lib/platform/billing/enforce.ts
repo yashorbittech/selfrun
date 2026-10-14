@@ -190,6 +190,7 @@ export async function rollbackIfOverSeats(insertedId: unknown): Promise<string |
   return limit === 1 ? ONE_PERSON_MESSAGE : `Your plan includes ${fmt(limit)} users and they are all in use. Upgrade in Settings → Billing.`;
 }
 
+const deniedCache = new Map<string, number>();
 const allowedCache = new Map<string, { ids: Set<string>; limit: number | null; at: number }>();
 
 /**
@@ -202,8 +203,8 @@ export async function accountWithinSeats(user: { _id: unknown; roles?: string[] 
     if (!rolesUseSeat(user.roles)) return true;
     const companyId = await currentCompanyIdOrNull();
     if (!companyId) return true;
-    let c = allowedCache.get(companyId);
-    if (!c || Date.now() - c.at > 20_000) {
+    const uid = String(user._id);
+    const load = async () => {
       const limit = (await getEntitlements()).limits.seats;
       let ids = new Set<string>();
       if (limit !== null) {
@@ -211,11 +212,24 @@ export async function accountWithinSeats(user: { _id: unknown; roles?: string[] 
         holders.sort((a, b) => Number((b.roles ?? []).includes("super_admin")) - Number((a.roles ?? []).includes("super_admin")) || +new Date(a.createdAt ?? 0) - +new Date(b.createdAt ?? 0) || String(a._id).localeCompare(String(b._id)));
         ids = new Set(holders.slice(0, limit).map((h) => String(h._id)));
       }
-      c = { ids, limit, at: Date.now() };
+      const fresh = { ids, limit, at: Date.now() };
       if (allowedCache.size > 2000) allowedCache.clear();
-      allowedCache.set(companyId, c);
-    }
-    return c.limit === null || c.ids.has(String(user._id));
+      allowedCache.set(companyId, fresh);
+      return fresh;
+    };
+    let c = allowedCache.get(companyId);
+    if (!c || Date.now() - c.at > 20_000) c = await load();
+    if (c.limit === null || c.ids.has(uid)) return true;
+    // Not in the cached list: the account may be newer than the list (just created or invited), so look again — unless this very account
+    // was found over the limit a moment ago, which keeps an over-limit account from costing a query per request.
+    const key = `${companyId}:${uid}`;
+    const denied = deniedCache.get(key);
+    if (denied && Date.now() - denied < 5_000) return false;
+    c = await load();
+    if (c.limit === null || c.ids.has(uid)) return true;
+    if (deniedCache.size > 2000) deniedCache.clear();
+    deniedCache.set(key, Date.now());
+    return false;
   } catch (err) {
     console.error("[billing] seat check failed", err); // fail open: a lookup blip must not lock a company out
     return true;
@@ -406,18 +420,6 @@ export async function hasPlanFlag(flag: string): Promise<boolean> {
 /** Friendly reason a plan flag is missing, or null. */
 export async function flagBlockReason(flag: string, what: string): Promise<string | null> {
   return (await hasPlanFlag(flag)) ? null : `${what} isn't included in your plan. Upgrade your plan in Settings → Billing.`;
-}
-
-/** Why an SMS / WhatsApp message can't be sent (not in the plan, or this month's allowance is used), or null. Only inside a company. */
-export async function smsBlockReason(): Promise<string | null> {
-  if (!(await currentCompanyIdOrNull())) return null;
-  const e = await getEntitlements();
-  if (e.readOnly) return READ_ONLY_MESSAGE;
-  const limit = e.limits.smsPerMonth;
-  if (limit === null || limit === undefined) return null;
-  if (limit === 0) return "SMS and WhatsApp messages aren't included in your plan. Upgrade your plan in Settings → Billing.";
-  const used = await getUsage("sms");
-  return used < limit ? null : `This month's ${fmt(limit)} SMS / WhatsApp messages are used up. The allowance resets on the 1st — upgrade your plan in Settings → Billing.`;
 }
 
 /** Why another custom domain can't be added, or null. `current` = domains already connected. */

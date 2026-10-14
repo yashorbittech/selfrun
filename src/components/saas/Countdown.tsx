@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** A live countdown to `endsAt` (epoch ms). Renders nothing once it has passed. `variant="bar"` is the compact one for the top strip. */
-export default function Countdown({ endsAt, variant = "big" }: { endsAt: number; variant?: "big" | "bar" }) {
+export default function Countdown({ endsAt, variant = "big" }: { endsAt: number; variant?: "big" | "bar" | "mini" }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const tick = () => setNow(Date.now());
@@ -13,11 +13,18 @@ export default function Countdown({ endsAt, variant = "big" }: { endsAt: number;
     const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, []);
-  if (now === null) return <div className={variant === "bar" ? "h-7 w-40" : "h-24"} aria-hidden />;
+  if (now === null) return <div className={variant === "bar" ? "h-7 w-40" : variant === "mini" ? "h-5 w-44" : "h-24"} aria-hidden />;
   const ms = endsAt - now;
   if (ms <= 0) return null;
   const s = Math.floor(ms / 1000);
   const parts = [["Days", Math.floor(s / 86400)], ["Hours", Math.floor((s % 86400) / 3600)], ["Min", Math.floor((s % 3600) / 60)], ["Sec", s % 60]] as const;
+  if (variant === "mini") {
+    return (
+      <span className="inline-flex items-center gap-1 font-mono text-[12px] font-black tabular-nums" role="timer" aria-label="Time left on the offer">
+        {parts.map(([l, v], i) => (<span key={l}>{i > 0 && <span className="opacity-50">:</span>}{pad(v)}<span className="ml-px text-[9px] font-bold uppercase opacity-70">{l[0].toLowerCase()}</span></span>))}
+      </span>
+    );
+  }
   if (variant === "bar") {
     return (
       <span className="inline-flex items-stretch gap-1.5" role="timer" aria-label="Time left on the offer">

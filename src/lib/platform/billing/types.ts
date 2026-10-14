@@ -37,7 +37,6 @@ export const PLAN_LIMIT_DEFS = [
   { key: "emailsPerMonth", label: "Emails per month", unit: "emails", min: 0 },
   { key: "voiceMinutesPerMonth", label: "Voice minutes per month", unit: "minutes", min: 0 },
   { key: "customDomains", label: "Custom domains", unit: "domains", min: 0 },
-  { key: "smsPerMonth", label: "SMS per month", unit: "SMS", min: 0 },
 ] as const;
 
 /**
@@ -64,7 +63,6 @@ export const USAGE_SERVICES: UsageService[] = [
   { limitKey: "emailsPerMonth", label: "Emails sent", provider: "Resend", unit: "emails", note: "Invites, invoices, reminders and notifications." },
   { limitKey: "voiceMinutesPerMonth", label: "Voice minutes", provider: "ElevenLabs", unit: "minutes", note: "Voice replies and voice chatbot." },
   { limitKey: "customDomains", label: "Custom domains", provider: "Vercel", unit: "domains", note: "Your own address for the website and the app." },
-  { limitKey: "smsPerMonth", label: "SMS", provider: "SMS provider", unit: "SMS", note: "OTP and alerts. Coming soon.", comingSoon: true },
 ];
 
 /** "25 GB", "1.5M tokens", "Unlimited" for a limit value. */
@@ -233,7 +231,7 @@ export interface SubscriptionPricing {
 }
 
 /** Usage metrics metered per company per calendar month. */
-export type UsageMetric = "ai_tokens" | "storage_mb" | "emails" | "voice_seconds" | "sms";
+export type UsageMetric = "ai_tokens" | "storage_mb" | "emails" | "voice_seconds";
 
 /** What the current company may do right now — the single question every panel asks. */
 export interface Entitlements {

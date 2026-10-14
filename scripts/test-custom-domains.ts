@@ -58,6 +58,9 @@ async function run(db: import("mongodb").Db) {
     { _id: A, slug: "alpha", name: "Alpha", status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now },
     { _id: B, slug: "beta", name: "Beta", status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now },
   ] as never[]);
+  // These checks are about the domain rules, not the plan's allowance (the real Free plan includes 1 domain): the default plan gets room for the cap here.
+  await (await import("@/lib/platform/billing/plans")).listPlans();
+  await db.collection("billing_plans").updateMany({}, { $set: { "limits.customDomains": 50 } });
   await domains.insertMany([
     { _id: "alpha.demo.test", companyId: A, status: "verified", verificationToken: "t", isPrimary: true, kind: "subdomain", createdAt: now, verifiedAt: now },
     { _id: "beta.demo.test", companyId: B, status: "verified", verificationToken: "t", isPrimary: true, kind: "subdomain", createdAt: now, verifiedAt: now },

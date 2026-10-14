@@ -56,6 +56,8 @@ async function main() {
   await db.collection("billing_plans").insertOne({ _id: "tiny" as never, name: "Tiny", description: "test", currency: "INR", priceMonthly: 100, priceYearly: 1000, modules: "all", limits: { seats: 3, aiTokensPerMonth: 1000, storageMb: 10 }, trialDays: 30, active: true, isDefault: false, sortOrder: 99, createdAt: now, updatedAt: now });
   const sub = (planId: string, status: string) => ({ subscription: { planId, status, interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now } });
   await db.collection("companies").updateOne({ _id: TINY as never }, { $set: sub("tiny", "active") });
+  // The default plan is Free (one person); the import checks need a company with room, so A and B are on Business.
+  await db.collection("companies").updateMany({ _id: { $in: [A, B] as never[] } }, { $set: sub("business", "active") });
   await db.collection("companies").updateOne({ _id: SUSP as never }, { $set: sub("growth", "suspended") });
 
   const actorId = new ObjectId();

@@ -25,11 +25,11 @@ export const SAAS_BRAND = {
   /** The company that operates the product and is the contracting party in its legal terms — set `SAAS_OPERATOR_NAME`; empty = not shown. */
   operator: process.env.SAAS_OPERATOR_NAME || "",
   /**
-   * When the current offer ends (ISO date-time, e.g. 2026-12-31T23:59:59+05:30) — set `SAAS_OFFER_ENDS_AT`. The countdown on the offers
-   * page, the top strip, the pop-up and the offer ads always shows; with no date set (or one in the past) it counts down to the end of
-   * the current month, so the offer runs in monthly cycles.
+   * When the launch offer ends (ISO date-time) — `SAAS_OFFER_ENDS_AT`, default 31 Dec 2026 23:59:59 IST. It is a real deadline: the plans carry
+   * a normal price above the offer price, and when this moment passes the catalogue's price becomes the normal one (see `plans.ts`,
+   * `endOfferIfDue`). Subscribers who bought during the offer keep the price they bought.
    */
-  offerEndsAt: process.env.SAAS_OFFER_ENDS_AT || "",
+  offerEndsAt: process.env.SAAS_OFFER_ENDS_AT || "2026-12-31T23:59:59+05:30",
   /** Static assets under /public/selfrun. */
   assets: {
     /** The full logo (mark + name) for light and for dark backgrounds, and the mark alone. All of them live in /public/selfrun/logo. */

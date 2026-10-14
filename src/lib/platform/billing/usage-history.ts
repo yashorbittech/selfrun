@@ -43,7 +43,7 @@ export function recentPeriods(now = new Date()): { key: string; label: string }[
 /** The meter's value in the unit people read (voice seconds → minutes, storage bytes → MB). */
 const display = (key: UsageMetricKey, raw: number) => (key === "voice" ? round(raw / 60, 2) : key === "storage" ? round(raw / MB, 2) : raw);
 
-const MONTHLY_METRIC: Partial<Record<UsageMetricKey, "ai_tokens" | "emails" | "voice_seconds" | "sms">> = { ai: "ai_tokens", emails: "emails", voice: "voice_seconds", sms: "sms" };
+const MONTHLY_METRIC: Partial<Record<UsageMetricKey, "ai_tokens" | "emails" | "voice_seconds">> = { ai: "ai_tokens", emails: "emails", voice: "voice_seconds" };
 
 async function firstUsageEvent(): Promise<Date | null> {
   const doc = await (await getDb()).collection(USAGE_EVENTS_COLLECTION).find({}, { projection: { at: 1 } }).sort({ at: 1 }).limit(1).next();
@@ -59,25 +59,24 @@ export async function getUsageOverview(now = new Date()): Promise<UsageOverview>
   const end = nextPeriodStart(period);
   const daysTotal = Math.round((end.getTime() - start.getTime()) / DAY);
   const elapsedDays = (now.getTime() - start.getTime()) / DAY; // fractional
-  const [e, seats, storageBytes, ai, emails, voiceSec, sms, domains, since] = await Promise.all([
+  const [e, seats, storageBytes, ai, emails, voiceSec, domains, since] = await Promise.all([
     getEntitlements(),
     countSeatsUsed().catch(() => 0),
     storageUsedBytes().catch(() => 0),
     getUsage("ai_tokens").catch(() => 0),
     getUsage("emails").catch(() => 0),
     getUsage("voice_seconds").catch(() => 0),
-    getUsage("sms").catch(() => 0),
     (await getPlatformDb()).collection("company_domains").countDocuments({ companyId, kind: "custom" }).catch(() => 0),
     firstUsageEvent().catch(() => null),
   ]);
-  const used: Record<UsageMetricKey, number> = { ai, storage: round(storageBytes / MB, 2), emails, voice: round(voiceSec / 60, 2), sms, seats, domains };
+  const used: Record<UsageMetricKey, number> = { ai, storage: round(storageBytes / MB, 2), emails, voice: round(voiceSec / 60, 2), seats, domains };
   const metrics: MetricOverview[] = (Object.keys(METRICS) as UsageMetricKey[]).map((key) => {
     const m = METRICS[key];
     const limit = e.limits[m.limitKey] ?? null;
     const u = used[key];
     const percent = limit === null ? 0 : limit === 0 ? (u > 0 ? 100 : 0) : Math.min(100, Math.round((u / limit) * 100));
     let projected: number | null = null;
-    if (m.kind === "monthly" && u > 0 && elapsedDays >= 1.5) projected = round((u / elapsedDays) * daysTotal, key === "ai" || key === "emails" || key === "sms" ? 0 : 1);
+    if (m.kind === "monthly" && u > 0 && elapsedDays >= 1.5) projected = round((u / elapsedDays) * daysTotal, key === "ai" || key === "emails" ? 0 : 1);
     const projectedPercent = projected !== null && limit ? Math.round((projected / limit) * 100) : null;
     return {
       key, label: m.label, unit: m.unit, used: u, limit, remaining: limit === null ? null : Math.max(0, round(limit - u, 2)), percent,
@@ -181,7 +180,7 @@ async function aiDetail(d: MetricDetail, start: Date, end: Date, now: Date, comp
   if (d.total > itemised) d.historyNote = `${(d.total - itemised).toLocaleString("en-IN")} of this month's tokens were used before call-by-call records began, so they appear in the total but not in the lists below.`;
 }
 
-async function eventsDetail(d: MetricDetail, metric: "emails" | "voice_seconds" | "sms" | "storage_bytes", start: Date, end: Date, now: Date, key: UsageMetricKey, cap: number) {
+async function eventsDetail(d: MetricDetail, metric: "emails" | "voice_seconds" | "storage_bytes", start: Date, end: Date, now: Date, key: UsageMetricKey, cap: number) {
   const col = (await getDb()).collection(USAGE_EVENTS_COLLECTION);
   const match = { metric, at: { $gte: start, $lt: end } };
   const conv = (raw: number) => display(key, raw);
@@ -294,7 +293,7 @@ export async function getMetricDetail(key: UsageMetricKey, periodIn?: string, no
     d.months = await monthlyMonths(key, limit, now);
     if (key === "ai") await aiDetail(d, start, end, now, companyId, cap);
     else {
-      await eventsDetail(d, monthly as "emails" | "voice_seconds" | "sms", start, end, now, key, cap);
+      await eventsDetail(d, monthly as "emails" | "voice_seconds", start, end, now, key, cap);
       const itemised = d.events.length > 0 && !d.eventsTruncated ? d.events.reduce((s, r) => s + r.value, 0) : d.bySource.reduce((s, r) => s + r.value, 0);
       if (d.total > itemised + 0.01) d.historyNote = since ? `${round(d.total - itemised, 2).toLocaleString("en-IN")} ${METRICS[key].unit} of this month's use happened before ${dateLabel(since)}, when itemised records began; it counts in the total but isn't listed below.` : `Itemised records begin with the next use; earlier use counts in the total only.`;
     }
@@ -343,7 +342,7 @@ export async function getPeopleUsage(periodIn?: string, now = new Date()): Promi
     const key = keyOf(id);
     let r = rows.get(key);
     if (!r) {
-      r = { key, label: id.k ? id.l || key : UNATTRIBUTED_LABEL, kind: id.kind || "unknown", ai: 0, aiCalls: 0, topFeature: null, emails: 0, voiceMinutes: 0, sms: 0, storageMb: 0, lastAt: null, aiShare: 0 };
+      r = { key, label: id.k ? id.l || key : UNATTRIBUTED_LABEL, kind: id.kind || "unknown", ai: 0, aiCalls: 0, topFeature: null, emails: 0, voiceMinutes: 0, storageMb: 0, lastAt: null, aiShare: 0 };
       rows.set(key, r);
     }
     return r;
@@ -356,12 +355,11 @@ export async function getPeopleUsage(periodIn?: string, now = new Date()): Promi
     const r = row(e._id);
     if (e._id.m === "emails") r.emails += e.v;
     else if (e._id.m === "voice_seconds") r.voiceMinutes = round(r.voiceMinutes + e.v / 60, 2);
-    else if (e._id.m === "sms") r.sms += e.v;
     else if (e._id.m === "storage_bytes") r.storageMb = round(r.storageMb + e.v / MB, 2);
     later(r, e.last);
   }
   const list = [...rows.values()];
-  const totals = list.reduce((t, r) => ({ ai: t.ai + r.ai, emails: t.emails + r.emails, voiceMinutes: round(t.voiceMinutes + r.voiceMinutes, 2), sms: t.sms + r.sms, storageMb: round(t.storageMb + r.storageMb, 2) }), { ai: 0, emails: 0, voiceMinutes: 0, sms: 0, storageMb: 0 });
+  const totals = list.reduce((t, r) => ({ ai: t.ai + r.ai, emails: t.emails + r.emails, voiceMinutes: round(t.voiceMinutes + r.voiceMinutes, 2), storageMb: round(t.storageMb + r.storageMb, 2) }), { ai: 0, emails: 0, voiceMinutes: 0, storageMb: 0 });
   for (const r of list) r.aiShare = totals.ai ? Math.round((r.ai / totals.ai) * 1000) / 10 : 0;
   list.sort((a, b) => b.ai - a.ai || b.emails - a.emails || a.label.localeCompare(b.label));
   return { period, periodLabel: monthLabel(period), rows: list, totals };
@@ -399,13 +397,12 @@ export async function getPersonDetail(actorKey: string, periodIn?: string, now =
   }
   if (!label) return null;
   const evBy = new Map(evSums.map((r) => [r._id, r.v]));
-  const company = { ai: await getUsage("ai_tokens", period), emails: await getUsage("emails", period), voice: await getUsage("voice_seconds", period), sms: await getUsage("sms", period) };
+  const company = { ai: await getUsage("ai_tokens", period), emails: await getUsage("emails", period), voice: await getUsage("voice_seconds", period) };
   const mk = (key: UsageMetricKey, value: number, total: number) => ({ key, label: METRICS[key].label, unit: METRICS[key].unit, value, companyTotal: total, share: total > 0 ? Math.round((value / total) * 1000) / 10 : 0 });
   const meters = [
     mk("ai", aiTotal[0]?.t ?? 0, company.ai),
     mk("emails", evBy.get("emails") ?? 0, company.emails),
     mk("voice", round((evBy.get("voice_seconds") ?? 0) / 60, 2), round(company.voice / 60, 2)),
-    mk("sms", evBy.get("sms") ?? 0, company.sms),
     { key: "storage" as const, label: METRICS.storage.label, unit: "MB uploaded", value: round((evBy.get("storage_bytes") ?? 0) / MB, 2), companyTotal: 0, share: 0 },
   ];
   const d: MetricDetail = emptyDetail("ai", period, now, null);
@@ -416,7 +413,7 @@ export async function getPersonDetail(actorKey: string, periodIn?: string, now =
     ...aiLatest.map<UsageEventRow>((r) => ({ at: new Date(r.at as Date).toISOString(), source: String(r.feature || "AI"), detail: [String(r.endpoint ?? "").replace(" (estimated)", ""), String(r.model ?? "")].filter(Boolean).join(" · "), value: Number(r.totalTokens) || 0, model: String(r.model ?? ""), inputTokens: Number(r.inputTokens) || 0, outputTokens: Number(r.outputTokens) || 0, estimated: String(r.endpoint ?? "").includes("(estimated)") })),
     ...evLatest.map<UsageEventRow>((r) => {
       const m = String(r.metric);
-      const key: UsageMetricKey = m === "emails" ? "emails" : m === "voice_seconds" ? "voice" : m === "sms" ? "sms" : "storage";
+      const key: UsageMetricKey = m === "emails" ? "emails" : m === "voice_seconds" ? "voice" : "storage";
       return { at: new Date(r.at as Date).toISOString(), source: key === "storage" ? storageSourceLabel(String(r.source)) : String(r.source), detail: `${METRICS[key].short}${r.detail ? ` · ${String(r.detail)}` : ""}`, value: display(key, Number(r.amount) || 0) };
     }),
   ].sort((a, b) => b.at.localeCompare(a.at));
@@ -432,7 +429,7 @@ export async function getPersonDetail(actorKey: string, periodIn?: string, now =
 export async function peopleUsageCsv(period?: string): Promise<{ filename: string; csv: string }> {
   const u = await getPeopleUsage(period);
   const esc = (v: unknown) => { if (typeof v === "number") return String(v); const t = String(v ?? ""); return `"${(/^[=+\-@\t\r]/.test(t) ? `'${t}` : t).replace(/"/g, '""')}"`; };
-  const head = ["Person", "Type", "AI tokens", "AI requests", "Share of AI tokens (%)", "Mostly used for", "Emails", "Voice minutes", "SMS / WhatsApp", "Uploaded (MB)", "Last activity (UTC)"];
-  const rows = u.rows.map((r) => [r.label, r.kind, r.ai, r.aiCalls, r.aiShare, r.topFeature ?? "", r.emails, r.voiceMinutes, r.sms, r.storageMb, r.lastAt ?? ""]);
+  const head = ["Person", "Type", "AI tokens", "AI requests", "Share of AI tokens (%)", "Mostly used for", "Emails", "Voice minutes", "Uploaded (MB)", "Last activity (UTC)"];
+  const rows = u.rows.map((r) => [r.label, r.kind, r.ai, r.aiCalls, r.aiShare, r.topFeature ?? "", r.emails, r.voiceMinutes, r.storageMb, r.lastAt ?? ""]);
   return { filename: `usage-people-${u.period}.csv`, csv: [head, ...rows].map((r) => r.map(esc).join(",")).join("\n") };
 }

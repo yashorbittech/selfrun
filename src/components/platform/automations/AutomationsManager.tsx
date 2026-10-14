@@ -33,13 +33,12 @@ const BLANK: WorkflowInput = { name: "", enabled: true, trigger: "lead.created",
 function newAction(type: WorkflowAction["type"]): WorkflowAction {
   if (type === "email") return { type: "email", to: "", subject: "", body: "" };
   if (type === "webhook") return { type: "webhook", url: "" };
-  if (type === "sms" || type === "whatsapp") return { type, to: "", body: "" };
+  if (type === "whatsapp") return { type, to: "", body: "" };
   return { type: "notify", target: "role", value: "", title: "", body: "" };
 }
 
 function describe(a: WorkflowAction, roles: Option[], people: { id: string; email: string }[]): string {
   if (a.type === "email") return `Email ${a.to}`;
-  if (a.type === "sms") return `SMS ${a.to}`;
   if (a.type === "whatsapp") return `WhatsApp ${a.to}`;
   if (a.type === "webhook") {
     try {
@@ -184,11 +183,11 @@ function Editor({
               </>
             )}
 
-            {(a.type === "sms" || a.type === "whatsapp") && (
+            {a.type === "whatsapp" && (
               <>
                 <Input aria-label={`Action ${i + 1} phone number`} value={a.to} maxLength={40} onChange={(e) => setAction(i, { ...a, to: e.target.value })} placeholder="+91 98765 43210 or {{phone}}" />
                 <Textarea aria-label={`Action ${i + 1} message`} value={a.body} maxLength={1000} rows={3} onChange={(e) => setAction(i, { ...a, body: e.target.value })} placeholder="Message" />
-                <p className="text-xs text-muted-foreground">Sent from your own {a.type === "sms" ? "Twilio" : "Twilio / WhatsApp Business"} account — connect it in Settings → Integrations.</p>
+                <p className="text-xs text-muted-foreground">Sent from your own Twilio / WhatsApp Business account — connect it in Settings → Integrations.</p>
               </>
             )}
 

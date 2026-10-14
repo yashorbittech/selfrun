@@ -52,14 +52,14 @@ export default async function UsagePage({ searchParams }: { searchParams: Promis
         <div role="status" className="rounded-xl border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
           <p className="font-medium">{worst.some((m) => m.level === "over") ? "A limit has been reached" : "You're close to a limit"}</p>
           <ul className="mt-1 list-inside list-disc text-muted-foreground">
-            {worst.map((m) => <li key={m.key}>{m.label}: {m.level === "over" ? "limit reached" : `${m.percent}% used`} — <Link href={`?metric=${m.key}#details`} scroll={false} className="text-primary underline">see details</Link></li>)}
+            {worst.map((m) => <li key={m.key}>{m.label}: {m.level === "over" ? "limit reached" : `${m.percent}% used`} — <Link href={`/workspace/settings/usage?metric=${m.key}#details`} scroll={false} className="text-primary underline">see details</Link></li>)}
           </ul>
         </div>
       )}
 
       <OverviewCards overview={overview} selected={metric} period={detail.period} />
       <PeoplePanel people={people} metric={metric} />
-      {person && <PersonView person={person} metric={metric} backHref={`?metric=${metric}&period=${detail.period}#people`} />}
+      {person && <PersonView person={person} metric={metric} backHref={`/workspace/settings/usage?metric=${metric}&period=${detail.period}#people`} />}
       <DetailView detail={detail} overview={overview} />
     </div>
   );

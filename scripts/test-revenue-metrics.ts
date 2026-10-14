@@ -43,6 +43,9 @@ async function main() {
   const invoices = db.collection("saas_invoices");
   const created = at("2025-01-01T00:00:00Z");
 
+  // These checks cover implicit trials, which the real catalogue does not have (Free is the start, no trial): the default plan gets 30 days here.
+  await listPlans();
+  await db.collection("billing_plans").updateMany({}, { $set: { trialDays: 30 } });
   const plans = await listPlans();
   const price = (id: string) => plans.find((p) => p._id === id)!;
   const STARTER_M = price("starter").priceMonthly;

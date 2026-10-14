@@ -124,6 +124,14 @@ async function main() {
     { _id: a as never, slug: "alpha", name: "Alpha", status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now },
     { _id: b as never, slug: "beta", name: "Beta", status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now },
   ]);
+  // These checks were written for a ₹1,999 Growth plan with a 14-day trial; the real catalogue has neither (Free is the start, Growth is ₹999),
+  // so the test database's Growth gets those two values. Business stays the dearer plan to upgrade to.
+  const g0 = (await getPlan("growth"))!;
+  const bz = (await getPlan("business"))!;
+  const edit = (pl: typeof g0, monthly: number, yearly: number, trialDays: number) => savePlan({ _id: pl._id, name: pl.name, description: pl.description, currency: pl.currency, intervals: ["monthly", "yearly"], prices: { monthly, yearly }, modules: pl.modules, highlights: pl.highlights ?? [], flags: pl.flags ?? [], limits: pl.limits, trialDays, active: true, isDefault: false }, "update", "test");
+  await edit(g0, 199_900, 1_999_000, 14);
+  await edit(bz, 399_900, 3_999_000, 30);
+  await db.collection("billing_plans").updateMany({ _id: { $in: ["starter"] as never[] } }, { $set: { trialDays: 30 } });
   await startTrial(a, "growth");
   await startTrial(b, "starter");
 
@@ -222,7 +230,7 @@ async function main() {
   eq(invoices[0].lines!.map((l) => [l.kind, l.refId, l.amount]), [["plan", "growth", 199_900]], "invoice lines are the stored quote lines (pre-tax)");
   eq([invoices[0].period!.start.getTime(), invoices[0].period!.end.getTime()], [unix(start) * 1000, unix(end) * 1000], "invoice period from Razorpay");
   ok(invoices[0].paidAt instanceof Date, "invoice paidAt set");
-  eq((await getCompanySubscription(a))!.priceVersion, 1, "price version recorded at checkout");
+  eq((await getCompanySubscription(a))!.priceVersion, 2, "price version recorded at checkout");
   sa = (await getCompanySubscription(a))!;
   eq(sa.lastPayment?.id, "pay_1", "last payment remembered");
 
@@ -438,7 +446,7 @@ async function main() {
   eq(await chargeCycle(sa2.id), withAddon + Math.round((withAddon * 18) / 100), "next cycle charged with add-ons");
   eq(invoices.at(-1)!.lines!.map((l) => [l.kind, l.amount]), [["plan", 199_900], ["addon", 100_000]], "invoice prints the add-on line");
   const fresh = await priceSubscription({ companyId: cr, planId: "growth", interval: "monthly" });
-  ok(fresh.ok && fresh.pricing.net === 299_900 && fresh.pricing.priceVersion === 2, "new subscribers get the new price version");
+  ok(fresh.ok && fresh.pricing.net === 299_900 && fresh.pricing.priceVersion === 3, "new subscribers get the new price version");
 
   console.log(`subscriptions: all ${checks} checks passed`);
 }

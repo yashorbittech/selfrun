@@ -41,7 +41,7 @@ const base = (over: Partial<PlanInput> = {}): PlanInput => ({
   modules: ["hrms", "pms"],
   highlights: ["Unlimited projects"],
   flags: ["apiAccess"],
-  limits: { seats: 20, aiTokensPerMonth: null, storageMb: 10_000, projects: 50 },
+  limits: { seats: 20, aiTokensPerMonth: null, storageMb: 10_000, emailsPerMonth: 1_000, voiceMinutesPerMonth: 10, customDomains: 1, projects: 50 },
   trialDays: null,
   active: true,
   isDefault: false,
@@ -88,12 +88,12 @@ async function main() {
 
   // ---- seed + create
   const seeded = await listPlans();
-  eq(seeded.map((p) => p._id), ["starter", "growth", "business"], "seeded");
+  eq(seeded.map((p) => p._id), ["free", "starter", "growth", "business", "enterprise"], "seeded");
   ok(seeded.every((p) => p.priceVersion === 1 && p.priceHistory?.length === 1), "seeds carry price version 1");
   const created = await savePlan(base(), "create", "admin-1");
   ok(created.ok, "create ok");
   const pro = (await getPlan("pro"))!;
-  eq(pro.sortOrder, 40, "new plan appended at the end");
+  eq(pro.sortOrder, 60, "new plan appended at the end");
   eq(pro.priceMonthly, 150_000, "legacy mirror written");
   eq(pro.limits.projects, 50, "custom limit stored");
   eq(pro.trialDays, null, "trial days blank stored as null");
@@ -131,7 +131,7 @@ async function main() {
   eq((await quoteCheckout({ planId: "pro", interval: "monthly" }))?.subtotal, 200_000, "quote uses current price");
 
   // legacy doc without history
-  await db.collection("billing_plans").insertOne({ _id: "legacy" as never, name: "Legacy", description: "", currency: "INR", priceMonthly: 500, priceYearly: 5000, modules: "all", limits: { seats: null, aiTokensPerMonth: null, storageMb: null }, trialDays: 14, active: true, isDefault: false, sortOrder: 50, createdAt: t0, updatedAt: t0 });
+  await db.collection("billing_plans").insertOne({ _id: "legacy" as never, name: "Legacy", description: "", currency: "INR", priceMonthly: 500, priceYearly: 5000, modules: "all", limits: { seats: null, aiTokensPerMonth: null, storageMb: null }, trialDays: 14, active: true, isDefault: false, sortOrder: 70, createdAt: t0, updatedAt: t0 });
   const leg = await savePlan(base({ _id: "legacy", name: "Legacy", modules: "all", prices: { monthly: 600, yearly: 5000 } }), "update", "admin-1");
   ok(leg.ok, "legacy update ok");
   eq((await getPlan("legacy"))!.priceHistory?.map((v) => [v.version, v.prices.monthly, v.createdBy]), [[1, 500, "legacy"], [2, 600, "admin-1"]], "legacy prices recorded as v1");
@@ -147,8 +147,8 @@ async function main() {
   ok(!(await setDefaultPlan("pro", "admin-1")).ok, "inactive plan can't be default");
   ok((await setPlanActive("pro", true, "admin-1")).ok, "reactivate");
   ok(!(await deletePlan("pro", "admin-1")).ok, "can't delete a plan companies are on");
-  ok(!(await setPlanActive("growth", false, "admin-1")).ok, "default can't be deactivated");
-  ok(!(await deletePlan("growth", "admin-1")).ok, "default can't be deleted");
+  ok(!(await setPlanActive("free", false, "admin-1")).ok, "default can't be deactivated");
+  ok(!(await deletePlan("free", "admin-1")).ok, "default can't be deleted");
   ok((await setDefaultPlan("starter", "admin-1")).ok, "set default");
   eq((await getDefaultPlan())?._id, "starter", "default moved");
   eq((await listPlans()).filter((p) => p.isDefault).length, 1, "exactly one default");
@@ -165,9 +165,9 @@ async function main() {
 
   // ---- reorder
   ok((await movePlan("pro", "up", "admin-1")).ok, "move up");
-  eq((await listPlans()).map((p) => p._id), ["starter", "growth", "pro", "business", "legacy"], "pro moved above business");
-  ok((await movePlan("starter", "up", "admin-1")).ok, "moving the first up is a no-op");
-  eq((await listPlans())[0]._id, "starter", "still first");
+  eq((await listPlans()).map((p) => p._id), ["free", "starter", "growth", "business", "pro", "enterprise", "legacy"], "pro moved above enterprise");
+  ok((await movePlan("free", "up", "admin-1")).ok, "moving the first up is a no-op");
+  eq((await listPlans())[0]._id, "free", "still first");
   eq(await auditCount("plan.reorder"), 1, "reorder audited");
 
   // ---- trials: start, settings-driven length, events
