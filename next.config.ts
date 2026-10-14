@@ -128,6 +128,15 @@ const nextConfig: NextConfig = {
     // page) shows at once instead of the loading screen every time. By default pages that read cookies are never kept (0 s). Saving
     // through a server action refreshes the page itself, so edits still show up; this is only how long a plain revisit may reuse the page.
     staleTimes: { dynamic: 180, static: 300 },
+    // Build memory. This app is large (hundreds of routes, ~370k lines), and Turbopack's production build was killed for running out of
+    // memory on Vercel's build machine ("Creating an optimized production build ... SIGKILL"). Source maps (kept in memory for every
+    // module of the server and the browser), scope hoisting (a whole-graph optimisation) and one static-generation worker per CPU are the
+    // parts that cost the most memory for the least benefit; the bundle is still minified. Re-enable `turbopackSourceMaps` only on a
+    // build machine with memory to spare (or when you need readable server stack traces from production).
+    turbopackSourceMaps: false,
+    turbopackInputSourceMaps: false,
+    turbopackScopeHoisting: false,
+    memoryBasedWorkersCount: true,
     ...(process.env.NODE_ENV !== "production" && {
       serverActions: { allowedOrigins: ['localhost:3000', '*.localhost:3000', '*.devtunnels.ms', '*.ngrok-free.dev'] },
     }),
