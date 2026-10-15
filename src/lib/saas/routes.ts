@@ -24,6 +24,8 @@ const EXACT = new Set([
   "/terms",
   "/cookies",
   "/data-policy",
+  "/status",
+  "/sla",
   "/refund-policy",
   "/demo",
   "/gallery",

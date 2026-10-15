@@ -94,6 +94,17 @@ export async function purgeCompany(input: { companyId: string; actorId: string; 
   const used = await db.collection<DeletionRequest>(REQUESTS).deleteOne({ _id: input.token });
   if (used.deletedCount !== 1) return { ok: false, error: "This confirmation was already used. Start the deletion again." };
 
+  return purgeCompanyNow(companyId);
+}
+
+/**
+ * The deletion itself, with no confirmation of its own: only callers that have already confirmed it (the Platform Panel's multi-step flow, or
+ * the daily sweep for a company whose 30-day period has ended) may call this.
+ */
+export async function purgeCompanyNow(companyId: string): Promise<PurgeResult> {
+  const found = await loadDeletable(companyId);
+  if (!found.ok) return found;
+  const db = await getPlatformDb();
   // 1. Domains at the hosting provider. If any can't be detached, stop before touching data so it can be retried.
   const domainDocs = await db.collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION).find({ companyId }).toArray();
   const hosts = [...new Set(domainDocs.flatMap((d) => (d.kind === "custom" ? [d._id, appHostOf(d._id)] : [d._id])))];

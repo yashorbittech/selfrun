@@ -63,8 +63,13 @@ export function classify(pathname: string, method: string): Class {
 
 // ── Scripted clients ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 const SCRIPTED = /(curl|wget|python|requests|httpx|aiohttp|urllib|axios|node-fetch|undici|got\/|go-http|okhttp|java\/|libwww|perl|ruby|php|scrapy|mechanize|httpie|postman|insomnia|restsharp|apache-httpclient|headless|phantomjs|selenium|puppeteer|playwright|webdriver|cypress|lighthouse|chrome-lighthouse|spider|crawler|scraper|harvest|libcurl|powershell|winhttp|colly|jsdom|bot\b)/i;
-const SEARCH_BOTS = /(googlebot|bingbot|duckduckbot|slurp|baiduspider|yandexbot|applebot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterestbot|google-inspectiontool|adsbot-google|mediapartners-google|bingpreview)/i;
-const AI_SCRAPERS = /(gptbot|chatgpt-user|oai-searchbot|ccbot|claudebot|claude-web|anthropic-ai|bytespider|perplexitybot|amazonbot|meta-externalagent|diffbot|omgili|imagesiftbot|petalbot|ahrefsbot|semrushbot|mj12bot|dotbot|dataforseobot|barkrowler|screaming frog)/i;
+/**
+ * AI assistants and AI search that read a public page when someone asks them about the product (ChatGPT, Claude, Perplexity). They are held
+ * to the same terms as search engines: the public website only, never the panels or the API, at a polite rate. Blocking them made them
+ * describe the product from guesses instead of from its own pages.
+ */
+const SEARCH_BOTS = /(googlebot|chatgpt-user|oai-searchbot|gptbot|claude-user|claude-searchbot|claude-web|claudebot|perplexitybot|perplexity-user|bingbot|duckduckbot|slurp|baiduspider|yandexbot|applebot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterestbot|google-inspectiontool|adsbot-google|mediapartners-google|bingpreview)/i;
+const AI_SCRAPERS = /(ccbot|anthropic-ai|bytespider|amazonbot|meta-externalagent|diffbot|omgili|imagesiftbot|petalbot|ahrefsbot|semrushbot|mj12bot|dotbot|dataforseobot|barkrowler|screaming frog)/i;
 
 export function userAgentKind(ua: string): "browser" | "search-bot" | "scripted" {
   if (!ua || ua.length < 8) return "scripted";

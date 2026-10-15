@@ -24,6 +24,8 @@ function copy(n: BillingNoticeInfo): { title: string; body: string; cta: string;
       return { title: `Grace period${n.daysLeft !== null ? ` · ${days(n.daysLeft)}` : ""}`, body: "Payment is still outstanding. Your workspace becomes read-only when the grace period ends.", cta: "Pay now", tone: "danger" };
     case "suspended":
       return { title: "Workspace is read-only", body: "Your subscription is suspended. You can view everything, but nothing new can be created until you renew.", cta: "Renew subscription", tone: "danger" };
+    case "deleting":
+      return { title: `Scheduled for deletion${n.daysLeft !== null ? ` · ${days(n.daysLeft)}` : ""}`, body: "Your company and all its data will be deleted for good when the days run out. It is read-only until then. You can cancel the deletion and restore your account any time before.", cta: "Cancel deletion", tone: "danger" };
     case "canceled":
       return { title: "Subscription ended", body: "Your workspace is read-only. Choose a plan to start making changes again.", cta: "Choose a plan", tone: "danger" };
   }
@@ -46,13 +48,14 @@ export default async function BillingNotice({ className }: { className?: string 
   }
   if (!notice) return null;
   const c = copy(notice);
-  const Icon = notice.status === "trialing" ? Timer : notice.status === "suspended" || notice.status === "canceled" ? Lock : AlertTriangle;
+  const Icon = notice.status === "trialing" ? Timer : notice.status === "suspended" || notice.status === "canceled" || notice.status === "deleting" ? Lock : AlertTriangle;
+  const href = notice.status === "deleting" ? "/workspace/settings/backups" : BILLING_SETTINGS_PATH;
 
   return (
     <div id="billing-notice" role="status" data-status={notice.status} title={c.body} className={cn("inline-flex max-w-full shrink-0 items-center gap-2 self-start rounded-full border py-1 pl-3 pr-1 text-xs backdrop-blur-md", TONES[c.tone], className)}>
       <Icon className="notice-icon size-3.5 shrink-0" aria-hidden />
       <span className="min-w-0 truncate font-semibold">{c.title}</span>
-      <Link href={BILLING_SETTINGS_PATH} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background/70 dark:bg-background dark:hover:bg-muted px-2.5 py-1 font-semibold text-primary transition-colors hover:bg-background">
+      <Link href={href} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-background/70 dark:bg-background dark:hover:bg-muted px-2.5 py-1 font-semibold text-primary transition-colors hover:bg-background">
         {c.cta}
         <ArrowRight className="size-3" />
       </Link>

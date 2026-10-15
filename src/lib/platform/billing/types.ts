@@ -247,6 +247,8 @@ export interface Entitlements {
   readOnly: boolean;
   /** Days left in the trial (trialing only). */
   trialDaysLeft: number | null;
+  /** When the company will be deleted for good (the Super Admin asked for it; until then it is read-only and the request can be cancelled). */
+  pendingDeletionAt?: Date | null;
 }
 
 /**

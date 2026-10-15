@@ -284,6 +284,11 @@ export const FAQS: Faq[] = [
 
 /** More answers, grouped by topic on the FAQ page. */
 export const FAQS_MORE: Faq[] = [
+  { topic: "Data & security", q: "Can one company see another company's data?", a: "No. Every record belongs to one company and the platform adds that company to every database query itself, so a page, report or export cannot ask for another company's rows. See Security & Trust." },
+  { topic: "Data & security", q: "Can the AI change my data on its own?", a: "No. Business questions use read-only queries with the asker's permissions. When an assistant proposes to create, edit or delete something, nothing happens until the person approves it, deletes ask for a second confirmation, and every action is logged." },
+  { topic: "Data & security", q: "Can I export my data or leave?", a: "Yes. Tables can be exported to CSV or Excel and documents downloaded as PDF. If you cancel, the workspace stays readable so you can export, and you can ask for permanent deletion of your company's data." },
+  { topic: "Data & security", q: "Who can see salaries, payroll and financial statements?", a: "Only people with the specific permission for them. Payroll, salary, bank and statement views are limited by role, even for managers, and every export and change is recorded in the audit log." },
+  { topic: "Support", q: "How do I get support?", a: "Inside the product the Help & Support panel has a help center, an AI help assistant and support requests you can follow from open to resolved, with attachments and notifications. You can also write to us through the contact page." },
   { topic: "Plans & pricing", q: "What does the Free plan include?", a: "Every panel and every feature, free forever. Paid plans add more people and bigger storage, AI, email and voice allowances." },
   { topic: "Plans & pricing", q: "Are any features locked behind a higher plan?", a: "No. Every plan includes every panel and every feature. Plans differ only by team size and by allowances." },
   { topic: "Plans & pricing", q: "Can I change plans later?", a: "Yes. You can upgrade as your team grows or move down when you need less. Your data stays in place." },

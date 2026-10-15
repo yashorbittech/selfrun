@@ -31,6 +31,7 @@ import UserActivityTab from "./UserActivityTab";
 import {
   setUserTypeAndNotesAction,
   resetAdminUserPasswordAction,
+  resetAdminUserTwoFactorAction,
   deactivateAdminUserAction,
   reactivateAdminUserAction,
   updateAdminUserPermissionOverridesAction,
@@ -99,6 +100,15 @@ export default function UserDetailDrawer({
       const res = await setUserTypeAndNotesAction(user._id, userType, notes);
       if (!res.ok) toast.error(res.error ?? "Failed to update user profile.");
       else toast.success("User profile metadata saved.");
+    });
+  };
+
+  const handleResetTwoFactor = () => {
+    if (!confirm(`Switch off two-step sign-in for ${user.email}? They can set it up again afterwards.`)) return;
+    startTransition(async () => {
+      const res = await resetAdminUserTwoFactorAction(user._id);
+      if (!res.ok) toast.error(res.error ?? "Could not reset two-step sign-in.");
+      else toast.success("Two-step sign-in is off for this person.");
     });
   };
 
@@ -356,6 +366,16 @@ export default function UserDetailDrawer({
                   >
                     <RefreshCw className="size-3.5" />
                     Reset Password
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/50">
+                  <div>
+                    <p className="text-xs font-medium text-foreground">Reset two-step sign-in</p>
+                    <p className="text-[11px] text-muted-foreground">For someone who lost their phone and recovery codes: switches the second step off so they can sign in and set it up again.</p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={handleResetTwoFactor} disabled={isPending} className="h-8 text-xs gap-1.5">
+                    Reset two-step
                   </Button>
                 </div>
 

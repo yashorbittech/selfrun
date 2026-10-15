@@ -10,9 +10,12 @@ import { cn, formatDateTime } from "@/lib/utils";
 import { EVENT_TYPES, eventFields, eventLabel } from "@/lib/platform/events/catalog";
 import { ACTION_TYPES, CONDITION_OPS, MAX_ACTIONS_PER_WORKFLOW, MAX_CONDITIONS_PER_WORKFLOW, type WorkflowAction, type WorkflowCondition, type WorkflowInput, type WorkflowRunView, type WorkflowView } from "@/lib/platform/workflows/shared";
 import { WORKFLOW_TEMPLATES } from "@/lib/platform/workflows/templates";
+import type { WorkflowVersionView } from "@/lib/platform/workflows/versions";
 import {
   addTemplateAction,
   automationRunsAction,
+  automationVersionsAction,
+  restoreAutomationVersionAction,
   deleteAutomationAction,
   saveAutomationAction,
   testAutomationAction,
@@ -239,7 +242,8 @@ export default function AutomationsManager({ initial, roles, people, max }: { in
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [history, setHistory] = useState<{ id: string; runs: WorkflowRunView[] } | null>(null);
+  const [history, setHistory] = useState<{ id: string; runs: WorkflowRunView[]; versions: WorkflowVersionView[] } | null>(null);
+  const [confirmRestore, setConfirmRestore] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [, start] = useTransition();
   const atLimit = workflows.length >= max;
@@ -278,7 +282,8 @@ export default function AutomationsManager({ initial, roles, people, max }: { in
     setBusy(`history:${id}`);
     start(async () => {
       try {
-        setHistory({ id, runs: await automationRunsAction(id) });
+        const [runs, versions] = await Promise.all([automationRunsAction(id), automationVersionsAction(id)]);
+        setHistory({ id, runs, versions });
       } catch {
         setNotice({ tone: "error", text: "Couldn't load the run history." });
       } finally {
@@ -399,6 +404,24 @@ export default function AutomationsManager({ initial, roles, people, max }: { in
 
               {history?.id === wf.id && (
                 <div className="mt-3 border-t pt-3" data-run-history>
+                  <p className="mb-1.5 text-xs font-semibold">Versions</p>
+                  <ul className="mb-3 space-y-1.5" data-version-history>
+                    {history.versions.map((v) => (
+                      <li key={v.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" data-version={v.version}>
+                        <span className="shrink-0 font-medium">v{v.version}{v.current ? " · current" : ""}</span>
+                        <span className="shrink-0 text-muted-foreground">{formatDateTime(v.at)}</span>
+                        <span className="min-w-0 text-muted-foreground">{v.label}{v.note ? ` (${v.note})` : ""}{v.by ? ` · ${v.by}` : ""} · {v.enabled ? "on" : "off"} · {eventLabel(v.trigger as never)} · {v.conditions} condition{v.conditions === 1 ? "" : "s"}, {v.actions} action{v.actions === 1 ? "" : "s"}</span>
+                        {!v.current && (
+                          confirmRestore === v.id ? (
+                            <Button type="button" size="xs" variant="destructive" disabled={busy !== null} onClick={() => run(`restore:${v.id}`, () => restoreAutomationVersionAction(wf.id, v.id), { after: () => { setConfirmRestore(null); setHistory(null); } })}>Confirm restore v{v.version}</Button>
+                          ) : (
+                            <Button type="button" size="xs" variant="outline" disabled={busy !== null} onClick={() => setConfirmRestore(v.id)}>Restore this version</Button>
+                          )
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mb-1.5 text-xs font-semibold">Runs</p>
                   {history.runs.length === 0 ? (
                     <p className="text-xs text-muted-foreground">No runs yet.</p>
                   ) : (

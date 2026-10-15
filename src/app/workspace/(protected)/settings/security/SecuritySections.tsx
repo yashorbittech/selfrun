@@ -5,14 +5,26 @@ import { cn, formatDateTime } from "@/lib/utils";
 import { listActiveSessions, listLoginHistory } from "@/lib/security/sessions";
 import type { ObjectId } from "mongodb";
 import SessionsList from "./SessionsList";
+import TwoFactorCard from "./TwoFactorCard";
+import { twoFactorStatus } from "@/lib/security/two-factor";
 
 const ICONS = { desktop: Laptop, mobile: Smartphone, tablet: Tablet, app: AppWindow } as const;
 
 /** "Where you're signed in" and "Sign-in history" for one account: the same two cards on the company Security page and on the personal one. */
 export default async function SecuritySections({ adminId, email }: { adminId: ObjectId; email: string }) {
-  const [sessions, history] = await Promise.all([listActiveSessions(adminId), listLoginHistory(adminId, email)]);
+  const [sessions, history, tf] = await Promise.all([listActiveSessions(adminId), listLoginHistory(adminId, email), twoFactorStatus(adminId)]);
   return (
     <>
+      <GlassCard interactive={false} containerClassName="h-auto">
+        <CardHeader>
+          <CardTitle className="text-base">Two-step sign-in</CardTitle>
+          <CardDescription>A second check with an authenticator app when you sign in with your password.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TwoFactorCard status={{ enabled: tf.enabled, enabledAt: tf.enabledAt ? tf.enabledAt.toISOString() : null, recoveryLeft: tf.recoveryLeft, available: tf.available }} />
+        </CardContent>
+      </GlassCard>
+
       <GlassCard interactive={false} containerClassName="h-auto">
         <CardHeader>
           <CardTitle className="text-base">Where you&apos;re signed in</CardTitle>

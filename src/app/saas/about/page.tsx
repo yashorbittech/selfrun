@@ -185,7 +185,7 @@ export default async function AboutPage() {
           <div>
             <SectionHead center icon="lock" eyebrow="Our commitments" title="Control and protection" accent="built in." />
             <IconColumns cols={3} items={SECURITY_POINTS.map((x) => ({ title: x.title, text: x.body, icon: x.icon }))} />
-            <p className="mt-10 text-center text-sm text-muted-foreground">Read the <Link href="/data-policy" className="font-bold text-primary">data policy</Link> and <Link href="/privacy" className="font-bold text-primary">privacy policy</Link>. Questions? <Link href="/contact" className="font-bold text-primary">Talk to us <ArrowRight className="inline h-3.5 w-3.5" /></Link></p>
+            <p className="mt-10 text-center text-sm text-muted-foreground">Read <Link href="/security" className="font-bold text-primary">security &amp; trust</Link>, the <Link href="/data-policy" className="font-bold text-primary">data policy</Link> and <Link href="/privacy" className="font-bold text-primary">privacy policy</Link>. Questions? <Link href="/contact" className="font-bold text-primary">Talk to us <ArrowRight className="inline h-3.5 w-3.5" /></Link></p>
           </div>
         </div>
       </section>

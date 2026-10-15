@@ -366,6 +366,7 @@ async function main() {
     if (a === "users") return "company.users";
     if (a === "documents" || (a === "account" && b === "documents")) return "account.documents";
     if (a === "usage") return "company.usage";
+    if (a === "backups") return "company.backups";
     if (a === "account" && b === "sessions") return "account.sessions";
     if (a === "activity-log") return "company.audit";
     return `manage.${a}.${b}`;
@@ -398,7 +399,7 @@ async function main() {
   });
   await check("every /api/workspace route authorizes with the key of its page; no /api/admin left", () => {
     const routes = walk(path.join(ROOT, "api/workspace")).filter((f) => f.endsWith("route.ts"));
-    assert.equal(routes.length, 34);
+    assert.equal(routes.length, 35);
     for (const file of routes) {
       const key = keyOf(path.relative(path.join(ROOT, "api/workspace"), file));
       assert.ok(NAV_KEYS.includes(key), `${file}: ${key}`);

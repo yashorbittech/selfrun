@@ -546,6 +546,7 @@ export const PANEL_ROUTES: Record<string, { path: string; name: string }[]> = {
     { path: "/platform/coupons/[id]", name: "Coupon" },
     { path: "/platform/coupons/new", name: "New coupon" },
     { path: "/platform/domains", name: "Domains & SSL" },
+    { path: "/platform/incidents", name: "Incidents" },
     { path: "/platform/integrations", name: "Integrations" },
     { path: "/platform/invoices", name: "SaaS invoices" },
     { path: "/platform/invoices/[id]", name: "SaaS invoice" },

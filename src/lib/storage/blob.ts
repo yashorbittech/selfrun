@@ -1,6 +1,7 @@
 import "server-only";
 import { put, get, del, head } from "@vercel/blob";
-import { assertStorageAvailable, meterStorage } from "@/lib/platform/billing/enforce";
+import { BillingLimitError, assertStorageAvailable, meterStorage } from "@/lib/platform/billing/enforce";
+import { recordBlockedUpload, scanUpload } from "@/lib/storage/upload-scan";
 
 /**
  * Shared Vercel Blob core — every `*-storage.ts` module in this codebase
@@ -42,6 +43,13 @@ export interface GetResult {
 export async function putObject(folder: string, filename: string, body: Buffer, contentType?: string): Promise<PutResult> {
   const storageKey = `${folder}/${filename}`;
   const resolvedContentType = contentType || "application/octet-stream";
+  // Safety check (see upload-scan.ts): programs, macros, scripts and known malware never reach storage. The caller's own message handling
+  // (the one used for plan limits) shows the reason to the person.
+  const scan = await scanUpload({ filename, contentType: resolvedContentType, body, folder });
+  if (!scan.ok) {
+    await recordBlockedUpload({ filename, reason: scan.reason, size: body.byteLength, folder });
+    throw new BillingLimitError("upload_blocked", scan.reason, 422);
+  }
   // Plan storage limit (throws a friendly BillingLimitError when full); metered once stored.
   await assertStorageAvailable(body.byteLength);
   await put(storageKey, body, {

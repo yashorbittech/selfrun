@@ -6,7 +6,6 @@ const MOVED: Record<string, string> = {
   ai: "/features",
   automation: "/features",
   integrations: "/features",
-  security: "/features",
   "how-it-works": "/docs",
   "use-cases": "/about#stories",
   industries: "/about#what-we-do",

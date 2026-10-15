@@ -6,7 +6,7 @@ import { TUTORIALS } from "@/lib/saas/tutorials";
 import { FEATURE_LISTS, featuresOf } from "@/lib/saas/feature-lists";
 import { listPanels } from "@/lib/platform/panels/store";
 
-const PAGES = ["", "/features", "/pricing", "/docs", "/about", "/contact", "/demo", "/gallery", "/offers", "/privacy", "/terms", "/cookies", "/data-policy", "/refund-policy"];
+const PAGES = ["", "/features", "/pricing", "/docs", "/about", "/contact", "/demo", "/gallery", "/offers", "/privacy", "/terms", "/security", "/status", "/sla", "/cookies", "/data-policy", "/refund-policy"];
 
 export async function saasSitemap(origin: string): Promise<MetadataRoute.Sitemap> {
   const plans = ["free", "starter", "growth", "business", "enterprise"];
@@ -24,5 +24,5 @@ export async function saasSitemap(origin: string): Promise<MetadataRoute.Sitemap
 }
 
 export function saasRobots(origin: string): string {
-  return ["User-agent: *", "Allow: /", "Disallow: /platform/", "Disallow: /api/", "Disallow: /workspace/", "Disallow: /signup/verify", "", `Sitemap: ${origin}/sitemap.xml`, ""].join("\n");
+  return ["User-agent: *", "Allow: /", "Disallow: /platform/", "Disallow: /api/", "Disallow: /workspace/", "Disallow: /signup/verify", "", `Sitemap: ${origin}/sitemap.xml`, `# For AI assistants: ${origin}/llms.txt`, ""].join("\n");
 }

@@ -120,7 +120,7 @@ export default async function FeaturesPage() {
           <div>
             <SectionHead icon="shield" eyebrow="Security" title="Control and protection" accent="built in." />
             <IconList items={SECURITY_POINTS} />
-            <Link href="/data-policy" className="sr-link mt-10">Read the data policy <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/security" className="sr-link mt-10">Read how security and trust work <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>

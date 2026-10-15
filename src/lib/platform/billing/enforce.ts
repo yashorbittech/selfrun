@@ -23,13 +23,14 @@ import type { SubscriptionStatus } from "@/lib/platform/billing/types";
 
 export const BILLING_SETTINGS_PATH = "/workspace/settings/billing";
 
-export type BillingBlockCode = "read_only" | "seats" | "ai_tokens" | "storage" | "module";
+export type BillingBlockCode = "read_only" | "seats" | "ai_tokens" | "storage" | "module" | "upload_blocked";
 
 export class BillingLimitError extends Error {
-  readonly status = 402;
   constructor(
     readonly code: BillingBlockCode,
     message: string,
+    /** 402 for plan limits; 422 for a refused upload (the same friendly-message handling, a more honest status). */
+    readonly status: number = 402,
   ) {
     super(message);
     this.name = "BillingLimitError";
@@ -357,7 +358,7 @@ export async function meterStorage(deltaBytes: number, ctx?: { source: string; d
 // ---------------------------------------------------------------------------
 
 export interface BillingNoticeInfo {
-  status: Extract<SubscriptionStatus, "trialing" | "past_due" | "grace" | "suspended" | "canceled">;
+  status: Extract<SubscriptionStatus, "trialing" | "past_due" | "grace" | "suspended" | "canceled"> | "deleting";
   planName: string | null;
   /** Trial or grace days left; null for the other states. */
   daysLeft: number | null;
@@ -366,6 +367,7 @@ export interface BillingNoticeInfo {
 /** What the panel banner should say for the current company, or null (active / internal). */
 export async function getBillingNotice(): Promise<BillingNoticeInfo | null> {
   const e = await getEntitlements();
+  if (e.pendingDeletionAt) return { status: "deleting", planName: e.planName, daysLeft: Math.max(0, Math.ceil((e.pendingDeletionAt.getTime() - Date.now()) / 86_400_000)) };
   switch (e.status) {
     case "trialing":
       return { status: "trialing", planName: e.planName, daysLeft: e.trialDaysLeft };

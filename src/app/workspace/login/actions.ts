@@ -14,6 +14,8 @@ import { loginLanding } from "@/lib/platform/onboarding/state";
 
 export interface HubLoginState {
   error?: string;
+  /** The password was right and the account has two-step sign-in: the form now asks for the code. */
+  needsCode?: boolean;
 }
 
 export async function hubLoginAction(_prevState: HubLoginState, formData: FormData): Promise<HubLoginState> {
@@ -24,9 +26,9 @@ export async function hubLoginAction(_prevState: HubLoginState, formData: FormDa
     return { error: "Enter your email and password." };
   }
 
-  const result = await verifyHubCredentials(email, password);
+  const result = await verifyHubCredentials(email, password, String(formData.get("code") ?? ""));
   if (!result.ok) {
-    return { error: result.error };
+    return { error: result.error, needsCode: result.needsCode };
   }
 
   const startedAt = new Date();

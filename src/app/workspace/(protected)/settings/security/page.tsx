@@ -8,6 +8,7 @@ import { requireWorkspaceAccess } from "@/lib/workspace/access";
 import { getCompanySecurity } from "@/lib/workspace/company";
 import { formatDateTime } from "@/lib/utils";
 import SecuritySections from "./SecuritySections";
+import { recentBlockedUploads } from "@/lib/storage/upload-scan";
 import { ObjectId } from "mongodb";
 
 export const metadata: Metadata = { title: "Security", robots: { index: false, follow: false } };
@@ -18,6 +19,7 @@ const linkClass = "inline-flex items-center gap-1 rounded-lg border border-borde
 export default async function SecurityPage() {
   const user = await requireWorkspaceAccess("company.security");
   const s = await getCompanySecurity(user.id);
+  const blocked = await recentBlockedUploads().catch(() => []);
 
   return (
     <div className="min-h-screen bg-muted/70 px-4 py-10 dark:bg-background">
@@ -44,6 +46,27 @@ export default async function SecurityPage() {
         </GlassCard>
 
         <SecuritySections adminId={new ObjectId(user.id)} email={user.email} />
+
+        <GlassCard interactive={false}>
+          <CardHeader>
+            <CardTitle className="text-base">Upload safety check</CardTitle>
+            <CardDescription>Every file uploaded in any panel is checked before it is stored. Programs, scripts, documents with macros, web pages, scripted images, archives that hold them and the standard antivirus test file are refused, with the reason shown to the person. Kept for 180 days.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {blocked.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No upload has been refused.</p>
+            ) : (
+              <ul className="divide-y divide-border/50 text-sm" aria-label="Refused uploads">
+                {blocked.map((b, i) => (
+                  <li key={i} className="flex flex-wrap items-baseline justify-between gap-2 py-2">
+                    <span>{b.reason} <span className="text-xs text-muted-foreground">({b.folder})</span></span>
+                    <time className="text-xs text-muted-foreground" dateTime={b.at.toISOString()} suppressHydrationWarning>{formatDateTime(b.at.toISOString())}</time>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </GlassCard>
 
         <GlassCard interactive={false}>
           <CardHeader>

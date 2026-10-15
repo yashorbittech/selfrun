@@ -7,6 +7,21 @@ import { ArrowRight, BadgePercent, Check, X } from "lucide-react";
 import Countdown from "@/components/saas/Countdown";
 
 const KEY = "sr-offer-popup-seen";
+/** When it was last closed (localStorage): it stays away for a day after that, across reloads and new tabs. */
+const CLOSED_KEY = "sr-offer-popup-closed-at";
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+/** Shown once per page load, however many times the page re-renders or the pointer leaves the window. */
+let shownThisLoad = false;
+
+function recentlySeen(): boolean {
+  try {
+    if (sessionStorage.getItem(KEY) === "1") return true;
+    const at = Number(localStorage.getItem(CLOSED_KEY));
+    return Number.isFinite(at) && at > 0 && Date.now() - at < COOLDOWN_MS;
+  } catch {
+    return false;
+  }
+}
 /** Pages where an offer pop-up would only get in the way. */
 const QUIET = ["/offers", "/signup", "/login", "/register"];
 
@@ -19,23 +34,34 @@ export interface PopupPlan { name: string; price: string; list: string; pct: num
 export default function OfferPopup({ label, topPct, plans, endsAt, freeLine }: { label: string; topPct: number; plans: PopupPlan[]; endsAt: number | null; freeLine: string }) {
   const path = usePathname() || "/";
   const [open, setOpen] = useState(false);
+  const close = () => {
+    setOpen(false);
+    try { localStorage.setItem(CLOSED_KEY, String(Date.now())); } catch {}
+  };
   const quiet = QUIET.some((q) => path === q || path.startsWith(`${q}/`));
 
   useEffect(() => {
-    if (quiet) return;
-    let seen = false;
-    try { seen = sessionStorage.getItem(KEY) === "1"; } catch {}
-    if (seen) return;
-    const show = () => { setOpen(true); try { sessionStorage.setItem(KEY, "1"); } catch {} };
-    const timer = window.setTimeout(show, 6000);
-    const onLeave = (e: MouseEvent) => { if (e.clientY <= 0) { window.clearTimeout(timer); show(); } };
+    if (quiet || shownThisLoad || recentlySeen()) return;
+    let armed = false;
+    const timer = window.setTimeout(() => { armed = true; show(); }, 8000);
+    // Leaving through the top edge (towards the tabs) counts only for a real mouse, and only after a few seconds on the page.
+    const arm = window.setTimeout(() => { armed = true; }, 5000);
+    function show() {
+      if (shownThisLoad) return;
+      shownThisLoad = true;
+      cleanup();
+      setOpen(true);
+      try { sessionStorage.setItem(KEY, "1"); } catch {}
+    }
+    const onLeave = (e: MouseEvent) => { if (armed && e.clientY <= 0 && !e.relatedTarget) show(); };
+    function cleanup() { window.clearTimeout(timer); window.clearTimeout(arm); document.removeEventListener("mouseout", onLeave); }
     document.addEventListener("mouseout", onLeave);
-    return () => { window.clearTimeout(timer); document.removeEventListener("mouseout", onLeave); };
+    return cleanup;
   }, [quiet, path]);
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
     window.addEventListener("keydown", onKey);
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
@@ -44,9 +70,9 @@ export default function OfferPopup({ label, topPct, plans, endsAt, freeLine }: {
 
   if (!open || quiet) return null;
   return (
-    <div className="fixed inset-0 z-[90] flex justify-center overflow-y-auto overscroll-contain bg-black/60 p-3 backdrop-blur-sm sm:p-4" onClick={() => setOpen(false)} role="dialog" aria-modal="true" aria-label="Current offer" style={{ animation: "sr-in .3s ease both" }}>
+    <div className="fixed inset-0 z-[90] flex justify-center overflow-y-auto overscroll-contain bg-black/60 p-3 backdrop-blur-sm sm:p-4" onClick={() => close()} role="dialog" aria-modal="true" aria-label="Current offer" style={{ animation: "sr-in .3s ease both" }}>
       <div className="relative my-auto w-full max-w-lg overflow-hidden rounded-[1.75rem] bg-background shadow-[0_50px_120px_-20px_rgb(0_0_0/.6)] sm:rounded-[2rem]" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40"><X className="h-5 w-5" /></button>
+        <button type="button" onClick={() => close()} aria-label="Close" className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur hover:bg-black/40"><X className="h-5 w-5" /></button>
         <div className="sr-band px-6 pb-7 pt-9 text-center sm:px-8 sm:pb-9 sm:pt-10 [@media(max-height:760px)]:pb-6 [@media(max-height:760px)]:pt-8">
           <span className="relative inline-flex items-center gap-2 rounded-full bg-white/15 px-3.5 py-1.5 text-xs font-black uppercase tracking-[0.16em] ring-1 ring-white/30"><BadgePercent className="h-4 w-4" />{label}</span>
           {topPct > 0 ? (
@@ -73,10 +99,10 @@ export default function OfferPopup({ label, topPct, plans, endsAt, freeLine }: {
               ))}
             </ul>
           )}
-          <Link href="/signup" onClick={() => setOpen(false)} className="group flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-base font-black text-background shadow-xl transition-transform hover:scale-[1.02]">Claim the offer<ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
+          <Link href="/signup" onClick={() => close()} className="group flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-4 text-base font-black text-background shadow-xl transition-transform hover:scale-[1.02]">Claim the offer<ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
           <div className="mt-3 flex items-center justify-between text-sm">
-            <Link href="/offers" onClick={() => setOpen(false)} className="font-bold text-primary hover:underline">See all offers</Link>
-            <button type="button" onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">Maybe later</button>
+            <Link href="/offers" onClick={() => close()} className="font-bold text-primary hover:underline">See all offers</Link>
+            <button type="button" onClick={() => close()} className="text-muted-foreground hover:text-foreground">Maybe later</button>
           </div>
         </div>
       </div>

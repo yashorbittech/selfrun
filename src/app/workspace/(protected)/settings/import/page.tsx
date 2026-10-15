@@ -8,6 +8,7 @@ import GlassCard from "@/components/lms/GlassCard";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { PORTAL_ROLES, PORTAL_ROLE_META } from "@/lib/portal-roles";
 import ImportWizard from "@/components/platform/ImportWizard";
+import { Download } from "lucide-react";
 
 export const metadata: Metadata = { title: "Import data", robots: { index: false, follow: false } };
 
@@ -22,9 +23,20 @@ export default async function ImportSettingsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/workspace/settings" }, { label: "Import data" }]}
           title={<>Import data</>}
-          description={<>Bring leads, clients or employees in from a CSV file. You&apos;ll see a preview before anything is saved.</>}
+          description={<>Bring leads, clients or employees in from a CSV file with a preview before anything is saved, or take a copy of everything your workspace holds.</>}
         />
 <div className="space-y-4">
+        <GlassCard interactive={false}>
+          <CardHeader>
+            <CardTitle>Take your data with you</CardTitle>
+            <CardDescription>
+              Every backup of your workspace can be downloaded, and you can make one any time. Backups, restoring them, and deleting your data or your company are on <Link href="/workspace/settings/backups" className="font-semibold text-primary underline-offset-2 hover:underline">Backups &amp; data</Link>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/workspace/settings/backups" className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"><Download className="size-4" />Open Backups &amp; data</Link>
+          </CardContent>
+        </GlassCard>
         <GlassCard interactive={false}>
           <CardContent>
             <ImportWizard leadTypes={PORTAL_ROLES.map((r) => ({ value: r, label: PORTAL_ROLE_META[r].label }))} />

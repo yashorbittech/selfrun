@@ -1,4 +1,5 @@
 import "server-only";
+import { getCompany } from "@/lib/platform/tenancy/companies";
 import { cache } from "react";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getPlan } from "@/lib/platform/billing/plans";
@@ -38,15 +39,18 @@ export async function entitlementsFor(companyId: string): Promise<Entitlements> 
   const plan = await getPlan(sub.planId);
   // Panels in the plan, plus any unlocked by module add-ons the company holds.
   const modules = !plan || plan.modules === "all" ? null : new Set<string>([...CORE, ...plan.modules, ...(await getModuleUnlocks(companyId))]);
+  // A company scheduled for deletion is read-only until the day it is deleted, or until the request is cancelled.
+  const pendingDeletionAt = (await getCompany(companyId).catch(() => null))?.deletion?.purgeAt ?? null;
   return {
     planId: sub.planId,
     planName: plan?.name ?? null,
+    pendingDeletionAt,
     status,
     modules,
     limits: await effectiveLimitsFor(sub, plan),
     // A plan that was deleted keeps its company running (no panel locked, no limits): flags follow the same rule.
     flags: plan ? plan.flags ?? [] : null,
-    readOnly: status === "suspended" || status === "canceled",
+    readOnly: status === "suspended" || status === "canceled" || pendingDeletionAt !== null,
     trialDaysLeft: status === "trialing" && sub.trialEndsAt ? trialDaysLeft(sub.trialEndsAt, now) : null,
   };
 }

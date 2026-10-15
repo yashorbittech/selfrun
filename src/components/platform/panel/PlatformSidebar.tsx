@@ -28,6 +28,7 @@ import {
   SlidersHorizontal,
   Wrench,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -96,6 +97,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
       { href: "/platform/audit", label: "Audit log", icon: ScrollText },
       { href: "/platform/settings", label: "Platform settings", icon: Settings2, exact: true },
       { href: "/platform/maintenance", label: "Maintenance", icon: Wrench },
+      { href: "/platform/incidents", label: "Incidents & status", icon: AlertTriangle },
       { href: "/workspace", label: "Workspace", icon: LayoutGrid, exact: true },
     ],
   },

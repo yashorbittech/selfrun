@@ -247,7 +247,7 @@ const COMPANY_GROUPS: Record<string, string> = {
   setup: "Organization", profile: "Organization", users: "Organization", roles: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
   branding: "Branding & domains", "website-domain": "Branding & domains", "app-domain": "Branding & domains", domains: "Branding & domains", app: "Branding & domains",
-  payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation",
+  payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Security & logs",
   audit: "Security & logs", security: "Security & logs",
 };
 const company = (key: string, href: string, icon: NavIcon, label: string, description: string, title?: string): NavItemDef => ({ key: `company.${key}`, section: "company", group: COMPANY_GROUPS[key], label, title, description, href, icon, allow: superAdmin });
@@ -267,7 +267,8 @@ const COMPANY: NavItemDef[] = [
   company("payments", "/workspace/settings/payments", "bank", "Payment account", "Connect your own Razorpay account to collect invoice payments and pay salaries.", "Payments & payouts"),
   company("integrations", "/workspace/settings/integrations", "plug", "Integrations", "What your workspace is connected to: payment gateway, webhooks and your own domain."),
   company("automations", "/workspace/settings/automations", "zap", "Automations", "When something happens, notify people, send an email or call a webhook."),
-  company("import", "/workspace/settings/import", "upload", "Import data", "Bring leads, clients and employees in from CSV files."),
+  company("backups", "/workspace/settings/backups", "history", "Backups & data", "Weekly backups you can download and restore, and deleting your data or your company."),
+  company("import", "/workspace/settings/import", "upload", "Import data", "Bring leads, clients and employees in from CSV files, or download a copy of everything your workspace holds."),
   {
     ...company("audit", "/workspace/settings/audit-log", "history", "Audit log", "Who did what across your workspace and its panels, and when: workspace events and panel activity in one place."),
     // Same rule as the old Management → Activity log; the Super Admin's workspace events source is checked on the page itself.

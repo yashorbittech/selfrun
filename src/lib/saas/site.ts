@@ -26,6 +26,9 @@ export const LEGAL_LINKS: NavLink[] = [
   { href: "/privacy", label: "Privacy Policy", hint: "How personal information is handled" },
   { href: "/terms", label: "Terms of Service", hint: "The agreement for using the service" },
   { href: "/cookies", label: "Cookie Policy", hint: "Cookies and similar storage we use" },
+  { href: "/security", label: "Security & Trust", hint: "Isolation, access, AI safety, reliability and data ownership" },
+  { href: "/sla", label: "Uptime SLA", hint: "99.9% monthly uptime, how it is measured and service credits" },
+  { href: "/status", label: "System status", hint: "A live check of the website and the database" },
   { href: "/data-policy", label: "Data Policy", hint: "Ownership, isolation, AI and export" },
   { href: "/refund-policy", label: "Refund & Cancellation Policy", hint: "The free plan, cancelling and billing issues" },
 ];
@@ -119,7 +122,226 @@ export interface LegalDoc {
 
 const SERVICE = "SelfRun AI";
 
-export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy", LegalDoc> = {
+export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "security" | "sla", LegalDoc> = {
+  sla: {
+    slug: "sla",
+    title: "Uptime SLA",
+    description: `${SERVICE}'s availability commitment: 99.9% monthly uptime on paid plans, how it is measured, what is excluded and the service credits if we miss it.`,
+    intro: `This page states how available ${SERVICE} will be for paying customers, how that is measured, and what we give you if we fall short. It is the same commitment most business software makes: 99.9% of each month.`,
+    highlights: [
+      { icon: "clock", title: "99.9% monthly uptime", text: "About 43 minutes of downtime allowed in a 30-day month, on every paid plan." },
+      { icon: "wallet", title: "Service credits", text: "Miss the target and you get 10%, 25% or 50% of that month's fee back as a credit." },
+      { icon: "check", title: "Live status", text: "The System status page checks the website and the database whenever it is opened." },
+    ],
+    sections: [
+      {
+        heading: "Our commitment",
+        body: [`${SERVICE} will be available for at least 99.9% of the minutes in each calendar month (the "Monthly Uptime Percentage"). This applies to the web app, every panel and the APIs of a workspace on a paid plan (Starter, Growth and Business). Enterprise customers can agree different terms in writing. The Free plan is provided on a best-effort basis and is not covered by credits.`],
+      },
+      {
+        heading: "What 99.9% allows",
+        list: [
+          "99.9% in a 30-day month: about 43 minutes of downtime.",
+          "99.0%: about 7 hours 12 minutes. 95.0%: about 36 hours.",
+          "Every minute below the target counts, whether it comes in one outage or many.",
+        ],
+      },
+      {
+        heading: "How it is measured",
+        body: ["Monthly Uptime Percentage = (minutes in the month − minutes of downtime) ÷ minutes in the month × 100."],
+        list: [
+          "Downtime: a minute in which a paid workspace cannot be opened or signed in to because of a fault on our side, as shown by our monitoring and the System status page.",
+          "Partial problems: a fault in one panel counts as downtime for that workspace when it stops the panel from loading at all.",
+          "Records: our monitoring and the incident history on the System status page are the source of truth; if you disagree you can send us your own logs with a claim and we will look at both.",
+        ],
+      },
+      {
+        heading: "What is not counted",
+        list: [
+          "Planned maintenance: announced in the product at least 24 hours ahead and kept within 4 hours a month.",
+          "Outside services: failures of your own network, device, DNS or custom domain, of payment gateways, email and messaging providers, social networks, and of the AI provider. When the AI service is down, AI features are paused with a message; that is not website downtime.",
+          "Your own account state: a workspace that is suspended, read-only for an unpaid renewal, or over a plan limit.",
+          "Misuse and abuse: traffic or actions that break the Terms of Service, and attacks we have to block to protect other customers.",
+          "Beta features and anything we label as such.",
+          "Events beyond our reasonable control: natural disaster, war, government action, and failures of the internet backbone or of our hosting and database providers' own regions.",
+        ],
+      },
+      {
+        heading: "Service credits",
+        body: ["If the Monthly Uptime Percentage of your workspace is below 99.9%, you can claim a credit on that month's subscription fee, excluding taxes:"],
+        list: [
+          "Below 99.9% but at least 99.0%: a credit of 10%.",
+          "Below 99.0% but at least 95.0%: a credit of 25%.",
+          "Below 95.0%: a credit of 50%.",
+          "Credits are applied to your next invoice or added as free time on your subscription. They are never paid out in cash, and they are your sole remedy for downtime.",
+        ],
+      },
+      {
+        heading: "How to claim",
+        list: [
+          "Open a request in the Help & Support panel (type Other) with the title \"SLA credit\", the dates and times you saw the problem, and what you could not do.",
+          "Send it within 30 days after the end of the month in which the downtime happened.",
+          "We review it against our records and answer in the request. If we confirm the downtime we apply the credit.",
+        ],
+      },
+      {
+        heading: "Changes",
+        body: ["We may improve this SLA at any time. If a change makes it less favourable to you we will tell you at least 30 days before it applies, and it never applies to a month that has already started."],
+      },
+    ],
+  },
+  security: {
+    slug: "security",
+    title: "Security & Trust",
+    description: `How ${SERVICE} separates every company's data, controls access, keeps AI and automation inside your permissions, and lets you export your data or leave.`,
+    intro: `This page describes how ${SERVICE} works today: how each company's data is kept apart, who can see what, how the AI and automations are held in check, what happens when something fails, and how you take your data with you. It is written for the person who has to answer "is it safe to run the business on this?"`,
+    highlights: [
+      { icon: "shield", title: "Separate per company", text: "The platform scopes every database query to one company, so a page cannot ask for another company's data." },
+      { icon: "brain", title: "AI proposes, you approve", text: "Assistants work with the asker's permissions; any change they propose waits for approval and is logged." },
+      { icon: "check", title: "Your data stays yours", text: "Export tables, import from CSV, cancel and still read your workspace, or ask for permanent deletion." },
+    ],
+    sections: [
+      {
+        heading: "Each company's data is separate",
+        list: [
+          "Isolation: every record belongs to one company, and the platform adds that company to every database query itself. A page, report or export cannot ask for another company's rows by mistake.",
+          "Own address: a company works on its own workspace address or custom domain. Signing in on one company's address never opens another's.",
+          "Own settings and keys: branding, domains, plan limits, integrations and API keys are kept per company.",
+          "Platform staff: the Platform Panel is separate from company workspaces, and what platform staff do is recorded in a platform audit log.",
+        ],
+      },
+      {
+        heading: "Who can see and do what",
+        list: [
+          "Roles per panel: each panel has its own roles, and on top of a role you can grant or remove a single permission for one person.",
+          "Custom roles: build a role from the permissions you choose and give it to people, instead of making everyone an administrator.",
+          "Sensitive areas: payroll, salaries, bank details, finance statements and stored credentials need their own permission, even for managers.",
+          "Delegated administrators: an administrator who is not a Super Admin cannot grant a role they do not hold themselves, cannot raise their own access and cannot change a Super Admin's account.",
+          "Checked on the server: permissions are enforced on pages, actions, APIs and exports, not only by hiding buttons.",
+          "Plans: a panel opens only if the company's plan includes it, and a suspended or unpaid workspace becomes read-only instead of being switched off.",
+          "Audit log: sign-ins and failed sign-ins are recorded with their device and place, changes are recorded in each panel's activity log, and the central Audit log brings the panels' activity and the company's business events together for administrators to filter.",
+        ],
+      },
+      {
+        heading: "Sign-in and account protection",
+        list: [
+          "Passwords: stored only as salted hashes. Five wrong attempts lock the account for 15 minutes.",
+          "Two-step sign-in: anyone can turn on a second step with an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password). A password alone then does not sign in: the six-digit code is needed too. Codes work once, wrong codes count towards the same lock-out, ten single-use recovery codes cover a lost phone, and a Super Admin can reset it for someone who lost both.",
+          "Sessions: a signed-in session is tied to the browser and network it started on. If the session token is copied somewhere else it is revoked and the owner signs in again.",
+          "Devices: each person can see their signed-in devices and sign-in history, and sign a device out.",
+          "Abuse protection: sign-in, forms, AI calls and exports are rate-limited, scripted clients are refused on the API, and requests from other websites are rejected.",
+          "Browser protection: pages are served over HTTPS only with strict transport security, clickjacking protection and a content policy on API responses.",
+        ],
+      },
+      {
+        heading: "Encryption and files",
+        list: [
+          "Secrets: credentials, API keys, bank details and vault documents are encrypted at rest with keys that are held outside the database.",
+          "Files: uploads are kept in private storage and served only to people who are allowed to open them.",
+          "Upload safety check: every file is checked before it is stored. Programs and scripts (even renamed), documents with macros, web pages, images that carry script, archives that hold them or are built to blow up, and PDFs that launch programs are refused with the reason shown. Optionally a file's fingerprint is checked against VirusTotal's database of known malware. This is a safety check, not a full antivirus scan.",
+          "Payments: payment webhooks must carry a valid signature, and each payment is recorded once, so a repeated delivery cannot create a second invoice.",
+        ],
+      },
+      {
+        heading: "AI that stays inside your permissions",
+        list: [
+          "Your data only: assistants answer from your own company's workspace, with the permissions of the person asking. An assistant cannot read what that person cannot open.",
+          "Read-only questions: business questions are answered with read-only queries. The numbers in an answer come from the query result, not from the model's memory, and the answer shows how it was calculated.",
+          "Changes need approval: when an assistant proposes to create, edit or delete something, nothing happens until the person approves it. Deletes ask for a second confirmation. A proposal expires after 30 minutes, can be used once and only by the person it was made for.",
+          "Documents are data: instructions found inside documents, files or records are treated as content, never as commands.",
+          "Logged: every action an assistant takes on someone's behalf is recorded with who asked, what changed and when.",
+          "No cost surprises: AI use is metered against the plan. When the allowance is used up, AI pauses with a clear message and the rest of the product keeps working; the same happens if the AI service itself is unavailable.",
+        ],
+      },
+      {
+        heading: "Automations you can follow",
+        list: [
+          "Run history: every automation run is recorded with its outcome and kept for 90 days.",
+          "No loops or floods: an automation cannot set off another automation, and a bulk CSV import is recorded but never runs automations, so a 1,000-row file cannot send 1,000 emails.",
+          "Failure alerts: administrators are told once when an automation starts failing, not on every failed run.",
+          "Test before you trust: \"Send test\" runs an automation's actions once with sample data, so you can see what it would do.",
+          "Safe messages: values from your records are escaped before they are placed in an email.",
+        ],
+      },
+      {
+        heading: "Finance and payroll",
+        list: [
+          "Finance: invoices, credit notes, bills, receipts, payment links, bank and cash accounts with reconciliation, and a chart of accounts. Changes are kept in a finance audit trail.",
+          "Restricted views: financial statements, banking and payroll figures are limited by role, so a project manager does not see them by default.",
+          "Payroll rules: PF and ESI rates and wage ceilings are configurable, and income tax follows the Indian new-regime slabs for FY 2025-26 with the standard deduction, the section 87A rebate and cess. A manual TDS override is available where a case needs one.",
+          "Your tax rates: tax rates used on invoices are a list you maintain, so a change in a rate is a setting, not a software update.",
+        ],
+      },
+      {
+        heading: "Reliability",
+        list: [
+          "Managed infrastructure: the product runs on managed cloud hosting with a managed MongoDB Atlas database, not on a single server.",
+          "Availability commitment: 99.9% monthly uptime on paid plans, with service credits if we miss it. See the Uptime SLA.",
+          "Live status and history: the System status page checks the website and the database each time it is opened, lists open and past incidents of the last 90 days with every update, and shows uptime worked out from that record.",
+          "Scheduled jobs: renewals, reminders, expiry checks and other recurring work run on schedule without anyone clicking.",
+          "Failed payments: a failed renewal starts a grace period; after it the workspace becomes read-only. Your data is not deleted, and paying brings everything straight back.",
+          "AI outages: if the AI service is unavailable, AI screens say so in plain words and the rest of the product keeps working.",
+        ],
+      },
+      {
+        heading: "Your data is yours: export, import and leave",
+        list: [
+          "Ownership: the records, files and content a company puts in its workspace belong to that company.",
+          "Backups: every week the platform saves a backup of each workspace (the last eight are kept) and the Super Admin can make one any time. Every backup stays in a history you can download from, and what you download is the very file that is stored (Settings → Backups & data). Passwords, tokens and saved API keys are never in a backup, and uploaded files stay in their panels.",
+          "Restore: the workspace can be put back to any backup, after a multi-step confirmation (the exact company name, a phrase, your password and your two-step code). The system first saves a safety copy of what you have, kept for 30 days, and every restore is recorded in its own history.",
+          "Export by table: tables in the panels can be exported to CSV or Excel, and documents such as invoices and payslips can be downloaded as PDF.",
+          "Import: leads, clients and employees can be imported from CSV, with a sample file and a preview before anything is saved.",
+          "Cancelling: you can cancel any time. The workspace then stays readable so you can download what you need.",
+          "Delete all my data: removes every record and file in the workspace but keeps the company, its accounts and its subscription so you can start again. A safety copy of the records is kept for 30 days.",
+          "Delete the company: schedules permanent deletion of the whole company and all its data in 30 days. It is read-only meanwhile, and until the last day you can cancel and bring the account back. Both deletions need the same multi-step confirmation as a restore, and both are recorded.",
+        ],
+      },
+      {
+        heading: "Support",
+        list: [
+          "Help & Support panel: a help center, an AI help assistant that knows the product, and support requests that you can follow from open to resolved, with attachments and notifications.",
+          "Contact: write to us through the contact page for billing, migration or security questions.",
+        ],
+      },
+      {
+        heading: "Privacy and compliance",
+        list: [
+          "Published policies: the Privacy Policy, Data Policy, Terms of Service and Cookie Policy are public and linked from every page.",
+          "No advertising cookies and no selling of data.",
+          "Tools for your own duties: role-based access, an audit log, export and deletion on request help a company meet its own obligations under the laws that apply to it.",
+          "Security questions: if your organisation needs a security questionnaire answered, send it through the contact page.",
+        ],
+      },
+      {
+        heading: "Questions teams ask before they switch",
+        list: [
+          "Too many modules for us?: Switch on only the panels you use. Each person's Staff Hub shows only the panels their roles allow, there is one login and one search across them, and every panel has a guide in the documentation and an AI assistant that answers how-to questions.",
+          "Hard for new people to learn?: Company setup walks through the profile, departments and invitations, and the documentation has step-by-step walkthroughs for the common jobs.",
+          "Same on a phone and a laptop?: Yes. The installable web app and the Android, iOS, Windows, macOS and Linux apps open the same workspace, so every screen and feature is the same everywhere. Each app carries your company's name and icon and is always current.",
+          "Will one busy company slow the others?: Each company's AI, storage, email and voice use is capped by its plan, requests are rate-limited per session and address, and the product runs on hosting that scales out.",
+          "Will AI costs run away?: No. AI is metered against the plan, shown per person and per feature on the Usage page, and paused with a clear message when the allowance is used up.",
+          "Can people abuse the free plan?: The Free plan is limited to one person and has its own AI, storage, email and voice allowances, enforced on the server.",
+          "What if an outside service fails?: Connections under Settings → Integrations have a test button, automations alert administrators when they start failing, and if the AI service is unavailable the AI screens say so while everything else keeps working.",
+          "How do I move in from other tools?: Import leads, clients and employees from CSV with a sample file and a preview, then connect your own domain, payment account, email and social accounts with your own keys.",
+          "Are we locked in?: No. You can export every table to CSV or Excel, download documents as PDF, and take one archive of the whole workspace at any time.",
+          "What if we stop using it?: Cancel from billing. The workspace stays readable so you can export, and you can ask for permanent deletion of the company's data.",
+          "Is the website builder enough?: It has pages, a blog, products, forms, themes with live preview, menus, SEO tools, tracking and verification scripts, your own domain with automatic SSL, and an AI chatbot, all under your brand.",
+          "How deep is the SEO panel?: Site audits, technical and on-page checks, keywords, rankings, competitors, internal links, backlinks, sitemap, robots.txt and structured data, with Google Search Console and PageSpeed connections.",
+          "How does social media work?: Campaigns, scheduled posts with an approval workflow, a media library, AI drafting and analytics for the Facebook, Instagram, LinkedIn and YouTube accounts you connect.",
+          "How are documents protected?: Digi Locker keeps credentials and documents encrypted at rest with per-record access, expiry alerts and an activity log. Legal & Documents adds approvals, signatures, document history and an audit trail, and SOPs keep version history and acknowledgement tracking.",
+          "Can a mistake in the AI hit our books?: An assistant cannot change a record until the person approves its proposal, and finance, payroll and bank views are limited by role.",
+        ],
+      },
+      {
+        heading: "Moving in and connecting other services",
+        list: [
+          "Moving in: bring leads, clients and employees in from CSV. Your own website and domain connect with automatic SSL.",
+          "Connections: payments (Razorpay), email (SMTP, Resend, SendGrid), messaging (Twilio, WhatsApp Business), AI and voice (OpenAI, ElevenLabs) and your social accounts are connected per company in Settings → Integrations, with your own keys.",
+          "Devices: web, installable app, and apps for Android, iOS, Windows, macOS and Linux that carry your company's name and icon.",
+        ],
+      },
+    ],
+  },
   cookies: {
     slug: "cookies",
     title: "Cookie Policy",
@@ -153,14 +375,14 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy", Le
     intro: `This policy describes what happens to the business data a customer keeps in ${SERVICE}. It complements the Privacy Policy, which covers personal information about website visitors and account holders.`,
     highlights: [
       { icon: "shield", title: "Isolated per company", text: "Every record belongs to one company and every query is confined to it by the platform itself." },
-      { icon: "brain", title: "AI is read-only", text: "AI answers use read-only queries with the asker's permissions and show how they were calculated." },
+      { icon: "brain", title: "AI stays in your permissions", text: "AI answers use read-only queries with the asker's permissions, and any change an assistant proposes waits for approval." },
       { icon: "check", title: "Yours to export", text: "Export your records any time; import leads, clients and employees from CSV." },
     ],
     sections: [
       { heading: "You own your data", body: ["The records, files and content a company puts into its workspace belong to that company. We process them only to provide the service."] },
       { heading: "Isolation between companies", body: ["Every record belongs to one company and every database query is confined to that company by the platform itself. One company cannot read another company's data."] },
-      { heading: "Access inside your company", body: ["Administrators control who can see and do what through roles and fine-grained permissions per module and action. Sign-ins, changes, exports and administrative actions are recorded in an audit log."] },
-      { heading: "AI and your data", body: ["AI features run against the requesting company's own workspace, with the permissions of the person asking. Questions are answered with read-only queries, so the AI cannot change your data, and answers show how they were calculated. AI usage is metered according to your plan."] },
+      { heading: "Access inside your company", body: ["Administrators control who can see and do what through roles and fine-grained permissions per module and action. Sign-ins, changes and administrative actions are recorded in an audit log."] },
+      { heading: "AI and your data", body: ["AI features run against the requesting company's own workspace, with the permissions of the person asking. Business questions are answered with read-only queries, and answers show how they were calculated. When an AI assistant in a panel proposes a change, nothing happens until the person approves it. AI usage is metered according to your plan."] },
       { heading: "Secrets", body: ["Credentials, API keys and vault documents are encrypted at rest with keys held outside the database."] },
       { heading: "Export and portability", body: ["You can export your records at any time. Leads, clients and employees can also be imported from CSV."] },
       { heading: "When a plan ends", body: ["After a plan ends, the workspace stays readable for a period so you can export what you need. You can ask us to delete your data."] },

@@ -38,6 +38,8 @@ interface HubUserDoc {
   permissionOverrides?: Record<string, boolean>;
   mustChangePassword?: boolean;
   emailVerified?: boolean;
+  /** Set once the person has turned on two-step sign-in (see security/two-factor.ts). */
+  twoFactor?: { secret: { c: string; iv: string; t: string }; enabledAt: Date; lastStep: number; recovery: string[] } | null;
 }
 
 interface HubSessionDoc {
@@ -93,8 +95,9 @@ function hashToken(token: string): string {
 
 export async function verifyHubCredentials(
   email: string,
-  password: string
-): Promise<{ ok: true; adminId: ObjectId } | { ok: false; error: string }> {
+  password: string,
+  code?: string
+): Promise<{ ok: true; adminId: ObjectId } | { ok: false; error: string; needsCode?: boolean }> {
   const users = await getHubUsersCollection();
   const normalizedEmail = email.trim().toLowerCase();
   const user = await users.findOne({ email: normalizedEmail });
@@ -120,6 +123,19 @@ export async function verifyHubCredentials(
     const lockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_MS) : null;
     await users.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockedUntil } });
     return { ok: false, error: GENERIC };
+  }
+
+  // Two-step sign-in: the password was right, so ask for the second step (without counting it as a failure) and check it.
+  if (user.twoFactor) {
+    if (!code || !code.trim()) return { ok: false, error: "Enter the 6-digit code from your authenticator app, or a recovery code.", needsCode: true };
+    const { verifySecondStep } = await import("@/lib/security/two-factor");
+    if (!(await verifySecondStep(user as never, code))) {
+      await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: "wrong_second_step" });
+      const attempts = (user.failedLoginAttempts ?? 0) + 1;
+      const lockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_MS) : null;
+      await users.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockedUntil } });
+      return { ok: false, error: "That code isn't right. Try the next one in your app, or use a recovery code.", needsCode: true };
+    }
   }
 
   if (!(await accountWithinSeats(user))) {

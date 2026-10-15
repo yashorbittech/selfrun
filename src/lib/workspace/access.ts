@@ -89,7 +89,7 @@ export async function requireWorkspaceAction(key: string): Promise<CurrentHubUse
   return user;
 }
 
-const READ_ONLY_OK = new Set(["company.billing", "company.invoices", "company.usage", "company.security"]);
+const READ_ONLY_OK = new Set(["company.billing", "company.invoices", "company.usage", "company.security", "company.backups"]);
 
 /** Route-handler guard: the user, or the 401 / 403 response to return. */
 export async function authorizeWorkspaceApi(key: string): Promise<{ ok: true; user: CurrentHubUser } | { ok: false; response: NextResponse }> {

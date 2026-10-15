@@ -17,6 +17,8 @@ import {
   type CreateAdminUserResult,
   type ResetPasswordResult,
 } from "@/lib/workspace/admin-users";
+import { ObjectId } from "mongodb";
+import { resetTwoFactor } from "@/lib/security/two-factor";
 import { ALL_KNOWN_ROLES } from "@/lib/workspace/role-catalog";
 import { ALL_PERMISSION_KEYS } from "@/lib/workspace/permission-catalog";
 import { searchActivityLog, type AdminActivityRow } from "@/lib/workspace/activity-log";
@@ -163,4 +165,15 @@ export async function getUserActivityAction(actorEmail: string): Promise<AdminAc
   if (!actorEmail) return [];
   const result = await searchActivityLog({ search: actorEmail, pageSize: 50 });
   return result.items;
+}
+
+/** Switches two-step sign-in off for someone who lost their device (Super Admin only); they can set it up again. */
+export async function resetAdminUserTwoFactorAction(id: string): Promise<{ ok: boolean; error?: string }> {
+  const actor = await requireWorkspaceAction("company.users");
+  if (!actor.roles.includes("super_admin")) return { ok: false, error: "Only a Super Admin can reset two-step sign-in." };
+  if (!ObjectId.isValid(id)) return { ok: false, error: "Unknown user." };
+  await resetTwoFactor(new ObjectId(id));
+  await recordAccessAudit({ actorId: actor.id, action: "user.two_factor_reset", target: id });
+  revalidate();
+  return { ok: true };
 }

@@ -116,7 +116,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
-        { source: "/:file((?!robots\\.txt$|sitemap[^/]*\\.xml$|manifest\\.json$|sw\\.js$|web-sw\\.js$|offline\\.html$)[A-Za-z0-9][A-Za-z0-9._-]*\\.(?:html?|xml|txt|json|js|csv))", destination: "/api/site-verification/:file" },
+        { source: "/:file((?!robots\\.txt$|llms\\.txt$|sitemap[^/]*\\.xml$|manifest\\.json$|sw\\.js$|web-sw\\.js$|offline\\.html$)[A-Za-z0-9][A-Za-z0-9._-]*\\.(?:html?|xml|txt|json|js|csv))", destination: "/api/site-verification/:file" },
       ],
       afterFiles: [],
       fallback: [],

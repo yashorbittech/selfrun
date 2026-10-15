@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { getDb } from "@/lib/mongodb";
 import { assertWritable } from "@/lib/platform/billing/enforce";
 import type { EventType } from "@/lib/platform/events/catalog";
+import { deleteWorkflowVersions, recordWorkflowVersion } from "@/lib/platform/workflows/versions";
 import { MAX_WORKFLOWS_PER_COMPANY, validateWorkflow, type WorkflowAction, type WorkflowCondition, type WorkflowRunView, type WorkflowView } from "@/lib/platform/workflows/shared";
 
 /**
@@ -83,7 +84,7 @@ export async function getWorkflow(id: string): Promise<WorkflowView | null> {
   return doc ? view(doc) : null;
 }
 
-export async function createWorkflow(raw: unknown, actorId: string | null): Promise<WorkflowResult> {
+export async function createWorkflow(raw: unknown, actorId: string | null, actorLabel: string | null = actorId): Promise<WorkflowResult> {
   await assertWritable();
   const v = validateWorkflow(raw);
   if (!v.ok) return v;
@@ -94,29 +95,37 @@ export async function createWorkflow(raw: unknown, actorId: string | null): Prom
   const now = new Date();
   const doc: WorkflowDoc = { _id: randomUUID(), ...v.data, secret: `whsec_${randomBytes(24).toString("hex")}`, lastRun: null, createdBy: actorId, createdAt: now, updatedAt: now };
   await workflows.insertOne(doc);
+  await recordWorkflowVersion(doc, "created", actorLabel);
   return { ok: true, workflow: view(doc) };
 }
 
-export async function updateWorkflow(id: string, raw: unknown): Promise<WorkflowResult> {
+export async function updateWorkflow(id: string, raw: unknown, actorLabel: string | null = null): Promise<WorkflowResult> {
   await assertWritable();
   const v = validateWorkflow(raw);
   if (!v.ok) return v;
   const { workflows } = await workflowCollections();
   const doc = await workflows.findOneAndUpdate({ _id: id }, { $set: { ...v.data, updatedAt: new Date() } }, { returnDocument: "after" });
-  return doc ? { ok: true, workflow: view(doc) } : { ok: false, error: "That automation no longer exists." };
+  if (!doc) return { ok: false, error: "That automation no longer exists." };
+  await recordWorkflowVersion(doc, "edited", actorLabel);
+  return { ok: true, workflow: view(doc) };
 }
 
-export async function setWorkflowEnabled(id: string, enabled: boolean): Promise<boolean> {
+export async function setWorkflowEnabled(id: string, enabled: boolean, actorLabel: string | null = null): Promise<boolean> {
   await assertWritable();
   const { workflows } = await workflowCollections();
-  return (await workflows.updateOne({ _id: id }, { $set: { enabled, updatedAt: new Date() } })).matchedCount === 1;
+  const doc = await workflows.findOneAndUpdate({ _id: id }, { $set: { enabled, updatedAt: new Date() } }, { returnDocument: "after" });
+  if (doc) await recordWorkflowVersion(doc, enabled ? "turned_on" : "turned_off", actorLabel);
+  return !!doc;
 }
 
 export async function deleteWorkflow(id: string): Promise<boolean> {
   await assertWritable();
   const { workflows, runs } = await workflowCollections();
   const res = await workflows.deleteOne({ _id: id });
-  if (res.deletedCount === 1) await runs.deleteMany({ workflowId: id });
+  if (res.deletedCount === 1) {
+    await runs.deleteMany({ workflowId: id });
+    await deleteWorkflowVersions(id);
+  }
   return res.deletedCount === 1;
 }
 

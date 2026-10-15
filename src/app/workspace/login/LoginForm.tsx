@@ -21,6 +21,8 @@ export default function LoginForm({ next = null }: { next?: string | null }) {
   const [showPassword, setShowPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const codeId = useId();
   const emailId = useId();
   const passwordId = useId();
 
@@ -60,7 +62,7 @@ export default function LoginForm({ next = null }: { next?: string | null }) {
             <div className="space-y-1.5">
               <Label htmlFor={passwordId}>Password</Label>
               <div className="relative">
-                <Input id={passwordId} name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" className="pr-9" />
+                <Input id={passwordId} name="password" type={showPassword ? "text" : "password"} required autoComplete="current-password" className="pr-9" value={password} onChange={(e) => setPassword(e.target.value)} />
                 <Button
                   type="button"
                   variant="ghost"
@@ -74,6 +76,13 @@ export default function LoginForm({ next = null }: { next?: string | null }) {
                 </Button>
               </div>
             </div>
+            {state?.needsCode && (
+              <div className="space-y-1.5">
+                <Label htmlFor={codeId}>Authentication code</Label>
+                <Input id={codeId} name="code" inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="6-digit code or recovery code" maxLength={20} required />
+                <p className="text-xs text-muted-foreground">Open your authenticator app and enter the current code. Lost your phone? Use one of your recovery codes.</p>
+              </div>
+            )}
             {state?.error && (
               <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {state.error}

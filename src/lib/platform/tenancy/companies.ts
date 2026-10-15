@@ -44,6 +44,8 @@ export interface Company {
   signupHints?: { country?: string; languages?: string; timezone?: string };
   /** Panels the platform switched off for THIS company only (Platform Panel → Companies). The global switch lives in the Panel Registry. */
   disabledPanels?: string[];
+  /** Set when the Super Admin asked for the company to be deleted for good: it is deleted on `purgeAt`, and until then the request can be cancelled. */
+  deletion?: { requestedAt: Date; purgeAt: Date; requestedBy: string };
   createdAt: Date;
   updatedAt: Date;
 }
