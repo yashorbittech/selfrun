@@ -14,9 +14,10 @@ export interface NavLink {
 /** The header's links: no dropdowns, one click to each place. */
 export const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home", hint: "What SelfRun AI is and why companies use it" },
-  { href: "/features", label: "Features", hint: "Every panel and feature, with a details page for each" },
+  { href: "/products", label: "Products", hint: "Every product and feature, with a details page for each" },
   { href: "/pricing", label: "Pricing", hint: "Plans, allowances and a details page for each plan" },
-  { href: "/docs", label: "Documentation", hint: "A guide for every panel and every feature" },
+  { href: "/docs", label: "Documentation", hint: "A guide for every product and every feature" },
+  { href: "/blog", label: "Blog", hint: "Practical guides, productivity advice and company updates" },
   { href: "/about", label: "About Us", hint: "Who we are, our mission, what we do and success stories" },
   { href: "/contact", label: "Contact Us", hint: "Sales, support and security" },
 ];
@@ -86,20 +87,8 @@ export interface ChangelogEntry {
 /** No versioned releases are published yet. Entries added here appear on /changelog, newest first. */
 export const CHANGELOG: ChangelogEntry[] = [];
 
-export interface BlogPost {
-  slug: string;
-  title: string;
-  summary: string;
-  date: string;
-  readMinutes: number;
-  /** Photo under /public/selfrun/photos and the real screen shown with the post. */
-  photo: string;
-  shot: string;
-  tag: string;
-  sections: { heading: string; body: string[] }[];
-}
-/** No blog posts are published yet. Posts added here appear on /blog and get their own page. */
-export const POSTS: BlogPost[] = [];
+export type { BlogPost } from "./blog-posts";
+export { POSTS } from "./blog-posts";
 
 export interface SuccessStory {
   slug: string;
@@ -136,7 +125,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
     sections: [
       {
         heading: "Our commitment",
-        body: [`${SERVICE} will be available for at least 99.9% of the minutes in each calendar month (the "Monthly Uptime Percentage"). This applies to the web app, every panel and the APIs of a workspace on a paid plan (Starter, Growth and Business). Enterprise customers can agree different terms in writing. The Free plan is provided on a best-effort basis and is not covered by credits.`],
+        body: [`${SERVICE} will be available for at least 99.9% of the minutes in each calendar month (the "Monthly Uptime Percentage"). This applies to the web app, every product and the APIs of a workspace on a paid plan (Starter, Growth and Business). Enterprise customers can agree different terms in writing. The Free plan is provided on a best-effort basis and is not covered by credits.`],
       },
       {
         heading: "What 99.9% allows",
@@ -151,7 +140,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         body: ["Monthly Uptime Percentage = (minutes in the month − minutes of downtime) ÷ minutes in the month × 100."],
         list: [
           "Downtime: a minute in which a paid workspace cannot be opened or signed in to because of a fault on our side, as shown by our monitoring and the System status page.",
-          "Partial problems: a fault in one panel counts as downtime for that workspace when it stops the panel from loading at all.",
+          "Partial problems: a fault in one product counts as downtime for that workspace when it stops the product from loading at all.",
           "Records: our monitoring and the incident history on the System status page are the source of truth; if you disagree you can send us your own logs with a claim and we will look at both.",
         ],
       },
@@ -179,7 +168,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       {
         heading: "How to claim",
         list: [
-          "Open a request in the Help & Support panel (type Other) with the title \"SLA credit\", the dates and times you saw the problem, and what you could not do.",
+          "Open a request in the Help & Support product (type Other) with the title \"SLA credit\", the dates and times you saw the problem, and what you could not do.",
           "Send it within 30 days after the end of the month in which the downtime happened.",
           "We review it against our records and answer in the request. If we confirm the downtime we apply the credit.",
         ],
@@ -207,19 +196,19 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
           "Isolation: every record belongs to one company, and the platform adds that company to every database query itself. A page, report or export cannot ask for another company's rows by mistake.",
           "Own address: a company works on its own workspace address or custom domain. Signing in on one company's address never opens another's.",
           "Own settings and keys: branding, domains, plan limits, integrations and API keys are kept per company.",
-          "Platform staff: the Platform Panel is separate from company workspaces, and what platform staff do is recorded in a platform audit log.",
+          "Platform staff: the Platform product is separate from company workspaces, and what platform staff do is recorded in a platform audit log.",
         ],
       },
       {
         heading: "Who can see and do what",
         list: [
-          "Roles per panel: each panel has its own roles, and on top of a role you can grant or remove a single permission for one person.",
+          "Roles per product: each product has its own roles, and on top of a role you can grant or remove a single permission for one person.",
           "Custom roles: build a role from the permissions you choose and give it to people, instead of making everyone an administrator.",
           "Sensitive areas: payroll, salaries, bank details, finance statements and stored credentials need their own permission, even for managers.",
           "Delegated administrators: an administrator who is not a Super Admin cannot grant a role they do not hold themselves, cannot raise their own access and cannot change a Super Admin's account.",
           "Checked on the server: permissions are enforced on pages, actions, APIs and exports, not only by hiding buttons.",
-          "Plans: a panel opens only if the company's plan includes it, and a suspended or unpaid workspace becomes read-only instead of being switched off.",
-          "Audit log: sign-ins and failed sign-ins are recorded with their device and place, changes are recorded in each panel's activity log, and the central Audit log brings the panels' activity and the company's business events together for administrators to filter.",
+          "Plans: a product opens only if the company's plan includes it, and a suspended or unpaid workspace becomes read-only instead of being switched off.",
+          "Audit log: sign-ins and failed sign-ins are recorded with their device and place, changes are recorded in each product's activity log, and the central Audit log brings the products' activity and the company's business events together for administrators to filter.",
         ],
       },
       {
@@ -287,9 +276,9 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         heading: "Your data is yours: export, import and leave",
         list: [
           "Ownership: the records, files and content a company puts in its workspace belong to that company.",
-          "Backups: every week the platform saves a backup of each workspace (the last eight are kept) and the Super Admin can make one any time. Every backup stays in a history you can download from, and what you download is the very file that is stored (Settings → Backups & data). Passwords, tokens and saved API keys are never in a backup, and uploaded files stay in their panels.",
+          "Backups: every week the platform saves a backup of each workspace (the last eight are kept) and the Super Admin can make one any time. Every backup stays in a history you can download from, and what you download is the very file that is stored (Settings → Backups & data). Passwords, tokens and saved API keys are never in a backup, and uploaded files stay in their products.",
           "Restore: the workspace can be put back to any backup, after a multi-step confirmation (the exact company name, a phrase, your password and your two-step code). The system first saves a safety copy of what you have, kept for 30 days, and every restore is recorded in its own history.",
-          "Export by table: tables in the panels can be exported to CSV or Excel, and documents such as invoices and payslips can be downloaded as PDF.",
+          "Export by table: tables in the products can be exported to CSV or Excel, and documents such as invoices and payslips can be downloaded as PDF.",
           "Import: leads, clients and employees can be imported from CSV, with a sample file and a preview before anything is saved.",
           "Cancelling: you can cancel any time. The workspace then stays readable so you can download what you need.",
           "Delete all my data: removes every record and file in the workspace but keeps the company, its accounts and its subscription so you can start again. A safety copy of the records is kept for 30 days.",
@@ -299,7 +288,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       {
         heading: "Support",
         list: [
-          "Help & Support panel: a help center, an AI help assistant that knows the product, and support requests that you can follow from open to resolved, with attachments and notifications.",
+          "Help & Support: a help center, an AI help assistant that knows the product, and support requests that you can follow from open to resolved, with attachments and notifications.",
           "Contact: write to us through the contact page for billing, migration or security questions.",
         ],
       },
@@ -315,7 +304,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       {
         heading: "Questions teams ask before they switch",
         list: [
-          "Too many modules for us?: Switch on only the panels you use. Each person's Staff Hub shows only the panels their roles allow, there is one login and one search across them, and every panel has a guide in the documentation and an AI assistant that answers how-to questions.",
+          "Too many modules for us?: Switch on only the products you use. Each person's Staff Hub shows only the products their roles allow, there is one login and one search across them, and every product has a guide in the documentation and an AI assistant that answers how-to questions.",
           "Hard for new people to learn?: Company setup walks through the profile, departments and invitations, and the documentation has step-by-step walkthroughs for the common jobs.",
           "Same on a phone and a laptop?: Yes. The installable web app and the Android, iOS, Windows, macOS and Linux apps open the same workspace, so every screen and feature is the same everywhere. Each app carries your company's name and icon and is always current.",
           "Will one busy company slow the others?: Each company's AI, storage, email and voice use is capped by its plan, requests are rate-limited per session and address, and the product runs on hosting that scales out.",
@@ -326,7 +315,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
           "Are we locked in?: No. You can export every table to CSV or Excel, download documents as PDF, and take one archive of the whole workspace at any time.",
           "What if we stop using it?: Cancel from billing. The workspace stays readable so you can export, and you can ask for permanent deletion of the company's data.",
           "Is the website builder enough?: It has pages, a blog, products, forms, themes with live preview, menus, SEO tools, tracking and verification scripts, your own domain with automatic SSL, and an AI chatbot, all under your brand.",
-          "How deep is the SEO panel?: Site audits, technical and on-page checks, keywords, rankings, competitors, internal links, backlinks, sitemap, robots.txt and structured data, with Google Search Console and PageSpeed connections.",
+          "How deep is the SEO product?: Site audits, technical and on-page checks, keywords, rankings, competitors, internal links, backlinks, sitemap, robots.txt and structured data, with Google Search Console and PageSpeed connections.",
           "How does social media work?: Campaigns, scheduled posts with an approval workflow, a media library, AI drafting and analytics for the Facebook, Instagram, LinkedIn and YouTube accounts you connect.",
           "How are documents protected?: Digi Locker keeps credentials and documents encrypted at rest with per-record access, expiry alerts and an activity log. Legal & Documents adds approvals, signatures, document history and an audit trail, and SOPs keep version history and acknowledgement tracking.",
           "Can a mistake in the AI hit our books?: An assistant cannot change a record until the person approves its proposal, and finance, payroll and bank views are limited by role.",
@@ -394,12 +383,12 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
     description: `The free plan, cancelling a subscription and how billing questions are handled for ${SERVICE}.`,
     intro: `This policy explains how the free plan and cancellation work and what to do if something on a bill looks wrong. Plans, prices and limits are always the ones shown on the pricing page and in your billing settings.`,
     highlights: [
-      { icon: "wallet", title: "Free plan, no card", text: "Free forever for one person, with every panel and every feature." },
+      { icon: "wallet", title: "Free plan, no card", text: "Free forever for one person, with every product and every feature." },
       { icon: "check", title: "Cancel from billing", text: "Cancel any time from your billing page; your workspace stays readable so you can export." },
       { icon: "chat", title: "Billing mistakes fixed", text: "Charged in error or twice? Tell us and we will review and correct it." },
     ],
     sections: [
-      { heading: "Free plan", body: ["The Free plan is free forever for one person, with every panel and every feature, and needs no card. Paid plans add people and bigger allowances."] },
+      { heading: "Free plan", body: ["The Free plan is free forever for one person, with every product and every feature, and needs no card. Paid plans add people and bigger allowances."] },
       { heading: "Subscriptions", body: ["A paid subscription renews each billing period until it is cancelled. Prices exclude applicable taxes."] },
       { heading: "Cancelling", body: ["You can cancel at any time from your billing page. Your workspace then stays readable for a period so you can export your data."] },
       { heading: "Failed payments", body: ["If a payment fails we give a grace period before restricting your workspace, and your data remains available to export."] },
@@ -419,7 +408,7 @@ export interface BrandPoint {
   shot: string;
 }
 export const YOUR_BRAND: BrandPoint[] = [
-  { key: "branding", title: "Your logo, name & colours", text: "Set once — applied across every panel, email and PDF your company sends.", icon: "target", shot: "branding" },
+  { key: "branding", title: "Your logo, name & colours", text: "Set once — applied across every product, email and PDF your company sends.", icon: "target", shot: "branding" },
   { key: "apps", title: "Your own apps", text: "Your company's own apps for phones and for Windows, macOS and Linux — generated automatically, with your name and icon.", icon: "rocket", shot: "apps" },
   { key: "domains", title: "Your own domain", text: "Your website and workspace on your domain, with automatic SSL.", icon: "globe", shot: "domains" },
   { key: "themes", title: "Multiple themes", text: "Pick and customise website themes with live preview — colours, fonts and layouts.", icon: "layers", shot: "cms-theme" },
@@ -430,9 +419,9 @@ export const YOUR_BRAND: BrandPoint[] = [
 /** SelfRun AI against the usual way of running a business: a separate tool for each job. No competitor is named or priced. */
 export const COMPARISON: { row: string; us: string; them: string }[] = [
   { row: "Software", us: "One platform for every department", them: "A different tool for every job" },
-  { row: "Logins", us: "One login, single sign-on across panels", them: "A separate login for each tool" },
-  { row: "Your data", us: "One database shared by every panel", them: "Data split across tools, copied by hand" },
-  { row: "AI", us: "Ask AI in every panel, answering from all your data", them: "AI, if any, sees only its own tool" },
+  { row: "Logins", us: "One login, single sign-on across products", them: "A separate login for each tool" },
+  { row: "Your data", us: "One database shared by every product", them: "Data split across tools, copied by hand" },
+  { row: "AI", us: "Ask AI in every product, answering from all your data", them: "AI, if any, sees only its own tool" },
   { row: "Automation", us: "Workflows across sales, HR, finance and projects", them: "Connectors to buy and maintain between tools" },
   { row: "Website", us: "AI-powered website builder: themes, AI chatbot, voice AI, SEO", them: "A separate website builder, host and plug-ins" },
   { row: "Mobile apps", us: "Your own Android and iOS apps, generated for you", them: "Each vendor's app, in their name" },
@@ -440,22 +429,22 @@ export const COMPARISON: { row: string; us: string; them: string }[] = [
   { row: "Installable app (PWA)", us: "Install on any device in one tap, with your icon", them: "Varies by tool" },
   { row: "Push notifications", us: "To your team and your website visitors, in your name", them: "Per tool, under the vendor's brand" },
   { row: "Your brand", us: "Your logo, colours, domain, emails and PDFs", them: "Each vendor's brand in front of your people" },
-  { row: "Control", us: "Switch panels on/off, roles and per-action permissions", them: "Different admin settings in every tool" },
+  { row: "Control", us: "Switch products on/off, roles and per-action permissions", them: "Different admin settings in every tool" },
   { row: "Audit", us: "One audit log and sign-in history for everything", them: "Scattered logs, if available" },
   { row: "Client portal", us: "Built in for clients, students and applicants", them: "Another product to buy" },
-  { row: "Features", us: "Every panel and every feature on every plan", them: "Features locked behind higher tiers per tool" },
+  { row: "Features", us: "Every product and every feature on every plan", them: "Features locked behind higher tiers per tool" },
   { row: "Pricing", us: "Free forever to start; one plan by team size after", them: "Many subscriptions to track and renew" },
   { row: "Setup", us: "Guided setup in minutes, CSV import built in", them: "Separate setup, training and support for each" },
 ];
 
 /** Everything included, grouped: the platform-wide capabilities a customer gets on day one. All of them exist in the product. */
 export const CAPABILITIES: { title: string; icon: IconKey; items: string[] }[] = [
-  { title: "AI", icon: "brain", items: ["Ask AI in every panel", "Business intelligence in plain language", "AI assistants on your knowledge", "AI website chatbot", "Voice AI conversations", "AI social content & images", "AI-assisted SEO", "AI help assistant"] },
+  { title: "AI", icon: "brain", items: ["Ask AI in every product", "Business intelligence in plain language", "AI assistants on your knowledge", "AI website chatbot", "Voice AI conversations", "AI social content & images", "AI-assisted SEO", "AI help assistant"] },
   { title: "Automation", icon: "workflow", items: ["Trigger → Condition → Action workflows", "Ready-made templates", "Email and in-app notifications", "Approvals and reminders", "Signed webhooks", "Run history for every workflow"] },
   { title: "Your brand", icon: "target", items: ["Logo, name and colours", "Custom domains with SSL", "Branded emails and PDFs", "Multiple website themes", "Your own push notifications", "Your own app icon and name"] },
   { title: "Every device", icon: "rocket", items: ["Web app on any browser", "Installable PWA", "Android and iOS apps", "Windows, macOS and Linux apps", "Push notifications", "Works on phone, tablet and desktop"] },
-  { title: "Control", icon: "shield", items: ["Switch panels on or off", "Roles and per-action permissions", "Audit log across every panel", "Sessions and sign-in history", "Strict company data isolation", "Encrypted secrets"] },
-  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every panel", "Company-wide executive view", "Saved filters", "CSV import with validation", "CSV export", "Search across every panel (⌘K)"] },
+  { title: "Control", icon: "shield", items: ["Switch products on or off", "Roles and per-action permissions", "Audit log across every product", "Sessions and sign-in history", "Strict company data isolation", "Encrypted secrets"] },
+  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every product", "Company-wide executive view", "Saved filters", "CSV import with validation", "CSV export", "Search across every product (⌘K)"] },
   { title: "Website & growth", icon: "globe", items: ["Drag-and-drop page builder", "Blog, careers and products", "Forms straight into your CRM", "Offers, coupons and referrals", "Wallet and reward credits", "SEO audits and rank tracking"] },
   { title: "People & portals", icon: "users", items: ["Employee self-service", "Client & student portal", "Team chat and meetings", "Announcements", "Help center and support desk", "Online tests and certificates"] },
 ];
@@ -465,7 +454,7 @@ export const AI_BENEFITS: { title: string; text: string; icon: IconKey }[] = [
   { title: "Hours back every week", text: "Follow-ups, reminders, approvals and notifications run on their own.", icon: "clock" },
   { title: "Decisions from live data", text: "Ask a question, get the answer from your real records — with the working shown.", icon: "brain" },
   { title: "Nothing slips through", text: "Overdue leads, invoices, leaves and tasks are chased automatically.", icon: "check" },
-  { title: "Grow without the busywork", text: "Add people and panels without adding admin. The platform scales with you.", icon: "rocket" },
+  { title: "Grow without the busywork", text: "Add people and products without adding admin. The platform scales with you.", icon: "rocket" },
   { title: "Always on", text: "Automations and AI assistants keep working nights, weekends and holidays.", icon: "bolt" },
   { title: "Safe by design", text: "AI reads only what the asker may see, and every action is in the audit log.", icon: "shield" },
 ];
@@ -504,8 +493,8 @@ export const DEVICES: { title: string; text: string; platforms: string[] }[] = [
 /** How the whole business runs itself, in four layers. */
 export const RUNS_ITSELF: { title: string; text: string; icon: IconKey; points: string[] }[] = [
   { title: "Capture", text: "Work enters once.", icon: "target", points: ["Website forms and campaigns", "CSV imports", "Client & student portal", "Apps on every device"] },
-  { title: "Connect", text: "Every panel shares one record.", icon: "layers", points: ["Deal → client → project", "Milestone → invoice → ledger", "Employee → payroll → finance", "Request → order → payment"] },
-  { title: "Automate", text: "The platform does the follow-up.", icon: "workflow", points: ["Triggers from every panel", "Notifications and emails", "Approvals and reminders", "Signed webhooks"] },
+  { title: "Connect", text: "Every product shares one record.", icon: "layers", points: ["Deal → client → project", "Milestone → invoice → ledger", "Employee → payroll → finance", "Request → order → payment"] },
+  { title: "Automate", text: "The platform does the follow-up.", icon: "workflow", points: ["Triggers from every product", "Notifications and emails", "Approvals and reminders", "Signed webhooks"] },
   { title: "Decide", text: "AI turns records into answers.", icon: "brain", points: ["Ask in plain language", "Answers with the working shown", "AI content and assistants", "Live dashboards everywhere"] },
 ];
 
@@ -552,7 +541,7 @@ export interface GrowthPhase {
 export const GROWTH: GrowthPhase[] = [
   {
     id: "launch", when: "Day 1", title: "Launch your company workspace", goal: "Be live, branded and ready for your team — in minutes, for free.", icon: "rocket", panels: ["workspace"], screen: "workspace",
-    actions: ["Register with your work email and start on the free-forever plan", "Complete the guided setup: profile, departments, the panels you want", "Add your logo, name and colours so everything carries your brand", "Invite your team with roles and permissions", "Import your leads, clients and employees from CSV"],
+    actions: ["Register with your work email and start on the free-forever plan", "Complete the guided setup: profile, departments, the products you want", "Add your logo, name and colours so everything carries your brand", "Invite your team with roles and permissions", "Import your leads, clients and employees from CSV"],
     outcomes: ["A branded workspace your team can sign in to today", "One login and one set of permissions for everyone", "Existing data already inside, not in a spreadsheet"],
     before: "Spreadsheets, email threads and a different login for every tool.", after: "One workspace, your brand, your people, your data.",
   },
@@ -583,7 +572,7 @@ export const GROWTH: GrowthPhase[] = [
   {
     id: "scale", when: "Year 1 and beyond", title: "Scale with your own apps and team", goal: "Grow the team and the company without growing the admin.", icon: "bolt", panels: ["tms", "ots", "lpms", "dlms", "workspace"], screen: "apps",
     actions: ["Roll out your own Android, iOS, desktop and installable apps in your name", "Hire and train at scale with online tests and training programs", "Generate and sign documents from templates; keep credentials in the vault", "Move up a plan only when your team size or allowances need it"],
-    outcomes: ["Your team and clients use apps that carry your brand", "Hiring, assessment and training run on one record", "More people and more panels — without more tools or more admin"],
+    outcomes: ["Your team and clients use apps that carry your brand", "Hiring, assessment and training run on one record", "More people and more products — without more tools or more admin"],
     before: "Every new hire or department means another tool to buy and manage.", after: "The same platform, with more people on it — still one login, one bill.",
   },
 ];

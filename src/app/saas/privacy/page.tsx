@@ -15,7 +15,7 @@ export default function PrivacyPage() {
     <LegalPage
       doc={{
         title: "Privacy Policy",
-        intro: <>How {name} handles personal information — on this website, in your account and inside the panels you use.</>,
+        intro: <>How {name} handles personal information — on this website, in your account and inside the products you use.</>,
         highlights: [
           { icon: "shield", title: "We do not sell personal information", text: "We use it to run, secure and improve the service, and to answer you." },
           { icon: "lock", title: "Your workspace data is yours", text: "We process it only to provide the service, isolated to your company." },
@@ -33,8 +33,8 @@ export default function PrivacyPage() {
             ],
           },
           {
-            heading: "What the panels store for you",
-            body: [`${name} is a set of business panels, and what is stored in them is what a customer chooses to put there. Depending on the panels switched on, that can include:`],
+            heading: "What the products store for you",
+            body: [`${name} is a set of business products, and what is stored in them is what a customer chooses to put there. Depending on the products switched on, that can include:`],
             list: [
               "Sales and clients: leads, clients, messages with them, offers, coupons and wallet or referral records.",
               "People: employee records, attendance, leave, payroll and documents.",

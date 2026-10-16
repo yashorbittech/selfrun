@@ -83,7 +83,6 @@ export function validateIdentity(
   check(preChat.fields.name, name, "name", "Name");
   check(preChat.fields.email, email, "email", "Email");
   check(preChat.fields.phone, phone, "phone", "Phone number");
-  check(preChat.fields.service, service, "service", "Main service");
   if (serviceRaw && !service) errors.service = "Choose a valid service.";
 
   if (email && !EMAIL_RE.test(email)) errors.email = "Enter a valid email address.";

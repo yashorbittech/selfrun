@@ -45,8 +45,8 @@ export function buildShowcase(plans: Plan[]): ShowcasePlan[] {
     list: { monthly: p.listPrices?.monthly ?? null, yearly: p.listPrices?.yearly ?? null },
     offerLabel: p.offerLabel ?? "",
     seats: p.limits.seats ?? null,
-    // Every plan has every panel; only the limits differ.
-    panels: "Every panel and feature",
+    // Every plan has every product; only the limits differ.
+    panels: "Every product and feature",
     flags: (p.flags ?? []).flatMap((f) => PLAN_FLAGS.find((d) => d.key === f)?.label ?? []),
     highlights: p.highlights ?? [],
     limits: USAGE_SERVICES.filter((u) => u.limitKey !== "seats").map((u) => {

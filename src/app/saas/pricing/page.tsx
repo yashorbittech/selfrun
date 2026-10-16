@@ -19,7 +19,7 @@ import { jsonForScript } from "@/lib/security/json-script";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Start free, no card needed. Every plan includes every panel and every feature; plans differ only by team size and by storage, AI, email and voice allowances.",
+  description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances.",
   alternates: { canonical: "/pricing" },
 };
 
@@ -33,7 +33,7 @@ export default async function PricingPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(ld) }} />
-      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${modules.length} panels and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="Finance" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
+      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${modules.length} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="Finance" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>
 
@@ -58,7 +58,7 @@ export default async function PricingPage() {
                   </thead>
                   <tbody>
                     <tr className="border-b border-border/40"><td className="p-4 font-semibold">People</td>{plans.map((p) => <td key={p.id} className="p-4">{p.seats ? `Up to ${p.seats.toLocaleString("en-IN")}` : "Unlimited"}</td>)}</tr>
-                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Panels and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />All {modules.length} panels</span></td>)}</tr>
+                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />All {modules.length} products</span></td>)}</tr>
                     {rows.map((k, i) => (
                       <tr key={k} className={`border-b border-border/40 ${i % 2 ? "" : "bg-muted/20"}`}>
                         <td className="p-4 font-semibold">{plans[0].limits.find((l) => l.key === k)?.label}</td>
@@ -79,11 +79,11 @@ export default async function PricingPage() {
 
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Included in every plan" title={`All ${modules.length} panels,`} accent="from the free plan up." lead="You never pay extra to unlock a panel. Open any to see what it does." />
+          <SectionHead center icon="layers" eyebrow="Included in every plan" title={`All ${modules.length} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
-                <Link href={`/features/${m.key}`} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
+                <Link href={`/products/${m.key}`} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
                   <span className="sr-icon h-10 w-10 flex-none"><Icon name={m.icon} className="h-4.5 w-4.5" /></span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">{featureCount(m.key) || m.capabilities.length} features</span></span>
                   <Check className="h-4 w-4 flex-none text-primary" />
@@ -112,7 +112,7 @@ export default async function PricingPage() {
         </section>
       )}
 
-      <CtaBand title="Start free. Grow when you're ready." lead="Free forever — with every panel and every feature." />
+      <CtaBand title="Start free. Grow when you're ready." lead="Free forever — with every product and every feature." />
       <FaqSection all limit={60} lead={`${faqs.length} answers about plans, your own brand and apps, AI and automation, devices, data and setup.`} />
     </>
   );

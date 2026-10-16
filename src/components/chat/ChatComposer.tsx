@@ -72,7 +72,7 @@ export function ChatComposer({
             disabled={disabled}
             maxLength={maxChars}
             aria-label={`Type your message to ${brand.name}`}
-            placeholder={tx("chat.chatComposer.ask-about-brand")}
+            placeholder={tx("chat.chatComposer.ask-about-brand") || `Ask ${brand.name || "SelfRun AI"} anything…`}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -103,7 +103,8 @@ export function ChatComposer({
 
       <div className="mt-1.5 flex items-center justify-between px-1">
         <p className="text-xs text-muted-foreground/70">
-          {tx("chat.chatComposer.ai-generated-verify-important-details-wi")}</p>
+          {tx("chat.chatComposer.ai-generated-verify-important-details-wi") || "AI-generated answers. Please verify important details with our team."}
+        </p>
         {!modeToggle && counter}
       </div>
     </div>

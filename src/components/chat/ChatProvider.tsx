@@ -175,10 +175,13 @@ function mapHistory(raw: HistoryMessage[]): ChatMessage[] {
 export function ChatProvider({
   children,
   withHistorySidebar = false,
+  disablePreChat = false,
 }: {
   children: React.ReactNode;
   /** When true, also loads the browser's full conversation list for the sidebar. */
   withHistorySidebar?: boolean;
+  /** When true, bypasses the pre-chat form so visitors can chat immediately. */
+  disablePreChat?: boolean;
 }) {
   const tx = useText();
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
@@ -495,7 +498,10 @@ export function ChatProvider({
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) {
-          return { ok: false, fieldErrors: json.fields ?? {} };
+          const errs = json.fields && Object.keys(json.fields).length > 0
+            ? json.fields
+            : { general: json.error || "Unable to start chat. Please try again." };
+          return { ok: false, fieldErrors: errs };
         }
         setIdentified(true);
         setVisitorName(json.name ?? data.name ?? null);
@@ -515,7 +521,7 @@ export function ChatProvider({
 
   const dismissError = React.useCallback(() => setError(null), []);
 
-  const needsIdentification = Boolean(config?.preChat?.enabled) && !identified;
+  const needsIdentification = !disablePreChat && Boolean(config?.preChat?.enabled) && !identified;
 
   const value = React.useMemo<ChatContextValue>(
     () => ({

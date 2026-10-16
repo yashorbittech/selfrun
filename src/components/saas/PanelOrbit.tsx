@@ -65,12 +65,12 @@ export default function PanelOrbit({ panels, brand }: { panels: OrbitPanel[]; br
             <span className="sr-circle size-9 sm:size-11"><Icon name={active.icon} /></span>
             <p className="sr-display mt-1.5 text-[12px] leading-tight font-semibold sm:text-[15px]">{active.name}</p>
             <p className="sr-muted mt-1 line-clamp-3 hidden text-[11.5px] leading-snug sm:block">{active.description}</p>
-            <Link href={`/features/${active.key}`} className="sr-link mt-1.5 text-[12px]">Explore <ArrowRight className="size-3" /></Link>
+            <Link href={`/products/${active.key}`} className="sr-link mt-1.5 text-[12px]">Explore <ArrowRight className="size-3" /></Link>
           </>
         ) : (
           <>
             <p className="sr-display text-[13px] font-semibold sm:text-lg">{brand}</p>
-            <p className="sr-muted mt-0.5 text-[11px] sm:text-[13px]">{panels.length} panels · one login</p>
+            <p className="sr-muted mt-0.5 text-[11px] sm:text-[13px]">{panels.length} products · one login</p>
           </>
         )}
       </div>

@@ -43,11 +43,11 @@ export default async function SaasHome() {
   const platforms = new Set(DEVICES.flatMap((d) => d.platforms).filter((x) => !["Chrome", "Safari", "Edge", "Firefox"].includes(x))).size;
   const byKey = new Map(modules.map((m) => [m.key, m]));
   const totalFeatures = Object.keys(FEATURE_LISTS).filter((k) => byKey.has(k)).reduce((n, k) => n + featureCount(k), 0);
-  const panelTabs = SHOWCASE.flatMap((k, i) => {
+  const productTabs = SHOWCASE.flatMap((k, i) => {
     const m = byKey.get(k);
     return m && screenFor(k) ? [{ key: k, name: m.name, icon: m.icon, summary: m.summary, points: m.capabilities, node: <DeviceScene screenKey={k} name={m.name} variant={(i % 6) as SceneVariant} /> }] : [];
   });
-  const brandTabs = YOUR_BRAND.flatMap((b, i) => (screenFor(b.shot) ? [{ key: b.key, name: b.title, icon: b.icon, summary: b.text, href: "/features#your-brand", node: <DeviceScene screenKey={b.shot} name={b.title} variant={((i + 2) % 6) as SceneVariant} /> }] : []));
+  const brandTabs = YOUR_BRAND.flatMap((b, i) => (screenFor(b.shot) ? [{ key: b.key, name: b.title, icon: b.icon, summary: b.text, href: "/products#your-brand", node: <DeviceScene screenKey={b.shot} name={b.title} variant={((i + 2) % 6) as SceneVariant} /> }] : []));
   const orbit = modules.map((m) => ({ key: m.key, name: m.name, description: m.description, icon: m.icon, color: panelColor(m.key) }));
 
   return (
@@ -83,14 +83,14 @@ export default async function SaasHome() {
       {/* Replace the stack */}
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="One software, every tool" title={`${REPLACES.length} kinds of software.`} accent="One subscription." lead="Stop paying for, logging into and copying data between a different tool for every job. Each one below is a full panel inside SelfRun — sharing one database, one login and one bill." />
+          <SectionHead center icon="layers" eyebrow="One software, every tool" title={`${REPLACES.length} kinds of software.`} accent="One subscription." lead="Stop paying for, logging into and copying data between a different tool for every job. Each one below is a full product inside SelfRun — sharing one database, one login and one bill." />
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
               REPLACES.map((r) => ({ label: byKey.get(r.panel)?.name ?? "Included", icon: r.icon })),
             ]} />
           </Reveal>
-          <div className="mt-10 flex justify-center"><Link href="/features" className="sr-btn sr-btn-primary">See every panel <ArrowRight className="h-4 w-4" /></Link></div>
+          <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See every product <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
 
@@ -106,7 +106,7 @@ export default async function SaasHome() {
       {/* How the whole business runs itself */}
       <section className="sr-section relative overflow-hidden">
         <div className="sr-container">
-          <SectionHead center icon="workflow" eyebrow="Fully automated" title="How your entire business" accent="runs itself." lead="Work enters once, flows through every panel on its own, and the platform follows up, approves, reminds and reports — while AI turns it all into answers." />
+          <SectionHead center icon="workflow" eyebrow="Fully automated" title="How your entire business" accent="runs itself." lead="Work enters once, flows through every product on its own, and the platform follows up, approves, reminds and reports — while AI turns it all into answers." />
           <TimelineSteps items={RUNS_ITSELF.map((l) => ({ title: l.title, text: l.text, icon: l.icon, points: l.points }))} />
           <div className="mt-20 grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
             <Reveal><AutomationFlow flows={FLOWS} /></Reveal>
@@ -125,7 +125,7 @@ export default async function SaasHome() {
               {[
                 { t: "Fewer subscriptions", b: "One bill replaces a tool for every department — and every feature is already included.", icon: "wallet" as const },
                 { t: "Less admin, fewer hires for it", b: "Reminders, follow-ups, approvals and reports run on their own, so your team grows the business instead of chasing it.", icon: "users" as const },
-                { t: "No integration costs", b: "Every panel shares one database, so there are no connectors to buy, build or fix.", icon: "plug" as const },
+                { t: "No integration costs", b: "Every product shares one database, so there are no connectors to buy, build or fix.", icon: "plug" as const },
               ].map((x, i) => (
                 <Reveal key={x.t} delay={i * 80}>
                   <div className="sr-glass relative h-full overflow-hidden p-7">
@@ -168,13 +168,13 @@ export default async function SaasHome() {
       {freePlan && (
         <section className="sr-section">
           <div className="sr-container">
-            <SectionHead icon="wallet" eyebrow="Free forever" title="Every panel. Every feature." accent="₹0, forever." lead={`Every panel and every feature, free. Not a trial that runs out — start running your business today, and pay only when your team grows.`} />
+            <SectionHead icon="wallet" eyebrow="Free forever" title="Every product. Every feature." accent="₹0, forever." lead={`Every product and every feature, free. Not a trial that runs out — start running your business today, and pay only when your team grows.`} />
             <div className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-background p-8 shadow-2xl sm:p-14">
               <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-accent/15 blur-3xl" />
               <div className="relative space-y-8">
                 <ul className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {[`${modules.length} panels and ${totalFeatures}+ features`, "AI and automation included", "Your own brand, domain and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
+                  {[`${modules.length} products and ${totalFeatures}+ features`, "AI and automation included", "Your own brand, domain and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
                     <li key={t} className="flex items-center gap-3 border-b border-border/50 py-3.5 text-[15px] font-semibold"><span className="sr-circle h-6 w-6"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>{t}</li>
                   ))}
                 </ul>
@@ -212,19 +212,19 @@ export default async function SaasHome() {
         </div>
       </section>
 
-      {/* No limits: every panel */}
+      {/* No limits: every product */}
       <section className="sr-section relative overflow-hidden bg-muted/10">
         <div className="pointer-events-none absolute right-0 top-1/3 h-[700px] w-[700px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <div className="sr-container relative">
-          <SectionHead center icon="layers" eyebrow="No limits" title="Every panel. Every feature." accent="On every plan." lead={`${modules.length} panels and ${totalFeatures}+ features — CRM, HR, payroll, finance, projects, procurement, training, documents, website, AI and more. Nothing is locked behind a higher tier: plans differ only by team size and allowances.`} />
+          <SectionHead center icon="layers" eyebrow="No limits" title="Every product. Every feature." accent="On every plan." lead={`${modules.length} products and ${totalFeatures}+ features — CRM, HR, payroll, finance, projects, procurement, training, documents, website, AI and more. Nothing is locked behind a higher tier: plans differ only by team size and allowances.`} />
           <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <ul className="space-y-3">
-              {["Switch on only what you need — add the rest any time", "Every panel shares one database and one login", "AI and automation work across all of them"].map((t) => (
+              {["Switch on only what you need — add the rest any time", "Every product shares one database and one login", "AI and automation work across all of them"].map((t) => (
                 <li key={t} className="flex gap-3 text-[15px]"><span className="sr-circle mt-0.5 h-5 w-5"><Check className="h-3 w-3" strokeWidth={3} /></span>{t}</li>
               ))}
             </ul>
-            <Link href="/features" className="sr-btn sr-btn-primary mt-8">See every feature <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/products" className="sr-btn sr-btn-primary mt-8">See every feature <ArrowRight className="h-4 w-4" /></Link>
           </div>
           <Reveal><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
         </div>
@@ -242,8 +242,8 @@ export default async function SaasHome() {
       {/* See the product */}
       <section className="sr-band sr-section">
         <div className="sr-container relative">
-          <SectionHead tone="dark" center icon="chart" eyebrow="See the product" title="Real screens from" accent="the live product." lead="Every panel your team will work in — with data in it. Pick one and look around." />
-          <ProductShowcase items={panelTabs} />
+          <SectionHead tone="dark" center icon="chart" eyebrow="See the product" title="Real screens from" accent="the live product." lead="Every product your team will work in — with data in it. Pick one and look around." />
+          <ProductShowcase items={productTabs} />
         </div>
       </section>
 
@@ -291,16 +291,16 @@ export default async function SaasHome() {
                 <div className="relative">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">One platform</p>
                   <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">{REPLACES.length}<span className="mx-3 text-white/50">→</span>1</p>
-                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">{modules.length} panels on one login and one database replace {REPLACES.length} kinds of separate software — and every feature is on every plan.</p>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">{modules.length} products on one login and one database replace {REPLACES.length} kinds of separate software — and every feature is on every plan.</p>
                 </div>
-                <Link href="/features" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every panel <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every product <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
             {[
               { icon: "brain" as const, t: "AI that respects permissions", b: "It reads your live records, writes your content and works inside your automations — always within each person's access, and showing its working." },
               { icon: "target" as const, t: "Your brand, not ours", b: "Your logo, domain, apps and notifications — SelfRun stays in the background for your team, clients and visitors." },
               { icon: "rocket" as const, t: "Every device", b: "Web, an installable app, Android, iOS, Windows, macOS and Linux — the same workspace everywhere." },
-              { icon: "wallet" as const, t: "Free forever to start", b: "Every panel and every feature, free. Pay only when you grow." },
+              { icon: "wallet" as const, t: "Free forever to start", b: "Every product and every feature, free. Pay only when you grow." },
             ].map((x, i) => (
               <Reveal key={x.t} delay={(i + 1) * 70}>
                 <div className="group relative h-full overflow-hidden rounded-[2rem] border border-border/60 bg-background p-7 shadow-sm">
@@ -317,9 +317,9 @@ export default async function SaasHome() {
                 <span className="sr-icon h-16 w-16 flex-none rounded-3xl"><Icon name="workflow" className="h-7 w-7" /></span>
                 <div className="flex-1">
                   <h3 className="text-2xl font-black tracking-tight">Work enters once and runs itself</h3>
-                  <p className="mt-1.5 max-w-3xl leading-relaxed text-muted-foreground">A deal won creates the client, a finished milestone raises the invoice, a paid invoice updates the ledger — reminders, approvals and hand-offs happen across panels on their own, and every run is logged.</p>
+                  <p className="mt-1.5 max-w-3xl leading-relaxed text-muted-foreground">A deal won creates the client, a finished milestone raises the invoice, a paid invoice updates the ledger — reminders, approvals and hand-offs happen across products on their own, and every run is logged.</p>
                 </div>
-                <Link href="/features/workspace" className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background transition-transform hover:scale-105">See automations <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/products/workspace" className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background transition-transform hover:scale-105">See automations <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
           </div>

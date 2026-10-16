@@ -14,13 +14,13 @@ export interface ShowcaseItem {
   summary: string;
   points: string[];
   href?: string;
-  /** The rendered device scene for this panel (a server-rendered node). */
+  /** The rendered device scene for this product (a server-rendered node). */
   node: ReactNode;
 }
 
 /**
- * A product stage on a dark band: panel pills on top, the real screen on a tilted, glowing stage and, beside it, what the
- * panel does. It moves to the next panel by itself every few seconds (a progress line shows when) and pauses on hover.
+ * A product stage on a dark band: product pills on top, the real screen on a tilted, glowing stage and, beside it, what the
+ * product does. It moves to the next product by itself every few seconds (a progress line shows when) and pauses on hover.
  */
 export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
   const [i, setI] = useState(0);
@@ -30,7 +30,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
   const next = () => setI((n) => (n + 1) % items.length);
   return (
     <div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-      <div className="sr-scroll-x -mx-6 mb-10 flex gap-2 px-6 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0" role="tablist" aria-label="Panels">
+      <div className="sr-scroll-x -mx-6 mb-10 flex gap-2 px-6 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0" role="tablist" aria-label="Products">
         {items.map((x, n) => (
           <button key={x.key} role="tab" aria-selected={n === i} onClick={() => setI(n)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${n === i ? "border-transparent bg-white text-black shadow-lg shadow-black/30" : "border-white/20 bg-white/10 text-white hover:bg-white/20"}`}>
             <Icon name={x.icon} className="h-4 w-4" />{x.name}
@@ -53,7 +53,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
               {t.points.slice(0, 4).map((p) => <li key={p} className="flex gap-3 text-[15px] leading-snug text-white/90"><span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white text-[var(--primary)]"><Check className="h-3 w-3" strokeWidth={3} /></span>{p}</li>)}
             </ul>
           )}
-          <Link href={t.href ?? `/features/${t.key}`} className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">
+          <Link href={t.href ?? `/products/${t.key}`} className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">
             Explore {t.name} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <div className="mt-8 flex items-center gap-3">

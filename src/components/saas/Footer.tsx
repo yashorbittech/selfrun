@@ -6,12 +6,12 @@ import { LEGAL_LINKS, NAV_LINKS } from "@/lib/saas/site";
 import { DOCS } from "@/lib/saas/docs";
 import { getFeatureModules } from "@/lib/saas/modules";
 
-/** The footer: what the platform is, every panel, the way in, the docs — and the legal pages beside the copyright line. */
+/** The footer: what the platform is, every product, the way in, the docs — and the legal pages beside the copyright line. */
 export default async function Footer({}: { host?: string }) {
-  const panels = await getFeatureModules();
-  const byKey = new Map(panels.map((m) => [m.key, m]));
+  const products = await getFeatureModules();
+  const byKey = new Map(products.map((m) => [m.key, m]));
   const guides = ["getting-started", "brand-your-workspace", "your-own-apps", "custom-domain"].map((slug) => DOCS.find((d) => d.slug === slug)).filter((d): d is NonNullable<typeof d> => !!d);
-  /** Four categories of five panels each, so every column holds five links. */
+  /** Four categories of five products each, so every column holds five links. */
   const CATEGORIES: { title: string; keys: string[] }[] = [
     { title: "Sales & marketing", keys: ["lms", "smms", "seo", "cms", "website"] },
     { title: "People & finance", keys: ["hrms", "tms", "ots", "fms", "pms"] },
@@ -28,7 +28,7 @@ export default async function Footer({}: { host?: string }) {
           <div className="relative flex flex-col items-start gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">Put your business on <span className="text-white/70">autopilot.</span></h2>
-              <p className="mt-1.5 max-w-xl text-[15px] text-white/80">Free forever, with every panel and every feature — or talk to the team first.</p>
+              <p className="mt-1.5 max-w-xl text-[15px] text-white/80">Free forever, with every product and every feature — or talk to the team first.</p>
             </div>
             <div className="flex w-full flex-none flex-row gap-3 lg:w-auto">
               <Link href="/signup" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-black shadow-xl transition-transform hover:scale-105">Get started free <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
@@ -41,7 +41,7 @@ export default async function Footer({}: { host?: string }) {
           <div className="col-span-2 space-y-4 md:col-span-3 lg:col-span-1">
             <Logo />
             <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{SAAS_BRAND.tagline}. One AI-powered platform for sales, people, finance, projects and your website — under your own brand, on web, Android, iOS and desktop.</p>
-            <p className="text-xs text-muted-foreground">Free forever. Every panel, every feature.</p>
+            <p className="text-xs text-muted-foreground">Free forever. Every product, every feature.</p>
           </div>
           <div>
             <p className="mb-3 text-sm font-bold">Explore</p>
@@ -53,7 +53,7 @@ export default async function Footer({}: { host?: string }) {
             <div key={c.title}>
               <p className="mb-3 text-sm font-bold">{c.title}</p>
               <ul className="space-y-2">
-                {c.keys.map((k) => byKey.get(k)).filter((m): m is NonNullable<typeof m> => !!m).map((m) => <li key={m.key}><Link href={`/features/${m.key}`} className="text-sm text-muted-foreground transition-colors hover:text-primary">{m.name}</Link></li>)}
+                {c.keys.map((k) => byKey.get(k)).filter((m): m is NonNullable<typeof m> => !!m).map((m) => <li key={m.key}><Link href={`/products/${m.key}`} className="text-sm text-muted-foreground transition-colors hover:text-primary">{m.name}</Link></li>)}
               </ul>
             </div>
           ))}

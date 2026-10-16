@@ -26,14 +26,14 @@ const VALUES = [
   { title: "Built for every business", body: "We design for the many companies that use the platform, never for one special case. If one customer needs something, it becomes a feature everyone can use.", icon: "building" as const },
   { title: "Automation with accountability", body: "Automation is only useful if you can trust it. Every automated action is logged, explained and under your control — and people stay in the loop wherever a decision matters.", icon: "workflow" as const },
   { title: "Your data stays yours", body: "Strict isolation between companies, roles and permissions per action, encrypted secrets, and the ability to export your data at any time.", icon: "lock" as const },
-  { title: "Simple on the surface", body: "Powerful software should still be easy to start with. Guided setup, sensible defaults and one consistent design across every panel.", icon: "bolt" as const },
+  { title: "Simple on the surface", body: "Powerful software should still be easy to start with. Guided setup, sensible defaults and one consistent design across every product.", icon: "bolt" as const },
   { title: "Your brand, not ours", body: "Every company runs the platform under its own name — logo, colours, domain, emails and apps. SelfRun stays in the background.", icon: "target" as const },
   { title: "Honest by default", body: "We describe the product as it is. Where there is no customer story to share yet, we say so rather than invent one.", icon: "check" as const },
 ];
 
 const PRINCIPLES = [
   { title: "Take the repetitive work off people", body: "Copying data between tools, chasing approvals and compiling reports should be the platform's job, so people spend their time on customers, craft and growth." },
-  { title: "One source of truth", body: "Every panel shares one record of the business, so a number means the same thing wherever you see it." },
+  { title: "One source of truth", body: "Every product shares one record of the business, so a number means the same thing wherever you see it." },
   { title: "Automation people can trust", body: "Every run is logged and explained, workflows can be paused at any time, and approvals keep people in control of anything that moves money." },
   { title: "Intelligence with permission", body: "AI answers from your real records, shows how it got there, and only sees what the person asking is allowed to see." },
 ];
@@ -61,7 +61,7 @@ export default async function AboutPage() {
         photo="open-office"
         shot="workspace"
         shotName="Workspace"
-        chip={{ title: `${modules.length} panels, one platform`, text: "Under your own brand" }}
+        chip={{ title: `${modules.length} products, one platform`, text: "Under your own brand" }}
       >
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
       </PageHero>
@@ -83,7 +83,7 @@ export default async function AboutPage() {
               <p>On top of that sits AI that answers questions from your own records, shows its working and respects who is asking, and a workflow engine that acts on events across the whole platform: a won deal creates the client, a completed milestone raises the invoice, a paid invoice updates the ledger.</p>
               <p>The platform is multi-tenant by design. Every company is a customer of the same product, with the same features, the same onboarding and the same safeguards. There is no special version for anyone — and every company runs it under its own brand, on the web, as an installable app, on Android and iOS and on the desktop.</p>
             </div>
-            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "panels" }, { v: "1", l: "login" }, { v: "1", l: "database" }]} /></div>
+            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "products" }, { v: "1", l: "login" }, { v: "1", l: "database" }]} /></div>
           </div>
           <Reveal><MarketingShot screenKey="workspace" name="Workspace" /></Reveal>
         </div>
@@ -101,13 +101,13 @@ export default async function AboutPage() {
       {/* What we do */}
       <section id="what-we-do" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="What we do" title="Seven areas of your business," accent="one platform." lead="We build and run the platform your company works in. Each area below is a set of panels — all included in every plan." />
+          <SectionHead center icon="layers" eyebrow="What we do" title="Seven areas of your business," accent="one platform." lead="We build and run the platform your company works in. Each area below is a set of products — all included in every plan." />
           <div className="mb-20 grid items-center gap-12 lg:grid-cols-2">
             <Reveal><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
             <ul className="space-y-6">
               {groups.map((g, i) => (
                 <Reveal key={g.id} as="li" delay={i * 50}>
-                  <Link href={`/features#${g.id}`} className="group flex gap-4">
+                  <Link href={`/products#${g.id}`} className="group flex gap-4">
                     <span className="sr-icon h-12 w-12 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span>
                     <span>
                       <span className="block font-black">{g.title}</span>
@@ -138,7 +138,7 @@ export default async function AboutPage() {
       {/* Growth */}
       <section id="growth" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="rocket" eyebrow="How your company grows" title="From day one to a company" accent="that runs itself." lead="A suggested path, not a rule: launch in a day, get organised in a week, automate in a month — then see, grow and scale. Switch on a few panels at each step." />
+          <SectionHead center icon="rocket" eyebrow="How your company grows" title="From day one to a company" accent="that runs itself." lead="A suggested path, not a rule: launch in a day, get organised in a week, automate in a month — then see, grow and scale. Switch on a few products at each step." />
           <ol className="relative mx-auto max-w-5xl space-y-12 lg:space-y-0">
             <span className="absolute bottom-0 left-[27px] top-0 w-px bg-gradient-to-b from-primary/60 via-primary/25 to-transparent lg:left-1/2" aria-hidden />
             {GROWTH.map((p, i) => (

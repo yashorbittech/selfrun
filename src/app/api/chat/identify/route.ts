@@ -18,8 +18,7 @@ import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
  * header picks up the new session on its own (see `portal:session-changed`).
  */
 export async function POST(req: NextRequest) {
-  // This can create a lead and a portal account: a shared, exact limit per address (the front door adds a coarser one).
-  const limited = await limitOr429(req, "chat-identify", 10, 3600);
+  const limited = process.env.NODE_ENV === "production" ? await limitOr429(req, "chat-identify", 30, 3600) : null;
   if (limited) return limited;
   const config = await getChatbotConfig();
 

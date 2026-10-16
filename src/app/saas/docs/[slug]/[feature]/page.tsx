@@ -215,7 +215,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
           </div>
           <div className="sr-band rounded-3xl p-5 shadow-xl shadow-primary/20">
             <p className="font-black leading-snug">Use {f.name} in your own workspace.</p>
-            <p className="mt-1 text-sm text-white/75">Free to start — every panel included.</p>
+            <p className="mt-1 text-sm text-white/75">Free to start — every product included.</p>
             <Link href="/signup" className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-105">Get started free <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
@@ -231,7 +231,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
       extra={[
         { q: `I cannot see ${f.name} in the menu.`, a: `Your role may not include it. Ask your workspace owner to open Workspace → Users and give your role access to ${m.name}.` },
         { q: "Can I do this on my phone?", a: "Yes. SelfRun AI works in the browser on any device and can be installed as an app on Android, iOS and desktop, with the same screens and the same data." },
-        { q: "Does this cost extra?", a: `No. ${f.name} comes with the ${m.name} panel, and every panel is included in every plan.` },
+        { q: "Does this cost extra?", a: `No. ${f.name} comes with the ${m.name} product, and every product is included in every plan.` },
       ]}
     />
     </>

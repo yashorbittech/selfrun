@@ -13,13 +13,13 @@ export interface ScreenTab {
   name: string;
   icon: IconKey;
   summary: string;
-  /** The rendered devices for this panel (a server-rendered scene). */
+  /** The rendered devices for this product (a server-rendered scene). */
   node: ReactNode;
-  /** Where "Explore" leads; defaults to the panel's feature page. */
+  /** Where "Explore" leads; defaults to the product page. */
   href?: string;
 }
 
-/** Tabs across the top, the real screen of the chosen panel below. */
+/** Tabs across the top, the real screen of the chosen product below. */
 export default function ScreenTabs({ items, tone }: { items: ScreenTab[]; tone?: "dark" }) {
   const dark = tone === "dark";
   const [i, setI] = useState(0);
@@ -27,7 +27,7 @@ export default function ScreenTabs({ items, tone }: { items: ScreenTab[]; tone?:
   if (!t) return null;
   return (
     <div>
-      <div className="sr-scroll-x -mx-6 mb-8 flex gap-2 px-6 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0" role="tablist" aria-label="Panels">
+      <div className="sr-scroll-x -mx-6 mb-8 flex gap-2 px-6 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0" role="tablist" aria-label="Products">
         {items.map((x, n) => (
           <button
             key={x.key}
@@ -51,7 +51,7 @@ export default function ScreenTabs({ items, tone }: { items: ScreenTab[]; tone?:
       <p className={`mt-5 text-center text-xs ${dark ? "text-white/60" : "text-muted-foreground"}`}>Real, full-resolution screens of the live product, captured in a demo workspace with sample data.</p>
       <div className="mx-auto mt-5 flex max-w-3xl flex-col items-center gap-4 text-center">
         <p className={`text-lg ${dark ? "text-white/85" : "text-muted-foreground"}`}>{t.summary}</p>
-        <Link href={t.href ?? `/features/${t.key}`} className={`group inline-flex items-center gap-2 text-sm font-bold ${dark ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"}`}>
+        <Link href={t.href ?? `/products/${t.key}`} className={`group inline-flex items-center gap-2 text-sm font-bold ${dark ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"}`}>
           Explore {t.name} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>

@@ -7,21 +7,13 @@ import OfferAd, { type AdSlide } from "@/components/saas/OfferAd";
 export async function OfferTopBar() {
   const o = await getOffers();
   const headline = o.topPct > 0 ? `${o.label}: save up to ${o.topPct}% on every paid plan` : "Free forever — full access, every feature unlocked";
-  const sub = o.topPct > 0 ? "Every panel and every feature on every plan." : "AI built in. Every panel included. Set up in minutes — no card needed.";
+  const sub = o.topPct > 0 ? "Every product and every feature on every plan." : "AI built in. Every product included. Set up in minutes — no card needed.";
   return <OfferBar headline={headline} sub={sub} endsAt={o.endsAt} cta={o.topPct > 0 ? "Claim offer" : "Get started free"} href={o.topPct > 0 ? "/offers" : "/signup"} />;
 }
 
 export async function OfferPopupHost() {
-  const o = await getOffers();
-  return (
-    <OfferPopup
-      label={o.topPct > 0 ? o.label : "Start free"}
-      topPct={o.topPct}
-      plans={o.plans.map((p) => ({ name: p.name, price: p.price, list: p.list, pct: p.pct }))}
-      endsAt={o.endsAt}
-      freeLine={"Full access to every panel and feature, AI included — start in minutes, no card needed."}
-    />
-  );
+  // Disabled for now
+  return null;
 }
 
 /** The ad that closes each page: slides built from the live plan catalogue. */

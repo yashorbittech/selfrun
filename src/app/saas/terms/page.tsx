@@ -18,7 +18,7 @@ export default function TermsPage() {
         intro: <>The agreement between you and {name}, written around how the product actually works.</>,
         highlights: [
           { icon: "file", title: "You own your data", text: "You give us the right to host and process it only to provide the service." },
-          { icon: "wallet", title: "Free forever for one person", text: "Every panel and every feature; paid plans add people and bigger allowances." },
+          { icon: "wallet", title: "Free forever for one person", text: "Every product and every feature; paid plans add people and bigger allowances." },
           { icon: "check", title: "Cancel any time", text: "From your billing page — your workspace stays readable so you can export." },
         ],
         sections: [
@@ -26,13 +26,13 @@ export default function TermsPage() {
           { heading: "Using the service", body: [`By registering for or using ${name} you agree to these terms. You must provide accurate information, keep your credentials secure and be authorised to bind the company you register on behalf of. You are responsible for activity under your workspace, including that of the people you invite.`] },
           {
             heading: "Your workspace and your people",
-            body: ["Each company has its own workspace. The owner and administrators decide which panels are switched on, invite people, and set roles and per-action permissions. The number of people depends on your plan. You are responsible for who you give access to and for removing access when someone leaves."],
+            body: ["Each company has its own workspace. The owner and administrators decide which products are switched on, invite people, and set roles and per-action permissions. The number of people depends on your plan. You are responsible for who you give access to and for removing access when someone leaves."],
           },
           {
             heading: "Plans, allowances and billing",
-            body: ["Every plan includes every panel and every feature. Plans differ by the number of people and by allowances such as storage, AI usage, email, voice and custom domains; the plans, prices and allowances are shown on the pricing page and in your billing settings. Paid subscriptions renew each billing period until cancelled, and prices exclude applicable taxes. If a payment fails we give a grace period before restricting your workspace, and your data remains available to export."],
+            body: ["Every plan includes every product and every feature. Plans differ by the number of people and by allowances such as storage, AI usage, email, voice and custom domains; the plans, prices and allowances are shown on the pricing page and in your billing settings. Paid subscriptions renew each billing period until cancelled, and prices exclude applicable taxes. If a payment fails we give a grace period before restricting your workspace, and your data remains available to export."],
           },
-          { heading: "The free plan", body: ["The Free plan is free forever for one person, with every panel and every feature, and needs no card. You can move to a paid plan when your team grows."] },
+          { heading: "The free plan", body: ["The Free plan is free forever for one person, with every product and every feature, and needs no card. You can move to a paid plan when your team grows."] },
           { heading: "Your data", body: ["You own the data you put into your workspace. You give us the right to host and process it only to provide the service. You are responsible for the lawfulness of the data you upload and for the instructions you give to automations and AI features."] },
           {
             heading: "Your brand, domains and apps",

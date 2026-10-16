@@ -79,9 +79,9 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
             {(panel || tutorial) && (
               <div className="mt-14 grid gap-4 sm:grid-cols-2">
                 {panel && (
-                  <Link href={`/features/${panel.key}`} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/20 p-5 transition-all hover:border-primary/40">
+                  <Link href={`/products/${panel.key}`} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/20 p-5 transition-all hover:border-primary/40">
                     <span className="sr-icon h-12 w-12 flex-none"><Icon name={panel.icon} className="h-5 w-5" /></span>
-                    <span><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">Panel reference</span><span className="block font-black">{panel.name}</span></span>
+                    <span><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">Product reference</span><span className="block font-black">{panel.name}</span></span>
                     <ArrowRight className="ml-auto h-5 w-5 text-primary" />
                   </Link>
                 )}

@@ -3,13 +3,14 @@ import "./saas.css";
 import Header from "@/components/saas/Header";
 import Footer from "@/components/saas/Footer";
 import Interactions from "@/components/saas/Interactions";
-import { OfferAdHost, OfferPopupHost, OfferTopBar } from "@/components/saas/OfferChrome";
+import { OfferAdHost, OfferTopBar } from "@/components/saas/OfferChrome";
 import { onSaasHost, requestHostOrNull, saasOrigin } from "@/lib/saas/request";
 import { saasCanonicalHost } from "@/lib/saas/hosts";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { jsonForScript } from "@/lib/security/json-script";
 import FreeForeverToast from "@/components/saas/FreeForeverToast";
 import SrRoot from "@/components/saas/SrRoot";
+import SaasFloatingContact from "@/components/saas/SaasFloatingContact";
 
 
 /** The product website exists only on the product's own host; on a customer's domain this path is not a page. */
@@ -37,8 +38,8 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
       <main>{children}</main>
       <Footer host={host} />
       <OfferAdHost />
-      <OfferPopupHost />
       <FreeForeverToast />
+      <SaasFloatingContact />
     </SrRoot>
   );
 }

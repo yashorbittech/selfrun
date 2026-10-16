@@ -55,8 +55,8 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
           <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
           <input value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} placeholder="Search screens…" className="sr-input" style={{ height: 48, paddingLeft: 42, borderRadius: 999 }} />
         </label>
-        <p className="mb-3 hidden px-1 text-xs font-bold uppercase tracking-[0.18em] text-primary xl:block">Panels</p>
-        <div className="sr-scroll-x flex gap-2 xl:block xl:space-y-0.5" role="tablist" aria-label="Panels">
+        <p className="mb-3 hidden px-1 text-xs font-bold uppercase tracking-[0.18em] text-primary xl:block">Products</p>
+        <div className="sr-scroll-x flex gap-2 xl:block xl:space-y-0.5" role="tablist" aria-label="Products">
           {[{ key: "all", name: "All screens", count: pool.length }, ...shownPanels].map((p) => {
             const on = panel === p.key;
             return (
@@ -117,7 +117,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
           <div className="relative flex items-center justify-between gap-4 border-b border-border/60 bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-8">
             <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-muted-foreground">{cur.panel} · {(open ?? 0) + 1} of {list.length}</p></div>
             <div className="flex items-center gap-2">
-              <Link href={`/features/${cur.panelKey}`} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
+              <Link href={`/products/${cur.panelKey}`} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted/50 transition-colors hover:border-primary/50 hover:text-primary"><X className="h-5 w-5" /></button>
             </div>
           </div>

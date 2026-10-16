@@ -14,18 +14,18 @@ export interface PanelDetail {
 
 export const PANEL_DETAIL: Record<string, PanelDetail> = {
   workspace: {
-    intro: "The Workspace is where the company is run from: every panel's numbers, every person's access and every automation in one place.",
+    intro: "The Workspace is where the company is run from: every product's numbers, every person's access and every automation in one place.",
     audience: [
       { who: "Founders & owners", does: "Watch the whole company on one dashboard and control access, billing and brand." },
-      { who: "Administrators", does: "Invite people, assign roles, import data and switch panels on or off." },
-      { who: "Managers", does: "Open any panel's analytics with date, department and owner filters." },
+      { who: "Administrators", does: "Invite people, assign roles, import data and switch products on or off." },
+      { who: "Managers", does: "Open any product's analytics with date, department and owner filters." },
       { who: "Everyone", does: "Get one notification inbox and one place to manage their own sessions and devices." },
     ],
     workflow: [
-      { title: "Set up", text: "A guided setup captures your company profile, departments and the panels your team uses." },
-      { title: "Invite", text: "Invite people by email with a role; verified accounts get access to exactly the panels you choose." },
+      { title: "Set up", text: "A guided setup captures your company profile, departments and the products your team uses." },
+      { title: "Invite", text: "Invite people by email with a role; verified accounts get access to exactly the products you choose." },
       { title: "Automate", text: "Build Trigger → Condition → Action workflows from templates or from scratch." },
-      { title: "Oversee", text: "Follow every panel's live numbers, the audit log, usage against your plan and security." },
+      { title: "Oversee", text: "Follow every product's live numbers, the audit log, usage against your plan and security." },
     ],
     connects: [
       { panel: "intelligence", text: "Ask questions across all of the data the Workspace oversees." },
@@ -78,7 +78,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
     ask: ["Who is on leave next week?", "How many people joined this quarter, by department?", "What is the monthly payroll trend?"],
   },
   fms: {
-    intro: "Money in, money out, the bank, the ledger and the reports — all fed by the other panels, so the books are never re-typed.",
+    intro: "Money in, money out, the bank, the ledger and the reports — all fed by the other products, so the books are never re-typed.",
     audience: [
       { who: "Finance managers", does: "Approve payouts, watch cash flow and close periods." },
       { who: "Accountants", does: "Post, reconcile and report from the ledger." },
@@ -420,7 +420,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Follow", text: "Status, replies and notifications on every request." },
     ],
     connects: [
-      { panel: "workspace", text: "Help from every panel's header." },
+      { panel: "workspace", text: "Help from every product's header." },
       { panel: "aibots", text: "AI answers grounded in your own content." },
     ],
   },

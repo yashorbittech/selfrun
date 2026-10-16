@@ -6,8 +6,10 @@
 
 const EXACT = new Set([
   "/",
+  "/products",
   "/features",
   "/pricing",
+  "/ask",
   "/changelog",
   "/roadmap",
   "/docs",
@@ -47,7 +49,7 @@ const EXACT = new Set([
   "/opengraph-image",
 ]);
 
-const PREFIXES = ["/features/", "/docs/", "/pricing/", "/blog/", "/tutorials/", "/modules/", "/use-cases/", "/industries/", "/resources/"];
+const PREFIXES = ["/products/", "/features/", "/docs/", "/pricing/", "/blog/", "/tutorials/", "/modules/", "/use-cases/", "/industries/", "/resources/"];
 
 export function isSaasPagePath(pathname: string): boolean {
   const p = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;

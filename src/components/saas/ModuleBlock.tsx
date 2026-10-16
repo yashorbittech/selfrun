@@ -28,7 +28,7 @@ export default function ModuleBlock({ m, flip = false, detailed = false, variant
           <p className="sr-lead">{m.summary}</p>
         </div>
         {!detailed && (
-          <Link href={`/features/${m.key}`} className="group inline-flex shrink-0 items-center gap-3 text-sm font-bold hover:text-primary">
+          <Link href={`/products/${m.key}`} className="group inline-flex shrink-0 items-center gap-3 text-sm font-bold hover:text-primary">
             {m.name} in detail
             <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-muted/40 transition-all group-hover:border-primary group-hover:bg-primary"><ArrowRight className="h-4 w-4 group-hover:text-primary-foreground" /></span>
           </Link>
@@ -40,7 +40,7 @@ export default function ModuleBlock({ m, flip = false, detailed = false, variant
             <div className="flex flex-col justify-center gap-1.5 p-6">
               <p className="text-xs font-bold uppercase tracking-widest text-primary">Replaces</p>
               <p className="text-lg font-black leading-snug">{value.replaces}</p>
-              <p className="text-sm text-muted-foreground">One panel instead of another subscription.</p>
+              <p className="text-sm text-muted-foreground">One product instead of another subscription.</p>
             </div>
             <ul className="grid gap-x-8 gap-y-3 p-6 sm:grid-cols-2">
               {value.benefits.map((b) => (

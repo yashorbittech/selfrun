@@ -20,7 +20,7 @@ export default function DemoPage() {
           <SectionHead icon="rocket" eyebrow="Your demo" title="What you" accent="will see." lead="A short, focused session built around your own business." />
           <div className="grid items-start gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-12">
           <div className="space-y-6">
-            <NumberedRows cols={1} items={["A walkthrough of the panels that matter to your business", "A live example of AI answering a question from your kind of data", "Automations for the processes that cost you the most time", "How your own brand, domain and apps would look", "A clear view of plans, users and what a rollout looks like"].map((t) => ({ title: t }))} />
+            <NumberedRows cols={1} items={["A walkthrough of the products that matter to your business", "A live example of AI answering a question from your kind of data", "Automations for the processes that cost you the most time", "How your own brand, domain and apps would look", "A clear view of plans, users and what a rollout looks like"].map((t) => ({ title: t }))} />
             <p className="text-muted-foreground">Prefer to explore on your own? <Link href="/signup" className="font-bold text-primary">Get started free</Link>.</p>
           </div>
           <InquiryForm kind="demo" />

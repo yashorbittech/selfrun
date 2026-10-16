@@ -67,7 +67,7 @@ export default function BrandShowcase({ items, brand }: { items: BrandItem[]; br
         </div>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">Set once in the Workspace — applied everywhere it shows.</p>
-          <Link href="/features/workspace" className="group inline-flex items-center gap-2 text-sm font-bold hover:text-primary">Explore branding <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+          <Link href="/products/workspace" className="group inline-flex items-center gap-2 text-sm font-bold hover:text-primary">Explore branding <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
         </div>
       </div>
     </div>

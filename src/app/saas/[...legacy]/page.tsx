@@ -2,10 +2,11 @@ import { notFound, permanentRedirect } from "next/navigation";
 
 /** Pages of earlier versions of the website, sent to where their content lives now. Only these paths are routed here (see lib/saas/routes.ts). */
 const MOVED: Record<string, string> = {
-  modules: "/features",
-  ai: "/features",
-  automation: "/features",
-  integrations: "/features",
+  features: "/products",
+  modules: "/products",
+  ai: "/products",
+  automation: "/products",
+  integrations: "/products",
   "how-it-works": "/docs",
   "use-cases": "/about#stories",
   industries: "/about#what-we-do",
@@ -15,7 +16,6 @@ const MOVED: Record<string, string> = {
   help: "/docs",
   faq: "/pricing#faq",
   tutorials: "/docs#walkthroughs",
-  blog: "/about",
   mission: "/about#mission",
   "what-we-do": "/about#what-we-do",
   "success-stories": "/about#stories",
@@ -23,10 +23,9 @@ const MOVED: Record<string, string> = {
 
 export default async function LegacyRedirect({ params }: { params: Promise<{ legacy: string[] }> }) {
   const [first, second] = (await params).legacy;
-  if (first === "modules" && second) permanentRedirect(`/features/${second}`);
+  if ((first === "modules" || first === "features") && second) permanentRedirect(`/products/${second}`);
   if (first === "resources" && second) permanentRedirect(`/docs/${second}`);
   if (first === "tutorials" && second) permanentRedirect(`/docs/walkthroughs/${second}`);
-  if (first === "blog" && second) permanentRedirect("/about");
   const to = MOVED[first];
   if (!to) notFound();
   permanentRedirect(to);

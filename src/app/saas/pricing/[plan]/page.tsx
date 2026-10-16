@@ -22,7 +22,7 @@ async function load(id: string) {
 
 export async function generateMetadata({ params }: { params: Promise<{ plan: string }> }): Promise<Metadata> {
   const d = await load((await params).plan);
-  return d ? { title: `${d.plan.name} plan`, description: `${d.plan.name}: ${d.plan.description} Every panel and every feature included.`, alternates: { canonical: `/pricing/${d.plan.id}` } } : {};
+  return d ? { title: `${d.plan.name} plan`, description: `${d.plan.name}: ${d.plan.description} Every product and every feature included.`, alternates: { canonical: `/pricing/${d.plan.id}` } } : {};
 }
 
 export default async function PlanDetailPage({ params }: { params: Promise<{ plan: string }> }) {
@@ -35,7 +35,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
   const yearly = plan.kind === "paid" ? plan.offer.yearly : null;
   return (
     <>
-      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${modules.length} panels`, text: `${total}+ features included` }}>
+      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${modules.length} products`, text: `${total}+ features included` }}>
         <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started", href: plan.kind === "contact" ? "/contact" : "/signup" }} secondary={{ label: "All plans", href: "/pricing" }} />
       </PageHero>
 
@@ -81,11 +81,11 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
 
       <section className="sr-section bg-muted/10">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Included" title={`Every panel, in ${plan.name}.`} accent={`${total}+ features.`} lead="Nothing is held back in any plan. Open a panel to see every feature." />
+          <SectionHead center icon="layers" eyebrow="Included" title={`Every product, in ${plan.name}.`} accent={`${total}+ features.`} lead="Nothing is held back in any plan. Open a product to see every feature." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
-                <Link href={`/features/${m.key}`} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
+                <Link href={`/products/${m.key}`} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
                   <span className="sr-icon h-10 w-10 flex-none"><Icon name={m.icon} className="h-4.5 w-4.5" /></span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">{featureCount(m.key) || m.capabilities.length} features</span></span>
                   <Check className="h-4 w-4 flex-none text-primary" />
