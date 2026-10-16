@@ -32,7 +32,7 @@ export default function StackCompare({ plan }: { plan: { name: string; price: st
   return (
     <Reveal>
       <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-background shadow-sm">
-        <div className="grid gap-px bg-border/60 md:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-px bg-border/60 md:grid-cols-2">
           <div className="flex flex-col bg-background p-6 sm:p-8">
             <p className="text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">Separate tools · a team of {COMPARE_TEAM}</p>
             <ul className="mb-4 mt-4 flex flex-1 flex-col divide-y divide-border/60">
