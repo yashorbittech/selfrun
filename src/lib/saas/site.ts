@@ -15,6 +15,7 @@ export interface NavLink {
 export const NAV_LINKS: NavLink[] = [
   { href: "/", label: "Home", hint: "What SelfRun AI is and why companies use it" },
   { href: "/products", label: "Products", hint: "Every product and feature, with a details page for each" },
+  { href: "/vision", label: "Product Vision", hint: "Strategic roadmap, statutory compliance, and architecture" },
   { href: "/pricing", label: "Pricing", hint: "Plans, allowances and a details page for each plan" },
   { href: "/docs", label: "Documentation", hint: "A guide for every product and every feature" },
   { href: "/blog", label: "Blog", hint: "Practical guides, productivity advice and company updates" },

@@ -32,6 +32,8 @@ const EXACT = new Set([
   "/demo",
   "/gallery",
   "/offers",
+  "/vision",
+  "/product-vision",
   // Pages of earlier versions of the website: redirected to their new homes by app/saas/[...legacy].
   "/modules",
   "/ai",
@@ -49,7 +51,7 @@ const EXACT = new Set([
   "/opengraph-image",
 ]);
 
-const PREFIXES = ["/products/", "/features/", "/docs/", "/pricing/", "/blog/", "/tutorials/", "/modules/", "/use-cases/", "/industries/", "/resources/"];
+const PREFIXES = ["/products/", "/features/", "/docs/", "/pricing/", "/blog/", "/tutorials/", "/modules/", "/use-cases/", "/industries/", "/resources/", "/vision/", "/product-vision/"];
 
 export function isSaasPagePath(pathname: string): boolean {
   const p = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
