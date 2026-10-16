@@ -23,7 +23,7 @@ export default async function DocsPage() {
   const entries: DocEntry[] = panels.flatMap((m) => featuresOf(m.key).map((f) => ({ panelKey: m.key, panel: m.name, slug: f.slug, name: f.name, text: f.text })));
   return (
     <>
-      <PageHero art="docs" eyebrow={`${panels.length} products · ${total} guides`} title="Documentation" accent="step by step." lead="Pick a product, pick a feature. Every guide shows the real screen and the exact steps to follow." photo="laptop-talk" shot="support" shotName="Help & Support" />
+      <PageHero art="docs" eyebrow={`${panels.length} products · ${total} guides`} title="Documentation" accent="step by step." lead="Pick a product, pick a feature. Every guide shows the real screen and the exact steps to follow." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ" />
 
       <nav aria-label="Products" className="sticky top-[76px] z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
         <div className="sr-container flex flex-col gap-3 py-3 lg:flex-row lg:items-center">

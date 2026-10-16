@@ -50,7 +50,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
     connects: [
       { panel: "pms", text: "A won deal creates the client and the project's starting point." },
       { panel: "fms", text: "Invoices are raised for won clients without re-entering their details." },
-      { panel: "cms", text: "Website forms feed your CRM directly." },
+      { panel: "cms", text: "Website forms feed SelfRun DealFlow AI directly." },
       { panel: "smms", text: "Campaign results sit next to the leads they brought in." },
     ],
     ask: ["How many leads did we get last month, by source?", "Which leads have had no follow-up for a week?", "What is our conversion from new to won this quarter?"],
@@ -67,10 +67,10 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Hire", text: "Applications move through a recruitment pipeline; an accepted offer creates the employee record." },
       { title: "Onboard", text: "Documents, department and reporting line are filled in one place." },
       { title: "Run daily operations", text: "Attendance, leave requests, holidays and approvals flow to the right manager." },
-      { title: "Pay", text: "Payroll runs, salary revisions and payslips — and the payout posts to Finance." },
+      { title: "Pay", text: "Payroll runs, salary revisions and payslips — and the payout posts to SelfRun CashFlow AI." },
     ],
     connects: [
-      { panel: "fms", text: "Salary payouts post to Finance automatically." },
+      { panel: "fms", text: "Salary payouts post to SelfRun CashFlow AI automatically." },
       { panel: "ots", text: "Candidates take online tests from the hiring pipeline." },
       { panel: "sop", text: "New joiners get their procedures assigned." },
       { panel: "messenger", text: "Leave and approval notifications can reach the team channel." },
@@ -112,10 +112,10 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Plan", text: "Create the project with milestones, tasks, owners and dates on a board and timeline." },
       { title: "Deliver", text: "Team members update tasks and log time; overdue work notifies the assignee." },
       { title: "Control", text: "Timesheets are approved and costs are compared with the budget." },
-      { title: "Bill", text: "A completed milestone can raise the invoice in Finance." },
+      { title: "Bill", text: "A completed milestone can raise the invoice in SelfRun CashFlow AI." },
     ],
     connects: [
-      { panel: "lms", text: "Projects start from clients won in the CRM." },
+      { panel: "lms", text: "Projects start from clients won in SelfRun DealFlow AI." },
       { panel: "fms", text: "Milestone billing and project profitability." },
       { panel: "messenger", text: "A discussion channel for each project." },
       { panel: "portal", text: "Clients see progress in their portal." },
@@ -134,7 +134,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Request", text: "A purchase request goes through the approval chain for its amount." },
       { title: "Source", text: "Run an RFQ, compare vendors and issue the purchase order." },
       { title: "Receive & match", text: "Record the goods receipt, then match order, receipt and invoice." },
-      { title: "Pay", text: "The matched invoice becomes a payable in Finance." },
+      { title: "Pay", text: "The matched invoice becomes a payable in SelfRun CashFlow AI." },
     ],
     connects: [
       { panel: "fms", text: "Matched vendor invoices post as payables." },
@@ -357,7 +357,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Build", text: "Compose pages from sections in the builder, as drafts." },
       { title: "Style", text: "Choose a theme, preview it live and customise colours, fonts and components." },
       { title: "Publish", text: "Review, then publish; maintenance mode protects the site while you work." },
-      { title: "Grow", text: "Forms feed the CRM; offers, wallet credits, push notifications and the AI chatbot bring visitors back." },
+      { title: "Grow", text: "Forms feed SelfRun DealFlow AI; offers, wallet credits, push notifications and the AI chatbot bring visitors back." },
     ],
     connects: [
       { panel: "lms", text: "Every form submission becomes a lead." },
@@ -377,7 +377,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Choose a theme", text: "Start from a neutral starter site that is live from day one." },
       { title: "Connect your domain", text: "Add your domain and publish the DNS records shown." },
       { title: "SSL", text: "Verification and the certificate are automatic." },
-      { title: "Capture leads", text: "Enquiries land in your CRM." },
+      { title: "Capture leads", text: "Enquiries land in SelfRun DealFlow AI." },
     ],
     connects: [
       { panel: "cms", text: "Everything is edited in the website builder." },

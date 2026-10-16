@@ -44,7 +44,7 @@ export default function PanelOrbit({ panels, brand }: { panels: OrbitPanel[]; br
               >
                 <Icon name={p.icon} className="size-[46%]" />
               </span>
-              <span className="mt-1.5 hidden max-w-[96px] -translate-x-0 truncate text-center text-[11px] font-semibold md:block" style={{ color: on ? "var(--primary)" : "var(--foreground)" }}>{p.name.replace(/ (Management|System)$/i, "").replace("Client & Student Portal", "Client Portal").replace("Procurement & Assets", "Procurement")}</span>
+              <span className="mt-1.5 hidden max-w-[96px] -translate-x-0 truncate text-center text-[11px] font-semibold md:block" style={{ color: on ? "var(--primary)" : "var(--foreground)" }}>{(p as any).shortName || p.name.replace(/^SelfRun\s+/i, "")}</span>
             </span>
           </button>
         );

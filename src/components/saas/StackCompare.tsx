@@ -4,9 +4,24 @@ import { COMPARE_UNPRICED, COMPARE_AS_OF, COMPARE_TEAM, COMPARE_USD_INR, compare
 import Reveal from "@/components/saas/Reveal";
 
 const ICON: Record<string, LucideIcon> = {
-  "Team Chat": MessageSquare, "HR & Payroll": Users, "CRM & Sales": Briefcase, Projects: FolderKanban, Finance: Landmark, "Procurement & Assets": ShoppingCart,
-  Training: GraduationCap, "Online Tests": ClipboardCheck, Website: Globe, SEO: Search, "Social Media": Share2, "AI Assistants": Bot,
-  "SOPs & Policies": BookOpen, "Legal & Documents": Scale, "Digi Locker": Lock, "AI Intelligence": Sparkles, "Client & Student Portal": UserRound,
+  "SelfRun Huddle AI": MessageSquare, "SelfRun Connect": MessageSquare, "Team Chat": MessageSquare,
+  "SelfRun TalentOS": Users, "SelfRun People": Users, "HR & Payroll": Users,
+  "SelfRun DealFlow AI": Briefcase, "SelfRun CRM": Briefcase, "CRM & Sales": Briefcase,
+  "SelfRun SprintOS": FolderKanban, "SelfRun Projects": FolderKanban, Projects: FolderKanban,
+  "SelfRun CashFlow AI": Landmark, "SelfRun Books": Landmark, Finance: Landmark,
+  "SelfRun SpendIQ": ShoppingCart, "SelfRun Procure": ShoppingCart, "Procurement & Assets": ShoppingCart,
+  "SelfRun Cohort AI": GraduationCap, "SelfRun Academy": GraduationCap, Training: GraduationCap,
+  "SelfRun EvalIQ": ClipboardCheck, "SelfRun Assess": ClipboardCheck, "Online Tests": ClipboardCheck,
+  "SelfRun SiteCraft AI": Globe, "SelfRun Web Studio": Globe, Website: Globe,
+  "SelfRun RankMax AI": Search, "SelfRun SEO": Search, SEO: Search,
+  "SelfRun ViralPulse AI": Share2, "SelfRun Social": Share2, "Social Media": Share2,
+  "SelfRun AgentOS": Bot, "SelfRun AI Studio": Bot, "AI Assistants": Bot,
+  "SelfRun Playbook AI": BookOpen, "SelfRun SOPs": BookOpen, "SOPs & Policies": BookOpen,
+  "SelfRun ContractFlow AI": Scale, "SelfRun Legal": Scale, "Legal & Documents": Scale,
+  "SelfRun CyberVault": Lock, "SelfRun Vault": Lock, "Digi Locker": Lock,
+  "SelfRun DataBrain AI": Sparkles, "SelfRun Intelligence": Sparkles, "AI Intelligence": Sparkles,
+  "SelfRun ClientOS": UserRound, "SelfRun Portal": UserRound, "Client & Student Portal": UserRound,
+  "SelfRun ResolveIQ": MessageSquare, "SelfRun Desk": MessageSquare,
 };
 
 const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;

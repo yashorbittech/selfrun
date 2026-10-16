@@ -36,6 +36,23 @@ export async function listPanels(): Promise<PanelRecord[]> {
     await c.insertMany(missing.map((p) => ({ _id: p.key, ...p })), { ordered: false }).catch(() => {});
     docs = await c.find({}).toArray();
   }
+  // Sync default panels to updated branded software names if they still carry legacy names
+  const defaultByKey = new Map(DEFAULT_PANELS.map((p) => [p.key, p]));
+  if (docs.length) {
+    const updates: Promise<unknown>[] = [];
+    for (const d of docs) {
+      const def = defaultByKey.get(d._id || d.key);
+      if (def && (!d.name?.startsWith("SelfRun ") || d.name !== def.name)) {
+        d.name = def.name;
+        d.shortName = def.shortName;
+        d.description = def.description;
+        updates.push(c.updateOne({ _id: d._id }, { $set: { name: def.name, shortName: def.shortName, description: def.description } }).catch(() => {}));
+      }
+    }
+    if (updates.length) {
+      await Promise.all(updates);
+    }
+  }
   const rows = (docs.length ? docs.filter((d) => !(d as { deleted?: boolean }).deleted).map(({ _id, ...r }) => ({ ...r, key: r.key ?? _id, aliases: r.aliases ?? defaultAliases(r.key ?? _id) })) : DEFAULT_PANELS)
     .filter((p) => !PLATFORM_ONLY_KEYS.includes(p.key))
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));

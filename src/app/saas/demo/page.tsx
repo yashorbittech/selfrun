@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <>
-      <PageHero art="demo" photo="presentation" shot="workspace" shotName="Workspace" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }} />
+      <PageHero art="demo" photo="presentation" shot="workspace" shotName="SelfRun CommandOS" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }} />
       <section className="sr-section">
         <div className="sr-container">
           <SectionHead icon="rocket" eyebrow="Your demo" title="What you" accent="will see." lead="A short, focused session built around your own business." />

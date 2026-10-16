@@ -191,7 +191,7 @@ export default async function SaasHome() {
           <SectionHead center icon="brain" eyebrow="The benefits" title="Stop running your business." accent="Let it run itself." lead="Most of a company's day goes on chasing, copying and reporting. Give that to the platform — and spend your time on customers and growth." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal className="relative">
-            <MarketingShot screenKey="fms" name="Finance" />
+            <MarketingShot screenKey="fms" name="SelfRun CashFlow AI" />
             <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/30 bg-black/45 p-5 text-white backdrop-blur-xl sm:inset-x-8 sm:bottom-8">
               <p className="text-xs font-semibold uppercase tracking-widest text-white/70">Ask your business</p>
               <p className="mt-1 text-lg font-bold">“Which invoices are more than 30 days overdue?”</p>
@@ -271,9 +271,9 @@ export default async function SaasHome() {
             </div>
           </div>
           <Reveal className="space-y-6">
-            <MarketingShot screenKey="intelligence" name="AI Intelligence" />
+            <MarketingShot screenKey="intelligence" name="SelfRun DataBrain AI" />
             <div className="grid grid-cols-2 gap-4">
-              <PanelShot moduleKey="aibots" name="AI Assistants" glow={false} />
+              <PanelShot moduleKey="aibots" name="SelfRun AgentOS" glow={false} />
               <PanelShot moduleKey="chatbot" name="AI Chatbot" glow={false} />
             </div>
           </Reveal>
@@ -354,11 +354,11 @@ export default async function SaasHome() {
           <SectionHead center icon="chart" eyebrow="Connected by design" title="From first enquiry" accent="to money in the ledger." lead="A deal won starts the project. A finished milestone raises the invoice. A paid invoice updates the books. Nobody re-types a thing." />
           <Journey
             steps={[
-              { label: "Lead captured", text: "From your website, forms and campaigns.", module: "lms", icon: "target" },
-              { label: "Deal won", text: "The client record is created for you.", module: "lms", icon: "check" },
-              { label: "Project delivered", text: "Tasks, timesheets and milestones.", module: "pms", icon: "layers" },
-              { label: "Invoice raised", text: "From the milestone, with a payment link.", module: "fms", icon: "wallet" },
-              { label: "Paid & posted", text: "Finance is told; the ledger is updated.", module: "fms", icon: "chart" },
+              { label: "Lead captured", text: "From your website, forms and campaigns.", module: "SelfRun DealFlow AI", icon: "target" },
+              { label: "Deal won", text: "The client record is created for you.", module: "SelfRun DealFlow AI", icon: "check" },
+              { label: "Project delivered", text: "Tasks, timesheets and milestones.", module: "SelfRun SprintOS", icon: "layers" },
+              { label: "Invoice raised", text: "From the milestone, with a payment link.", module: "SelfRun CashFlow AI", icon: "wallet" },
+              { label: "Paid & posted", text: "Finance is told; the ledger is updated.", module: "SelfRun CashFlow AI", icon: "chart" },
             ]}
           />
         </div>

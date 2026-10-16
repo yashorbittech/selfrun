@@ -58,7 +58,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Step 2: Personalize Your Brand Colors and Content in Clicks",
         body: [
-          "Every business has its own personality. Open the Website CMS panel inside your workspace to upload your logo and choose your primary brand accent color. In one click, the system updates your navigation header, buttons, banners, and footer across every page.",
+          "Every business has its own personality. Open SelfRun SiteCraft AI inside your workspace to upload your logo and choose your primary brand accent color. In one click, the system updates your navigation header, buttons, banners, and footer across every page.",
           "Editing text is as simple as typing into a document. If you want to refine a headline or expand your service descriptions, select the block and type directly. You can also prompt the built-in AI assistant: ask it to make your opening paragraph more conversational, emphasize your twenty-four-hour customer support, or highlight your customer satisfaction guarantee.",
           "Because the layout engine enforces clean visual hierarchy and balanced spacing, your site looks professionally designed without you having to worry about font pairings or CSS breakpoints.",
         ],
@@ -67,7 +67,7 @@ export const POSTS: BlogPost[] = [
         heading: "Step 3: Connect Forms Directly to Your Built-in CRM",
         body: [
           "The biggest flaw of traditional standalone websites is lead leakage. When a visitor fills out a contact form on WordPress or Squarespace, the submission usually sits in an email inbox or gets lost in spam filters.",
-          "With SelfRun AI, every contact form, inquiry button, and newsletter signup connects directly to your Lead Management (LMS) panel. When a prospective client submits their phone number and project requirements, three things happen instantly: a new lead card appears on your sales board, an email alert notifies your team, and an automated confirmation email reaches the customer.",
+          "With SelfRun AI, every contact form, inquiry button, and newsletter signup connects directly to SelfRun DealFlow AI. When a prospective client submits their phone number and project requirements, three things happen instantly: a new lead card appears on your sales board, an email alert notifies your team, and an automated confirmation email reaches the customer.",
           "There are no third-party webhook tools or API keys to configure. Your marketing website and your sales pipeline share one database from day one.",
         ],
       },
@@ -128,13 +128,13 @@ export const POSTS: BlogPost[] = [
       {
         heading: "3. Kill Unnecessary Status Meetings with Visual Dashboards",
         body: [
-          "The dreaded 'quick sync' meeting often exists solely because managers do not know what everyone is working on. Replace thirty-minute status meetings with real-time project boards. When team members log task updates and timesheets in SelfRun AI's PMS panel, anyone can check progress at a glance without interrupting work.",
+          "The dreaded 'quick sync' meeting often exists solely because managers do not know what everyone is working on. Replace thirty-minute status meetings with real-time project boards. When team members log task updates and timesheets in SelfRun SprintOS, anyone can check progress at a glance without interrupting work.",
         ],
       },
       {
         heading: "4. Use Plain-Language Search to Find Business Answers",
         body: [
-          "Stop spending twenty minutes digging through old spreadsheets to answer simple business questions. With SelfRun AI's conversational Intelligence panel, you can type: 'Which clients have unpaid invoices older than 14 days?' or 'What was our total software spend last quarter?' and receive an instant, accurate answer with verified workings.",
+          "Stop spending twenty minutes digging through old spreadsheets to answer simple business questions. With SelfRun DataBrain AI, you can type: 'Which clients have unpaid invoices older than 14 days?' or 'What was our total software spend last quarter?' and receive an instant, accurate answer with verified workings.",
         ],
       },
       {
@@ -146,7 +146,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "6. Document Repeatable Tasks into Digital SOPs",
         body: [
-          "If you have to explain the same procedure three times, it belongs in a Standard Operating Procedure (SOP). Use the SOP Library in SelfRun AI to document client onboarding, payroll runs, and quality reviews. New hires can follow clear checklists independently instead of pinging senior staff every ten minutes.",
+          "If you have to explain the same procedure three times, it belongs in a Standard Operating Procedure (SOP). Use SelfRun Playbook AI to document client onboarding, payroll runs, and quality reviews. New hires can follow clear checklists independently instead of pinging senior staff every ten minutes.",
         ],
       },
       {
@@ -158,13 +158,13 @@ export const POSTS: BlogPost[] = [
       {
         heading: "8. Implement Spend Approval Thresholds",
         body: [
-          "Prevent billing surprises by establishing clear purchase requisition rules. Require team approval for any equipment purchase or software subscription above fifty dollars. In SelfRun AI's Procurement panel, managers can approve requests from their phone in seconds, keeping budgets intact without slowing work down.",
+          "Prevent billing surprises by establishing clear purchase requisition rules. Require team approval for any equipment purchase or software subscription above fifty dollars. In SelfRun SpendIQ, managers can approve requests from their phone in seconds, keeping budgets intact without slowing work down.",
         ],
       },
       {
         heading: "9. Keep Sensitive Credentials in a Central Vault",
         body: [
-          "Searching for lost passwords or asking colleagues for shared logins in chat wastes hours and creates severe security vulnerabilities. Store your company software credentials, hosting logins, and registration documents inside SelfRun AI's encrypted Digi Locker (DLMS) with role-based access.",
+          "Searching for lost passwords or asking colleagues for shared logins in chat wastes hours and creates severe security vulnerabilities. Store your company software credentials, hosting logins, and registration documents inside SelfRun CyberVault with role-based access.",
         ],
       },
       {
@@ -203,7 +203,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Generating Clean Digital Invoices from Completed Work",
         body: [
-          "In SelfRun AI's Finance panel (FMS), creating an invoice takes under thirty seconds because your project data is already connected. If your team tracks hours on a client milestone in the PMS panel, you can convert approved timesheets directly into an itemized bill with a single click.",
+          "In SelfRun CashFlow AI, creating an invoice takes under thirty seconds because your project data is already connected. If your team tracks hours on a client milestone in SelfRun SprintOS, you can convert approved timesheets directly into an itemized bill with a single click.",
           "Every invoice includes your company logo, legal registration details, tax breakdown, line-item descriptions, and a clear payment due date. You can preview the invoice exactly as the customer will see it before sending.",
         ],
       },
@@ -262,7 +262,7 @@ export const POSTS: BlogPost[] = [
         body: [
           "In the early days of a business, tracking inquiries in a simple Google Sheet or flagging emails in an inbox seems manageable. But as inquiry volume grows, this ad-hoc system inevitably breaks down.",
           "A salesperson forgets to call back an interested prospect. Two team members accidentally contact the same customer with conflicting quotes. Notes from a phone call remain trapped in someone's personal notebook. The result is lost revenue and a poor first impression on prospective customers.",
-          "A modern Lead Management (LMS) system gives your team a shared, organized headquarters where every inquiry has a clear owner, status, and scheduled next step.",
+          "A modern software like SelfRun DealFlow AI gives your team a shared, organized headquarters where every inquiry has a clear owner, status, and scheduled next step.",
         ],
       },
       {
@@ -276,7 +276,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Mapping Your Customer Journey into Visual Pipeline Stages",
         body: [
-          "A sales pipeline should mirror the natural steps a prospect takes before buying from you. In SelfRun AI's LMS panel, leads move smoothly across visual Kanban columns:",
+          "A sales pipeline should mirror the natural steps a prospect takes before buying from you. In SelfRun DealFlow AI, leads move smoothly across visual Kanban columns:",
           "1. New Inquiries: Fresh leads awaiting initial review and outreach.",
           "2. Contacted: Rep has reached out via phone or email; waiting for client response.",
           "3. Discovery & Demo: Meeting scheduled to evaluate client requirements.",
@@ -296,7 +296,7 @@ export const POSTS: BlogPost[] = [
         heading: "Converting Won Deals into Live Projects and Invoices",
         body: [
           "The true magic of an integrated business platform happens when a deal is closed. In separate software ecosystems, closing a deal means copying client details into the accounting tool and re-typing project scopes into the project management tool.",
-          "In SelfRun AI, clicking 'Mark as Won' does it all automatically: it creates a permanent Client record in your CRM, opens an onboarding project in your PMS panel, and prepares the deposit invoice in your Finance panel. Your team moves straight into project delivery without wasting an hour on administrative paperwork.",
+          "In SelfRun AI, clicking 'Mark as Won' does it all automatically: it creates a permanent Client record in your CRM, opens an onboarding project in SelfRun SprintOS, and prepares the deposit invoice in SelfRun CashFlow AI. Your team moves straight into project delivery without wasting an hour on administrative paperwork.",
         ],
       },
       {
@@ -338,14 +338,14 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Connecting Attendance, Shifts, and Leaves Automatically",
         body: [
-          "The secret to fast payroll is having clean data fed directly from the source. In SelfRun AI's HRMS panel, employee attendance is tracked daily through web logins, mobile check-ins, or biometric hardware integrations.",
+          "The secret to fast payroll is having clean data fed directly from the source. In SelfRun TalentOS, employee attendance is tracked daily through web logins, mobile check-ins, or biometric hardware integrations.",
           "When team members request vacation, sick leave, or unpaid time off, their managers approve or decline requests inside the same portal. By the time month-end arrives, the system already knows the exact count of working days, paid leaves, approved overtime hours, and unpaid absences for every single staff member.",
         ],
       },
       {
         heading: "Executing a One-Click Payroll Calculation Run",
         body: [
-          "When you are ready to process salaries, navigate to HRMS > Payroll Runs and click 'New Payroll Run'. Select the month and department, then click 'Calculate'.",
+          "When you are ready to process salaries, navigate to SelfRun TalentOS > Payroll Runs and click 'New Payroll Run'. Select the month and department, then click 'Calculate'.",
           "In seconds, SelfRun AI scans every employee contract, salary structure (basic pay, housing allowance, special allowances), approved expense reimbursements, and statutory deductions like Provident Fund, ESI, or professional tax.",
           "The system displays a clear summary table showing gross salary, total deductions, and net payout for the entire company. You can review anomalies or make one-time bonuses with a click.",
         ],
@@ -362,7 +362,7 @@ export const POSTS: BlogPost[] = [
         heading: "Automated Accounting Entries in Your Finance Ledger",
         body: [
           "In traditional setups, the HR team finishes payroll and then sends a summary report to the accountant, who manually types journal entries into QuickBooks or Tally. This double entry wastes hours and creates reconciliation discrepancies.",
-          "In SelfRun AI, finalizing a payroll run automatically creates the corresponding journal entries in the Finance panel (FMS). Salary expense, tax payables, and bank disbursement accounts balance automatically, keeping your profit-and-loss reporting 100% synchronized with human resources.",
+          "In SelfRun AI, finalizing a payroll run automatically creates the corresponding journal entries in SelfRun CashFlow AI. Salary expense, tax payables, and bank disbursement accounts balance automatically, keeping your profit-and-loss reporting 100% synchronized with human resources.",
         ],
       },
       {
@@ -415,7 +415,7 @@ export const POSTS: BlogPost[] = [
         heading: "Step 2: Use AI to Tailor One Idea Across Multiple Channels",
         body: [
           "One of the biggest mistakes brands make is copy-pasting the exact same message to every platform. What works on LinkedIn will look stiff on Twitter, and what works on Instagram needs strong visual framing.",
-          "In SelfRun AI's Social Media panel (SMMS), you simply enter your core concept: for example, 'How our new automated invoicing saves business owners 10 hours a month.' Click 'Generate with AI', and the assistant produces three tailored variants:",
+          "In SelfRun ViralPulse AI, you simply enter your core concept: for example, 'How our new automated invoicing saves business owners 10 hours a month.' Click 'Generate with AI', and the assistant produces three tailored variants:",
           "- LinkedIn: A polished, structured professional post with bullet points, strategic line breaks, and clear business takeaways.",
           "- Twitter / X: A punchy, hook-driven post under 280 characters with relevant hashtags.",
           "- Facebook / Instagram: A conversational, community-oriented caption with an engaging call-to-action question at the end.",
@@ -498,7 +498,7 @@ export const POSTS: BlogPost[] = [
         heading: "Tracking Read Receipts and Version Acknowledgments",
         body: [
           "How do you know if your team has actually read an updated compliance policy or security procedure? In traditional setups, managers send an email and hope for the best.",
-          "In SelfRun AI's SOP panel, you can mark critical procedures as requiring mandatory acknowledgment. When an SOP is published or revised, affected employees receive a notification and must click 'Acknowledge Policy'. Managers can view a live compliance dashboard showing exactly who has read the procedure and who still needs a reminder.",
+          "In SelfRun Playbook AI, you can mark critical procedures as requiring mandatory acknowledgment. When an SOP is published or revised, affected employees receive a notification and must click 'Acknowledge Policy'. Managers can view a live compliance dashboard showing exactly who has read the procedure and who still needs a reminder.",
         ],
       },
       {
@@ -556,13 +556,13 @@ export const POSTS: BlogPost[] = [
         heading: "Turning Conversations into Qualified CRM Leads",
         body: [
           "A great support bot does more than answer questions; it acts as an active sales assistant. When a visitor asks an in-depth question about your enterprise plans or requests a tailored quote, the chatbot smoothly asks: 'I would be happy to have our solutions specialist send you the full breakdown. What is the best email address and phone number to reach you?'",
-          "The moment the visitor types their details, SelfRun AI creates a lead card in your LMS pipeline, tags it as 'Chatbot Inquiry', and attaches the full conversation transcript so your sales team knows the prospect's exact requirements before picking up the phone.",
+          "The moment the visitor types their details, SelfRun AI creates a lead card in your SelfRun DealFlow AI pipeline, tags it as 'Chatbot Inquiry', and attaches the full conversation transcript so your sales team knows the prospect's exact requirements before picking up the phone.",
         ],
       },
       {
         heading: "Seamless Escalation to Human Support",
         body: [
-          "AI should empower your human team, not replace human connection where it matters most. If a customer expresses frustration or specifically requests to speak with a human agent, the bot creates a priority ticket in your Support panel.",
+          "AI should empower your human team, not replace human connection where it matters most. If a customer expresses frustration or specifically requests to speak with a human agent, the bot creates a priority ticket in SelfRun ResolveIQ.",
           "Your customer support team receives an immediate notification with the conversation history and can take over the chat live or follow up via email within minutes.",
         ],
       },
@@ -604,7 +604,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Breaking Big Deliverables into Milestones and Tasks",
         body: [
-          "In SelfRun AI's Project Management panel (PMS), every client engagement is structured hierarchically: Project > Milestones > Tasks.",
+          "In SelfRun AI's SelfRun SprintOS, every client engagement is structured hierarchically: Project > Milestones > Tasks.",
           "Milestones represent major achievements that client stakeholders care about—such as 'Architecture Sign-off', 'Beta Build Review', or 'Final Launch'. Each milestone contains specific, actionable tasks assigned to individual team members with firm start and due dates.",
           "Visual Kanban boards and Gantt calendar views let your team see task dependencies clearly. If a frontend task depends on an API design task, everyone knows why work has not started and who needs support.",
         ],
@@ -613,14 +613,14 @@ export const POSTS: BlogPost[] = [
         heading: "Tracking Real Hours with Integrated Timesheets",
         body: [
           "Do you know the true cost of delivering your services? If your team does not track hours against specific projects, you cannot know whether a fifty-thousand-dollar contract actually made money or cost you fifty-five thousand dollars in staff payroll.",
-          "SelfRun AI includes built-in timesheets. Team members log hours against tasks with a single click, either using live timers or end-of-day entries. Because employee salary costs are already configured in HRMS, the platform calculates real-time project cost and gross margin automatically as work happens.",
+          "SelfRun AI includes built-in timesheets. Team members log hours against tasks with a single click, either using live timers or end-of-day entries. Because employee salary costs are already configured in SelfRun TalentOS, the platform calculates real-time project cost and gross margin automatically as work happens.",
         ],
       },
       {
         heading: "Connecting Task Milestones Directly to Client Invoicing",
         body: [
           "One of the biggest advantages of an all-in-one platform is milestone billing. Instead of having project managers send a message to the finance team saying 'Milestone 2 is complete, please raise an invoice', SelfRun AI handles the transition seamlessly.",
-          "When a project manager marks a milestone as 'Delivered', the system prompts them to generate the corresponding invoice in the Finance panel (FMS) with the agreed contract price. The invoice is created, sent, and tracked without administrative delay.",
+          "When a project manager marks a milestone as 'Delivered', the system prompts them to generate the corresponding invoice in SelfRun CashFlow AI with the agreed contract price. The invoice is created, sent, and tracked without administrative delay.",
         ],
       },
       {
@@ -669,8 +669,8 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Conducting a Fast 30-Minute Software Spend Audit",
         body: [
-          "Taking back control begins with visibility. In SelfRun AI's Procurement & Assets panel (PRMS), create an inventory of every active digital subscription your company pays for. Record the tool name, vendor, billing frequency (monthly or annual), monthly cost, seat count, and primary owner.",
-          "Next, compare the number of paid licenses against your active employee list in HRMS. You will almost certainly find that you are paying for twelve Figma seats when only six people are designing, or twenty Zoom licenses when five would suffice. Downgrading unused seats alone often pays for your entire operations software.",
+          "Taking back control begins with visibility. In SelfRun AI's SelfRun SpendIQ, create an inventory of every active digital subscription your company pays for. Record the tool name, vendor, billing frequency (monthly or annual), monthly cost, seat count, and primary owner.",
+          "Next, compare the number of paid licenses against your active employee list in SelfRun TalentOS. You will almost certainly find that you are paying for twelve Figma seats when only six people are designing, or twenty Zoom licenses when five would suffice. Downgrading unused seats alone often pays for your entire operations software.",
         ],
       },
       {
@@ -685,14 +685,14 @@ export const POSTS: BlogPost[] = [
         heading: "Automated Renewal Alerts That Prevent Surprise Auto-Charges",
         body: [
           "SaaS vendors rely heavily on auto-renewals. You intend to cancel an expensive enterprise tool, but the renewal date passes unnoticed, and your card gets charged for another non-refundable full year.",
-          "SelfRun AI's PRMS panel includes contract expiry tracking. You set a renewal notice date (such as thirty or sixty days before contract expiry). When that date arrives, the system alerts the tool owner and finance manager, giving you ample time to evaluate usage, negotiate a discount, or cancel the contract cleanly.",
+          "SelfRun AI's SelfRun SpendIQ includes contract expiry tracking. You set a renewal notice date (such as thirty or sixty days before contract expiry). When that date arrives, the system alerts the tool owner and finance manager, giving you ample time to evaluate usage, negotiate a discount, or cancel the contract cleanly.",
         ],
       },
       {
         heading: "Managing Hardware Assets and Vendor Relationships",
         body: [
           "Procurement is not just about software; physical hardware assets (laptops, monitors, smartphones, testing tablets) must also be accounted for. When an employee resigns, failing to track company-assigned hardware results in lost equipment.",
-          "The Assets module links equipment serial numbers directly to employee profiles in HRMS. When an employee completes their exit clearance, HR sees every piece of hardware and every software seat assigned to that person, ensuring a smooth return process.",
+          "The Assets module links equipment serial numbers directly to employee profiles in SelfRun TalentOS. When an employee completes their exit clearance, HR sees every piece of hardware and every software seat assigned to that person, ensuring a smooth return process.",
         ],
       },
       {
@@ -733,8 +733,8 @@ export const POSTS: BlogPost[] = [
       {
         heading: "How Conversational AI Queries Your Live Operations",
         body: [
-          "SelfRun AI's Intelligence panel introduces conversational business intelligence. Because your leads, projects, employee records, payroll, procurement, and financial ledgers live inside the same database, the AI can query across your entire company seamlessly.",
-          "You do not need to know SQL, Python, or data modeling formulas. You simply open the Intelligence panel and type your question in ordinary conversational English, exactly as if you were asking a senior operational director.",
+          "SelfRun AI's SelfRun DataBrain AI introduces conversational business intelligence. Because your leads, projects, employee records, payroll, procurement, and financial ledgers live inside the same database, the AI can query across your entire company seamlessly.",
+          "You do not need to know SQL, Python, or data modeling formulas. You simply open SelfRun DataBrain AI and type your question in ordinary conversational English, exactly as if you were asking a senior operational director.",
         ],
       },
       {
@@ -758,14 +758,14 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Role-Based Security: Confidentiality Guaranteed",
         body: [
-          "Not everyone in your organization should have access to company-wide financial records or executive salary figures. SelfRun AI enforces strict role-based access control inside the Intelligence panel.",
+          "Not everyone in your organization should have access to company-wide financial records or executive salary figures. SelfRun AI enforces strict role-based access control inside SelfRun DataBrain AI.",
           "A project manager asking questions will only receive answers drawn from the projects, timesheets, and tasks they have permission to view. Executive financials, bank account balances, and payroll specifics remain strictly accessible to Super Admins and authorized Finance Officers.",
         ],
       },
       {
         heading: "How to Build a Smarter Morning Routine with AI",
         body: [
-          "Start your Monday morning by opening the Intelligence panel and asking: 'Summarize our top operational priorities, overdue invoices, and blocked project tasks for this week.'",
+          "Start your Monday morning by opening SelfRun DataBrain AI and asking: 'Summarize our top operational priorities, overdue invoices, and blocked project tasks for this week.'",
           "Use the answers to set your team's agenda before stepping into your morning meetings.",
           "Prompt the AI to spot trends before they become problems: 'Are any client accounts taking longer to settle invoices this quarter compared to last quarter?'",
         ],
@@ -802,7 +802,7 @@ export const POSTS: BlogPost[] = [
         body: [
           "Avoid trying to rank for broad, hyper-competitive terms like 'accounting' or 'web development'. You will be competing against massive multinational directories with multimillion-dollar budgets.",
           "Instead, focus on specific, long-tail phrases that indicate immediate buyer intent: for example, 'b2b payroll software for small teams', 'commercial electrical contractor in Austin', or 'custom packaging design services'. These searchers know exactly what they need and are ready to contact your business today.",
-          "In SelfRun AI's SEO panel, you can track your target keywords, observe search volume, and monitor your ranking progression over time.",
+          "In SelfRun RankMax AI, you can track your target keywords, observe search volume, and monitor your ranking progression over time.",
         ],
       },
       {
@@ -819,7 +819,7 @@ export const POSTS: BlogPost[] = [
         heading: "Step 3: Run an Automated Technical Site Health Audit",
         body: [
           "Technical SEO errors quietly sabotage your rankings. Broken links (404 errors), missing title tags, uncompressed images that slow down page loads, and pages missing mobile viewport tags cause search engine crawlers to penalize your domain.",
-          "In SelfRun AI's SEO panel, click 'Run Site Audit'. The system crawls your public website in seconds, checks every page against search best practices, and presents a prioritized list of issues with direct links to fix them inside your CMS.",
+          "In SelfRun RankMax AI, click 'Run Site Audit'. The system crawls your public website in seconds, checks every page against search best practices, and presents a prioritized list of issues with direct links to fix them inside SelfRun SiteCraft AI.",
         ],
       },
       {
@@ -866,7 +866,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Setting Up an Encrypted Corporate Credential Vault",
         body: [
-          "SelfRun AI's Digi Locker (DLMS) provides a secure, centralized digital vault for your company's credentials and vital documents. Instead of sharing plain-text passwords, credentials are stored in encrypted vaults with strict role-based access.",
+          "SelfRun AI's SelfRun CyberVault provides a secure, centralized digital vault for your company's credentials and vital documents. Instead of sharing plain-text passwords, credentials are stored in encrypted vaults with strict role-based access.",
           "You can categorize entries by type: Software Logins, Hosting & Servers, API Keys, Banking Portals, and Client Accounts. You decide who can view passwords: for instance, granting the marketing team access to the social media login without exposing financial accounts.",
         ],
       },
@@ -888,7 +888,7 @@ export const POSTS: BlogPost[] = [
         heading: "One-Click Access Revocation When Staff Members Depart",
         body: [
           "Employee offboarding is a critical security vulnerability for small businesses. When a staff member resigns, having to manually remember thirty different passwords they might know is nearly impossible.",
-          "In SelfRun AI, revoking an employee's workspace account instantly severs their access to every connected panel, the credential vault, team channels, and internal documents in a single click. The master audit log records the exact timestamp of account termination for compliance records.",
+          "In SelfRun AI, revoking an employee's workspace account instantly severs their access to every connected product, SelfRun CyberVault, team channels, and internal documents in a single click. The master audit log records the exact timestamp of account termination for compliance records.",
         ],
       },
       {
@@ -932,7 +932,7 @@ export const POSTS: BlogPost[] = [
         heading: "Step 1: The Pre-Boarding Phase (Before Day 1)",
         body: [
           "Great onboarding begins the moment the candidate signs their offer letter. Send a warm, branded welcome email from your company domain outlining what they can expect on their first day, what time to arrive, what to wear, and who their team buddy will be.",
-          "In SelfRun AI's HRMS panel, provision their employee profile, assign their department, set their initial role permissions, and send an invitation to their employee self-service portal. New hires can upload their identification documents, tax records, and direct deposit banking details from home before their official start date.",
+          "In SelfRun AI's SelfRun TalentOS, provision their employee profile, assign their department, set their initial role permissions, and send an invitation to their employee self-service portal. New hires can upload their identification documents, tax records, and direct deposit banking details from home before their official start date.",
         ],
       },
       {
@@ -945,7 +945,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Step 3: Clear Day 1 Starter Learning Modules",
         body: [
-          "Nothing creates more anxiety for new hires than sitting idle wondering what they are supposed to do. In SelfRun AI's SOP and Training panels, assign a curated 'New Hire Onboarding' track.",
+          "Nothing creates more anxiety for new hires than sitting idle wondering what they are supposed to do. In SelfRun AI's SelfRun Playbook AI and SelfRun Cohort AI, assign a curated 'New Hire Onboarding' track.",
           "This track should include essential starter guides: Company Mission & Values, Remote Work Guidelines, Communication Norms, and Department Procedures. The new hire can read each guide and click 'Acknowledge', giving both the employee and manager a clear visual checklist of completed orientation steps.",
         ],
       },
@@ -996,7 +996,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Building Your Question Bank in Minutes",
         body: [
-          "In SelfRun AI's Online Test System (OTS), you can build comprehensive question banks categorized by topic, difficulty, and department. Supported question formats include Multiple Choice (single or multiple answer), True/False, Short Answer, and Long Explanations.",
+          "In SelfRun AI's SelfRun EvalIQ, you can build comprehensive question banks categorized by topic, difficulty, and department. Supported question formats include Multiple Choice (single or multiple answer), True/False, Short Answer, and Long Explanations.",
           "If you have existing questions in spreadsheets, use the bulk CSV import tool to upload hundreds of questions in seconds. You can tag questions by subject—such as 'Digital Marketing', 'Python Fundamentals', 'Customer Service SOPs', or 'Financial Compliance'—and randomly generate balanced test papers from the bank.",
         ],
       },
@@ -1065,7 +1065,7 @@ export const POSTS: BlogPost[] = [
           "Sound cash flow management requires real-time visibility into two opposing forces:",
           "1. Cash Coming In (Accounts Receivable): Invoices that have been billed, categorized by due date (Due this week, Due in 15 days, Overdue).",
           "2. Cash Going Out (Accounts Payable): Vendor bills, software subscriptions, contractor fees, and tax payments with firm deadlines.",
-          "In SelfRun AI's Finance panel (FMS), the Cash Flow dashboard plots these numbers side by side on a visual timeline. You can see your projected cash balance thirty, sixty, and ninety days into the future based on realistic payment schedules.",
+          "In SelfRun AI's SelfRun CashFlow AI, the Cash Flow dashboard plots these numbers side by side on a visual timeline. You can see your projected cash balance thirty, sixty, and ninety days into the future based on realistic payment schedules.",
         ],
       },
       {
@@ -1095,7 +1095,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "The Weekly 10-Minute Financial Review Checklist",
         body: [
-          "Every Friday afternoon, open your FMS panel and review three numbers: Total Bank Balance, Overdue Invoices older than 7 days, and Bills Due next week.",
+          "Every Friday afternoon, open SelfRun CashFlow AI and review three numbers: Total Bank Balance, Overdue Invoices older than 7 days, and Bills Due next week.",
           "Follow up immediately on any high-value overdue invoice before the weekend begins.",
           "Verify that planned vendor payments for next week do not exceed expected incoming receipts.",
         ],
@@ -1146,8 +1146,8 @@ export const POSTS: BlogPost[] = [
         body: [
           "In SelfRun AI, your entire business operates on a single unified data architecture. Look at how smoothly a real workflow moves through the platform:",
           "1. A prospective client fills out a form on your public Website.",
-          "2. The inquiry immediately appears as a lead card in your LMS CRM pipeline.",
-          "3. When the sales rep closes the deal, one click creates the Client profile, kicks off a delivery project in PMS, and generates the deposit invoice in FMS.",
+          "2. The inquiry immediately appears as a lead card in your SelfRun DealFlow AI pipeline.",
+          "3. When the sales rep closes the deal, one click creates the Client profile, kicks off a delivery project in SelfRun SprintOS, and generates the deposit invoice in SelfRun CashFlow AI.",
           "4. The delivery team logs hours on project tasks, which automatically flow into milestone billing and payroll calculations.",
           "5. The client tracks progress through their branded Client Portal without sending a single status-check email.",
           "No webhooks, no third-party sync integrations, and zero duplicate data entry.",
@@ -1157,17 +1157,17 @@ export const POSTS: BlogPost[] = [
         heading: "One Login, Role-Based Access, and Master Audit Logs",
         body: [
           "Managing employee access across ten separate tools is an IT nightmare. When someone is hired or promoted, you have to create accounts across eight different platforms with separate passwords.",
-          "In SelfRun AI, every employee has one login. Administrators assign role permissions (Super Admin, Manager, Specialist, Employee, Viewer) per panel. The central Audit Log records every critical action—from invoice deletions and permission changes to export downloads—providing airtight accountability and compliance.",
+          "In SelfRun AI, every employee has one login. Administrators assign role permissions (Super Admin, Manager, Specialist, Employee, Viewer) per product. The central Audit Log records every critical action—from invoice deletions and permission changes to export downloads—providing airtight accountability and compliance.",
         ],
       },
       {
         heading: "A Practical Migration Plan: Transitioning Without Friction",
         body: [
           "Transitioning from separate apps to a unified platform does not have to happen overnight. Follow a phased rollout:",
-          "- Week 1: Set up company branding, invite your team, and establish your employee directory in HRMS.",
-          "- Week 2: Import your existing clients and active leads via CSV into the LMS panel.",
-          "- Week 3: Transition active projects and tasks into PMS.",
-          "- Week 4: Move month-end invoicing and billing onto FMS and cancel redundant subscriptions.",
+          "- Week 1: Set up company branding, invite your team, and establish your employee directory in SelfRun TalentOS.",
+          "- Week 2: Import your existing clients and active leads via CSV into SelfRun DealFlow AI.",
+          "- Week 3: Transition active projects and tasks into SelfRun SprintOS.",
+          "- Week 4: Move month-end invoicing and billing onto SelfRun CashFlow AI and cancel redundant subscriptions.",
         ],
       },
       {
@@ -1208,7 +1208,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Setting Up Structured Programs, Batches, and Schedules",
         body: [
-          "In SelfRun AI's Training Management panel (TMS), education is organized logically: Program > Batches > Classes.",
+          "In SelfRun AI's SelfRun Cohort AI, education is organized logically: Program > Batches > Classes.",
           "You define your course curriculum, syllabus modules, and schedule. You can create multiple cohorts or batches (e.g., 'Spring 2026 Cohort - Evening Batch') with specific start dates, maximum seat limits, and assigned instructors.",
           "The interactive batch calendar displays scheduled lectures, assignment deadlines, and exam dates, keeping instructors and students synchronized.",
         ],
@@ -1239,7 +1239,7 @@ export const POSTS: BlogPost[] = [
         body: [
           "Keep individual class sessions focused: combine thirty minutes of instruction with twenty minutes of hands-on practical exercises.",
           "Set assignment due dates with automated 24-hour reminder notifications to encourage on-time submissions.",
-          "Conduct mid-term knowledge check tests using the OTS panel to identify struggling students early.",
+          "Conduct mid-term knowledge check tests using SelfRun EvalIQ to identify struggling students early.",
           "Celebrate completions publicly: encourage students to share their verified digital certificates on LinkedIn to drive organic referrals for your next cohort.",
         ],
       },
@@ -1273,7 +1273,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Creating Specialized Bots for Different Departments",
         body: [
-          "Rather than building one generic, overloaded bot, SelfRun AI's AI Assistants panel (AIBots) lets you create specialized personas tailored to specific organizational functions:",
+          "Rather than building one generic, overloaded bot, SelfRun AI's SelfRun AgentOS lets you create specialized personas tailored to specific organizational functions:",
           "- HR Helper Bot: Answers questions on leave policies, health insurance, company holidays, and expense reimbursement guidelines.",
           "- Sales Objection Coach: Helps reps handle customer pushback, explains competitor comparisons, and suggests relevant case studies.",
           "- Technical Onboarding Bot: Guides new developers and engineers through repository setups, coding standards, and deployment pipelines.",
@@ -1298,7 +1298,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "Analyzing Logs to Discover Organizational Knowledge Gaps",
         body: [
-          "One of the most valuable benefits of internal AI bots is the visibility they provide into what your team is struggling with. By reviewing anonymous conversation logs in the AIBots panel, managers can see recurring themes.",
+          "One of the most valuable benefits of internal AI bots is the visibility they provide into what your team is struggling with. By reviewing anonymous conversation logs in SelfRun AgentOS, managers can see recurring themes.",
           "If fifteen employees ask the HR bot about maternity leave policy within two weeks, that is a clear signal that your current handbook documentation on that topic needs clarification.",
         ],
       },
@@ -1306,7 +1306,7 @@ export const POSTS: BlogPost[] = [
         heading: "Actionable Steps to Build Your First Internal Bot",
         body: [
           "Start with your HR department: gather your employee handbook, leave policy, and expense guidelines into clean PDF or text files.",
-          "Create a new bot named 'HR Assistant' inside the AIBots panel and upload those documents.",
+          "Create a new bot named 'HR Assistant' inside SelfRun AgentOS and upload those documents.",
           "Invite three team members to test the bot and provide feedback before rolling it out company-wide.",
         ],
       },
@@ -1352,7 +1352,7 @@ export const POSTS: BlogPost[] = [
         body: [
           "Your workspace should live on your domain, not ours. Under Settings > Domains, you can map two distinct web addresses:",
           "1. Your Public Website: e.g., yourcompany.com (serving your marketing pages, blog, and contact forms).",
-          "2. Your Secure App & Client Portal: e.g., app.yourcompany.com or portal.yourcompany.com (serving your workspace panels and client self-service).",
+          "2. Your Secure App & Client Portal: e.g., app.yourcompany.com or portal.yourcompany.com (serving your workspace products and client self-service).",
           "Add the simple CNAME records to your DNS provider. SelfRun AI automatically verifies ownership and provisions a free, automatic TLS/SSL certificate that renews seamlessly in the background.",
         ],
       },

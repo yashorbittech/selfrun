@@ -117,7 +117,7 @@ const added: Doc[] = [
   d({
     slug: "leads-and-pipeline", title: "Capture leads and run your pipeline", summary: "From a website form to a won deal, with owners and due dates.", category: "Sales & marketing", readMinutes: 5, shot: "lms", panel: "lms",
     sections: [
-      { heading: "Where leads come from", body: ["Leads arrive from your website forms, campaigns, manual entry and CSV import. Each one lands in the CRM & Sales panel with its source, so you can see what brings enquiries in."] },
+      { heading: "Where leads come from", body: ["Leads arrive from your website forms, campaigns, manual entry and CSV import. Each one lands in SelfRun DealFlow AI with its source, so you can see what brings enquiries in."] },
       { heading: "Work the pipeline", list: ["Every lead has an owner, a status (New, In progress, Completed, Rejected) and a due date", "Notes and two-way messages keep the history on the lead", "Pending-task alerts flag leads untouched for several days", "Saved filters segment by category, status, source and date range"], shot: "lms-leads" },
       { heading: "Measure what works", body: ["The dashboard shows pipeline health, campaign spend, attributed leads, cost per lead, qualified leads, won deals, revenue and ROI. Export the current view to CSV at any time."] },
       { heading: "When a deal is won", body: ["Marking a lead won can create the client record, so projects and invoices start without re-entering details."] },
@@ -161,8 +161,8 @@ const added: Doc[] = [
   d({
     slug: "run-payroll", title: "Run payroll and give employees self-service", summary: "Attendance, leave, salary revisions, payslips and payouts that post to Finance.", category: "People & finance", readMinutes: 6, shot: "hrms-payroll", panel: "hrms",
     sections: [
-      { heading: "Set up people first", body: ["Add employees (or import them), then departments and reporting lines. Leave types, balances and holidays are configured in the HR panel."], shot: "hrms-employees" },
-      { heading: "Run a payroll month", list: ["Review attendance and leave for the month", "Run payroll for the period", "Check salary revisions and payslips", "Pay salaries — payouts post to Finance automatically"], shot: "hrms-payroll" },
+      { heading: "Set up people first", body: ["Add employees (or import them), then departments and reporting lines. Leave types, balances and holidays are configured in SelfRun TalentOS."] },
+      { heading: "Run a payroll month", list: ["Review attendance and leave for the month", "Run payroll for the period", "Check salary revisions and payslips", "Pay salaries — payouts post to SelfRun CashFlow AI automatically"], shot: "hrms-payroll" },
       { heading: "Employee self-service", body: ["Employees check in, request leave, and view their salary, payslips and documents themselves, so HR stops answering the same questions."] },
     ],
   }),
@@ -171,13 +171,13 @@ const added: Doc[] = [
     sections: [
       { heading: "Plan the project", body: ["Create a project with milestones and tasks. See them as a board, a task list or a timeline, and on the calendar."], shot: "pms-projects" },
       { heading: "Track time and cost", list: ["Team members log time on a timesheet", "Managers approve timesheets", "Costing compares cost with budget so you see profitability before the project ends"] },
-      { heading: "Bill from milestones", body: ["When a milestone completes it can raise the invoice in Finance, so billing never waits for someone to remember."] },
+      { heading: "Bill from milestones", body: ["When a milestone completes it can raise the invoice in SelfRun CashFlow AI, so billing never waits for someone to remember."] },
     ],
   }),
   d({
     slug: "procurement-and-assets", title: "Control purchases, vendors and company assets", summary: "Requests, approvals, RFQs, orders, goods receipt, invoices and an asset register.", category: "Operations", readMinutes: 5, shot: "prms", panel: "prms",
     sections: [
-      { heading: "From request to payment", list: ["An employee raises a purchase request; it follows the approval chain for its amount", "Run an RFQ and compare vendors, then issue the purchase order", "Record the goods receipt, then match order, receipt and invoice", "The matched invoice becomes a payable in Finance"], shot: "prms-purchase-orders" },
+      { heading: "From request to payment", list: ["An employee raises a purchase request; it follows the approval chain for its amount", "Run an RFQ and compare vendors, then issue the purchase order", "Record the goods receipt, then match order, receipt and invoice", "The matched invoice becomes a payable in SelfRun CashFlow AI"], shot: "prms-purchase-orders" },
       { heading: "Assets and subscriptions", body: ["Register hardware and assign it to people, track software subscriptions with renewal alerts, and keep infrastructure and inventory in one place."] },
       { heading: "Self-service", body: ["Employees raise and follow their own requests and expense claims from My requests and My expenses."] },
     ],
@@ -187,7 +187,7 @@ const added: Doc[] = [
     sections: [
       { heading: "Programs and batches", body: ["Create programs, then batches with a schedule, mentors and capacity. The batch calendar shows them all together."], shot: "tms-students" },
       { heading: "Students", list: ["Applications arrive as a list or a board", "Accepted students join a batch and get their own portal", "Track attendance, assignments and live projects", "Collect fees with reminders, and issue certificates that can be verified publicly"] },
-      { heading: "Assessments", body: ["Pair training with the Online Tests panel for exams and automatic evaluation."] },
+      { heading: "Assessments", body: ["Pair training with SelfRun EvalIQ for exams and automatic evaluation."] },
     ],
   }),
   d({
@@ -201,7 +201,7 @@ const added: Doc[] = [
     slug: "documents-and-vault", title: "Generate documents and keep credentials safe", summary: "Templates, approvals and signatures — and an encrypted vault for what must not be lost.", category: "Operations", readMinutes: 5, shot: "lpms", panel: "lpms",
     sections: [
       { heading: "Documents from templates", body: ["Build reusable templates, create documents from them, route them through the approval workflow for their type and collect signatures. The register keeps status and history."], shot: "lpms-documents" },
-      { heading: "A vault for credentials and files", body: ["Digi Locker holds company and per-client vaults for credentials, documents, links and notes. Records are encrypted and shared record by record; expiry alerts warn before anything lapses."], shot: "dlms-credentials" },
+      { heading: "A vault for credentials and files", body: ["SelfRun CyberVault holds company and per-client vaults for credentials, documents, links and notes. Records are encrypted and shared record by record; expiry alerts warn before anything lapses."], shot: "dlms-credentials" },
     ],
   }),
   d({

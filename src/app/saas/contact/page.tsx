@@ -19,7 +19,7 @@ export default async function ContactPage() {
   ];
   return (
     <>
-      <PageHero art="contact" photo="colleagues" shot="support" shotName="Help & Support" eyebrow="Contact Us" title="Let's talk about" accent="your business." lead="Questions about plans, how the platform fits your business, or security? Send a message and we'll reply within one business day." chip={{ title: "Reply within one business day", text: "From the people who build the platform" }} />
+      <PageHero art="contact" photo="colleagues" shot="support" shotName="SelfRun ResolveIQ" eyebrow="Contact Us" title="Let's talk about" accent="your business." lead="Questions about plans, how the platform fits your business, or security? Send a message and we'll reply within one business day." chip={{ title: "Reply within one business day", text: "From the people who build the platform" }} />
       <section className="sr-section">
         <div className="sr-container">
           <SectionHead icon="chat" eyebrow="Get in touch" title="Reach the" accent="right team." lead="Pick the address that fits, or send a message with the form and we will route it for you." />

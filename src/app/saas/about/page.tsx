@@ -60,7 +60,7 @@ export default async function AboutPage() {
         lead="Too many companies spend their best hours copying data between tools, chasing approvals and compiling reports. SelfRun AI exists to take that work off people's plates — with one AI-powered platform that runs the routine."
         photo="open-office"
         shot="workspace"
-        shotName="Workspace"
+        shotName="SelfRun CommandOS"
         chip={{ title: `${modules.length} products, one platform`, text: "Under your own brand" }}
       >
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
@@ -85,7 +85,7 @@ export default async function AboutPage() {
             </div>
             <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "products" }, { v: "1", l: "login" }, { v: "1", l: "database" }]} /></div>
           </div>
-          <Reveal><MarketingShot screenKey="workspace" name="Workspace" /></Reveal>
+          <Reveal><MarketingShot screenKey="workspace" name="SelfRun CommandOS" /></Reveal>
         </div>
         </div>
       </section>

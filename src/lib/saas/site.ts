@@ -61,11 +61,11 @@ export interface Flow {
   action: string[];
 }
 export const FLOWS: Flow[] = [
-  { id: "lead", area: "Sales", trigger: "A new lead is created", condition: "Matches your assignment rule", action: ["Assign the lead to its owner", "Notify the owner", "Send a welcome message"] },
-  { id: "deal", area: "Sales → Projects", trigger: "A deal is won", condition: "Always", action: ["Create the client record", "Notify the account team"] },
-  { id: "leave", area: "People", trigger: "A leave request is filed", condition: "Needs approval", action: ["Notify the manager", "Track the approval"] },
-  { id: "invoice", area: "Finance", trigger: "An invoice goes overdue", condition: "Past the reminder date", action: ["Send a payment reminder", "Notify finance"] },
-  { id: "task", area: "Projects", trigger: "A task is assigned or overdue", condition: "Always", action: ["Notify the assignee"] },
+  { id: "lead", area: "SelfRun DealFlow AI", trigger: "A new lead is created", condition: "Matches your assignment rule", action: ["Assign the lead to its owner", "Notify the owner", "Send a welcome message"] },
+  { id: "deal", area: "SelfRun DealFlow AI → SelfRun SprintOS", trigger: "A deal is won", condition: "Always", action: ["Create the client record", "Notify the account team"] },
+  { id: "leave", area: "SelfRun TalentOS", trigger: "A leave request is filed", condition: "Needs approval", action: ["Notify the manager", "Track the approval"] },
+  { id: "invoice", area: "SelfRun CashFlow AI", trigger: "An invoice goes overdue", condition: "Past the reminder date", action: ["Send a payment reminder", "Notify finance"] },
+  { id: "task", area: "SelfRun SprintOS", trigger: "A task is assigned or overdue", condition: "Always", action: ["Notify the assignee"] },
 ];
 
 export type RoadmapStatus = "Completed" | "In Progress" | "Planned" | "Future";
@@ -445,7 +445,7 @@ export const CAPABILITIES: { title: string; icon: IconKey; items: string[] }[] =
   { title: "Every device", icon: "rocket", items: ["Web app on any browser", "Installable PWA", "Android and iOS apps", "Windows, macOS and Linux apps", "Push notifications", "Works on phone, tablet and desktop"] },
   { title: "Control", icon: "shield", items: ["Switch products on or off", "Roles and per-action permissions", "Audit log across every product", "Sessions and sign-in history", "Strict company data isolation", "Encrypted secrets"] },
   { title: "Data & insight", icon: "chart", items: ["Live dashboards in every product", "Company-wide executive view", "Saved filters", "CSV import with validation", "CSV export", "Search across every product (⌘K)"] },
-  { title: "Website & growth", icon: "globe", items: ["Drag-and-drop page builder", "Blog, careers and products", "Forms straight into your CRM", "Offers, coupons and referrals", "Wallet and reward credits", "SEO audits and rank tracking"] },
+  { title: "Website & growth", icon: "globe", items: ["Drag-and-drop page builder", "Blog, careers and products", "Forms straight into SelfRun DealFlow AI", "Offers, coupons and referrals", "Wallet and reward credits", "SEO audits and rank tracking"] },
   { title: "People & portals", icon: "users", items: ["Employee self-service", "Client & student portal", "Team chat and meetings", "Announcements", "Help center and support desk", "Online tests and certificates"] },
 ];
 

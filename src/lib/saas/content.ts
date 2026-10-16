@@ -47,7 +47,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     headline: "From hiring to payroll, every people process in one place",
     summary: "Employee records, attendance, leave, holidays, recruitment and payroll — with self-service for employees and approvals for managers.",
     capabilities: ["Employee directory, documents and organisation tree", "Attendance with monthly calendar and reports", "Leave types, balances, requests and approvals", "Recruitment pipeline from application to offer", "Payroll runs, salary revisions and payslips", "Employee self-service: my attendance, leave, salary and documents"],
-    automations: ["Notify the manager when a leave request is filed", "Create the employee record when an offer is accepted", "Alert HR before documents or probation periods expire", "Post payroll results to Finance automatically"],
+    automations: ["Notify the manager when a leave request is filed", "Create the employee record when an offer is accepted", "Alert HR before documents or probation periods expire", "Post payroll results to SelfRun CashFlow AI automatically"],
     outcome: "Hours of HR admin saved every week and employees who always know where they stand.",
   },
   fms: {
@@ -55,7 +55,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     headline: "Accounting, invoicing and cash flow you can trust",
     summary: "Invoices, bills, payments, banking, reconciliation and financial reports — connected to every other module so numbers are never re-entered.",
     capabilities: ["Invoices, credit notes, bills and debit notes", "Receipts, payment links and payouts", "Bank and cash accounts with reconciliation", "Chart of accounts, general ledger and trial balance", "Profit & loss, balance sheet, cash flow and tax reports", "Approvals, advances, expenses and numbering rules"],
-    automations: ["Send payment reminders on overdue invoices", "Route large expenses for approval", "Post salary and vendor payments from HR and Procurement", "Notify finance when a payment link is paid"],
+    automations: ["Send payment reminders on overdue invoices", "Route large expenses for approval", "Post salary and vendor payments from SelfRun TalentOS and SelfRun SpendIQ", "Notify finance when a payment link is paid"],
     outcome: "Books that close faster, fewer payment delays and reports you can hand to your accountant as they are.",
   },
   pms: {
@@ -71,7 +71,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     headline: "Control spend from request to payment",
     summary: "Requisitions, RFQs, purchase orders, goods receipts, vendor invoices, inventory and assets — with approvals at every step.",
     capabilities: ["Purchase requests with approval chains", "RFQs and vendor comparison", "Purchase orders, GRN and three-way invoice matching", "Vendor directory and subscription tracking", "Inventory with stock movements", "Asset register, infrastructure and expense claims"],
-    automations: ["Route requests to the right approver by amount", "Alert before subscriptions renew", "Create a payable in Finance when an invoice is matched"],
+    automations: ["Route requests to the right approver by amount", "Alert before subscriptions renew", "Create a payable in SelfRun CashFlow AI when an invoice is matched"],
     outcome: "Spend that is approved, tracked and matched — with no surprise invoices.",
   },
   tms: {
@@ -159,7 +159,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     headline: "Your website, fully in your control",
     summary: "A complete website builder: pages, sections, blog, forms, media, navigation, themes, SEO and custom domains.",
     capabilities: ["Drag-and-drop page builder with draft and publish", "Blog, collections and forms", "Media library", "Themes with live preview", "Navigation and footer management", "Custom domain with automatic SSL"],
-    automations: ["Send form submissions to your CRM and your inbox", "Notify the team when a page is waiting for approval"],
+    automations: ["Send form submissions to SelfRun DealFlow AI and your inbox", "Notify the team when a page is waiting for approval"],
     outcome: "A professional website your team can change any day — without a developer.",
   },
   portal: {
@@ -191,7 +191,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     headline: "A public website on your own domain",
     summary: "Publish your company website, served from your domain with automatic SSL, edited through the website builder.",
     capabilities: ["Your own domain and subdomain", "Automatic SSL", "Maintenance mode", "Built-in forms and lead capture"],
-    automations: ["Capture every enquiry straight into your CRM"],
+    automations: ["Capture every enquiry straight into SelfRun DealFlow AI"],
     outcome: "A live website without hosting, plug-ins or developers.",
   },
 };
@@ -234,11 +234,11 @@ export interface UseCase {
 }
 
 export const USE_CASES: UseCase[] = [
-  { slug: "lead-to-cash", title: "Lead to cash", summary: "From first enquiry to paid invoice without re-entering a single detail.", problem: "Sales, delivery and finance live in different tools. Deals are won but the invoice is raised late, and nobody sees the full picture.", solution: ["Capture enquiries from your website and campaigns into the CRM pipeline", "Create the client and project automatically when a deal is won", "Raise the invoice from the milestone and send a payment link", "Remind the client automatically and post the receipt to the ledger"], modules: ["lms", "pms", "fms"], result: "Shorter sales cycles, faster payments and revenue you can trace from campaign to cash." },
+  { slug: "lead-to-cash", title: "Lead to cash", summary: "From first enquiry to paid invoice without re-entering a single detail.", problem: "Sales, delivery and finance live in different tools. Deals are won but the invoice is raised late, and nobody sees the full picture.", solution: ["Capture enquiries from your website and campaigns into the SelfRun DealFlow AI pipeline", "Create the client and project automatically when a deal is won", "Raise the invoice from the milestone and send a payment link", "Remind the client automatically and post the receipt to the ledger"], modules: ["lms", "pms", "fms"], result: "Shorter sales cycles, faster payments and revenue you can trace from campaign to cash." },
   { slug: "hire-to-retire", title: "Hire to retire", summary: "Every people process, from the job post to the final settlement.", problem: "Hiring, onboarding, attendance, leave and payroll are spread across spreadsheets and email, so HR spends its time chasing instead of helping.", solution: ["Publish jobs on your website and track applicants through stages", "Test candidates online and issue offers", "Create the employee record and onboarding SOPs on acceptance", "Run attendance, leave and payroll with employee self-service"], modules: ["hrms", "ots", "sop", "cms"], result: "A smooth employee experience and an HR team that works on people, not paperwork." },
-  { slug: "procure-to-pay", title: "Procure to pay", summary: "Approved, matched and paid — with a full trail.", problem: "Purchases happen over chat and email, invoices arrive without a purchase order and approvals are hard to prove.", solution: ["Raise purchase requests with approval chains by amount", "Compare vendor quotes and issue purchase orders", "Match invoice, order and goods receipt before payment", "Post the payable and the payment to Finance"], modules: ["prms", "fms"], result: "Controlled spend, no duplicate payments and a clean audit trail." },
+  { slug: "procure-to-pay", title: "Procure to pay", summary: "Approved, matched and paid — with a full trail.", problem: "Purchases happen over chat and email, invoices arrive without a purchase order and approvals are hard to prove.", solution: ["Raise purchase requests with approval chains by amount", "Compare vendor quotes and issue purchase orders", "Match invoice, order and goods receipt before payment", "Post the payable and the payment to SelfRun CashFlow AI"], modules: ["prms", "fms"], result: "Controlled spend, no duplicate payments and a clean audit trail." },
   { slug: "training-operations", title: "Training operations", summary: "Run programs, batches and certificates at scale.", problem: "Institutes juggle enrolments, schedules, fees and certificates across several tools and manual follow-ups.", solution: ["Take applications and enrol students into batches", "Schedule classes and track attendance and assignments", "Collect fees with payment links and reminders", "Issue verifiable certificates automatically"], modules: ["tms", "ots", "portal", "fms"], result: "Organised batches, on-time fees and certificates without manual work." },
-  { slug: "always-on-marketing", title: "Always-on marketing", summary: "A website, social presence and SEO that keep working.", problem: "Marketing depends on agencies and tools that do not talk to sales, so nobody knows which effort brings customers.", solution: ["Publish and update your website without a developer", "Plan campaigns and social posts with AI and approvals", "Track rankings and fix SEO issues from audit tasks", "Capture every enquiry into the CRM and measure campaign results"], modules: ["cms", "smms", "seo", "lms"], result: "Consistent marketing that is measured against real enquiries and revenue." },
+  { slug: "always-on-marketing", title: "Always-on marketing", summary: "A website, social presence and SEO that keep working.", problem: "Marketing depends on agencies and tools that do not talk to sales, so nobody knows which effort brings customers.", solution: ["Publish and update your website without a developer", "Plan campaigns and social posts with AI and approvals", "Track rankings and fix SEO issues from audit tasks", "Capture every enquiry into SelfRun DealFlow AI and measure campaign results"], modules: ["cms", "smms", "seo", "lms"], result: "Consistent marketing that is measured against real enquiries and revenue." },
   { slug: "compliance-and-documents", title: "Compliance and documents", summary: "Procedures, agreements and records that stand up to an audit.", problem: "Policies live in shared drives, nobody can prove who read what, and documents expire unnoticed.", solution: ["Publish SOPs with versions and assign them to teams", "Track acknowledgements and escalate the overdue", "Generate agreements and certificates from templates", "Store credentials and documents with expiry alerts"], modules: ["sop", "lpms", "dlms"], result: "Audit-ready records and a team that knows the current way of working." },
 ];
 
