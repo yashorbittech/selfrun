@@ -26,7 +26,7 @@ export default async function SupportNotificationsPage() {
       panel="support"
       panelName="Help & Support"
       shortCode="HELP"
-      description="Replies and status updates on your requests to SelfRun AI."
+      description="Replies and status updates on your support requests."
       initialNotifications={items.map((n) => ({ id: n.id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined, priority: n.priority === "high" ? "high" : "normal" }))}
       onMarkRead={markRead}
       onMarkAllRead={markAll}

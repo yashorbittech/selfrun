@@ -11,7 +11,7 @@ import { whiteLabelProductName } from "@/lib/platform/panels/types";
 
 export default async function HubLoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
   // The headline products come from the Product Registry (the first few active, non-core business products).
-  const panelList = (await listPanels().catch(() => [])).filter((p) => p.active && !p.core && !(["website", "support", "portal"] as string[]).includes(p.key)).slice(0, 5).map((p) => p.name).join(", ");
+  const panelList = (await listPanels().catch(() => [])).filter((p) => p.active && !p.core && !(["website", "support", "portal"] as string[]).includes(p.key)).slice(0, 5).map((p) => whiteLabelProductName(p.name)).join(", ");
   // Where to go after sign-in: only a same-origin path survives `safeNextPath` (no open redirect).
   const next = safeNextPath((await searchParams).next);
   const user = await getCurrentHubUser();

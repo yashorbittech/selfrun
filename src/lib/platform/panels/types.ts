@@ -53,7 +53,7 @@ export interface PanelMeta {
 
 /** Remove the platform brand when a product name is shown inside a customer's white-label workspace. */
 export function whiteLabelProductName(name: string): string {
-  return name.replace(/^SelfRun\s+/i, "").trim();
+  return name.replace(/\bSelfRun(?:\s+AI)?\b/gi, "").replace(/\s{2,}/g, " ").trim();
 }
 
 /**

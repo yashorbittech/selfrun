@@ -105,7 +105,7 @@ const hexRgb = (hex: string) => {
   return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 };
 
-const IOS_CONTENTS = (): string =>
+const IOS_CONTENTS = (author: string): string =>
   JSON.stringify(
     {
       images: [
@@ -120,7 +120,7 @@ const IOS_CONTENTS = (): string =>
         { size: "83.5x83.5", idiom: "ipad", scale: "2x", filename: "icon-167.png" },
         { size: "1024x1024", idiom: "ios-marketing", scale: "1x", filename: "icon-1024.png" },
       ],
-      info: { version: 1, author: "SelfRun AI" },
+      info: { version: 1, author },
     },
     null,
     2,
@@ -151,7 +151,7 @@ export async function buildAssetPack(group: AssetGroup | "all"): Promise<Buffer>
     for (const n of ["ic_launcher", "ic_launcher_round"]) zip.file(at("android", `res/mipmap-anydpi-v26/${n}.xml`), `<?xml version="1.0" encoding="utf-8"?>\n<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n    <background android:drawable="@color/ic_launcher_background"/>\n    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>\n</adaptive-icon>\n`);
     zip.file(at("android", "README.txt"), `Android assets for ${identity.name}\nIcon background colour: ${art.iconBackground} (rgb ${c.r}, ${c.g}, ${c.b})\nCopy "res" into app/src/main/res of your Android Studio project. Upload playstore/* to the Play Console.\n`);
   }
-  if (groups.includes("ios")) zip.file(at("ios", "AppIcon.appiconset/Contents.json"), IOS_CONTENTS());
+  if (groups.includes("ios")) zip.file(at("ios", "AppIcon.appiconset/Contents.json"), IOS_CONTENTS(identity.name));
   zip.file(at(groups[0], "app-config.json"), JSON.stringify(config, null, 2));
   zip.file("README.txt", `${identity.name}: asset pack\nGenerated ${new Date().toISOString()} from the company's own name, logo and colours (Workspace → Settings → Apps).\nGroups in this pack: ${groups.join(", ")}.\n`);
   return zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });

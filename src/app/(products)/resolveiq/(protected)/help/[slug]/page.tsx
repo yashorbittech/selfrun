@@ -27,7 +27,7 @@ export default async function HelpArticlePage({ params }: { params: Promise<{ sl
       </GlassCard>
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/50 bg-card p-4">
         <p className="text-sm text-muted-foreground">Didn&apos;t solve it?</p>
-        <Link href="/resolveiq/requests/new" className={buttonVariants({ size: "sm" })}><LifeBuoy className="size-3.5" data-icon="inline-start" /> Contact SelfRun AI</Link>
+        <Link href="/resolveiq/requests/new" className={buttonVariants({ size: "sm" })}><LifeBuoy className="size-3.5" data-icon="inline-start" /> Contact support</Link>
       </div>
     </div>
 </div>

@@ -182,7 +182,7 @@ export function PreChatForm({ wide = false }: { wide?: boolean }) {
           ) : (
             <p className="flex items-start gap-1.5 pt-1 text-[10px] leading-tight text-muted-foreground/70">
               <ShieldCheck className="mt-px size-3 flex-none" />
-              By continuing you agree that SelfRun AI may contact you about your enquiry. We never share your details.
+              By continuing you agree that we may contact you about your enquiry. We never share your details.
             </p>
           )}
         </form>

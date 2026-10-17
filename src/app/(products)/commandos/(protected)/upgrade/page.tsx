@@ -6,6 +6,7 @@ import { listPanels } from "@/lib/platform/panels/store";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { BILLING_SETTINGS_PATH } from "@/lib/platform/billing/enforce";
 import { productAppPath } from "@/lib/platform/saas/product-routes";
+import { whiteLabelProductName } from "@/lib/platform/panels/types";
 
 export const metadata: Metadata = { title: "Upgrade to unlock", robots: { index: false, follow: false } };
 
@@ -18,7 +19,7 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
   const base = MODULES.find((m) => m.key === key) ?? null;
   // Name and description come from the Product Registry, like everywhere else.
   const reg = (await listPanels()).find((p) => p.key === key);
-  const mod = base ? { key: base.key, label: reg?.name ?? base.label, description: reg?.description ?? base.description } : null;
+  const mod = base ? { key: base.key, label: whiteLabelProductName(reg?.name ?? base.label), description: reg?.description ?? base.description } : null;
   const e = await getEntitlements();
   const unlocked = mod !== null && (e.modules === null || e.modules.has(mod.key));
   const label = mod?.label ?? "this product";
