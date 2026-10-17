@@ -6,6 +6,7 @@ import Reveal from "@/components/saas/Reveal";
 import CustomerStoriesSection from "@/components/saas/CustomerStoriesSection";
 import { USE_CASES } from "@/lib/saas/content";
 import { getFeatureModules } from "@/lib/saas/modules";
+import { productPath } from "@/lib/saas/product-routes";
 
 export const metadata: Metadata = {
   title: "Customer Success Stories",
@@ -51,7 +52,7 @@ export default async function SuccessStoriesPage() {
                       {workflow.solution.map((step, stepIndex) => <li key={step} className="flex gap-3 text-sm leading-relaxed"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary">{stepIndex + 1}</span><span>{step}</span></li>)}
                     </ol>
                     <div className="mt-6 flex flex-wrap gap-2 border-t border-border/50 pt-5">
-                      {workflow.modules.map((key) => <Link key={key} href={`/products/${key}`} className="rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary/40 hover:text-primary">{moduleNames.get(key) ?? key}</Link>)}
+                      {workflow.modules.map((key) => <Link key={key} href={productPath(key)} className="rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary/40 hover:text-primary">{moduleNames.get(key) ?? key}</Link>)}
                     </div>
                   </div>
                 </article>

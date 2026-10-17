@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { productPath } from "@/lib/saas/product-routes";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -51,7 +52,7 @@ export default function ScreenTabs({ items, tone }: { items: ScreenTab[]; tone?:
       <p className={`mt-5 text-center text-xs ${dark ? "text-white/60" : "text-muted-foreground"}`}>Real, full-resolution screens of the live product, captured in a demo workspace with sample data.</p>
       <div className="mx-auto mt-5 flex max-w-3xl flex-col items-center gap-4 text-center">
         <p className={`text-lg ${dark ? "text-white/85" : "text-muted-foreground"}`}>{t.summary}</p>
-        <Link href={t.href ?? `/products/${t.key}`} className={`group inline-flex items-center gap-2 text-sm font-bold ${dark ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"}`}>
+        <Link href={t.href ?? productPath(t.key)} className={`group inline-flex items-center gap-2 text-sm font-bold ${dark ? "text-white hover:text-white/80" : "text-foreground hover:text-primary"}`}>
           Explore {t.name} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>

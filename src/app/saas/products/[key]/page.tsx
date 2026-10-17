@@ -1,7 +1,7 @@
 import FaqSection from "@/components/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Zap } from "lucide-react";
 import { getFeatureModules } from "@/lib/saas/modules";
 import { FEATURE_LISTS, PANEL_VALUE, featureCount } from "@/lib/saas/feature-lists";
@@ -13,19 +13,22 @@ import { IconColumns, NumberedRows, TimelineSteps } from "@/components/saas/Mode
 import Icon from "@/components/saas/Icon";
 import Reveal from "@/components/saas/Reveal";
 import DeviceScene, { type SceneVariant } from "@/components/saas/DeviceScene";
+import { productKeyFromSlug, productPath, productSlugFor } from "@/lib/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 
 async function load(key: string) {
+  const productKey = productKeyFromSlug(key);
+  if (!productKey) return null;
   const all = await getFeatureModules();
-  const i = all.findIndex((m) => m.key === key);
+  const i = all.findIndex((m) => m.key === productKey);
   return i < 0 ? null : { m: all[i], all, prev: all[(i + all.length - 1) % all.length], next: all[(i + 1) % all.length] };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ key: string }> }): Promise<Metadata> {
   const d = await load((await params).key);
   if (!d) return {};
-  return { title: `${d.m.name} — products`, description: `${d.m.headline}. ${d.m.summary}`, alternates: { canonical: `/products/${d.m.key}` } };
+  return { title: `${d.m.name} — products`, description: `${d.m.headline}. ${d.m.summary}`, alternates: { canonical: productPath(d.m.key) } };
 }
 
 const SECTIONS = [
@@ -40,9 +43,11 @@ const SECTIONS = [
 ];
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ key: string }> }) {
-  const d = await load((await params).key);
+  const { key } = await params;
+  const d = await load(key);
   if (!d) notFound();
   const { m, all, prev, next } = d;
+  if (key !== productSlugFor(m.key)) permanentRedirect(productPath(m.key));
   const groups = FEATURE_LISTS[m.key] ?? [];
   const total = featureCount(m.key) || m.capabilities.length;
   const value = PANEL_VALUE[m.key];
@@ -233,7 +238,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </Reveal>
             ))}
           </div>
-          <p className="mt-8 text-center text-sm text-white/75">Build your own in <Link href="/products/workspace#features" className="font-bold text-white underline underline-offset-4">Workspace → Automations</Link>.</p>
+          <p className="mt-8 text-center text-sm text-white/75">Build your own in <Link href={`${productPath("workspace")}#features`} className="font-bold text-white underline underline-offset-4">Workspace → Automations</Link>.</p>
         </div>
       </section>
 
@@ -242,7 +247,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <section id="connected" className="sr-section" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container">
             <SectionHead center icon="plug" eyebrow="Connected products" title="Nothing is re-typed." accent="Everything is connected." lead={`${m.name} shares one database with every other product, so work moves between teams on its own.`} />
-            <NumberedRows items={detail.connects.flatMap((c) => { const o = byKey.get(c.panel); return o ? [{ title: o.name, text: c.text, icon: o.icon, href: `/products/${o.key}` }] : []; })} />
+            <NumberedRows items={detail.connects.flatMap((c) => { const o = byKey.get(c.panel); return o ? [{ title: o.name, text: c.text, icon: o.icon, href: productPath(o.key) }] : []; })} />
           </div>
         </section>
       )}
@@ -291,7 +296,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <section className="border-t border-border/50 py-10">
         <div className="sr-container grid gap-4 sm:grid-cols-2">
           {[{ p: prev, dir: "Previous product" }, { p: next, dir: "Next product" }].map(({ p, dir }, i) => (
-            <Link key={dir} href={`/products/${p.key}`} className={`group flex items-center gap-4 rounded-2xl border border-border/60 bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 ${i ? "sm:flex-row-reverse sm:text-right" : ""}`}>
+            <Link key={dir} href={productPath(p.key)} className={`group flex items-center gap-4 rounded-2xl border border-border/60 bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 ${i ? "sm:flex-row-reverse sm:text-right" : ""}`}>
               <span className="sr-icon h-12 w-12 flex-none"><Icon name={p.icon} className="h-5 w-5" /></span>
               <span className="min-w-0 flex-1"><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">{dir}</span><span className="block truncate text-lg font-black">{p.name}</span></span>
               <ArrowRight className={`h-5 w-5 flex-none text-primary ${i ? "sm:rotate-180" : "rotate-180"}`} />

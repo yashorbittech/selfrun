@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Layers, Lightbulb, ListChecks, Monitor, Plug, Route, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { getFeatureModules } from "@/lib/saas/modules";
 import { PANEL_VALUE, featuresOf } from "@/lib/saas/feature-lists";
@@ -10,6 +10,7 @@ import FaqSection from "@/components/saas/FaqSection";
 import { HeroCtas, PageHero } from "@/components/saas/blocks";
 import Icon from "@/components/saas/Icon";
 import DocsNav from "@/components/saas/DocsNav";
+import { productDocsPath, productKeyFromSlug, productSlugFor } from "@/lib/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -30,16 +31,21 @@ async function load(key: string, slug: string) {
   return m && f ? { m, all, f, list } : null;
 }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; feature: string }> }): Promise<Metadata> {
-  const { slug: key, feature } = await params;
+  const { slug, feature } = await params;
+  const key = productKeyFromSlug(slug);
+  if (!key) return {};
   const d = await load(key, feature);
-  return d ? { title: `${d.f.name} — ${d.m.name} guide`, description: `Step-by-step guide to ${d.f.name} in ${d.m.name}: ${d.f.text}`, alternates: { canonical: `/docs/${key}/${feature}` } } : {};
+  return d ? { title: `${d.f.name} — ${d.m.name} guide`, description: `Step-by-step guide to ${d.f.name} in ${d.m.name}: ${d.f.text}`, alternates: { canonical: productDocsPath(d.m.key, feature) } } : {};
 }
 
 export default async function FeatureGuidePage({ params }: { params: Promise<{ slug: string; feature: string }> }) {
-  const { slug: key, feature } = await params;
+  const { slug, feature } = await params;
+  const key = productKeyFromSlug(slug);
+  if (!key) notFound();
   const d = await load(key, feature);
   if (!d) notFound();
   const { m, all, f, list } = d;
+  if (slug !== productSlugFor(m.key)) permanentRedirect(productDocsPath(m.key, feature));
   const guide = guideFor(m.key, f.name, m.name, f.text);
   const i = list.findIndex((x) => x.slug === f.slug);
   const prev = list[(i + list.length - 1) % list.length];
@@ -191,13 +197,13 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
         {siblings.length > 0 && (
           <section id="more" className="scroll-mt-32">
             <GuideHeading icon={Layers}>More in {f.group}</GuideHeading>
-            <div className="grid gap-3 sm:grid-cols-2">{siblings.map((s) => <Link key={s.slug} href={`/docs/${m.key}/${s.slug}`} className="rounded-2xl border border-border/60 p-4 transition-all hover:border-primary/40"><p className="font-black">{s.name}</p><p className="text-sm leading-snug text-muted-foreground">{s.text}</p></Link>)}</div>
+            <div className="grid gap-3 sm:grid-cols-2">{siblings.map((s) => <Link key={s.slug} href={productDocsPath(m.key, s.slug)} className="rounded-2xl border border-border/60 p-4 transition-all hover:border-primary/40"><p className="font-black">{s.name}</p><p className="text-sm leading-snug text-muted-foreground">{s.text}</p></Link>)}</div>
           </section>
         )}
 
         <div className="grid gap-3 sm:grid-cols-2">
           {[{ p: prev, d: "Previous guide" }, { p: next, d: "Next guide" }].map(({ p, d: dir }, k) => (
-            <Link key={dir} href={`/docs/${m.key}/${p.slug}`} className={`rounded-2xl border border-border/60 p-4 transition-all hover:border-primary/40 ${k ? "sm:text-right" : ""}`}>
+            <Link key={dir} href={productDocsPath(m.key, p.slug)} className={`rounded-2xl border border-border/60 p-4 transition-all hover:border-primary/40 ${k ? "sm:text-right" : ""}`}>
               <span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">{dir}</span><span className="mt-1 block font-black leading-snug">{p.name}</span>
             </Link>
           ))}

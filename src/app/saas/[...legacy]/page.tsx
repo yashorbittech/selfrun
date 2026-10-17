@@ -1,4 +1,5 @@
 import { notFound, permanentRedirect } from "next/navigation";
+import { productPath } from "@/lib/saas/product-routes";
 
 /** Pages of earlier versions of the website, sent to where their content lives now. Only these paths are routed here (see lib/saas/routes.ts). */
 const MOVED: Record<string, string> = {
@@ -24,7 +25,7 @@ const MOVED: Record<string, string> = {
 
 export default async function LegacyRedirect({ params }: { params: Promise<{ legacy: string[] }> }) {
   const [first, second] = (await params).legacy;
-  if ((first === "modules" || first === "features") && second) permanentRedirect(`/products/${second}`);
+  if ((first === "modules" || first === "features") && second) permanentRedirect(productPath(second));
   if (first === "resources" && second) permanentRedirect(`/docs/${second}`);
   if (first === "tutorials" && second) permanentRedirect(`/docs/walkthroughs/${second}`);
   const to = MOVED[first];

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, Search } from "lucide-react";
 import Icon from "@/components/saas/Icon";
 import type { IconKey } from "@/lib/saas/content";
+import { productDocsPath } from "@/lib/saas/product-routes";
 
 export interface DocsNavPanel {
   key: string;
@@ -55,7 +56,7 @@ export default function DocsNav({ panels, currentPanel, currentSlug }: { panels:
                         {g.items.map((x) => {
                           const active = p.key === currentPanel && x.slug === currentSlug;
                           return (
-                            <li key={x.slug}><Link ref={active ? activeRef : undefined} href={`/docs/${p.key}/${x.slug}`} aria-current={active ? "page" : undefined} className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${active ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{x.name}</Link></li>
+                            <li key={x.slug}><Link ref={active ? activeRef : undefined} href={productDocsPath(p.key, x.slug)} aria-current={active ? "page" : undefined} className={`block rounded-lg px-3 py-1.5 text-sm transition-colors ${active ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{x.name}</Link></li>
                           );
                         })}
                       </ul>

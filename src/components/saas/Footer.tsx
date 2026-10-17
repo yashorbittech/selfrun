@@ -3,37 +3,38 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import Logo from "@/components/saas/Logo";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 import { LEGAL_LINKS } from "@/lib/saas/site";
+import { productPath } from "@/lib/saas/product-routes";
 
 /** The footer: what the platform is, every product, the way in, the docs — and the legal pages beside the copyright line. */
 export default async function Footer({}: { host?: string }) {
   const CATEGORIES: { title: string; products: { label: string; href: string }[] }[] = [
     { title: "Sales & marketing", products: [
-      { label: "SelfRun DealFlow AI", href: "/products/lms" },
-      { label: "SelfRun ViralPulse AI", href: "/products/smms" },
-      { label: "SelfRun RankMax AI", href: "/products/seo" },
-      { label: "SelfRun SiteCraft AI", href: "/products/cms" },
-      { label: "SelfRun Sites", href: "/products/website" },
+      { label: "SelfRun DealFlow AI", href: productPath("lms") },
+      { label: "SelfRun ViralPulse AI", href: productPath("smms") },
+      { label: "SelfRun RankMax AI", href: productPath("seo") },
+      { label: "SelfRun SiteCraft AI", href: productPath("cms") },
+      { label: "SelfRun Sites", href: productPath("website") },
     ] },
     { title: "People & finance", products: [
-      { label: "SelfRun TalentOS", href: "/products/hrms" },
-      { label: "SelfRun Cohort AI", href: "/products/tms" },
-      { label: "SelfRun EvalIQ", href: "/products/ots" },
-      { label: "SelfRun CashFlow AI", href: "/products/fms" },
-      { label: "SelfRun SprintOS", href: "/products/pms" },
+      { label: "SelfRun TalentOS", href: productPath("hrms") },
+      { label: "SelfRun Cohort AI", href: productPath("tms") },
+      { label: "SelfRun EvalIQ", href: productPath("ots") },
+      { label: "SelfRun CashFlow AI", href: productPath("fms") },
+      { label: "SelfRun SprintOS", href: productPath("pms") },
     ] },
     { title: "Operations & control", products: [
-      { label: "SelfRun CommandOS", href: "/products/workspace" },
-      { label: "SelfRun SpendIQ", href: "/products/prms" },
-      { label: "SelfRun Playbook AI", href: "/products/sop" },
-      { label: "SelfRun ContractFlow AI", href: "/products/lpms" },
-      { label: "SelfRun CyberVault", href: "/products/dlms" },
+      { label: "SelfRun CommandOS", href: productPath("workspace") },
+      { label: "SelfRun SpendIQ", href: productPath("prms") },
+      { label: "SelfRun Playbook AI", href: productPath("sop") },
+      { label: "SelfRun ContractFlow AI", href: productPath("lpms") },
+      { label: "SelfRun CyberVault", href: productPath("dlms") },
     ] },
     { title: "AI & collaboration", products: [
-      { label: "SelfRun DataBrain AI", href: "/products/intelligence" },
-      { label: "SelfRun AgentOS", href: "/products/aibots" },
-      { label: "SelfRun Huddle AI", href: "/products/messenger" },
-      { label: "SelfRun ClientOS", href: "/products/portal" },
-      { label: "SelfRun ResolveIQ", href: "/products/support" },
+      { label: "SelfRun DataBrain AI", href: productPath("intelligence") },
+      { label: "SelfRun AgentOS", href: productPath("aibots") },
+      { label: "SelfRun Huddle AI", href: productPath("messenger") },
+      { label: "SelfRun ClientOS", href: productPath("portal") },
+      { label: "SelfRun ResolveIQ", href: productPath("support") },
     ] },
   ];
   const explore = [

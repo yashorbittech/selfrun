@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { productPath } from "@/lib/saas/product-routes";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Icon from "@/components/saas/Icon";
@@ -65,7 +66,7 @@ export default function PanelOrbit({ panels, brand }: { panels: OrbitPanel[]; br
             <span className="sr-circle size-9 sm:size-11"><Icon name={active.icon} /></span>
             <p className="sr-display mt-1.5 text-[12px] leading-tight font-semibold sm:text-[15px]">{active.name}</p>
             <p className="sr-muted mt-1 line-clamp-3 hidden text-[11.5px] leading-snug sm:block">{active.description}</p>
-            <Link href={`/products/${active.key}`} className="sr-link mt-1.5 text-[12px]">Explore <ArrowRight className="size-3" /></Link>
+            <Link href={productPath(active.key)} className="sr-link mt-1.5 text-[12px]">Explore <ArrowRight className="size-3" /></Link>
           </>
         ) : (
           <>

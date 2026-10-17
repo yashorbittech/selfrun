@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
+import { productDocsPath } from "@/lib/saas/product-routes";
 
 export interface DocEntry { panelKey: string; panel: string; slug: string; name: string; text: string }
 
@@ -30,7 +31,7 @@ export default function DocsSearch({ entries }: { entries: DocEntry[] }) {
       {focus && q.trim() !== "" && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border/70 bg-background p-2 shadow-2xl shadow-primary/15" style={{ animation: "sr-in .2s ease both" }}>
           {hits.length === 0 ? <p className="p-4 text-sm text-muted-foreground">No guide matches. Try another word.</p> : hits.map((h) => (
-            <Link key={`${h.panelKey}/${h.slug}`} href={`/docs/${h.panelKey}/${h.slug}`} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/10">
+            <Link key={`${h.panelKey}/${h.slug}`} href={productDocsPath(h.panelKey, h.slug)} className="group flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-primary/10">
               <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold group-hover:text-primary">{h.name}</span><span className="block truncate text-xs text-muted-foreground">{h.panel}</span></span>
               <ArrowUpRight className="h-4 w-4 flex-none text-primary opacity-0 transition-opacity group-hover:opacity-100" />
             </Link>

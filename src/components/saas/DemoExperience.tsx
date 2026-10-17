@@ -10,7 +10,7 @@ const DEMO_PASSWORD = "Demo@123";
 
 export default function DemoExperience() {
   return (
-    <section className="sr-section overflow-hidden bg-muted/10">
+    <section id="self-guided-demo" className="sr-section scroll-mt-24 overflow-hidden bg-muted/10">
       <div className="sr-container">
         <SectionHead icon="layers" eyebrow="Self-guided product tour" title="Explore the full product" accent="at your own pace." lead="Visit the public website, then sign in to the demo workspace to explore the product interface and connected business modules for yourself." />
 

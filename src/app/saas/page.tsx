@@ -19,6 +19,7 @@ import PanelOrbit from "@/components/saas/PanelOrbit";
 import PanelShot from "@/components/saas/PanelShot";
 import MarketingShot from "@/components/saas/MarketingShot";
 import FaqSection from "@/components/saas/FaqSection";
+import { productPath } from "@/lib/saas/product-routes";
 import StackCompare from "@/components/saas/StackCompare";
 import WhyCompare from "@/components/saas/WhyCompare";
 import BrandShowcase from "@/components/saas/BrandShowcase";
@@ -319,7 +320,7 @@ export default async function SaasHome() {
                   <h3 className="text-2xl font-black tracking-tight">Work enters once and runs itself</h3>
                   <p className="mt-1.5 max-w-3xl leading-relaxed text-muted-foreground">A deal won creates the client, a finished milestone raises the invoice, a paid invoice updates the ledger — reminders, approvals and hand-offs happen across products on their own, and every run is logged.</p>
                 </div>
-                <Link href="/products/workspace" className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background transition-transform hover:scale-105">See automations <ArrowRight className="h-4 w-4" /></Link>
+                <Link href={productPath("workspace")} className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-bold text-background transition-transform hover:scale-105">See automations <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
           </div>

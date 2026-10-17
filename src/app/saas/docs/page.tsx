@@ -8,6 +8,7 @@ import { PageHero, SectionHead } from "@/components/saas/blocks";
 import DocsSearch, { type DocEntry } from "@/components/saas/DocsSearch";
 import Icon from "@/components/saas/Icon";
 import Reveal from "@/components/saas/Reveal";
+import { productDocsPath } from "@/lib/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -65,7 +66,7 @@ export default async function DocsPage() {
                 <ul className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
                   {list.map((f, i) => (
                     <Reveal key={f.slug} as="li" delay={(i % 3) * 50}>
-                      <Link href={`/docs/${m.key}/${f.slug}`} className="group flex items-start gap-4 border-b border-border/60 py-5 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
+                      <Link href={productDocsPath(m.key, f.slug)} className="group flex items-start gap-4 border-b border-border/60 py-5 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
                         <span className="sr-outline mt-0.5 w-9 flex-none text-2xl font-black leading-none" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block font-black leading-snug group-hover:text-primary">{f.name}</span>

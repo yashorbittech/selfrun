@@ -9,6 +9,7 @@ import { screenFor } from "@/lib/saas/screens";
 import { EXTRA_SCREENS } from "@/lib/saas/site";
 import { FEATURE_LISTS, PANEL_VALUE, featureCount } from "@/lib/saas/feature-lists";
 import type { FeatureModule } from "@/lib/saas/modules";
+import { productPath } from "@/lib/saas/product-routes";
 
 /** One panel in full: its real screen, every feature it has (grouped like its own menu), what runs on its own and the result. */
 export default function ModuleBlock({ m, flip = false, detailed = false, variant = 0 }: { m: FeatureModule; flip?: boolean; detailed?: boolean; variant?: SceneVariant }) {
@@ -28,7 +29,7 @@ export default function ModuleBlock({ m, flip = false, detailed = false, variant
           <p className="sr-lead">{m.summary}</p>
         </div>
         {!detailed && (
-          <Link href={`/products/${m.key}`} className="group inline-flex shrink-0 items-center gap-3 text-sm font-bold hover:text-primary">
+          <Link href={productPath(m.key)} className="group inline-flex shrink-0 items-center gap-3 text-sm font-bold hover:text-primary">
             {m.name} in detail
             <span className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-muted/40 transition-all group-hover:border-primary group-hover:bg-primary"><ArrowRight className="h-4 w-4 group-hover:text-primary-foreground" /></span>
           </Link>

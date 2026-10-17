@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Grid3X3, LayoutDashboard, Maximize2, Search, Star, X } from "lucide-react";
+import { productPath } from "@/lib/saas/product-routes";
 
 export interface GalleryEntry { id: string; src: string; title: string; panelKey: string; panel: string; featured: boolean }
 
@@ -117,7 +118,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
           <div className="relative flex items-center justify-between gap-4 border-b border-border/60 bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-8">
             <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-muted-foreground">{cur.panel} · {(open ?? 0) + 1} of {list.length}</p></div>
             <div className="flex items-center gap-2">
-              <Link href={`/products/${cur.panelKey}`} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
+              <Link href={productPath(cur.panelKey)} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted/50 transition-colors hover:border-primary/50 hover:text-primary"><X className="h-5 w-5" /></button>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { ArrowRight, Check, MessageSquareText, ShieldCheck } from "lucide-react"
 import { PageHero, SectionHead } from "@/components/saas/blocks";
 import Reveal from "@/components/saas/Reveal";
 import { getFeatureGroups } from "@/lib/saas/modules";
+import { productPath } from "@/lib/saas/product-routes";
 
 export const metadata: Metadata = {
   title: "Product Roadmap",
@@ -40,7 +41,7 @@ export default async function RoadmapPage() {
                   <h3 className="mt-2 text-xl font-black">{group.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{group.lead}</p>
                   <ul className="mt-5 space-y-2.5">
-                    {group.items.map((item) => <li key={item.key}><Link href={`/products/${item.key}`} className="flex items-center gap-2 text-sm font-semibold hover:text-primary"><Check className="h-4 w-4 text-primary" />{item.name}<ArrowRight className="ml-auto h-3.5 w-3.5 opacity-50" /></Link></li>)}
+                    {group.items.map((item) => <li key={item.key}><Link href={productPath(item.key)} className="flex items-center gap-2 text-sm font-semibold hover:text-primary"><Check className="h-4 w-4 text-primary" />{item.name}<ArrowRight className="ml-auto h-3.5 w-3.5 opacity-50" /></Link></li>)}
                   </ul>
                 </article>
               </Reveal>

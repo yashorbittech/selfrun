@@ -5,6 +5,7 @@ import { DOCS } from "@/lib/saas/docs";
 import { TUTORIALS } from "@/lib/saas/tutorials";
 import { FEATURE_LISTS, featuresOf } from "@/lib/saas/feature-lists";
 import { listPanels } from "@/lib/platform/panels/store";
+import { productDocsPath, productPath } from "@/lib/saas/product-routes";
 
 const PAGES = ["", "/products", "/pricing", "/docs", "/about", "/contact", "/demo", "/gallery", "/offers", "/privacy", "/terms", "/security", "/status", "/sla", "/cookies", "/data-policy", "/refund-policy"];
 
@@ -13,10 +14,10 @@ export async function saasSitemap(origin: string): Promise<MetadataRoute.Sitemap
   const panels = (await listPanels().catch(() => [])).filter((p) => p.active && MODULE_COPY[p.key]);
   const paths = [
     ...PAGES,
-    ...panels.map((p) => `/products/${p.key}`),
+    ...panels.map((p) => productPath(p.key)),
     ...DOCS.map((r) => `/docs/${r.slug}`),
     ...TUTORIALS.map((t) => `/docs/walkthroughs/${t.slug}`),
-    ...Object.keys(FEATURE_LISTS).flatMap((k) => featuresOf(k).map((f) => `/docs/${k}/${f.slug}`)),
+    ...Object.keys(FEATURE_LISTS).flatMap((k) => featuresOf(k).map((f) => productDocsPath(k, f.slug))),
     ...plans.map((p) => `/pricing/${p}`),
   ];
   const now = new Date();

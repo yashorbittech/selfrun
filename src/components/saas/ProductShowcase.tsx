@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { productPath } from "@/lib/saas/product-routes";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowRight, Check, Pause } from "lucide-react";
@@ -53,7 +54,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
               {t.points.slice(0, 4).map((p) => <li key={p} className="flex gap-3 text-[15px] leading-snug text-white/90"><span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-white text-[var(--primary)]"><Check className="h-3 w-3" strokeWidth={3} /></span>{p}</li>)}
             </ul>
           )}
-          <Link href={t.href ?? `/products/${t.key}`} className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">
+          <Link href={t.href ?? productPath(t.key)} className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">
             Explore {t.name} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
           <div className="mt-8 flex items-center gap-3">

@@ -12,6 +12,7 @@ import { CtaBand, PageHero } from "@/components/saas/blocks";
 import DeviceScene, { type SceneVariant } from "@/components/saas/DeviceScene";
 import Reveal from "@/components/saas/Reveal";
 import Icon from "@/components/saas/Icon";
+import { productKeyFromSlug, productPath } from "@/lib/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 const slugOf = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -27,7 +28,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function DocArticle({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
   const g = docBySlug(slug);
-  if (!g && slug in FEATURE_LISTS) redirect(`/docs#${slug}`);
+  const productKey = productKeyFromSlug(slug);
+  if (!g && productKey && productKey in FEATURE_LISTS) redirect(`/docs#${productKey}`);
   if (!g) notFound();
   const i = DOCS.indexOf(g);
   const next = DOCS[(i + 1) % DOCS.length];
@@ -79,7 +81,7 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
             {(panel || tutorial) && (
               <div className="mt-14 grid gap-4 sm:grid-cols-2">
                 {panel && (
-                  <Link href={`/products/${panel.key}`} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/20 p-5 transition-all hover:border-primary/40">
+                  <Link href={productPath(panel.key)} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/20 p-5 transition-all hover:border-primary/40">
                     <span className="sr-icon h-12 w-12 flex-none"><Icon name={panel.icon} className="h-5 w-5" /></span>
                     <span><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">Product reference</span><span className="block font-black">{panel.name}</span></span>
                     <ArrowRight className="ml-auto h-5 w-5 text-primary" />

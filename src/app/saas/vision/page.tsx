@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { productPath } from "@/lib/saas/product-routes";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -803,7 +804,7 @@ export default function VisionPage() {
                       </div>
                       <p className="text-xs leading-relaxed text-muted-foreground mb-4">{p.desc}</p>
                       <Link
-                        href={`/products/${p.key}`}
+                        href={productPath(p.key)}
                         className="inline-flex items-center gap-1.5 text-xs font-bold text-primary transition-all hover:gap-2.5"
                       >
                         Explore {p.name} <ArrowRight className="h-3.5 w-3.5" />

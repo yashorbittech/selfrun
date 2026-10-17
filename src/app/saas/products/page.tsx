@@ -19,6 +19,7 @@ import Icon from "@/components/saas/Icon";
 import Reveal from "@/components/saas/Reveal";
 import PanelShot from "@/components/saas/PanelShot";
 import type { IconKey } from "@/lib/saas/content";
+import { productPath } from "@/lib/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -242,7 +243,7 @@ export default async function ProductsPage() {
                           style={{ perspective: "1500px" }}
                         >
                           <Link
-                            href={`/products/${m.key}`}
+                            href={productPath(m.key)}
                             className="group/screen block relative"
                             aria-label={`${m.name} details`}
                           >
@@ -330,7 +331,7 @@ export default async function ProductsPage() {
                             </div>
 
                             <h3 className="text-3xl font-black tracking-tight sm:text-4xl text-foreground transition-colors group-hover:text-primary">
-                              <Link href={`/products/${m.key}`}>
+                              <Link href={productPath(m.key)}>
                                 {m.name}
                               </Link>
                             </h3>
@@ -378,7 +379,7 @@ export default async function ProductsPage() {
                           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-border/50">
                             <div className="flex flex-wrap items-center gap-3">
                               <Link
-                                href={`/products/${m.key}`}
+                                href={productPath(m.key)}
                                 className="group/btn inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:gap-3 hover:bg-primary/90 hover:scale-105"
                               >
                                 Explore {m.name}
