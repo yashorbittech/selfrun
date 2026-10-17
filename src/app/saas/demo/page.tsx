@@ -4,6 +4,7 @@ import Link from "next/link";
 import InquiryForm from "@/components/saas/InquiryForm";
 import { PageHero, SectionHead } from "@/components/saas/blocks";
 import { NumberedRows } from "@/components/saas/Modern";
+import DemoExperience from "@/components/saas/DemoExperience";
 
 export const metadata: Metadata = {
   title: "Request a demo",
@@ -15,6 +16,7 @@ export default function DemoPage() {
   return (
     <>
       <PageHero art="demo" photo="presentation" shot="workspace" shotName="SelfRun CommandOS" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }} />
+      <DemoExperience />
       <section className="sr-section">
         <div className="sr-container">
           <SectionHead icon="rocket" eyebrow="Your demo" title="What you" accent="will see." lead="A short, focused session built around your own business." />

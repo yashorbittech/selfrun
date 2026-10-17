@@ -2,23 +2,56 @@ import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import Logo from "@/components/saas/Logo";
 import { SAAS_BRAND } from "@/lib/saas/brand";
-import { LEGAL_LINKS, NAV_LINKS } from "@/lib/saas/site";
-import { DOCS } from "@/lib/saas/docs";
-import { getFeatureModules } from "@/lib/saas/modules";
+import { LEGAL_LINKS } from "@/lib/saas/site";
 
 /** The footer: what the platform is, every product, the way in, the docs — and the legal pages beside the copyright line. */
 export default async function Footer({}: { host?: string }) {
-  const products = await getFeatureModules();
-  const byKey = new Map(products.map((m) => [m.key, m]));
-  const guides = ["getting-started", "brand-your-workspace", "your-own-apps", "custom-domain"].map((slug) => DOCS.find((d) => d.slug === slug)).filter((d): d is NonNullable<typeof d> => !!d);
-  /** Four categories of five products each, so every column holds five links. */
-  const CATEGORIES: { title: string; keys: string[] }[] = [
-    { title: "Sales & marketing", keys: ["lms", "smms", "seo", "cms", "website"] },
-    { title: "People & finance", keys: ["hrms", "tms", "ots", "fms", "pms"] },
-    { title: "Operations & control", keys: ["workspace", "prms", "sop", "lpms", "dlms"] },
-    { title: "AI & collaboration", keys: ["intelligence", "aibots", "messenger", "portal", "support"] },
+  const CATEGORIES: { title: string; products: { label: string; href: string }[] }[] = [
+    { title: "Sales & marketing", products: [
+      { label: "SelfRun DealFlow AI", href: "/products/lms" },
+      { label: "SelfRun ViralPulse AI", href: "/products/smms" },
+      { label: "SelfRun RankMax AI", href: "/products/seo" },
+      { label: "SelfRun SiteCraft AI", href: "/products/cms" },
+      { label: "SelfRun Sites", href: "/products/website" },
+    ] },
+    { title: "People & finance", products: [
+      { label: "SelfRun TalentOS", href: "/products/hrms" },
+      { label: "SelfRun Cohort AI", href: "/products/tms" },
+      { label: "SelfRun EvalIQ", href: "/products/ots" },
+      { label: "SelfRun CashFlow AI", href: "/products/fms" },
+      { label: "SelfRun SprintOS", href: "/products/pms" },
+    ] },
+    { title: "Operations & control", products: [
+      { label: "SelfRun CommandOS", href: "/products/workspace" },
+      { label: "SelfRun SpendIQ", href: "/products/prms" },
+      { label: "SelfRun Playbook AI", href: "/products/sop" },
+      { label: "SelfRun ContractFlow AI", href: "/products/lpms" },
+      { label: "SelfRun CyberVault", href: "/products/dlms" },
+    ] },
+    { title: "AI & collaboration", products: [
+      { label: "SelfRun DataBrain AI", href: "/products/intelligence" },
+      { label: "SelfRun AgentOS", href: "/products/aibots" },
+      { label: "SelfRun Huddle AI", href: "/products/messenger" },
+      { label: "SelfRun ClientOS", href: "/products/portal" },
+      { label: "SelfRun ResolveIQ", href: "/products/support" },
+    ] },
   ];
-  const explore = NAV_LINKS.filter((l) => l.href !== "/docs");
+  const explore = [
+    { href: "/ask", label: "Ask AI" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/blog", label: "Blog" },
+    { href: "/about", label: "About Us" },
+    { href: "/contact", label: "Contact Us" },
+    { href: "/docs", label: "Documentation" },
+  ];
+  const productLinks = [
+    { label: "Our Products", href: "/products" },
+    { label: "Product Live Demo", href: "/demo" },
+    { label: "Product Vision", href: "/vision" },
+    { label: "Product Roadmap", href: "/roadmap" },
+    { label: "Success Stories", href: "/success-stories" },
+    { label: "Onboarded Business", href: "/onboarded-businesses" },
+  ];
   return (
     <footer className="relative overflow-hidden border-t border-border/50 bg-muted/20">
       <div className="pointer-events-none absolute -top-40 left-1/2 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
@@ -53,15 +86,14 @@ export default async function Footer({}: { host?: string }) {
             <div key={c.title}>
               <p className="mb-3 text-sm font-bold">{c.title}</p>
               <ul className="space-y-2">
-                {c.keys.map((k) => byKey.get(k)).filter((m): m is NonNullable<typeof m> => !!m).map((m) => <li key={m.key}><Link href={`/products/${m.key}`} className="text-sm text-muted-foreground transition-colors hover:text-primary">{m.name}</Link></li>)}
+                {c.products.map((product) => <li key={product.href}><Link href={product.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">{product.label}</Link></li>)}
               </ul>
             </div>
           ))}
           <div>
-            <p className="mb-3 text-sm font-bold">Documentation</p>
+            <p className="mb-3 text-sm font-bold">Products</p>
             <ul className="space-y-2">
-              {guides.map((g) => <li key={g.slug}><Link href={`/docs/${g.slug}`} className="text-sm text-muted-foreground transition-colors hover:text-primary">{g.title.split(":")[0]}</Link></li>)}
-              <li><Link href="/docs" className="text-sm font-semibold text-primary">All guides →</Link></li>
+              {productLinks.map((product) => <li key={product.href}><Link href={product.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">{product.label}</Link></li>)}
             </ul>
           </div>
         </div>

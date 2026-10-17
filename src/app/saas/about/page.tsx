@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { INDUSTRIES, SECURITY_POINTS, USE_CASES } from "@/lib/saas/content";
-import { GROWTH, STORIES } from "@/lib/saas/site";
+import { GROWTH } from "@/lib/saas/site";
 import { getFeatureGroups } from "@/lib/saas/modules";
 import { panelColor } from "@/lib/saas/palette";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/saas/blocks";
@@ -13,6 +13,7 @@ import CountStats from "@/components/saas/CountStats";
 import Reveal from "@/components/saas/Reveal";
 import MarketingShot from "@/components/saas/MarketingShot";
 import PanelOrbit from "@/components/saas/PanelOrbit";
+import CustomerStoriesSection from "@/components/saas/CustomerStoriesSection";
 import { SAAS_BRAND } from "@/lib/saas/brand";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +44,7 @@ const NAV = [
   { id: "mission", label: "Our mission" },
   { id: "what-we-do", label: "What we do" },
   { id: "growth", label: "How you grow" },
-  { id: "stories", label: "Success stories" },
+  { id: "stories", label: "Customer stories & workflows" },
   { id: "values", label: "Our values" },
 ];
 
@@ -158,20 +159,20 @@ export default async function AboutPage() {
       {/* Stories */}
       <section id="stories" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container relative space-y-16">
-          <SectionHead tone="dark" center icon="chart" eyebrow="Success stories" title="How teams run" accent="on the platform." lead="Customer stories appear here with the customer's permission and their real results. Until then, these are the whole-process scenarios the platform is built to automate." />
-          {STORIES.length === 0 && <div className="sr-glass mx-auto max-w-2xl p-8 text-center"><p className="text-lg font-black">Customer stories are on the way</p><p className="mt-1 text-sm text-white/75">We publish a story only when a customer has agreed to share it, with their real results. None have been published yet.</p></div>}
+          <CustomerStoriesSection tone="dark" />
+          <SectionHead tone="dark" center icon="chart" eyebrow="Stories from the product" title="Stories built around" accent="how work gets done." lead="Explore realistic workflow narratives based on capabilities in the product. They show how SelfRun connects teams and records without presenting invented customers or outcomes." />
           <div className="grid gap-5 lg:grid-cols-2">
             {USE_CASES.map((u, i) => (
               <Reveal key={u.slug} delay={(i % 2) * 80}>
                 <article className="sr-glass h-full space-y-5 p-8">
-                  <div><p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Scenario {i + 1}</p><h3 className="text-2xl font-black">{u.title}</h3><p className="mt-1 text-sm text-muted-foreground">{u.summary}</p></div>
+                  <div><p className="mb-1 text-xs font-bold uppercase tracking-widest text-primary">Illustrative product workflow</p><h3 className="text-2xl font-black">{u.title}</h3><p className="mt-1 text-sm text-muted-foreground">{u.summary}</p><p className="mt-4 text-sm leading-relaxed text-white/80">{u.narrative}</p></div>
                   <div><p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">The problem</p><p className="text-sm leading-relaxed">{u.problem}</p></div>
                   <div><p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-muted-foreground">How it runs</p><ol className="space-y-2">{u.solution.map((s, n) => <li key={s} className="flex gap-3 text-sm"><span className="sr-circle mt-0.5 h-5 w-5 flex-none text-[10px] font-black">{n + 1}</span>{s}</li>)}</ol></div>
-                  <p className="border-t pt-4 text-sm"><span className="font-bold text-primary">Result · </span>{u.result}</p>
                 </article>
               </Reveal>
             ))}
           </div>
+          <div className="text-center"><Link href="/success-stories" className="inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">Explore customer stories and workflows <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
 

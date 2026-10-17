@@ -22,6 +22,7 @@ const EXACT = new Set([
   "/mission",
   "/what-we-do",
   "/success-stories",
+  "/onboarded-businesses",
   "/privacy",
   "/terms",
   "/cookies",
