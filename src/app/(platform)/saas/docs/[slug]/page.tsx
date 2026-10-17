@@ -13,6 +13,7 @@ import DeviceScene, { type SceneVariant } from "@/components/platform/saas/Devic
 import Reveal from "@/components/platform/saas/Reveal";
 import Icon from "@/components/platform/saas/Icon";
 import { productKeyFromSlug, productPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 const slugOf = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -82,7 +83,7 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
               <div className="mt-14 grid gap-4 sm:grid-cols-2">
                 {panel && (
                   <Link href={productPath(panel.key)} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-muted/20 p-5 transition-all hover:border-primary/40">
-                    <span className="sr-icon h-12 w-12 flex-none"><Icon name={panel.icon} className="h-5 w-5" /></span>
+                    <span className="sr-icon h-12 w-12 flex-none"><ProductLogo productKey={panel.key} size={36} title={panel.name} /></span>
                     <span><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">Product reference</span><span className="block font-black">{panel.name}</span></span>
                     <ArrowRight className="ml-auto h-5 w-5 text-primary" />
                   </Link>

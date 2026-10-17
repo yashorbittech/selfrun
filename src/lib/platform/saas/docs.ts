@@ -99,7 +99,7 @@ const added: Doc[] = [
   d({
     slug: "invite-your-team", title: "Invite your team and choose what each person can do", summary: "Roles per product, fine-grained permissions and seat limits.", category: "Workspace & people", readMinutes: 4, shot: "workspace-users", panel: "workspace",
     sections: [
-      { heading: "Invitations", body: ["From Workspace → Users, roles & seats, invite someone by email and give them a role. They accept the invitation, verify their email and sign in with the same login for every product they are allowed to use."] },
+      { heading: "Invitations", body: ["Invite each person to the products they need. Each product has its own sign-in and access settings; use its invitation flow to give someone access."] },
       { heading: "Roles and permissions", body: ["Each product has its own roles — for example administrator, manager and employee. On top of a role you can grant or remove a single permission for one person, such as exporting reports or approving payments."], shot: "workspace-users" },
       { heading: "Seats", body: ["The plan sets how many people your company can have. The Users screen and Usage show how many seats you have used."] },
       { heading: "Review regularly", body: ["The audit log shows who changed what, so you can review access as the team changes."] },

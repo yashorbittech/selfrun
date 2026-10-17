@@ -1,27 +1,28 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Check, Bot, Briefcase, ClipboardCheck, FolderKanban, Gift, GraduationCap, Globe, Landmark, Layers, Lock, MessageSquare, Scale, Search, Share2, ShoppingCart, Sparkles, UserRound, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, Check, Gift } from "lucide-react";
 import { COMPARE_UNPRICED, COMPARE_AS_OF, COMPARE_TEAM, COMPARE_USD_INR, compareStack } from "@/lib/platform/saas/compare";
 import Reveal from "@/components/platform/saas/Reveal";
+import ProductLogo from "@/components/products/ProductLogo";
 
-const ICON: Record<string, LucideIcon> = {
-  "SelfRun Huddle AI": MessageSquare, "SelfRun Connect": MessageSquare, "Team Chat": MessageSquare,
-  "SelfRun TalentOS": Users, "SelfRun People": Users, "HR & Payroll": Users,
-  "SelfRun DealFlow AI": Briefcase, "SelfRun CRM": Briefcase, "CRM & Sales": Briefcase,
-  "SelfRun SprintOS": FolderKanban, "SelfRun Projects": FolderKanban, Projects: FolderKanban,
-  "SelfRun CashFlow AI": Landmark, "SelfRun Books": Landmark, Finance: Landmark,
-  "SelfRun SpendIQ": ShoppingCart, "SelfRun Procure": ShoppingCart, "Procurement & Assets": ShoppingCart,
-  "SelfRun Cohort AI": GraduationCap, "SelfRun Academy": GraduationCap, Training: GraduationCap,
-  "SelfRun EvalIQ": ClipboardCheck, "SelfRun Assess": ClipboardCheck, "Online Tests": ClipboardCheck,
-  "SelfRun SiteCraft AI": Globe, "SelfRun Web Studio": Globe, Website: Globe,
-  "SelfRun RankMax AI": Search, "SelfRun SEO": Search, SEO: Search,
-  "SelfRun ViralPulse AI": Share2, "SelfRun Social": Share2, "Social Media": Share2,
-  "SelfRun AgentOS": Bot, "SelfRun AI Studio": Bot, "AI Assistants": Bot,
-  "SelfRun Playbook AI": BookOpen, "SelfRun SOPs": BookOpen, "SOPs & Policies": BookOpen,
-  "SelfRun ContractFlow AI": Scale, "SelfRun Legal": Scale, "Legal & Documents": Scale,
-  "SelfRun CyberVault": Lock, "SelfRun Vault": Lock, "Digi Locker": Lock,
-  "SelfRun DataBrain AI": Sparkles, "SelfRun Intelligence": Sparkles, "AI Intelligence": Sparkles,
-  "SelfRun ClientOS": UserRound, "SelfRun Portal": UserRound, "Client & Student Portal": UserRound,
-  "SelfRun ResolveIQ": MessageSquare, "SelfRun Desk": MessageSquare,
+const PRODUCT_KEY: Record<string, string> = {
+  "SelfRun Huddle AI": "messenger",
+  "SelfRun TalentOS": "hrms",
+  "SelfRun DealFlow AI": "lms",
+  "SelfRun SprintOS": "pms",
+  "SelfRun CashFlow AI": "fms",
+  "SelfRun SpendIQ": "prms",
+  "SelfRun Cohort AI": "tms",
+  "SelfRun EvalIQ": "ots",
+  "SelfRun SiteCraft AI": "cms",
+  "SelfRun RankMax AI": "seo",
+  "SelfRun ViralPulse AI": "smms",
+  "SelfRun AgentOS": "aibots",
+  "SelfRun DataBrain AI": "intelligence",
+  "SelfRun CyberVault": "dlms",
+  "SelfRun Playbook AI": "sop",
+  "SelfRun ClientOS": "portal",
+  "SelfRun ContractFlow AI": "lpms",
+  "SelfRun ResolveIQ": "support",
 };
 
 const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
@@ -87,13 +88,12 @@ export default function StackCompare({ plan }: { plan: { name: string; price: st
             )}
 
             <div className="relative">
-              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>All of it, in one login</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">{c.rows.length + COMPARE_UNPRICED.length} products</span></p>
+              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>Independent products, together in one suite</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">{c.rows.length + COMPARE_UNPRICED.length} products</span></p>
               <div className="grid grid-cols-2 gap-2">
                 {c.rows.map((r) => {
-                  const Ic = ICON[r.panel] ?? Layers;
                   return (
                     <div key={r.panel} className="group flex items-center gap-2.5 rounded-xl bg-white/10 p-2.5 ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-white/[0.17]">
-                      <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-white/15 ring-1 ring-white/25"><Ic className="h-4 w-4" /></span>
+                      <span className="flex h-8 w-8 flex-none items-center justify-center"><ProductLogo productKey={PRODUCT_KEY[r.panel] ?? "workspace"} size={32} title={r.panel} /></span>
                       <span className="min-w-0 leading-tight">
                         <span className="block truncate text-[12px] font-bold">{r.panel}</span>
                         <span className="block truncate text-[10px] text-emerald-200/90">replaces a separate tool</span>
@@ -105,8 +105,7 @@ export default function StackCompare({ plan }: { plan: { name: string; price: st
               <p className="mb-2 mt-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Also included — no public price to compare</p>
               <div className="flex flex-wrap gap-1.5">
                 {COMPARE_UNPRICED.map((n) => {
-                  const Ic = ICON[n] ?? Layers;
-                  return <span key={n} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-white/15"><Ic className="h-3 w-3 text-emerald-300" />{n}</span>;
+                  return <span key={n} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-white/15"><ProductLogo productKey={PRODUCT_KEY[n] ?? "workspace"} size={16} title={n} />{n}</span>;
                 })}
               </div>
             </div>

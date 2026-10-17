@@ -68,7 +68,7 @@ export const POSTS: BlogPost[] = [
         body: [
           "The biggest flaw of traditional standalone websites is lead leakage. When a visitor fills out a contact form on WordPress or Squarespace, the submission usually sits in an email inbox or gets lost in spam filters.",
           "With SelfRun AI, every contact form, inquiry button, and newsletter signup connects directly to SelfRun DealFlow AI. When a prospective client submits their phone number and project requirements, three things happen instantly: a new lead card appears on your sales board, an email alert notifies your team, and an automated confirmation email reaches the customer.",
-          "There are no third-party webhook tools or API keys to configure. Your marketing website and your sales pipeline share one database from day one.",
+          "The website and sales product each keep their own data. Configure a form integration or workflow to send enquiries to DealFlow AI; the website and sales pipeline continue to run independently.",
         ],
       },
       {
@@ -116,7 +116,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "1. Work from One Single Unified Platform",
         body: [
-          "Instead of opening separate software for sales, employee leave, client tasks, and billing, run your operations from a single dashboard. When your team shares one source of truth, an approved project milestone automatically creates an invoice draft, and an employee leave request automatically updates the project schedule without anyone having to re-type data.",
+          "SelfRun brings independent products into one suite that teams can manage from one place. Each product keeps its own records and sign-in. If a team wants a project milestone to trigger an invoice draft, or a leave request to notify a project manager, they can configure those handoffs as automations.",
         ],
       },
       {
@@ -733,7 +733,7 @@ export const POSTS: BlogPost[] = [
       {
         heading: "How Conversational AI Queries Your Live Operations",
         body: [
-          "SelfRun AI's SelfRun DataBrain AI introduces conversational business intelligence. Because your leads, projects, employee records, payroll, procurement, and financial ledgers live inside the same database, the AI can query across your entire company seamlessly.",
+          "SelfRun DataBrain AI provides conversational business intelligence using the records available to that product. Each SelfRun product keeps its own database; connect approved data sources when you want a broader view.",
           "You do not need to know SQL, Python, or data modeling formulas. You simply open SelfRun DataBrain AI and type your question in ordinary conversational English, exactly as if you were asking a senior operational director.",
         ],
       },
@@ -1116,7 +1116,7 @@ export const POSTS: BlogPost[] = [
     keyTakeaways: [
       "The average 20-person company spends over $1,200/month on disconnected SaaS subscriptions.",
       "Data silos between sales, project delivery, and accounting cause customer churn and administrative drag.",
-      "A unified multi-tenant workspace gives employees one login and managers one comprehensive audit trail.",
+      "A suite of independent products lets teams choose their own tools, sign-ins and data stores while managing the product links from one place.",
       "Consolidating your software stack reduces IT maintenance, onboarding complexity, and security risk.",
     ],
     sections: [
@@ -1144,20 +1144,20 @@ export const POSTS: BlogPost[] = [
       {
         heading: "The Power of One Connected Business Record",
         body: [
-          "In SelfRun AI, your entire business operates on a single unified data architecture. Look at how smoothly a real workflow moves through the platform:",
+          "SelfRun products operate independently, with their own sign-ins and databases. Where a business wants a handoff, it can configure an automation or integration between the relevant products:",
           "1. A prospective client fills out a form on your public Website.",
           "2. The inquiry immediately appears as a lead card in your SelfRun DealFlow AI pipeline.",
           "3. When the sales rep closes the deal, one click creates the Client profile, kicks off a delivery project in SelfRun SprintOS, and generates the deposit invoice in SelfRun CashFlow AI.",
           "4. The delivery team logs hours on project tasks, which automatically flow into milestone billing and payroll calculations.",
           "5. The client tracks progress through their branded Client Portal without sending a single status-check email.",
-          "No webhooks, no third-party sync integrations, and zero duplicate data entry.",
+          "These handoffs are configured workflows; each product remains usable on its own and keeps its own records.",
         ],
       },
       {
-        heading: "One Login, Role-Based Access, and Master Audit Logs",
+        heading: "Product Sign-Ins, Access, and Audit Logs",
         body: [
           "Managing employee access across ten separate tools is an IT nightmare. When someone is hired or promoted, you have to create accounts across eight different platforms with separate passwords.",
-          "In SelfRun AI, every employee has one login. Administrators assign role permissions (Super Admin, Manager, Specialist, Employee, Viewer) per product. The central Audit Log records every critical action—from invoice deletions and permission changes to export downloads—providing airtight accountability and compliance.",
+          "Each SelfRun product has its own sign-in and access settings. Administrators can assign roles within each product, and its audit log records the actions available there. This keeps access and activity clear without requiring products to share accounts or data.",
         ],
       },
       {

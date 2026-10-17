@@ -52,6 +52,7 @@ import { AnalyticsFilterBar } from "@/components/products/commandos/AnalyticsFil
 import type { CommandCenterStats } from "@/lib/products/commandos/command-center";
 import { formatCurrency } from "@/lib/utils";
 import { productAnalyticsPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Product status grid config
@@ -424,7 +425,7 @@ export function PanelPerformanceMatrix({
           key: r.key,
           label: r.name,
           description: PRODUCT_CARD_DESCRIPTIONS[r.key] ?? r.description,
-          icon: known?.icon ?? <LayoutGrid className="size-5" />,
+          icon: <ProductLogo productKey={r.key} size={44} />,
           color: known?.color ?? "from-primary to-brand-accent",
           analyticsHref: known?.analyticsHref ?? null,
           panelHref: r.route,
@@ -460,9 +461,7 @@ export function PanelPerformanceMatrix({
               >
                 <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 z-0 size-36 rounded-full bg-primary/10 blur-3xl transition-colors duration-300 group-hover:bg-primary/20" />
                 <CardHeader className="relative z-10 grid-cols-[auto_minmax(0,1fr)] items-start gap-3 pb-2">
-                  <div
-                    className={`mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${panel.color} text-white shadow-md shadow-black/10 ring-1 ring-white/15 transition-transform duration-300 group-hover/gcard:scale-105`}
-                  >
+                  <div className="mt-0.5 flex size-11 shrink-0 items-center justify-center transition-transform duration-300 group-hover/gcard:scale-105">
                     {panel.icon}
                   </div>
                   <div className="min-w-0 flex-1">

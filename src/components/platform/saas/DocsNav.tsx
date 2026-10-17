@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, Search } from "lucide-react";
-import Icon from "@/components/platform/saas/Icon";
 import type { IconKey } from "@/lib/platform/saas/content";
 import { productDocsPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export interface DocsNavPanel {
   key: string;
@@ -42,7 +42,7 @@ export default function DocsNav({ panels, currentPanel, currentSlug }: { panels:
           return (
             <div key={p.key} className={`rounded-2xl ${p.key === currentPanel ? "bg-primary/[0.04]" : ""}`}>
               <button type="button" onClick={() => toggle(p.key)} aria-expanded={isOpen} className="flex w-full items-center gap-3 rounded-2xl px-2 py-2 text-left hover:bg-muted/50">
-                <span className="sr-icon h-8 w-8 flex-none rounded-xl"><Icon name={p.icon} className="h-4 w-4" /></span>
+                <span className="sr-icon h-8 w-8 flex-none rounded-xl"><ProductLogo productKey={p.key} size={28} title={p.name} /></span>
                 <span className="min-w-0 flex-1"><span className="block truncate text-[15px] font-black">{p.name}</span></span>
                 <span className="text-[11px] font-semibold text-muted-foreground">{count}</span>
                 <ChevronDown className={`h-4 w-4 flex-none text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />

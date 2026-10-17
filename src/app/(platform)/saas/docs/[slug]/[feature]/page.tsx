@@ -8,9 +8,9 @@ import { PANEL_DETAIL } from "@/lib/platform/saas/panel-detail";
 import { guideFor } from "@/lib/platform/saas/guide-steps";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
-import Icon from "@/components/platform/saas/Icon";
 import DocsNav from "@/components/platform/saas/DocsNav";
 import { productDocsPath, productKeyFromSlug, productSlugFor } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -182,7 +182,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
         {value && (
           <section id="why" className="scroll-mt-32">
             <GuideHeading icon={Sparkles}>Why use {m.name}</GuideHeading>
-            <p className="mb-3 text-muted-foreground">{m.name} replaces {value.replaces.toLowerCase()}, on the same login and the same data.</p>
+            <p className="mb-3 text-muted-foreground">{m.name} replaces {value.replaces.toLowerCase()} and runs independently with its own sign-in and database.</p>
             <ul className="space-y-2">{value.benefits.map((b) => <li key={b} className="flex gap-3"><span className="sr-circle mt-1 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span><span>{b}</span></li>)}</ul>
           </section>
         )}
@@ -213,7 +213,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
       <aside className="hidden lg:block">
         <div className="sticky top-28 space-y-5">
           <div className="rounded-3xl border border-border/60 bg-background p-5 shadow-sm">
-            <div className="mb-4 flex items-center gap-3"><span className="sr-icon h-10 w-10"><Icon name={m.icon} className="h-5 w-5" /></span><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Guide</p><p className="font-black leading-tight">{m.name}</p></div></div>
+            <div className="mb-4 flex items-center gap-3"><span className="sr-icon h-10 w-10"><ProductLogo productKey={m.key} size={36} title={m.name} /></span><div><p className="text-xs font-bold uppercase tracking-widest text-primary">Guide</p><p className="font-black leading-tight">{m.name}</p></div></div>
             <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">On this page</p>
             <ul className="space-y-0.5 border-l border-border/60">
               {toc.map((t) => <li key={t.id}><a href={`#${t.id}`} className="-ml-px block border-l-2 border-transparent py-1.5 pl-4 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary">{t.label}</a></li>)}

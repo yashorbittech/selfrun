@@ -2,64 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { ComponentType } from "react";
-import {
-  Activity, Banknote, Bell, BookOpen, Bot, BriefcaseBusiness, Building2,
-  ChartNoAxesCombined, CheckSquare, CircleHelp, FileText, Globe2, Grid2X2, KeyRound,
-  LayoutDashboard, LockKeyhole, Megaphone, MessageCircle, PanelsTopLeft, Palette,
-  Search, Settings2, ShieldCheck, ShoppingCart, Smartphone, Sparkles, Users,
-  Vault, Wallet, X,
-} from "lucide-react";
+import { Grid2X2, Search, X } from "lucide-react";
 import type { PanelMeta } from "@/lib/platform/panels/types";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import type { NavIcon } from "@/lib/products/commandos/nav";
-
-const ICONS: Record<NavIcon, ComponentType<{ className?: string }>> = {
-  help: CircleHelp,
-  dashboard: LayoutDashboard,
-  users: Users,
-  projects: BriefcaseBusiness,
-  cart: ShoppingCart,
-  training: CheckSquare,
-  finance: Banknote,
-  book: BookOpen,
-  search: Search,
-  vault: Vault,
-  bot: Bot,
-  megaphone: Megaphone,
-  test: CheckSquare,
-  chat: MessageCircle,
-  grid: Grid2X2,
-  website: PanelsTopLeft,
-  shield: ShieldCheck,
-  chart: ChartNoAxesCombined,
-  globe: Globe2,
-  building: Building2,
-  card: Wallet,
-  receipt: FileText,
-  gauge: Activity,
-  palette: Palette,
-  smartphone: Smartphone,
-  bank: Wallet,
-  plug: Settings2,
-  zap: Sparkles,
-  upload: FileText,
-  history: Activity,
-  lock: LockKeyhole,
-  bell: Bell,
-  key: KeyRound,
-  file: FileText,
-  platform: Building2,
-};
-
-const COLORS = [
-  "from-violet-500 to-indigo-500",
-  "from-sky-500 to-cyan-500",
-  "from-emerald-500 to-teal-500",
-  "from-amber-500 to-orange-500",
-  "from-rose-500 to-pink-500",
-  "from-blue-500 to-indigo-500",
-];
+import ProductLogo from "@/components/products/ProductLogo";
 
 export default function ProductLauncher({ currentPanel, products: panelList }: { currentPanel: string; products: PanelMeta[] }) {
   const [query, setQuery] = useState("");
@@ -116,13 +62,12 @@ export default function ProductLauncher({ currentPanel, products: panelList }: {
         </div>
 
         <div className="grid flex-1 grid-cols-3 content-start gap-1 overflow-y-auto p-3">
-          {filtered.map((product, index) => {
-            const Icon = ICONS[product.icon] ?? Grid2X2;
+          {filtered.map((product) => {
             const isCurrent = product.key === currentPanel;
             const tile = (
               <>
-                <span className={`relative flex size-12 items-center justify-center rounded-full bg-gradient-to-br ${COLORS[index % COLORS.length]} text-white shadow-md transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-110 group-hover:shadow-lg`}>
-                  <Icon className="size-[21px] drop-shadow-sm" />
+                <span className="relative flex size-12 items-center justify-center transition duration-200 group-hover:-translate-y-0.5 group-hover:scale-110">
+                  <ProductLogo productKey={product.key} size={48} className="drop-shadow-md" />
                   {isCurrent && <span className="absolute right-0 top-0 size-2.5 rounded-full bg-emerald-400 ring-2 ring-popover" />}
                 </span>
                 <span className="w-full truncate text-center text-[11px] font-medium leading-tight transition-colors group-hover:text-primary">{product.shortName || product.name}</span>

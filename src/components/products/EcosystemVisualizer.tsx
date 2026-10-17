@@ -3,6 +3,7 @@
 import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ProductLogo from "@/components/products/ProductLogo";
 import {
   Sparkles,
   Lock,
@@ -35,6 +36,11 @@ interface SphereData {
   dataFlowTrigger: string;
   products: { name: string; tag: string; icon: LucideIcon }[];
 }
+
+const PRODUCT_KEY_BY_TAG: Record<string, string> = {
+  LMS: "lms", SEO: "seo", SMMS: "smms", Web: "website", HRMS: "hrms", OTS: "ots", TMS: "tms",
+  PMS: "pms", PRMS: "prms", Chat: "messenger", Admin: "workspace", "AI Bots": "aibots", DLMS: "dlms", Portal: "portal",
+};
 
 export default function EcosystemVisualizer() {
   const tx = useText();
@@ -203,14 +209,13 @@ export default function EcosystemVisualizer() {
               {/* Connected Products Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {activeSphere.products.map((prod, idx) => {
-                  const ProdIcon = prod.icon;
                   return (
                     <div
                       key={idx}
                       className="p-3 rounded-xl border border-border/50 bg-card hover:border-primary/40 transition-all flex items-center gap-3 shadow-xs"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                        <ProdIcon className="w-4 h-4" />
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0">
+                        <ProductLogo productKey={PRODUCT_KEY_BY_TAG[prod.tag] ?? "workspace"} size={32} title={prod.name} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-xs text-foreground truncate">{prod.name}</div>

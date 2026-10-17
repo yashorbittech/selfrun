@@ -7,6 +7,7 @@ import { TextProvider } from "@/components/products/sitecraft-ai/TextContext";
 import { useProducts } from "@/components/products/sitecraft-ai/useProducts";
 import ProductCard from "@/components/products/ProductCard";
 import ProductDetailModal from "@/components/products/ProductDetailModal";
+import ProductLogo from "@/components/products/ProductLogo";
 import ProductMockup from "@/components/products/ProductMockup";
 import EcosystemVisualizer from "@/components/products/EcosystemVisualizer";
 import Link from "next/link";
@@ -761,8 +762,8 @@ export default function SaasProductCatalog({ categories }: { categories: string[
                     <div className="rounded-3xl border border-border/80 bg-card p-6 shadow-2xl space-y-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                            <prod.icon className="w-5 h-5" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-xl">
+                            <ProductLogo productKey={prod.slug} size={40} title={prod.name} />
                           </div>
                           <div>
                             <h4 className="font-bold text-foreground text-lg">{prod.name}</h4>

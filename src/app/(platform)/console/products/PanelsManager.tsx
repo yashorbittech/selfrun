@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { deletePanelAction, savePanelAction, seedPanelsAction, setPanelActiveAction } from "./actions";
 import type { PanelRecord } from "@/lib/platform/panels/types";
 import { cn } from "@/lib/utils";
+import ProductLogo from "@/components/products/ProductLogo";
 
 const ICONS = ["dashboard", "users", "projects", "cart", "training", "finance", "book", "search", "vault", "bot", "megaphone", "test", "chat", "grid", "website", "shield", "chart", "globe", "building", "card", "receipt", "gauge", "palette", "bank", "plug", "zap", "upload", "history", "lock", "bell", "key", "file", "platform", "help"];
 const INPUT = "w-full rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary";
@@ -88,9 +89,12 @@ export default function PanelsManager({ panels, disabledFor, canManage }: { pane
         {panels.map((p) => (
           <Fragment key={p.key}>
             <div className={cn("grid items-center gap-3 border-b border-border/40 px-4 py-3 last:border-0 md:grid-cols-[1.4fr_2fr_auto_auto]", !p.active && "opacity-70")}>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-foreground">{productListingName(p.name)} {p.core && <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Core</span>}</p>
-                <p className="truncate text-xs text-muted-foreground"><code>{p.route}</code> · order {p.order}</p>
+              <div className="flex min-w-0 items-center gap-3">
+                <ProductLogo productKey={p.key} size={32} title={productListingName(p.name)} />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-foreground">{productListingName(p.name)} {p.core && <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">Core</span>}</p>
+                  <p className="truncate text-xs text-muted-foreground"><code>{p.route}</code> · order {p.order}</p>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">{p.description}</p>
               <p className="text-xs text-muted-foreground md:w-24 md:text-center">{disabledFor[p.key] ? `${disabledFor[p.key]} compan${disabledFor[p.key] === 1 ? "y" : "ies"}` : "—"}</p>

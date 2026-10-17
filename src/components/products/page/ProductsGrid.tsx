@@ -7,9 +7,9 @@ import { ArrowRight, Boxes, LayoutGrid, Sparkles } from "lucide-react";
 import FeaturedListingCard from "@/components/sections/FeaturedListingCard";
 import ListingCard from "@/components/sections/ListingCard";
 import { BTN_PRIMARY, BTN_SECONDARY, listingCardProps, nextImageSrc } from "@/components/products/page/cta-styles";
-import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { fillText } from "@/lib/products/text";
 import { capabilityChips, groupByCategory, productHref, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
+import ProductLogo from "@/components/products/ProductLogo";
 
 /**
  * The /products listing, built like the site's other listing pages: a featured card on top (the whole connected automation platform),
@@ -89,7 +89,7 @@ export default function ProductsGrid({ products, text }: { products: StoredProdu
             <ListingCard
               key={p.slug}
               index={products.indexOf(p)}
-              icon={resolveIcon(p.iconName)}
+              icon={<ProductLogo productKey={p.slug} size={44} />}
               badge={p.category}
               badgeIcon={Sparkles}
               {...listingCardProps(p)}

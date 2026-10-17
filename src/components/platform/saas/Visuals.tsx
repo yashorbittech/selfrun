@@ -2,12 +2,14 @@ import { ArrowRight } from "lucide-react";
 import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import type { IconKey } from "@/lib/platform/saas/content";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export interface JourneyStep {
   label: string;
   text: string;
   module: string;
   icon: IconKey;
+  productKey?: string;
 }
 
 /** A connected row of coloured circles: one business process flowing across modules. Vertical on phones. */
@@ -18,7 +20,7 @@ export function Journey({ steps }: { steps: JourneyStep[] }) {
       {steps.map((s, i) => {
         return (
           <Reveal key={s.label} as="li" delay={i * 90} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
-            <span className="sr-circle relative size-14 shrink-0 shadow-lg shadow-primary/25 ring-4 ring-background"><Icon name={s.icon} className="size-6" /></span>
+            <span className="sr-circle relative size-14 shrink-0 shadow-lg shadow-primary/25 ring-4 ring-background">{s.productKey ? <ProductLogo productKey={s.productKey} size={40} title={s.module} /> : <Icon name={s.icon} className="size-6" />}</span>
             <div className="space-y-1">
               <p className="sr-mono text-[11px] tracking-wider uppercase text-primary">{String(i + 1).padStart(2, "0")} · {s.module}</p>
               <p className="text-[16px] font-semibold">{s.label}</p>
@@ -48,11 +50,11 @@ export function BeforeAfter({ modules }: { modules: { name: string; color: strin
       </div>
       <div className="mx-auto flex size-14 items-center justify-center rounded-full text-white" style={{ background: "linear-gradient(135deg,#4f46e5,#8b5cf6)", boxShadow: "0 14px 30px -12px #4f46e5" }}><ArrowRight className="size-6 rotate-90 md:rotate-0" aria-hidden /></div>
       <div className="space-y-4">
-        <p className="sr-mono text-[12px] tracking-wider uppercase" style={{ color: "var(--sr-primary)" }}>After · one platform, one login</p>
+        <p className="sr-mono text-[12px] tracking-wider uppercase" style={{ color: "var(--sr-primary)" }}>After · independent products, one suite</p>
         <div className="flex flex-wrap gap-2">
           {modules.map((m) => <span key={m.name} className="inline-flex items-center gap-2 rounded-full bg-card py-1.5 pr-3.5 pl-2 text-[13px] font-medium shadow-sm ring-1 ring-[var(--sr-line)]"><span className="size-3.5 rounded-full" style={{ background: m.color }} />{m.name}</span>)}
         </div>
-        <p className="text-[14.5px] leading-snug">Everything shares one record. Work moves between teams on its own.</p>
+        <p className="text-[14.5px] leading-snug">Each product keeps its own data. Set up automations for the handoffs you want.</p>
       </div>
     </div>
   );

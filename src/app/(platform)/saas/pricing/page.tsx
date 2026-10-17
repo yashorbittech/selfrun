@@ -12,10 +12,10 @@ import PricingPlans from "@/components/platform/saas/PricingPlans";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import StackCompare from "@/components/platform/saas/StackCompare";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
-import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import { jsonForScript } from "@/lib/security/json-script";
 import { productPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -85,7 +85,7 @@ export default async function PricingPage() {
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
                 <Link href={productPath(m.key)} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
-                  <span className="sr-icon h-10 w-10 flex-none"><Icon name={m.icon} className="h-4.5 w-4.5" /></span>
+                  <span className="sr-icon h-10 w-10 flex-none"><ProductLogo productKey={m.key} size={30} title={m.name} /></span>
                   <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">{featureCount(m.key) || m.capabilities.length} features</span></span>
                   <Check className="h-4 w-4 flex-none text-primary" />
                 </Link>

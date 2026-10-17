@@ -6,9 +6,9 @@ import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { featuresOf } from "@/lib/platform/saas/feature-lists";
 import { PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import DocsSearch, { type DocEntry } from "@/components/platform/saas/DocsSearch";
-import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import { productDocsPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -44,7 +44,7 @@ export default async function DocsPage() {
                 <a href={`#${m.key}`} className="group flex flex-col items-center text-center">
                   <span className="relative mb-4 inline-flex">
                     <span className="absolute inset-0 -z-10 scale-125 rounded-full bg-primary/25 blur-xl transition-opacity group-hover:opacity-100 sm:opacity-50" aria-hidden />
-                    <span className="sr-icon h-16 w-16 rounded-3xl transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110"><Icon name={m.icon} className="h-7 w-7" /></span>
+                    <span className="sr-icon h-16 w-16 rounded-3xl transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-110"><ProductLogo productKey={m.key} size={44} title={m.name} /></span>
                   </span>
                   <span className="font-black leading-tight group-hover:text-primary">{m.name}</span>
                   <span className="mt-0.5 text-xs font-semibold text-muted-foreground">{featuresOf(m.key).length} guides</span>
@@ -62,7 +62,7 @@ export default async function DocsPage() {
             if (!list.length) return null;
             return (
               <div key={m.key} id={m.key} style={{ scrollMarginTop: 140 }}>
-                <SectionHead icon={m.icon} eyebrow={`${list.length} guides`} title={m.name} lead={m.summary} />
+                <SectionHead icon={<ProductLogo productKey={m.key} size={56} title={m.name} />} eyebrow={`${list.length} guides`} title={m.name} lead={m.summary} />
                 <ul className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
                   {list.map((f, i) => (
                     <Reveal key={f.slug} as="li" delay={(i % 3) * 50}>

@@ -78,13 +78,13 @@ export default async function SaasHome() {
             { v: "₹0", l: "free forever" },
           ]} />
         </div>
-        <div className="pb-8"><ModuleMarquee items={modules.map((m) => ({ name: m.name, icon: m.icon }))} /></div>
+        <div className="pb-8"><ModuleMarquee items={modules.map((m) => ({ key: m.key, name: m.name, icon: m.icon }))} /></div>
       </section>
 
       {/* Replace the stack */}
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="One software, every tool" title={`${REPLACES.length} kinds of software.`} accent="One subscription." lead="Stop paying for, logging into and copying data between a different tool for every job. Each one below is a full product inside SelfRun — sharing one database, one login and one bill." />
+          <SectionHead center icon="layers" eyebrow="Independent products, one suite" title={`${REPLACES.length} kinds of software.`} accent="One place to manage." lead="Replace a collection of separate vendors with purpose-built products from SelfRun. Every product runs independently with its own sign-in and database, while the suite gives you one place to discover and manage them." />
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
@@ -126,7 +126,7 @@ export default async function SaasHome() {
               {[
                 { t: "Fewer subscriptions", b: "One bill replaces a tool for every department — and every feature is already included.", icon: "wallet" as const },
                 { t: "Less admin, fewer hires for it", b: "Reminders, follow-ups, approvals and reports run on their own, so your team grows the business instead of chasing it.", icon: "users" as const },
-                { t: "No integration costs", b: "Every product shares one database, so there are no connectors to buy, build or fix.", icon: "plug" as const },
+                { t: "Automate the handoffs you choose", b: "Configure workflows and integrations for the products and services you want to connect. Each product also works independently.", icon: "plug" as const },
               ].map((x, i) => (
                 <Reveal key={x.t} delay={i * 80}>
                   <div className="sr-glass relative h-full overflow-hidden p-7">
@@ -221,7 +221,7 @@ export default async function SaasHome() {
           <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <ul className="space-y-3">
-              {["Switch on only what you need — add the rest any time", "Every product shares one database and one login", "AI and automation work across all of them"].map((t) => (
+              {["Choose products independently and add others any time", "Each product has its own sign-in and database", "Manage the suite from one place and configure automations when needed"].map((t) => (
                 <li key={t} className="flex gap-3 text-[15px]"><span className="sr-circle mt-0.5 h-5 w-5"><Check className="h-3 w-3" strokeWidth={3} /></span>{t}</li>
               ))}
             </ul>
@@ -292,7 +292,7 @@ export default async function SaasHome() {
                 <div className="relative">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">One platform</p>
                   <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">{REPLACES.length}<span className="mx-3 text-white/50">→</span>1</p>
-                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">{modules.length} products on one login and one database replace {REPLACES.length} kinds of separate software — and every feature is on every plan.</p>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">{modules.length} independent products replace {REPLACES.length} kinds of separate software. Each product keeps its own data and sign-in, and the suite gives you one place to manage the tools you choose.</p>
                 </div>
                 <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every product <ArrowRight className="h-4 w-4" /></Link>
               </div>
@@ -355,11 +355,11 @@ export default async function SaasHome() {
           <SectionHead center icon="chart" eyebrow="Connected by design" title="From first enquiry" accent="to money in the ledger." lead="A deal won starts the project. A finished milestone raises the invoice. A paid invoice updates the books. Nobody re-types a thing." />
           <Journey
             steps={[
-              { label: "Lead captured", text: "From your website, forms and campaigns.", module: "SelfRun DealFlow AI", icon: "target" },
-              { label: "Deal won", text: "The client record is created for you.", module: "SelfRun DealFlow AI", icon: "check" },
-              { label: "Project delivered", text: "Tasks, timesheets and milestones.", module: "SelfRun SprintOS", icon: "layers" },
-              { label: "Invoice raised", text: "From the milestone, with a payment link.", module: "SelfRun CashFlow AI", icon: "wallet" },
-              { label: "Paid & posted", text: "Finance is told; the ledger is updated.", module: "SelfRun CashFlow AI", icon: "chart" },
+              { label: "Lead captured", text: "From your website, forms and campaigns.", module: "SelfRun DealFlow AI", productKey: "lms", icon: "target" },
+              { label: "Deal won", text: "The client record is created for you.", module: "SelfRun DealFlow AI", productKey: "lms", icon: "check" },
+              { label: "Project delivered", text: "Tasks, timesheets and milestones.", module: "SelfRun SprintOS", productKey: "pms", icon: "layers" },
+              { label: "Invoice raised", text: "From the milestone, with a payment link.", module: "SelfRun CashFlow AI", productKey: "fms", icon: "wallet" },
+              { label: "Paid & posted", text: "Finance is told; the ledger is updated.", module: "SelfRun CashFlow AI", productKey: "fms", icon: "chart" },
             ]}
           />
         </div>

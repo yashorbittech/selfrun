@@ -11,7 +11,6 @@ import {
   Globe,
   ShoppingCart,
   GraduationCap,
-  LayoutDashboard,
   AlertTriangle,
   AlertCircle,
   TrendingUp,
@@ -62,6 +61,7 @@ import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import KpiCard from "@/components/products/dealflow-ai/KpiCard";
 import KpiGrid from "@/components/products/dealflow-ai/KpiGrid";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
+import ProductLogo from "@/components/products/ProductLogo";
 import TimeSeriesChart from "@/components/products/dealflow-ai/TimeSeriesChart";
 import CategoryBarChart from "@/components/products/dealflow-ai/CategoryBarChart";
 import ExecutiveSection from "@/components/products/commandos/ExecutiveSection";
@@ -305,27 +305,6 @@ const PANEL_FILTER_FIELDS: Record<PanelKey, FilterField[]> = {
       ],
     },
   ],
-};
-
-/* ─── Icon map ─────────────────────────────────────────── */
-const PANEL_ICONS: Record<PanelKey, React.ReactNode> = {
-  aibots: <Bot className="size-5" />,
-  cms: <PanelsTopLeft className="size-5" />,
-  dlms: <Vault className="size-5" />,
-  lpms: <FileText className="size-5" />,
-  ots: <FileCheck2 className="size-5" />,
-  seo: <SearchCheck className="size-5" />,
-  smms: <Megaphone className="size-5" />,
-  sop: <BookText className="size-5" />,
-  fms: <Landmark className="size-5" />,
-  hrms: <Users className="size-5" />,
-  lms: <LayoutGrid className="size-5" />,
-  messenger: <MessagesSquare className="size-5" />,
-  pms: <FolderKanban className="size-5" />,
-  portal: <Globe className="size-5" />,
-  prms: <ShoppingCart className="size-5" />,
-  tms: <GraduationCap className="size-5" />,
-  workspace: <LayoutDashboard className="size-5" />,
 };
 
 /* ─── Shared UI helpers ─────────────────────────────────── */
@@ -1065,7 +1044,7 @@ export async function PanelAnalyticsBlock({
   compact?: boolean;
 }) {
   const config = (await panelConfigs())[panel];
-  const icon = PANEL_ICONS[panel];
+  const icon = <ProductLogo productKey={panel} size={40} />;
   const roles = user.roles;
   // The same rule that lists this page in the Workspace navigation: role / permission override, plan and switched-on products.
   const isAuthorized = await checkWorkspaceAccess(user, `analytics.${panel}`);

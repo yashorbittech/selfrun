@@ -5,11 +5,11 @@ import React from "react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import type { ProductItem } from "@/types/content";
 import ProductMockup from "./ProductMockup";
+import ProductLogo from "@/components/products/ProductLogo";
 import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  ShieldCheck,
   AlertCircle,
   TrendingUp,
   Globe,
@@ -23,7 +23,6 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, onSelect }: ProductCardProps) {
   const tx = useText();
-  const Icon = product.icon || ShieldCheck;
   const mouseX = useMotionValue(0.5);
   const mouseY = useMotionValue(0.5);
 
@@ -83,7 +82,7 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
         {/* Product Identity Header */}
         <div className="flex items-start gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 via-secondary/15 to-primary/5 border border-primary/25 shadow-md group-hover:scale-105 group-hover:rotate-2 transition-all duration-300">
-            <Icon className="h-7 w-7 text-primary" />
+            <ProductLogo productKey={product.slug} size={40} />
           </div>
           <div className="space-y-1">
             <h3 className="text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors leading-tight">

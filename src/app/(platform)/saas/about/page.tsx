@@ -5,14 +5,14 @@ import { ArrowRight, Check } from "lucide-react";
 import { INDUSTRIES, SECURITY_POINTS, USE_CASES } from "@/lib/platform/saas/content";
 import { GROWTH } from "@/lib/platform/saas/site";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
-import { panelColor } from "@/lib/platform/saas/palette";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { panelColor } from "@/lib/platform/saas/palette";
 import Icon from "@/components/platform/saas/Icon";
 import { IconColumns, NumberedRows } from "@/components/platform/saas/Modern";
 import CountStats from "@/components/platform/saas/CountStats";
 import Reveal from "@/components/platform/saas/Reveal";
 import MarketingShot from "@/components/platform/saas/MarketingShot";
-import PanelOrbit from "@/components/platform/saas/PanelOrbit";
+import AboutHeroArtwork from "@/components/platform/saas/AboutHeroArtwork";
 import CustomerStoriesSection from "@/components/platform/saas/CustomerStoriesSection";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
@@ -34,7 +34,7 @@ const VALUES = [
 
 const PRINCIPLES = [
   { title: "Take the repetitive work off people", body: "Copying data between tools, chasing approvals and compiling reports should be the platform's job, so people spend their time on customers, craft and growth." },
-  { title: "One source of truth", body: "Every product shares one record of the business, so a number means the same thing wherever you see it." },
+  { title: "Independent products", body: "Each product keeps its own sign-in and data. Choose the products that fit your business and run each one on its own." },
   { title: "Automation people can trust", body: "Every run is logged and explained, workflows can be paused at any time, and approvals keep people in control of anything that moves money." },
   { title: "Intelligence with permission", body: "AI answers from your real records, shows how it got there, and only sees what the person asking is allowed to see." },
 ];
@@ -51,18 +51,14 @@ const NAV = [
 export default async function AboutPage() {
   const groups = await getFeatureGroups();
   const modules = groups.flatMap((g) => g.items);
-  const orbit = modules.map((m) => ({ key: m.key, name: m.name, description: m.description, icon: m.icon, color: panelColor(m.key) }));
+  const orbitPanels = modules.map((module) => ({ ...module, color: panelColor(module.key) }));
   return (
     <>
-      <PageHero art="about"
+      <PageHero artContent={<AboutHeroArtwork panels={orbitPanels} brand={SAAS_BRAND.name} />}
         eyebrow="About SelfRun AI"
         title="We believe a business"
         accent="should run itself."
         lead="Too many companies spend their best hours copying data between tools, chasing approvals and compiling reports. SelfRun AI exists to take that work off people's plates — with one AI-powered platform that runs the routine."
-        photo="open-office"
-        shot="workspace"
-        shotName="SelfRun CommandOS"
-        chip={{ title: `${modules.length} products, one platform`, text: "Under your own brand" }}
       >
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
       </PageHero>
@@ -80,11 +76,11 @@ export default async function AboutPage() {
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <div>
             <div className="sr-prose">
-              <p>{SAAS_BRAND.name} combines the systems a company normally buys separately — CRM, HR and payroll, finance, projects, procurement, training, documents, a website builder, team chat and more — on one database with one set of permissions.</p>
-              <p>On top of that sits AI that answers questions from your own records, shows its working and respects who is asking, and a workflow engine that acts on events across the whole platform: a won deal creates the client, a completed milestone raises the invoice, a paid invoice updates the ledger.</p>
+              <p>{SAAS_BRAND.name} brings independent business products together in one suite — CRM, HR and payroll, finance, projects, procurement, training, documents, a website builder, team chat and more. Each product has its own sign-in and database, and can run on its own.</p>
+              <p>Use the products separately or manage them from one place. AI works with the records available in its product, while configurable workflows can automate handoffs between products when you choose to connect them.</p>
               <p>The platform is multi-tenant by design. Every company is a customer of the same product, with the same features, the same onboarding and the same safeguards. There is no special version for anyone — and every company runs it under its own brand, on the web, as an installable app, on Android and iOS and on the desktop.</p>
             </div>
-            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "products" }, { v: "1", l: "login" }, { v: "1", l: "database" }]} /></div>
+            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "independent products" }, { v: "Own", l: "sign-in per product" }, { v: "Own", l: "database per product" }]} /></div>
           </div>
           <Reveal><MarketingShot screenKey="workspace" name="SelfRun CommandOS" /></Reveal>
         </div>
@@ -103,9 +99,8 @@ export default async function AboutPage() {
       <section id="what-we-do" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead center icon="layers" eyebrow="What we do" title="Seven areas of your business," accent="one platform." lead="We build and run the platform your company works in. Each area below is a set of products — all included in every plan." />
-          <div className="mb-20 grid items-center gap-12 lg:grid-cols-2">
-            <Reveal><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
-            <ul className="space-y-6">
+          <div className="mb-20">
+            <ul className="grid gap-x-10 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((g, i) => (
                 <Reveal key={g.id} as="li" delay={i * 50}>
                   <Link href={`/products#${g.id}`} className="group flex gap-4">

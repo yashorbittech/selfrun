@@ -11,7 +11,7 @@ let closedThisLoad = false;
 const QUIET = ["/signup", "/login", "/register", "/contact"];
 const LINES = [
   { tag: "Free forever", body: "Every product and feature. AI built in. No card." },
-  { tag: "Start at ₹0", body: "Sales, HR, finance and more in one login — free." },
+  { tag: "Start at ₹0", body: "Independent products for sales, HR, finance and more — free." },
   { tag: "Try it free", body: "Set up in minutes. Full access, no card needed." },
 ];
 const W = 232;

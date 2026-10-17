@@ -5,8 +5,8 @@ import { productPath } from "@/lib/platform/saas/product-routes";
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowRight, Check, Pause } from "lucide-react";
-import Icon from "@/components/platform/saas/Icon";
 import type { IconKey } from "@/lib/platform/saas/content";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export interface ShowcaseItem {
   key: string;
@@ -34,7 +34,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
       <div className="sr-scroll-x -mx-6 mb-10 flex gap-2 px-6 lg:mx-0 lg:flex-wrap lg:justify-center lg:px-0" role="tablist" aria-label="Products">
         {items.map((x, n) => (
           <button key={x.key} role="tab" aria-selected={n === i} onClick={() => setI(n)} className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${n === i ? "border-transparent bg-white text-black shadow-lg shadow-black/30" : "border-white/20 bg-white/10 text-white hover:bg-white/20"}`}>
-            <Icon name={x.icon} className="h-4 w-4" />{x.name}
+            <ProductLogo productKey={x.key} size={20} title={x.name} />{x.name}
           </button>
         ))}
       </div>
@@ -46,7 +46,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
         </div>
 
         <div key={`${t.key}-i`} style={{ animation: "sr-in .5s ease .08s both" }}>
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/30"><Icon name={t.icon} className="h-7 w-7" /></span>
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl"><ProductLogo productKey={t.key} size={56} title={t.name} /></span>
           <h3 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">{t.name}</h3>
           <p className="mt-3 text-[17px] leading-relaxed text-white/80">{t.summary}</p>
           {t.points.length > 0 && (

@@ -9,7 +9,7 @@ import BrandMark from "@/components/BrandMark";
 import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 interface ListingCardProps {
-  icon: LucideIcon;
+  icon: React.ReactNode;
   index: number;
   badge: string;
   badgeIcon: LucideIcon;
@@ -27,7 +27,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({
-  icon: Icon,
+  icon: ProductMark,
   index,
   badgeIcon: BadgeIcon,
   title,
@@ -103,7 +103,7 @@ export default function ListingCard({
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center justify-between mb-6">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 border border-primary/20 flex items-center justify-center group-hover/card:from-primary group-hover/card:to-brand-accent group-hover/card:border-primary group-hover/card:shadow-lg group-hover/card:shadow-primary/20 group-hover/card:scale-110 group-hover/card:rotate-3 transition-all duration-300">
-              <Icon className="w-6 h-6 text-primary group-hover/card:text-white transition-colors duration-300" />
+              {ProductMark}
             </div>
             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-background/70 border border-border/50 px-2.5 py-1 rounded-full backdrop-blur-sm group-hover/card:border-primary/30 group-hover/card:text-foreground transition-colors duration-300">
               <BrandMark className="w-3.5 h-3.5" />

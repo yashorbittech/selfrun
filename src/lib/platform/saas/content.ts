@@ -15,12 +15,12 @@ export type IconKey =
 
 /** Home + Features page: what the platform gives every business. */
 export const CORE_FEATURES: Feature[] = [
-  { icon: "layers", title: "One platform instead of twenty tools", body: "Sales, HR and payroll, finance, projects, procurement, training, documents, your website and team chat share one login, one database and one set of permissions — no more copying data between apps." },
+  { icon: "layers", title: "Independent products in one suite", body: "Choose from purpose-built products for sales, HR, finance, projects, procurement, training, documents, websites and team chat. Each has its own sign-in and database, and the suite gives you one place to manage them." },
   { icon: "workflow", title: "Automations that run on their own", body: "Build Trigger → Condition → Action workflows with no code. When a lead is won, a leave is approved or an invoice goes overdue, the right people are notified and the right records are updated automatically." },
   { icon: "brain", title: "AI that knows your business", body: "Ask questions in plain language and get answers built from your real records — with the calculation shown. AI assistants, drafting and summaries work across every module and respect each person's access." },
   { icon: "globe", title: "A website that manages itself", body: "Every workspace comes with a complete website builder: pages, blog, forms, SEO, themes and your own domain with automatic SSL — edited by your team, published in one click." },
   { icon: "shield", title: "Built for security and control", body: "Role-based access down to individual actions, a full audit trail, encrypted credentials and strict isolation between companies. You decide who can see and change what." },
-  { icon: "chart", title: "Live numbers, not month-end surprises", body: "Dashboards for every module and a company-wide view for leadership. Filter by date, department or owner and export what you need — always from live data." },
+  { icon: "chart", title: "Live numbers, not month-end surprises", body: "Product-specific dashboards give teams a current view of their records. Filter by date, department or owner and export what you need." },
 ];
 
 export interface ModuleCopy {
@@ -44,7 +44,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   },
   hrms: {
     icon: "users",
-    headline: "From hiring to payroll, every people process in one place",
+    headline: "Independent people tools for hiring through payroll",
     summary: "Employee records, attendance, leave, holidays, recruitment and payroll — with self-service for employees and approvals for managers.",
     capabilities: ["Employee directory, documents and organisation tree", "Attendance with monthly calendar and reports", "Leave types, balances, requests and approvals", "Recruitment pipeline from application to offer", "Payroll runs, salary revisions and payslips", "Employee self-service: my attendance, leave, salary and documents"],
     automations: ["Notify the manager when a leave request is filed", "Create the employee record when an offer is accepted", "Alert HR before documents or probation periods expire", "Post payroll results to SelfRun CashFlow AI automatically"],
@@ -133,8 +133,8 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   intelligence: {
     icon: "brain",
     headline: "Ask your business anything",
-    summary: "Ask questions in plain language and get answers computed from your real records, with tables, charts and a clear explanation of how each number was calculated.",
-    capabilities: ["Natural-language questions across your modules", "Answers built from live data, never guessed", "Tables, charts and KPIs", "“How this was calculated” traceability", "Respects each person's access rights"],
+    summary: "Ask questions in plain language and get answers computed from the records available to this product, with tables, charts and a clear explanation of how each number was calculated.",
+    capabilities: ["Natural-language questions about available records", "Answers built from live data, never guessed", "Tables, charts and KPIs", "“How this was calculated” traceability", "Respects each person's access rights"],
     automations: ["Turn a recurring question into a scheduled summary"],
     outcome: "Leadership decisions in seconds instead of waiting for a report.",
   },
@@ -181,7 +181,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   workspace: {
     icon: "bolt",
     headline: "The home of your company",
-    summary: "One dashboard for every module, company-wide analytics, users and roles, audit log, automations, imports and settings.",
+    summary: "A suite console for product links, company settings, plan details and setup, with analytics and records kept within each independent product.",
     capabilities: ["Executive dashboard and per-module analytics", "Users, roles and fine-grained permissions", "Audit log across everything", "Workflow automations", "Data import", "Branding, domains and billing"],
     automations: ["Build your own Trigger → Condition → Action workflows"],
     outcome: "Leadership visibility and administrative control from a single screen.",
@@ -220,7 +220,7 @@ export const HOW_IT_WORKS: Step[] = [
   { title: "Register and choose a plan", body: "Create your account with your work email, verify it and start on the free-forever plan — no card needed. Upgrade only when your team grows." },
   { title: "Set up your company", body: "A short guided setup collects your business details, creates your departments, invites your team and lets you switch modules on or off. It takes minutes, not weeks." },
   { title: "Configure your website, AI and automations", body: "Choose a theme and publish your website, connect your AI and email, and switch on the automations that matter. Every setting is yours to change at any time." },
-  { title: "Run your business from one place", body: "Your team works in the modules they need, leadership watches the live dashboard, and the platform handles the repetitive work in the background." },
+  { title: "Manage your software suite from one place", body: "Choose independent products for your team, then configure reminders and workflow handoffs where they help. Each product remains usable on its own." },
 ];
 
 export interface UseCase {
@@ -244,7 +244,7 @@ export const USE_CASES: UseCase[] = [
   { slug: "compliance-and-documents", title: "Compliance and documents", summary: "Procedures, agreements and records that stand up to an audit.", narrative: "A team publishes controlled procedure versions, assigns them to the right people and tracks acknowledgements. Agreements can be generated from templates, while credentials and important files are kept in the document vault with expiry alerts to prompt review.", problem: "Policies live in shared drives, nobody can prove who read what, and documents expire unnoticed.", solution: ["Publish SOPs with versions and assign them to teams", "Track acknowledgements and escalate the overdue", "Generate agreements and certificates from templates", "Store credentials and documents with expiry alerts"], modules: ["sop", "lpms", "dlms"], result: "Audit-ready records and a team that knows the current way of working." },
   { slug: "client-onboarding-and-delivery", title: "Client onboarding and delivery", summary: "A consistent handoff from a won deal to active project work.", narrative: "After a deal is marked won, the client and project records are created for the delivery team. The team coordinates tasks and milestones in the project workspace, shares relevant updates and documents through the client portal, and carries billable milestones into invoicing.", problem: "Sales handoffs, project updates and client documents are scattered across inboxes, so delivery teams repeat setup and clients have to ask for status.", solution: ["Create the client and project record from a won deal", "Break delivery into assigned tasks and milestones", "Give clients a portal for project updates, invoices and documents", "Raise invoices from completed billable milestones"], modules: ["lms", "pms", "portal", "fms"], result: "A traceable handoff and a shared view of delivery, communication and billing." },
   { slug: "customer-support-to-resolution", title: "Customer support to resolution", summary: "Give customers a clear self-service path with a human handoff when needed.", narrative: "A customer starts with a knowledge-grounded assistant or searchable help content. If the question needs a person, the conversation can become a support request with attachments and status tracking, while the support team works from a queue and keeps the customer updated.", problem: "Customers repeat the issue across channels and have no clear way to see whether support is working on it.", solution: ["Make help content searchable and available in context", "Let an assistant answer from the product knowledge you provide", "Create a support request with its attachments when escalation is needed", "Track request status and send customer notifications"], modules: ["aibots", "support", "portal"], result: "A consistent support path from self-service to a tracked human response." },
-  { slug: "leadership-live-answers", title: "Leadership answers from live records", summary: "Explore business questions with traceable answers and access controls.", narrative: "A manager asks a business question in plain language. SelfRun Intelligence queries the records that person is allowed to access, then returns a table, chart or KPI with an explanation of the calculation. Leaders can review the source logic instead of relying on a hand-built report with unknown filters.", problem: "Leaders wait for reports, reconcile different spreadsheets and cannot easily check how a number was calculated.", solution: ["Ask a question in plain language across connected modules", "Receive an answer computed from current records", "Review the calculation and applied filters", "Keep access aligned with the signed-in person's permissions"], modules: ["intelligence", "workspace"], result: "Faster exploration with an answer that people can inspect and verify." },
+  { slug: "leadership-live-answers", title: "Leadership answers from live records", summary: "Explore product-specific business data with traceable answers and access controls.", narrative: "A manager asks a business question in plain language. SelfRun Intelligence queries the records available to that product and returns a table, chart or KPI with an explanation of the calculation. Leaders can review the source logic instead of relying on a hand-built report with unknown filters.", problem: "Leaders wait for reports, reconcile different spreadsheets and cannot easily check how a number was calculated.", solution: ["Ask a question in plain language about available records", "Receive an answer computed from current records", "Review the calculation and applied filters", "Keep access aligned with the signed-in person's permissions"], modules: ["intelligence", "workspace"], result: "Faster exploration with an answer that people can inspect and verify." },
   { slug: "contract-review-and-records", title: "Contract review and records", summary: "Move agreements from reusable template to approval and secure storage.", narrative: "A team prepares an agreement from an approved template, routes it through the configured review and signature steps, then stores the final document with its version and activity history. Expiry reminders help the owner review records before they lapse.", problem: "Teams reuse outdated agreement files, lose track of approvals and discover expiry dates too late.", solution: ["Start from a reusable document template", "Route the agreement through review and signature", "Keep the final record with its status and history", "Store related files securely and set expiry reminders"], modules: ["lpms", "dlms"], result: "A more controlled agreement lifecycle with a retrievable record of review." },
 ];
 
@@ -262,7 +262,7 @@ export const INDUSTRIES: Industry[] = [
   { slug: "agencies-and-consultancies", name: "Agencies & consultancies", summary: "Win clients, deliver projects and keep every engagement profitable.", needs: ["CRM pipeline and proposals", "Projects, tasks and approvals", "Time tracking and profitability", "Marketing and social content"], modules: ["lms", "pms", "fms", "smms"] },
   { slug: "trading-and-distribution", name: "Trading & distribution", summary: "Control purchasing, inventory, payments and receivables.", needs: ["Purchase requests, orders and goods receipts", "Inventory and stock movements", "Vendor invoices and payments", "Customer invoicing and collections"], modules: ["prms", "fms", "lms"] },
   { slug: "professional-services", name: "Professional services", summary: "Documents, agreements, clients and compliance in order.", needs: ["Document templates and approvals", "Secure document vault", "Client portal", "Time and billing"], modules: ["lpms", "dlms", "portal", "fms"] },
-  { slug: "growing-smes", name: "Growing small & medium businesses", summary: "Replace a stack of tools with one system that grows with you.", needs: ["Everything in one login", "Start with the modules you need", "Add users and modules as you grow", "Affordable monthly pricing"], modules: ["workspace", "lms", "hrms", "fms"] },
+  { slug: "growing-smes", name: "Growing small & medium businesses", summary: "Choose independent products and manage your software suite from one place.", needs: ["Separate sign-in and data for each product", "Start with the products you need", "Add products as you grow", "Affordable monthly pricing"], modules: ["workspace", "lms", "hrms", "fms"] },
 ];
 
 export interface Faq {
@@ -311,11 +311,11 @@ export const FAQS_MORE: Faq[] = [
   { topic: "Apps & devices", q: "Which devices are supported?", a: "The web app works in any modern browser. You can install it on Android, iPhone and iPad, Windows, macOS, Linux and ChromeOS, and generate Android, iOS and desktop apps." },
   { topic: "Apps & devices", q: "Do the apps need updating when you add features?", a: "No. The apps load your workspace, so new features and branding changes appear without reinstalling." },
   { topic: "Data & security", q: "Can I export my data?", a: "Yes. You can export records and reports at any time, and after a plan ends your workspace stays readable for a period so you can take what you need." },
-  { topic: "Data & security", q: "How do I see who did what?", a: "The Workspace audit log records activity across every product with filters and CSV export, and each person can see their own sign-in history and devices." },
+  { topic: "Data & security", q: "How do I see who did what?", a: "Each product keeps its own activity records and sign-in history. Open that product's audit tools to review and export the activity available there." },
   { topic: "Data & security", q: "How are passwords and credentials protected?", a: "Credentials, API keys and vault documents are encrypted at rest, and company data is isolated from every other company at the data layer." },
   { topic: "Setup", q: "How do I get my existing data in?", a: "Import leads, clients and employees from CSV. Every row is validated and the importer tells you exactly what to fix. Imports never trigger workflows." },
   { topic: "Setup", q: "Can I use my own domain?", a: "Yes. Add your domain, publish the DNS records shown, and the platform verifies it and issues the SSL certificate automatically." },
-  { topic: "Setup", q: "Do I have to switch on every product?", a: "No. Switch on only what you need and add the rest whenever you are ready — they all share the same data from day one." },
+  { topic: "Setup", q: "Do I have to use every product?", a: "No. Choose the products you need. Each product runs independently with its own sign-in and database; add other products whenever you are ready." },
   { topic: "Support", q: "Where do I get help?", a: "Signed-in users have an AI help assistant that knows the screen they are on, a searchable help center and a request desk with status tracking. You can also contact the team from this website." },
 ];
 

@@ -5,13 +5,13 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProductItem } from "@/types/content";
 import ProductMockup from "./ProductMockup";
+import ProductLogo from "@/components/products/ProductLogo";
 import Link from "next/link";
 import {
   X,
   Sparkles,
   CheckCircle2,
   ArrowRight,
-  ShieldCheck,
   Zap,
   Users,
   Building2,
@@ -46,7 +46,6 @@ export default function ProductDetailModal({ product, onClose }: ProductDetailMo
 
   if (!product) return null;
 
-  const Icon = product.icon || ShieldCheck;
 
   return (
     <AnimatePresence>
@@ -72,7 +71,7 @@ export default function ProductDetailModal({ product, onClose }: ProductDetailMo
           <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-6 py-5 backdrop-blur-md shrink-0">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20 border border-primary/30 shadow-md">
-                <Icon className="w-6 h-6 text-primary" />
+                <ProductLogo productKey={product.slug} size={36} />
               </div>
               <div>
                 <div className="flex items-center gap-2">

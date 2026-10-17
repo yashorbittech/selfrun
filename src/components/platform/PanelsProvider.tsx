@@ -3,6 +3,7 @@
 import { createContext, useContext } from "react";
 import type { PanelMeta } from "@/lib/platform/panels/types";
 import ProductLauncher from "@/components/platform/ProductLauncher";
+import ProductLogo from "@/components/products/ProductLogo";
 
 const PanelsContext = createContext<Record<string, PanelMeta>>({});
 
@@ -30,12 +31,13 @@ export function ProductLauncherForPanel({ panel }: { panel: string }) {
 export function PanelHeading({ panel, fallbackTitle, fallbackDescription, className = "min-w-0 flex-1 md:flex-none" }: { panel: string; fallbackTitle?: string; fallbackDescription?: string; className?: string }) {
   const meta = usePanelMeta(panel);
   return (
-    <>
-      <div className={`${className} min-w-0`}>
+      <div className={`${className} flex min-w-0 items-center gap-2.5`}>
+        {meta && <ProductLogo productKey={panel} size={34} title={meta.name} className="shrink-0 shadow-sm" />}
+        <div className="min-w-0">
         <p className="truncate text-sm font-semibold text-foreground" title={meta?.headerTitle ?? fallbackTitle ?? panel}>{meta?.headerTitle ?? fallbackTitle ?? panel}</p>
         <p className="truncate text-[11px] text-muted-foreground" title={meta?.headerDescription ?? fallbackDescription ?? ""}>{meta?.headerDescription ?? fallbackDescription ?? ""}</p>
+        </div>
       </div>
-    </>
   );
 }
 

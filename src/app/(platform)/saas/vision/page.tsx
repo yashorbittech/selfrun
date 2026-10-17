@@ -104,10 +104,10 @@ const HORIZONS = [
     badgeColor: "bg-emerald-500/15 text-emerald-500 border-emerald-500/25",
     color: "text-emerald-500",
     ringColor: "ring-emerald-500/30",
-    summary: "Every product is fully functional, independently deployable, and sharing one real-time database fabric. Free forever. Zero credit card.",
+    summary: "Every product is a fully functional, independent SaaS with its own sign-in and database. Choose, deploy and use products separately or manage the suite from one place.",
     items: [
       "CRM, HR, Finance, Projects, Procurement — all live",
-      "One login, one permission system, zero data sync lag",
+      "Independent sign-ins, permissions and databases for every product",
       "White-label: your logo, your domain, your brand",
       "Free forever plan with 100% features unlocked",
       "AI assistant grounded in your actual business data",
@@ -753,7 +753,7 @@ export default function VisionPage() {
               <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
                 Every module below is an independent, market-ready software engine.
                 Sell subscriptions to just the CRM. Run just HR. Or deploy the full platform.
-                Each one replaces an expensive legacy tool — and all 20 share one database.
+                Each one replaces an expensive legacy tool and runs with its own sign-in and database.
               </p>
             </div>
           </Reveal>

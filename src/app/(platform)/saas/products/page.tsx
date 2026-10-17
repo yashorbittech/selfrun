@@ -20,6 +20,7 @@ import Reveal from "@/components/platform/saas/Reveal";
 import PanelShot from "@/components/platform/saas/PanelShot";
 import type { IconKey } from "@/lib/platform/saas/content";
 import { productPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -112,7 +113,7 @@ export default async function ProductsPage() {
         eyebrow={`${all.length} standalone SaaS products · ${total}+ features`}
         title="Every software product."
         accent="Built for modern business."
-        lead="Each product below is a complete, market-ready software engine engineered with native AI. Market them independently, deploy them together, or run your entire enterprise on one integrated platform."
+        lead="Each product below is a complete, market-ready software engine engineered with native AI. Use and deploy products independently, or manage the suite from one place and configure the workflows you want between them."
         photo="analytics"
         shot="workspace"
         chip={{
@@ -201,8 +202,8 @@ export default async function ProductsPage() {
                       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border/40 pb-6 mb-8 sm:mb-10">
                         {/* Left: Product Identity */}
                         <div className="flex items-center gap-3.5">
-                          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/25 shadow-sm transition-transform duration-500 group-hover:scale-105">
-                            <Icon name={m.icon} className="h-6 w-6" />
+                          <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/25 shadow-sm transition-transform duration-500 group-hover:scale-105">
+                            <ProductLogo productKey={m.key} size={48} title={m.name} />
                           </span>
                           <div>
                             <div className="flex items-center gap-2">
@@ -322,7 +323,7 @@ export default async function ProductsPage() {
                             {/* Product Name & Feature Count Pill */}
                             <div className="flex flex-wrap items-center gap-3 mb-2.5">
                               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/25 px-3 py-1 text-xs font-bold text-primary">
-                                <Icon name={m.icon} className="h-3.5 w-3.5" />
+                                <ProductLogo productKey={m.key} size={16} title={m.name} />
                                 {m.name}
                               </span>
                               <span className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-3 py-1 text-xs font-semibold text-muted-foreground">

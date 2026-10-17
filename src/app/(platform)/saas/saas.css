@@ -26,6 +26,7 @@
 .sr ::selection { background: var(--primary); color: var(--primary-foreground); }
 .sr main { overflow-x: clip; }
 
+
 /* ── layout ───────────────────────────────────────── */
 .sr { --sr-max: 80rem; }
 @media (min-width: 1536px) { .sr { --sr-max: 90rem; } }
@@ -108,7 +109,6 @@
 .sr-orbit-ring { position: absolute; inset: 0; border-radius: 999px; border: 1px dashed color-mix(in oklch, var(--primary) 25%, transparent); }
 @keyframes sr-spin { to { transform: rotate(360deg); } }
 @keyframes sr-spin-rev { to { transform: rotate(-360deg); } }
-.sr-orbit:hover .sr-orbit-spin, .sr-orbit:focus-within .sr-orbit-spin, .sr-orbit:hover .sr-orbit-node, .sr-orbit:focus-within .sr-orbit-node, .sr-orbit:hover .sr-orbit-node-rev, .sr-orbit:focus-within .sr-orbit-node-rev { animation-play-state: paused; }
 .sr-orbit-spin { animation: sr-spin 140s linear infinite; }
 .sr-orbit-spin-rev { animation: sr-spin-rev 110s linear infinite; }
 .sr-orbit-node { animation: sr-spin-rev 140s linear infinite; }

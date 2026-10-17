@@ -5,7 +5,7 @@ import { productPath } from "@/lib/platform/saas/product-routes";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import Icon from "@/components/platform/saas/Icon";
+import ProductLogo from "@/components/products/ProductLogo";
 import type { ReactNode } from "react";
 import type { IconKey } from "@/lib/platform/saas/content";
 
@@ -37,7 +37,7 @@ export default function ScreenTabs({ items, tone }: { items: ScreenTab[]; tone?:
             onClick={() => setI(n)}
             className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all ${n === i ? (dark ? "border-transparent bg-white text-black shadow-lg" : "border-transparent bg-foreground text-background shadow-lg") : dark ? "border-white/20 bg-white/10 text-white hover:bg-white/20" : "border-border/50 bg-muted/30 text-foreground hover:border-primary/40 hover:text-primary"}`}
           >
-            <Icon name={x.icon} className="h-4 w-4" />
+            <ProductLogo productKey={x.key} size={20} title={x.name} />
             {x.name}
           </button>
         ))}

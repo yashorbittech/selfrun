@@ -259,7 +259,7 @@ export default async function BlogPostPage({
                     Written by {post.author}
                   </h4>
                   <p className="mt-0.5 text-sm text-muted-foreground">
-                    SelfRun AI brings together your website, leads, project delivery, payroll, and finance into one unified platform under your own brand.
+                    SelfRun AI offers independent products for your website, leads, project delivery, payroll, and finance, managed as a suite under your own brand.
                   </p>
                 </div>
               </div>

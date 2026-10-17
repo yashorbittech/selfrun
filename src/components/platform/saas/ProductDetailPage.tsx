@@ -10,7 +10,7 @@ import { EXTRA_SCREENS } from "@/lib/platform/saas/site";
 import { screenFor } from "@/lib/platform/saas/screens";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import { IconColumns, NumberedRows, TimelineSteps } from "@/components/platform/saas/Modern";
-import Icon from "@/components/platform/saas/Icon";
+import ProductLogo from "@/components/products/ProductLogo";
 import Reveal from "@/components/platform/saas/Reveal";
 import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
 import { productKeyFromSlug, productPath, productSlugFor } from "@/lib/platform/saas/product-routes";
@@ -89,7 +89,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
       {/* overview */}
       <section id="overview" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon={m.icon} eyebrow="Overview" title={m.name} accent="in one page." lead={detail?.intro ?? m.summary} />
+          <SectionHead center icon={<ProductLogo productKey={m.key} size={56} title={m.name} />} eyebrow="Overview" title={m.name} accent="in one page." lead={detail?.intro ?? m.summary} />
           <div className="grid items-start gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
             <div className="space-y-9">
               <blockquote className="relative rounded-[1.75rem] bg-gradient-to-br from-primary to-brand-accent p-7 text-white shadow-xl shadow-primary/25">
@@ -160,7 +160,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
       {value && (
         <section id="benefits" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container relative">
-            <SectionHead tone="dark" center icon="rocket" eyebrow="Why teams use it" title={`What ${m.name} gives you`} accent="that separate tools don't." lead={`It replaces ${value.replaces.toLowerCase()} — as one product inside the same platform, on the same login and the same data.`} />
+            <SectionHead tone="dark" center icon="rocket" eyebrow="Why teams use it" title={`What ${m.name} gives you`} accent="as an independent product." lead={`It replaces ${value.replaces.toLowerCase()} and runs independently, with its own sign-in and database. You can manage it alongside other SelfRun products from one place.`} />
             <div className="grid gap-5 sm:grid-cols-2">
               {value.benefits.map((b, i) => (
                 <Reveal key={b} delay={(i % 2) * 80}>
@@ -246,7 +246,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
       {detail && detail.connects.length > 0 && (
         <section id="connected" className="sr-section" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container">
-            <SectionHead center icon="plug" eyebrow="Connected products" title="Nothing is re-typed." accent="Everything is connected." lead={`${m.name} shares one database with every other product, so work moves between teams on its own.`} />
+            <SectionHead center icon="plug" eyebrow="Optional product workflows" title="Connect products when useful." accent="Keep each one independent." lead={`${m.name} works on its own. If you want a handoff to another product, configure an automation for that workflow; no other product is required to use ${m.name}.`} />
             <NumberedRows items={detail.connects.flatMap((c) => { const o = byKey.get(c.panel); return o ? [{ title: o.name, text: c.text, icon: o.icon, href: productPath(o.key) }] : []; })} />
           </div>
         </section>
@@ -297,7 +297,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
         <div className="sr-container grid gap-4 sm:grid-cols-2">
           {[{ p: prev, dir: "Previous product" }, { p: next, dir: "Next product" }].map(({ p, dir }, i) => (
             <Link key={dir} href={productPath(p.key)} className={`group flex items-center gap-4 rounded-2xl border border-border/60 bg-background p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 ${i ? "sm:flex-row-reverse sm:text-right" : ""}`}>
-              <span className="sr-icon h-12 w-12 flex-none"><Icon name={p.icon} className="h-5 w-5" /></span>
+              <span className="sr-icon h-12 w-12 flex-none"><ProductLogo productKey={p.key} size={36} title={p.name} /></span>
               <span className="min-w-0 flex-1"><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">{dir}</span><span className="block truncate text-lg font-black">{p.name}</span></span>
               <ArrowRight className={`h-5 w-5 flex-none text-primary ${i ? "sm:rotate-180" : "rotate-180"}`} />
             </Link>

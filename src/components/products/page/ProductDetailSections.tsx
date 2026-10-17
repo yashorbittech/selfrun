@@ -5,7 +5,7 @@ import FAQAccordion from "@/components/sections/FAQAccordion";
 import DetailHeading from "@/components/products/page/DetailHeading";
 import Reveal from "@/components/products/page/Reveal";
 import ProductTour from "@/components/products/page/ProductTour";
-import ProductIcon from "@/components/products/page/ProductIcon";
+import ProductLogo from "@/components/products/ProductLogo";
 import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { neighbours, pageContent, productHref, relatedProducts, valueLine, type DetailSectionId, type StoredProduct } from "@/lib/products/shared";
 
@@ -434,7 +434,7 @@ export function IntegrationsSection({ product, text, tones }: { product: StoredP
       <DetailHeading title={text["products.detail.integrations"]} description={text["products.detail.integrationsDescription"]} />
       <Reveal>
         <div className="mx-auto mb-6 flex w-fit items-center gap-3 rounded-2xl border border-primary/30 bg-primary/10 px-5 py-3 text-sm font-bold text-foreground">
-          <ProductIcon name={product.iconName} className="h-5 w-5 text-primary" aria-hidden="true" />
+          <ProductLogo productKey={product.slug} size={42} title={product.name} />
           {product.shortName || product.name}
         </div>
       </Reveal>
@@ -493,7 +493,7 @@ export function RelatedSection({ product, all, text, tones }: { product: StoredP
               <div className="group h-full rounded-2xl border border-border/50 bg-muted/20 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 motion-reduce:hover:translate-y-0">
                 <Link href={productHref(p.slug)} className="flex h-full flex-col rounded-2xl p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                   <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-                    <ProductIcon name={p.iconName} className="h-5 w-5 text-primary" aria-hidden="true" />
+                    <ProductLogo productKey={p.slug} size={44} title={p.name} />
                   </span>
                   <h3 className="mb-2 font-bold leading-snug text-foreground">{p.name}</h3>
                   <p className="mb-4 flex-1 text-sm leading-relaxed text-muted-foreground">{valueLine(p)}</p>

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Zap } from "lucide-react";
-import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import PanelShot from "@/components/platform/saas/PanelShot";
 import MarketingShot from "@/components/platform/saas/MarketingShot";
@@ -10,6 +9,7 @@ import { EXTRA_SCREENS } from "@/lib/platform/saas/site";
 import { FEATURE_LISTS, PANEL_VALUE, featureCount } from "@/lib/platform/saas/feature-lists";
 import type { FeatureModule } from "@/lib/platform/saas/modules";
 import { productPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 
 /** One product in full: its real screen, every feature it has (grouped like its own menu), what runs on its own and the result. */
 export default function ModuleBlock({ m, flip = false, detailed = false, variant = 0 }: { m: FeatureModule; flip?: boolean; detailed?: boolean; variant?: SceneVariant }) {
@@ -21,7 +21,7 @@ export default function ModuleBlock({ m, flip = false, detailed = false, variant
       <Reveal className="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <div className="mb-4 flex flex-wrap items-center gap-3">
-            <span className="sr-icon"><Icon name={m.icon} className="h-5 w-5" /></span>
+            <span className="sr-icon"><ProductLogo productKey={m.key} size={36} title={m.name} /></span>
             <span className="sr-eyebrow">{m.name}</span>
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{count} features</span>
           </div>

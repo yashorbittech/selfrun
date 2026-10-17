@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, LogIn, Sparkles } from "lucide-react";
+import { ArrowRight, LogIn, Sparkles, type LucideIcon } from "lucide-react";
 import PageHero from "@/components/sections/PageHero";
 import { BTN_PRIMARY, BTN_SECONDARY } from "@/components/products/page/cta-styles";
-import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { ctaTarget, hasOwnAi, pageContent, productHeroImage, resolveCtas, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
 import type { ProductCtaKind } from "@/types/content";
+import ProductLogo from "@/components/products/ProductLogo";
 
 const CTA_TEXT_KEY: Record<Exclude<ProductCtaKind, "none">, string> = {
   "get-started": "products.cta.getStarted",
@@ -69,6 +69,7 @@ export function ProductCtas({ product, text }: { product: StoredProduct; text: R
 export default function ProductDetailHero({ product, text }: { product: StoredProduct; text: Record<string, string> }) {
   const c = pageContent(product);
   const name = product.shortName || product.name;
+  const ProductHeroMark = (({ className }: { className?: string }) => <ProductLogo productKey={product.slug} className={className} />) as LucideIcon;
   return (
     <PageHero
       category="products"
@@ -76,7 +77,7 @@ export default function ProductDetailHero({ product, text }: { product: StoredPr
       title={product.name}
       subtitle={product.tagline}
       description={c.pitch}
-      icon={resolveIcon(product.iconName)}
+      icon={ProductHeroMark}
       image={productHeroImage(product, text)}
       crumbs={[{ label: text["products.breadcrumb.home"], href: "/" }, { label: text["products.breadcrumb.products"], href: "/products" }, { label: name }]}
       actions={<ProductCtas product={product} text={text} />}

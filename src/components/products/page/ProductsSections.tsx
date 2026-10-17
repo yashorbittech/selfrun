@@ -6,6 +6,7 @@ import ProductDemoForm from "@/components/products/page/ProductDemoForm";
 import { BTN_PRIMARY } from "@/components/products/page/cta-styles";
 import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { groupByCategory, hasOwnAi, label, productHref, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
+import ProductLogo from "@/components/products/ProductLogo";
 
 type Text = Record<string, string>;
 
@@ -29,11 +30,10 @@ export function ProductsConnected({ products, text }: { products: StoredProduct[
                     <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-primary">{g.category}</p>
                     <ul className="flex flex-wrap gap-1.5">
                       {g.products.map((p) => {
-                        const Icon = resolveIcon(p.iconName);
                         return (
                           <li key={p.slug}>
                             <Link href={productHref(p.slug)} className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/50 px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                              <Icon className="h-3 w-3 text-primary" aria-hidden="true" />
+                              <ProductLogo productKey={p.slug} size={16} />
                               {label(p)}
                             </Link>
                           </li>

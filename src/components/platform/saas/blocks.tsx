@@ -18,13 +18,13 @@ export function Blobs({ strong = false }: { strong?: boolean }) {
 }
 
 /** Section heading in the default theme's style: optional icon tile, primary eyebrow, bold title with a gradient accent. */
-export function SectionHead({ eyebrow, title, accent, lead, center = true, icon, tone }: { eyebrow?: string; title: React.ReactNode; accent?: string; lead?: React.ReactNode; center?: boolean; icon?: IconKey; tone?: "dark" }) {
+export function SectionHead({ eyebrow, title, accent, lead, center = true, icon, tone }: { eyebrow?: string; title: React.ReactNode; accent?: string; lead?: React.ReactNode; center?: boolean; icon?: IconKey | React.ReactNode; tone?: "dark" }) {
   const dark = tone === "dark";
   return (
     <Reveal className={`${center ? "mx-auto text-center" : ""} mb-12 max-w-2xl sm:mb-14`}>
       {icon && (
         <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm ${center ? "mx-auto" : ""} ${dark ? "border-white/25 bg-white/10 text-white backdrop-blur" : "border-border/50 bg-muted/40"}`}>
-          <Icon name={icon} className={`h-6 w-6 ${dark ? "text-white" : "text-primary"}`} />
+          {typeof icon === "string" ? <Icon name={icon as IconKey} className={`h-6 w-6 ${dark ? "text-white" : "text-primary"}`} /> : icon}
         </div>
       )}
       {eyebrow && <p className={`sr-eyebrow mb-3 ${dark ? "sr-dh-soft" : ""}`}>{eyebrow}</p>}
@@ -42,7 +42,7 @@ export function SectionHead({ eyebrow, title, accent, lead, center = true, icon,
  * product screen on the right. `size="home"` is the taller homepage version.
  */
 export function PageHero({
-  eyebrow, title, accent, lead, children, photo = "team-desk", shot = "workspace", shotName = "Workspace", chip, notes, size = "page", hero = 1, art,
+  eyebrow, title, accent, lead, children, photo = "team-desk", shot = "workspace", shotName = "Workspace", chip, notes, size = "page", hero = 1, art, artContent,
 }: {
   eyebrow: string;
   title: React.ReactNode;
@@ -58,9 +58,12 @@ export function PageHero({
   hero?: 0 | 1 | 2 | 3 | 4 | 5;
   /** The page's own generated hero artwork (see scripts/hero-art.mjs). When present it replaces the photo and the framed screen. */
   art?: string;
+  /** A live visual to use in place of generated artwork or a product screen. */
+  artContent?: React.ReactNode;
 }) {
   const home = size === "home";
   const artSrc = art ? heroFor(art) : null;
+  const hasArtwork = Boolean(artSrc || artContent);
   const bgSrc = art ? heroFor(`bg-${art}`) : null;
   const bgDark = art ? heroFor(`bg-${art}-dark`) : null;
   return (
@@ -75,19 +78,19 @@ export function PageHero({
           )}
         </div>
       )}
-      {!artSrc && <div className="pointer-events-none absolute inset-0" aria-hidden>
+      {!artSrc && !artContent && <div className="pointer-events-none absolute inset-0" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={`/selfrun/photos/${photo}.jpg`} alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-background/[0.93] lg:hidden" />
         <div className="absolute inset-0 hidden bg-background lg:block" style={{ maskImage: "linear-gradient(to right, black 0%, black 42%, rgba(0,0,0,.78) 100%)", WebkitMaskImage: "linear-gradient(to right, black 0%, black 42%, rgba(0,0,0,.78) 100%)" }} />
         <div className="absolute inset-0 hidden bg-background lg:block" style={{ maskImage: "linear-gradient(to top, black 0%, transparent 35%)", WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 35%)" }} />
       </div>}
-      {!bgSrc && <Blobs strong />}
+      {!bgSrc && !artContent && <Blobs strong />}
       {bgSrc && <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,color-mix(in_oklch,var(--primary)_7%,var(--background)),var(--background)_70%)] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,color-mix(in_oklch,var(--primary)_16%,var(--background)),var(--background)_75%)] lg:hidden" aria-hidden />}
       {/* a light tint over the background keeps the heading and text clearly readable */}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-900/[0.10] via-slate-900/[0.05] to-slate-900/[0.02] [[data-theme=dark]_&]:from-black/30 [[data-theme=dark]_&]:via-black/10 [[data-theme=dark]_&]:to-transparent" aria-hidden />
       <div className="sr-grid-bg" aria-hidden />
-      <div className={`sr-container relative grid items-center gap-10 ${artSrc ? "lg:grid-cols-[1fr_1.22fr]" : "gap-14 lg:grid-cols-[1fr_1.08fr]"}`}>
+      <div className={`sr-container relative grid items-center gap-10 ${hasArtwork ? "lg:grid-cols-[1fr_1.22fr]" : "gap-14 lg:grid-cols-[1fr_1.08fr]"}`}>
         <div className="max-w-2xl">
           <Reveal>
             <span className="mb-7 inline-flex items-center gap-2 rounded-full border border-border/50 bg-background/70 px-4 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur-md">
@@ -112,8 +115,8 @@ export function PageHero({
           {artSrc ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={artSrc} alt={`${shotName} — the real product, on its own artwork`} width={2240} height={1568} fetchPriority="high" decoding="async" className="sr-hero-art h-auto w-full lg:-mr-8 lg:w-[calc(100%+2rem)] lg:max-w-none" />
-          ) : marketingFor(shot) ? <MarketingShot screenKey={shot} name={shotName} priority /> : <PanelShot moduleKey={shot} name={shotName} priority variant={hero} />}
-          {chip && !artSrc && (
+          ) : artContent ? artContent : marketingFor(shot) ? <MarketingShot screenKey={shot} name={shotName} priority /> : <PanelShot moduleKey={shot} name={shotName} priority variant={hero} />}
+          {chip && !hasArtwork && (
             <div className="sr-float absolute -left-5 bottom-10 hidden items-center gap-3 rounded-2xl border border-border/50 bg-background/90 p-4 shadow-xl backdrop-blur-xl sm:flex">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent"><Zap className="h-5 w-5 text-white" /></span>
               <span><span className="block text-sm font-bold">{chip.title}</span><span className="block text-xs text-muted-foreground">{chip.text}</span></span>
