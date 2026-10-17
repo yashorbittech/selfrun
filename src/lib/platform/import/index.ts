@@ -8,13 +8,13 @@ import { validateLeadInput } from "@/lib/lead-validation";
 import { provisionLeadAndAccount } from "@/lib/lead-management/provision";
 import { LEAD_RECORDS_COLLECTION } from "@/lib/lead-management/records";
 import { isPortalRole, type PortalRole } from "@/lib/portal-roles";
-import { validateClient } from "@/lib/pms/validation";
-import { CLIENTS_COLLECTION, createClient, type ClientWriteData } from "@/lib/pms/clients";
-import { recordActivity } from "@/lib/pms/activity";
-import { validateEmployeeCreate } from "@/lib/hrms/validation";
-import { EMPLOYEES_COLLECTION, createEmployee, type EmployeeWriteData } from "@/lib/hrms/employees";
-import { rebuildHierarchyFor } from "@/lib/hrms/hierarchy";
-import { recordAudit } from "@/lib/hrms/audit";
+import { validateClient } from "@/lib/products/sprintos/validation";
+import { CLIENTS_COLLECTION, createClient, type ClientWriteData } from "@/lib/products/sprintos/clients";
+import { recordActivity } from "@/lib/products/sprintos/activity";
+import { validateEmployeeCreate } from "@/lib/products/talentos/validation";
+import { EMPLOYEES_COLLECTION, createEmployee, type EmployeeWriteData } from "@/lib/products/talentos/employees";
+import { rebuildHierarchyFor } from "@/lib/products/talentos/hierarchy";
+import { recordAudit } from "@/lib/products/talentos/audit";
 import {
   IMPORT_DEFS,
   IMPORT_MAX_BYTES,
@@ -31,7 +31,7 @@ import {
 
 /**
  * CSV import for leads, clients and employees. Rows are validated with each
- * panel's own validator and created through each panel's own create function
+ * product's own validator and created through each product's own create function
  * — so numbering, events, activity/audit logs and plan limits behave exactly
  * as if the rows had been typed in. Runs inside the request (≤ 1,000 rows).
  *

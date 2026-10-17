@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import BrandMark from "@/components/BrandMark";
 import { CheckCircle2, ShieldCheck, Sparkles, Rocket } from "lucide-react";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import type { BrandName } from "@/lib/brand";
 
 const ICONS = [CheckCircle2, ShieldCheck, Sparkles, Rocket];

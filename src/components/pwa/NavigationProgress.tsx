@@ -7,7 +7,7 @@ import { captureShell } from "@/components/ui/SnapshotShell";
 /**
  * A thin progress bar at the top of the window that starts the moment a link to another page of the app is clicked and ends when the
  * new page has arrived. Without it a click on a menu item shows nothing until the server has answered, and people click again.
- * Panels hosts only (mounted from the root layout there). Pure client, no data; gives up after 15 s so it can never stick.
+ * App hosts only (mounted from the root layout there). Pure client, no data; gives up after 15 s so it can never stick.
  */
 function Bar() {
   const pathname = usePathname();
@@ -15,7 +15,7 @@ function Bar() {
   const [pending, setPending] = useState(false);
   const [label, setLabel] = useState("");
 
-  // A new location arrived: done. (And the first change of location means the app's shell has been on screen: later panel switches keep
+  // A new location arrived: done. (And the first change of location means the app's shell has been on screen: later product switches keep
   // the sidebar and header while they load: `data-app-shell-seen` on <html>, see `AppLoading` in components/ui/page-loading.)
   const firstRender = useRef(true);
   useEffect(() => {
@@ -38,7 +38,7 @@ function Bar() {
       if (url.origin !== window.location.origin) return;
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
       document.documentElement.setAttribute("data-app-shell-seen", "");
-      // Going to another panel: keep a copy of this one's sidebar and header to show while the next one opens.
+      // Going to another product: keep a copy of this one's sidebar and header to show while the next one opens.
       if (url.pathname.split("/")[1] !== window.location.pathname.split("/")[1]) captureShell();
       setLabel((a.getAttribute("aria-label") || a.textContent || "").replace(/\s+/g, " ").trim().slice(0, 28));
       setPending(true);

@@ -5,7 +5,7 @@ import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, Sparkles } from "lucide-react";
-import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
+import { MobileSidebarProfile } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SidebarBrand from "@/components/SidebarBrand";
@@ -26,7 +26,7 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; ema
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="flex w-72 flex-col p-0 sm:max-w-72">
           <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <SheetDescription className="sr-only">Platform Panel navigation menu</SheetDescription>
+          <SheetDescription className="sr-only">Platform Console navigation menu</SheetDescription>
           <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border/60 px-4">
             <SidebarBrand />
           </div>
@@ -36,7 +36,7 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; ema
           <MobileSidebarProfile />
         </SheetContent>
       </Sheet>
-      <PanelHeading panel="platform" fallbackTitle="Platform Panel" fallbackDescription="Every company, plan and setting of the SaaS platform" />
+      <PanelHeading panel="platform" fallbackTitle="Platform Console" fallbackDescription="Every company, plan and setting of the SaaS platform" />
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
         <HelpLauncher />
         <button
@@ -48,7 +48,7 @@ export default function PlatformTopbar({ flags }: { flags: PlatformNavFlags; ema
         >
           <Sparkles className="size-4" />
         </button>
-        <PanelBellLink href="/platform/notifications" unread={flags.unreadNotifications ?? 0} />
+        <PanelBellLink href="/console/notifications" unread={flags.unreadNotifications ?? 0} />
       </div>
       <AskAiDrawer
         open={aiOpen}

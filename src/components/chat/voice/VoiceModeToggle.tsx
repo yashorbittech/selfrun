@@ -5,14 +5,14 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Keyboard, AudioLines } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVoice } from "@/components/chat/VoiceProvider";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 /**
  * Accessible two-option segmented control for switching between Text Mode and
  * Voice Mode. Rendered as a radio group so screen readers announce it as a
  * single control with two choices, and arrow keys move between them.
  *
- * - `size="sm"` sits inside the chat input toolbar / voice panel.
+ * - `size="sm"` sits inside the chat input toolbar / voice product.
  * - `size="md"` is a standalone compact control.
  * - `size="lg"` is the prominent, full-width variant.
  */

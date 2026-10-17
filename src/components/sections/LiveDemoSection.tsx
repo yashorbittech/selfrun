@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ExternalLink, Play, Sparkles, Zap } from "lucide-react";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 interface LiveDemoSectionProps {
   demoUrl: string;

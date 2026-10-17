@@ -25,8 +25,8 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "platform_audit_log",
   "status_incidents", // the public status page's incident record (platform-wide)
   "platform_roles",
-  "platform_panels", // the Panel Registry (names, descriptions, global on/off)
-  // Help & Support Center: the platform's own cross-company service (rows carry their companyId; see lib/support/db.ts)
+  "platform_panels", // the Product Registry (names, descriptions, global on/off)
+  // Help & Support Center: the platform's own cross-company service (rows carry their companyId; see lib/resolveiq/db.ts)
   "support_requests",
   "support_messages",
   "support_articles",

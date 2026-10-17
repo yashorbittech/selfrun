@@ -54,7 +54,7 @@ async function run(provider: string, v: Record<string, string>): Promise<TestOut
       }
     }
     default:
-      return { ok: true, message: "Saved. This service has no automatic check — it is verified the first time a panel uses it." };
+      return { ok: true, message: "Saved. This service has no automatic check — it is verified the first time a product uses it." };
   }
 }
 

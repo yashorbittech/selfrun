@@ -26,7 +26,7 @@ function fromDoc(doc: Doc | null | undefined): MaintenanceState {
   };
 }
 
-/** The maintenance window set for ONE company (Platform Panel → Companies → that company → Maintenance). */
+/** The maintenance window set for ONE company (Platform Console → Companies → that company → Maintenance). */
 export async function getCompanyMaintenance(companyId: string): Promise<MaintenanceState> {
   const cache = (g.__companyMaintenance ??= new Map());
   const hit = cache.get(companyId);

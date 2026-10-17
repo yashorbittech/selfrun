@@ -1,7 +1,7 @@
-import CmsPageView from "@/components/cms/CmsPageView";
-import { CollectionsProvider } from "@/components/cms/CollectionsContext";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
-import { getRecords } from "@/lib/cms/collections/store";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { CollectionsProvider } from "@/components/products/sitecraft-ai/CollectionsContext";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
+import { getRecords } from "@/lib/products/sitecraft-ai/collections/store";
 
 const path = "/services/our-saas-product";
 

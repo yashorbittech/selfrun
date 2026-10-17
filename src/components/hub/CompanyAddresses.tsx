@@ -20,7 +20,7 @@ export default async function CompanyAddresses({ focus }: { focus?: "website" | 
         caption="Team app"
         title="App domain"
         url={app}
-        hint="This is where you and your team sign in to the Workspace and every panel (HR, CRM, Finance and more). Bookmark it and share it with your team."
+        hint="This is where you and your team sign in to the Workspace and every product (HR, CRM, Finance and more). Bookmark it and share it with your team."
         highlighted={focus === "app"}
       />
     </div>

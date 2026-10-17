@@ -33,22 +33,22 @@ import { createHubSession, setHubSessionCookie, clearHubSessionCookie } from "@/
 import { loginSessions, LOGIN_COOKIE } from "@/lib/security/store";
 
 /**
- * Cross-module single sign-on / sign-off. Every internal panel shares one
+ * Cross-module single sign-on / sign-off. Every internal product shares one
  * identity store (`admin_users`), but each keeps its OWN independent
  * session/cookie. This module is the single place that knows about all of
  * them, so login can mint sessions everywhere access is real, and logout can
  * tear them all down everywhere at once.
  *
- * `provisionAccessibleSessions` mints a REAL session (that panel's own
- * cookie, own session collection, own TTL) in every panel the account's
- * CURRENT `roles` actually grant access to, so signing into any ONE panel is
+ * `provisionAccessibleSessions` mints a REAL session (that product's own
+ * cookie, own session collection, own TTL) in every product the account's
+ * CURRENT `roles` actually grant access to, so signing into any ONE product is
  * enough — no second login anywhere else. This grants nothing new: it only
  * saves a second login for access the account already has. Which roles an
- * account holds — and therefore which panels get provisioned — is entirely
- * controlled by the Super Admin at `/workspace/users`.
+ * account holds — and therefore which products get provisioned — is entirely
+ * controlled by the Super Admin at `/commandos/users`.
  *
  * `destroySessionsEverywhere` is the single-logout counterpart: logging out
- * of ANY one panel destroys every session for that account, in every panel,
+ * of ANY one product destroys every session for that account, in every product,
  * on every device (there's no per-login "batch id" to scope a narrower
  * "just this device" logout without a larger schema change — see the plan
  * this shipped with for that trade-off, made deliberately).
@@ -192,7 +192,7 @@ const MODULES: ModuleEntry[] = [
     collection: "messenger_sessions",
     hasAccess: (roles) => normalizeChatRoles(roles).length > 0,
   },
-  // Unconditional — no role gate on either of these panels.
+  // Unconditional — no role gate on either of these products.
   { key: "lms", create: createLmsSession, setCookie: setLmsSessionCookie, clearCookie: clearLmsSessionCookie, collection: "admin_sessions" },
   { key: "hub", create: createHubSession, setCookie: setHubSessionCookie, clearCookie: clearHubSessionCookie, collection: "hub_sessions" },
 ];
@@ -219,8 +219,8 @@ export async function provisionAccessibleSessions(adminId: ObjectId, skip?: SsoM
 
 /**
  * Single logout: destroys every session for this account across every
- * panel (on every device — see the module doc comment above) and clears
- * every panel's cookie in the current browser.
+ * product (on every device — see the module doc comment above) and clears
+ * every product's cookie in the current browser.
  */
 export async function destroySessionsEverywhere(adminId: ObjectId): Promise<void> {
   const db = await getDb();
@@ -230,16 +230,16 @@ export async function destroySessionsEverywhere(adminId: ObjectId): Promise<void
   await clearAllSessionCookies();
 }
 
-/** Every Mongo collection that holds panel sessions (the LMS and admin ones share one). */
+/** Every Mongo collection that holds product sessions (the LMS and admin ones share one). */
 export function sessionCollectionNames(): string[] {
   return [...new Set(MODULES.map((m) => m.collection))];
 }
 
-/** Clears every panel's session cookie (and the Security page's device id) in the current browser. */
+/** Clears every product's session cookie (and the Security page's device id) in the current browser. */
 export async function clearAllSessionCookies(): Promise<void> {
   await Promise.all(MODULES.map((m) => m.clearCookie()));
   const store = await cookies();
   store.delete(LOGIN_COOKIE);
-  // The separate admin panel is gone; drop its cookie from browsers that still carry one.
+  // The separate admin product is gone; drop its cookie from browsers that still carry one.
   store.delete("admin_session");
 }

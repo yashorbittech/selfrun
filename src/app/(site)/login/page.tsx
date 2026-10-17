@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import CmsPageView from "@/components/cms/CmsPageView";
-import { cmsPageMetadata } from "@/lib/cms/page-route";
-import { getPublicPage, type PublicPage } from "@/lib/cms/public";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { cmsPageMetadata } from "@/lib/products/sitecraft-ai/page-route";
+import { getPublicPage, type PublicPage } from "@/lib/products/sitecraft-ai/public";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
@@ -69,7 +69,7 @@ function defaultLoginPage(name: string, operator: boolean): PublicPage {
 
 export default async function LoginPage() {
   const user = await getCurrentPortalUser();
-  if (user) redirect(user.mustChangePassword ? "/portal/change-password" : "/portal");
+  if (user) redirect(user.mustChangePassword ? "/clientos/change-password" : "/clientos");
   const brand = await getCompanyBrand();
   const page = (await getPublicPage("/login")) ?? defaultLoginPage(brand.name, await isPlatformOwnerContext());
   return <CmsPageView page={page} />;

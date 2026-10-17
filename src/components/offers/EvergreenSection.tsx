@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { ArrowRight, Code2, Bot, GraduationCap, Users, Briefcase, Headset, PlayCircle, Gift, Wallet, MessageCircle, Phone } from "lucide-react";
 import { getServiceHref } from "@/lib/offers/constants";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import type { CategorySlug } from "@/lib/categories";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const POPULAR = (tx: (key: string) => string): { slug: CategorySlug; icon: typeof Code2; title: string; blurb: string }[] => ([
   { slug: "software-development", icon: Code2, title: tx("offers.evergreenSection.web-mobile-apps"), blurb: tx("offers.evergreenSection.custom-web-mobile-and-saas-products-buil") },

@@ -1,5 +1,5 @@
 /**
- * Platform Panel permission catalogue — pure data + checks, safe to import
+ * Platform Console permission catalogue — pure data + checks, safe to import
  * from client components (for hiding buttons) as well as the server.
  *
  * A permission is `<area>.<verb>`. Within an area, `manage` implies every
@@ -21,10 +21,10 @@ export const PERMISSION_GROUPS = [
     ],
   },
   {
-    area: "Panels",
+    area: "Products",
     permissions: [
-      { key: "panels.read", label: "View the Panel Registry and which panels each company has" },
-      { key: "panels.manage", label: "Create, edit, switch on/off and delete panels (everywhere or per company)" },
+      { key: "panels.read", label: "View the Product Registry and which products each company has" },
+      { key: "panels.manage", label: "Create, edit, switch on/off and delete products (everywhere or per company)" },
     ],
   },
   {
@@ -106,36 +106,36 @@ export function coversPermissions(actor: readonly string[], wanted: readonly str
   return wanted.every((w) => isPlatformPermission(w) && hasPermission(actor, w));
 }
 
-/** Read-only across the whole panel. */
+/** Read-only across the whole product. */
 export const VIEWER_PERMISSIONS: PlatformPermission[] = ALL_PERMISSIONS.filter((p) => p.endsWith(".read"));
 
 /**
- * The permission each Platform Panel route needs to be viewed. Pages use the
+ * The permission each Platform Console route needs to be viewed. Pages use the
  * `.read` key; their mutating actions use the matching `.manage` (or narrower) key.
  */
 export const ROUTE_PERMISSIONS: Record<string, PlatformPermission | null> = {
-  "/platform": null, // any platform user
-  "/platform/companies": "companies.read",
-  "/platform/panels": "panels.read",
-  "/platform/signups": "signups.read",
-  "/platform/domains": "domains.read",
-  "/platform/plans": "plans.read",
-  "/platform/costs": "plans.read",
-  "/platform/incidents": "settings.read",
-  "/platform/subscriptions": "subscriptions.read",
-  "/platform/invoices": "invoices.read",
-  "/platform/coupons": "coupons.read",
-  "/platform/addons": "addons.read",
-  "/platform/payments": "payments.read",
-  "/platform/settings/billing": "tax.read",
-  "/platform/revenue": "revenue.read",
-  "/platform/usage": "usage.read",
-  "/platform/ai-usage": "usage.read",
-  "/platform/support": "support.read",
-  "/platform/support/help": "support.read",
-  "/platform/support/settings": "support.read",
-  "/platform/users": "users.read",
-  "/platform/integrations": "integrations.read",
-  "/platform/audit": "audit.read",
-  "/platform/settings": "settings.read",
+  "/console": null, // any platform user
+  "/console/companies": "companies.read",
+  "/console/products": "panels.read",
+  "/console/signups": "signups.read",
+  "/console/domains": "domains.read",
+  "/console/plans": "plans.read",
+  "/console/costs": "plans.read",
+  "/console/incidents": "settings.read",
+  "/console/subscriptions": "subscriptions.read",
+  "/console/invoices": "invoices.read",
+  "/console/coupons": "coupons.read",
+  "/console/addons": "addons.read",
+  "/console/payments": "payments.read",
+  "/console/settings/billing": "tax.read",
+  "/console/revenue": "revenue.read",
+  "/console/usage": "usage.read",
+  "/console/ai-usage": "usage.read",
+  "/console/resolveiq": "support.read",
+  "/console/resolveiq/help": "support.read",
+  "/console/resolveiq/settings": "support.read",
+  "/console/users": "users.read",
+  "/console/integrations": "integrations.read",
+  "/console/audit": "audit.read",
+  "/console/settings": "settings.read",
 };

@@ -7,8 +7,8 @@ import { loadSubscriptionEvents, planMrr, type SubscriptionEvent } from "@/lib/p
 import type { BillingInterval, CompanySubscription, Plan, SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
- * Platform revenue & subscription analytics for the Platform Panel
- * (`/platform/revenue`, plus the headline cards on `/platform`).
+ * Platform revenue & subscription analytics for the Platform Console
+ * (`/console/revenue`, plus the headline cards on `/console`).
  * Cross-company, raw DB, built from `companies` (current state),
  * `subscription_events` (history) and `saas_invoices` (money billed and
  * collected). The platform owner (`internal`) is excluded from every figure.
@@ -301,7 +301,7 @@ export interface RevenueSnapshot {
   trialsEndingSoon: TrialEnding[];
 }
 
-/** Headline figures for the Platform Panel dashboard — current state only, no history. */
+/** Headline figures for the Platform Console dashboard — current state only, no history. */
 export async function getRevenueSnapshot(now: Date = new Date()): Promise<RevenueSnapshot> {
   const { subs, planById, currency } = await loadCurrentState(now);
   const counts = emptyCounts();

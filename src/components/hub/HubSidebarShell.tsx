@@ -1,12 +1,12 @@
 "use client";
 
-import type { NavSection } from "@/lib/workspace/nav";
+import type { NavSection } from "@/lib/products/commandos/nav";
 import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import SidebarBrand from "@/components/SidebarBrand";
 import HubSidebar from "@/components/hub/HubSidebar";
 import HubProfileMenu from "@/components/hub/HubProfileMenu";
-import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
+import { useSidebarCollapse, SidebarProfileSlot } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
 
 const EXPANDED_WIDTH = 240;
@@ -57,7 +57,7 @@ export default function HubSidebarShell({
       <HubProfileMenu
         email={email}
         lastLoginAt={lastLoginAt}
-        links={nav.filter((section) => section.key === "account" || section.key === "platform").flatMap((section) => section.items).filter((item) => item.href !== "/workspace/change-password").map((item) => ({ href: item.href, label: item.label }))}
+        links={nav.filter((section) => section.key === "account" || section.key === "platform").flatMap((section) => section.items).filter((item) => item.href !== "/commandos/change-password").map((item) => ({ href: item.href, label: item.label }))}
       />
       </SidebarProfileSlot>
     </motion.aside>

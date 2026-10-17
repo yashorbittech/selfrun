@@ -1,10 +1,10 @@
 /**
- * PMS (Project Management System) role model. Like the HRMS panel, PMS access
+ * PMS (Project Management System) role model. Like the HRMS product, PMS access
  * is gated on the shared `admin_users.roles` array — there is no separate PMS
- * user store. An account can sign into `/pms` only if it carries at least one
+ * user store. An account can sign into `/sprintos` only if it carries at least one
  * of these roles (see `verifyPmsCredentials` in `pms-auth.ts`).
  *
- * `super_admin` is the same literal used by the HRMS/LMS panels and implicitly
+ * `super_admin` is the same literal used by the HRMS/LMS products and implicitly
  * grants full PMS access.
  *
  * The capability predicates below (everything except `hasPmsAccess`,
@@ -19,7 +19,7 @@ export const PMS_ROLES = ["super_admin", "pms_admin", "pms_manager", "pms_employ
 
 export type PmsRole = (typeof PMS_ROLES)[number];
 
-/** Roles that open the full staff panel (dashboard, clients, projects, costing…). */
+/** Roles that open the full staff product (dashboard, clients, projects, costing…). */
 export const PMS_STAFF_ROLES: PmsRole[] = ["super_admin", "pms_admin", "pms_manager"];
 
 export const PMS_ROLE_META: Record<PmsRole, { label: string; description: string }> = {
@@ -51,17 +51,17 @@ export function normalizePmsRoles(value: unknown): PmsRole[] {
   return Array.from(new Set(value.filter(isPmsRole)));
 }
 
-/** Can open the PMS panel at `/pms/*` (staff panel or employee portal). */
+/** Can open the PMS product at `/sprintos/*` (staff product or employee portal). */
 export function hasPmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizePmsRoles(roles).length > 0;
 }
 
-/** Can open the full staff panel (dashboard, clients, projects, costing, settings). */
+/** Can open the full staff product (dashboard, clients, projects, costing, settings). */
 export function hasPmsStaffRole(roles: readonly PmsRole[]): boolean {
   return roles.some((r) => PMS_STAFF_ROLES.includes(r));
 }
 
-/** Only the `pms_employee` role — belongs in the `/pms/me` portal. */
+/** Only the `pms_employee` role — belongs in the `/sprintos/me` portal. */
 export function isPmsEmployeeOnly(roles: readonly PmsRole[]): boolean {
   return roles.length > 0 && !hasPmsStaffRole(roles);
 }

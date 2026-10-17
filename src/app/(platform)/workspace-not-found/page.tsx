@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { ArrowRight, Compass, Globe, Link2Off, PauseCircle, SearchCheck } from "lucide-react";
 import ErrorScreen from "@/components/errors/ErrorScreen";
 import { buttonVariants } from "@/components/ui/button";
-import { saasSiteOrigin } from "@/lib/saas/hosts";
+import { saasSiteOrigin } from "@/lib/platform/saas/hosts";
 
 /**
  * Shown (404) by the proxy for a host that no company owns — an unverified

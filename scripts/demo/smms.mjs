@@ -1,7 +1,7 @@
 // Social Media (SMMS) demo data: five logins (one per role), brand context, three campaigns with ads, a dozen posts across
 // every lifecycle status (with recorded performance on the published ones), version history and an activity log.
 //
-// No OpenAI calls and no media files (Blob) — content is hand-written demo copy, so the panel is explorable without keys.
+// No OpenAI calls and no media files (Blob) — content is hand-written demo copy, so the product is explorable without keys.
 // If LMS ad-platform data exists (`campaigns` collection), the launched demo campaign links to the first imported one.
 //
 // Idempotent: every row it creates has a `demo-smms-` id and is replaced on each run. Brand settings are only created when

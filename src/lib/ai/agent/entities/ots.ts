@@ -1,16 +1,16 @@
 import "server-only";
-import * as A from "@/app/ots/(protected)/actions";
+import * as A from "@/app/(products)/evaliq/(protected)/actions";
 import { otsCan, type OtsPermission } from "@/lib/ots-roles";
-import { TEST_TYPES, DIFFICULTIES, QUESTION_DIFFICULTIES, QUESTION_STATUSES, PRIORITIES, RESULT_RELEASES, RESULT_DETAILS, ATTEMPT_SCORING, TARGET_TYPES } from "@/lib/ots/constants";
-import { QUESTION_TYPE_LIST } from "@/lib/ots/question-types";
-import { getDashboard } from "@/lib/ots/analytics";
+import { TEST_TYPES, DIFFICULTIES, QUESTION_DIFFICULTIES, QUESTION_STATUSES, PRIORITIES, RESULT_RELEASES, RESULT_DETAILS, ATTEMPT_SCORING, TARGET_TYPES } from "@/lib/products/evaliq/constants";
+import { QUESTION_TYPE_LIST } from "@/lib/products/evaliq/question-types";
+import { getDashboard } from "@/lib/products/evaliq/analytics";
 import { peek } from "@/lib/ai/agent/records";
 import { viaAction, f, fail, str, values } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
  * Online tests (OTS) for the agent: build the question bank, assemble and publish tests, assign them to employees, applicants and students,
- * evaluate answers, publish results and issue certificates — through the panel's own actions and permission rules.
+ * evaluate answers, publish results and issue certificates — through the product's own actions and permission rules.
  */
 
 const ctx = (u: AgentUser) => ({ roles: u.roles, permissionOverrides: u.permissionOverrides });

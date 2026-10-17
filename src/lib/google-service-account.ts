@@ -3,7 +3,7 @@ import crypto from "crypto";
 
 /**
  * OAuth2 access tokens for a Google service account (JWT bearer grant). Shared
- * by the Indexing API notifier and the SEO panel's Search Console / Analytics
+ * by the Indexing API notifier and the SEO product's Search Console / Analytics
  * adapters — one implementation of the signing flow for every Google API.
  */
 

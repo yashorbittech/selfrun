@@ -1,23 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isMaintenanceOn, isPublicSitePath } from "@/lib/cms/maintenance-gate";
+import { isMaintenanceOn, isPublicSitePath } from "@/lib/products/sitecraft-ai/maintenance-gate";
 import { resolveCompanyIdByHost, resolveHostInfo, normalizeHost, type HostInfo } from "@/lib/platform/tenancy/companies";
 import { gateApi, gatePage, hardenApiResponse, isAssetPath } from "@/lib/security/gate";
 import { gateSessionBinding } from "@/lib/security/session-bind";
 import { counterpartHost, surfaceRedirect } from "@/lib/platform/tenancy/surfaces";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
-import { isSaasAppHost, isSaasHost } from "@/lib/saas/hosts";
+import { isSaasAppHost, isSaasHost } from "@/lib/platform/saas/hosts";
 import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
 import { isTakeoverNow } from "@/lib/platform/maintenance-shared";
-import { isSaasPagePath } from "@/lib/saas/routes";
+import { isSaasPagePath } from "@/lib/platform/saas/routes";
 import { entitlementsFor } from "@/lib/platform/billing/entitlements";
 import type { Entitlements } from "@/lib/platform/billing/types";
+import { productKeyFromSlug, productSlugFor } from "@/lib/platform/saas/product-routes";
 
 /**
  * First-touch referral capture, server side. A `?ref=CODE` on any page view
  * is stored in an HttpOnly cookie for 30 days (first code wins) so the
  * attribution survives even when the browser blocks localStorage, the visitor
- * bounces through /portal/login, or they sign up days later. Sign-up actions
+ * bounces through /clientos/login, or they sign up days later. Sign-up actions
  * read this cookie server-side — the client can't forge or drop it.
  */
 const COOKIE = "yo_ref";
@@ -27,9 +28,9 @@ const MAX_AGE = 30 * 24 * 60 * 60;
 const CMS_SESSION_COOKIE = "cms_session";
 
 /**
- * Panel Registry gate: a panel the platform switched off (for every company, or for this one) is not reachable — its
- * pages show "not available" and its API answers 403. The Workspace itself and anything that isn't a registry panel
- * pass straight through. Fails open on a lookup error (the panel's own checks still apply).
+ * Product Registry gate: a product the platform switched off (for every company, or for this one) is not reachable — its
+ * pages show "not available" and its API answers 403. The Workspace itself and anything that isn't a registry product
+ * pass straight through. Fails open on a lookup error (the product's own checks still apply).
  */
 async function panelGate(request: NextRequest, companyId: string | null | undefined): Promise<NextResponse | null> {
   if (!companyId) return null;
@@ -37,33 +38,34 @@ async function panelGate(request: NextRequest, companyId: string | null | undefi
   const parts = pathname.split("/").filter(Boolean);
   const isApi = parts[0] === "api";
   const segment = isApi ? parts[1] : parts[0];
+  const panelKey = segment ? productKeyFromSlug(segment) ?? segment : "";
   try {
     const off = await unavailablePanelKeys(companyId);
     if (off.size === 0) return null;
     const unavailable = (key: string, name: string) => {
       if (isApi) return NextResponse.json({ error: `${name} isn't available for this workspace.` }, { status: 403 });
-      const url = new URL("/panel-unavailable", request.url);
+      const url = new URL("/product-unavailable", request.url);
       url.searchParams.set("panel", key);
       return NextResponse.rewrite(url, { status: 403 });
     };
-    // The company's public website is the "website" panel: its public pages go offline when it is switched off.
+    // The company's public website is the "website" product: its public pages go offline when it is switched off.
     if (!isApi && off.has("website") && isPublicSitePath(pathname)) return unavailable("website", "The website");
-    if (!segment || segment === "workspace" || !off.has(segment)) return null;
-    const panel = (await listPanels()).find((p) => p.key === segment);
-    return panel && !panel.core ? unavailable(segment, panel.name) : null;
+    if (!panelKey || panelKey === "workspace" || !off.has(panelKey)) return null;
+    const panel = (await listPanels()).find((p) => p.key === panelKey);
+    return panel && !panel.core ? unavailable(panelKey, panel.name) : null;
   } catch (err) {
-    console.error("[panels] availability check failed in proxy", err);
+    console.error("[products] availability check failed in proxy", err);
     return null;
   }
 }
 
 
 /**
- * Subscription gate for the business panels, applied to every API call and every Server Action (page views are
- * covered by each panel's layout, which sends people to the upgrade page):
- *  - a panel that is not in the company's plan answers 403, whatever the caller tries;
- *  - while the subscription is suspended or canceled (read-only) nothing can be created, changed or deleted in a panel.
- * Sign-in and password pages stay open. Fails open on a lookup error (each panel still checks its own entitlements).
+ * Subscription gate for the business products, applied to every API call and every Server Action (page views are
+ * covered by each product's layout, which sends people to the upgrade page):
+ *  - a product that is not in the company's plan answers 403, whatever the caller tries;
+ *  - while the subscription is suspended or canceled (read-only) nothing can be created, changed or deleted in a product.
+ * Sign-in and password pages stay open. Fails open on a lookup error (each product still checks its own entitlements).
  */
 const PLAN_PANELS = new Set(["hrms", "pms", "lms", "fms", "prms", "tms", "ots", "sop", "lpms", "dlms", "cms", "seo", "smms", "aibots", "intelligence", "portal"]);
 const OPEN_IN_READ_ONLY = /\/(login|logout|signin|change-password|forgot-password|reset-password|verify-email|handoff)(\/|$)/i;
@@ -75,7 +77,8 @@ async function planGate(request: NextRequest, companyId: string | null | undefin
   const parts = pathname.split("/").filter(Boolean);
   const isApi = parts[0] === "api";
   const segment = isApi ? parts[1] : parts[0];
-  if (!segment || !PLAN_PANELS.has(segment)) return null;
+  const panelKey = segment ? productKeyFromSlug(segment) ?? segment : "";
+  if (!panelKey || !PLAN_PANELS.has(panelKey)) return null;
   const mutating = !["GET", "HEAD"].includes(request.method.toUpperCase());
   if (!isApi && !mutating) return null;
   try {
@@ -87,7 +90,7 @@ async function planGate(request: NextRequest, companyId: string | null | undefin
     }
     const { ent } = hit;
     const deny = (status: number, error: string) => (isApi ? NextResponse.json({ error }, { status, headers: { "Cache-Control": "no-store" } }) : new NextResponse(error, { status, headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" } }));
-    if (ent.modules !== null && !ent.modules.has(segment)) return deny(403, "This panel isn't included in your plan. Upgrade in Settings → Billing to unlock it.");
+    if (ent.modules !== null && !ent.modules.has(panelKey)) return deny(403, "This product isn't included in your plan. Upgrade in Settings → Billing to unlock it.");
     if (ent.readOnly && mutating && !OPEN_IN_READ_ONLY.test(pathname)) return deny(402, "Your workspace is read-only because its subscription is suspended or has ended. You can still view everything; renew in Settings → Billing to make changes.");
   } catch (err) {
     console.error("[plan] gate lookup failed in proxy", err);
@@ -96,13 +99,28 @@ async function planGate(request: NextRequest, companyId: string | null | undefin
 }
 
 export async function proxy(request: NextRequest) {
-  // API calls: only the panel gate applies (everything below is about page views).
+  // API calls: only the product gate applies (everything below is about page views).
   const hostHeader0 = request.headers.get("host") ?? "";
   const onSaasHost0 = (() => {
     const h = normalizeHost(hostHeader0);
     return !!h && (isSaasHost(h) || isSaasAppHost(h));
   })();
   const isApi = request.nextUrl.pathname.startsWith("/api/");
+  const pathParts = request.nextUrl.pathname.split("/").filter(Boolean);
+  const oldProductSegment = isApi ? pathParts[1] : pathParts[0];
+  // The Platform Console now lives at /console. Keep bookmarks to the old route working.
+  if (!isApi && (request.nextUrl.pathname === "/platform" || request.nextUrl.pathname.startsWith("/platform/")) && ["GET", "HEAD"].includes(request.method.toUpperCase())) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/console" + request.nextUrl.pathname.slice("/platform".length);
+    return NextResponse.redirect(url, 308);
+  }
+  const oldProductKey = oldProductSegment ? productKeyFromSlug(oldProductSegment) : undefined;
+  const isOldProductPath = !!oldProductKey && oldProductSegment !== productSlugFor(oldProductKey);
+  if (!isApi && isOldProductPath && ["GET", "HEAD"].includes(request.method.toUpperCase())) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${productSlugFor(oldProductKey!)}` + request.nextUrl.pathname.slice(oldProductSegment!.length + 1);
+    return NextResponse.redirect(url, 308);
+  }
   // Anything that changes data — a Server Action, a form post, any non-GET route — goes through the same front door as the API.
   const mutating = !["GET", "HEAD"].includes(request.method.toUpperCase());
   if (isApi || mutating) {
@@ -122,7 +140,13 @@ export async function proxy(request: NextRequest) {
     }
     if (!isApi) return NextResponse.next();
     const out = (await panelGate(request, apiCompany)) ?? NextResponse.next();
-    return hardenApiResponse(out, isAssetPath(request.nextUrl.pathname, request.method) ? "asset" : "other");
+    const hardened = hardenApiResponse(out, isAssetPath(request.nextUrl.pathname, request.method) ? "asset" : "other");
+    if (isApi && isOldProductPath && oldProductKey) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/api/${productSlugFor(oldProductKey)}` + request.nextUrl.pathname.slice(`/api/${oldProductSegment}`.length);
+      return NextResponse.rewrite(url, { headers: hardened.headers });
+    }
+    return hardened;
   }
 
   // The SaaS product's own website: its public pages live under /saas and need no company.
@@ -147,15 +171,15 @@ export async function proxy(request: NextRequest) {
   }
   const companyId = info?.companyId;
 
-  // Page views: scanner traps, scripted scrapers and floods (crawlers are kept off the signed-in panels altogether).
+  // Page views: scanner traps, scripted scrapers and floods (crawlers are kept off the signed-in products altogether).
   const appSurface = info ? info.surface === "app" : isSaasAppHost(normalizeHost(hostHeader0) ?? "");
   const pageBlocked = await gatePage(request, appSurface);
   if (pageBlocked) return pageBlocked;
   const copiedSession = await gateSessionBinding(request, false);
   if (copiedSession) return copiedSession;
 
-  // A company's website and its panels live on different hosts: a page of the other side is sent to its own host
-  // (so a link to /workspace from the website, or to / from a panel, still lands somewhere right).
+  // A company's website and its products live on different hosts: a page of the other side is sent to its own host
+  // (so a link to /commandos from the website, or to / from a product, still lands somewhere right).
   if (info) {
     const action = surfaceRedirect(info.surface, request.nextUrl.pathname);
     if (action) {
@@ -163,14 +187,14 @@ export async function proxy(request: NextRequest) {
       const hostHeader = request.headers.get("host");
       const proto = request.headers.get("x-forwarded-proto")?.split(",")[0].trim() || request.nextUrl.protocol.replace(":", "");
       const to = (host: string, path: string) => NextResponse.redirect(new URL(path, `${proto}://${host}`));
-      // The product's own app host (SelfRun) opens on the Platform Panel; every company's panels host opens on its Workspace.
-      if (action === "app-home" && hostHeader) return to(hostHeader, isSaasAppHost(hostHeader) ? "/platform" : "/workspace");
+      // The product's own app host (SelfRun) opens on the Platform Console; every company's app host opens on its Workspace.
+      if (action === "app-home" && hostHeader) return to(hostHeader, isSaasAppHost(hostHeader) ? "/console" : "/commandos");
       const target = action === "app-home" ? null : counterpartHost(hostHeader, action === "to-app" ? "site" : "app");
       if (target) return to(target, `${request.nextUrl.pathname}${request.nextUrl.search}`);
     }
   }
 
-  // Platform maintenance (Platform Panel → Maintenance), "takeover" mode: every company's website / panels show the maintenance screen for
+  // Platform maintenance (Platform Console → Maintenance), "takeover" mode: every company's website / products show the maintenance screen for
   // the length of the window and come back on their own after it. Page views only (APIs, webhooks, crons and payment links keep working),
   // and never the product's own hosts, so the platform staff can always end it.
   if (info && !isSaasHost(request.headers.get("host")) && !isSaasAppHost(request.headers.get("host"))) {
@@ -178,7 +202,7 @@ export async function proxy(request: NextRequest) {
     if (!["platform-maintenance", "offline-shell", "pay", "verify"].includes(first)) {
       const m = await getEffectiveMaintenance(info.companyId);
       if (isTakeoverNow(m, info.surface)) {
-        return NextResponse.rewrite(new URL("/platform-maintenance", request.url), { status: 503, headers: { "Retry-After": String(Math.max(30, Math.ceil((m.endsAt - Date.now()) / 1000))), "Cache-Control": "no-store" } });
+        return NextResponse.rewrite(new URL("/console-maintenance", request.url), { status: 503, headers: { "Retry-After": String(Math.max(30, Math.ceil((m.endsAt - Date.now()) / 1000))), "Cache-Control": "no-store" } });
       }
     }
   }
@@ -209,7 +233,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Page views and API calls (API calls only get the panel gate) — skip Next internals and static files.
+  // Page views and API calls (API calls only get the product gate) — skip Next internals and static files.
   // Everything except Next internals and plain static assets. (Paths with other dots — /.env, /wp-login.php, /backup.sql — DO come through, so the scanner traps in the gate see them.)
   matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|css|js|map|woff2?|ttf|otf|mp4|webm|mp3|wav|pdf|txt|xml|json|webmanifest)$).*)"],
 };

@@ -8,7 +8,7 @@ import { cn, formatDateTime } from "@/lib/utils";
 import { Markdown } from "@/components/chat/Markdown";
 import { TypingIndicator } from "@/components/chat/TypingIndicator";
 import type { ChatMessage as ChatMessageType } from "@/components/chat/ChatProvider";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function StreamingCursor() {
   return (

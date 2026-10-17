@@ -5,8 +5,8 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRight, Calendar, Clock, User } from "lucide-react";
 import type { BlogPostMeta } from "@/types/content";
-import DynamicIcon from "@/components/cms/DynamicIcon";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import DynamicIcon from "@/components/products/sitecraft-ai/DynamicIcon";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },

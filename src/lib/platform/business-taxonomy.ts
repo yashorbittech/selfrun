@@ -198,7 +198,7 @@ const EXTRA_DEEP: Record<string, string[]> = {
   ],
   "Electronics, Computers & Optical": [
     "Printed circuit board assembly", "Consumer electronics manufacturing", "Mobile phone assembly", "LED and lighting manufacturing", "Batteries and power banks",
-    "Cables and connectors", "Transformers, switchgear and panels", "Meters and measuring instruments", "CCTV and security electronics", "Medical electronics",
+    "Cables and connectors", "Transformers, switchgear and products", "Meters and measuring instruments", "CCTV and security electronics", "Medical electronics",
     "Solar inverters and charge controllers", "Semiconductor and chip design", "Embedded and IoT devices", "Optical lenses and eyewear manufacturing", "Watches and clocks manufacturing",
     "Electric motors and fans", "Home-appliance manufacturing", "Drone manufacturing",
   ],
@@ -457,7 +457,7 @@ const EXTRA_WORLD: Record<string, string[]> = {
     "Embroidery and monogram services", "Hat, cap and glove makers", "Lace and ribbon makers", "Traditional dress makers (kimono, sari, kaftan, dirndl, hanbok)",
   ],
   "Wood, Paper & Printing": [
-    "Sawmilling and planing of wood", "Manufacture of veneer sheets and wood-based panels", "Manufacture of builders' carpentry and joinery", "Manufacture of wooden containers and pallets", "Manufacture of cork and straw products",
+    "Sawmilling and planing of wood", "Manufacture of veneer sheets and wood-based products", "Manufacture of builders' carpentry and joinery", "Manufacture of wooden containers and pallets", "Manufacture of cork and straw products",
     "Manufacture of pulp", "Manufacture of paper and paperboard", "Manufacture of corrugated paper and containers", "Manufacture of household and sanitary paper", "Manufacture of paper stationery",
     "Manufacture of wallpaper", "Printing of newspapers", "Other printing", "Pre-press and pre-media services", "Binding and related services",
     "Bookbinding and restoration", "Woodworking and cabinet-making shops", "Log-home and timber-frame builders",
@@ -486,7 +486,7 @@ const EXTRA_WORLD: Record<string, string[]> = {
   "Electronics, Computers & Optical": [
     "Manufacture of electronic components", "Manufacture of loaded electronic boards", "Manufacture of computers and peripheral equipment", "Manufacture of communication equipment", "Manufacture of consumer electronics",
     "Manufacture of measuring, testing and navigation instruments", "Manufacture of watches and clocks", "Manufacture of irradiation and electromedical equipment", "Manufacture of optical instruments and photographic equipment", "Manufacture of magnetic and optical media",
-    "Manufacture of semiconductors and photovoltaic cells", "Manufacture of sensors and transducers", "Manufacture of display panels and LED screens", "Manufacture of wearables and smart devices", "Manufacture of radar, sonar and navigation systems",
+    "Manufacture of semiconductors and photovoltaic cells", "Manufacture of sensors and transducers", "Manufacture of display products and LED screens", "Manufacture of wearables and smart devices", "Manufacture of radar, sonar and navigation systems",
     "Manufacture of 3D printers and scanners", "Manufacture of robots and cobots", "Manufacture of electric-vehicle chargers", "Manufacture of smart meters", "Manufacture of telecom handsets and routers",
     "Electronics repair and refurbishment", "Electronics design services and EMS", "Calibration and test-equipment service",
   ],
@@ -1119,7 +1119,7 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Uniforms and workwear", "Fur and leather apparel", "Footwear", "Leather goods and luggage", "Fashion design and accessories",
   ]),
   cat("Wood, Paper & Printing", [
-    "Sawmilling and wood processing", "Wood panels and veneer", "Builders' carpentry and joinery", "Wooden containers and pallets", "Pulp and paper", "Corrugated paper and cartons",
+    "Sawmilling and wood processing", "Wood products and veneer", "Builders' carpentry and joinery", "Wooden containers and pallets", "Pulp and paper", "Corrugated paper and cartons",
     "Household and stationery paper products", "Commercial printing", "Pre-press and bookbinding", "Reproduction of recorded media",
   ]),
   cat("Chemicals, Pharmaceuticals & Plastics", [
@@ -1439,14 +1439,14 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
   ]),
   cat("Electronics, Mobile & Computer Shops", [
     "Mobile phone shop", "Mobile accessories shop", "Mobile repair shop", "Computer and laptop store", "Computer and laptop repair", "Printer, toner and cartridge shop", "CCTV and security-camera dealer", "Home-appliance store", "AC dealer and installer",
-    "TV and audio dealer", "Electrical and lighting shop", "Inverter, battery and UPS dealer", "Solar panel dealer", "Camera and photography equipment shop", "Gaming console and accessories shop", "Second-hand electronics and exchange store",
+    "TV and audio dealer", "Electrical and lighting shop", "Inverter, battery and UPS dealer", "Solar product dealer", "Camera and photography equipment shop", "Gaming console and accessories shop", "Second-hand electronics and exchange store",
     "Cyber cafe and browsing centre", "Photocopy, printing and lamination", "SIM card, recharge and DTH dealer", "Cable TV and local ISP operator", "Computer hardware assembler", "Drone and gadget store", "Smart-home and gadget retailer",
   ]),
   cat("Hardware, Building Materials & Home Furnishing Shops", [
     "Hardware and tools store", "Plywood and laminates dealer", "Paint shop", "Sanitary and bath-fittings shop", "Tiles and marble dealer", "Cement dealer", "Steel and iron dealer", "Bricks, sand and aggregate supplier", "Electrical goods shop",
     "Plumbing materials shop", "Glass and aluminium fabricator", "Furniture shop", "Mattress and bedding shop", "Modular kitchen showroom", "Curtains and furnishing store", "Carpet and flooring shop", "Lighting and lamp showroom", "Timber depot and sawmill",
     "Pipes and fittings dealer", "Fasteners and fittings dealer", "Safety equipment and PPE shop", "Locks and security-hardware shop", "Doors and windows dealer", "Roofing sheets and PEB dealer", "Scrap and junk dealer", "Used and second-hand furniture shop",
-    "Home décor and artefacts shop", "Wallpaper and wall-panel dealer",
+    "Home décor and artefacts shop", "Wallpaper and wall-product dealer",
   ]),
   cat("Repair, Installation & Home Services", [
     "Plumber", "Electrician", "Carpenter", "Painter and polisher", "AC repair and service", "Refrigerator and washing-machine repair", "TV and appliance repair", "Watch and clock repair", "Shoe and bag repair", "Bicycle repair shop",
@@ -1486,7 +1486,7 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Job-work and contract manufacturing", "Packaging unit", "Plastic moulding unit", "Garment manufacturing unit", "Pickle, papad and snack unit", "Bakery and biscuit unit", "Ice-cream and dairy unit", "Soap and detergent unit", "Candle and incense (agarbatti) unit",
     "Pottery and terracotta", "Handicraft unit", "Furniture workshop", "Metal fabrication and powder coating", "Machine shop and tool room", "Foundry and casting unit", "Press-shop and sheet metal", "Rubber products unit", "Paper products and paper-cup unit",
     "Printing press", "Flex and banner printing", "Screen and offset printing", "Leather workshop", "Jewellery workshop", "Brick kiln", "Stone crusher and quarry unit", "Cement-products unit (blocks, pipes)", "Paint and chemical unit", "Cosmetic and herbal unit",
-    "Electrical assembly and panel unit", "Transformer and motor repair", "LED and lighting manufacturer", "Plastic recycling unit", "Bag and sack manufacturing", "Mattress and foam unit", "Handloom and powerloom", "Dyeing and processing unit", "Spinning mill",
+    "Electrical assembly and product unit", "Transformer and motor repair", "LED and lighting manufacturer", "Plastic recycling unit", "Bag and sack manufacturing", "Mattress and foam unit", "Handloom and powerloom", "Dyeing and processing unit", "Spinning mill",
     "Food-processing and masala unit", "Packaged water and beverage plant", "Wooden toys and crafts unit",
   ]),
   cat("Wholesale, Distribution & Dealers", [
@@ -1872,8 +1872,8 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Travel blogger-led and community trips",
   ]),
   cat("Electricians & Electrical Workers", [
-    "Electrician (house wiring)", "Industrial and factory electrician", "Electrical contractor and wireman", "Electrical fitter and panel wirer", "Motor, transformer and generator repairer",
-    "Lineman and power-line worker", "Solar-panel and inverter installer", "Electrical shop and goods dealer", "Electrical engineer and supervisor", "CCTV, alarm and fire-alarm wiring technician",
+    "Electrician (house wiring)", "Industrial and factory electrician", "Electrical contractor and wireman", "Electrical fitter and product wirer", "Motor, transformer and generator repairer",
+    "Lineman and power-line worker", "Solar-product and inverter installer", "Electrical shop and goods dealer", "Electrical engineer and supervisor", "CCTV, alarm and fire-alarm wiring technician",
     "Elevator and escalator electrician", "Marine, auto and aircraft electrician", "Electric-vehicle charger installer", "Street-light and traffic-signal electrician", "Domestic-appliance electrician",
   ]),
   cat("Plumbers & Pipe Fitters", [
@@ -1887,7 +1887,7 @@ export const BUSINESS_CATEGORIES: BusinessCategory[] = [
     "Plywood, laminate and veneer worker", "Bamboo and cane furniture maker", "Interior carpenter and false-ceiling worker", "Carpentry-tool and machine dealer", "Wooden toy and craft maker",
   ]),
   cat("Painters, Plasterers & Finishers", [
-    "House painter and polisher", "Wall-putty, POP and plaster worker", "Textured, stencil and designer-wall painter", "Wall-paper and wall-panel installer", "Spray-paint and industrial painter",
+    "House painter and polisher", "Wall-putty, POP and plaster worker", "Textured, stencil and designer-wall painter", "Wall-paper and wall-product installer", "Spray-paint and industrial painter",
     "Vehicle painter and denting-painting worker", "Signboard and wall-lettering artist", "Waterproofing and coating applicator", "Tile, marble and floor-polishing worker", "False-ceiling and gypsum worker",
     "Paint shop and colour-mixing centre", "Mural and artistic-wall painter", "Furniture and door painter", "Exterior and high-rise (rope-access) painter",
   ]),

@@ -9,7 +9,7 @@ import { isClaimHref } from "@/lib/offers/constants";
 import { useOfferTracking } from "@/lib/useOfferTracking";
 import { popupMayShow, markPopupShown, markPopupClosed } from "@/lib/offers/popup-frequency";
 import type { ActiveDisplayPopup } from "@/lib/useActiveCampaignDisplay";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export default function OfferPopup({
   campaign,

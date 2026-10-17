@@ -5,7 +5,7 @@ import type { StaffViewer } from "@/lib/notify/counts";
 
 export type NotifyViewer = { actor: "staff"; user: StaffViewer } | { actor: "portal"; user: { id: string } };
 
-/** Who is asking: a company account (any panel) or an external portal account. `as=portal` is sent by the Portal's own pages. */
+/** Who is asking: a company account (any product) or an external portal account. `as=portal` is sent by the Portal's own pages. */
 export async function currentNotifyViewer(as: string | null): Promise<NotifyViewer | null> {
   if (as === "portal") {
     const p = await getCurrentPortalUser();

@@ -1,7 +1,7 @@
 "use client";
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
-import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
+import { hubLogoutAction } from "@/app/(products)/commandos/(protected)/actions";
 
 export default function SupportProfileMenu({ email, roles, createdAt, lastLoginAt }: { email: string; roles: string[]; createdAt: string; lastLoginAt: string | null }) {
   return (

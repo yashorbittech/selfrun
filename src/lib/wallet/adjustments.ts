@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { creditWallet, applyBalanceDelta, insertLedgerRow, claimIdempotencyKey } from "@/lib/wallet/wallets";
 import { externalUsers } from "@/lib/portal-auth";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { formatCredits } from "@/lib/wallet/constants";
 
 /**
@@ -41,7 +41,7 @@ export async function adjustWalletManually(input: {
       actorId: input.actorId,
     });
     if (!tx) return { ok: false, error: "Adjustment was already processed." };
-    await notifyPortalUser({ recipientUserId: user._id, type: "wallet.credit_earned", title: "Credits added", body: `${formatCredits(amount)} were added to your wallet.`, link: "/portal/wallet" });
+    await notifyPortalUser({ recipientUserId: user._id, type: "wallet.credit_earned", title: "Credits added", body: `${formatCredits(amount)} were added to your wallet.`, link: "/clientos/wallet" });
     return { ok: true };
   }
 

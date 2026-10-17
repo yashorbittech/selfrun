@@ -4,7 +4,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * The one tab design for every panel: a rounded card-like track holding pill tabs, the active one tinted with the
+ * The one tab design for every product: a rounded card-like track holding pill tabs, the active one tinted with the
  * brand colour and ringed like the Search & Filters card's icon. Scrolls sideways instead of wrapping on phones.
  * Use `PanelTabs` for link/button tab bars; `tabTrackClass` / `tabItemClass` are exported for the few places that need
  * their own element (the `ui/Tabs` primitives use them too).

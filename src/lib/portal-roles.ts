@@ -1,5 +1,5 @@
 /**
- * External User Portal (`/portal`) role model. Unlike the internal panels, portal
+ * External User Portal (`/clientos`) role model. Unlike the internal products, portal
  * users live in their **own** `external_users` collection — never `admin_users` —
  * and each account has exactly one role that decides which of the four completely
  * separate portal experiences they get.
@@ -54,47 +54,47 @@ export interface PortalNavItem {
   label: string;
   icon: string;
   exact?: boolean;
-  /** Sidebar category label. Items with the same `group` sit under one heading (like the other panels); no group = top-level. */
+  /** Sidebar category label. Items with the same `group` sit under one heading (like the other products); no group = top-level. */
   group?: string;
 }
 
 const inGroup = (group: string, items: PortalNavItem[]): PortalNavItem[] => items.map((i) => ({ ...i, group }));
 
-const DASHBOARD: PortalNavItem = { href: "/portal", label: "Dashboard", icon: "LayoutDashboard", exact: true };
+const DASHBOARD: PortalNavItem = { href: "/clientos", label: "Dashboard", icon: "LayoutDashboard", exact: true };
 
 const OVERVIEW_NAV = inGroup("Overview", [
-  { href: "/portal/journey", label: "My Journey", icon: "Route" },
-  { href: "/portal/messages", label: "Messages", icon: "MessagesSquare" },
+  { href: "/clientos/journey", label: "My Journey", icon: "Route" },
+  { href: "/clientos/messages", label: "Messages", icon: "MessagesSquare" },
 ]);
 
 const REWARDS_NAV = inGroup("Rewards", [
-  { href: "/portal/referrals", label: "Refer & Earn", icon: "Gift" },
-  { href: "/portal/rewards/daily", label: "Daily Rewards", icon: "Flame" },
-  { href: "/portal/rewards/journey", label: "Journey Rewards", icon: "Trophy" },
-  { href: "/portal/rewards/tasks", label: "Bonus Tasks", icon: "ListChecks" },
+  { href: "/clientos/referrals", label: "Refer & Earn", icon: "Gift" },
+  { href: "/clientos/rewards/daily", label: "Daily Rewards", icon: "Flame" },
+  { href: "/clientos/rewards/journey", label: "Journey Rewards", icon: "Trophy" },
+  { href: "/clientos/rewards/tasks", label: "Bonus Tasks", icon: "ListChecks" },
 ]);
 
 const ACCOUNT_NAV = inGroup("Account", [
-  { href: "/portal/documents", label: "Documents", icon: "FolderOpen" },
-  { href: "/portal/profile", label: "Profile", icon: "CircleUser" },
+  { href: "/clientos/documents", label: "Documents", icon: "FolderOpen" },
+  { href: "/clientos/profile", label: "Profile", icon: "CircleUser" },
 ]);
 
-const WALLET_ITEM: PortalNavItem = { href: "/portal/wallet", label: "Wallet", icon: "Coins" };
+const WALLET_ITEM: PortalNavItem = { href: "/clientos/wallet", label: "Wallet", icon: "Coins" };
 
 function learnerNav(programLabel: string, scheduleLabel: string): PortalNavItem[] {
   return [
     DASHBOARD,
     ...OVERVIEW_NAV,
     ...inGroup("Learning", [
-      { href: "/portal/program", label: programLabel, icon: "GraduationCap" },
-      { href: "/portal/schedule", label: scheduleLabel, icon: "CalendarClock" },
-      { href: "/portal/projects", label: "Projects", icon: "FolderKanban" },
-      { href: "/portal/assignments", label: "Assignments", icon: "ClipboardList" },
-      { href: "/portal/tests", label: "Tests & Exams", icon: "FileCheck2" },
-      { href: "/portal/attendance", label: "Attendance", icon: "CalendarCheck" },
-      { href: "/portal/certificates", label: "Certificates", icon: "Award" },
+      { href: "/clientos/program", label: programLabel, icon: "GraduationCap" },
+      { href: "/clientos/schedule", label: scheduleLabel, icon: "CalendarClock" },
+      { href: "/clientos/projects", label: "Projects", icon: "FolderKanban" },
+      { href: "/clientos/assignments", label: "Assignments", icon: "ClipboardList" },
+      { href: "/clientos/tests", label: "Tests & Exams", icon: "FileCheck2" },
+      { href: "/clientos/attendance", label: "Attendance", icon: "CalendarCheck" },
+      { href: "/clientos/certificates", label: "Certificates", icon: "Award" },
     ]),
-    ...inGroup("Finance", [{ href: "/portal/payments", label: "Payments", icon: "Wallet" }, WALLET_ITEM]),
+    ...inGroup("Finance", [{ href: "/clientos/payments", label: "Payments", icon: "Wallet" }, WALLET_ITEM]),
     ...REWARDS_NAV,
     ...ACCOUNT_NAV,
   ];
@@ -105,9 +105,9 @@ export const PORTAL_NAV: Record<PortalRole, PortalNavItem[]> = {
     DASHBOARD,
     ...OVERVIEW_NAV,
     ...inGroup("Recruitment", [
-      { href: "/portal/application", label: "My Application", icon: "FileText" },
-      { href: "/portal/interviews", label: "Interview Schedule", icon: "CalendarClock" },
-      { href: "/portal/tests", label: "Assessments", icon: "FileCheck2" },
+      { href: "/clientos/application", label: "My Application", icon: "FileText" },
+      { href: "/clientos/interviews", label: "Interview Schedule", icon: "CalendarClock" },
+      { href: "/clientos/tests", label: "Assessments", icon: "FileCheck2" },
     ]),
     ...inGroup("Finance", [WALLET_ITEM]),
     ...REWARDS_NAV,
@@ -119,18 +119,18 @@ export const PORTAL_NAV: Record<PortalRole, PortalNavItem[]> = {
     DASHBOARD,
     ...OVERVIEW_NAV,
     ...inGroup("Projects", [
-      { href: "/portal/projects", label: "My Projects", icon: "FolderKanban" },
-      { href: "/portal/milestones", label: "Milestones", icon: "Flag" },
-      { href: "/portal/meetings", label: "Meetings", icon: "CalendarClock" },
+      { href: "/clientos/projects", label: "My Projects", icon: "FolderKanban" },
+      { href: "/clientos/milestones", label: "Milestones", icon: "Flag" },
+      { href: "/clientos/meetings", label: "Meetings", icon: "CalendarClock" },
     ]),
-    ...inGroup("Finance", [{ href: "/portal/invoices", label: "Invoices", icon: "ReceiptText" }, WALLET_ITEM]),
+    ...inGroup("Finance", [{ href: "/clientos/invoices", label: "Invoices", icon: "ReceiptText" }, WALLET_ITEM]),
     ...REWARDS_NAV,
     ...ACCOUNT_NAV,
   ],
 };
 
 /** Route-group access — which roles may open a `(learner)` / `(applicant)` / `(client)` page. */
-/** Portal roles that can take Online Test System tests (`/portal/tests`, `/portal/exam`). */
+/** Portal roles that can take Online Test System tests (`/clientos/tests`, `/clientos/exam`). */
 export const TEST_TAKER_ROLES: PortalRole[] = ["job_applicant", "intern", "trainee"];
 
 export const ROUTE_GROUP_ROLES = {
@@ -140,5 +140,5 @@ export const ROUTE_GROUP_ROLES = {
 };
 
 export function roleHome(): string {
-  return "/portal";
+  return "/clientos";
 }

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { toast } from "sonner";
-import { registerCmsMediaAction } from "@/app/cms/(protected)/media/actions";
-import type { CmsMediaDoc } from "@/lib/cms/media";
+import { registerCmsMediaAction } from "@/app/(products)/sitecraft-ai/(protected)/media/actions";
+import type { CmsMediaDoc } from "@/lib/products/sitecraft-ai/media";
 
 const IMAGE_EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "image/svg+xml": "svg" };
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
@@ -28,7 +28,7 @@ export function useCmsMediaUpload() {
       const pathname = `cms/uploads/${crypto.randomUUID()}.${ext}`;
       await upload(pathname, file, {
         access: "private",
-        handleUploadUrl: "/api/cms/media/upload",
+        handleUploadUrl: "/api/sitecraft-ai/media/upload",
         contentType: file.type,
         onUploadProgress: (p) => setProgress(Math.round(p.percentage)),
       });

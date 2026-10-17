@@ -1,4 +1,4 @@
-// Campaign import history for /lms/campaigns (campaigns + metrics come from the base seeder).
+// Campaign import history for /dealflow-ai/campaigns (campaigns + metrics come from the base seeder).
 import { rint, pick, chance, ago, insertAll } from "./lib.mjs";
 
 const FILES = {

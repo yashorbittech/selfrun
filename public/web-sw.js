@@ -1,5 +1,5 @@
 /* Service worker of a company's public WEBSITE: notifications only. It does not cache anything, handle page loads or make the
- * site installable (the installable app lives on the separate panels host and uses /sw.js). */
+ * site installable (the installable app lives on the separate app host and uses /sw.js). */
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 

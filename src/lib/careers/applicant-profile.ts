@@ -2,15 +2,15 @@ import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { getApplication, APPLICATIONS_COLLECTION, type CareerApplication } from "@/lib/career-applications";
-import { listInterviewsForApplication } from "@/lib/portal/interviews";
+import { listInterviewsForApplication } from "@/lib/products/clientos/interviews";
 import { listLeadTimeline } from "@/lib/lead-management/timeline";
 import { listLeadMessages } from "@/lib/lead-management/messages";
 import { stageMeta } from "@/lib/lead-management/workflows";
 import { LEAD_RECORDS_COLLECTION } from "@/lib/lead-management/records";
-import { PORTAL_DOCS_COLLECTION, type PortalDocument } from "@/lib/portal/documents";
-import { AUDIT_COLLECTION as PORTAL_AUDIT_COLLECTION, type PortalAuditLog } from "@/lib/portal/audit";
-import { getOfferByApplication } from "@/lib/hrms/offers";
-import { EMPLOYEES_COLLECTION, employeeFullName, type Employee } from "@/lib/hrms/employees";
+import { PORTAL_DOCS_COLLECTION, type PortalDocument } from "@/lib/products/clientos/documents";
+import { AUDIT_COLLECTION as PORTAL_AUDIT_COLLECTION, type PortalAuditLog } from "@/lib/products/clientos/audit";
+import { getOfferByApplication } from "@/lib/products/talentos/offers";
+import { EMPLOYEES_COLLECTION, employeeFullName, type Employee } from "@/lib/products/talentos/employees";
 import { getWallet } from "@/lib/wallet/wallets";
 import type { LeadRecord, SerializedLeadMessage, SerializedLeadTimelineEvent } from "@/lib/lead-management/types";
 import type { ExternalUserDoc } from "@/lib/portal-auth";
@@ -125,7 +125,7 @@ export async function getApplicantProfile(id: string): Promise<ApplicantProfile 
   if (account) {
     const docs = await db.collection<PortalDocument>(PORTAL_DOCS_COLLECTION).find({ ownerUserId: account._id, deletedAt: null }).sort({ createdAt: -1 }).toArray();
     for (const d of docs)
-      files.push({ id: d._id, name: d.name, size: d.size, contentType: d.contentType, category: d.category, source: "portal_document", sharedBy: "staff", createdAt: d.createdAt.toISOString(), href: `/api/lms/applicants/${appId}/documents/${d._id}` });
+      files.push({ id: d._id, name: d.name, size: d.size, contentType: d.contentType, category: d.category, source: "portal_document", sharedBy: "staff", createdAt: d.createdAt.toISOString(), href: `/api/dealflow-ai/applicants/${appId}/documents/${d._id}` });
   }
   for (const l of leads)
     for (const m of [...l.portalMessages, ...l.internalMessages])

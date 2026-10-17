@@ -85,7 +85,7 @@ async function main() {
     await allowed("photos.zip", await zipOf({ "a.txt": "a", "pics/b.txt": "b" }));
     await allowed("voice.mp3", Buffer.from([0x49, 0x44, 0x33, 3, 0, 0, 0, 0, 0, 0]));
   });
-  await check("the real storage path refuses before anything is stored, with a message the panels already show, and records it", async () => {
+  await check("the real storage path refuses before anything is stored, with a message the products already show, and records it", async () => {
     const A = randomUUID();
     await pdb.collection("companies").insertOne({ _id: A as never, slug: "alpha", name: "Alpha", status: "active", isPlatformOwner: false, createdAt: new Date(), updatedAt: new Date() });
     await runAsCompany(A, async () => {

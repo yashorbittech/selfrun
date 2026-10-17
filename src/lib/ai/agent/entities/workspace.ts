@@ -1,19 +1,19 @@
 import "server-only";
-import * as U from "@/app/workspace/(protected)/users/actions";
-import * as Brand from "@/app/workspace/(protected)/settings/branding/actions";
-import * as Auto from "@/app/workspace/(protected)/settings/automations/actions";
-import * as Dom from "@/app/workspace/(protected)/settings/domains/actions";
-import { ALL_KNOWN_ROLES } from "@/lib/workspace/role-catalog";
+import * as U from "@/app/(products)/commandos/(protected)/users/actions";
+import * as Brand from "@/app/(products)/commandos/(protected)/settings/branding/actions";
+import * as Auto from "@/app/(products)/commandos/(protected)/settings/automations/actions";
+import * as Dom from "@/app/(products)/commandos/(protected)/settings/domains/actions";
+import { ALL_KNOWN_ROLES } from "@/lib/products/commandos/role-catalog";
 import { listWorkflows, listWorkflowRuns } from "@/lib/platform/workflows";
 import { EVENT_TYPES } from "@/lib/platform/events/catalog";
 import { WORKFLOW_TEMPLATES } from "@/lib/platform/workflows/templates";
 import { listCompanyDomains } from "@/lib/platform/domains/custom";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
-import { searchActivityLog } from "@/lib/workspace/activity-log";
-import * as Portal from "@/app/workspace/(protected)/portal/users/actions";
-import * as Billing from "@/app/workspace/(protected)/settings/billing/actions";
-import * as Sec from "@/app/workspace/(protected)/settings/security/actions";
+import { searchActivityLog } from "@/lib/products/commandos/activity-log";
+import * as Portal from "@/app/(products)/commandos/(protected)/portal/users/actions";
+import * as Billing from "@/app/(products)/commandos/(protected)/settings/billing/actions";
+import * as Sec from "@/app/(products)/commandos/(protected)/settings/security/actions";
 import { listActiveSessions } from "@/lib/security/sessions";
 import { ObjectId } from "mongodb";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
@@ -36,9 +36,9 @@ const USER_TYPES = ["employee", "contractor", "partner", "system"];
 
 export const WORKSPACE_ENTITIES: EntityDef[] = [
   { key: "workspace.user", panel: "workspace", label: "User", description: "People who can sign in: email, roles, status, type, last login.", collection: "admin_users", titleField: "email", search: ["email", "name"], read: "staff", allowRead: admin, hide: ["permissionOverrides", "manualOverrides", "manualRoles", "lockedUntil", "failedLoginAttempts"] },
-  { key: "workspace.custom_role", panel: "workspace", label: "Custom role", description: "Roles the company built itself: name, description, the panel roles it includes and its permission rules.", collection: "custom_roles", idType: "string", titleField: "name", search: ["name", "description"], read: "staff", allowRead: owner, hide: ["nameKey"] },
+  { key: "workspace.custom_role", panel: "workspace", label: "Custom role", description: "Roles the company built itself: name, description, the product roles it includes and its permission rules.", collection: "custom_roles", idType: "string", titleField: "name", search: ["name", "description"], read: "staff", allowRead: owner, hide: ["nameKey"] },
   { key: "workspace.portal_user", panel: "workspace", label: "Portal account", description: "External people who sign in to the portal (applicants, interns, trainees, clients): name, email, role, status.", collection: "external_users", idType: "string", titleField: "displayName", search: ["email", "displayName", "phone"], read: "staff", allowRead: admin, hide: ["passwordHash", "failedLoginAttempts", "lockedUntil", "referralCode"] },
-  { key: "workspace.my_notifications", panel: "workspace", label: "My notifications in every panel", description: "Your own notifications from all panels (Finance, Leads, Legal, Website, Support …): title, panel, whether read.", collection: "panel_notifications", idType: "string", titleField: "title", read: "any", hide: ["dedupeKey", "expiresAt"], self: (u) => ({ userId: u.id }), scope: (u) => ({ userId: u.id }) },
+  { key: "workspace.my_notifications", panel: "workspace", label: "My notifications in every product", description: "Your own notifications from all products (Finance, Leads, Legal, Website, Support …): title, product, whether read.", collection: "panel_notifications", idType: "string", titleField: "title", read: "any", hide: ["dedupeKey", "expiresAt"], self: (u) => ({ userId: u.id }), scope: (u) => ({ userId: u.id }) },
   { key: "workspace.notification", panel: "workspace", label: "Notification", description: "Your workspace notifications (the bell).", collection: "platform_notifications", titleField: "title", read: "any", self: (u) => ({ userId: u.id }), scope: (u) => ({ userId: u.id }) },
 ];
 
@@ -53,7 +53,7 @@ export const WORKSPACE_ACTIONS: ActionDef[] = [
     const r = await U.createAdminUserAction(String(v.email ?? ""), (v.roles as string[]) ?? [], (str(v.userType) as never) ?? undefined, str(v.notes) ?? undefined);
     return r.ok ? { ok: true, result: "Invitation sent." } : r;
   }, "Invitation sent.", { destructive: true }),
-  act("workspace.set_user_roles", "Change a person's roles", `Replace the roles of a person (they gain or lose access to panels). ${ROLES}.`, [f.ref("userId", "User (workspace.user id)", "workspace.user", true), f.list("roles", "New roles", )], (v) => U.updateAdminUserRolesAction(String(v.userId), (v.roles as string[]) ?? []), "Roles updated.", { destructive: true }),
+  act("workspace.set_user_roles", "Change a person's roles", `Replace the roles of a person (they gain or lose access to products). ${ROLES}.`, [f.ref("userId", "User (workspace.user id)", "workspace.user", true), f.list("roles", "New roles", )], (v) => U.updateAdminUserRolesAction(String(v.userId), (v.roles as string[]) ?? []), "Roles updated.", { destructive: true }),
   act("workspace.deactivate_user", "Deactivate a person", "Remove a person's access (their data stays); they can be reactivated.", [f.ref("userId", "User id", "workspace.user", true)], (v) => U.deactivateAdminUserAction(String(v.userId)), "User deactivated.", { destructive: true }),
   act("workspace.reactivate_user", "Reactivate a person", "Restore a deactivated person's access (optionally with these roles).", [f.ref("userId", "User id", "workspace.user", true), f.list("roles", "Roles to restore")], (v) => U.reactivateAdminUserAction(String(v.userId), (v.roles as string[]) ?? undefined), "User reactivated."),
   act("workspace.set_user_type", "Set a person's type and notes", "Employee, contractor, partner or system account.", [f.ref("userId", "User id", "workspace.user", true), f.enum("userType", "Type", USER_TYPES, true), f.text("notes", "Notes")], (v) => U.setUserTypeAndNotesAction(String(v.userId), v.userType as never, str(v.notes) ?? undefined), "Saved."),
@@ -61,7 +61,7 @@ export const WORKSPACE_ACTIONS: ActionDef[] = [
     const cur = await getCompanyBrand();
     return Brand.saveBrandingAction({ namePrimary: String(v.namePrimary ?? ""), nameAccent: String(v.nameAccent ?? ""), logoUrl: str(v.logoUrl) ?? ((cur as unknown as Json).logoUrl as string | null) ?? null });
   }, "Branding saved.", { allow: owner }),
-  act("workspace.apply_theme", "Switch the company theme", "Pick a theme by key; it becomes the look of the website and every panel.", [f.str("themeKey", "Theme key", true)], (v) => Brand.applyThemeAction(String(v.themeKey)), "Theme applied.", { allow: owner }),
+  act("workspace.apply_theme", "Switch the company theme", "Pick a theme by key; it becomes the look of the website and every product.", [f.str("themeKey", "Theme key", true)], (v) => Brand.applyThemeAction(String(v.themeKey)), "Theme applied.", { allow: owner }),
   act("workspace.add_automation_template", "Add a ready-made automation", `Add one of the templates (${WORKFLOW_TEMPLATES.map((t) => t.key).join(", ")}).`, [f.str("templateKey", "Template key", true)], (v) => Auto.addTemplateAction(String(v.templateKey)), "Automation added.", { allow: owner }),
   act("workspace.save_automation", "Create or edit an automation", `A rule: trigger event → conditions → up to 5 actions. Events: ${EVENT_TYPES.map((e) => e.type).join(", ")}. Actions: {type:"notify", target:"role"|"user", value, title, body} · {type:"email", to, subject, body} · {type:"whatsapp", to, body} · {type:"webhook", url}. Use {{field}} in text.`, [f.str("automationId", "Automation id to edit (leave out to create)"), f.str("name", "Name", true), f.bool("enabled", "Enabled"), f.str("trigger", "Trigger event", true), f.json("conditions", "Conditions: [{field, op: eq|neq|contains|gt|lt, value}]"), f.json("actions", "Actions", true)], (v) => Auto.saveAutomationAction(str(v.automationId), { name: v.name, enabled: v.enabled !== false, trigger: v.trigger, conditions: (v.conditions as unknown[]) ?? [], actions: v.actions }), "Automation saved.", { allow: owner, destructive: true }),
   act("workspace.set_automation_enabled", "Turn an automation on or off", "Enable or pause an automation.", [f.str("automationId", "Automation id", true), f.bool("enabled", "Enabled")], (v) => Auto.toggleAutomationAction(String(v.automationId), v.enabled !== false), "Automation updated.", { allow: owner }),
@@ -101,7 +101,7 @@ export const WORKSPACE_REPORTS: ReportDef[] = [
   { key: "workspace.my_sessions", panel: "workspace", label: "My sign-ins", description: "Your own signed-in devices (to end one).", level: "any", params: [], run: async (_v, u) => JSON.parse(JSON.stringify({ sessions: await listActiveSessions(new ObjectId(u.id)) })) as Json },
   { key: "workspace.automations", panel: "workspace", label: "Automations", description: "Your automations with their triggers, actions and last run; add a workflow id for its recent runs.", level: "any", allow: owner, params: [f.str("automationId", "Show the runs of this automation")], run: async (v) => (str(v.automationId) ? { runs: await listWorkflowRuns(String(v.automationId), 20) } : { automations: (await listWorkflows()).map((w) => ({ id: w.id, name: w.name, enabled: w.enabled, trigger: w.trigger, actions: w.actions.map((a) => a.type), lastRun: w.lastRun })) }) as unknown as Json },
   { key: "workspace.domains", panel: "workspace", label: "Domains", description: "The workspace's addresses and their verification / SSL state.", level: "any", allow: owner, params: [], run: async () => ({ domains: await listCompanyDomains() }) as unknown as Json },
-  { key: "workspace.plan_usage", panel: "workspace", label: "Plan and usage", description: "The company's plan, limits (seats, AI tokens, storage) and which panels are included.", level: "any", allow: admin, params: [], run: async () => (await getEntitlements()) as unknown as Json },
-  { key: "workspace.activity", panel: "workspace", label: "Company-wide activity log", description: "Who did what across every panel (search by person or action).", level: "any", allow: admin, params: [f.str("search", "Search text, e.g. an email")], run: async (v) => ({ items: (await searchActivityLog({ search: str(v.search) ?? "", pageSize: 30 })).items }) as unknown as Json },
+  { key: "workspace.plan_usage", panel: "workspace", label: "Plan and usage", description: "The company's plan, limits (seats, AI tokens, storage) and which products are included.", level: "any", allow: admin, params: [], run: async () => (await getEntitlements()) as unknown as Json },
+  { key: "workspace.activity", panel: "workspace", label: "Company-wide activity log", description: "Who did what across every product (search by person or action).", level: "any", allow: admin, params: [f.str("search", "Search text, e.g. an email")], run: async (v) => ({ items: (await searchActivityLog({ search: str(v.search) ?? "", pageSize: 30 })).items }) as unknown as Json },
   { key: "workspace.event_catalog", panel: "workspace", label: "Automation events and templates", description: "The events an automation can trigger on, and the ready-made templates.", level: "any", allow: owner, params: [], run: async () => ({ events: EVENT_TYPES.map((e) => ({ type: e.type, label: e.label })), templates: WORKFLOW_TEMPLATES.map((t) => ({ key: t.key, title: (t as unknown as Json).title })) }) as unknown as Json },
 ];

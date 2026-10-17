@@ -1,6 +1,6 @@
-import CmsPageView from "@/components/cms/CmsPageView";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
 import { getLeadCategories } from "@/lib/lead-categories";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
 
 /** The homepage — content, SEO and structured data from the CMS page "/". */
 export const generateMetadata = () => cmsPageMetadata("/");

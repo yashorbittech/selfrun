@@ -11,11 +11,11 @@ import { WhatsAppIcon } from "@/components/icons/SocialIcons";
 import SiteLogo from "@/components/SiteLogo";
 import NavDropdown from "@/components/header/NavDropdown";
 import { socialIconFor } from "@/components/icons/social-icon-for";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
-import type { SiteInfo } from "@/lib/cms/site-info-shared";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
+import type { SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
 import { loadAndToggleTawk } from "@/lib/tawk";
-import { resolveIcon } from "@/lib/cms/icon-map";
-import type { PublicNavTop } from "@/lib/cms/nav";
+import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
+import type { PublicNavTop } from "@/lib/products/sitecraft-ai/nav";
 import { isProductsHref, SIGNUP_PATH } from "@/lib/products/shared";
 import { resolveProductsText } from "@/lib/products/text";
 
@@ -118,7 +118,7 @@ function FeaturedCard({ item, featuredLabel, cta }: { item: NavColumn; featuredL
 }
 
 /**
- * `variant` is chosen per theme in the CMS (src/lib/cms/component-variants.ts):
+ * `variant` is chosen per theme in the CMS (src/lib/sitecraft-ai/component-variants.ts):
  * "default" is the site's standard header; "menu" drops the desktop nav bar
  * and uses the slide-out menu at every screen width; "centered" puts the logo
  * above a centered nav row; "floating" is a rounded bar floating over the page.

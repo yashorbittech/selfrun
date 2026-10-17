@@ -1,11 +1,11 @@
 /**
  * Social Media Marketing System (SMMS) role + permission model. Like every
- * other panel, access is gated on the shared `admin_users.roles` array — there
+ * other product, access is gated on the shared `admin_users.roles` array — there
  * is no separate user store. SMMS access needs an explicit `smms_*` role (or
- * super_admin); it is never implied by another panel's role.
+ * super_admin); it is never implied by another product's role.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -113,7 +113,7 @@ export function normalizeSmmsRoles(value: unknown): SmmsRole[] {
   return Array.from(new Set(value.filter(isSmmsRole)));
 }
 
-/** Can open the Social Media panel at `/smms/*`. */
+/** Can open the Social Media product at `/viralpulse-ai/*`. */
 export function hasSmmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeSmmsRoles(roles).length > 0;
 }

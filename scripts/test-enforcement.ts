@@ -94,7 +94,7 @@ async function main() {
   const company = (id: string, slug: string, isPlatformOwner = false) => ({ _id: id as never, slug, name: slug[0].toUpperCase() + slug.slice(1), status: "active", isPlatformOwner, createdAt: now, updatedAt: now });
   await db.collection("companies").insertMany([company(owner, "owner", true), company(starter, "starter"), company(tiny, "tiny"), company(susp, "susp"), company(trial, "trial"), company(grace, "grace")]);
   await listPlans(); // seeds the default catalogue
-  // Every real plan has every panel; this test needs one with a smaller set, so Starter is narrowed here (test database only).
+  // Every real plan has every product; this test needs one with a smaller set, so Starter is narrowed here (test database only).
   await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms"] } });
   await db.collection("billing_plans").insertOne({
     _id: "tiny" as never,
@@ -121,16 +121,16 @@ async function main() {
   await setSub(grace, { planId: "growth", status: "grace", graceEndsAt: new Date(now.getTime() + 3 * 86_400_000) });
 
   console.log("module gating");
-  await check("plan panels open, others locked, core always open", async () => {
+  await check("plan products open, others locked, core always open", async () => {
     assert.equal(await runAsCompany(starter, () => moduleBlockReason("hrms")), null);
-    assert.equal(await runAsCompany(starter, () => moduleBlockReason("messenger")), null, "core panel");
+    assert.equal(await runAsCompany(starter, () => moduleBlockReason("messenger")), null, "core product");
     assert.match((await runAsCompany(starter, () => moduleBlockReason("fms"))) ?? "", /Starter plan/);
   });
-  await check("requireModule redirects a locked panel to /workspace/upgrade", async () => {
-    await rejectsWith(runAsCompany(starter, () => requireModule("fms")), (e) => String((e as { digest?: string }).digest ?? "").includes("/workspace/upgrade?module=fms"), "redirect to upgrade");
+  await check("requireModule redirects a locked product to /commandos/upgrade", async () => {
+    await rejectsWith(runAsCompany(starter, () => requireModule("fms")), (e) => String((e as { digest?: string }).digest ?? "").includes("/commandos/upgrade?module=fms"), "redirect to upgrade");
     await runAsCompany(starter, () => requireModule("pms"));
   });
-  await check("internal owner: every panel open", async () => {
+  await check("internal owner: every product open", async () => {
     await runAsCompany(owner, () => requireModule("smms"));
     assert.equal(await runAsCompany(owner, () => moduleBlockReason("aibots")), null);
   });
@@ -171,7 +171,7 @@ async function main() {
   });
 
   console.log("seats");
-  const { createAdminUser, reactivateAdminUser, updateAdminUserRoles } = await import("@/lib/workspace/admin-users");
+  const { createAdminUser, reactivateAdminUser, updateAdminUserRoles } = await import("@/lib/products/commandos/admin-users");
   await check("training students don't take a seat", () => {
     assert.equal(rolesUseSeat(["training_student"]), false);
     assert.equal(rolesUseSeat(["training_student", "employee"]), true);

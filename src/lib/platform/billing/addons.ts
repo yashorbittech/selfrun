@@ -12,7 +12,7 @@ import type { BillingInterval, CompanyAddon, CompanySubscription, PlanLimits } f
 import { ADDON_LIMIT_KEYS, type Addon, type AddonLimitKey } from "@/lib/platform/billing/catalog-types";
 
 /**
- * Add-ons (platform-level `billing_addons`), managed in the Platform Panel.
+ * Add-ons (platform-level `billing_addons`), managed in the Platform Console.
  * A company's add-ons live on its subscription:
  * `companies.subscription.addons: [{ addonId, quantity, addedAt, complimentary? }]`.
  *
@@ -108,7 +108,7 @@ export function applyLimitBoosters(limits: PlanLimits, boosters: { limitKey: Add
   return out;
 }
 
-/** Panels unlocked by the company's module add-ons. */
+/** Products unlocked by the company's module add-ons. */
 export async function getModuleUnlocks(companyId: string): Promise<ModuleKey[]> {
   const held = await getCompanyAddons(companyId);
   if (!held.length) return [];
@@ -120,7 +120,7 @@ export type CompanyAddonResult = { ok: true } | { ok: false; error: string };
 
 /**
  * Sets how many units of an add-on a company holds (0 removes it). Used by
- * the Platform Panel (grants) and by checkout after a paid add-on purchase.
+ * the Platform Console (grants) and by checkout after a paid add-on purchase.
  * Each write is a single atomic update on the company document. Audited.
  */
 export async function setCompanyAddon(
@@ -185,7 +185,7 @@ export async function setCompanyAddon(
 }
 
 // ---------------------------------------------------------------------------
-// Platform Panel management
+// Platform Console management
 // ---------------------------------------------------------------------------
 
 export interface AddonInput {
@@ -233,7 +233,7 @@ export async function saveAddon(id: string | null, input: AddonInput, actorId: s
     if (!Number.isInteger(amountPerUnit) || amountPerUnit <= 0) errors.amountPerUnit = "Enter a whole number greater than zero.";
   } else {
     const m = MODULES.find((x) => x.key === input.moduleKey && !x.core);
-    if (!m) errors.moduleKey = "Choose a panel to unlock.";
+    if (!m) errors.moduleKey = "Choose a product to unlock.";
     moduleKey = m?.key ?? null;
   }
   const known = new Set((await listPlans()).map((p) => p._id));

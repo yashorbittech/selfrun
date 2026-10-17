@@ -6,8 +6,8 @@ import { queuePush } from "@/lib/push/send";
 
 /**
  * Company-wide in-app notifications, one row per recipient, shown by the
- * Staff Hub bell and `/workspace/notifications`. The panels' own bells
- * (HRMS, PMS, …) are separate and untouched — this is the cross-panel one
+ * Staff Hub bell and `/commandos/notifications`. The products' own bells
+ * (HRMS, PMS, …) are separate and untouched — this is the cross-product one
  * that workflows write to.
  */
 

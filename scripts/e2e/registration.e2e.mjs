@@ -1,7 +1,7 @@
 /**
  * Browser test for the simple registration flow: public sign-up (no e-mail gate)
  * -> the owner is signed in on the new company's host and lands in the Workspace,
- * whose FIRST screen is the onboarding wizard (/workspace/onboarding) -> the
+ * whose FIRST screen is the onboarding wizard (/commandos/onboarding) -> the
  * "Verify email" strip -> verification link -> finish the wizard -> the dashboard. Against a RUNNING server (production
  * build recommended) with EMAIL_PROVIDER=console and PLATFORM_ROOT_DOMAIN=localhost
  * (company hosts are <slug>.localhost):
@@ -80,39 +80,39 @@ try {
     await page.locator('input[name="password"]').fill(PASSWORD);
     await page.locator('input[name="acceptTerms"]').check();
     await page.getByRole("button", { name: "Create workspace" }).click();
-    await page.waitForURL((u) => u.hostname.startsWith(`${SLUG}.`) && u.pathname === "/workspace/onboarding", { timeout: 90_000 });
+    await page.waitForURL((u) => u.hostname.startsWith(`${SLUG}.`) && u.pathname === "/commandos/onboarding", { timeout: 90_000 });
     await page.getByRole("heading", { name: `Set up ${COMPANY}` }).waitFor();
     // It is the Workspace frame, not a standalone page.
     await page.locator('aside nav[aria-label="Workspace"]').waitFor();
-    assert.equal(await page.getByText("My Operational Panels").count(), 0, "the first screen after sign-up is onboarding, not the dashboard");
+    assert.equal(await page.getByText("My Operational Products").count(), 0, "the first screen after sign-up is onboarding, not the dashboard");
     assert.equal(await page.locator("#setup-banner").count(), 0, "no reminder banner on the wizard itself");
     assert.equal(await mongo.db().collection("pending_signups").countDocuments({ email: EMAIL }), 0, "no pending sign-up step");
     const owner = await mongo.db().collection("admin_users").findOne({ email: EMAIL });
     assert.equal(owner?.emailVerified, false, "the owner starts unverified");
   });
 
-  await step("/workspace is never redirected: it shows the dashboard with the \"Complete setup\" strip; deep links show the strip too", async () => {
+  await step("/commandos is never redirected: it shows the dashboard with the \"Complete setup\" strip; deep links show the strip too", async () => {
     const origin = new URL(page.url()).origin;
-    await page.goto(`${origin}/workspace`);
-    await page.getByText("My Operational Panels").waitFor();
-    assert.equal(pathOf(page), "/workspace", "not redirected back to onboarding");
+    await page.goto(`${origin}/commandos`);
+    await page.getByText("My Operational Products").waitFor();
+    assert.equal(pathOf(page), "/commandos", "not redirected back to onboarding");
     await page.locator("#setup-banner").getByRole("link", { name: "Complete setup" }).waitFor();
-    await page.goto(`${origin}/workspace/settings/billing`);
-    assert.equal(pathOf(page), "/workspace/settings/billing");
+    await page.goto(`${origin}/commandos/settings/billing`);
+    assert.equal(pathOf(page), "/commandos/settings/billing");
     await page.locator("#setup-banner").waitFor();
-    await Promise.all([page.waitForURL((u) => u.pathname === "/workspace/onboarding"), page.locator("#setup-banner-link").click()]);
+    await Promise.all([page.waitForURL((u) => u.pathname === "/commandos/onboarding"), page.locator("#setup-banner-link").click()]);
   });
 
   await step("old /onboarding link still works", async () => {
     const origin = new URL(page.url()).origin;
     await page.goto(`${origin}/onboarding`);
-    assert.equal(pathOf(page), "/workspace/onboarding");
+    assert.equal(pathOf(page), "/commandos/onboarding");
   });
 
   await step("the \"Verify email\" strip shows on the dashboard; clicking it sends the link and the strip says \"Check your inbox\"", async () => {
     const origin = new URL(page.url()).origin;
-    await page.goto(`${origin}/workspace`);
-    await page.getByText("My Operational Panels").waitFor();
+    await page.goto(`${origin}/commandos`);
+    await page.getByText("My Operational Products").waitFor();
     const strip = page.locator("#verify-banner");
     await strip.waitFor();
     assert.ok((await strip.textContent()).includes(EMAIL), "the strip shows the address");
@@ -120,7 +120,7 @@ try {
     await strip.getByText("Check your inbox").waitFor({ timeout: 30_000 });
     assert.ok(await page.locator("#verify-banner-resend").isVisible(), "a Resend option is offered");
     // Still there on another page, and nothing is blocked.
-    await page.goto(`${origin}/workspace/settings/billing`);
+    await page.goto(`${origin}/commandos/settings/billing`);
     await page.locator("#verify-banner").waitFor();
   });
 
@@ -132,22 +132,22 @@ try {
     // Only the hash of the e-mailed token is stored: swap in a token we know.
     await mongo.db().collection("email_verifications").updateOne({ _id: doc._id }, { $set: { tokenHash: createHash("sha256").update(TOKEN).digest("hex") } });
     const origin = new URL(page.url()).origin;
-    await page.goto(`${origin}/workspace/verify-email?token=${TOKEN}`);
+    await page.goto(`${origin}/commandos/verify-email?token=${TOKEN}`);
     await page.getByRole("button", { name: "Verify my email" }).waitFor();
     assert.equal(await page.locator("#verify-banner").count(), 0, "no strip on the verification page");
     assert.equal((await mongo.db().collection("admin_users").findOne({ email: EMAIL })).emailVerified, false, "a bare GET does not verify");
     await page.getByRole("button", { name: "Verify my email" }).click();
-    await page.waitForURL((u) => u.pathname === "/workspace", { timeout: 30_000 });
-    await page.getByText("My Operational Panels").waitFor();
+    await page.waitForURL((u) => u.pathname === "/commandos", { timeout: 30_000 });
+    await page.getByText("My Operational Products").waitFor();
     assert.equal(await page.locator("#verify-banner").count(), 0, "the strip is gone after verifying");
     assert.equal((await mongo.db().collection("admin_users").findOne({ email: EMAIL })).emailVerified, true);
-    await page.goto(`${origin}/workspace/verify-email?token=${TOKEN}`);
+    await page.goto(`${origin}/commandos/verify-email?token=${TOKEN}`);
     await page.getByText("This link has expired").waitFor();
   });
 
-  await step("finishing the wizard (profile, departments, team, branding, panels) lands on the dashboard", async () => {
+  await step("finishing the wizard (profile, departments, team, branding, products) lands on the dashboard", async () => {
     // Verifying the email leaves the owner on the dashboard (never the wizard): open the wizard from there, as a person would.
-    await page.goto(`${new URL(page.url()).origin}/workspace/onboarding`);
+    await page.goto(`${new URL(page.url()).origin}/commandos/onboarding`);
     await page.locator("#ob-industry").selectOption({ index: 1 });
     await page.locator("#ob-size").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Save & continue" }).click();
@@ -161,36 +161,36 @@ try {
     await page.getByRole("button", { name: "Finish setup" }).click();
     await page.getByText("You're all set").waitFor({ timeout: 30_000 });
     await page.getByText("Go to your workspace", { exact: true }).click();
-    await page.waitForURL((u) => u.pathname === "/workspace", { timeout: 30_000 });
-    await page.getByText("My Operational Panels").waitFor();
+    await page.waitForURL((u) => u.pathname === "/commandos", { timeout: 30_000 });
+    await page.getByText("My Operational Products").waitFor();
     assert.equal(await page.locator("#setup-banner").count(), 0, "finishing the wizard removes the strip");
   });
 
-  await step("setup is recorded (completed), so /workspace now stays on the dashboard and the banner is gone", async () => {
+  await step("setup is recorded (completed), so /commandos now stays on the dashboard and the banner is gone", async () => {
     const company = await mongo.db().collection("companies").findOne({ slug: SLUG });
     assert.ok(company?.onboarding?.completedAt, "onboarding.completedAt is set");
     assert.equal(company.onboarding.completedSteps.length, 5);
     const origin = new URL(page.url()).origin;
-    await page.goto(`${origin}/workspace`);
-    assert.equal(pathOf(page), "/workspace");
-    await page.getByText("My Operational Panels").waitFor();
-    await page.goto(`${origin}/workspace/settings/billing`);
+    await page.goto(`${origin}/commandos`);
+    assert.equal(pathOf(page), "/commandos");
+    await page.getByText("My Operational Products").waitFor();
+    await page.goto(`${origin}/commandos/settings/billing`);
     assert.equal(await page.locator("#setup-banner").count(), 0);
     // Company setup stays reachable from the Company section to revisit.
-    await page.locator('aside nav[aria-label="Workspace"] a[href="/workspace/onboarding"]').first().waitFor({ state: "attached" });
-    assert.equal((await page.goto(`${origin}/workspace/onboarding`))?.status(), 200);
-    assert.equal(pathOf(page), "/workspace/onboarding");
+    await page.locator('aside nav[aria-label="Workspace"] a[href="/commandos/onboarding"]').first().waitFor({ state: "attached" });
+    assert.equal((await page.goto(`${origin}/commandos/onboarding`))?.status(), 200);
+    assert.equal(pathOf(page), "/commandos/onboarding");
   });
 
-  await step("a returning owner with completed setup signs in at /workspace/login and goes straight to the dashboard", async () => {
+  await step("a returning owner with completed setup signs in at /commandos/login and goes straight to the dashboard", async () => {
     const c2 = await browser.newContext();
     const p2 = await c2.newPage();
     const origin = new URL(page.url()).origin;
-    await p2.goto(`${origin}/workspace/login`);
+    await p2.goto(`${origin}/commandos/login`);
     await p2.fill('input[name="email"]', EMAIL);
     await p2.fill('input[name="password"]', PASSWORD);
     await Promise.all([p2.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), p2.press('input[name="password"]', "Enter")]);
-    assert.equal(pathOf(p2), "/workspace");
+    assert.equal(pathOf(p2), "/commandos");
     await c2.close();
   });
 

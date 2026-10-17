@@ -1,5 +1,5 @@
 /**
- * LPMS Panel role + permission model. Client-safe (no server-only imports).
+ * LPMS Product role + permission model. Client-safe (no server-only imports).
  * Mirrors sop-roles.ts exactly but for the Legal Policy Maker System (LPMS).
  *
  * Access is gated on the shared admin_users.roles array. HRMS stays the source
@@ -154,7 +154,7 @@ export function effectiveLpmsRoles(roles: readonly string[] | undefined | null):
   return Array.from(new Set([...normalizeLpmsRoles(raw), ...impliedFromHrms(raw)]));
 }
 
-/** Can open the LPMS panel at /lpms/*. */
+/** Can open the LPMS product at /contractflow-ai/*. */
 export function hasLpmsAccess(roles: readonly string[] | undefined | null): boolean {
   const raw = roles ?? [];
   if (raw.some((r) => r === 'super_admin' || r === 'admin' || r === 'workspace_admin' || r === 'owner')) return true;

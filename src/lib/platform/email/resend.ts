@@ -2,7 +2,7 @@ import type { EmailProvider } from "@/lib/platform/email/types";
 
 /**
  * Resend (https://resend.com) over its REST API — no SDK dependency. The API
- * key is resolved server-side by `integrations/` (Platform Panel →
+ * key is resolved server-side by `integrations/` (Platform Console →
  * Integrations, else `RESEND_API_KEY`).
  */
 export function createResendEmailProvider(apiKey: string | null): EmailProvider {

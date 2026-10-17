@@ -8,7 +8,7 @@ import { panelFromHref, type NotifyPanel } from "@/lib/notify/panels";
 import NotificationToasts from "@/components/platform/NotificationToasts";
 
 /**
- * The topbar notification icon every panel shares: a link to the panel's own Notifications page whose count is LIVE — it follows the
+ * The topbar notification icon every product shares: a link to the product's own Notifications page whose count is LIVE — it follows the
  * shared realtime stream (a new notification raises it at once, marking read lowers it) and starts from the server-rendered count so
  * nothing flashes. The first bell on a page also shows the "new notification" cards.
  */

@@ -1,7 +1,7 @@
 import "server-only";
-import { getViewer } from "@/lib/cms/viewer";
-import { TOOL_SCHEMAS, runTool } from "@/lib/cms/ai-agent/tools";
-import { getSiteInfoForEdit } from "@/lib/cms/site-info";
+import { getViewer } from "@/lib/products/sitecraft-ai/viewer";
+import { TOOL_SCHEMAS, runTool } from "@/lib/products/sitecraft-ai/ai-agent/tools";
+import { getSiteInfoForEdit } from "@/lib/products/sitecraft-ai/site-info";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import type { Json } from "@/lib/ai/agent/types";
 

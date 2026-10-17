@@ -1,22 +1,22 @@
 import HubSidebarShell from "@/components/hub/HubSidebarShell";
 import HubTopbar from "@/components/hub/HubTopbar";
-import { SidebarCollapseProvider } from "@/components/lms/SidebarCollapseContext";
+import { SidebarCollapseProvider } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import BillingNotice from "@/components/platform/BillingNotice";
-import { workspaceUnreadCount } from "@/lib/workspace/notifications";
+import { workspaceUnreadCount } from "@/lib/products/commandos/notifications";
 import type { CurrentHubUser } from "@/lib/hub-auth";
-import type { ResolvedNav } from "@/lib/workspace/nav";
-import SetupBanner from "@/components/workspace/SetupBanner";
+import type { ResolvedNav } from "@/lib/products/commandos/nav";
+import SetupBanner from "@/components/products/commandos/SetupBanner";
 import { setupStripNeeded } from "@/lib/platform/onboarding/state";
-import VerifyEmailBanner, { VerifiedNotice } from "@/components/workspace/VerifyEmailBanner";
+import VerifyEmailBanner, { VerifiedNotice } from "@/components/products/commandos/VerifyEmailBanner";
 import { showVerifyStrip } from "@/lib/platform/email-verification-rule";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 
 /**
  * The Workspace frame: sidebar, top bar, billing notice. One layout
- * (`src/app/workspace/(protected)/layout.tsx`) wraps every Workspace page —
- * the dashboard, the registers, company settings (`/workspace/settings/*`),
+ * (`src/app/commandos/(protected)/layout.tsx`) wraps every Workspace page —
+ * the dashboard, the registers, company settings (`/commandos/settings/*`),
  * onboarding and upgrade — so the whole company-level area is one application.
  *
  * A company owner whose setup is not completed also gets the "Complete setup"

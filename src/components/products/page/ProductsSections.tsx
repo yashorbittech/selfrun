@@ -4,7 +4,7 @@ import SectionHeader from "@/components/sections/SectionHeader";
 import Reveal from "@/components/products/page/Reveal";
 import ProductDemoForm from "@/components/products/page/ProductDemoForm";
 import { BTN_PRIMARY } from "@/components/products/page/cta-styles";
-import { resolveIcon } from "@/lib/cms/icon-map";
+import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { groupByCategory, hasOwnAi, label, productHref, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
 
 type Text = Record<string, string>;

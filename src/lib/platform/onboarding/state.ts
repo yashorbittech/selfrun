@@ -2,9 +2,9 @@ import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { afterForCompany, currentCompanyId } from "@/lib/platform/tenancy/context";
 import { COMPANIES_COLLECTION, forgetCompanyRouting, type Company } from "@/lib/platform/tenancy/companies";
-import { getCompanyDetails, updateCompanyDetails } from "@/lib/hrms/company";
+import { getCompanyDetails, updateCompanyDetails } from "@/lib/products/talentos/company";
 import { syncSiteContact } from "@/lib/platform/website/starter";
-import { createDepartment, createDesignation, listDepartments, listDesignations } from "@/lib/hrms/departments";
+import { createDepartment, createDesignation, listDepartments, listDesignations } from "@/lib/products/talentos/departments";
 import { isOnboardingOwner, postLoginTarget, showSetupStrip } from "@/lib/platform/onboarding/gate";
 import { unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
@@ -189,10 +189,10 @@ export async function completeTeamStep(): Promise<void> {
   await markOnboardingStep("team");
 }
 
-// ── Step 4: panels ───────────────────────────────────────────────────────────
+// ── Step 4: products ───────────────────────────────────────────────────────────
 
 export async function saveModules(keys: string[]): Promise<void> {
-  // Panels the platform switched off (for everyone or for this company) can't be chosen.
+  // Products the platform switched off (for everyone or for this company) can't be chosen.
   const off = await unavailablePanelKeys(await currentCompanyId());
   const valid = new Set<string>(MODULES.filter((m) => !off.has(m.key)).map((m) => m.key));
   const core = MODULES.filter((m) => m.core).map((m) => m.key);
@@ -202,7 +202,7 @@ export async function saveModules(keys: string[]): Promise<void> {
 }
 
 /**
- * Which panels this company uses. `null` = no choice recorded (the platform
+ * Which products this company uses. `null` = no choice recorded (the platform
  * owner, companies created before onboarding existed) → everything is on.
  */
 export async function enabledModules(): Promise<Set<string> | null> {
@@ -217,11 +217,11 @@ export async function enabledModules(): Promise<Set<string> | null> {
 export async function loginLanding(roles: readonly string[], requestedNext: string | null, userId?: string): Promise<string> {
   try {
     const { company, state } = await getOnboarding();
-    // The product's own staff (SelfRun) open on the Platform Panel; an explicit `next` still wins.
-    if (!requestedNext && company.isPlatformOwner && userId && (await getPlatformAccessForUser(userId))) return "/platform";
+    // The product's own staff (SelfRun) open on the Platform Console; an explicit `next` still wins.
+    if (!requestedNext && company.isPlatformOwner && userId && (await getPlatformAccessForUser(userId))) return "/console";
     return postLoginTarget({ isOwner: isOnboardingOwner(roles), isPlatformOwnerCompany: company.isPlatformOwner === true, state, requestedNext });
   } catch {
-    return requestedNext ?? "/workspace";
+    return requestedNext ?? "/commandos";
   }
 }
 

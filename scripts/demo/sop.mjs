@@ -1,4 +1,4 @@
-// SOP panel demo data: a small HRMS org (only when none exists), SOP-role logins, and ~10 SOPs that exercise every lifecycle state,
+// SOP product demo data: a small HRMS org (only when none exists), SOP-role logins, and ~10 SOPs that exercise every lifecycle state,
 // confidentiality level, version history, assignment/acknowledgement state, checklist, feedback item and audit entry.
 // Idempotent: everything it creates has a `demo-sop-` id (or the demo email) and is replaced on each run.
 import { ObjectId } from "mongodb";
@@ -119,11 +119,11 @@ export async function seedSop(db) {
       sec("prerequisites", "Prerequisites", [blk.check("Before you start", ["Change is merged to `main` and CI is green", "Release notes drafted", "On-call engineer informed", ...(v >= 2 ? ["Feature flags reviewed"] : [])])]),
       sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["Tag the release commit (`vX.Y.Z`).", "Trigger the **deploy** pipeline and select the tag.", "Wait for the smoke tests to pass.", "Promote traffic gradually: 10% → 50% → 100%.", ...(v >= 2 ? ["Post the deployment summary in #releases."] : [])]), blk.warn("Never deploy on a Friday after 15:00 unless the release owner and on-call both agree.")]),
       sec("validation", "Validation", [blk.table(["Check", "Where", "Expected"], [["Error rate", "Grafana › API", "< 0.5%"], ["p95 latency", "Grafana › API", "< 400 ms"], ["Login flow", "Smoke test", "Pass"]])]),
-      sec("escalation", "Escalation", [blk.p("If any check fails, **roll back first**, then investigate. Page the on-call lead if rollback fails."), blk.link("Incident Response Runbook", "/sop/library", "Internal")]),
+      sec("escalation", "Escalation", [blk.p("If any check fails, **roll back first**, then investigate. Page the on-call lead if rollback fails."), blk.link("Incident Response Runbook", "/playbook-ai/library", "Internal")]),
     ],
     relatedSopIds: [],
     relatedPolicies: [{ title: "Change Management Policy", url: "" }],
-    moduleLinks: [{ module: "pms", label: "Project releases", url: "/pms" }],
+    moduleLinks: [{ module: "pms", label: "Project releases", url: "/sprintos" }],
   });
 
   function add({ dept, title, status, version = null, conf = "internal", mandatory = false, priority = "medium", owner = mgr, authorU = mgr, content, effective = dayAgo(60), review = dayAhead(120), expiry = null, tags = [], versions = [], unpublished = false, access = [], download = true, created = 90, archived = false }) {
@@ -185,20 +185,20 @@ export async function seedSop(db) {
 
   add({
     dept: hr, title: "Employee Onboarding", status: "active", version: "1.0", mandatory: true, tags: ["onboarding", "hr"], owner: adminUser, authorU: adminUser,
-    content: { title: "Employee Onboarding", description: "Everything that happens between offer acceptance and day 30.", purpose: "Give every new joiner a consistent, welcoming start.", scope: "All new employees and their managers.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["HR sends the welcome email and document checklist.", "IT provisions laptop, email and tool access.", "Manager schedules the first-week plan.", "Buddy is assigned."]), blk.check("Day-one checklist", ["ID card issued", "Laptop handed over", "Introduced to the team", "Policies shared"])])], relatedSopIds: [], relatedPolicies: [{ title: "Code of Conduct", url: "" }], moduleLinks: [{ module: "hrms", label: "HRMS onboarding", url: "/hrms" }] },
+    content: { title: "Employee Onboarding", description: "Everything that happens between offer acceptance and day 30.", purpose: "Give every new joiner a consistent, welcoming start.", scope: "All new employees and their managers.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["HR sends the welcome email and document checklist.", "IT provisions laptop, email and tool access.", "Manager schedules the first-week plan.", "Buddy is assigned."]), blk.check("Day-one checklist", ["ID card issued", "Laptop handed over", "Introduced to the team", "Policies shared"])])], relatedSopIds: [], relatedPolicies: [{ title: "Code of Conduct", url: "" }], moduleLinks: [{ module: "hrms", label: "HRMS onboarding", url: "/talentos" }] },
     versions: [{ version: "1.0", type: "initial", summary: "Initial release", daysAgo: 60, content: null }],
   });
   V[V.length - 1].content = S[S.length - 1].live;
   add({
     dept: hr, title: "Payroll Data Handling", status: "active", version: "1.0", conf: "highly_confidential", priority: "critical", download: false, tags: ["payroll", "privacy"], owner: adminUser, authorU: adminUser,
-    content: { title: "Payroll Data Handling", description: "Who may see salary data and how it is protected.", purpose: "Protect employee compensation data.", scope: "HR and Finance staff with payroll access.", sections: [sec("security", "Security", [blk.bullets(["Salary files are never emailed.", "Access is reviewed quarterly."]), blk.warn("Payroll exports are logged and audited.")])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "fms", label: "Payroll payments", url: "/fms" }] },
+    content: { title: "Payroll Data Handling", description: "Who may see salary data and how it is protected.", purpose: "Protect employee compensation data.", scope: "HR and Finance staff with payroll access.", sections: [sec("security", "Security", [blk.bullets(["Salary files are never emailed.", "Access is reviewed quarterly."]), blk.warn("Payroll exports are logged and audited.")])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "fms", label: "Payroll payments", url: "/cashflow-ai" }] },
     versions: [{ version: "1.0", type: "initial", summary: "Initial release", daysAgo: 80, content: null }],
   });
   V[V.length - 1].content = S[S.length - 1].live;
 
   add({
     dept: fin, title: "Vendor Payment Procedure", status: "active", version: "1.1", conf: "department_only", tags: ["payments", "vendors"], owner: adminUser, authorU: adminUser,
-    content: { title: "Vendor Payment Procedure", description: "From verified invoice to released payment.", purpose: "Pay vendors accurately and on time.", scope: "Accounts payable team.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["Match the invoice to the PO and goods receipt.", "Record the bill in FMS.", "Schedule payment on the due date.", "Release payment and file the confirmation."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "fms", label: "Payables", url: "/fms/payables" }, { module: "prms", label: "Vendors", url: "/prms/vendors" }] },
+    content: { title: "Vendor Payment Procedure", description: "From verified invoice to released payment.", purpose: "Pay vendors accurately and on time.", scope: "Accounts payable team.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["Match the invoice to the PO and goods receipt.", "Record the bill in FMS.", "Schedule payment on the due date.", "Release payment and file the confirmation."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "fms", label: "Payables", url: "/cashflow-ai/payables" }, { module: "prms", label: "Vendors", url: "/spendiq/vendors" }] },
     versions: [
       { version: "1.0", type: "initial", summary: "Initial release", daysAgo: 100, content: null },
       { version: "1.1", type: "minor", summary: "Added the three-way match step", daysAgo: 40, content: null },
@@ -208,13 +208,13 @@ export async function seedSop(db) {
   V[V.length - 1].content = S[S.length - 1].live;
   add({
     dept: fin, title: "Expense Reimbursement", status: "published", version: "1.0", effective: dayAhead(10), tags: ["expenses"], owner: adminUser, authorU: adminUser,
-    content: { title: "Expense Reimbursement", description: "How to claim work expenses.", purpose: "Reimburse valid expenses quickly.", scope: "All employees.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["Submit the claim with receipts within 30 days.", "Your manager confirms the expense.", "Finance pays it with the next payroll."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "prms", label: "Expense claims", url: "/prms" }] },
+    content: { title: "Expense Reimbursement", description: "How to claim work expenses.", purpose: "Reimburse valid expenses quickly.", scope: "All employees.", sections: [sec("step_by_step", "Step-by-Step Instructions", [blk.steps(["Submit the claim with receipts within 30 days.", "Your manager confirms the expense.", "Finance pays it with the next payroll."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "prms", label: "Expense claims", url: "/spendiq" }] },
     versions: [{ version: "1.0", type: "initial", summary: "Initial release", daysAgo: 2, content: null }],
   });
   V[V.length - 1].content = S[S.length - 1].live;
   add({
     dept: sales, title: "Lead Qualification", status: "expired", version: "1.0", expiry: dayAgo(15), tags: ["sales", "leads"], owner: adminUser, authorU: adminUser,
-    content: { title: "Lead Qualification", description: "Decide which leads deserve a proposal.", purpose: "Focus the team on winnable deals.", scope: "Sales team.", sections: [sec("procedure", "Procedure", [blk.steps(["Confirm budget, authority, need and timeline.", "Log the outcome in the CRM."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "lms", label: "CRM", url: "/lms" }] },
+    content: { title: "Lead Qualification", description: "Decide which leads deserve a proposal.", purpose: "Focus the team on winnable deals.", scope: "Sales team.", sections: [sec("procedure", "Procedure", [blk.steps(["Confirm budget, authority, need and timeline.", "Log the outcome in the CRM."])])], relatedSopIds: [], relatedPolicies: [], moduleLinks: [{ module: "lms", label: "CRM", url: "/dealflow-ai" }] },
     versions: [{ version: "1.0", type: "initial", summary: "Initial release", daysAgo: 200, content: null }],
   });
   V[V.length - 1].content = S[S.length - 1].live;

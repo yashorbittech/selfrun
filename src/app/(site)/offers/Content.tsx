@@ -26,8 +26,8 @@ import { PUBLIC_AUDIENCE_TABS, estimateSavings, type PublicAudienceTabKey, type 
 import type { SerializedCampaign } from "@/lib/offers/campaigns";
 import type { SerializedOffer } from "@/lib/offers/offers";
 import type { CategorySlug } from "@/lib/categories";
-import { useText } from "@/components/cms/TextContext";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 const CATEGORY_META = (tx: (key: string) => string): Record<CategorySlug, { id: string; icon: typeof Code2; title: string; description: string }> => ({
   "software-development": {

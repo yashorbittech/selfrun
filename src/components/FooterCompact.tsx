@@ -2,13 +2,13 @@ import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import { socialIconFor } from "@/components/icons/social-icon-for";
 import { socialLinks } from "@/components/footer/FooterParts";
-import type { SiteInfo } from "@/lib/cms/site-info-shared";
-import type { PublicFooterColumn } from "@/lib/cms/footer";
+import type { SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
+import type { PublicFooterColumn } from "@/lib/products/sitecraft-ai/footer";
 import SiteLogo from "@/components/SiteLogo";
 
 /**
  * "Compact" footer variant, selectable per theme in the CMS
- * (src/lib/cms/component-variants.ts). Same content sources as the default
+ * (src/lib/sitecraft-ai/component-variants.ts). Same content sources as the default
  * `Footer` — the CMS footer columns (or their code-defined defaults) and
  * CMS Site Identity (brand, contact details) — in a different structure: no CTA band, one dense
  * row of link groups, a slim bottom bar.

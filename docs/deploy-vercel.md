@@ -34,7 +34,7 @@ website and everything is created for them.
 8. [Point your DNS](#8-point-your-dns)
 9. [Deploy and check the first start](#9-deploy-and-check-the-first-start)
 10. [Set up email (Resend)](#10-set-up-email-resend)
-11. [First sign-in and Platform Panel setup](#11-first-sign-in-and-platform-panel-setup)
+11. [First sign-in and Platform Console setup](#11-first-sign-in-and-platform-console-setup)
 12. [Test the whole flow](#12-test-the-whole-flow)
 13. [Optional: payments (Razorpay)](#13-optional-payments-razorpay)
 14. [Optional: customers' own domains](#14-optional-customers-own-domains)
@@ -59,7 +59,7 @@ website and everything is created for them.
 | 8 | Point DNS | 15 min + wait | Yes | HTTPS addresses |
 | 9 | Deploy and check | 10 min | Yes | **Your live website** |
 | 10 | Email (Resend) | 20 min | For sign-up emails | `RESEND_API_KEY` |
-| 11 | First sign-in and Platform Panel | 10 min | Yes | Plans and settings |
+| 11 | First sign-in and Platform Console | 10 min | Yes | Plans and settings |
 | 12 | Test the whole flow | 30 min | Recommended | Proof it works |
 | 13 to 15 | Payments, customers' domains, automatic apps | 20 + 15 + 40 min | Optional | Extras |
 
@@ -72,13 +72,13 @@ website and everything is created for them.
 
 ⏱ *read only · 3 min*
 
-Every company, including yours, has **two addresses**: one for its public **website** and one for its **panels** (Workspace, HR,
-Finance, the client portal and the rest). The website address shows only the website. The panels address shows only the panels.
-Open a panel URL on the website address and you are sent to the panels address automatically.
+Every company, including yours, has **two addresses**: one for its public **website** and one for its **products** (Workspace, HR,
+Finance, the client portal and the rest). The website address shows only the website. The app address shows the enabled products.
+Open a product URL on the website address and you are sent to the app address automatically.
 
-| Who | Website address | Panels address |
+| Who | Website address | app address |
 | --- | --- | --- |
-| SelfRun Business (you) | `selfrunbusiness.com` and `www.selfrunbusiness.com` (product website, `/signup`, `/login`) | `app.selfrunbusiness.com` (Platform Panel for your staff) |
+| SelfRun Business (you) | `selfrunbusiness.com` and `www.selfrunbusiness.com` (product website, `/signup`, `/login`) | `app.selfrunbusiness.com` (Platform Console for your staff) |
 | A customer on an automatic address | `acme.selfrunbusiness.com` | `acme-app.selfrunbusiness.com` |
 | A customer with its own domain | `acme.com` | `app.acme.com` |
 | Any other address | "No workspace here" | |
@@ -341,7 +341,7 @@ You add **four** domain names to the project. Do them one by one.
 
 - **7.3** Add `selfrunbusiness.com`. When Vercel offers it, choose **Redirect to** `www.selfrunbusiness.com`.
 
-- **7.4** Add `app.selfrunbusiness.com`. No redirect. This is the address where **you and your staff** sign in to the Platform Panel.
+- **7.4** Add `app.selfrunbusiness.com`. No redirect. This is the address where **you and your staff** sign in to the Platform Console.
 
 - **7.5** Add the wildcard `*.selfrunbusiness.com`. This one gives every company a working HTTPS address (`acme` and `acme-app`).
   If Vercel says a wildcard needs its nameservers, that is expected. You choose how to handle it in step 8.
@@ -431,16 +431,16 @@ If the provider refuses, first turn off DNSSEC for the domain, then try again.
   [saas] Platform operator … created
   ```
 
-This line means the first start created your operator company, your staff account and the list of panels in the database.
+This line means the first start created your operator company, your staff account and the list of products in the database.
 
 - **9.4** Open `https://www.selfrunbusiness.com` in a private window.
 
 - **9.5** Click through `/pricing` and `/signup`. They must open.
 
-- **9.6** Open `https://www.selfrunbusiness.com/platform`. It must **redirect** to `https://app.selfrunbusiness.com/platform`.
-  (Panels never open on the website address.)
+- **9.6** Open `https://www.selfrunbusiness.com/console`. It must **redirect** to `https://app.selfrunbusiness.com/console`.
+  (products never open on the website address.)
 
-> ✅ **Checkpoint:** the SelfRun Business website shows with a valid HTTPS padlock, the log line `[saas] Platform operator … created` exists, and `/platform` redirects to the `app.` address.
+> ✅ **Checkpoint:** the SelfRun Business website shows with a valid HTTPS padlock, the log line `[saas] Platform operator … created` exists, and `/console` redirects to the `app.` address.
 
 > [!TIP]
 > A 404 with a small monogram header on the main domain means the host is not recognised as a website host. Re-check
@@ -474,22 +474,22 @@ Sign-up confirmation, "workspace ready", invitations and approvals are sent thro
 
 ---
 
-## 11. First sign-in and Platform Panel setup
+## 11. First sign-in and Platform Console setup
 
-⏱ *10 min · required · you get: your Platform Panel set up*
+⏱ *10 min · required · you get: your Platform Console set up*
 
 - **11.1** Open `https://app.selfrunbusiness.com/workspace/login` (the **app** address, not `www`).
 
 - **11.2** Sign in with `SAAS_ADMIN_EMAIL` and `SAAS_ADMIN_PASSWORD`. If you did not set a password, use the temporary one printed once in the logs.
 
-- **11.3** Open `/platform` (the Platform Panel). Set up, in this order:
+- **11.3** Open `/console` (the Platform Console). Set up, in this order:
 
-1. **Plans**: review plans and prices, and which panels each plan includes.
+1. **Plans**: review plans and prices, and which products each plan includes.
 2. **Platform settings**: platform name, support details, seller details for invoices, and the **sign-up mode** (open, approval or closed).
 3. **Payments**: Razorpay keys (step 13), when you are ready.
 4. **Integrations**: email and domain providers, if you prefer saving them here rather than in environment variables.
 
-> ✅ **Checkpoint:** you see the Platform Panel dashboard on `app.selfrunbusiness.com`.
+> ✅ **Checkpoint:** you see the Platform Console dashboard on `app.selfrunbusiness.com`.
 
 ---
 
@@ -517,10 +517,10 @@ Do this once after the first deployment. Use a throwaway company.
   desktop: Install; iPhone/iPad: Share → Add to Home Screen). Open **Notifications → Settings** → **Turn on notifications** → **Send a test**.
   The website address `https://testco.selfrunbusiness.com` must show **no** install option.
 
-- **12.7** **Website push.** In `testco`'s panels open **CMS → Push notifications**, switch on *Website notifications*, save. On
+- **12.7** **Website push.** In `testco`'s products open **CMS → Push notifications**, switch on *Website notifications*, save. On
   `https://testco.selfrunbusiness.com` a bell appears. Allow notifications, choose topics, then send one from the CMS page and check it arrives.
 
-- **12.8** **Apps page.** In `testco`'s panels open **Settings → Apps & downloads**. The PWA tab shows the address, QR code and previews. (The Mobile and Desktop tabs build automatically once step 15 is done.)
+- **12.8** **Apps page.** In `testco`'s products open **Settings → Apps & downloads**. The PWA tab shows the address, QR code and previews. (The Mobile and Desktop tabs build automatically once step 15 is done.)
 
 - **12.9** (Optional) Fill the test company with demo data: put the production `MONGODB_URI` in a local `.env` **only for this throwaway company** and run `npm run demo:seeders -- --company testco`. Never do this for a real company.
 
@@ -536,7 +536,7 @@ This is how the platform charges companies for plans. It can wait until after la
 
 - **13.1** In Razorpay → **Settings → API Keys** → generate a Key ID and Key Secret.
 
-- **13.2** In your Platform Panel → **Payments & Razorpay** → enter the Key ID and Key Secret → Save. They are stored encrypted.
+- **13.2** In your Platform Console → **Payments & Razorpay** → enter the Key ID and Key Secret → Save. They are stored encrypted.
 
 - **13.3** In Razorpay → **Settings → Webhooks** → **Add New Webhook**:
   - URL: `https://www.selfrunbusiness.com/api/platform/billing/webhook`
@@ -555,7 +555,7 @@ A company that wants to collect payments from **its own customers** connects its
 
 ⏱ *15 min · optional · you get: customers' own domains*
 
-This lets a company put its website on its own domain (for example `www.acme.com`, with its panels on `app.acme.com`). The company does
+This lets a company put its website on its own domain (for example `www.acme.com`, with its products on `app.acme.com`). The company does
 the steps itself on its **Workspace → Settings → Custom domains** page, which has its own step-by-step guide. For it to work
 (and for Option B in step 8) the platform must be able to attach domains to the Vercel project:
 
@@ -566,20 +566,20 @@ the steps itself on its **Workspace → Settings → Custom domains** page, whic
 - **14.3** If the project belongs to a team, copy the **Team ID** (team **Settings → General**).
 
 - **14.4** In Vercel add these variables: `DOMAIN_PROVIDER` = `vercel`, `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, and `VERCEL_TEAM_ID` if you use a team. **Redeploy.**
-  (They can also be saved in Platform Panel → Integrations.)
+  (They can also be saved in Platform Console → Integrations.)
 
 - **14.5** Test: on the test company's **Custom domains** page add a domain you own. The page lists the exact DNS records to create. Create them at that domain's DNS, press **Check now**, and watch it become **Verified** with **SSL active**.
 
-You can see every company's domains in Platform Panel → **Domains & SSL**.
+You can see every company's domains in Platform Console → **Domains & SSL**.
 
 > [!NOTE]
 > **Nothing has to be done by hand in the Vercel dashboard.** A custom domain brings two hosts to Vercel: the website (`www.acme.com`) and
-> the panels (`app.acme.com`). If Vercel asks for an ownership TXT record for either (it shows "Verification Required" on that host), the
+> the app (`app.acme.com`). If Vercel asks for an ownership TXT record for either (it shows "Verification Required" on that host), the
 > company's Domains page lists that exact record next to the others, under the domain. The company publishes **all** listed records once.
-> After that, **Check now** and the daily automatic check verify both hosts through the Vercel API, and the page shows "Panels live at
+> After that, **Check now** and the daily automatic check verify both hosts through the Vercel API, and the page shows "products live at
 > app.acme.com". The platform cannot write DNS records at the company's DNS provider by itself, so publishing the records is the one step that stays with the domain owner.
 
-> ✅ **Checkpoint:** a test domain reaches **Verified** and **SSL active**, and `https://<that domain>` shows the company's website while `https://app.<that domain>` shows its panels.
+> ✅ **Checkpoint:** a test domain reaches **Verified** and **SSL active**, and `https://<that domain>` shows the company's website while `https://app.<that domain>` shows its products.
 
 ---
 
@@ -645,11 +645,11 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 | Job | Time (UTC) | Does |
 | --- | --- | --- |
 | `/api/wallet/expiry-sweep` | 02:30 | Expires wallet credits |
-| `/api/sop/cron` | 03:00 | SOP review and acknowledgement upkeep |
-| `/api/seo/cron` | 03:30 | SEO audits and rank checks |
-| `/api/dlms/cron` | 04:00 | Digi Locker expiry alerts |
-| `/api/smms/cron` | 04:30 | Scheduled social posts |
-| `/api/ots/cron` | 05:00 | Test deadlines and auto-submission |
+| `/api/playbook-ai/cron` | 03:00 | SOP review and acknowledgement upkeep |
+| `/api/rankmax-ai/cron` | 03:30 | SEO audits and rank checks |
+| `/api/cybervault/cron` | 04:00 | Digi Locker expiry alerts |
+| `/api/viralpulse-ai/cron` | 04:30 | Scheduled social posts |
+| `/api/evaliq/cron` | 05:00 | Test deadlines and auto-submission |
 | `/api/platform/domains/cron` | 05:30 | Re-checks custom domains |
 | `/api/platform/billing/trials/cron` | 06:00 | Trial reminders and expiry |
 | `/api/platform/billing/subscriptions/cron` | 06:00 | Renewals and grace periods |
@@ -664,11 +664,11 @@ To confirm they are registered: Vercel → project → **Settings → Cron Jobs*
 Tick these before you tell customers the platform is open.
 
 - [ ] The website opens on `https://www.selfrunbusiness.com` with a padlock, and `/signup` works
-- [ ] `https://app.selfrunbusiness.com/workspace/login` lets your staff in, and `/platform` opens
+- [ ] `https://app.selfrunbusiness.com/workspace/login` lets your staff in, and `/console` opens
 - [ ] A test company can sign up, receive the confirmation email and land on its own `<slug>-app` address
-- [ ] `https://<slug>.selfrunbusiness.com` shows only the website; `<slug>-app` shows only the panels
+- [ ] `https://<slug>.selfrunbusiness.com` shows only the website; `<slug>-app` shows only the products
 - [ ] Two test companies cannot see each other's data
-- [ ] Plans and prices are set in the Platform Panel; sign-up mode is what you want (open, approval or closed)
+- [ ] Plans and prices are set in the Platform Console; sign-up mode is what you want (open, approval or closed)
 - [ ] Email arrives from `no-reply@selfrunbusiness.com`
 - [ ] A phone installed the app and received a test notification
 - [ ] Your encryption keys and `MONGODB_URI` are saved in a password manager (and nowhere else)
@@ -690,7 +690,7 @@ Tick these before you tell customers the platform is open.
 | `E11000 duplicate key` in the first-start logs | A race on the very first start. Redeploy once; if it persists, use a fresh empty database |
 | Company address shows `localhost` | `PLATFORM_ROOT_DOMAIN` is missing. Set it and redeploy |
 | `app.selfrunbusiness.com` shows a certificate error or "not found" | Add `app.selfrunbusiness.com` to the project (7.4) and, for Option B, its DNS record |
-| "No workspace here" on `<slug>.selfrunbusiness.com` | The company is suspended (Platform Panel → Companies), the slug is wrong, or the wildcard domain is missing |
+| "No workspace here" on `<slug>.selfrunbusiness.com` | The company is suspended (Platform Console → Companies), the slug is wrong, or the wildcard domain is missing |
 | Certificate error on a new company address | The wildcard is not active yet (step 8), or with Option B the address was not attached yet (step 14) |
 | Sign-up email never arrives | `EMAIL_PROVIDER` is `console`, the Resend domain is not verified, or `EMAIL_FROM` is on another domain (step 10) |
 | Uploads fail | `BLOB_READ_WRITE_TOKEN` is missing, or the Blob store is not private |

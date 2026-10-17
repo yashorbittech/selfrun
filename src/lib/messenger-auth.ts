@@ -9,8 +9,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { CHAT_ROLES, normalizeChatRoles, type ChatRole } from "@/lib/messenger-roles";
 
 /**
- * Messenger panel authentication. A separate cookie / session store from the
- * other panels so sign-in state is independent, but the *identity* store is
+ * Messenger product authentication. A separate cookie / session store from the
+ * other products so sign-in state is independent, but the *identity* store is
  * shared: users live in `admin_users`, and Messenger access is gated on the
  * `roles` array there. Mirrors `src/lib/prms-auth.ts`.
  */
@@ -32,7 +32,7 @@ interface AdminUserDoc {
   permissionOverrides?: Record<string, boolean>;
   employeeId?: string | null;
   mustChangePassword?: boolean;
-  /** Optional display overrides set from `/messenger/settings`. */
+  /** Optional display overrides set from `/huddle-ai/settings`. */
   chatDisplayName?: string | null;
   chatAvatarUrl?: string | null;
 }
@@ -50,7 +50,7 @@ export interface CurrentChatUser {
   email: string;
   roles: ChatRole[];
   /** Raw, unfiltered `admin_users.roles` — used only to decide whether this
-   * account also has access to OTHER panels (cross-panel nav links), never
+   * account also has access to OTHER products (cross-product nav links), never
    * as Messenger's own gate (use `roles` above for that). */
   allRoles: string[];
   /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
@@ -161,8 +161,8 @@ export async function getSessionChatUser(token: string | undefined | null): Prom
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getChatUserForAccount(adminId: ObjectId): Promise<CurrentChatUser | null> {
   const users = await getAdminUsersCollection();
@@ -207,7 +207,7 @@ export async function getCurrentChatUser(): Promise<CurrentChatUser | null> {
   const store = await cookies();
   const own = await getSessionChatUser(store.get(MESSENGER_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getChatUserForAccount(accountId) : null;
 }

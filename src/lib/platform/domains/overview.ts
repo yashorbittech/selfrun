@@ -9,7 +9,7 @@ import { removeCustomDomain, setPrimaryDomain, toView, verifyCustomDomain } from
 import type { CompanyDomainView } from "@/lib/platform/domains/types";
 
 /**
- * Platform Panel → Domains & SSL: every company's domains in one list, and
+ * Platform Console → Domains & SSL: every company's domains in one list, and
  * the operator actions on them. The actions reuse the per-company functions
  * in `custom.ts` (run inside the owning company's scope) and
  * `syncAtProvider`, so the rules are identical to Settings → Domains. The

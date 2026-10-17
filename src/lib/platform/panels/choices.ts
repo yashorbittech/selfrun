@@ -11,14 +11,14 @@ export interface PanelChoice {
 }
 
 /**
- * The panels this company can choose from (onboarding, plan & settings screens): the code-level module list with the
- * Panel Registry's names and descriptions applied, minus anything the platform switched off for everyone or for this company
- * (`includeUnavailable` keeps them — for the Platform Panel's plan and add-on editors).
+ * The products this company can choose from (onboarding, plan & settings screens): the code-level module list with the
+ * Product Registry's names and descriptions applied, minus anything the platform switched off for everyone or for this company
+ * (`includeUnavailable` keeps them — for the Platform Console's plan and add-on editors).
  */
 export async function listPanelChoices(opts: { includeUnavailable?: boolean } = {}): Promise<PanelChoice[]> {
   const [registry, off] = await Promise.all([listPanels(), opts.includeUnavailable ? Promise.resolve(new Set<string>()) : currentCompanyId().then(unavailablePanelKeys)]);
   const planModules = new Set<string>(MODULES.map((m) => m.key));
-  // Every panel the registry lists. Core panels, and panels that aren't plan modules (Help & Support, the public website),
+  // Every product the registry lists. Core products, and products that aren't plan modules (Help & Support, the public website),
   // are always on for a company; the rest can be chosen / included in plans.
   return registry
     .filter((p) => !off.has(p.key))

@@ -25,7 +25,7 @@ export default function NotificationBell({ initial }: { initial: number }) {
   return (
     <>
       <Link
-        href="/workspace/notifications"
+        href="/commandos/notifications"
         id="hub-bell"
         data-unread={count}
         aria-label={count > 0 ? `Notifications, ${count} unread` : "Notifications"}

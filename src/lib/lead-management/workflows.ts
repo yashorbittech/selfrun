@@ -1,7 +1,7 @@
 import type { LeadType } from "@/lib/lead-management/types";
 
 /**
- * Per-type lead lifecycles. `label` is shown to staff in `/lms/leads`;
+ * Per-type lead lifecycles. `label` is shown to staff in `/dealflow-ai/leads`;
  * `portalLabel` is what the applicant / student / client sees in their portal
  * timeline. The last non-terminal stage is the "happy path" end; `terminal`
  * stages set the lead's `status` to won/lost and stop progression.

@@ -11,7 +11,7 @@ export default function PlanChooser({ plans, currentPlanId, interval }: { plans:
       plans={plans}
       currentPlanId={currentPlanId}
       defaultInterval={interval}
-      contactHref="/support"
+      contactHref="/resolveiq"
       onSelect={(planId, iv) => {
         window.dispatchEvent(new CustomEvent("billing:select-plan", { detail: { planId, interval: iv } }));
         document.getElementById("billing-checkout")?.scrollIntoView({ behavior: "smooth", block: "start" });

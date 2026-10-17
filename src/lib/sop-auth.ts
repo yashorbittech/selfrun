@@ -9,8 +9,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { effectiveSopRoles, hasSopAccess } from "@/lib/sop-roles";
 
 /**
- * SOP panel authentication. A separate cookie / session store from the LMS,
- * HRMS, PMS, TMS and PRMS panels so sign-in state is independent, but the
+ * SOP product authentication. A separate cookie / session store from the LMS,
+ * HRMS, PMS, TMS and PRMS products so sign-in state is independent, but the
  * *identity* store is shared: users live in `admin_users`, and SOP access is
  * gated on the `roles` array there: any account whose roles carry an
  * effective SOP tier (explicit `sop_*` role, or an HRMS employee/manager/hr role).
@@ -151,8 +151,8 @@ export async function getSessionSopUser(token: string | undefined | null): Promi
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getSopUserForAccount(adminId: ObjectId): Promise<CurrentSopUser | null> {
   const users = await getAdminUsersCollection();
@@ -196,7 +196,7 @@ export async function getCurrentSopUser(): Promise<CurrentSopUser | null> {
   const store = await cookies();
   const own = await getSessionSopUser(store.get(SOP_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getSopUserForAccount(accountId) : null;
 }

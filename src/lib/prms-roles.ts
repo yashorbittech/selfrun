@@ -1,11 +1,11 @@
 /**
  * PRMS (Procurement & Expense Management System) role model. Like the HRMS,
- * PMS and TMS panels, PRMS access is gated on the shared `admin_users.roles`
+ * PMS and TMS products, PRMS access is gated on the shared `admin_users.roles`
  * array — there is no separate PRMS user store. An account can sign into
- * `/prms` only if it carries at least one of these roles (see
+ * `/spendiq` only if it carries at least one of these roles (see
  * `verifyPrmsCredentials` in `prms-auth.ts`).
  *
- * `super_admin` is the same literal used by the LMS / HRMS / PMS / TMS panels
+ * `super_admin` is the same literal used by the LMS / HRMS / PMS / TMS products
  * and implicitly grants full PRMS access.
  *
  * The capability predicates below (everything except `hasPrmsAccess`,
@@ -27,7 +27,7 @@ export const PRMS_ROLES = [
 
 export type PrmsRole = (typeof PRMS_ROLES)[number];
 
-/** Roles that open the full staff panel (dashboard, vendors, requisitions…). */
+/** Roles that open the full staff product (dashboard, vendors, requisitions…). */
 export const PRMS_STAFF_ROLES: PrmsRole[] = [
   "super_admin",
   "prms_admin",
@@ -73,17 +73,17 @@ export function normalizePrmsRoles(value: unknown): PrmsRole[] {
   return Array.from(new Set(value.filter(isPrmsRole)));
 }
 
-/** Can open the PRMS panel at `/prms/*` (staff panel or employee portal). */
+/** Can open the PRMS product at `/spendiq/*` (staff product or employee portal). */
 export function hasPrmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizePrmsRoles(roles).length > 0;
 }
 
-/** Can open the full staff panel (dashboard, vendors, requisitions, settings). */
+/** Can open the full staff product (dashboard, vendors, requisitions, settings). */
 export function hasPrmsStaffRole(roles: readonly PrmsRole[]): boolean {
   return roles.some((r) => PRMS_STAFF_ROLES.includes(r));
 }
 
-/** Only the `prms_employee` role — belongs in the `/prms/me` portal. */
+/** Only the `prms_employee` role — belongs in the `/spendiq/me` portal. */
 export function isEmployeeOnly(roles: readonly PrmsRole[]): boolean {
   return roles.length > 0 && !hasPrmsStaffRole(roles);
 }

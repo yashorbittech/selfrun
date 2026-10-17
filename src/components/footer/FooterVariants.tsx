@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/SocialIcons";
-import type { SiteInfo } from "@/lib/cms/site-info-shared";
-import type { PublicFooterColumn } from "@/lib/cms/footer";
+import type { SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
+import type { PublicFooterColumn } from "@/lib/products/sitecraft-ai/footer";
 import { FooterBrand, FooterContactLines, FooterSocialIcons, FooterCopyright, FooterLegalLinks, socialLinks } from "@/components/footer/FooterParts";
 
 /**
  * The footer layouts a theme can pick besides "standard" and "compact"
- * (src/lib/cms/component-variants.ts). Same content sources as every footer:
+ * (src/lib/sitecraft-ai/component-variants.ts). Same content sources as every footer:
  * CMS footer columns + Site Identity — different structure.
  */
 

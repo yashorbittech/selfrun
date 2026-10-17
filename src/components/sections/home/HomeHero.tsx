@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Play, CheckCircle2, Zap } from "lucide-react";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import type { BrandName } from "@/lib/brand";
 
 /**

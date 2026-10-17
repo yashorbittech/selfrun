@@ -18,7 +18,7 @@ import { startTrial, getCompanySubscription } from "@/lib/platform/billing/subsc
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { getBillingSettings, saveBillingSettings } from "@/lib/platform/billing/settings";
 import { extendTrial, getTrialOverview, runTrialSweep } from "@/lib/platform/billing/trials";
-import { parsePlanForm, planToFormValues, emptyPlanForm } from "../src/app/(platform)/platform/plans/planFormValues";
+import { parsePlanForm, planToFormValues, emptyPlanForm } from "../src/app/(platform)/console/plans/planFormValues";
 
 const DAY = 86_400_000;
 let checks = 0;

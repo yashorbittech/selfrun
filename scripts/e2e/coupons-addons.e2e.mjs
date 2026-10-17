@@ -1,6 +1,6 @@
 /**
  * Browser test for Coupons & discounts, Add-ons and the company add-ons card
- * in the Platform Panel, against a RUNNING server (production build recommended).
+ * in the Platform Console, against a RUNNING server (production build recommended).
  * Creates uniquely named records each run (it never deletes; coupons/add-ons
  * are deactivated at the end).
  *
@@ -47,11 +47,11 @@ let addonUrl = null;
 
 try {
   await step("owner signs in", async () => {
-    await page.goto(`${BASE}/platform/coupons`);
+    await page.goto(`${BASE}/console/coupons`);
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="password"]', PASSWORD);
     await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
-    await page.goto(`${BASE}/platform/coupons`);
+    await page.goto(`${BASE}/console/coupons`);
     await page.getByRole("heading", { name: "Coupons & discounts", level: 1 }).waitFor();
   });
 
@@ -80,7 +80,7 @@ try {
   });
 
   await step("duplicate code (different case) is rejected", async () => {
-    await page.goto(`${BASE}/platform/coupons/new`);
+    await page.goto(`${BASE}/console/coupons/new`);
     await page.fill("#c-code", CODE.toLowerCase());
     await page.fill("#c-percent", "10");
     await page.getByRole("button", { name: "Create coupon" }).click();
@@ -88,7 +88,7 @@ try {
   });
 
   await step("coupon listed with redemptions used/limit", async () => {
-    await page.goto(`${BASE}/platform/coupons`);
+    await page.goto(`${BASE}/console/coupons`);
     await page.getByRole("link", { name: new RegExp(CODE) }).first().waitFor();
     assert.equal((await page.getByTestId(`redemptions-${CODE}`).first().innerText()).replace(/\s+/g, " ").trim(), "0 / 5");
   });
@@ -106,7 +106,7 @@ try {
   });
 
   await step("create a limit-booster add-on", async () => {
-    await page.goto(`${BASE}/platform/addons`);
+    await page.goto(`${BASE}/console/addons`);
     await page.getByRole("heading", { name: "Add-ons", level: 1 }).waitFor();
     await page.getByRole("link", { name: "New add-on" }).click();
     await page.fill("#a-name", ADDON);
@@ -124,7 +124,7 @@ try {
 
   if (COMPANY_ID) {
     await step("grant the add-on to a company (complimentary), then remove it", async () => {
-      await page.goto(`${BASE}/platform/companies/${COMPANY_ID}`);
+      await page.goto(`${BASE}/console/companies/${COMPANY_ID}`);
       await page.getByText("Add-ons", { exact: true }).first().waitFor();
       await page.selectOption("#ca-addon", { label: ADDON });
       await page.fill("#ca-qty", "9");
@@ -137,9 +137,9 @@ try {
       await list.getByText(ADDON).waitFor({ timeout: 30_000 });
       await list.getByText("Complimentary").waitFor();
       const addonId = addonUrl.split("/").pop();
-      await page.goto(`${BASE}/platform/addons`);
+      await page.goto(`${BASE}/console/addons`);
       assert.equal((await page.getByTestId(`holders-${addonId}`).innerText()).trim(), "1");
-      await page.goto(`${BASE}/platform/companies/${COMPANY_ID}`);
+      await page.goto(`${BASE}/console/companies/${COMPANY_ID}`);
       await page.getByRole("button", { name: `Remove ${ADDON}` }).click();
       await page.getByRole("button", { name: `Remove ${ADDON}` }).waitFor({ state: "detached", timeout: 30_000 });
     });
@@ -155,8 +155,8 @@ try {
 
   await step("no horizontal scroll at phone width, no page errors", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    const paths = ["/platform/coupons", "/platform/coupons/new", new URL(couponUrl).pathname, "/platform/addons", "/platform/addons/new", new URL(addonUrl).pathname];
-    if (COMPANY_ID) paths.push(`/platform/companies/${COMPANY_ID}`);
+    const paths = ["/console/coupons", "/console/coupons/new", new URL(couponUrl).pathname, "/console/addons", "/console/addons/new", new URL(addonUrl).pathname];
+    if (COMPANY_ID) paths.push(`/console/companies/${COMPANY_ID}`);
     for (const path of paths) {
       await page.goto(`${BASE}${path}`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

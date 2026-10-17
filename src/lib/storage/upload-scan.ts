@@ -4,7 +4,7 @@ import JSZip from "jszip";
 import { getDb } from "@/lib/mongodb";
 
 /**
- * The safety check every upload passes before it is stored (called from `putObject`, which every panel's file storage goes through).
+ * The safety check every upload passes before it is stored (called from `putObject`, which every product's file storage goes through).
  *
  * What it does, with no outside service: refuses programs and scripts (by file name AND by what the bytes really are, so a renamed .exe is
  * still caught), documents with macros (Word, Excel, PowerPoint — old and new formats), PDFs that launch programs, HTML and SVG that carry
@@ -57,7 +57,7 @@ async function scanZip(name: string, body: Buffer): Promise<string | null> {
   try {
     zip = await JSZip.loadAsync(body);
   } catch {
-    return null; // not a readable zip: its own panel's type check decides
+    return null; // not a readable zip: its own product's type check decides
   }
   const entries = Object.values(zip.files);
   if (entries.length > ZIP_MAX_ENTRIES) return `${name} holds too many files (${entries.length.toLocaleString("en-IN")}).`;

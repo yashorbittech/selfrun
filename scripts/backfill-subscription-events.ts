@@ -1,6 +1,6 @@
 /**
  * Backfills `subscription_events` for companies that have a subscription but
- * no history yet, so the revenue analytics (/platform/revenue) aren't empty
+ * no history yet, so the revenue analytics (/console/revenue) aren't empty
  * after the first deploy. See `src/lib/platform/billing/backfill.ts` for what
  * gets written. Safe to re-run: companies with any history are skipped and
  * event ids are deterministic.

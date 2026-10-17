@@ -8,7 +8,7 @@ import { useVoice } from "@/components/chat/VoiceProvider";
 import { ChatSidebar, ChatSidebarDrawer } from "@/components/chat/ChatSidebar";
 import { ChatConversation } from "@/components/chat/ChatConversation";
 import { ChatDock } from "@/components/chat/ChatDock";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function VoiceModeBadge() {
   const tx = useText();

@@ -5,7 +5,7 @@ import type { AiAnalysis, Attachment, ChatTurn, RequestContext } from "@/lib/sup
 /**
  * The Help & Support Center is the platform's own service, so its data is NOT company-scoped: it lives in platform-level
  * collections (raw DB) and every row carries the `companyId` it belongs to. Every company-facing read in `requests.ts`
- * is built from `companyScope()` so one company can never see another's rows; only the Platform Panel (staff) queries
+ * is built from `companyScope()` so one company can never see another's rows; only the Platform Console (staff) queries
  * across companies.
  */
 
@@ -69,7 +69,7 @@ export interface ArticleDoc {
   body: string;
   category: string;
   tags: string[];
-  /** Panel keys this article is about (matched against the user's current panel for context-aware help). */
+  /** Product keys this article is about (matched against the user's current product for context-aware help). */
   panels: string[];
   status: "draft" | "published";
   createdAt: Date;

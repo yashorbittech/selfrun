@@ -6,7 +6,7 @@ import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { COMPANIES_COLLECTION, getCompany, type Company } from "@/lib/platform/tenancy/companies";
 import { companyAppBaseUrl } from "@/lib/platform/tenancy/provisioning";
-import { getCompanyDetails, type CompanyDetails } from "@/lib/hrms/company";
+import { getCompanyDetails, type CompanyDetails } from "@/lib/products/talentos/company";
 import { getPlan } from "@/lib/platform/billing/plans";
 import { getBillingSettings, type PlatformBillingSettings } from "@/lib/platform/billing/settings";
 import type { Quote, QuoteLine } from "@/lib/platform/billing/quote";
@@ -24,9 +24,9 @@ import { renderEmail } from "@/lib/platform/email/template";
  *    successful charge. Idempotent on the provider payment id.
  *  - `issueSaasCreditNote` — refunds / cancellations. Idempotent on the
  *    provider refund id when there is one.
- *  - `markSaasInvoicePaid`, `voidSaasInvoice` — Platform Panel actions.
+ *  - `markSaasInvoicePaid`, `voidSaasInvoice` — Platform Console actions.
  *
- * EVERY seller, tax and numbering value comes from the Platform Panel's
+ * EVERY seller, tax and numbering value comes from the Platform Console's
  * billing settings (`getBillingSettings()`): seller legal/trade name, GSTIN,
  * state, address, PAN, email; GST rate, SAC, prices-include-tax; invoice
  * prefix, footer note, terms. They are snapshotted on the document at issue
@@ -196,7 +196,7 @@ function ref(inv: SaasInvoice): SaasInvoiceRef {
   return { id: inv._id, number: inv.number!, total: inv.total };
 }
 
-/** The seller is the platform, exactly as set in Platform Panel → Tax & invoicing. */
+/** The seller is the platform, exactly as set in Platform Console → Tax & invoicing. */
 function sellerParty(seller: PlatformBillingSettings["seller"]): SaasInvoiceParty {
   const gstin = isValidGstin(seller.gstin) ? normalizeGstin(seller.gstin) : null;
   const state = resolveGstState(gstin, seller.stateCode);
@@ -266,7 +266,7 @@ function describeLine(line: QuoteLine, period: { start: Date; end: Date } | null
 
 async function emailInvoice(inv: SaasInvoice, slug: string): Promise<void> {
   if (!inv.buyer.email || !inv.number || inv.status !== "paid") return;
-  const url = `${companyAppBaseUrl(slug)}/workspace/settings/billing/invoices`;
+  const url = `${companyAppBaseUrl(slug)}/commandos/settings/billing/invoices`;
   const period = inv.periodStart && inv.periodEnd ? ` (${formatInvoiceDate(inv.periodStart)} to ${formatInvoiceDate(inv.periodEnd)})` : "";
   const { html, text } = renderEmail({
     brand: inv.seller.name,
@@ -350,7 +350,7 @@ export async function issueSaasInvoice(input: IssueSaasInvoiceInput): Promise<Sa
 
     const settings = await getBillingSettings();
     const seller = sellerParty(settings.seller);
-    if (!seller.legalName) throw new Error("Platform billing settings have no seller legal name — set it in Platform Panel → Tax & invoicing");
+    if (!seller.legalName) throw new Error("Platform billing settings have no seller legal name — set it in Platform Console → Tax & invoicing");
     const buyer = await buyerSnapshot(company);
     const ratePercent = input.quote?.gstRatePercent ?? settings.tax.gstRatePercent;
     const gst = computeGst({
@@ -460,7 +460,7 @@ export async function issueSaasInvoice(input: IssueSaasInvoiceInput): Promise<Sa
   return ref(numbered);
 }
 
-/* ─────────────────────────── Panel actions ─────────────────────────── */
+/* ─────────────────────────── Product actions ─────────────────────────── */
 
 export type InvoiceActionResult<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
@@ -625,7 +625,7 @@ export async function issueSaasCreditNote(input: IssueCreditNoteInput): Promise<
 
 /* ─────────────────────────── Reads ─────────────────────────── */
 
-/** Any invoice or credit note, by id. Platform Panel only — tenant code uses `getCompanySaasInvoice`. */
+/** Any invoice or credit note, by id. Platform Console only — tenant code uses `getCompanySaasInvoice`. */
 export async function getSaasInvoice(id: string): Promise<SaasInvoice | null> {
   if (typeof id !== "string" || !id || id.length > 64) return null;
   return (await invoices()).findOne({ _id: id, number: { $type: "string" } });
@@ -727,7 +727,7 @@ function buildMatch(filter: SaasInvoiceFilter, companyIdsForQ: string[] | null):
   return match;
 }
 
-/** Every company's invoices and credit notes for the Platform Panel, newest first, with company names and totals. */
+/** Every company's invoices and credit notes for the Platform Console, newest first, with company names and totals. */
 export async function listSaasInvoices(filter: SaasInvoiceFilter = {}, opts: { page?: number; pageSize?: number } = {}): Promise<{ rows: SaasInvoiceRow[]; total: number; totals: SaasInvoiceTotals }> {
   const db = await getPlatformDb();
   const companies = db.collection<Company>(COMPANIES_COLLECTION);

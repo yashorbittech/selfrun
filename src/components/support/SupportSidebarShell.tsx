@@ -5,7 +5,7 @@ import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import SidebarBrand from "@/components/SidebarBrand";
 import SupportSidebar from "@/components/support/SupportSidebar";
 import SupportProfileMenu from "@/components/support/SupportProfileMenu";
-import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
+import { useSidebarCollapse, SidebarProfileSlot } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
 
 const EXPANDED_WIDTH = 244;

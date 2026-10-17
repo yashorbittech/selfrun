@@ -206,9 +206,9 @@ async function main() {
   const badAddon = await saveAddon(null, { ...addonBase, name: "Seats", amountPerUnit: 0 }, "tester");
   ok(!badAddon.ok && "amountPerUnit" in badAddon.errors, "booster amount required");
   const badModule = await saveAddon(null, { ...addonBase, name: "Core", type: "module", moduleKey: "workspace" }, "tester");
-  ok(!badModule.ok && "moduleKey" in badModule.errors, "core panels can't be sold");
+  ok(!badModule.ok && "moduleKey" in badModule.errors, "core products can't be sold");
   const seats = await saveAddon(null, { ...addonBase, name: "5 extra seats", priceMonthly: 25_000, priceYearly: 250_000 }, "tester");
-  const smms = await saveAddon(null, { ...addonBase, name: "Social Media panel", type: "module", moduleKey: "smms", limitKey: null, amountPerUnit: null, priceMonthly: 49_900, priceYearly: 499_000, plans: ["starter", "growth"] }, "tester");
+  const smms = await saveAddon(null, { ...addonBase, name: "Social Media product", type: "module", moduleKey: "smms", limitKey: null, amountPerUnit: null, priceMonthly: 49_900, priceYearly: 499_000, plans: ["starter", "growth"] }, "tester");
   const storage = await saveAddon(null, { ...addonBase, name: "Storage 10 GB", limitKey: "storageMb", amountPerUnit: 10_000, priceMonthly: 10_000, priceYearly: 100_000 }, "tester");
   assert.ok(seats.ok && smms.ok && storage.ok);
   eq(seats.id, "5-extra-seats", "slug id");

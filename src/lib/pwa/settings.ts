@@ -24,15 +24,15 @@ export interface AppSettings {
     /** Background behind the icon on phones that crop it into a circle or rounded square (adaptive icons). */
     background: ColorChoice | { mode: "white"; value: string };
   };
-  /** Panel key the app opens on (`workspace`, `hrms`, `messenger`, …). */
+  /** Product key the app opens on (`workspace`, `hrms`, `messenger`, …). */
   startPage: string;
-  /** Up to 4 long-press shortcuts: panel keys, or `notifications`. */
+  /** Up to 4 long-press shortcuts: product keys, or `notifications`. */
   shortcuts: string[];
   display: "standalone" | "minimal-ui";
   orientation: "any" | "portrait" | "landscape";
   /** iPhone/iPad status bar over the app. */
   statusBar: "default" | "black-translucent" | "black";
-  /** Show the "Install the app" banner on panel pages. */
+  /** Show the "Install the app" banner on product pages. */
   installPrompt: boolean;
   /** How the apps get built. */
   generation: {
@@ -79,7 +79,7 @@ function color(v: unknown, d: ColorChoice): ColorChoice {
 }
 
 /**
- * Validates untrusted input into a complete settings object. `panelKeys` (when given) are the panels this company can
+ * Validates untrusted input into a complete settings object. `panelKeys` (when given) are the products this company can
  * actually open: a start page or shortcut outside them is dropped.
  */
 export function normalizeAppSettings(input: unknown, panelKeys?: readonly string[]): AppSettings {

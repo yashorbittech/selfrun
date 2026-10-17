@@ -4,17 +4,17 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-import { SiteInfoProvider } from "@/components/cms/SiteInfoContext";
-import { getSiteInfo } from "@/lib/cms/site-info";
-import { parseSiteInfo } from "@/lib/cms/site-info-shared";
+import { SiteInfoProvider } from "@/components/products/sitecraft-ai/SiteInfoContext";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
+import { parseSiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
 import { siteUrl } from "@/lib/seo";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
-import { getSiteSeo, parseSiteSeo, siteMetadata } from "@/lib/cms/site-seo";
+import { getSiteSeo, parseSiteSeo, siteMetadata } from "@/lib/products/sitecraft-ai/site-seo";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { NEUTRAL_BRAND } from "@/lib/platform/branding/types";
-import { resolveSiteThemeState } from "@/lib/cms/theme-preview";
-import { FALLBACK_THEME, isDefaultTokens, themeCssBlock } from "@/lib/cms/theme-shared";
+import { resolveSiteThemeState } from "@/lib/products/sitecraft-ai/theme-preview";
+import { FALLBACK_THEME, isDefaultTokens, themeCssBlock } from "@/lib/products/sitecraft-ai/theme-shared";
 import { BrandProvider } from "@/components/platform/BrandProvider";
 import { PanelsProvider } from "@/components/platform/PanelsProvider";
 import PanelTextSync from "@/components/platform/PanelTextSync";
@@ -23,15 +23,15 @@ import PlatformNoticeBanner from "@/components/platform/PlatformNoticeBanner";
 import MaintenanceBanner from "@/components/platform/MaintenanceBanner";
 import { getEffectiveMaintenance } from "@/lib/platform/maintenance-state";
 import { isBannerNow, maintenancePhase } from "@/lib/platform/maintenance-shared";
-import { getTracking, type TrackingSettings } from "@/lib/cms/tracking";
+import { getTracking, type TrackingSettings } from "@/lib/products/sitecraft-ai/tracking";
 import { getPlatformSettings } from "@/lib/platform/settings";
-import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
+import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/platform/saas/request";
 import { getPwaIdentity } from "@/lib/pwa/identity";
 import PwaRegister from "@/components/pwa/PwaRegister";
 import NavigationProgress from "@/components/pwa/NavigationProgress";
 import { InstallBanner } from "@/components/pwa/InstallApp";
-import { SAAS_BRAND } from "@/lib/saas/brand";
-import { SAAS_THEME } from "@/lib/saas/theme";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { SAAS_THEME } from "@/lib/platform/saas/theme";
 
 function verificationMetadata(t: TrackingSettings): Metadata["verification"] {
   const other: Record<string, string[]> = {};
@@ -51,11 +51,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-/** Panels hosts (`app.…`, `<slug>-app.…`) are for signed-in work: never indexed. */
+/** App hosts (`app.…`, `<slug>-app.…`) are for signed-in work: never indexed. */
 export async function generateMetadata(): Promise<Metadata> {
   const metadata = await siteWideMetadata();
   if (!(await onAppSurface())) return metadata;
-  // The installable app (panels hosts only): manifest, iOS home-screen settings and app icons.
+  // The installable app (app hosts only): manifest, iOS home-screen settings and app icons.
   const pwa = await getPwaIdentity().catch(() => null);
   return {
     ...metadata,
@@ -81,7 +81,7 @@ export async function generateViewport(): Promise<Viewport> {
   return pwa ? { ...base, themeColor: [{ media: "(prefers-color-scheme: light)", color: pwa.themeColor }, { media: "(prefers-color-scheme: dark)", color: pwa.themeColorDark }], colorScheme: "light dark" } : base;
 }
 
-/** Site-wide SEO defaults every page inherits — CMS → Settings (see lib/cms/site-seo.ts). */
+/** Site-wide SEO defaults every page inherits — CMS → Settings (see lib/sitecraft-ai/site-seo.ts). */
 async function siteWideMetadata(): Promise<Metadata> {
   // The SaaS product's own website carries the product's identity, never a customer's.
   if (await onSaasHost()) {
@@ -120,18 +120,18 @@ export default async function RootLayout({
   // doing them one after another is what made the installed app sit on a blank screen). Every one of them is non-fatal.
   const [pwa, panels, siteInfoRes, seoRes, brand, tracking, themeState, platformSettings, maintenance] = await Promise.all([
     appSurface ? getPwaIdentity().catch(() => null) : null,
-    // The Panel Registry (names, descriptions, what is switched on) as it applies to this company.
+    // The Product Registry (names, descriptions, what is switched on) as it applies to this company.
     hasCompany ? panelMetaFor(companyId).catch(() => ({})) : {},
     hasCompany ? getSiteInfo() : parseSiteInfo(null),
     // Site-wide structured data (CMS → Settings): public-website only.
     hasCompany && !appSurface ? getSiteSeo() : parseSiteSeo(null),
     hasCompany ? getCompanyBrand() : NEUTRAL_BRAND,
     hasCompany && !appSurface ? getTracking() : null,
-    // The company's active theme (CMS → Themes, or the pick made in setup): colours, fonts, corner radius for the website and every panel.
+    // The company's active theme (CMS → Themes, or the pick made in setup): colours, fonts, corner radius for the website and every product.
     hasCompany ? resolveSiteThemeState().catch(() => null) : null,
-    // Platform Panel → Platform settings: a maintenance message for every company's panels (cached).
+    // Platform Console → Platform settings: a maintenance message for every company's products (cached).
     hasCompany ? getPlatformSettings().catch(() => null) : null,
-    // The platform maintenance window (Platform Panel → Maintenance); never on the product's own hosts.
+    // The platform maintenance window (Platform Console → Maintenance); never on the product's own hosts.
     hasCompany && !saasHost ? getEffectiveMaintenance(companyId) : null,
   ]);
   const installPrompt = appSurface ? (pwa?.installPrompt ?? true) : false;
@@ -140,14 +140,14 @@ export default async function RootLayout({
   const liveChatId = tracking?.tawkId ?? "";
   const themeTokens = hasCompany ? (themeState?.tokens ?? FALLBACK_THEME) : FALLBACK_THEME;
   const themeCss = saasHost ? themeCssBlock(SAAS_THEME) : hasCompany ? themeCssBlock(themeTokens) : "";
-  // Every theme but the original default gets the modern panel treatment (see globals.css `[data-ui="modern"]`).
+  // Every theme but the original default gets the modern product treatment (see globals.css `[data-ui="modern"]`).
   const modernUi = saasHost || (hasCompany && !isDefaultTokens(themeTokens));
   const notice = platformSettings?.maintenanceBanner ?? "";
 
   return (
     <html lang="en" suppressHydrationWarning data-ui={modernUi ? "modern" : undefined} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <head>
-        {/* The active theme, for the website and every panel. */}
+        {/* The active theme, for the website and every product. */}
         {/* `themeCss` is "" with no company: `"" && …` would put a text node in <head> (hydration error, page left unstyled). */}
         {themeCss ? <style id="company-theme-vars" dangerouslySetInnerHTML={{ __html: themeCss }} /> : null}
       </head>
@@ -155,7 +155,7 @@ export default async function RootLayout({
         {jsonLd.map((schema, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(schema) }} />
         ))}
-        {/* On the product's own hosts (its website and its panels) the theme is the website's: light unless the visitor chose dark with the website's switch, kept under the same key. Customers' hosts keep following the system. */}
+        {/* On the product's own hosts (its website and its products) the theme is the website's: light unless the visitor chose dark with the website's switch, kept under the same key. Customers' hosts keep following the system. */}
         <ThemeProvider
           attribute="class"
           {...(saasHost ? { defaultTheme: "light", enableSystem: false, storageKey: "sr-theme" } : { defaultTheme: "system", enableSystem: true })}

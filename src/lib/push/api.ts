@@ -2,11 +2,11 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import { onAppSurface } from "@/lib/saas/request";
+import { onAppSurface } from "@/lib/platform/saas/request";
 import type { PushActor } from "@/lib/push/store";
 
 /**
- * Shared guard for /api/push/*. Push exists only in the app (panels hosts), never on a website host, and only for a signed-in
+ * Shared guard for /api/push/*. Push exists only in the app (app hosts), never on a website host, and only for a signed-in
  * person: a staff/employee account, else a portal account. Returns the person, or the response to send instead.
  */
 export async function pushCaller(): Promise<{ actor: PushActor; userId: string; label: string } | NextResponse> {

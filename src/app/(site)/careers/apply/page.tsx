@@ -1,5 +1,5 @@
-import CmsPageView from "@/components/cms/CmsPageView";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
 import { getOpenJobPositions } from "@/lib/career-applications";
 
 export const generateMetadata = () => cmsPageMetadata("/careers/apply");

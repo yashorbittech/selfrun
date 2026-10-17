@@ -46,12 +46,12 @@ export const DEPARTMENT_TEMPLATES: Record<Industry, DepartmentTemplate[]> = {
 };
 
 /**
- * Invitation role presets → the REAL role literals each panel checks (see
+ * Invitation role presets → the REAL role literals each product checks (see
  * each module's `*-roles.ts` / `admin/role-catalog.ts`). A preset is only a
  * convenient bundle; roles stay editable per person in Users & Roles.
  */
 export const ROLE_PRESETS = [
-  { value: "admin", label: "Company Admin", description: "Full access to every panel and company settings.", roles: ["super_admin"] },
+  { value: "admin", label: "Company Admin", description: "Full access to every product and company settings.", roles: ["super_admin"] },
   {
     value: "hr",
     label: "HR Manager",
@@ -86,7 +86,7 @@ export function rolesForPreset(preset: string): string[] | null {
   return p ? [...p.roles] : null;
 }
 
-/** The panels a company can switch on or off. `core` panels are always on. */
+/** The products a company can switch on or off. `core` products are always on. */
 export const MODULES = [
   { key: "workspace", label: "Staff Hub", description: "Everyone's home screen", core: true },
   { key: "admin", label: "Command Center", description: "Company dashboard, users & roles", core: true },
@@ -125,6 +125,6 @@ export const ONBOARDING_STEPS = [
   { key: "structure", label: "Departments" },
   { key: "team", label: "Invite your team" },
   { key: "branding", label: "Branding" },
-  { key: "modules", label: "Choose panels" },
+  { key: "modules", label: "Choose products" },
 ] as const;
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number]["key"];

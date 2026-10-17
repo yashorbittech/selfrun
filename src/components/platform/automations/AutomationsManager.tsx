@@ -21,7 +21,7 @@ import {
   testAutomationAction,
   toggleAutomationAction,
   type AutomationResult,
-} from "@/app/workspace/(protected)/settings/automations/actions";
+} from "@/app/(products)/commandos/(protected)/settings/automations/actions";
 
 const selectClass =
   "h-9 w-full min-w-0 rounded-xl border border-border/50 bg-background px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30";
@@ -196,7 +196,7 @@ function Editor({
 
             {a.type === "webhook" && (
               <>
-                <Input aria-label={`Action ${i + 1} webhook URL`} value={a.url} maxLength={2000} onChange={(e) => setAction(i, { ...a, url: e.target.value })} placeholder="https://example.com/hooks/workspace" inputMode="url" autoCapitalize="none" spellCheck={false} />
+                <Input aria-label={`Action ${i + 1} webhook URL`} value={a.url} maxLength={2000} onChange={(e) => setAction(i, { ...a, url: e.target.value })} placeholder="https://example.com/hooks/commandos" inputMode="url" autoCapitalize="none" spellCheck={false} />
                 <p className="text-xs text-muted-foreground">
                   We POST the event as JSON, signed in the <code className="font-mono">X-Webhook-Signature</code> header (<code className="font-mono">t=timestamp,v1=HMAC-SHA256(secret, &quot;timestamp.body&quot;)</code>). Public https addresses only; redirects aren&apos;t followed.
                 </p>

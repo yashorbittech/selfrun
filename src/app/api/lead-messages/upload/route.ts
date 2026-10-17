@@ -12,7 +12,7 @@ export const runtime = "nodejs";
  * POST /api/lead-messages/upload  (multipart/form-data: `file`, `leadId`)
  *
  * Returns the attachment descriptor to include in a subsequent send action —
- * same decoupled upload-then-send flow as `/api/messenger/upload`.
+ * same decoupled upload-then-send flow as `/api/huddle-ai/upload`.
  *
  * `leadId` is only ever TRUSTED from an LMS session (any staff, matching this
  * codebase's existing no-fine-grained-role convention on Lead Management). A

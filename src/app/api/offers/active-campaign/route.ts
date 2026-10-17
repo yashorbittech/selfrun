@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveCampaignForPage, getUpcomingCampaignForPage, type OfferCampaign } from "@/lib/offers/campaigns";
 import { getPopupTemplateMeta, audienceForPath } from "@/lib/offers/constants";
-import { getSiteInfo, type SiteInfo } from "@/lib/cms/site-info";
+import { getSiteInfo, type SiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 
 function resolveCtaHref(contact: SiteInfo["contact"], actionType: string, actionValue: string): string {
   if (actionType === "whatsapp") return contact.whatsappHref;

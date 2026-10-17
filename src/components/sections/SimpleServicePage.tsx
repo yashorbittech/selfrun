@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, ChevronRight } from "lucide-react";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 /**
  * The plain "service" page layout (breadcrumb hero → overview with capability

@@ -137,7 +137,7 @@ export default function BrandingForm({
 
       {/* The save button sits at the far right of the whole card (under both columns), wired to the form by id. */}
       <div className="flex items-center justify-end gap-3 md:col-span-2">
-        {saved && <span className="text-sm text-emerald-600" aria-live="polite">Saved — your theme now applies to the website and every panel.</span>}
+        {saved && <span className="text-sm text-emerald-600" aria-live="polite">Saved — your theme now applies to the website and every product.</span>}
         <Button type="submit" form="branding-form" disabled={saving || uploading}>
           {saving ? <Loader2 className="size-4 animate-spin" /> : submitLabel}
         </Button>

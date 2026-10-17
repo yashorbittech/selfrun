@@ -1,14 +1,14 @@
 import "server-only";
-import * as A from "@/app/aibots/(protected)/actions";
+import * as A from "@/app/(products)/agentos/(protected)/actions";
 import { aibotsCan, type AibotsPermission } from "@/lib/aibots-roles";
-import { getBot } from "@/lib/aibots/bots";
-import { getSettings } from "@/lib/aibots/settings";
+import { getBot } from "@/lib/products/agentos/bots";
+import { getSettings } from "@/lib/products/agentos/settings";
 import { viaAction, f, str, fail } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json } from "@/lib/ai/agent/types";
 
 /**
  * AI Bots for the agent: create and tune the company's own assistants (instructions, model, who can use them), manage their knowledge files
- * and chats, and the panel settings — through the panel's own actions.
+ * and chats, and the product settings — through the product's own actions.
  */
 
 const ctx = (u: AgentUser) => ({ roles: u.roles, permissionOverrides: u.permissionOverrides });

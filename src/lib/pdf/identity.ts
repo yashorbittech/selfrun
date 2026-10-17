@@ -3,10 +3,10 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import type { ReactElement } from "react";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { pdfAccentScope } from "@/lib/pdf/colors-scope";
-import { getActiveThemeState } from "@/lib/cms/theme";
-import { DEFAULT_BRAND } from "@/lib/cms/theme-shared";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
+import { DEFAULT_BRAND } from "@/lib/products/sitecraft-ai/theme-shared";
 import { getCompanyBrand } from "@/lib/platform/branding";
-import { getCompanyDetails } from "@/lib/hrms/company";
+import { getCompanyDetails } from "@/lib/products/talentos/company";
 import { LOGO_ROUTE, readCompanyLogo } from "@/lib/platform/branding/logo";
 
 /**

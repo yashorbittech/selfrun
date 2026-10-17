@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PUBLIC_AUDIENCE_TABS, type PublicAudienceTabKey } from "@/lib/offers/constants";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export default function AudienceSelector({
   selected,

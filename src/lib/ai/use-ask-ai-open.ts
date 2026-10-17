@@ -20,7 +20,7 @@ function subscribe(cb: () => void) {
   };
 }
 
-/** Open state of the Ask AI sidebar, kept for the browser tab so it stays open as the user moves between pages and panels. */
+/** Open state of the Ask AI sidebar, kept for the browser tab so it stays open as the user moves between pages and products. */
 export function useAskAiOpen(): [boolean, (open: boolean) => void] {
   const open = useSyncExternalStore(subscribe, read, () => false);
   const setOpen = useCallback((next: boolean) => {

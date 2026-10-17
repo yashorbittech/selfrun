@@ -145,7 +145,7 @@ export async function sendTestRun(workflowId: string, actor: { id: string; email
   const wf = await workflows.findOne({ _id: workflowId });
   if (!wf) return { ok: false, error: "That automation no longer exists." };
   const def = eventDef(wf.trigger);
-  const ctx: EventContext = { ...(def?.sample ?? {}), label: `Sample ${eventLabel(wf.trigger).toLowerCase()}`, url: "/workspace", actorEmail: actor.email, source: "test" };
-  const run = await executeWorkflow(wf, { id: null, type: wf.trigger, at: new Date(), entity: { type: "sample", id: "sample", label: String(ctx.label), url: "/workspace" }, ctx }, { test: true });
+  const ctx: EventContext = { ...(def?.sample ?? {}), label: `Sample ${eventLabel(wf.trigger).toLowerCase()}`, url: "/commandos", actorEmail: actor.email, source: "test" };
+  const run = await executeWorkflow(wf, { id: null, type: wf.trigger, at: new Date(), entity: { type: "sample", id: "sample", label: String(ctx.label), url: "/commandos" }, ctx }, { test: true });
   return { ok: run.status === "success", results: run.results, error: run.status === "failed" ? run.results.filter((r) => !r.ok).map((r) => r.detail).join(" ") : undefined };
 }

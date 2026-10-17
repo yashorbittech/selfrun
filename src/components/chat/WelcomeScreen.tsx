@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight, Bot, Mic, Quote, Sparkles } from "lucide-react";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const CAPABILITIES = (tx: (key: string) => string) => ([
   { icon: Sparkles, label: tx("chat.welcomeScreen.grounded-in-our-knowledge-base") || "Grounded in our knowledge base" },

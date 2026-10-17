@@ -168,8 +168,8 @@ export async function seedTms(db) {
     return rest;
   };
   const wipe = async (name) => db.collection(name).deleteMany({ _id: /^demo-/ });
-  // The base seeder (seed-all-panels-demo.mjs) wrote TMS docs in a different, non-app shape (no fullName / programCode / …). They render as
-  // nameless rows in the TMS panel and can't be opened, so remove exactly those legacy-shaped docs — real app-created records are never touched.
+  // The base seeder (seed-all-products-demo.mjs) wrote TMS docs in a different, non-app shape (no fullName / programCode / …). They render as
+  // nameless rows in the TMS product and can't be opened, so remove exactly those legacy-shaped docs — real app-created records are never touched.
   const legacy = { training_programs: { programCode: { $exists: false } }, training_batches: { programId: { $exists: false } }, training_students: { fullName: { $exists: false } }, student_enrollments: { programId: { $exists: false } }, class_schedules: { programId: { $exists: false } }, class_attendance: { classId: { $exists: false } }, assignments: { programId: { $exists: false } }, assignment_submissions: { assignmentId: /^ASG-/ }, certificates: { certificateNumber: { $exists: false } }, placement_records: { company: { $exists: false } } };
   for (const [name, filter] of Object.entries(legacy)) await db.collection(name).deleteMany(filter);
   for (const c of ["training_programs", "training_batches", "training_students", "student_enrollments", "class_schedules", "class_attendance", "assignments", "assignment_submissions", "certificates", "payments", "live_projects", "placement_records"]) await wipe(c);

@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
-import { getCertificateByCode, type CertificateView } from "@/lib/tms/certificates";
+import { getCertificateByCode, type CertificateView } from "@/lib/products/cohort-ai/certificates";
 import { getDb } from "@/lib/mongodb";
-import { getTmsSettings } from "@/lib/tms/settings";
-import { CERTIFICATE_TYPES } from "@/lib/tms/constants";
-import { certificateState, getCertificateByCode as getOtsCertificateByCode, type OtsCertificate } from "@/lib/ots/certificates";
+import { getTmsSettings } from "@/lib/products/cohort-ai/settings";
+import { CERTIFICATE_TYPES } from "@/lib/products/cohort-ai/constants";
+import { certificateState, getCertificateByCode as getOtsCertificateByCode, type OtsCertificate } from "@/lib/products/evaliq/certificates";
 import { BrandName } from "@/components/platform/BrandProvider";
 import { companySiteHost } from "@/lib/platform/tenancy/site-url";
 

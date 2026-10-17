@@ -1,6 +1,6 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
-import { newId } from "@/lib/portal/db";
+import { newId } from "@/lib/products/clientos/db";
 import type { LeadEventKind, LeadTimelineEvent, SerializedLeadTimelineEvent } from "@/lib/lead-management/types";
 
 export const LEAD_TIMELINE_COLLECTION = "lead_timeline";

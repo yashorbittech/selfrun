@@ -1,5 +1,5 @@
 import "server-only";
-import { notifySmmsUsers } from "@/lib/smms/notifications";
+import { notifySmmsUsers } from "@/lib/products/viralpulse-ai/notifications";
 import { audienceUserIds } from "@/lib/notify/audience";
 import { short } from "@/lib/notify/triggers/format";
 
@@ -10,7 +10,7 @@ async function owners() {
 }
 export const smmsEvents = {
   disconnected: async (provider: string) =>
-    notifySmmsUsers(await owners(), { type: "smms_integration_disconnected", title: `${provider} was disconnected`, body: "Posts to this account will fail until you reconnect it.", link: "/smms/settings", dedupeKey: `smms-disc:${provider}:${hour()}` }),
+    notifySmmsUsers(await owners(), { type: "smms_integration_disconnected", title: `${provider} was disconnected`, body: "Posts to this account will fail until you reconnect it.", link: "/viralpulse-ai/settings", dedupeKey: `smms-disc:${provider}:${hour()}` }),
   error: async (provider: string, message: string) =>
-    notifySmmsUsers(await owners(), { type: "smms_integration_error", title: `${provider} needs attention`, body: short(message, 140), link: "/smms/settings", dedupeKey: `smms-err:${provider}:${short(message, 30)}:${new Date().toISOString().slice(0, 10)}` }),
+    notifySmmsUsers(await owners(), { type: "smms_integration_error", title: `${provider} needs attention`, body: short(message, 140), link: "/viralpulse-ai/settings", dedupeKey: `smms-err:${provider}:${short(message, 30)}:${new Date().toISOString().slice(0, 10)}` }),
 };

@@ -38,7 +38,7 @@ import { formatMoney, type BillingInterval, type CompanySubscription, type Subsc
 
 /**
  * Paid subscriptions through Razorpay (the platform owner's own account,
- * configured in the Platform Panel → Payments & Razorpay).
+ * configured in the Platform Console → Payments & Razorpay).
  *
  *  pricing    every amount comes from `quoteCheckout()` (plan + coupon +
  *             add-ons) plus GST from the billing settings. The quote is stored
@@ -365,7 +365,7 @@ async function notify(companyId: string, kind: NoticeKind): Promise<void> {
     if (!to) return;
     const plan = sub ? await getPlan(sub.planId) : null;
     const planName = plan?.name ?? "your plan";
-    const url = `${companyAppBaseUrl(company.slug)}/workspace/settings/billing`;
+    const url = `${companyAppBaseUrl(company.slug)}/commandos/settings/billing`;
     const copy: Record<NoticeKind, { subject: string; heading: string; paragraphs: string[]; label: string }> = {
       payment_failed: {
         subject: `Payment failed for ${company.name}`,
@@ -673,7 +673,7 @@ export async function resumeSubscription(companyId: string, actorId = "system"):
 /**
  * Changes plan / interval. See the module comment for the upgrade (immediate,
  * pro-rata refund of the unused part of the last payment) and downgrade (at
- * cycle end) rules. `when` lets the Platform Panel force either.
+ * cycle end) rules. `when` lets the Platform Console force either.
  */
 export async function changePlan(
   companyId: string,
@@ -810,7 +810,7 @@ export async function cancelSubscription(companyId: string, input: { when: "peri
  *    cycles are all billed (`getRenewalRedemption` no longer returns it) is
  *    dropped, so the next cycle is charged at full price; a "forever" coupon
  *    keeps re-quoting to the same total and is left alone;
- *  - by the Platform Panel after a company's add-ons change;
+ *  - by the Platform Console after a company's add-ons change;
  *  - by the daily cron, as a retry.
  * The plan line stays at the price version the company bought. No-op when the
  * total is unchanged or there is no live Razorpay subscription (the next
@@ -944,7 +944,7 @@ export async function handleWebhook(eventId: string, payload: RazorpayWebhookPay
   }
 }
 
-/** Recent webhook deliveries for the Platform Panel (payload omitted). */
+/** Recent webhook deliveries for the Platform Console (payload omitted). */
 export async function listWebhookEvents(limit = 25): Promise<Omit<WebhookEventDoc, "payload">[]> {
   return (await getPlatformDb())
     .collection<WebhookEventDoc>(WEBHOOK_EVENTS_COLLECTION)
@@ -1143,7 +1143,7 @@ export async function runDunningSweep(now: Date = new Date()): Promise<DunningSu
             // The renewal webhook never arrived: take Razorpay's word for it.
             if (await reconcile(companyId, sub)) summary.reconciled++;
           } else {
-            // Manually managed (Platform Panel) period ran out without a renewal.
+            // Manually managed (Platform Console) period ran out without a renewal.
             await applyChange(companyId, sub, { status: "past_due", dunning: { failedPayments: 0, pastDueSince: now } }, cron("period_ended_unpaid"));
             await notify(companyId, "payment_failed");
             summary.toPastDue++;

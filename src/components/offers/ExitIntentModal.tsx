@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useOfferTracking } from "@/lib/useOfferTracking";
 import { formatOfferBadge } from "@/lib/offers/constants";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const SESSION_FLAG = "offer_exit_intent_shown";
 

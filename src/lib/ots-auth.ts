@@ -9,8 +9,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { effectiveOtsRoles, hasOtsAccess } from "@/lib/ots-roles";
 
 /**
- * OTS panel authentication. A separate cookie / session store from every other
- * panel so sign-in state is independent, but the *identity* store is shared:
+ * OTS product authentication. A separate cookie / session store from every other
+ * product so sign-in state is independent, but the *identity* store is shared:
  * users live in `admin_users`, and OTS access is gated on the `roles` array
  * there — an explicit `ots_*` role, or an HRMS / TMS role that implies one
  * (every HRMS employee can take tests; see `ots-roles.ts`). Applicants and
@@ -155,8 +155,8 @@ export async function getSessionOtsUser(token: string | undefined | null): Promi
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getOtsUserForAccount(adminId: ObjectId): Promise<CurrentOtsUser | null> {
   const users = await getAdminUsersCollection();
@@ -201,7 +201,7 @@ export async function getCurrentOtsUser(): Promise<CurrentOtsUser | null> {
   const store = await cookies();
   const own = await getSessionOtsUser(store.get(OTS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getOtsUserForAccount(accountId) : null;
 }

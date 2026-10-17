@@ -1,5 +1,5 @@
 /**
- * A company's brand as the panels, emails and documents show it. Client-safe
+ * A company's brand as the products, emails and documents show it. Client-safe
  * (no data access) — the server resolves it once per request and hands it to
  * the client through `BrandProvider`.
  */

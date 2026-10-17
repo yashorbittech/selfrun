@@ -8,7 +8,7 @@ import FeaturedListingCard from "@/components/sections/FeaturedListingCard";
 import SubscriptionCard from "@/components/sections/SubscriptionCard";
 import FeaturedBlogCard from "@/components/sections/FeaturedBlogCard";
 import BlogCard from "@/components/sections/BlogCard";
-import { useBlogPosts, useEngagementModels, useJobs } from "@/components/cms/CollectionsContext";
+import { useBlogPosts, useEngagementModels, useJobs } from "@/components/products/sitecraft-ai/CollectionsContext";
 
 /**
  * The listing sections of the four index pages (/careers, /resource-augmentation,

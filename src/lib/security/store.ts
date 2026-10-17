@@ -7,7 +7,7 @@ import { readClient, type ClientInfo, type DeviceInfo, type LocationInfo } from 
 /**
  * Where people are signed in, and the history of sign-ins. Two company-scoped collections:
  *  - `login_sessions`: one row per sign-in (device) — what the Security page lists and lets a person end. Every session the sign-in
- *    created in any panel carries its `loginId`, so ending a device ends exactly that device, everywhere.
+ *    created in any product carries its `loginId`, so ending a device ends exactly that device, everywhere.
  *  - `login_events`: the append-only history (sign-ins, failed attempts, sign-outs, sessions ended), kept 180 days.
  */
 

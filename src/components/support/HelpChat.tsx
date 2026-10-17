@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { BookOpen, Bot, Loader2, LifeBuoy, Send, Sparkles, User } from "lucide-react";
 import { toast } from "sonner";
-import { askHelpAction, draftRequestAction, getRequestFormConfigAction } from "@/app/support/actions";
+import { askHelpAction, draftRequestAction, getRequestFormConfigAction } from "@/app/(products)/resolveiq/actions";
 import RequestForm, { type RequestFormConfig, type RequestFormInitial } from "@/components/support/RequestForm";
 import { currentContext } from "@/lib/support/client-context";
 import { cn } from "@/lib/utils";
@@ -17,9 +17,9 @@ interface Turn extends ChatTurn {
 }
 
 const STORE = "support:chat";
-const GREETING = "Hi, I'm the SelfRun Assistant. Ask me how anything in SelfRun AI works — I answer from the official help content, and if I can't, I'll help you send a request to the SelfRun AI team.";
+const GREETING = "Hi, I'm your workspace assistant. Ask me how to use this workspace. I answer from its help content and can help you send a support request if needed.";
 
-/** The AI Help chatbot: used full-page on the Help Assistant screen and inside the drawer available from every panel. */
+/** The AI Help chatbot: used full-page on the Help Assistant screen and inside the drawer available from every product. */
 export default function HelpChat({ compact = false, suggestions = [] }: { compact?: boolean; suggestions?: string[] }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -28,7 +28,7 @@ export default function HelpChat({ compact = false, suggestions = [] }: { compac
   const [form, setForm] = useState<{ config: RequestFormConfig; initial: RequestFormInitial } | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
 
-  // The conversation survives page changes and panel switches for the browser tab.
+  // The conversation survives page changes and product switches for the browser tab.
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(STORE);
@@ -98,7 +98,7 @@ export default function HelpChat({ compact = false, suggestions = [] }: { compac
               {t.sources && t.sources.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {t.sources.map((s) => (
-                    <Link key={s.slug} href={`/support/help/${s.slug}`} className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/5">
+                    <Link key={s.slug} href={`/resolveiq/help/${s.slug}`} className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-medium text-primary hover:bg-primary/5">
                       <BookOpen className="size-3" /> {s.title}
                     </Link>
                   ))}
@@ -128,7 +128,7 @@ export default function HelpChat({ compact = false, suggestions = [] }: { compac
             <p className="mb-3 flex items-center gap-1.5 text-sm font-semibold text-foreground">
               <Sparkles className="size-4 text-primary" /> Review your request
             </p>
-            <p className="mb-3 text-xs text-muted-foreground">I prepared this from our conversation. Edit anything, then send it to SelfRun AI.</p>
+            <p className="mb-3 text-xs text-muted-foreground">I prepared this from our conversation. Edit anything, then send your support request.</p>
             <RequestForm config={form.config} initial={form.initial} chat={plain} source="chat" compact />
             <button type="button" onClick={() => setForm(null)} className="mt-3 text-xs text-muted-foreground hover:text-foreground">Cancel</button>
           </div>

@@ -1,19 +1,19 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { hasLevel } from "@/lib/ai/agent/access";
-import { unreadCount as hrmsUnread } from "@/lib/hrms/notifications";
-import { unreadCount as pmsUnread } from "@/lib/pms/notifications";
-import { unreadCount as prmsUnread } from "@/lib/prms/notifications";
-import { unreadCount as tmsUnread } from "@/lib/tms/notifications";
-import { unreadCount as messengerUnread, NOTIFICATIONS_COLLECTION as CHAT_STORE } from "@/lib/messenger/notifications";
+import { unreadCount as hrmsUnread } from "@/lib/products/talentos/notifications";
+import { unreadCount as pmsUnread } from "@/lib/products/sprintos/notifications";
+import { unreadCount as prmsUnread } from "@/lib/products/spendiq/notifications";
+import { unreadCount as tmsUnread } from "@/lib/products/cohort-ai/notifications";
+import { unreadCount as messengerUnread, NOTIFICATIONS_COLLECTION as CHAT_STORE } from "@/lib/products/huddle-ai/notifications";
 import { unreadCount as platformUnread } from "@/lib/platform/notifications";
-import { portalUnreadCount } from "@/lib/portal/notifications";
-import { workspaceUnreadCount } from "@/lib/workspace/notifications";
+import { portalUnreadCount } from "@/lib/products/clientos/notifications";
+import { workspaceUnreadCount } from "@/lib/products/commandos/notifications";
 import { panelUnread } from "@/lib/notify";
 import { CHAT_STORE_PREFIXES, type NotifyPanel } from "@/lib/notify/panels";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
-import type { WorkspaceUser } from "@/lib/workspace/access";
+import type { WorkspaceUser } from "@/lib/products/commandos/access";
 
 export interface StaffViewer { id: string; roles: string[]; permissionOverrides?: Record<string, boolean> | null }
 export type UnreadMap = Partial<Record<NotifyPanel, number>>;
@@ -21,7 +21,7 @@ export type UnreadMap = Partial<Record<NotifyPanel, number>>;
 const UNIFIED: NotifyPanel[] = ["fms", "lms", "lpms", "cms", "intelligence", "support"];
 const safe = async (fn: () => Promise<number>) => fn().catch(() => 0);
 
-/** Unread count for each panel THIS person can open — a panel they cannot open is simply absent (never 0-with-a-peek). */
+/** Unread count for each product THIS person can open — a product they cannot open is simply absent (never 0-with-a-peek). */
 export async function unreadForStaff(user: StaffViewer): Promise<UnreadMap> {
   const out: UnreadMap = {};
   const can = (p: NotifyPanel) => hasLevel(user.roles, p, "any");

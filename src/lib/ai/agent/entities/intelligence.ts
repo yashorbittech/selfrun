@@ -1,8 +1,8 @@
 import "server-only";
 import { getCurrentIntelligenceUser } from "@/lib/intelligence-auth";
 import { intelligenceCan } from "@/lib/intelligence-roles";
-import { prepareTurn, executeTurn } from "@/lib/intelligence/turn";
-import { deleteConversationAction } from "@/app/intelligence/(protected)/actions";
+import { prepareTurn, executeTurn } from "@/lib/products/databrain-ai/turn";
+import { deleteConversationAction } from "@/app/(products)/databrain-ai/(protected)/actions";
 import { viaAction, f, fail } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
@@ -38,7 +38,7 @@ function render(blocks: unknown[]): string {
 
 export const INTELLIGENCE_REPORTS: ReportDef[] = [
   {
-    key: "intelligence.ask", panel: "intelligence", label: "Ask the whole-company analytics engine", description: "A plain-language question about company data across panels (totals, trends, rankings, breakdowns). Returns the answer with tables and the figures it calculated. Counts toward the hourly question limit.", level: "any", allow: can,
+    key: "intelligence.ask", panel: "intelligence", label: "Ask the whole-company analytics engine", description: "A plain-language question about company data across products (totals, trends, rankings, breakdowns). Returns the answer with tables and the figures it calculated. Counts toward the hourly question limit.", level: "any", allow: can,
     params: [f.text("question", "The question, in plain language", true), f.str("conversationId", "Continue an earlier Intelligence conversation (optional)")],
     run: async (v) => {
       const user = await getCurrentIntelligenceUser();

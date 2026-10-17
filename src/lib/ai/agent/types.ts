@@ -10,11 +10,11 @@ export interface AgentUser {
   employeeId?: string | null;
   /** The training student record linked to this login (students see their own training data). */
   studentId?: string | null;
-  /** The Super Admin's per-person capability overrides; every panel's own `canX(user)` rules honour them. */
+  /** The Super Admin's per-person capability overrides; every product's own `canX(user)` rules honour them. */
   permissionOverrides?: Record<string, boolean>;
-  /** Platform Panel only: the platform permissions of this person (e.g. "companies.read"; "*" = Platform Owner). */
+  /** Platform Console only: the platform permissions of this person (e.g. "companies.read"; "*" = Platform Owner). */
   platformPermissions?: string[];
-  /** Panels this company can't use right now (not in the plan, switched off): the agent offers nothing from them. */
+  /** Products this company can't use right now (not in the plan, switched off): the agent offers nothing from them. */
   blockedPanels?: string[];
   /** Subscription suspended / canceled: the agent can read but not change anything. */
   readOnly?: boolean;
@@ -41,7 +41,7 @@ export interface FieldDef {
 }
 
 export interface EntityDef {
-  /** `<panel>.<name>`, e.g. "pms.task". */
+  /** `<product>.<name>`, e.g. "pms.task". */
   key: string;
   panel: string;
   label: string;
@@ -64,8 +64,8 @@ export interface EntityDef {
   /** Always ANDed into every query (e.g. a type discriminator). */
   baseFilter?: Json;
   /**
-   * How writes happen. Panels have business rules (sequence codes, events, soft delete, status flows), so writes go through the
-   * panel's own functions here. An entity with neither `ops` nor `rawWrite` is read-only.
+   * How writes happen. Products have business rules (sequence codes, events, soft delete, status flows), so writes go through the
+   * product's own functions here. An entity with neither `ops` nor `rawWrite` is read-only.
    */
   ops?: {
     create?: (values: Json, user: AgentUser) => Promise<Json>;
@@ -75,13 +75,13 @@ export interface EntityDef {
   /** Plain-collection writes (no business rules): the agent inserts/updates the row itself. Only for simple settings-like lists. */
   rawWrite?: boolean;
   /**
-   * What a person who can open the panel but is not staff may see: a filter that limits rows to their own (e.g. their timesheets), or
+   * What a person who can open the product but is not staff may see: a filter that limits rows to their own (e.g. their timesheets), or
    * null for "nothing". Without it, such people don't get the entity at all.
    */
   self?: (user: AgentUser) => Promise<Json | null> | Json | null;
-  /** The panel's own capability rule for changing this (e.g. canManageEmployees). Checked on top of `write`. */
+  /** The product's own capability rule for changing this (e.g. canManageEmployees). Checked on top of `write`. */
   allow?: (user: AgentUser) => boolean;
-  /** The panel's own rule for reading it at all (e.g. canViewAllEmployees). Checked on top of `read`. */
+  /** The product's own rule for reading it at all (e.g. canViewAllEmployees). Checked on top of `read`. */
   allowRead?: (user: AgentUser) => boolean;
   /** Always applied, even to people with full read access (e.g. a vault person only sees the clients they were granted). Return null for "nothing". */
   scope?: (user: AgentUser) => Promise<Json | null> | Json | null;
@@ -93,7 +93,7 @@ export interface EntityDef {
 
 /** A state change that is not plain create/update/delete: approve a leave, send an invoice, publish a document… */
 export interface ActionDef {
-  /** `<panel>.<name>`, e.g. "hrms.decide_leave". */
+  /** `<product>.<name>`, e.g. "hrms.decide_leave". */
   key: string;
   panel: string;
   label: string;
@@ -101,14 +101,14 @@ export interface ActionDef {
   params: FieldDef[];
   level: Level;
   destructive?: boolean;
-  /** The panel's own capability rule (e.g. canApproveLeave), on top of `level`. */
+  /** The product's own capability rule (e.g. canApproveLeave), on top of `level`. */
   allow?: (user: AgentUser) => boolean;
   run: (values: Json, user: AgentUser) => Promise<Json>;
 }
 
-/** A read-only calculation done by the panel's own code (profit of a project, leave analytics, pipeline stats…): same numbers as its dashboards. */
+/** A read-only calculation done by the product's own code (profit of a project, leave analytics, pipeline stats…): same numbers as its dashboards. */
 export interface ReportDef {
-  /** `<panel>.<name>`, e.g. "pms.project_financials". */
+  /** `<product>.<name>`, e.g. "pms.project_financials". */
   key: string;
   panel: string;
   label: string;

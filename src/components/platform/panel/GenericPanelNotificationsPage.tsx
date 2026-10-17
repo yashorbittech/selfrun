@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BellOff, CheckCheck, Clock, Settings2 } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { usePanelMeta } from "@/components/platform/PanelsProvider";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
@@ -38,13 +38,13 @@ export default function GenericPanelNotificationsPage({
   onMarkAllRead,
   unreadEvent,
 }: {
-  /** Panel Registry key — the page then shows the registry's name, not the fallback text below. */
+  /** Product Registry key — the page then shows the registry's name, not the fallback text below. */
   panel?: string;
   panelName: string;
   shortCode: string;
   description: string;
   initialNotifications?: PanelNotificationItem[];
-  /** Kept for callers that still pass it; the page always shows the panel's real notifications (an empty list shows the empty state). */
+  /** Kept for callers that still pass it; the page always shows the product's real notifications (an empty list shows the empty state). */
   live?: boolean;
   /** Server actions that persist read state; without them read state is local to the page. */
   onMarkRead?: MarkRead;
@@ -63,7 +63,7 @@ export default function GenericPanelNotificationsPage({
   const items: PanelNotificationItem[] = (initialNotifications ?? []).map((n) => (locallyRead.has(n.id) ? { ...n, read: true } : n));
   const unreadCount = items.filter((n) => !n.read).length;
 
-  // A new notification (or a read elsewhere) for this panel: re-render the server list at once.
+  // A new notification (or a read elsewhere) for this product: re-render the server list at once.
   useEffect(() => {
     if (!livePanel) return;
     const panels: NotifyPanel[] = livePanel === "platform" ? ["platform", "workspace"] : [livePanel];

@@ -2,7 +2,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { TRANSACTIONS_COLLECTION, type WalletTransaction } from "@/lib/wallet/transactions";
 import { reconcileExpiredLots } from "@/lib/wallet/wallets";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { formatCredits } from "@/lib/wallet/constants";
 
 const WARN_DAYS = 7;
@@ -34,7 +34,7 @@ export async function runExpirySweep(): Promise<ExpirySweepResult> {
       type: "wallet.credits_expiring",
       title: "Credits expiring soon",
       body: `${formatCredits(lot.amount)} expire on ${lot.expiresAt!.toLocaleDateString("en-IN")}. Use them before then.`,
-      link: "/portal/wallet",
+      link: "/clientos/wallet",
       dedupeKey: `wallet.expiring:${lot._id}`,
     });
   }

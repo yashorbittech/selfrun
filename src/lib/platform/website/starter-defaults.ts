@@ -3,7 +3,7 @@
  * here belongs to any company; the company's own name, contact details and social links are filled in from its profile.
  */
 
-import type { SiteInfo } from "@/lib/cms/site-info-shared";
+import type { SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
 
 export const STARTER_SITE_INFO_DEFAULTS = {
   "header": {

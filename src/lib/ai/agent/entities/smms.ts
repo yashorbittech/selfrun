@@ -1,15 +1,15 @@
 import "server-only";
-import * as A from "@/app/smms/(protected)/actions";
+import * as A from "@/app/(products)/viralpulse-ai/(protected)/actions";
 import { smmsCan, type SmmsPermission } from "@/lib/smms-roles";
-import { AD_PLATFORMS, POST_PLATFORMS, TONES, LANGUAGES, CTAS, INDUSTRIES, GENERATOR_TYPES } from "@/lib/smms/constants";
-import { requireCampaign } from "@/lib/smms/campaigns";
-import { requirePost } from "@/lib/smms/posts";
-import { getSettings } from "@/lib/smms/settings";
+import { AD_PLATFORMS, POST_PLATFORMS, TONES, LANGUAGES, CTAS, INDUSTRIES, GENERATOR_TYPES } from "@/lib/products/viralpulse-ai/constants";
+import { requireCampaign } from "@/lib/products/viralpulse-ai/campaigns";
+import { requirePost } from "@/lib/products/viralpulse-ai/posts";
+import { getSettings } from "@/lib/products/viralpulse-ai/settings";
 import { viaAction, f, fail, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json } from "@/lib/ai/agent/types";
 
 /**
- * Social media (SMMS) for the agent. Campaigns, ads and posts are changed by calling the panel's own actions, so permissions, approval
+ * Social media (SMMS) for the agent. Campaigns, ads and posts are changed by calling the product's own actions, so permissions, approval
  * rules (publishing needs a publisher), version history and the audit log behave exactly as on the screens.
  */
 

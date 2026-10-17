@@ -2,11 +2,11 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getCompanyBrand } from "@/lib/platform/branding";
-import { getActiveThemeState } from "@/lib/cms/theme";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
 import { brandInitials } from "@/lib/platform/branding/types";
 import { LOGO_ROUTE, readCompanyLogo } from "@/lib/platform/branding/logo";
-import { SAAS_BRAND } from "@/lib/saas/brand";
-import { onSaasHost } from "@/lib/saas/request";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { onSaasHost } from "@/lib/platform/saas/request";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { getAppSettings } from "@/lib/pwa/store";
 

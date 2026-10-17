@@ -9,8 +9,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { HRMS_ROLES, normalizeRoles, type HrmsRole } from "@/lib/hrms-roles";
 
 /**
- * HRMS panel authentication. Deliberately a separate cookie / session store
- * from the LMS panel (`lms-auth.ts`) so the two panels have
+ * HRMS product authentication. Deliberately a separate cookie / session store
+ * from the LMS product (`lms-auth.ts`) so the two products have
  * independent sign-in state, but the *identity* store is shared: users live
  * in `admin_users`, and HRMS access is gated on the `roles` array there.
  */
@@ -47,7 +47,7 @@ export interface CurrentHrmsUser {
   email: string;
   roles: HrmsRole[];
   /** Raw, unfiltered `admin_users.roles` — used only to decide whether this
-   * account also has access to OTHER panels (cross-panel nav links), never
+   * account also has access to OTHER products (cross-product nav links), never
    * as HRMS's own gate (use `roles` above for that). */
   allRoles: string[];
   /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
@@ -151,8 +151,8 @@ export async function getSessionHrmsUser(token: string | undefined | null): Prom
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getHrmsUserForAccount(adminId: ObjectId): Promise<CurrentHrmsUser | null> {
   const users = await getAdminUsersCollection();
@@ -196,7 +196,7 @@ export async function getCurrentHrmsUser(): Promise<CurrentHrmsUser | null> {
   const store = await cookies();
   const own = await getSessionHrmsUser(store.get(HRMS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getHrmsUserForAccount(accountId) : null;
 }

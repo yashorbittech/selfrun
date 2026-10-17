@@ -5,11 +5,11 @@ import { PANEL_ROLES } from "@/lib/ai/agent/access";
 import type { NotifyPanel } from "@/lib/notify/panels";
 
 /**
- * Who a panel-wide notification goes to: only people who can actually open that panel at that level (roles), never everyone.
- *   any   — anyone who can open the panel
- *   staff — people who run the panel's records
+ * Who a product-wide notification goes to: only people who can actually open that product at that level (roles), never everyone.
+ *   any   — anyone who can open the product
+ *   staff — people who run the product's records
  *   admin — people who configure it
- * `super_admin` is always included (they can open every panel). Deactivated accounts have no roles, so they never match.
+ * `super_admin` is always included (they can open every product). Deactivated accounts have no roles, so they never match.
  */
 const OPEN_TO_ANY_ACCOUNT = new Set<NotifyPanel>(["workspace", "support", "platform"]);
 
@@ -22,12 +22,12 @@ export async function audienceUserIds(panel: NotifyPanel, level: Audience, extra
   return rows.map((r) => String(r._id));
 }
 
-/** Of `userIds`, those who can still open `panel` (roles may have changed since the event). Super admins always can. */
+/** Of `userIds`, those who can still open `product` (roles may have changed since the event). Super admins always can. */
 export async function canOpen(panel: NotifyPanel, userIds: string[]): Promise<string[]> {
   const ids = userIds.filter((i) => ObjectId.isValid(i));
   if (ids.length === 0) return [];
   const def = PANEL_ROLES[panel];
-  // The Workspace, Help & Support and the Platform Panel have no role list of their own: any signed-in (active) account of the company can be addressed.
+  // The Workspace, Help & Support and the Platform Console have no role list of their own: any signed-in (active) account of the company can be addressed.
   const open = OPEN_TO_ANY_ACCOUNT.has(panel);
   const roles = new Set<string>(["super_admin", ...(def ? def.any : [])]);
   const rows = await (await getDb()).collection<{ _id: ObjectId }>("admin_users").find({ _id: { $in: ids.map((i) => new ObjectId(i)) }, roles: open ? { $exists: true, $ne: [] } : { $in: [...roles] } }, { projection: { _id: 1 } }).toArray();

@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPaymentLinkByToken, serializePaymentLink } from "@/lib/fms/payments/links";
+import { getPaymentLinkByToken, serializePaymentLink } from "@/lib/products/cashflow-ai/payments/links";
 import PublicCheckoutClient from "./PublicCheckoutClient";
 import { getCompanyBrand } from "@/lib/platform/branding";
 

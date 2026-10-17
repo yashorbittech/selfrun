@@ -8,7 +8,7 @@ import type { BillingInterval, Plan } from "@/lib/platform/billing/types";
 /**
  * Razorpay REST client for PLATFORM subscription billing — the platform
  * owner's own Razorpay account collecting from customer companies. The
- * credentials come from the Platform Panel (`razorpay-config.ts`; env only as
+ * credentials come from the Platform Console (`razorpay-config.ts`; env only as
  * a fallback while nothing is saved). Plain `fetch`, no SDK, so tests can mock
  * the network. Every call throws `RazorpayError` on a non-2xx answer.
  *

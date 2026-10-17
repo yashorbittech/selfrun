@@ -3,7 +3,7 @@
 import * as React from "react";
 import { ArrowUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import { useBrand } from "@/components/platform/BrandProvider";
 
 export function ChatComposer({
@@ -72,7 +72,7 @@ export function ChatComposer({
             disabled={disabled}
             maxLength={maxChars}
             aria-label={`Type your message to ${brand.name}`}
-            placeholder={tx("chat.chatComposer.ask-about-brand") || `Ask ${brand.name || "SelfRun AI"} anything…`}
+            placeholder={tx("chat.chatComposer.ask-about-brand") || `Ask ${brand.name || "your team"} anything…`}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {

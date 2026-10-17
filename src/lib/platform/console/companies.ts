@@ -47,7 +47,7 @@ export interface CompanyRow {
 
 export interface CompanyDetail extends CompanyRow {
   profile: CompanyProfile | null;
-  /** Panel labels; null = no choice recorded, so every panel is on. */
+  /** Product labels; null = no choice recorded, so every product is on. */
   enabledPanels: string[] | null;
   branding: { wordmark: string | null; logoUrl: string | null; primaryColor: string | null };
   domainRecords: { host: string; kind: "subdomain" | "custom"; status: "pending" | "verified"; isPrimary: boolean; providerError: string | null }[];

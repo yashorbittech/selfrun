@@ -11,7 +11,7 @@ import CurriculumTimeline from "@/components/sections/CurriculumTimeline";
 import FAQAccordion from "@/components/sections/FAQAccordion";
 import DetailCTA from "@/components/sections/DetailCTA";
 import type { EngagementCategory } from "@/types/content";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 /** Every fixed string on an engagement-model page (CMS engagement-detail section config). `{title}` / `{title_lower}` = the model's title; `{option}` = a plan's title. */
 export interface EngagementDetailCopy {

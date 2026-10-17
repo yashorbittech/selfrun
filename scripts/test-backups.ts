@@ -16,9 +16,9 @@ import { listPlans } from "@/lib/platform/billing/plans";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
 import { hashPassword } from "@/lib/lms-auth";
-import { KEEP_MANUAL, backupBuffer, backupFile, createBackup, listBackups, useBackupStorage, type BackupStorage } from "@/lib/workspace/backups";
-import { cancelCompanyDeletion, listDataEvents, listRestores, restoreBackup, runLifecycleJobs, scheduleCompanyDeletion, wipeCompanyData } from "@/lib/workspace/data-lifecycle";
-import { consumeChallenge, startChallenge } from "@/lib/workspace/danger";
+import { KEEP_MANUAL, backupBuffer, backupFile, createBackup, listBackups, useBackupStorage, type BackupStorage } from "@/lib/products/commandos/backups";
+import { cancelCompanyDeletion, listDataEvents, listRestores, restoreBackup, runLifecycleJobs, scheduleCompanyDeletion, wipeCompanyData } from "@/lib/products/commandos/data-lifecycle";
+import { consumeChallenge, startChallenge } from "@/lib/products/commandos/danger";
 
 let passed = 0;
 async function check(name: string, fn: () => Promise<void> | void) {

@@ -1,29 +1,29 @@
 import "server-only";
-import { getVendor, createVendor, updateVendor, deleteVendor } from "@/lib/prms/vendors";
-import { getRequisition, createRequisition, updateRequisition, submitRequisition, decideRequisition, deleteRequisition } from "@/lib/prms/requisitions";
-import { getPurchaseOrder, createPurchaseOrder, updatePurchaseOrder, issuePurchaseOrder, setPurchaseOrderStatus, deletePurchaseOrder, type PoItemInput } from "@/lib/prms/purchase-orders";
-import { getRfq, createRfq, updateRfq, setRfqStatus, addQuotation, awardRfq, deleteRfq, createRfqFromRequisition, type RfqLine } from "@/lib/prms/rfqs";
-import { createGoodsReceipt, deleteGoodsReceipt, getGoodsReceipt, type GrnLineInput } from "@/lib/prms/goods-receipts";
-import { getInvoice, createInvoice, updateInvoice, setInvoiceStatus, deleteInvoice, type InvoiceWriteData } from "@/lib/prms/invoices";
-import { recordPayment, markPaymentProcessed, deletePayment, getPayment, type PaymentWriteData } from "@/lib/prms/payments";
-import { getExpense, createExpense, updateExpense, decideExpense, markExpenseReimbursed, setRecurringActive, deleteExpense, type ExpenseWriteData } from "@/lib/prms/expenses";
-import { getAsset, createAsset, updateAsset, assignAsset, returnAsset, changeAssetStatus, deleteAsset, type AssetWriteData } from "@/lib/prms/assets";
-import { getInventoryItem, createInventoryItem, updateInventoryItem, recordInventoryTransaction, deleteInventoryItem } from "@/lib/prms/inventory";
-import { getContract, createContract, updateContract, deleteContractRow, type ContractWriteInput } from "@/lib/prms/contracts";
-import { getBudget, createBudget, updateBudget, deleteBudget, refreshBudgetConsumption, type BudgetWriteData } from "@/lib/prms/budgets";
-import { getSubscription, createSubscription, updateSubscription, deleteSubscriptionRow, type SubscriptionWriteInput } from "@/lib/prms/software-subscriptions";
-import { getThirdPartyService, createThirdPartyService, updateThirdPartyService, deleteThirdPartyRow, type ThirdPartyWriteInput } from "@/lib/prms/third-party-services";
-import { getInfrastructureResource, createInfrastructure, updateInfrastructure, deleteInfrastructureRow, type InfraWriteInput } from "@/lib/prms/infrastructure";
-import { getPrmsSettings, normalizeSettingsInput, updatePrmsSettings } from "@/lib/prms/settings";
-import { getPrmsDashboardStats } from "@/lib/prms/dashboard";
-import { notify, notifyStaff } from "@/lib/prms/notifications";
-import { recordAudit } from "@/lib/prms/audit";
-import { validateVendor, validateRequisition } from "@/lib/prms/validation";
+import { getVendor, createVendor, updateVendor, deleteVendor } from "@/lib/products/spendiq/vendors";
+import { getRequisition, createRequisition, updateRequisition, submitRequisition, decideRequisition, deleteRequisition } from "@/lib/products/spendiq/requisitions";
+import { getPurchaseOrder, createPurchaseOrder, updatePurchaseOrder, issuePurchaseOrder, setPurchaseOrderStatus, deletePurchaseOrder, type PoItemInput } from "@/lib/products/spendiq/purchase-orders";
+import { getRfq, createRfq, updateRfq, setRfqStatus, addQuotation, awardRfq, deleteRfq, createRfqFromRequisition, type RfqLine } from "@/lib/products/spendiq/rfqs";
+import { createGoodsReceipt, deleteGoodsReceipt, getGoodsReceipt, type GrnLineInput } from "@/lib/products/spendiq/goods-receipts";
+import { getInvoice, createInvoice, updateInvoice, setInvoiceStatus, deleteInvoice, type InvoiceWriteData } from "@/lib/products/spendiq/invoices";
+import { recordPayment, markPaymentProcessed, deletePayment, getPayment, type PaymentWriteData } from "@/lib/products/spendiq/payments";
+import { getExpense, createExpense, updateExpense, decideExpense, markExpenseReimbursed, setRecurringActive, deleteExpense, type ExpenseWriteData } from "@/lib/products/spendiq/expenses";
+import { getAsset, createAsset, updateAsset, assignAsset, returnAsset, changeAssetStatus, deleteAsset, type AssetWriteData } from "@/lib/products/spendiq/assets";
+import { getInventoryItem, createInventoryItem, updateInventoryItem, recordInventoryTransaction, deleteInventoryItem } from "@/lib/products/spendiq/inventory";
+import { getContract, createContract, updateContract, deleteContractRow, type ContractWriteInput } from "@/lib/products/spendiq/contracts";
+import { getBudget, createBudget, updateBudget, deleteBudget, refreshBudgetConsumption, type BudgetWriteData } from "@/lib/products/spendiq/budgets";
+import { getSubscription, createSubscription, updateSubscription, deleteSubscriptionRow, type SubscriptionWriteInput } from "@/lib/products/spendiq/software-subscriptions";
+import { getThirdPartyService, createThirdPartyService, updateThirdPartyService, deleteThirdPartyRow, type ThirdPartyWriteInput } from "@/lib/products/spendiq/third-party-services";
+import { getInfrastructureResource, createInfrastructure, updateInfrastructure, deleteInfrastructureRow, type InfraWriteInput } from "@/lib/products/spendiq/infrastructure";
+import { getPrmsSettings, normalizeSettingsInput, updatePrmsSettings } from "@/lib/products/spendiq/settings";
+import { getPrmsDashboardStats } from "@/lib/products/spendiq/dashboard";
+import { notify, notifyStaff } from "@/lib/products/spendiq/notifications";
+import { recordAudit } from "@/lib/products/spendiq/audit";
+import { validateVendor, validateRequisition } from "@/lib/products/spendiq/validation";
 import {
   PRIORITIES, VENDOR_CATEGORIES, VENDOR_STATUSES, PAYMENT_TERMS, PAYMENT_METHODS, UNITS_OF_MEASURE, ASSET_CATEGORIES, ASSET_STATUSES, DEPRECIATION_METHODS, INVENTORY_TXN_TYPES, RESOURCE_STATUSES, BILLING_CYCLES, INFRA_RESOURCE_TYPES, CONTRACT_TYPES, INVOICE_STATUSES, BUDGET_LEVELS, BUDGET_PERIODS, EXPENSE_CATEGORY_TREE, RECURRENCE_INTERVALS, PO_STATUSES, SUPPORTED_CURRENCIES, DEFAULT_GST_RATE,
   isValidExpenseCategory, isValidPaymentMethod, isValidRecurrenceInterval, isValidInvoiceStatus, isValidAssetStatus, isValidInventoryTxnType, isValidBudgetLevel, isValidBudgetPeriod, isValidBillingCycle, isValidResourceStatus, isValidDepreciationMethod,
   type InvoiceStatus, type AssetStatus, type InventoryTxnType, type BudgetLevel, type BudgetPeriod, type BillingCycle, type ResourceStatus,
-} from "@/lib/prms/constants";
+} from "@/lib/products/spendiq/constants";
 import { canManageProcurement, canManageFinance, canApproveRequisitions, canManageExpenses, canManageSettings, canViewAuditLog, canViewReports } from "@/lib/prms-roles";
 import { hasLevel } from "@/lib/ai/agent/access";
 import { check, crudOps, f, fail, values, str } from "@/lib/ai/agent/entities/helpers";
@@ -275,7 +275,7 @@ export const PRMS_ENTITIES: EntityDef[] = [
         const autoApprove = canManageExpenses(u) && v.autoApprove === true;
         const created = await createExpense(d.data, { userId: u.id, name: nameFromEmail(u.email) }, u.id, autoApprove);
         await audit(u, { action: "create", entity: "expense", entityId: created._id, entityLabel: created.expenseCode });
-        if (!autoApprove) await notifyStaff({ type: "expense_submitted", title: `Expense ${created.expenseCode} awaiting approval`, body: `${created.currency} ${created.totalAmount.toLocaleString("en-IN")}`, link: `/prms/expenses/${created._id}`, dedupeKey: `expense_submitted:${created._id}` } as never, ["super_admin", "prms_admin", "finance", "procurement_manager"]);
+        if (!autoApprove) await notifyStaff({ type: "expense_submitted", title: `Expense ${created.expenseCode} awaiting approval`, body: `${created.currency} ${created.totalAmount.toLocaleString("en-IN")}`, link: `/spendiq/expenses/${created._id}`, dedupeKey: `expense_submitted:${created._id}` } as never, ["super_admin", "prms_admin", "finance", "procurement_manager"]);
         return { ok: true, id: created._id, record: created as unknown as Json };
       },
       update: async (id, v, u) => {
@@ -450,7 +450,7 @@ async function billData(v: Json): Promise<{ data: InvoiceWriteData } | { error: 
   let poNumber: string | null = null;
   const poRef = String(v.poNumber ?? "").trim();
   if (poRef) {
-    const { getPurchaseOrderByNumber } = await import("@/lib/prms/purchase-orders");
+    const { getPurchaseOrderByNumber } = await import("@/lib/products/spendiq/purchase-orders");
     const po = await getPurchaseOrderByNumber(poRef);
     if (po) { poId = po._id; poNumber = po.poNumber; }
   }
@@ -508,7 +508,7 @@ export const PRMS_ACTIONS: ActionDef[] = [
     const r = await submitRequisition(before._id, u.id);
     if (!r.ok) return fail(r.reason);
     await audit(u, { action: "submit", entity: "requisition", entityId: before._id, entityLabel: before.prCode, summary: `status: draft → ${r.doc?.status ?? "submitted"}` });
-    await notifyStaff({ type: "requisition_submitted", title: `Requisition ${before.prCode} awaiting approval`, body: `${before.itemName} · ${before.currency} ${before.estimatedCost.toLocaleString("en-IN")}`, link: `/prms/requisitions/${before._id}`, dedupeKey: `requisition_submitted:${before._id}` } as never, ["super_admin", "prms_admin", "procurement_manager", "dept_manager"]);
+    await notifyStaff({ type: "requisition_submitted", title: `Requisition ${before.prCode} awaiting approval`, body: `${before.itemName} · ${before.currency} ${before.estimatedCost.toLocaleString("en-IN")}`, link: `/spendiq/requisitions/${before._id}`, dedupeKey: `requisition_submitted:${before._id}` } as never, ["super_admin", "prms_admin", "procurement_manager", "dept_manager"]);
     return { ok: true, id: before._id, result: "Submitted for approval." };
   }),
   R("prms.decide_requisition", "Approve or reject a requisition", "Decide a requisition waiting for your approval level and tell the requester.", [refP("requisitionId", "Requisition id", "prms.requisition"), f.bool("approve", "Approve (false = reject)"), f.str("note", "Note")], "staff", canApproveRequisitions, async (v, u) => {
@@ -518,10 +518,10 @@ export const PRMS_ACTIONS: ActionDef[] = [
     const res = await decideRequisition(before._id, approve, str(v.note), { id: u.id, email: u.email, roles: u.roles as never, permissionOverrides: u.permissionOverrides });
     if (!res.ok) return fail(res.reason);
     await audit(u, { action: approve ? "approve" : "reject", entity: "requisition", entityId: before._id, entityLabel: before.prCode, summary: `status: ${before.status} → ${res.doc?.status ?? "?"}` });
-    await notify({ recipientUserId: before.requestedBy.userId, audience: "employee", type: res.rejected ? "requisition_rejected" : res.fullyApproved ? "requisition_approved" : "requisition_progress", title: res.rejected ? `Requisition ${before.prCode} was rejected` : res.fullyApproved ? `Requisition ${before.prCode} approved` : `Requisition ${before.prCode} advanced`, body: str(v.note), link: `/prms/me/requisitions/${before._id}` } as never);
+    await notify({ recipientUserId: before.requestedBy.userId, audience: "employee", type: res.rejected ? "requisition_rejected" : res.fullyApproved ? "requisition_approved" : "requisition_progress", title: res.rejected ? `Requisition ${before.prCode} was rejected` : res.fullyApproved ? `Requisition ${before.prCode} approved` : `Requisition ${before.prCode} advanced`, body: str(v.note), link: `/spendiq/me/requisitions/${before._id}` } as never);
     if (res.fullyApproved) {
       const s = await getPrmsSettings();
-      if (before.estimatedCost >= s.financeNotifyThreshold) await notifyStaff({ type: "requisition_high_value_approved", title: `High-value requisition ${before.prCode} approved`, body: `${before.currency} ${before.estimatedCost.toLocaleString("en-IN")} · ${before.itemName}`, link: `/prms/requisitions/${before._id}`, dedupeKey: `requisition_high_value_approved:${before._id}` } as never, ["super_admin", "prms_admin", "finance"]);
+      if (before.estimatedCost >= s.financeNotifyThreshold) await notifyStaff({ type: "requisition_high_value_approved", title: `High-value requisition ${before.prCode} approved`, body: `${before.currency} ${before.estimatedCost.toLocaleString("en-IN")} · ${before.itemName}`, link: `/spendiq/requisitions/${before._id}`, dedupeKey: `requisition_high_value_approved:${before._id}` } as never, ["super_admin", "prms_admin", "finance"]);
     }
     return { ok: true, id: before._id, result: res.rejected ? "Requisition rejected." : res.fullyApproved ? "Requisition fully approved." : "Approved at your level; it moves to the next approver." };
   }, true),
@@ -530,7 +530,7 @@ export const PRMS_ACTIONS: ActionDef[] = [
     const r = await issuePurchaseOrder(String(v.poId), u.id);
     if (!r.ok) return fail(r.reason);
     await audit(u, { action: "status_change", entity: "purchase_order", entityId: String(v.poId), entityLabel: before?.poNumber, summary: "status: draft → issued" });
-    await notifyStaff({ type: "po_issued", title: `${before?.poNumber} issued to ${before?.vendorName}`, body: `Total ${before?.currency} ${before?.totalAmount.toLocaleString("en-IN")}`, link: `/prms/purchase-orders/${String(v.poId)}`, dedupeKey: `po_issued:${String(v.poId)}` } as never, ["super_admin", "prms_admin", "procurement_manager", "finance"]);
+    await notifyStaff({ type: "po_issued", title: `${before?.poNumber} issued to ${before?.vendorName}`, body: `Total ${before?.currency} ${before?.totalAmount.toLocaleString("en-IN")}`, link: `/spendiq/purchase-orders/${String(v.poId)}`, dedupeKey: `po_issued:${String(v.poId)}` } as never, ["super_admin", "prms_admin", "procurement_manager", "finance"]);
     return { ok: true, id: String(v.poId), result: "Purchase order issued." };
   }, true),
   R("prms.set_po_status", "Cancel or close a purchase order", `Set a PO to cancelled or closed (statuses: ${PO.join(", ")}).`, [refP("poId", "Purchase order id", "prms.purchase_order"), f.enum("status", "New status", ["cancelled", "closed"], true)], "staff", canManageProcurement, async (v, u) => {
@@ -582,7 +582,7 @@ export const PRMS_ACTIONS: ActionDef[] = [
     const r = await recordPayment(data, u.id);
     if (!r.ok) return fail(r.reason);
     const inv = await getInvoice(data.invoiceId);
-    if (inv?.status === "paid") await notifyStaff({ type: "invoice_paid", title: `Invoice ${inv.invoiceNumber} fully paid`, body: inv.vendorName, link: `/prms/invoices/${inv._id}`, dedupeKey: `invoice_paid:${inv._id}` } as never, ["super_admin", "prms_admin", "finance"]);
+    if (inv?.status === "paid") await notifyStaff({ type: "invoice_paid", title: `Invoice ${inv.invoiceNumber} fully paid`, body: inv.vendorName, link: `/spendiq/invoices/${inv._id}`, dedupeKey: `invoice_paid:${inv._id}` } as never, ["super_admin", "prms_admin", "finance"]);
     return { ok: true, id: String(v.billId), result: "Payment recorded." };
   }, true),
   R("prms.process_payment", "Mark a scheduled vendor payment as processed", "Confirm a scheduled payment has gone out.", [refP("paymentId", "Payment id", "prms.payment")], "staff", canManageFinance, async (v, u) => {
@@ -599,7 +599,7 @@ export const PRMS_ACTIONS: ActionDef[] = [
     const res = await decideExpense(String(v.expenseId), approve, str(v.note), u.id);
     if (!res.ok) return fail(res.reason);
     await audit(u, { action: approve ? "approve" : "reject", entity: "expense", entityId: String(v.expenseId), entityLabel: res.expense?.expenseCode });
-    if (res.expense) await notify({ recipientUserId: res.expense.raisedByUserId, audience: "employee", type: approve ? "expense_approved" : "expense_rejected", title: `Expense ${res.expense.expenseCode} ${approve ? "approved" : "rejected"}`, body: str(v.note), link: `/prms/me/expenses/${String(v.expenseId)}` } as never);
+    if (res.expense) await notify({ recipientUserId: res.expense.raisedByUserId, audience: "employee", type: approve ? "expense_approved" : "expense_rejected", title: `Expense ${res.expense.expenseCode} ${approve ? "approved" : "rejected"}`, body: str(v.note), link: `/spendiq/me/expenses/${String(v.expenseId)}` } as never);
     return { ok: true, id: String(v.expenseId), result: approve ? "Expense approved." : "Expense rejected." };
   }, true),
   R("prms.reimburse_expense", "Mark an expense as reimbursed", "Record that the person has been paid back for an approved expense.", [refP("expenseId", "Expense id", "prms.expense")], "staff", canManageExpenses, async (v, u) => {

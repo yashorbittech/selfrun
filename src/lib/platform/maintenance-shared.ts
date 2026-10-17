@@ -1,9 +1,9 @@
 /**
- * Platform-wide maintenance (Platform Panel → Maintenance). Pure helpers, no server imports: used by the proxy, the root layout, the
- * Platform Panel form and the countdown components.
+ * Platform-wide maintenance (Platform Console → Maintenance). Pure helpers, no server imports: used by the proxy, the root layout, the
+ * Platform Console form and the countdown components.
  *
  * One window for every company: from `startsAt` to `endsAt`. Before it starts there is an announcement banner with a countdown to the
- * start; during it, either a banner ("banner") or the full maintenance screen instead of the site / panels ("takeover"), with a
+ * start; during it, either a banner ("banner") or the full maintenance screen instead of the site / products ("takeover"), with a
  * countdown to the end; after `endsAt` everything is back on its own, with nobody having to switch anything off.
  */
 
@@ -30,12 +30,12 @@ export function maintenancePhase(m: MaintenanceState, now: number = Date.now()):
   return now < m.startsAt ? "upcoming" : "active";
 }
 
-/** Does the window reach this kind of address — a company's website ("site") or its panels ("app")? */
+/** Does the window reach this kind of address — a company's website ("site") or its products ("app")? */
 export function maintenanceReaches(m: MaintenanceState, surface: "site" | "app"): boolean {
   return m.appliesTo === "both" || (surface === "site" ? m.appliesTo === "sites" : m.appliesTo === "apps");
 }
 
-/** The full maintenance screen replaces the site / panels (only while the window is open). */
+/** The full maintenance screen replaces the site / products (only while the window is open). */
 export function isTakeoverNow(m: MaintenanceState, surface: "site" | "app", now: number = Date.now()): boolean {
   return maintenancePhase(m, now) === "active" && m.mode === "takeover" && maintenanceReaches(m, surface);
 }

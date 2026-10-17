@@ -1,6 +1,6 @@
 /**
  * Browser test for plan enforcement (module gating, upgrade page, billing
- * banner, locked Staff Hub tiles) and the Platform Panel "Usage & limits"
+ * banner, locked Staff Hub tiles) and the Platform Console "Usage & limits"
  * page, against a RUNNING server (production build recommended).
  *
  *   PANEL_BASE_URL=http://localhost:3006 OWNER_EMAIL=... OWNER_PASSWORD=... \
@@ -41,7 +41,7 @@ async function step(name, fn) {
 }
 
 async function signIn(page, origin, email, password) {
-  await page.goto(`${origin}/workspace/login`);
+  await page.goto(`${origin}/commandos/login`);
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
@@ -50,8 +50,8 @@ async function signIn(page, origin, email, password) {
 
 /** A company whose setup is still open lands in the onboarding wizard first; skipping it is the way into the dashboard. */
 async function skipSetupIfShown(page) {
-  if (new URL(page.url()).pathname !== "/workspace/onboarding") return;
-  await Promise.all([page.waitForURL((u) => u.pathname === "/workspace", { timeout: 30_000 }), page.getByRole("button", { name: "Skip for now" }).click()]);
+  if (new URL(page.url()).pathname !== "/commandos/onboarding") return;
+  await Promise.all([page.waitForURL((u) => u.pathname === "/commandos", { timeout: 30_000 }), page.getByRole("button", { name: "Skip for now" }).click()]);
 }
 
 async function noHorizontalScroll(page, url) {
@@ -73,7 +73,7 @@ try {
   });
 
   await step("Usage & limits page lists companies with plan, seats, AI tokens, storage", async () => {
-    await page.goto(`${BASE}/platform/usage`);
+    await page.goto(`${BASE}/console/usage`);
     await page.getByRole("heading", { name: "Usage & limits", level: 1 }).waitFor();
     await page.locator("#usage-count").waitFor();
     const table = page.locator("#usage-table");
@@ -112,19 +112,19 @@ try {
     assert.match(text.split("\r\n")[0], /^Company,Slug,Plan,Status,Seats used,Seat limit/);
   });
 
-  await step("owner workspace: no panel is locked and no billing banner", async () => {
-    await page.goto(`${BASE}/workspace`);
-    await page.getByText("My Operational Panels").waitFor();
+  await step("owner workspace: no product is locked and no billing banner", async () => {
+    await page.goto(`${BASE}/commandos`);
+    await page.getByText("My Operational Products").waitFor();
     assert.equal(await page.locator('[data-locked="true"]').count(), 0);
     assert.equal(await page.locator("#billing-notice").count(), 0);
     const res = await page.goto(`${BASE}/${LOCKED}`);
     assert.ok(res && res.status() < 400);
-    assert.ok(!new URL(page.url()).pathname.startsWith("/workspace/upgrade"), `owner was sent to ${page.url()}`);
+    assert.ok(!new URL(page.url()).pathname.startsWith("/commandos/upgrade"), `owner was sent to ${page.url()}`);
   });
 
   await step("owner pages: no horizontal scroll at phone width", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await noHorizontalScroll(page, `${BASE}/platform/usage`);
+    await noHorizontalScroll(page, `${BASE}/console/usage`);
     await page.locator('[data-company]').first().waitFor();
     await page.setViewportSize({ width: 1280, height: 800 });
   });
@@ -140,13 +140,13 @@ try {
     });
 
     await step(`Staff Hub marks ${LOCKED} as locked`, async () => {
-      await cp.goto(`${COMPANY_URL}/workspace`);
-      await cp.getByText("My Operational Panels").waitFor();
+      await cp.goto(`${COMPANY_URL}/commandos`);
+      await cp.getByText("My Operational Products").waitFor();
       const tile = cp.locator(`[data-module="${LOCKED}"]`);
       if ((await tile.count()) > 0) {
         assert.equal(await tile.getAttribute("data-locked"), "true");
         await tile.getByText("Upgrade to unlock").waitFor();
-        assert.match((await tile.locator("a").first().getAttribute("href")) ?? "", new RegExp(`/workspace/upgrade\\?module=${LOCKED}$`));
+        assert.match((await tile.locator("a").first().getAttribute("href")) ?? "", new RegExp(`/commandos/upgrade\\?module=${LOCKED}$`));
       }
     });
 
@@ -155,28 +155,28 @@ try {
       await notice.waitFor();
       assert.equal(await notice.getAttribute("data-status"), "trialing");
       await notice.getByText(/day|ends today/).first().waitFor();
-      assert.equal(await notice.getByRole("link").getAttribute("href"), "/workspace/settings/billing");
+      assert.equal(await notice.getByRole("link").getAttribute("href"), "/commandos/settings/billing");
     });
 
     await step(`opening /${LOCKED} shows the upgrade page`, async () => {
       await cp.goto(`${COMPANY_URL}/${LOCKED}`);
-      await cp.waitForURL((u) => u.pathname === "/workspace/upgrade", { timeout: 30_000 });
+      await cp.waitForURL((u) => u.pathname === "/commandos/upgrade", { timeout: 30_000 });
       assert.equal(new URL(cp.url()).searchParams.get("module"), LOCKED);
       const title = cp.locator("#upgrade-title");
       await title.waitFor();
       assert.match((await title.textContent()) ?? "", /^Upgrade to unlock /);
-      assert.equal(await cp.locator("#upgrade-billing-link").getAttribute("href"), "/workspace/settings/billing");
+      assert.equal(await cp.locator("#upgrade-billing-link").getAttribute("href"), "/commandos/settings/billing");
     });
 
-    await step("included panels still open normally", async () => {
-      await cp.goto(`${COMPANY_URL}/hrms`);
-      assert.ok(!new URL(cp.url()).pathname.startsWith("/workspace/upgrade"), cp.url());
+    await step("included products still open normally", async () => {
+      await cp.goto(`${COMPANY_URL}/talentos`);
+      assert.ok(!new URL(cp.url()).pathname.startsWith("/commandos/upgrade"), cp.url());
     });
 
     await step("upgrade page and workspace: no horizontal scroll at phone width", async () => {
       await cp.setViewportSize({ width: 390, height: 844 });
-      await noHorizontalScroll(cp, `${COMPANY_URL}/workspace/upgrade?module=${LOCKED}`);
-      await noHorizontalScroll(cp, `${COMPANY_URL}/workspace`);
+      await noHorizontalScroll(cp, `${COMPANY_URL}/commandos/upgrade?module=${LOCKED}`);
+      await noHorizontalScroll(cp, `${COMPANY_URL}/commandos`);
     });
     await cctx.close();
   } else {

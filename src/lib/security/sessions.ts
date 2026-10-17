@@ -9,7 +9,7 @@ import { LOGIN_COOKIE, captureClient, loginEvents, loginSessions, recordLoginEve
 import { countryName, flagEmoji, isPrivateAddress } from "@/lib/security/client-info";
 
 /**
- * Sign-ins as devices. `startLoginSession` runs right after a person signs in (the Workspace session and every panel session have just been
+ * Sign-ins as devices. `startLoginSession` runs right after a person signs in (the Workspace session and every product session have just been
  * minted): it records the device and place, gives the sign-in an id, stamps that id on every session the sign-in created and puts it in a
  * cookie. After that a device can be listed, and ended exactly — or all of them at once.
  */
@@ -36,7 +36,7 @@ export async function startLoginSession(adminId: ObjectId, o: { startedAt: Date;
     revokedAt: null,
     revokedReason: null,
   });
-  // Every session this sign-in created, in every panel, carries the id.
+  // Every session this sign-in created, in every product, carries the id.
   const since = new Date(o.startedAt.getTime() - 2000);
   const db = await getDb();
   await Promise.all(sessionCollectionNames().map((n) => db.collection(n).updateMany({ adminId, createdAt: { $gte: since }, loginId: { $exists: false } }, { $set: { loginId } }).catch(() => {})));
@@ -50,7 +50,7 @@ async function currentLoginId(): Promise<string | null> {
   return v && UUID.test(v) ? v : null;
 }
 
-/** Ends one sign-in (device): its sessions in every panel. */
+/** Ends one sign-in (device): its sessions in every product. */
 async function endLogin(adminId: ObjectId, loginId: string, reason: string, event: "logout" | "session_revoked", email: string): Promise<void> {
   const db = await getDb();
   await Promise.all(sessionCollectionNames().map((n) => db.collection(n).deleteMany({ adminId, loginId })));

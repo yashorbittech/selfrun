@@ -7,7 +7,7 @@ import { ArrowRight, Boxes, LayoutGrid, Sparkles } from "lucide-react";
 import FeaturedListingCard from "@/components/sections/FeaturedListingCard";
 import ListingCard from "@/components/sections/ListingCard";
 import { BTN_PRIMARY, BTN_SECONDARY, listingCardProps, nextImageSrc } from "@/components/products/page/cta-styles";
-import { resolveIcon } from "@/lib/cms/icon-map";
+import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { fillText } from "@/lib/products/text";
 import { capabilityChips, groupByCategory, productHref, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
 

@@ -28,7 +28,7 @@ export async function notifySupportStaff(input: { requestId: string; number: num
         to: { userIds },
         title: input.kind === "new" ? `New support request #${input.number} from ${input.companyName}` : `${input.companyName} replied on request #${input.number}`,
         body: input.title.slice(0, 200),
-        url: `/platform/support/${input.requestId}`,
+        url: `/console/resolveiq/${input.requestId}`,
       });
     });
   } catch (err) {

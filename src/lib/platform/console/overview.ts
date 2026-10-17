@@ -2,9 +2,9 @@ import "server-only";
 import { getRevenueSnapshot, type RevenueSnapshot, type TrialEnding, type TrackedStatus } from "@/lib/platform/billing/metrics";
 
 /**
- * Platform Panel dashboard data (cross-company, raw DB): subscription status
+ * Platform Console dashboard data (cross-company, raw DB): subscription status
  * mix, trials ending soon and the headline revenue figures. All of it comes
- * from `billing/metrics.ts`, so the dashboard and /platform/revenue always
+ * from `billing/metrics.ts`, so the dashboard and /console/revenue always
  * agree. Companies with no stored subscription (created before billing) count
  * as trialing from their creation date, matching `getCompanySubscription`.
  * The platform owner is excluded.

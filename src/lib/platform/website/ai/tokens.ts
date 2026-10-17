@@ -1,4 +1,4 @@
-import { sanitizeTokens, type ThemeTokens } from "@/lib/cms/theme-shared";
+import { sanitizeTokens, type ThemeTokens } from "@/lib/products/sitecraft-ai/theme-shared";
 
 /**
  * Turns a few brand colours chosen for a business into a complete light + dark theme: every token derived from them with a

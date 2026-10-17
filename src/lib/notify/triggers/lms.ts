@@ -10,7 +10,7 @@ const TYPE_LABEL: Record<string, string> = { client: "client enquiry", trainee: 
 const label = (t: string) => TYPE_LABEL[t] ?? t.replace(/_/g, " ");
 
 interface L { id: string; code?: string; name: string; type: string; ownerStaffId?: string | null }
-const link = (l: { id: string }) => `/lms/leads/${l.id}`;
+const link = (l: { id: string }) => `/dealflow-ai/leads/${l.id}`;
 
 export const lmsEvents = {
   leadCreated: (l: L & { source?: string; message?: string | null }, actor: string | null) =>
@@ -30,9 +30,9 @@ export const lmsEvents = {
   interviewScheduled: (l: L | null, title: string, when: Date, actor: string) =>
     l?.ownerStaffId && l.ownerStaffId !== actor ? notifyUsers("lms", [l.ownerStaffId], { type: "lms_interview", title: `Interview scheduled: ${short(title, 60)}`, body: `${l.name} · ${day(when)} ${when.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`, link: link(l) }) : Promise.resolve(0),
   applicationReceived: (a: { id: string; name: string; positionTitle: string }) =>
-    notifyPanel("lms", { type: "lms_application_new", title: `New application: ${a.name}`, body: a.positionTitle, link: `/lms/careers/applicants/${a.id}`, priority: "high", dedupeKey: `lms-app-new:${a.id}` }, { level: "staff" }),
+    notifyPanel("lms", { type: "lms_application_new", title: `New application: ${a.name}`, body: a.positionTitle, link: `/dealflow-ai/careers/applicants/${a.id}`, priority: "high", dedupeKey: `lms-app-new:${a.id}` }, { level: "staff" }),
   staleDigest: async (leads: { count: number; names: string[] }, apps: { count: number; names: string[] }) => {
-    if (leads.count > 0) await notifyPanel("lms", { type: "lms_stale_leads", title: `${plural(leads.count, "lead")} waiting too long`, body: leads.names.length ? `Oldest: ${leads.names.join(", ")}` : "Open leads with no progress.", link: "/lms/leads/list", priority: "high", dedupeKey: `lms-stale-leads:${today()}` }, { level: "staff" });
-    if (apps.count > 0) await notifyPanel("lms", { type: "lms_stale_applications", title: `${plural(apps.count, "application")} waiting too long`, body: apps.names.length ? `Oldest: ${apps.names.join(", ")}` : "Open applications with no update.", link: "/lms/careers/applicants", priority: "high", dedupeKey: `lms-stale-apps:${today()}` }, { level: "staff" });
+    if (leads.count > 0) await notifyPanel("lms", { type: "lms_stale_leads", title: `${plural(leads.count, "lead")} waiting too long`, body: leads.names.length ? `Oldest: ${leads.names.join(", ")}` : "Open leads with no progress.", link: "/dealflow-ai/leads/list", priority: "high", dedupeKey: `lms-stale-leads:${today()}` }, { level: "staff" });
+    if (apps.count > 0) await notifyPanel("lms", { type: "lms_stale_applications", title: `${plural(apps.count, "application")} waiting too long`, body: apps.names.length ? `Oldest: ${apps.names.join(", ")}` : "Open applications with no update.", link: "/dealflow-ai/careers/applicants", priority: "high", dedupeKey: `lms-stale-apps:${today()}` }, { level: "staff" });
   },
 };

@@ -3,7 +3,7 @@
 /**
  * /contact — extracted verbatim from the former `contact/Content.tsx` into a
  * hero and a form section. Copy is CMS-editable; the form fields are managed
- * at /cms/forms (passed in as runtime props with the ?category / ?subService
+ * at /sitecraft-ai/forms (passed in as runtime props with the ?category / ?subService
  * pre-selection), and the lead submission pipeline is unchanged code.
  * Contact details (email, phone, address) stay owned by src/lib/contact.ts.
  */
@@ -12,12 +12,12 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, MapPin, Phone, ArrowRight, MessageCircle, Clock, Sparkles, Loader2 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/SocialIcons";
-import { useSiteInfo, useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo, useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import { CATEGORIES, categoryAcceptsResume, getSubServices, type CategorySlug } from "@/lib/categories";
 import { SUCCESS_AUTO_HIDE_MS, useLeadSubmit } from "@/lib/useLeadSubmit";
 import { useStableCardHeight } from "@/lib/useStableCardHeight";
 import LeadSuccessState from "@/components/sections/LeadSuccessState";
-import { CONTACT_FORM_FIELD_NAMES, completeFormFields, type CmsFormFieldConfig } from "@/lib/cms/forms-shared";
+import { CONTACT_FORM_FIELD_NAMES, completeFormFields, type CmsFormFieldConfig } from "@/lib/products/sitecraft-ai/forms-shared";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },

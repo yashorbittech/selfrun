@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import BlogCard from "@/components/sections/BlogCard";
 import type { BlogPostMeta } from "@/types/content";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 export default function RelatedPosts({ posts, title: titleProp }: { posts: BlogPostMeta[]; title?: string }) {
   const l = useUiLabels();

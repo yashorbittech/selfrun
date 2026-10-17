@@ -6,10 +6,10 @@ import { ObjectId, type Collection } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
-import { fetchUrl } from "@/lib/seo-panel/fetch";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import { fetchUrl } from "@/lib/products/rankmax-ai/fetch";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 import { getCompanyBrand } from "@/lib/platform/branding";
-import { getCompanyDetails } from "@/lib/hrms/company";
+import { getCompanyDetails } from "@/lib/products/talentos/company";
 import { ensureVectorStore } from "@/lib/chatbot-config";
 import {
   uploadTextToVectorStore,

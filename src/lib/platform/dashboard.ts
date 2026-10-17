@@ -3,12 +3,12 @@ import { getDb } from "@/lib/mongodb";
 import { accessibleAreas, type AccessUser, type Area } from "@/lib/platform/access";
 import { listEvents, type EventView } from "@/lib/platform/events";
 import { LEAD_RECORDS_COLLECTION } from "@/lib/lead-management/records";
-import { countActiveProjects } from "@/lib/pms/projects";
-import { TASKS_COLLECTION } from "@/lib/pms/tasks";
-import { totalReceivables } from "@/lib/fms/customers";
-import { countActiveEmployees } from "@/lib/hrms/employees";
-import { getPendingLeaveCount } from "@/lib/hrms/leave";
-import { todayDateString } from "@/lib/hrms/time";
+import { countActiveProjects } from "@/lib/products/sprintos/projects";
+import { TASKS_COLLECTION } from "@/lib/products/sprintos/tasks";
+import { totalReceivables } from "@/lib/products/cashflow-ai/customers";
+import { countActiveEmployees } from "@/lib/products/talentos/employees";
+import { getPendingLeaveCount } from "@/lib/products/talentos/leave";
+import { todayDateString } from "@/lib/products/talentos/time";
 
 /**
  * "Your company today" on the Staff Hub: a handful of company-wide numbers,
@@ -31,21 +31,21 @@ function addDays(date: string, days: number): string {
 }
 
 const KPI_DEFS: { key: CompanyKpi["key"]; label: string; area: Area; href: string; format?: "currency"; load: () => Promise<number> }[] = [
-  { key: "open_leads", label: "Open leads", area: "leads", href: "/lms/leads", load: async () => (await getDb()).collection(LEAD_RECORDS_COLLECTION).countDocuments({ status: "open", deletedAt: null }) },
-  { key: "active_projects", label: "Active projects", area: "projects", href: "/pms/projects", load: countActiveProjects },
+  { key: "open_leads", label: "Open leads", area: "leads", href: "/dealflow-ai/leads", load: async () => (await getDb()).collection(LEAD_RECORDS_COLLECTION).countDocuments({ status: "open", deletedAt: null }) },
+  { key: "active_projects", label: "Active projects", area: "projects", href: "/sprintos/projects", load: countActiveProjects },
   {
     key: "tasks_due",
     label: "Tasks due this week",
     area: "tasks",
-    href: "/pms/projects",
+    href: "/sprintos/projects",
     load: async () => {
       const today = todayDateString();
       return (await getDb()).collection(TASKS_COLLECTION).countDocuments({ deletedAt: null, status: { $ne: "done" }, dueDate: { $gte: today, $lte: addDays(today, 6) } });
     },
   },
-  { key: "unpaid_invoices", label: "Unpaid invoices", area: "invoices", href: "/fms/invoices", format: "currency", load: totalReceivables },
-  { key: "employees", label: "Employees", area: "employees", href: "/hrms/employees", load: countActiveEmployees },
-  { key: "pending_leave", label: "Pending leave requests", area: "leave", href: "/hrms/leave?tab=requests", load: () => getPendingLeaveCount() },
+  { key: "unpaid_invoices", label: "Unpaid invoices", area: "invoices", href: "/cashflow-ai/invoices", format: "currency", load: totalReceivables },
+  { key: "employees", label: "Employees", area: "employees", href: "/talentos/employees", load: countActiveEmployees },
+  { key: "pending_leave", label: "Pending leave requests", area: "leave", href: "/talentos/leave?tab=requests", load: () => getPendingLeaveCount() },
 ];
 
 export async function getCompanyKpis(user: Pick<AccessUser, "roles">): Promise<CompanyKpi[]> {

@@ -8,23 +8,23 @@ import { canViewAllEmployees } from "@/lib/hrms-roles";
 import { hasFmsAccess } from "@/lib/fms-roles";
 
 /**
- * Which cross-panel areas a person may see company-wide data for — the one
+ * Which cross-product areas a person may see company-wide data for — the one
  * rule behind the company KPIs, global search, recent activity and the AI
- * assistant. An area is visible only when its panel is in the company's plan,
+ * assistant. An area is visible only when its product is in the company's plan,
  * switched on, AND the person's roles give them company-wide access there
- * (the same tier each panel uses for its own "see everything" views; people
- * with narrower access use the panel itself, which scopes to their own work).
+ * (the same tier each product uses for its own "see everything" views; people
+ * with narrower access use the product itself, which scopes to their own work).
  */
 
 export interface AccessUser {
   id: string;
   email: string;
   roles: readonly string[];
-  /** The Super Admin's per-user capability overrides, where a panel's "see everything" rule honours them. */
+  /** The Super Admin's per-user capability overrides, where a product's "see everything" rule honours them. */
   permissionOverrides?: Record<string, boolean> | null;
 }
 
-/** The cross-panel data areas (the `intelligence` event area is an audit trail, not data). */
+/** The cross-product data areas (the `intelligence` event area is an audit trail, not data). */
 export type Area = Exclude<EventArea, "intelligence">;
 
 const AREA_MODULE: Record<Area, string> = { leads: "lms", clients: "pms", projects: "pms", tasks: "pms", invoices: "fms", employees: "hrms", leave: "hrms" };

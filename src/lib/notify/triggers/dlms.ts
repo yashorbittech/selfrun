@@ -1,6 +1,6 @@
 import "server-only";
-import { listDlmsManagerIds } from "@/lib/dlms/access";
-import { notifyDlmsUsers } from "@/lib/dlms/notifications";
+import { listDlmsManagerIds } from "@/lib/products/cybervault/access";
+import { notifyDlmsUsers } from "@/lib/products/cybervault/notifications";
 import { short } from "@/lib/notify/triggers/format";
 
 /**
@@ -16,11 +16,11 @@ async function managers(actor: string) {
 
 export const dlmsEvents = {
   added: async (type: string, id: string, name: string, actor: string) =>
-    notifyDlmsUsers(await managers(actor), { type: "dlms_record_added", title: `New ${type} added: ${short(name, 60)}`, body: "Stored in the vault.", link: `/dlms/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-add:${id}` }),
+    notifyDlmsUsers(await managers(actor), { type: "dlms_record_added", title: `New ${type} added: ${short(name, 60)}`, body: "Stored in the vault.", link: `/cybervault/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-add:${id}` }),
   revealed: async (id: string, name: string, how: "reveal" | "copy", actor: string, actorEmail: string) =>
-    notifyDlmsUsers(await managers(actor), { type: "dlms_reveal", title: `Password ${how === "copy" ? "copied" : "revealed"}: ${short(name, 60)}`, body: `By ${actorEmail}.`, link: "/dlms/credentials", dedupeKey: `dlms-reveal:${id}:${actor}:${hourKey()}` }),
+    notifyDlmsUsers(await managers(actor), { type: "dlms_reveal", title: `Password ${how === "copy" ? "copied" : "revealed"}: ${short(name, 60)}`, body: `By ${actorEmail}.`, link: "/cybervault/credentials", dedupeKey: `dlms-reveal:${id}:${actor}:${hourKey()}` }),
   deleted: async (type: string, id: string, name: string, actor: string, actorEmail: string) =>
-    notifyDlmsUsers(await managers(actor), { type: "dlms_record_deleted", title: `${type[0].toUpperCase()}${type.slice(1)} deleted: ${short(name, 60)}`, body: `By ${actorEmail}.`, link: `/dlms/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-del:${id}` }),
+    notifyDlmsUsers(await managers(actor), { type: "dlms_record_deleted", title: `${type[0].toUpperCase()}${type.slice(1)} deleted: ${short(name, 60)}`, body: `By ${actorEmail}.`, link: `/cybervault/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-del:${id}` }),
   archived: async (type: string, id: string, name: string, archived: boolean, actor: string) =>
-    notifyDlmsUsers(await managers(actor), { type: "dlms_record_archived", title: `${type[0].toUpperCase()}${type.slice(1)} ${archived ? "archived" : "restored"}: ${short(name, 60)}`, body: "", link: `/dlms/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-arc:${id}:${archived ? 1 : 0}:${hourKey()}` }),
+    notifyDlmsUsers(await managers(actor), { type: "dlms_record_archived", title: `${type[0].toUpperCase()}${type.slice(1)} ${archived ? "archived" : "restored"}: ${short(name, 60)}`, body: "", link: `/cybervault/${PATH[type] ?? "credentials"}`, dedupeKey: `dlms-arc:${id}:${archived ? 1 : 0}:${hourKey()}` }),
 };

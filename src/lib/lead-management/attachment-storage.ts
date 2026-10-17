@@ -5,7 +5,7 @@ import { putObject, getObject } from "@/lib/storage/blob";
 /**
  * Lead-message attachments — served only through the authenticated route
  * `/api/lead-messages/files/[key]` (which re-derives access from the
- * message the file is attached to). Mirrors `src/lib/messenger/attachments.ts`,
+ * message the file is attached to). Mirrors `src/lib/huddle-ai/attachments.ts`,
  * minus its `chat_shared_files` ledger — there's no Files hub for Lead
  * Management, so that bookkeeping isn't needed here.
  */

@@ -7,12 +7,12 @@ import { getDb } from "@/lib/mongodb";
 import { storedUsageActor, SYSTEM_ACTOR, VISITOR_ACTOR, type UsageActor } from "@/lib/platform/billing/usage-actor-store";
 
 /**
- * Who is making this request, for the usage history. Looked up from the session cookies the browser sent, the same way the panels do
- * (every panel keeps `{ tokenHash, adminId }` rows). Work inside a request with no sign-in is a website visitor (the public chatbot,
+ * Who is making this request, for the usage history. Looked up from the session cookies the browser sent, the same way the products do
+ * (every product keeps `{ tokenHash, adminId }` rows). Work inside a request with no sign-in is a website visitor (the public chatbot,
  * voice, forms); work outside any request (cron, automations) is the system. Never throws: history must not break the work it describes.
  */
 
-/** Session cookie → the collection holding that panel's sessions. The Workspace session is tried first. */
+/** Session cookie → the collection holding that product's sessions. The Workspace session is tried first. */
 const COOKIE_COLLECTIONS: [cookie: string, collection: string][] = [
   ["hub_session", "hub_sessions"], ["lms_session", "admin_sessions"], ["hrms_session", "hrms_sessions"], ["pms_session", "pms_sessions"], ["prms_session", "prms_sessions"],
   ["tms_session", "tms_sessions"], ["fms_session", "fms_sessions"], ["smms_session", "smms_sessions"], ["sop_session", "sop_sessions"], ["dlms_session", "dlms_sessions"],

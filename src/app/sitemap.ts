@@ -2,17 +2,17 @@ import type { MetadataRoute } from "next";
 import fs from "fs";
 import path from "path";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
-import { getRuntimeRecords } from "@/lib/cms/collections/store";
+import { getRuntimeRecords } from "@/lib/products/sitecraft-ai/collections/store";
 import type { BlogPostMeta } from "@/types/content";
 import type { Job } from "@/types/content";
 import type { EngagementCategory } from "@/types/content";
-import { getSeoSiteState } from "@/lib/seo-panel/public";
+import { getSeoSiteState } from "@/lib/products/rankmax-ai/public";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
-import { listPublishedPaths } from "@/lib/cms/public";
+import { listPublishedPaths } from "@/lib/products/sitecraft-ai/public";
 import { loadProducts } from "@/lib/products/server";
 import { isProductsHref, productHref } from "@/lib/products/shared";
-import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/saas/request";
-import { saasSitemap } from "@/lib/saas/seo";
+import { onAppSurface, onSaasHost, saasOrigin } from "@/lib/platform/saas/request";
+import { saasSitemap } from "@/lib/platform/saas/seo";
 
 const APP_DIR = path.join(process.cwd(), "src/app/(site)");
 
@@ -115,8 +115,8 @@ export async function baseSitemap(): Promise<MetadataRoute.Sitemap> {
 }
 
 /**
- * The served sitemap: the code-defined routes with the SEO panel's per-page
- * settings applied (/seo/sitemap, /seo/pages) — pages excluded there, or
+ * The served sitemap: the code-defined routes with the SEO product's per-page
+ * settings applied (/rankmax-ai/sitemap, /rankmax-ai/pages) — pages excluded there, or
  * set to noindex, are dropped; priority / change frequency overrides win.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

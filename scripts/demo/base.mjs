@@ -1,10 +1,10 @@
 /**
- * ULTRA-LARGE MEGA SEEDER (70+ COLLECTIONS, THOUSANDS OF RECORDS, ALL 10 PANELS)
+ * ULTRA-LARGE MEGA SEEDER (70+ COLLECTIONS, THOUSANDS OF RECORDS, ALL 10 PRODUCTS)
  *
  * FIXED VERSION — all collection names, field names, and schema shapes match
- * the application code exactly so every panel dashboard renders correctly.
+ * the application code exactly so every product dashboard renders correctly.
  *
- * Panels:
+ * Products:
  *  1. Admin Command Center
  *  2. HRMS
  *  3. PMS
@@ -78,7 +78,7 @@ function randomName() {
 export async function seedBase(rawDb) {
 
   console.log("==========================================================================");
-  console.log("🚀 ULTRA-LARGE MEGA 10-PANEL DEMO SEEDER (ALL 70+ COLLECTIONS, THOUSANDS)");
+  console.log("🚀 ULTRA-LARGE MEGA 10-PRODUCT DEMO SEEDER (ALL 70+ COLLECTIONS, THOUSANDS)");
   console.log("==========================================================================");
 
   {
@@ -100,7 +100,7 @@ export async function seedBase(rawDb) {
     const defaultPasswordHash = hashPassword("Admin#2026pw");
 
     // =========================================================================
-    // 1. CENTRAL IDENTITY ROSTER & HRMS PANEL (23 Collections, 150 Employees)
+    // 1. CENTRAL IDENTITY ROSTER & HRMS Product (23 Collections, 150 Employees)
     // =========================================================================
     console.log("\n[1/10] Seeding Mega Central Roster & Complete HRMS Suite (150+ Employees)...");
     const adminUsersCol = db.collection("admin_users");
@@ -422,7 +422,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ HRMS Suite: 150 Employees, 1050 Attendance, 100 Leave Requests, 300 Payslips, 40 Salary Revisions, 30 Offers.");
 
     // =========================================================================
-    // 2. PMS PANEL — schema-aligned with pms_projects Project interface
+    // 2. PMS Product — schema-aligned with pms_projects Project interface
     // =========================================================================
     console.log("\n[2/10] Seeding Mega PMS Suite (30 Clients, 30 Projects, 500 Tasks, 600 Timesheets)...");
     const clientCol = db.collection("pms_clients");
@@ -591,7 +591,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ PMS Suite: 30 Clients, 30 Projects, 500 Tasks, 600 Timesheets, 50 Notifications, 200 Audit Logs.");
 
     // =========================================================================
-    // 3. PRMS PANEL (20 Collections, 80 POs, 100 Assets, 50 Inventory Items)
+    // 3. PRMS Product (20 Collections, 80 POs, 100 Assets, 50 Inventory Items)
     // =========================================================================
     console.log("\n[3/10] Seeding Mega PRMS Procurement Suite...");
     const vendorCol = db.collection("prms_vendors");
@@ -704,7 +704,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ PRMS Suite: 30 Vendors, 80 POs/GRNs/Invoices/Payments, 100 Assets, 50 Inventory, 15 Subscriptions, 200 Audits.");
 
     // =========================================================================
-    // 4. TMS PANEL (14 Collections, 6 Programs, 24 Batches, 200 Students)
+    // 4. TMS Product (14 Collections, 6 Programs, 24 Batches, 200 Students)
     // =========================================================================
     console.log("\n[4/10] Seeding Mega TMS Training Management Suite (200 Students)...");
     const programCol = db.collection("training_programs");
@@ -772,7 +772,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ TMS Suite: 6 Programs, 24 Batches, 200 Students, 100 Certs, 100 Placements, 50 Applications.");
 
     // =========================================================================
-    // 5. FMS PANEL (10+ Collections, 100 Invoices, 400 Transactions)
+    // 5. FMS Product (10+ Collections, 100 Invoices, 400 Transactions)
     // =========================================================================
     console.log("\n[5/10] Seeding Mega FMS Accounting Suite (100 Invoices, 400 Ledger Txns)...");
     const invoiceCol = db.collection("fms_invoices");
@@ -1048,7 +1048,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ Messenger Suite: chat_users synced, 10 Channels, 1,500 channel_messages, 50 DM convs, 1,000 direct_messages, 200 Chatbot Sessions.");
 
     // =========================================================================
-    // 7. LMS / CRM PANEL (300 Leads, 4 Campaigns, 1,200 Campaign Metrics)
+    // 7. LMS / CRM Product (300 Leads, 4 Campaigns, 1,200 Campaign Metrics)
     // =========================================================================
     console.log("\n[7/10] Seeding Mega LMS / CRM Lead Management Suite (300 Leads)...");
     const leadsCol = db.collection("leads");
@@ -1187,7 +1187,7 @@ export async function seedBase(rawDb) {
     console.log("  ✓ Portal Suite: 5 Job Postings, 200 Candidate Applications, 100 Interviews.");
 
     // =========================================================================
-    // 9. WORKSPACE PANEL (3 Collections, 20 Boards, 120 Cards)
+    // 9. WORKSPACE Product (3 Collections, 20 Boards, 120 Cards)
     // =========================================================================
     console.log("\n[9/10] Seeding Mega Workspace Suite (20 Boards, 120 Cards)...");
     const boardCol = db.collection("workspace_boards");
@@ -1218,9 +1218,9 @@ export async function seedBase(rawDb) {
     console.log("  ✓ Workspace Suite: 20 Boards, 120 Task Cards, Live Projects.");
 
     // =========================================================================
-    // 10. CENTRAL CROSS-PANEL AUDIT PIPELINE (500 Logs)
+    // 10. CENTRAL CROSS-Product AUDIT PIPELINE (500 Logs)
     // =========================================================================
-    console.log("\n[10/10] Seeding Central Cross-Panel Audit Activity Feed (500 Audit Logs)...");
+    console.log("\n[10/10] Seeding Central Cross-Product Audit Activity Feed (500 Audit Logs)...");
     const auditCol = db.collection("activity_logs");
     const modules = ["admin", "hrms", "pms", "prms", "tms", "fms", "messenger", "lms", "portal", "workspace"];
     const actions = ["create", "update", "approve", "delete", "export", "login", "sync"];
@@ -1240,10 +1240,10 @@ export async function seedBase(rawDb) {
       });
     }
     await auditCol.insertMany(auditLogs);
-    console.log("  ✓ 500 Central Cross-Panel Audit Activity Logs Populated.");
+    console.log("  ✓ 500 Central Cross-Product Audit Activity Logs Populated.");
 
     console.log("\n==========================================================================");
-    console.log("✨ ALL 70+ COLLECTIONS ACROSS ALL 10 PANELS FULLY SEEDED ✨");
+    console.log("✨ ALL 70+ COLLECTIONS ACROSS ALL 10 PRODUCTS FULLY SEEDED ✨");
     console.log("==========================================================================");
     console.log("\nSummary:");
     console.log("  • 150 Employees (admin_users + hrms_employees + chat_users)");
@@ -1257,6 +1257,6 @@ export async function seedBase(rawDb) {
     console.log("  • 20 Workspace Boards, 120 Cards");
     console.log("  • 500 Central Audit Logs");
     if (skippedDup) console.log(`\n  ℹ Skipped ${skippedDup} base rows that clashed with existing unique indexes (demo layer seeds those modules).`);
-    console.log("\nAll panels are now ready for end-to-end testing. 🚀");
+    console.log("\nAll products are now ready for end-to-end testing. 🚀");
   }
 }

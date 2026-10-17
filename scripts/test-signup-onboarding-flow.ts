@@ -7,12 +7,12 @@
  *
  * Checks:
  *  - a fresh sign-up in open mode (no e-mail gate) creates the company at once and
- *    hands the owner off to /workspace (not a setup wizard); the owner starts unverified;
+ *    hands the owner off to /commandos (not a setup wizard); the owner starts unverified;
  *  - approval mode stores the request straight away (no e-mail step); approving creates the same company with the same fresh setup state;
  *  - the sign-in landing (`postLoginTarget`, pure): an owner whose setup is
- *    neither completed nor skipped lands on /workspace/onboarding at sign-in
+ *    neither completed nor skipped lands on /commandos/onboarding at sign-in
  *    (an explicit `next` wins); completed/skipped owners, invited employees and
- *    the platform owner's company never do; /workspace itself never redirects;
+ *    the platform owner's company never do; /commandos itself never redirects;
  *    the "Complete setup" strip shows until setup is completed (skipped included);
  *  - the real onboarding state (`companies.onboarding`) drives it, including an
  *    invited employee accepting an invitation;
@@ -83,20 +83,20 @@ async function run() {
     assert.ok(!/useState\(\s*(0|1)\s*\)[^\n]*step/i.test(form) && !/\bstep\b/i.test(form.replace(/\/\/.*$/gm, "")), "no multi-step flow in the form");
   });
 
-  console.log("fresh sign-up -> handoff -> /workspace");
+  console.log("fresh sign-up -> handoff -> /commandos");
   let freshCompanyId = "";
-  await check("an open-mode sign-up creates the company at once and a handoff whose next is /workspace", async () => {
+  await check("an open-mode sign-up creates the company at once and a handoff whose next is /commandos", async () => {
     const started = await startSignup({ companyName: "Fresh Co", slug: "freshco", name: "Fiona Founder", email: "fiona@fresh.test", password: "correct-horse-battery", businessCategories: sampleBusinessInput().categories, businessSubCategories: sampleBusinessInput().subCategories, acceptTerms: true }, { hostHint: "localhost:3000", clientKey: "t1" });
     assert.ok(started.ok && started.kind === "created", JSON.stringify(started));
     assert.equal(await db.collection("pending_signups").countDocuments({ email: "fiona@fresh.test" }), 0, "no pending sign-up / confirmation step in open mode");
     const url = new URL(started.redirectTo);
     assert.equal(url.host, "freshco.localhost:3000");
-    assert.equal(url.pathname, "/workspace/handoff");
+    assert.equal(url.pathname, "/commandos/handoff");
     const company = await db.collection(COMPANIES_COLLECTION).findOne({ slug: "freshco" });
     freshCompanyId = String(company!._id);
     const handoff = await consumeHandoff(url.searchParams.get("token")!, freshCompanyId);
     assert.ok(handoff, "handoff is valid on the new company");
-    assert.equal(handoff!.next, "/workspace", "the handoff lands on the Workspace home, where onboarding takes over");
+    assert.equal(handoff!.next, "/commandos", "the handoff lands on the Workspace home, where onboarding takes over");
     assert.equal(await consumeHandoff(url.searchParams.get("token")!, freshCompanyId), null, "single use");
   });
   await check("the same e-mail may sign up another company (user e-mail is unique per company); a taken address is refused", async () => {
@@ -126,7 +126,7 @@ async function run() {
     assert.ok(pending, "the request waits in the queue");
     const res = await approveSignup(String(pending!._id), { hostHint: "localhost:3000" });
     assert.ok(res.ok, res.ok ? "" : res.error);
-    const mail = emailsTo("ann@approved.test").find((m) => m.includes("/workspace/login"));
+    const mail = emailsTo("ann@approved.test").find((m) => m.includes("/commandos/login"));
     assert.ok(mail, "the approval e-mail links to the Workspace sign-in");
     const approvedOwner = await db.collection("admin_users").findOne({ companyId: (res as { companyId: string }).companyId as never, email: "ann@approved.test" });
     assert.equal(approvedOwner?.emailVerified, false, "an approved owner starts unverified");
@@ -149,17 +149,17 @@ async function run() {
 
   console.log("sign-in landing (pure)");
   const done = new Date();
-  await check("fresh company and an existing never-finished company: owner lands on /workspace/onboarding", () => {
+  await check("fresh company and an existing never-finished company: owner lands on /commandos/onboarding", () => {
     assert.equal(landing(), ONBOARDING_PATH);
     assert.equal(landing({ state: { completedAt: null, dismissedAt: null } }), ONBOARDING_PATH, "same for companies that predate onboarding");
-    assert.equal(WORKSPACE_HOME, "/workspace");
+    assert.equal(WORKSPACE_HOME, "/commandos");
   });
   await check("skipped or completed setup lands on the dashboard", () => {
     assert.equal(landing({ state: { completedAt: null, dismissedAt: done } }), WORKSPACE_HOME);
     assert.equal(landing({ state: { completedAt: done, dismissedAt: null } }), WORKSPACE_HOME);
   });
-  await check("an explicit valid `next` (deep link, panel login) is honoured, never overridden", () => {
-    for (const next of ["/hrms", "/workspace/crm/leads", "/workspace/settings/billing", "/workspace"]) assert.equal(landing({ requestedNext: next }), next);
+  await check("an explicit valid `next` (deep link, product login) is honoured, never overridden", () => {
+    for (const next of ["/talentos", "/commandos/crm/leads", "/commandos/settings/billing", "/commandos"]) assert.equal(landing({ requestedNext: next }), next);
   });
   await check("invited employees, non-Super-Admin roles and the platform owner's company never land on onboarding", () => {
     for (const roles of [["employee"], ["pms_employee", "workspace_member"], ["hr", "employee", "chat_hr"], []]) assert.equal(landing({ isOwner: isOnboardingOwner(roles) }), WORKSPACE_HOME, roles.join(","));
@@ -176,8 +176,8 @@ async function run() {
     assert.equal(setupIsOpen(f({ state: { completedAt: null, dismissedAt: done } })), false, "skipped: no login landing");
   });
   await check("no page redirect decision exists on /workspace: the dashboard and the gate module have none", () => {
-    const page = fs.readFileSync(path.join(process.cwd(), "src/app/workspace/(protected)/page.tsx"), "utf8");
-    assert.ok(!page.includes("/workspace/onboarding"), "the dashboard has no onboarding redirect");
+    const page = fs.readFileSync(path.join(process.cwd(), "src/app/commandos/(protected)/page.tsx"), "utf8");
+    assert.ok(!page.includes("/commandos/onboarding"), "the dashboard has no onboarding redirect");
     assert.ok(!page.includes("onboardingGateTarget"));
     const gate = fs.readFileSync(path.join(process.cwd(), "src/lib/platform/onboarding/gate.ts"), "utf8");
     assert.ok(!/onboardingGateTarget/.test(gate), "the old page gate is gone");
@@ -223,11 +223,11 @@ async function run() {
   await check("login and handoff use the landing rule; the wizard, settings and upgrade pages sit under /workspace; handoff and approval land in the Workspace", () => {
     const root = process.cwd();
     const read = (rel: string) => fs.readFileSync(path.join(root, rel), "utf8");
-    assert.ok(read("src/app/workspace/login/actions.ts").includes("loginLanding") && read("src/app/workspace/handoff/route.ts").includes("loginLanding"), "login and handoff share the one landing rule");
-    assert.ok(!read("src/app/workspace/(protected)/onboarding/page.tsx").includes('redirect("/workspace")') || read("src/app/workspace/(protected)/onboarding/page.tsx").includes("super_admin"), "the wizard only bounces non-owners");
-    assert.ok(fs.existsSync(path.join(root, "src/app/workspace/(protected)/onboarding/OnboardingWizard.tsx")));
+    assert.ok(read("src/app/commandos/login/actions.ts").includes("loginLanding") && read("src/app/commandos/handoff/route.ts").includes("loginLanding"), "login and handoff share the one landing rule");
+    assert.ok(!read("src/app/commandos/(protected)/onboarding/page.tsx").includes('redirect("/commandos")') || read("src/app/commandos/(protected)/onboarding/page.tsx").includes("super_admin"), "the wizard only bounces non-owners");
+    assert.ok(fs.existsSync(path.join(root, "src/app/commandos/(protected)/onboarding/OnboardingWizard.tsx")));
     assert.ok(!read("src/lib/platform/signup.ts").includes('next: "/onboarding"'));
-    assert.ok(read("src/lib/platform/signup.ts").includes('next: "/workspace"'));
+    assert.ok(read("src/lib/platform/signup.ts").includes('next: "/commandos"'));
   });
 }
 

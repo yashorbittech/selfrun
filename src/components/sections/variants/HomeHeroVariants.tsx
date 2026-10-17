@@ -66,7 +66,7 @@ export function HomeHeroCentered(p: HomeHeroProps) {
   );
 }
 
-/** Left-aligned giant headline on a gradient panel with status cards. */
+/** Left-aligned giant headline on a gradient product with status cards. */
 export function HomeHeroSpotlight(p: HomeHeroProps) {
   const cards = [
     { title: p.statusTitle, text: p.statusText, icon: CheckCircle2 },

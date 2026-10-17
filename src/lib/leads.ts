@@ -508,7 +508,7 @@ export interface StaleLeadsSummary {
 
 /** Global, unfiltered version of the dashboard's stale-lead facet — used by the
  * topbar notifications bell, which reflects the current real backlog across the
- * whole panel rather than whatever filters happen to be active on the dashboard. */
+ * whole product rather than whatever filters happen to be active on the dashboard. */
 export async function getStaleLeadsSummary(): Promise<StaleLeadsSummary> {
   const staleThreshold = staleThresholdDate();
   const filter = { status: { $in: ["new", "in_progress"] }, createdAt: { $lte: staleThreshold } };

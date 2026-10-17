@@ -146,7 +146,7 @@ async function run() {
   });
 
   console.log("getCompanyDetail");
-  await check("detail: panels, domains, last sign-in", async () => {
+  await check("detail: products, domains, last sign-in", async () => {
     const d = (await getCompanyDetail(acme.companyId))!;
     assert.deepEqual(d.enabledPanels, ["Staff Hub", "HR & Payroll"]);
     assert.equal(d.domainRecords[0].host, "acme.localhost");
@@ -210,8 +210,8 @@ async function run() {
     assert.equal(ownerUser?.emailVerified, false, "an approved owner starts with an unverified email");
     const mail = emailsTo("peter@initech.test");
     assert.equal(mail.length, 2, "the approval e-mail and the email-verification e-mail");
-    assert.ok(mail.some((m) => m.includes("http://initech.localhost:3000/workspace/login")), mail.join("\n"));
-    assert.ok(mail.some((m) => m.includes("http://initech.localhost:3000/workspace/verify-email?token=")));
+    assert.ok(mail.some((m) => m.includes("http://initech.localhost:3000/commandos/login")), mail.join("\n"));
+    assert.ok(mail.some((m) => m.includes("http://initech.localhost:3000/commandos/verify-email?token=")));
   });
   await check("approving twice is refused (atomic claim)", async () => {
     const res = await approveSignup(initechId, { hostHint: null });

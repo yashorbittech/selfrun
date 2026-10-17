@@ -6,7 +6,7 @@ import { ago } from "./lib.mjs";
 const D = "demo-sup-";
 
 const REQUESTS = [
-  ["help", "How do I add a new employee and give them access to Projects?", "I created the employee in HR but they cannot see the Projects panel.", "hrms", "normal", null, "resolved", "support", 18, "Open Settings → Users, pick the employee and add the Projects role. Access applies on their next sign-in."],
+  ["help", "How do I add a new employee and give them access to Projects?", "I created the employee in HR but they cannot see the Projects product.", "hrms", "normal", null, "resolved", "support", 18, "Open Settings → Users, pick the employee and add the Projects role. Access applies on their next sign-in."],
   ["bug", "Payslip PDF shows the wrong month", "Downloaded the payslip for September but the header says August.", "hrms", "high", "major", "in-progress", "engineering", 6, "We can reproduce this and a fix is being tested."],
   ["technical", "Invoice email is not reaching the client", "FMS says the invoice was sent, but the client has not received anything.", "fms", "high", "major", "waiting", "support", 4, "Could you confirm the client's email address and check their spam folder?"],
   ["feature", "Bulk import for leads from Excel", "We receive 300+ leads after every campaign and add them one by one.", "lms", "normal", null, "triaged", "product", 9, null],

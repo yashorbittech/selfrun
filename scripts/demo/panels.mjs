@@ -1,4 +1,4 @@
-// Cross-panel repair + fill: removes the wrong-shaped docs the legacy base seeder wrote (they crash pages), then seeds schema-correct data for
+// Cross-product repair + fill: removes the wrong-shaped docs the legacy base seeder wrote (they crash pages), then seeds schema-correct data for
 // HRMS (org, employees, leave), FMS (chart of accounts, ledger transactions), TMS applications and the audit trail of every module.
 import { rng, rint, pick, chance, weighted, shuffle, ago, audit, dayAgo, dayAhead, isoDay, personName, slug, phone, CITIES, insertAll } from "./lib.mjs";
 
@@ -208,5 +208,5 @@ export async function seedPanels(db, tms, pms) {
   await insertAll(db.collection("fms_transactions"), transactions);
   await insertAll(db.collection("training_applications"), applications);
   for (const [col, docs] of Object.entries(auditDocs)) await insertAll(db.collection(col), docs);
-  console.log(`  ✓ Panels: removed ${removed} legacy-shaped docs, backfilled ${backfilled} audit stamps; ${departments.length} departments, ${designations.length} designations, ${employees.length} employees, ${requests.length} leave requests, ${runs.length} payroll runs / ${payslips.length} payslips, ${accounts.length} accounts, ${transactions.length} ledger transactions, ${applications.length} TMS applications, ${Object.values(auditDocs).flat().length} audit entries`);
+  console.log(`  ✓ Products: removed ${removed} legacy-shaped docs, backfilled ${backfilled} audit stamps; ${departments.length} departments, ${designations.length} designations, ${employees.length} employees, ${requests.length} leave requests, ${runs.length} payroll runs / ${payslips.length} payslips, ${accounts.length} accounts, ${transactions.length} ledger transactions, ${applications.length} TMS applications, ${Object.values(auditDocs).flat().length} audit entries`);
 }

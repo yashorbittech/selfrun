@@ -1,14 +1,14 @@
 import "server-only";
 import { STARTER_CONTACT_FIELDS, STARTER_SITE_INFO_DEFAULTS } from "@/lib/platform/website/starter-defaults";
 import { getDb } from "@/lib/mongodb";
-import { COLLECTIONS } from "@/lib/cms/db";
-import { createPage, getPageByPath, publishPage } from "@/lib/cms/pages";
-import { createNavItem, listNavItems } from "@/lib/cms/nav";
-import { createFooterColumn, createFooterLink, listFooterColumns } from "@/lib/cms/footer";
-import { getSiteInfoForEdit, saveSiteInfo } from "@/lib/cms/site-info";
-import { parseSiteInfo, type SiteInfo } from "@/lib/cms/site-info-shared";
-import { saveFormFields } from "@/lib/cms/forms";
-import { parsePageSeo } from "@/lib/cms/page-seo";
+import { COLLECTIONS } from "@/lib/products/sitecraft-ai/db";
+import { createPage, getPageByPath, publishPage } from "@/lib/products/sitecraft-ai/pages";
+import { createNavItem, listNavItems } from "@/lib/products/sitecraft-ai/nav";
+import { createFooterColumn, createFooterLink, listFooterColumns } from "@/lib/products/sitecraft-ai/footer";
+import { getSiteInfoForEdit, saveSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
+import { parseSiteInfo, type SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
+import { saveFormFields } from "@/lib/products/sitecraft-ai/forms";
+import { parsePageSeo } from "@/lib/products/sitecraft-ai/page-seo";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { starterFooter, starterNavigation, starterPages } from "@/lib/platform/website/starter-template";
 import { fillName, pickStarterPack, type StarterPack } from "@/lib/platform/website/starter-packs";
@@ -17,8 +17,8 @@ import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION } from "@/lib/platform/tenancy/companies";
 import type { BusinessSelection } from "@/lib/platform/business-taxonomy";
 import { categoryFallbackPack } from "@/lib/platform/website/ai/fallback";
-import { getActiveThemeKey, installThemePreset, setActiveTheme } from "@/lib/cms/theme";
-import { DEFAULT_DISPLAY } from "@/lib/cms/site-info-shared";
+import { getActiveThemeKey, installThemePreset, setActiveTheme } from "@/lib/products/sitecraft-ai/theme";
+import { DEFAULT_DISPLAY } from "@/lib/products/sitecraft-ai/site-info-shared";
 
 /**
  * Publishes the neutral starter website into the CURRENT company's CMS —

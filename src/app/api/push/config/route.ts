@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { onAppSurface } from "@/lib/saas/request";
+import { onAppSurface } from "@/lib/platform/saas/request";
 import { pushConfigured, vapidPublicKey } from "@/lib/push/vapid";
 
 /** Whether push is available on this host and the public key a browser needs to subscribe. */

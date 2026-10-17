@@ -1,6 +1,6 @@
 /**
- * The one header every panel page opens with, under the shared "Back to Workspace" action row (PanelBackBar), whose
- * "Workspace › Panel" trail is the page's only breadcrumb:
+ * The one header every product page opens with, under the shared "Back to Workspace" action row (PanelBackBar), whose
+ * "Workspace › Product" trail is the page's only breadcrumb:
  *
  *   heading section (title + description left, CTAs right) → search & filters
  *

@@ -1,9 +1,9 @@
 "use client";
 
 import { Check } from "lucide-react";
-import ThemeThumbnail from "@/components/cms/theme/ThemeThumbnail";
-import type { ThemeTokens } from "@/lib/cms/theme-shared";
-import type { ThemeComponentSelections } from "@/lib/cms/component-variants";
+import ThemeThumbnail from "@/components/products/sitecraft-ai/theme/ThemeThumbnail";
+import type { ThemeTokens } from "@/lib/products/sitecraft-ai/theme-shared";
+import type { ThemeComponentSelections } from "@/lib/products/sitecraft-ai/component-variants";
 import { cn } from "@/lib/utils";
 
 export interface PickerTheme {
@@ -16,7 +16,7 @@ export interface PickerTheme {
 
 /**
  * Every theme as a small preview card — pick one and it becomes the look of the
- * website and every panel. Compact: a scrollable grid, no wizard-sized panels.
+ * website and every product. Compact: a scrollable grid, no wizard-sized products.
  */
 export default function ThemePicker({ themes, value, onChange }: { themes: PickerTheme[]; value: string; onChange: (key: string) => void }) {
   return (

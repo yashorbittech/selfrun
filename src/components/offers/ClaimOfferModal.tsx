@@ -14,11 +14,11 @@ import { useOfferTracking } from "@/lib/useOfferTracking";
 import LiveCountdown from "@/components/offers/LiveCountdown";
 import { formatOfferBadge, estimateSavings } from "@/lib/offers/constants";
 import { claimProgress } from "@/lib/offers/live";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import { formatCurrency } from "@/lib/utils";
 import type { SerializedOffer } from "@/lib/offers/offers";
 import type { Audience } from "@/lib/offers/constants";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function claimAudienceFor(offer: SerializedOffer): Extract<Audience, "CLIENT" | "STUDENT" | "INTERN" | "HIRING"> {
   if (offer.category === "internship-program") return "INTERN";
@@ -67,7 +67,7 @@ export default function ClaimOfferModal({
   useEffect(() => {
     if (!offer) return;
     let cancelled = false;
-    fetch("/api/portal/wallet-balance", { cache: "no-store" })
+    fetch("/api/clientos/wallet-balance", { cache: "no-store" })
       .then((r) => r.json())
       .then((j) => {
         if (!cancelled && j?.signedIn && j.available > 0) setWallet({ email: j.email, available: j.available });

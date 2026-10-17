@@ -44,15 +44,15 @@ export default function SupportSidebar({ openRequests = 0, onNavigate, collapsed
   const common = { collapsed, onNavigate };
   return (
     <nav className="flex h-full flex-col gap-1 p-3">
-      <NavLink {...common} href="/support" label="Dashboard" icon={LayoutDashboard} exact />
+      <NavLink {...common} href="/resolveiq" label="Dashboard" icon={LayoutDashboard} exact />
 
       <SectionLabel collapsed={collapsed}>Get help</SectionLabel>
-      <NavLink {...common} href="/support/assistant" label="Help Assistant" icon={Bot} />
-      <NavLink {...common} href="/support/help" label="Help Center" icon={BookOpen} />
+      <NavLink {...common} href="/resolveiq/assistant" label="Help Assistant" icon={Bot} />
+      <NavLink {...common} href="/resolveiq/help" label="Help Center" icon={BookOpen} />
 
       <SectionLabel collapsed={collapsed}>Support</SectionLabel>
-      <NavLink {...common} href="/support/requests/new" label="New Request" icon={PlusCircle} exact />
-      <NavLink {...common} href="/support/requests" label="My Requests" icon={Inbox} exact badge={openRequests} />
+      <NavLink {...common} href="/resolveiq/requests/new" label="New Request" icon={PlusCircle} exact />
+      <NavLink {...common} href="/resolveiq/requests" label="My Requests" icon={Inbox} exact badge={openRequests} />
     </nav>
   );
 }

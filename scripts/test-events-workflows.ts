@@ -98,7 +98,7 @@ async function main() {
   await runAsCompany(B, async () => {
     await (await getDb()).collection("admin_users").insertOne({ _id: salesB, email: "sales@beta.test", roles: ["lms_manager"], createdAt: now });
   });
-  const lead = (name = "Asha Verma", extra: Record<string, string | number | boolean> = {}) => ({ entity: { type: "lead", id: randomUUID(), label: name, url: "/lms/leads/x" }, actorId: String(userA), data: { name, email: "asha@example.com", phone: "+91 98765 43210", ...extra } });
+  const lead = (name = "Asha Verma", extra: Record<string, string | number | boolean> = {}) => ({ entity: { type: "lead", id: randomUUID(), label: name, url: "/dealflow-ai/leads/x" }, actorId: String(userA), data: { name, email: "asha@example.com", phone: "+91 98765 43210", ...extra } });
 
   console.log("catalogue");
   await check("the eleven event types, each with a label, fields and a sample", () => {
@@ -189,7 +189,7 @@ async function main() {
   await check("values are HTML-escaped in emails", () => {
     const evil = { name: `<script>alert(1)</script>`, email: `"><img src=x onerror=1>`, actorEmail: "a@b.co" };
     assert.equal(renderTemplate("{{name}}", evil, { html: true }), "&lt;script&gt;alert(1)&lt;/script&gt;");
-    const mail = buildWorkflowEmail({ type: "email", to: "{{actorEmail}}", subject: "Lead {{name}}\r\nBcc: x@y.z", body: "Hello {{name}}\n\nContact: {{email}}" }, evil, { brand: "Alpha <b>", link: "https://alpha.example/lms/leads/x" });
+    const mail = buildWorkflowEmail({ type: "email", to: "{{actorEmail}}", subject: "Lead {{name}}\r\nBcc: x@y.z", body: "Hello {{name}}\n\nContact: {{email}}" }, evil, { brand: "Alpha <b>", link: "https://alpha.example/dealflow-ai/leads/x" });
     assert.equal(mail.to, "a@b.co");
     assert.ok(!mail.html.includes("<script>") && !mail.html.includes("<img"), "no raw markup from event data");
     assert.ok(mail.html.includes("&lt;script&gt;alert(1)&lt;/script&gt;"));
@@ -258,7 +258,7 @@ async function main() {
       assert.equal(got.length, 1);
       assert.equal(got[0].title, "New lead: Rohit Shah");
       assert.equal(got[0].body, "asha@example.com");
-      assert.equal(got[0].url, "/lms/leads/x");
+      assert.equal(got[0].url, "/dealflow-ai/leads/x");
       assert.equal(got[0].read, false);
       assert.equal((await listNotifications(String(userA))).length, 0, "only the role's holders");
       const runs = await listWorkflowRuns(notifyWf);
@@ -308,7 +308,7 @@ async function main() {
     await runAsCompany(A, async () => {
       const w = await createWorkflow(wf({ name: "mail", trigger: "invoice.created", actions: [{ type: "email", to: "finance@alpha.test", subject: "Invoice {{invoiceNumber}}", body: "Hello" }, { type: "email", to: "{{actorEmail}}", subject: "You created {{invoiceNumber}}", body: "Hi" }] }), null);
       assert.ok(w.ok);
-      await emitEvent("invoice.created", { entity: { type: "invoice", id: "i2", label: "INV-2", url: "/fms/invoices/i2" }, actorId: String(userA), data: { invoiceNumber: "INV-2" } });
+      await emitEvent("invoice.created", { entity: { type: "invoice", id: "i2", label: "INV-2", url: "/cashflow-ai/invoices/i2" }, actorId: String(userA), data: { invoiceNumber: "INV-2" } });
       const run = (await listWorkflowRuns(w.workflow.id))[0];
       assert.equal(run.status, "success", run.error ?? "");
       assert.deepEqual(run.results.map((r) => r.detail), ["Sent to finance@alpha.test", "Sent to owner@alpha.test"]);
@@ -464,31 +464,31 @@ async function main() {
     mock.close();
   }
 
-  console.log("panel functions emit");
+  console.log("product functions emit");
   await check("client, project, task (completed once), employee, invoice (paid once), lead", async () => {
     await runAsCompany(A, async () => {
       const actor = String(userA);
       const count = async (type: string) => (await listEvents({ types: [type] })).total;
       const base = { lead: await count("lead.created"), status: await count("lead.status_changed") };
 
-      const { createClient } = await import("@/lib/pms/clients");
+      const { createClient } = await import("@/lib/products/sprintos/clients");
       const client = await createClient(
         { companyName: "Northwind", industry: "Retail", website: null, status: "active" as never, primaryContact: { name: "Ravi", email: "ravi@nw.test", phone: null, designation: null }, billing: { addressLine: null, city: null, country: null, gstin: null, currency: "INR", paymentTermsDays: null }, notes: null, tags: [] },
         actor,
       );
       const clientEvents = await listEvents({ types: ["client.created"] });
       assert.equal(clientEvents.items[0].label, "Northwind");
-      assert.equal(clientEvents.items[0].url, `/pms/clients/${client._id}`);
+      assert.equal(clientEvents.items[0].url, `/sprintos/clients/${client._id}`);
       assert.equal(clientEvents.items[0].actorEmail, "owner@alpha.test");
 
-      const { createProject } = await import("@/lib/pms/projects");
+      const { createProject } = await import("@/lib/products/sprintos/projects");
       const project = await createProject(
         { name: "Redesign", clientId: client._id, category: null, description: null, priority: "medium" as never, status: "planning" as never, startDate: null, endDate: null, estimatedBudget: 1000, estimatedHours: null, currency: "INR", projectManagerId: null, technologies: [], progressPercent: 0 },
         actor,
       );
       assert.equal(await count("project.created"), 1);
 
-      const { createTask, updateTask, moveTask } = await import("@/lib/pms/tasks");
+      const { createTask, updateTask, moveTask } = await import("@/lib/products/sprintos/tasks");
       const taskData = { title: "Home page", description: null, status: "todo" as never, priority: "medium" as never, assigneeId: null, labels: [], startDate: null, dueDate: null, estimateHours: null, parentTaskId: null };
       const task = await createTask(project._id, taskData, actor);
       assert.equal(await count("task.created"), 2, "this one + the SSRF test's hand-emitted one");
@@ -504,7 +504,7 @@ async function main() {
       await moveTask(task._id, "done" as never, null, null, actor);
       assert.equal(await count("task.completed"), 2, "reopened then done again");
 
-      const { createEmployee } = await import("@/lib/hrms/employees");
+      const { createEmployee } = await import("@/lib/products/talentos/employees");
       await createEmployee(
         {
           firstName: "Meera",
@@ -519,7 +519,7 @@ async function main() {
       );
       assert.equal((await listEvents({ types: ["employee.created"] })).items[0].label, "Meera Nair");
 
-      const { createInvoice, applyReceiptToInvoice } = await import("@/lib/fms/invoices");
+      const { createInvoice, applyReceiptToInvoice } = await import("@/lib/products/cashflow-ai/invoices");
       const invoice = await createInvoice({ customerId: client._id, customerName: "Northwind", projectId: null, invoiceDate: "2026-01-10", dueDate: "2026-01-31", items: [{ description: "Work", quantity: 1, unitPrice: 1000, taxRate: 0 } as never], discount: 0, currency: "INR", paymentTerms: null, poNumber: null, notes: null }, actor);
       assert.equal(await count("invoice.created"), 2, "this one + the email test's hand-emitted one");
       const paidBefore = await count("invoice.paid");

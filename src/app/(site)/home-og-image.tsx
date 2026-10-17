@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
-import { getActiveThemeState } from "@/lib/cms/theme";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 import { brandInitials } from "@/lib/platform/branding/types";
 

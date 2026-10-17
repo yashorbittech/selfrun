@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AlertTriangle, Check, CheckCircle2, Clock, Copy, Download, ExternalLink, Globe, Laptop, Loader2, Monitor, PackageOpen, RefreshCw, Smartphone, Terminal, Wand2 } from "lucide-react";
 import PanelTabs from "@/components/platform/panel/PanelTabs";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { InstallCard } from "@/components/pwa/InstallApp";

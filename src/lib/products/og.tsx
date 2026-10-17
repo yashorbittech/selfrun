@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
-import { getSiteInfo } from "@/lib/cms/site-info";
-import { getActiveThemeState } from "@/lib/cms/theme";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
 import { requireProducts } from "@/lib/products/server";
 import { valueLine, type StoredProduct } from "@/lib/products/shared";
 

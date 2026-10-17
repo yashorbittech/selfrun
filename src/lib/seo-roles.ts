@@ -1,13 +1,13 @@
 /**
- * SEO Panel role + permission model. Like every other panel, access is gated
+ * SEO Product role + permission model. Like every other product, access is gated
  * on the shared `admin_users.roles` array — there is no separate SEO user
  * store. Unlike SOP, SEO access is never implied by an HRMS role: SEO is a
  * specialist function, so it needs an explicit `seo_*` role (or super_admin).
  *
  * Permissions are the eighteen granular capabilities from the SEO spec. Every
  * predicate is Super-Admin-override-aware (`resolvePermission`), so the Super
- * Admin can dial individual capabilities per user at `/workspace/users` (catalog
- * entries are derived from this file in `src/lib/workspace/permission-catalog.ts`).
+ * Admin can dial individual capabilities per user at `/commandos/users` (catalog
+ * entries are derived from this file in `src/lib/commandos/permission-catalog.ts`).
  *
  * This file is pure (no server-only imports) so client components can use it
  * to hide buttons — hiding a button is never the security boundary; every
@@ -87,7 +87,7 @@ export const SEO_PERMISSION_KEY: Record<SeoPermission, string> = {
 };
 
 export const SEO_PERMISSION_META: Record<SeoPermission, { label: string; description: string }> = {
-  VIEW: { label: "View", description: "Open the SEO panel and read every SEO dataset." },
+  VIEW: { label: "View", description: "Open the SEO product and read every SEO dataset." },
   CREATE: { label: "Create", description: "Add SEO records such as manual issues and pages." },
   EDIT: { label: "Edit", description: "Update SEO issues and recommendations (status, assignee, notes)." },
   DELETE: { label: "Delete", description: "Delete SEO records (keywords, backlinks, competitors, schema, tasks)." },
@@ -103,7 +103,7 @@ export const SEO_PERMISSION_META: Record<SeoPermission, { label: string; descrip
   MANAGE_COMPETITORS: { label: "Manage competitors", description: "Add competitors and record their estimated SEO data." },
   MANAGE_TASKS: { label: "Manage tasks", description: "Create SEO tasks and work on assigned ones (managers: the whole team's)." },
   EXPORT_REPORTS: { label: "Export reports", description: "Download SEO reports as CSV / Excel." },
-  MANAGE_INTEGRATIONS: { label: "Manage integrations & settings", description: "Configure Search Console, Analytics, PageSpeed and panel settings." },
+  MANAGE_INTEGRATIONS: { label: "Manage integrations & settings", description: "Configure Search Console, Analytics, PageSpeed and product settings." },
   VIEW_AUDIT: { label: "View audit", description: "Read the SEO audit trail." },
 };
 
@@ -137,7 +137,7 @@ export function normalizeSeoRoles(value: unknown): SeoRole[] {
   return Array.from(new Set(value.filter(isSeoRole)));
 }
 
-/** Can open the SEO panel at `/seo/*`. */
+/** Can open the SEO product at `/rankmax-ai/*`. */
 export function hasSeoAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeSeoRoles(roles ?? []).length > 0;
 }

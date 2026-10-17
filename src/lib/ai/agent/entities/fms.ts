@@ -1,49 +1,49 @@
 import "server-only";
-import { createInvoice, updateInvoice, deleteInvoice, getInvoice, setInvoiceStatus, type InvoiceWriteData } from "@/lib/fms/invoices";
-import { recordReceipt, voidReceipt, type RecordReceiptData } from "@/lib/fms/receipts";
-import { createTransaction, updateTransaction, deleteTransaction, changeTransactionStatus, getTransaction, type TransactionWriteData } from "@/lib/fms/transactions";
-import { createCreditNote, issueCreditNote, cancelCreditNote, getCreditNote } from "@/lib/fms/credit-notes";
-import { createDebitNote, issueDebitNote, cancelDebitNote, getDebitNote } from "@/lib/fms/debit-notes";
-import { requestRefund, changeRefundStatus, getRefund } from "@/lib/fms/refunds";
-import { recordReimbursement } from "@/lib/fms/reimbursements";
-import { requestAdvance, changeAdvanceStatus, recordRepayment, getAdvance } from "@/lib/fms/employee-advances";
-import { recordVendorPayment, markVendorPaymentProcessed } from "@/lib/fms/vendor-payments";
-import { recordTransfer } from "@/lib/fms/fund-transfers";
-import { createBankAccount, updateBankAccount, deleteBankAccount, getBankAccount } from "@/lib/fms/bank-accounts";
-import { createCashAccount, updateCashAccount, deleteCashAccount, getCashAccount } from "@/lib/fms/cash-accounts";
-import { createAccount, updateAccount, deleteAccount, getAccount, seedDefaultAccounts } from "@/lib/fms/accounts";
-import { createFiscalPeriod, closePeriod, reopenPeriod } from "@/lib/fms/fiscal-periods";
-import { getTaxConfig, updateTaxConfig } from "@/lib/fms/tax-config";
-import { addExchangeRate, deleteExchangeRate } from "@/lib/fms/exchange-rates";
-import { recordAssetExpense } from "@/lib/fms/asset-expenses";
-import { disposeAsset } from "@/lib/fms/asset-disposals";
-import { recordCashCount } from "@/lib/fms/cash-reconciliation";
-import { createStatementLine, matchStatementLine, flagStatementLine } from "@/lib/fms/bank-reconciliation";
-import { getFmsDashboardStats } from "@/lib/fms/dashboard";
-import { getProfitAndLoss } from "@/lib/fms/reports/profit-and-loss";
-import { getBalanceSheet } from "@/lib/fms/reports/balance-sheet";
-import { getTrialBalance } from "@/lib/fms/reports/trial-balance";
-import { getCashFlow } from "@/lib/fms/reports/cash-flow";
-import { getTaxSummary, currentTaxPayable } from "@/lib/fms/reports/tax";
-import { getBudgetVsActual } from "@/lib/fms/reports/budget-vs-actual";
-import { projectProfitabilityReport } from "@/lib/fms/reports/project-financials";
-import { generalLedgerForAccount } from "@/lib/fms/reports/general-ledger";
-import { receivablesAging, customerWiseReceivables, totalOutstandingInvoices, overdueInvoices } from "@/lib/fms/receivables";
-import { payablesAging, vendorWisePayables, totalOutstandingPayable, overdueBills } from "@/lib/fms/payables";
-import { listPendingApprovals } from "@/lib/fms/approvals";
-import { recordAudit } from "@/lib/fms/audit";
-import { getClient } from "@/lib/pms/clients";
+import { createInvoice, updateInvoice, deleteInvoice, getInvoice, setInvoiceStatus, type InvoiceWriteData } from "@/lib/products/cashflow-ai/invoices";
+import { recordReceipt, voidReceipt, type RecordReceiptData } from "@/lib/products/cashflow-ai/receipts";
+import { createTransaction, updateTransaction, deleteTransaction, changeTransactionStatus, getTransaction, type TransactionWriteData } from "@/lib/products/cashflow-ai/transactions";
+import { createCreditNote, issueCreditNote, cancelCreditNote, getCreditNote } from "@/lib/products/cashflow-ai/credit-notes";
+import { createDebitNote, issueDebitNote, cancelDebitNote, getDebitNote } from "@/lib/products/cashflow-ai/debit-notes";
+import { requestRefund, changeRefundStatus, getRefund } from "@/lib/products/cashflow-ai/refunds";
+import { recordReimbursement } from "@/lib/products/cashflow-ai/reimbursements";
+import { requestAdvance, changeAdvanceStatus, recordRepayment, getAdvance } from "@/lib/products/cashflow-ai/employee-advances";
+import { recordVendorPayment, markVendorPaymentProcessed } from "@/lib/products/cashflow-ai/vendor-payments";
+import { recordTransfer } from "@/lib/products/cashflow-ai/fund-transfers";
+import { createBankAccount, updateBankAccount, deleteBankAccount, getBankAccount } from "@/lib/products/cashflow-ai/bank-accounts";
+import { createCashAccount, updateCashAccount, deleteCashAccount, getCashAccount } from "@/lib/products/cashflow-ai/cash-accounts";
+import { createAccount, updateAccount, deleteAccount, getAccount, seedDefaultAccounts } from "@/lib/products/cashflow-ai/accounts";
+import { createFiscalPeriod, closePeriod, reopenPeriod } from "@/lib/products/cashflow-ai/fiscal-periods";
+import { getTaxConfig, updateTaxConfig } from "@/lib/products/cashflow-ai/tax-config";
+import { addExchangeRate, deleteExchangeRate } from "@/lib/products/cashflow-ai/exchange-rates";
+import { recordAssetExpense } from "@/lib/products/cashflow-ai/asset-expenses";
+import { disposeAsset } from "@/lib/products/cashflow-ai/asset-disposals";
+import { recordCashCount } from "@/lib/products/cashflow-ai/cash-reconciliation";
+import { createStatementLine, matchStatementLine, flagStatementLine } from "@/lib/products/cashflow-ai/bank-reconciliation";
+import { getFmsDashboardStats } from "@/lib/products/cashflow-ai/dashboard";
+import { getProfitAndLoss } from "@/lib/products/cashflow-ai/reports/profit-and-loss";
+import { getBalanceSheet } from "@/lib/products/cashflow-ai/reports/balance-sheet";
+import { getTrialBalance } from "@/lib/products/cashflow-ai/reports/trial-balance";
+import { getCashFlow } from "@/lib/products/cashflow-ai/reports/cash-flow";
+import { getTaxSummary, currentTaxPayable } from "@/lib/products/cashflow-ai/reports/tax";
+import { getBudgetVsActual } from "@/lib/products/cashflow-ai/reports/budget-vs-actual";
+import { projectProfitabilityReport } from "@/lib/products/cashflow-ai/reports/project-financials";
+import { generalLedgerForAccount } from "@/lib/products/cashflow-ai/reports/general-ledger";
+import { receivablesAging, customerWiseReceivables, totalOutstandingInvoices, overdueInvoices } from "@/lib/products/cashflow-ai/receivables";
+import { payablesAging, vendorWisePayables, totalOutstandingPayable, overdueBills } from "@/lib/products/cashflow-ai/payables";
+import { listPendingApprovals } from "@/lib/products/cashflow-ai/approvals";
+import { recordAudit } from "@/lib/products/cashflow-ai/audit";
+import { getClient } from "@/lib/products/sprintos/clients";
 import {
   isValidTransactionType, isValidPaymentMethod, isValidSourceModule, isValidTransactionStatus, isValidFundAccountType, isValidInvoiceStatus, isValidRefundStatus, isValidAdvanceStatus, isValidAccountType, isValidFundAccountStatus, isValidAssetExpenseCategory, isValidStatementLineStatus,
   TRANSACTION_TYPES, TRANSACTION_STATUSES, PAYMENT_METHODS, SOURCE_MODULES, REFUND_STATUSES, ADVANCE_STATUSES, ACCOUNT_TYPES, FUND_ACCOUNT_TYPES, FUND_ACCOUNT_STATUSES, ASSET_EXPENSE_CATEGORIES, SUPPORTED_CURRENCIES, DEFAULT_CURRENCY,
-} from "@/lib/fms/constants";
+} from "@/lib/products/cashflow-ai/constants";
 import { canManageTransactions, canApproveTransactions, canManageAccounts, canManageBanking, canManageFiscalPeriods, canManageTaxConfig, canReconcile, canViewReports, canViewAuditLog } from "@/lib/fms-roles";
 import { fail, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * Finance (FMS) for the agent. Customers are the PMS clients and vendors come from procurement, exactly as in the panel. Every money
- * movement goes through the panel's own functions (balances, ledger postings, period locks, approvals) and is written to the FMS audit log.
+ * Finance (FMS) for the agent. Customers are the PMS clients and vendors come from procurement, exactly as in the product. Every money
+ * movement goes through the product's own functions (balances, ledger postings, period locks, approvals) and is written to the FMS audit log.
  */
 
 const soft = { deletedAt: null };

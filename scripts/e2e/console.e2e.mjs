@@ -1,5 +1,5 @@
 /**
- * Browser test for the Platform Panel (/platform) against a RUNNING
+ * Browser test for the Platform Console (/platform) against a RUNNING
  * dev/preview server. Never point it at production data: it suspends and
  * reactivates a company and approves a sign-up.
  *
@@ -79,31 +79,31 @@ async function main() {
   const page = await context.newPage();
 
   try {
-    await step("/platform 404s on a company's own host", async () => {
-      const res = await page.goto(`${COMPANY_URL}/platform`);
+    await step("/console 404s on a company's own host", async () => {
+      const res = await page.goto(`${COMPANY_URL}/console`);
       assert.equal(res?.status(), 404);
-      await page.goto(`${COMPANY_URL}/platform/signups`).then((r) => assert.equal(r?.status(), 404));
+      await page.goto(`${COMPANY_URL}/console/signups`).then((r) => assert.equal(r?.status(), 404));
     });
 
-    await step("owner signs in and opens the Platform Panel", async () => {
-      await page.goto(`${BASE}/workspace/login`);
+    await step("owner signs in and opens the Platform Console", async () => {
+      await page.goto(`${BASE}/commandos/login`);
       await page.getByLabel("Email").fill(OWNER_EMAIL);
       await page.locator('input[name="password"]').fill(OWNER_PASSWORD);
       await page.getByRole("button", { name: "Sign in" }).click();
-      await page.waitForURL((u) => !u.pathname.startsWith("/workspace/login"), { timeout: 30_000 });
-      await page.goto(`${BASE}/platform`);
+      await page.waitForURL((u) => !u.pathname.startsWith("/commandos/login"), { timeout: 30_000 });
+      await page.goto(`${BASE}/console`);
       await page.getByText("Awaiting approval").first().waitFor();
-      await page.goto(`${BASE}/platform/companies`);
+      await page.goto(`${BASE}/console/companies`);
       await page.getByRole("heading", { name: "Companies", level: 1 }).waitFor();
     });
 
     await step("companies table lists and filters companies", async () => {
-      await page.goto(`${BASE}/platform/companies?q=${encodeURIComponent(SLUG)}`);
-      await page.locator(`a[href^="/platform/companies/"]`, { hasText: SLUG }).first().waitFor();
+      await page.goto(`${BASE}/console/companies?q=${encodeURIComponent(SLUG)}`);
+      await page.locator(`a[href^="/console/companies/"]`, { hasText: SLUG }).first().waitFor();
     });
 
     await step("suspend the test company (confirm step), its host then shows 'No workspace here'", async () => {
-      await page.locator(`a[href^="/platform/companies/"]`, { hasText: SLUG }).first().click();
+      await page.locator(`a[href^="/console/companies/"]`, { hasText: SLUG }).first().click();
       await page.getByRole("button", { name: "Suspend company" }).click();
       await page.getByRole("alertdialog").getByRole("button", { name: "Suspend", exact: true }).click();
       await page.getByRole("button", { name: "Reactivate company" }).waitFor({ timeout: 15_000 });
@@ -124,16 +124,16 @@ async function main() {
     });
 
     await step("the platform owner company offers no suspend button", async () => {
-      await page.goto(`${BASE}/platform/companies`);
+      await page.goto(`${BASE}/console/companies`);
       const ownerRow = page.locator("tr", { hasText: "Platform owner" }).first();
-      await ownerRow.locator(`a[href^="/platform/companies/"]`).first().click();
+      await ownerRow.locator(`a[href^="/console/companies/"]`).first().click();
       await page.getByText("can't be suspended").waitFor();
       assert.equal(await page.getByRole("button", { name: "Suspend company" }).count(), 0);
     });
 
     const seeded = await seedApprovalRequest();
     await step("approval queue: approve a request", async () => {
-      await page.goto(`${BASE}/platform/signups`);
+      await page.goto(`${BASE}/console/signups`);
       await page.getByText("Who can create a company", { exact: true }).waitFor();
       const row = seeded ? page.locator(`li[data-signup-email="${seeded.email}"]`) : page.locator("li[data-signup-email]").first();
       if (!seeded && (await row.count()) === 0) {
@@ -145,8 +145,8 @@ async function main() {
       await page.getByText(/^Approved/).waitFor({ timeout: 30_000 });
       if (seeded) {
         assert.equal(await page.locator(`li[data-signup-email="${seeded.email}"]`).count(), 0, "request left the queue");
-        await page.goto(`${BASE}/platform/companies?q=${encodeURIComponent(seeded.slug)}`);
-        await page.locator(`a[href^="/platform/companies/"]`, { hasText: seeded.slug }).first().waitFor();
+        await page.goto(`${BASE}/console/companies?q=${encodeURIComponent(seeded.slug)}`);
+        await page.locator(`a[href^="/console/companies/"]`, { hasText: seeded.slug }).first().waitFor();
       }
     });
   } finally {

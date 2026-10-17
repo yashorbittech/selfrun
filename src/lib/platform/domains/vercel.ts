@@ -4,7 +4,7 @@ import type { DnsRecord, DomainProvider, DomainResult, DomainStatus } from "@/li
  * Vercel project domains (REST API). Attaching a host to the project is what
  * makes Vercel route it here and issue its TLS certificate automatically.
  * Needs an API token + project id (and a team id for a team-owned project),
- * resolved server-side by `integrations/` (Platform Panel → Integrations,
+ * resolved server-side by `integrations/` (Platform Console → Integrations,
  * else `VERCEL_API_TOKEN` / `VERCEL_PROJECT_ID` / `VERCEL_TEAM_ID`).
  */
 
@@ -16,7 +16,7 @@ export interface VercelConfig {
   team: string | null;
 }
 
-/** The environment-only configuration (used when nothing is saved in the Platform Panel). */
+/** The environment-only configuration (used when nothing is saved in the Platform Console). */
 export function vercelEnvConfig(): VercelConfig | null {
   const token = process.env.VERCEL_API_TOKEN;
   const project = process.env.VERCEL_PROJECT_ID;
@@ -113,7 +113,7 @@ export function createVercelDomainProvider(cfg: VercelConfig | null): DomainProv
 }
 
 /**
- * Read-only credential check for Platform Panel → Integrations: reads the
+ * Read-only credential check for Platform Console → Integrations: reads the
  * project (never changes anything). Reports what went wrong in plain words.
  */
 export async function checkVercelAccess(cfg: VercelConfig): Promise<{ ok: true; projectName: string } | { ok: false; error: string }> {

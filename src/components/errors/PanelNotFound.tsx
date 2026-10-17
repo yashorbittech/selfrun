@@ -8,14 +8,14 @@ import ArcadeStage from "@/components/game/ArcadeStage";
 import { buttonVariants } from "@/components/ui/button";
 
 /**
- * The 404 of a panel: the same moving stage as the website's 404 (the company's own logo and name, the lost cartoon runner at a
- * leaning "404" signpost), but drawn inside the panel so the sidebar and top bar stay and the person can simply carry on. The way back
- * is the panel's own start page (the first part of the address).
+ * The 404 of a product: the same moving stage as the website's 404 (the company's own logo and name, the lost cartoon runner at a
+ * leaning "404" signpost), but drawn inside the product so the sidebar and top bar stay and the person can simply carry on. The way back
+ * is the product's own start page (the first part of the address).
  */
 export default function PanelNotFound() {
   const pathname = usePathname() ?? "/";
   const first = pathname.split("/")[1] ?? "";
-  const home = first ? `/${first}` : "/workspace";
+  const home = first ? `/${first}` : "/commandos";
   return (
     <div className="relative overflow-hidden rounded-3xl px-1 py-6 sm:px-4" role="status">
       <BrandBackdrop />

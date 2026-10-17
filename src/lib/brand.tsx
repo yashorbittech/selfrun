@@ -7,7 +7,7 @@ export interface BrandName {
 }
 
 /**
- * The internal admin panels' wordmark (LMS, HRMS, FMS … sign-in screens and
+ * The internal admin products' wordmark (LMS, HRMS, FMS … sign-in screens and
  * sidebars). The PUBLIC website never uses this — its sections get the brand
  * from CMS → Site Identity (see `SectionRenderContext.brand`).
  */

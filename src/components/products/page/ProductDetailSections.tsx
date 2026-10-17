@@ -6,7 +6,7 @@ import DetailHeading from "@/components/products/page/DetailHeading";
 import Reveal from "@/components/products/page/Reveal";
 import ProductTour from "@/components/products/page/ProductTour";
 import ProductIcon from "@/components/products/page/ProductIcon";
-import { resolveIcon } from "@/lib/cms/icon-map";
+import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { neighbours, pageContent, productHref, relatedProducts, valueLine, type DetailSectionId, type StoredProduct } from "@/lib/products/shared";
 
 /**
@@ -212,7 +212,7 @@ export function FeaturesSection({ product, text, tones }: { product: StoredProdu
   );
 }
 
-/** The AI in and around the product, as one highlighted panel. A product with no AI of its own says so and names what surrounds it. */
+/** The AI in and around the product, as one highlighted product. A product with no AI of its own says so and names what surrounds it. */
 export function AiSection({ product, text, tones }: { product: StoredProduct; text: Text; tones: Tones }) {
   const { ai } = pageContent(product);
   if (!ai.length) return null;

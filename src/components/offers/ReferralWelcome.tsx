@@ -6,7 +6,7 @@ import { Gift, X } from "lucide-react";
 import { useReferralCode } from "@/lib/useReferralCode";
 import { formatCredits } from "@/lib/wallet/constants";
 
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import { BrandName } from "@/components/platform/BrandProvider";
 interface Preview {
   valid: boolean;
@@ -42,7 +42,7 @@ export default function ReferralWelcome() {
     let cancelled = false;
     Promise.all([
       fetch(`/api/referral/validate?code=${encodeURIComponent(code)}`, { cache: "no-store" }).then((r) => r.json()),
-      fetch("/api/portal/wallet-balance", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ signedIn: false })),
+      fetch("/api/clientos/wallet-balance", { cache: "no-store" }).then((r) => r.json()).catch(() => ({ signedIn: false })),
     ])
       .then(([p, w]) => {
         if (cancelled) return;

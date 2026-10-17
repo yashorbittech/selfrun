@@ -38,21 +38,21 @@ export function groupByCategory<T extends { category: string }>(products: T[]): 
 }
 
 /**
- * Where "Start Using" (existing customers) goes: the product's own panel via
- * the Workspace sign-in. `/` (the public website product) and unknown values have no panel.
+ * Where "Start Using" (existing customers) goes: the product's own product via
+ * the Workspace sign-in. `/` (the public website product) and unknown values have no product.
  */
 export function startUsingHref(panelPath: string): string | null {
   const p = panelPath.trim();
   if (!p.startsWith("/") || p === "/" || p.startsWith("//")) return null;
   // /admin was folded into the Workspace (see next.config.ts redirects).
-  const target = p === "/admin" ? "/workspace" : p;
-  return `/workspace/login?next=${encodeURIComponent(target)}`;
+  const target = p === "/admin" ? "/commandos" : p;
+  return `/commandos/login?next=${encodeURIComponent(target)}`;
 }
 
 export interface ResolvedCtas {
   primary: ProductCtaKind;
   secondary: ProductCtaKind;
-  /** Existing-customer entry; null when the product has no panel to sign in to. */
+  /** Existing-customer entry; null when the product has no product to sign in to. */
   startUsing: string | null;
 }
 

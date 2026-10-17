@@ -1,8 +1,8 @@
 import "server-only";
-import * as A from "@/app/dlms/(protected)/actions";
+import * as A from "@/app/(products)/cybervault/(protected)/actions";
 import { dlmsCan, type DlmsPermission } from "@/lib/dlms-roles";
-import { requireViewer, scopeFilter } from "@/lib/dlms/viewer";
-import { CREDENTIAL_TYPES, DOCUMENT_CATEGORIES, LINK_TYPES, NOTE_TYPES, RECORD_TYPES, SCOPES } from "@/lib/dlms/constants";
+import { requireViewer, scopeFilter } from "@/lib/products/cybervault/viewer";
+import { CREDENTIAL_TYPES, DOCUMENT_CATEGORIES, LINK_TYPES, NOTE_TYPES, RECORD_TYPES, SCOPES } from "@/lib/products/cybervault/constants";
 import { viaAction, f, str, values } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json } from "@/lib/ai/agent/types";
 

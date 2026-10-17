@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { jsonForScript } from "@/lib/security/json-script";
-import { withSeoOverrides } from "@/lib/seo-panel/public";
+import { withSeoOverrides } from "@/lib/products/rankmax-ai/public";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 import { getMockupText, getProductsText, requireProduct } from "@/lib/products/server";
 import { productJsonLd, productMetadata } from "@/lib/products/seo";
 import { detailSectionTones, productHref, SIGNUP_PATH } from "@/lib/products/shared";

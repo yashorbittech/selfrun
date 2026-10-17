@@ -9,11 +9,11 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { normalizeAibotsRoles, hasAibotsAccess } from "@/lib/aibots-roles";
 
 /**
- * AIBOTS panel authentication. A separate cookie / session store from the LMS,
- * HRMS, PMS, TMS, PRMS and SOP panels so sign-in state is independent, but the
+ * AIBOTS product authentication. A separate cookie / session store from the LMS,
+ * HRMS, PMS, TMS, PRMS and SOP products so sign-in state is independent, but the
  * *identity* store is shared: users live in `admin_users`, and AIBOTS access is
  * gated on the `roles` array there: any account whose roles carry an
- * explicit `aibots_*` role (AI Bots access is never implied by another panel's role).
+ * explicit `aibots_*` role (AI Bots access is never implied by another product's role).
  */
 
 export const AIBOTS_SESSION_COOKIE = "aibots_session";
@@ -151,8 +151,8 @@ export async function getSessionAibotsUser(token: string | undefined | null): Pr
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getAibotsUserForAccount(adminId: ObjectId): Promise<CurrentAibotsUser | null> {
   const users = await getAdminUsersCollection();
@@ -196,7 +196,7 @@ export async function getCurrentAibotsUser(): Promise<CurrentAibotsUser | null> 
   const store = await cookies();
   const own = await getSessionAibotsUser(store.get(AIBOTS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getAibotsUserForAccount(accountId) : null;
 }

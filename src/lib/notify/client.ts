@@ -87,14 +87,14 @@ export function useNotifyState(actor: "staff" | "portal" = "staff"): State {
   return useSyncExternalStore(subscribe, snapshot, serverSnapshot);
 }
 
-/** Runs `fn` whenever a signal arrives for any of `panels` (e.g. a notifications page refreshing its list). */
+/** Runs `fn` whenever a signal arrives for any of `products` (e.g. a notifications page refreshing its list). */
 export function onNotifySignal(panels: NotifyPanel[], fn: (item: SignalItem | null, kind: "new" | "sync") => void): () => void {
   const l = (p: NotifyPanel, kind: "new" | "sync", item: SignalItem | null) => { if (panels.includes(p)) fn(item, kind); };
   signalListeners.add(l);
   return () => { signalListeners.delete(l); };
 }
 
-/** Tell the bell a panel's unread count (the page just marked things read) without waiting for a round trip. */
+/** Tell the bell a product's unread count (the page just marked things read) without waiting for a round trip. */
 export function setLocalUnread(panel: NotifyPanel, n: number) { set({ counts: { ...state.counts, [panel]: Math.max(0, n) } }); }
 export function refreshNotifyCounts() { void recount(); }
 

@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 import type { ComponentType } from "react";
 
 /**
- * The header's dropdown styles besides the standard "mega" panel (which lives in `Header.tsx`). The theme picks one
+ * The header's dropdown styles besides the standard "mega" product (which lives in `Header.tsx`). The theme picks one
  * (component-variants.ts `MENU_VARIANTS`): "list" (compact popover), "tiles" (full-width bar of tiles) or
  * "minimal" (plain text links). Same navigation data in every style.
  */

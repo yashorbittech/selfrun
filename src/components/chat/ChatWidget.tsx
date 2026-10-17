@@ -7,11 +7,11 @@ import { VoiceProvider } from "@/components/chat/VoiceProvider";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 
 /**
- * Floating docked chat panel (bottom-right). Rendered by
+ * Floating docked chat product (bottom-right). Rendered by
  * FloatingContactButtons, which owns the open/close state and the launcher.
  */
 export function ChatWidget({ open, onClose }: { open: boolean; onClose: () => void }) {
-  // Lock body scroll on small screens when the full-height panel is open.
+  // Lock body scroll on small screens when the full-height product is open.
   React.useEffect(() => {
     if (!open) return;
     const mq = window.matchMedia("(max-width: 640px)");

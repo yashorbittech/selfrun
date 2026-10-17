@@ -1,40 +1,40 @@
-import { isSaasAppHost, isSaasHost } from "@/lib/saas/hosts";
+import { isSaasAppHost, isSaasHost } from "@/lib/platform/saas/hosts";
 import { APP_SLUG_SUFFIX, isPlatformHost, normalizeHost, type HostSurface } from "@/lib/platform/tenancy/companies";
 
 /**
  * A company has two sides, on two hosts:
  *  - the SITE (`<slug>.<root>` or its own domain, e.g. `acme.com`): only the public website;
- *  - the APP (`<slug>-app.<root>`, `app.<its own domain>`, or `app.<SaaS host>` for the platform operator): the panels.
+ *  - the APP (`<slug>-app.<root>`, `app.<its own domain>`, or `app.<SaaS host>` for the platform operator): the products.
  * A page that belongs to the other side is redirected there, so every link keeps working from either host.
  */
 
-/** First path segments that are panels (pages, not APIs): reachable only on an app host. */
+/** First path segments that are products (pages, not APIs): reachable only on an app host. */
 const PANEL_SEGMENTS = new Set([
-  "workspace",
+  "commandos",
   "platform",
   "console",
-  "hrms",
-  "pms",
-  "prms",
-  "tms",
-  "fms",
-  "lms",
-  "messenger",
-  "sop",
-  "lpms",
-  "dlms",
-  "ots",
-  "aibots",
-  "intelligence",
-  "smms",
-  "seo",
-  "cms",
-  "support",
-  "portal",
+  "talentos",
+  "sprintos",
+  "spendiq",
+  "cohort-ai",
+  "cashflow-ai",
+  "dealflow-ai",
+  "huddle-ai",
+  "playbook-ai",
+  "contractflow-ai",
+  "cybervault",
+  "evaliq",
+  "agentos",
+  "databrain-ai",
+  "viralpulse-ai",
+  "rankmax-ai",
+  "sitecraft-ai",
+  "resolveiq",
+  "clientos",
 ]);
 
 /** Public links that work on either host (payment links, certificate verification, portal login/register) and internal rewrite targets. */
-const SHARED_SEGMENTS = new Set(["pay", "verify", "panel-unavailable", "workspace-not-found", "maintenance", "offline-shell", "platform-maintenance", "login", "register"]);
+const SHARED_SEGMENTS = new Set(["pay", "verify", "product-unavailable", "workspace-not-found", "maintenance", "offline-shell", "platform-maintenance", "login", "register"]);
 
 const firstSegment = (pathname: string) => pathname.split("/")[1] ?? "";
 

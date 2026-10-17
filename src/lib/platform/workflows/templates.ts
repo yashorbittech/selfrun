@@ -1,6 +1,6 @@
 import type { WorkflowInput } from "@/lib/platform/workflows/shared";
 
-/** Ready-made automations offered on /workspace/settings/automations — client-safe. */
+/** Ready-made automations offered on /commandos/settings/automations — client-safe. */
 export interface WorkflowTemplate {
   key: string;
   title: string;

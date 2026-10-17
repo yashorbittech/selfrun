@@ -35,7 +35,7 @@ const SERVICES = DOC(
 
 | Service | Typical deliverables | Typical timeline |
 |---|---|---|
-| Web application development | Responsive web app, admin panel, API, CI/CD | 10–16 weeks |
+| Web application development | Responsive web app, admin product, API, CI/CD | 10–16 weeks |
 | Mobile app development | iOS + Android (React Native or Flutter), store release | 12–18 weeks |
 | AI/ML solutions | Model or LLM feature, evaluation report, monitoring | 6–12 weeks |
 | AI chat assistants | Knowledge-grounded assistant, admin console, analytics | 4–8 weeks |
@@ -497,8 +497,8 @@ Demo Company`,
 **Rule of thumb:** REST is simpler to build, cache and secure; GraphQL shines when many different screens need different slices of related data.`,
       ],
       [
-        "Which would you pick for a simple admin panel?",
-        `REST. A simple admin panel has predictable screens, and REST's simplicity, HTTP caching and mature tooling outweigh GraphQL's flexibility there.`,
+        "Which would you pick for a simple admin product?",
+        `REST. A simple admin product has predictable screens, and REST's simplicity, HTTP caching and mature tooling outweigh GraphQL's flexibility there.`,
       ],
     ],
   },

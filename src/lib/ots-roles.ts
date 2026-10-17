@@ -1,5 +1,5 @@
 /**
- * Online Test System (OTS) role + permission model. Like every other panel,
+ * Online Test System (OTS) role + permission model. Like every other product,
  * staff access is gated on the shared `admin_users.roles` array — there is no
  * separate OTS user store. HRMS/TMS stay the source of truth for who a person
  * is, so an account's *effective* OTS roles are its explicit `ots_*` roles PLUS
@@ -15,7 +15,7 @@
  * itself (job_applicant / intern / trainee) is what lets them take tests.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -206,7 +206,7 @@ export function effectiveOtsRoles(roles: readonly string[] | undefined | null): 
   return Array.from(new Set([...normalizeOtsRoles(raw), ...impliedRoles(raw)]));
 }
 
-/** Can open the OTS panel at `/ots/*`. */
+/** Can open the OTS product at `/evaliq/*`. */
 export function hasOtsAccess(roles: readonly string[] | undefined | null): boolean {
   return effectiveOtsRoles(roles).length > 0;
 }

@@ -1,4 +1,4 @@
-import { SAAS_BRAND } from "@/lib/saas/brand";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { recordPlatformAudit } from "@/lib/platform/audit";
@@ -6,13 +6,13 @@ import { RESERVED_SLUGS } from "@/lib/platform/tenancy/slug";
 
 /**
  * Platform-wide settings (not per company), stored in `platform_settings`
- * and edited in Platform Panel → Platform settings (platform owner's Super
+ * and edited in Platform Console → Platform settings (platform owner's Super
  * Admins only). Every save is audited.
  *
  *  - `_id: "signup"`  — who can create a company (sign-up mode)
  *  - `_id: "general"` — platform name + support contact (SaaS emails and
  *    pages), defaults for new companies, the maintenance banner shown on
- *    company panels, and extra reserved subdomains
+ *    company products, and extra reserved subdomains
  *
  * Provider credentials live separately in `integrations/`.
  */
@@ -60,7 +60,7 @@ export interface PlatformGeneralSettings {
   defaultLocale: string;
   /** IANA time zone for new companies, e.g. "Asia/Kolkata". */
   defaultTimezone: string;
-  /** Shown on every company's panels while set; empty = no banner. */
+  /** Shown on every company's products while set; empty = no banner. */
   maintenanceBanner: string;
   /** Subdomains no new company may take, on top of the built-in list. */
   reservedSubdomains: string[];
@@ -82,7 +82,7 @@ export const PLATFORM_SETTINGS_DEFAULTS: PlatformGeneralInput = {
 
 type GeneralDoc = Partial<PlatformGeneralSettings> & { _id: "general" };
 
-// Read on every company panel render (maintenance banner), so cached briefly;
+// Read on every company product render (maintenance banner), so cached briefly;
 // on globalThis so every bundle in the process shares it. A save busts it here;
 // other instances follow within the TTL.
 const TTL_MS = 30_000;
@@ -188,7 +188,7 @@ export async function savePlatformSettings(input: PlatformGeneralInput, actorId:
 
 // ── Helpers used elsewhere ───────────────────────────────────────────────────
 
-/** Built-in reserved subdomains plus the ones added in the Platform Panel. */
+/** Built-in reserved subdomains plus the ones added in the Platform Console. */
 export async function reservedSubdomains(): Promise<Set<string>> {
   const { reservedSubdomains: extra } = await getPlatformSettings();
   return new Set([...RESERVED_SLUGS, ...extra]);

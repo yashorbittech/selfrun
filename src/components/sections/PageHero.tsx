@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ChevronRight, ArrowRight, CheckCircle2, Users, LucideIcon } from "lucide-react";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },

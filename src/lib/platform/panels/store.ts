@@ -1,13 +1,14 @@
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION } from "@/lib/platform/tenancy/companies";
-import { DEFAULT_PANELS, PANEL_KEY_RE, PLATFORM_ONLY_KEYS, defaultAliases, type PanelMeta, type PanelRecord } from "@/lib/platform/panels/types";
-import type { NavIcon } from "@/lib/workspace/nav";
+import { DEFAULT_PANELS, PANEL_KEY_RE, PLATFORM_ONLY_KEYS, defaultAliases, whiteLabelProductName, type PanelMeta, type PanelRecord } from "@/lib/platform/panels/types";
+import type { NavIcon } from "@/lib/products/commandos/nav";
+import { productSlugFor } from "@/lib/platform/saas/product-routes";
 
 export const PANELS_COLLECTION = "platform_panels";
 
-/** Panels listed here are never routable panels of their own (reserved segments the registry must not claim). */
-const RESERVED = new Set(["api", ...PLATFORM_ONLY_KEYS, "login", "signup", "admin", "workspace-not-found", "panel-unavailable"]);
+/** Products listed here are never routable products of their own (reserved segments the registry must not claim). */
+const RESERVED = new Set(["api", ...PLATFORM_ONLY_KEYS, "login", "signup", "admin", "workspace-not-found", "product-unavailable"]);
 
 const TTL_MS = 10_000;
 let cache: { at: number; rows: PanelRecord[] } | null = null;
@@ -23,12 +24,12 @@ async function col() {
   return (await getPlatformDb()).collection<PanelRecord & { _id: string }>(PANELS_COLLECTION);
 }
 
-/** Every panel in display order. Until the registry has been seeded, the built-in defaults stand in. */
+/** Every product in display order. Until the registry has been seeded, the built-in defaults stand in. */
 export async function listPanels(): Promise<PanelRecord[]> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.rows;
   const c = await col();
   let docs = await c.find({}).toArray();
-  // A default panel added to the code after the registry was first seeded appears on its own (unless an admin deleted
+  // A default product added to the code after the registry was first seeded appears on its own (unless an admin deleted
   // it: deletions leave a marker so it doesn't come back). Failures here never break the page.
   const known = new Set(docs.map((d) => d._id));
   const missing = DEFAULT_PANELS.filter((p) => !known.has(p.key));
@@ -36,7 +37,7 @@ export async function listPanels(): Promise<PanelRecord[]> {
     await c.insertMany(missing.map((p) => ({ _id: p.key, ...p })), { ordered: false }).catch(() => {});
     docs = await c.find({}).toArray();
   }
-  // Sync default panels to updated branded software names if they still carry legacy names
+  // Sync default products to updated branded software names if they still carry legacy names
   const defaultByKey = new Map(DEFAULT_PANELS.map((p) => [p.key, p]));
   if (docs.length) {
     const updates: Promise<unknown>[] = [];
@@ -53,7 +54,7 @@ export async function listPanels(): Promise<PanelRecord[]> {
       await Promise.all(updates);
     }
   }
-  const rows = (docs.length ? docs.filter((d) => !(d as { deleted?: boolean }).deleted).map(({ _id, ...r }) => ({ ...r, key: r.key ?? _id, aliases: r.aliases ?? defaultAliases(r.key ?? _id) })) : DEFAULT_PANELS)
+  const rows = (docs.length ? docs.filter((d) => !(d as { deleted?: boolean }).deleted).map(({ _id, ...r }) => { const key = r.key ?? _id; return { ...r, key, route: r.route === `/${key}` ? `/${productSlugFor(key)}` : r.route, aliases: r.aliases ?? defaultAliases(key) }; }) : DEFAULT_PANELS)
     .filter((p) => !PLATFORM_ONLY_KEYS.includes(p.key))
     .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
   cache = { at: Date.now(), rows };
@@ -64,7 +65,7 @@ export async function getPanelRecord(key: string): Promise<PanelRecord | null> {
   return (await listPanels()).find((p) => p.key === key) ?? null;
 }
 
-/** Panels a given company has been switched OFF for by the platform (company-specific deactivation). */
+/** Products a given company has been switched OFF for by the platform (company-specific deactivation). */
 export async function disabledPanelKeys(companyId: string): Promise<Set<string>> {
   const hit = disabledCache.get(companyId);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.keys;
@@ -74,7 +75,7 @@ export async function disabledPanelKeys(companyId: string): Promise<Set<string>>
   return keys;
 }
 
-/** Panel keys that are NOT available to this company: switched off globally or for the company. */
+/** Product keys that are NOT available to this company: switched off globally or for the company. */
 export async function unavailablePanelKeys(companyId: string): Promise<Set<string>> {
   const [panels, disabled] = await Promise.all([listPanels(), disabledPanelKeys(companyId)]);
   const out = new Set<string>(disabled);
@@ -95,10 +96,10 @@ export async function panelMetaFor(companyId: string | null): Promise<Record<str
       p.key,
       {
         key: p.key,
-        name: p.name,
-        shortName: p.shortName || p.name,
+        name: whiteLabelProductName(p.name),
+        shortName: whiteLabelProductName(p.shortName || p.name),
         description: p.description,
-        headerTitle: p.headerTitle || p.name,
+        headerTitle: whiteLabelProductName(p.headerTitle || p.name),
         headerDescription: p.headerDescription || p.description,
         icon: p.icon,
         route: p.route,
@@ -111,26 +112,27 @@ export async function panelMetaFor(companyId: string | null): Promise<Record<str
   );
 }
 
-// ── Admin (Platform Panel) ───────────────────────────────────────────────────────────────────────────────────────
+// ── Admin (Platform Console) ───────────────────────────────────────────────────────────────────────────────────────
 const clean = (v: unknown, max: number) => String(v ?? "").trim().slice(0, max);
 
 export type PanelInput = Partial<Omit<PanelRecord, "key">> & { key: string };
 
 export async function savePanel(input: PanelInput, mode: "create" | "update"): Promise<{ ok: true; panel: PanelRecord } | { ok: false; error: string }> {
   const key = clean(input.key, 30).toLowerCase();
-  if (!PANEL_KEY_RE.test(key) || RESERVED.has(key)) return { ok: false, error: "Use 2–30 lowercase letters, numbers or dashes for the panel key (it is the URL segment)." };
+  if (!PANEL_KEY_RE.test(key) || RESERVED.has(key)) return { ok: false, error: "Use 2–30 lowercase letters, numbers or dashes for the product key (it is the URL segment)." };
   await seedIfEmpty();
   const existingDoc = await (await col()).findOne({ _id: key });
   const existing = existingDoc && !(existingDoc as { deleted?: boolean }).deleted ? existingDoc : null;
-  if (mode === "create" && existing) return { ok: false, error: "A panel with that key already exists." };
-  if (mode === "update" && !existing) return { ok: false, error: "That panel no longer exists." };
+  if (mode === "create" && existing) return { ok: false, error: "A product with that key already exists." };
+  if (mode === "update" && !existing) return { ok: false, error: "That product no longer exists." };
   const prev = existing ?? null;
 
   const name = clean(input.name, 60);
   const description = clean(input.description, 200);
-  if (!name) return { ok: false, error: "Give the panel a name." };
-  if (!description) return { ok: false, error: "Give the panel a short description." };
-  const route = clean(input.route ?? `/${key}`, 80);
+  if (!name) return { ok: false, error: "Give the product a name." };
+  if (!description) return { ok: false, error: "Give the product a short description." };
+  const routeInput = clean(input.route ?? `/${productSlugFor(key)}`, 80);
+  const route = routeInput === `/${key}` ? `/${productSlugFor(key)}` : routeInput;
   if (!route.startsWith("/") || route.startsWith("//") || route.includes("\\")) return { ok: false, error: "The route must be a path on this site, like /hrms." };
 
   const core = prev?.core ?? false;
@@ -155,8 +157,8 @@ export async function savePanel(input: PanelInput, mode: "create" | "update"): P
 
 export async function setPanelActive(key: string, active: boolean): Promise<{ ok: true } | { ok: false; error: string }> {
   const panel = await getPanelRecord(key);
-  if (!panel) return { ok: false, error: "Unknown panel." };
-  if (panel.core && !active) return { ok: false, error: `${panel.name} is a core panel and can't be switched off.` };
+  if (!panel) return { ok: false, error: "Unknown product." };
+  if (panel.core && !active) return { ok: false, error: `${panel.name} is a core product and can't be switched off.` };
   await seedIfEmpty();
   await (await col()).updateOne({ _id: key }, { $set: { active } });
   forgetPanelCache();
@@ -165,10 +167,10 @@ export async function setPanelActive(key: string, active: boolean): Promise<{ ok
 
 export async function deletePanel(key: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const panel = await getPanelRecord(key);
-  if (!panel) return { ok: false, error: "Unknown panel." };
-  if (panel.core) return { ok: false, error: `${panel.name} is a core panel and can't be deleted.` };
+  if (!panel) return { ok: false, error: "Unknown product." };
+  if (panel.core) return { ok: false, error: `${panel.name} is a core product and can't be deleted.` };
   await seedIfEmpty();
-  // Keep a marker instead of the row, so the built-in defaults don't re-add a panel an admin deliberately removed.
+  // Keep a marker instead of the row, so the built-in defaults don't re-add a product an admin deliberately removed.
   await (await col()).updateOne({ _id: key }, { $set: { key, deleted: true } } as never, { upsert: true });
   const db = await getPlatformDb();
   await db.collection(COMPANIES_COLLECTION).updateMany({}, { $pull: { disabledPanels: key } } as never);
@@ -176,11 +178,11 @@ export async function deletePanel(key: string): Promise<{ ok: true } | { ok: fal
   return { ok: true };
 }
 
-/** Company-specific switch: `active=false` hides and blocks the panel for that company only. */
+/** Company-specific switch: `active=false` hides and blocks the product for that company only. */
 export async function setCompanyPanelActive(companyId: string, key: string, active: boolean): Promise<{ ok: true } | { ok: false; error: string }> {
   const panel = await getPanelRecord(key);
-  if (!panel) return { ok: false, error: "Unknown panel." };
-  if (panel.core && !active) return { ok: false, error: `${panel.name} is a core panel and can't be switched off.` };
+  if (!panel) return { ok: false, error: "Unknown product." };
+  if (panel.core && !active) return { ok: false, error: `${panel.name} is a core product and can't be switched off.` };
   const res = await (await getPlatformDb())
     .collection(COMPANIES_COLLECTION)
     .updateOne({ _id: companyId } as never, active ? ({ $pull: { disabledPanels: key } } as never) : ({ $addToSet: { disabledPanels: key } } as never));
@@ -195,10 +197,10 @@ async function seedIfEmpty(): Promise<void> {
   if ((await c.estimatedDocumentCount()) === 0) await seedPanels();
 }
 
-/** Writes the starter registry. Existing panels are kept as they are unless `reset` is set (then they return to the defaults). */
+/** Writes the starter registry. Existing products are kept as they are unless `reset` is set (then they return to the defaults). */
 export async function seedPanels(opts: { reset?: boolean } = {}): Promise<{ inserted: number; reset: number; kept: number }> {
   const c = await col();
-  // The Platform Panel is the provider's alone; remove it if an earlier seed listed it.
+  // The Platform Console is the provider's alone; remove it if an earlier seed listed it.
   await c.deleteMany({ _id: { $in: [...PLATFORM_ONLY_KEYS] } });
   let inserted = 0;
   let reset = 0;
@@ -215,7 +217,7 @@ export async function seedPanels(opts: { reset?: boolean } = {}): Promise<{ inse
         kept++;
       }
     } else if (opts.reset || (exists as { deleted?: boolean }).deleted) {
-      // "Restore defaults" / re-seeding also brings back a default panel that had been deleted.
+      // "Restore defaults" / re-seeding also brings back a default product that had been deleted.
       await c.replaceOne({ _id: p.key }, { ...p });
       reset++;
     } else kept++;
@@ -228,6 +230,6 @@ const KEY_ALIASES: Record<string, string> = { teamchat: "messenger", admin: "wor
 
 /** Registry names by key (plus the older aliases some records carry) — for server code that builds a label. */
 export async function panelNameMap(): Promise<(key: string, fallback?: string) => string> {
-  const names = new Map((await listPanels()).map((p) => [p.key, p.name]));
+  const names = new Map((await listPanels()).map((p) => [p.key, whiteLabelProductName(p.name)]));
   return (key, fallback) => names.get(KEY_ALIASES[key] ?? key) ?? fallback ?? key;
 }

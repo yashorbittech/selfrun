@@ -4,7 +4,7 @@ import { getDb } from "@/lib/mongodb";
 
 /**
  * Shared helpers for the Wallet & Credits data layer. Mirrors
- * `src/lib/offers/db.ts` / `src/lib/portal/db.ts` exactly — string UUID
+ * `src/lib/offers/db.ts` / `src/lib/clientos/db.ts` exactly — string UUID
  * `_id`, audit stamps, soft delete via `deletedAt`.
  */
 

@@ -13,9 +13,9 @@ import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { COMPANIES_COLLECTION, COMPANY_DOMAINS_COLLECTION, forgetCompanyRouting, type Company, type CompanyDomain } from "@/lib/platform/tenancy/companies";
 import { companySiteHost, companySiteUrl, forgetCompanySiteUrls } from "@/lib/platform/tenancy/site-url";
 import { siteUrl } from "@/lib/seo";
-import { defaultRobots } from "@/lib/seo-panel/robots-store";
-import { robotsTxtTemplate } from "@/lib/seo-panel/robots-parse";
-import { getSettings } from "@/lib/seo-panel/settings";
+import { defaultRobots } from "@/lib/products/rankmax-ai/robots-store";
+import { robotsTxtTemplate } from "@/lib/products/rankmax-ai/robots-parse";
+import { getSettings } from "@/lib/products/rankmax-ai/settings";
 
 const uri = process.env.MONGODB_URI ?? "";
 if (!/^mongodb:\/\/(127\.0\.0\.1|localhost)(:\d+)?\/[\w-]*test[\w-]*$/i.test(uri)) {

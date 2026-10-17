@@ -33,7 +33,7 @@ async function main() {
   assert.equal((await getDefaultPlan())?._id, "free");
   assert.deepEqual(plans.map((p) => p.priceMonthly), [0, 49_900, 99_900, 199_900, 0], "decided monthly prices (paise)");
   assert.ok(plans.every((p) => p.trialDays === 0), "no trial: Free is the start");
-  // The rest checks trials and panel sets, which the real catalogue does not have (every plan has every panel; Free is the start), so this
+  // The rest checks trials and product sets, which the real catalogue does not have (every plan has every product; Free is the start), so this
   // test database gets an older-style catalogue: Growth is the default, with a 30-day trial and without Social Media.
   const col = (await getPlatformDb()).collection("billing_plans");
   await col.updateMany({}, { $set: { trialDays: 30, isDefault: false } });
@@ -58,7 +58,7 @@ async function main() {
   const ea = await runAsCompany(a, () => getEntitlements());
   assert.equal(ea.status, "trialing");
   assert.equal(ea.trialDaysLeft, 30);
-  assert.ok(ea.modules?.has("hrms") && ea.modules.has("messenger") && !ea.modules.has("smms"), "growth panels + core, not smms");
+  assert.ok(ea.modules?.has("hrms") && ea.modules.has("messenger") && !ea.modules.has("smms"), "growth products + core, not smms");
   assert.equal(ea.limits.seats, 50);
 
   // No stored subscription + created 30 days ago → implicit trial just ended → grace (platform
@@ -69,7 +69,7 @@ async function main() {
 
   await updateCompanySubscription(a, { planId: "business", status: "active" });
   const ea2 = await runAsCompany(a, () => getEntitlements());
-  assert.equal(ea2.modules, null, "business = all panels");
+  assert.equal(ea2.modules, null, "business = all products");
   assert.equal((await getCompanySubscription(owner))?.status, "internal", "owner can't be given a subscription");
   await updateCompanySubscription(owner, { status: "suspended" });
   assert.equal((await getCompanySubscription(owner))?.status, "internal");

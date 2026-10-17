@@ -1,5 +1,5 @@
 /**
- * Browser test for Platform Panel → Plans & pricing and the company page's
+ * Browser test for Platform Console → Plans & pricing and the company page's
  * extend-trial card, against a RUNNING server (production build recommended)
  * on a scratch database. Creates a plan with a unique id each run.
  *
@@ -43,11 +43,11 @@ page.on("pageerror", (e) => pageErrors.push(e.message));
 
 try {
   await step("owner signs in", async () => {
-    await page.goto(`${BASE}/platform/plans`);
+    await page.goto(`${BASE}/console/plans`);
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="password"]', PASSWORD);
     await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
-    await page.goto(`${BASE}/platform/plans`);
+    await page.goto(`${BASE}/console/plans`);
     await page.getByRole("heading", { name: "Plans & pricing", level: 1 }).waitFor();
     await page.getByRole("list", { name: "Plans" }).waitFor();
   });
@@ -61,7 +61,7 @@ try {
     await page.getByText("Give the plan a name.").waitFor();
   });
 
-  await step("create a plan: monthly only, panels, flag, highlight, custom limit, default trial", async () => {
+  await step("create a plan: monthly only, products, flag, highlight, custom limit, default trial", async () => {
     await page.fill("#plan-id", planId);
     await page.fill("#plan-name", planName);
     await page.fill("#plan-description", "Created by the browser test");
@@ -76,7 +76,7 @@ try {
     await page.fill("#plan-custom-key-0", "projects");
     await page.fill("#plan-custom-value-0", "25");
     await page.click("#plan-save");
-    await page.waitForURL((u) => u.pathname === "/platform/plans", { timeout: 60_000 });
+    await page.waitForURL((u) => u.pathname === "/console/plans", { timeout: 60_000 });
     const c = card(page);
     await c.waitFor();
     await c.getByText("Not offered").waitFor();
@@ -94,14 +94,14 @@ try {
     await page.fill("#plan-price-monthly", "1999");
     await page.getByText("Saving creates a new price version").waitFor();
     await page.click("#plan-save");
-    await page.waitForURL((u) => u.pathname === "/platform/plans", { timeout: 60_000 });
+    await page.waitForURL((u) => u.pathname === "/console/plans", { timeout: 60_000 });
     await card(page).getByText("v2", { exact: true }).waitFor();
     await card(page).getByRole("link", { name: `Edit ${planName}` }).click();
     const history = page.getByRole("list", { name: "Price versions" });
     await history.getByText("v1", { exact: true }).waitFor();
     await history.getByText("v2", { exact: true }).waitFor();
     await history.getByText("Current").waitFor();
-    await page.goto(`${BASE}/platform/plans`);
+    await page.goto(`${BASE}/console/plans`);
   });
 
   await step("reorder: move the new plan up one place", async () => {
@@ -143,7 +143,7 @@ try {
 
   if (TRIAL_COMPANY_ID) {
     await step("extend a company's trial from its page", async () => {
-      await page.goto(`${BASE}/platform/companies/${TRIAL_COMPANY_ID}`);
+      await page.goto(`${BASE}/console/companies/${TRIAL_COMPANY_ID}`);
       await page.getByText("Subscription & trial").waitFor();
       await page.fill("#trial-extend-days", "0");
       await page.click("#trial-extend");
@@ -156,7 +156,7 @@ try {
 
   await step("no horizontal scroll at phone width, no page errors", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/platform/plans", "/platform/plans/new", "/platform/plans/growth", ...(TRIAL_COMPANY_ID ? [`/platform/companies/${TRIAL_COMPANY_ID}`] : [])]) {
+    for (const path of ["/console/plans", "/console/plans/new", "/console/plans/growth", ...(TRIAL_COMPANY_ID ? [`/console/companies/${TRIAL_COMPANY_ID}`] : [])]) {
       await page.goto(`${BASE}${path}`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 1, `${path} scrolls horizontally by ${overflow}px`);

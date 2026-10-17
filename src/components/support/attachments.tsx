@@ -9,7 +9,7 @@ const MAX_FILES = 5;
 const MAX_BYTES = 4 * 1024 * 1024;
 const ACCEPT = "image/png,image/jpeg,image/webp,image/gif,application/pdf,text/plain";
 
-export const attachmentUrl = (key: string) => `/api/support/attachments?key=${encodeURIComponent(key)}`;
+export const attachmentUrl = (key: string) => `/api/resolveiq/attachments?key=${encodeURIComponent(key)}`;
 
 /** Upload state for a form: files go to the server as soon as they are chosen (or pasted), so submit only sends their keys. */
 export function useAttachments() {
@@ -28,7 +28,7 @@ export function useAttachments() {
       try {
         const fd = new FormData();
         fd.set("file", file, file.name || "screenshot.png");
-        const res = await fetch("/api/support/attachments", { method: "POST", body: fd });
+        const res = await fetch("/api/resolveiq/attachments", { method: "POST", body: fd });
         const json = (await res.json()) as Attachment & { error?: string };
         if (!res.ok) toast.error(json.error ?? "Upload failed.");
         else setItems((cur) => (cur.length >= MAX_FILES ? cur : [...cur, json]));

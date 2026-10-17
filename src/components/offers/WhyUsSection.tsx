@@ -3,7 +3,7 @@
 import { Rocket, Handshake, Building2, Headphones } from "lucide-react";
 import StatsBand from "@/components/sections/StatsBand";
 import ChecklistGrid from "@/components/sections/ChecklistGrid";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 // Same figures already shown on /about/our-mission and /about/success-stories —
 // reused verbatim here, never re-invented for this page.

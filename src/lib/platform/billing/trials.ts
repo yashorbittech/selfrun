@@ -21,11 +21,11 @@ import { renderEmail } from "@/lib/platform/email/template";
 /**
  * Free-trial lifecycle, run once a day by `/api/platform/billing/trials/cron`
  * across every company (raw platform DB — a registry-level job). All timings
- * come from the Platform Panel (`getBillingSettings().billing`):
+ * come from the Platform Console (`getBillingSettings().billing`):
  *
  *  1. A company with no stored subscription (created before billing existed)
  *     gets the trial `getCompanySubscription` already assumes for it,
- *     persisted, so the steps below and the panel see the same thing.
+ *     persisted, so the steps below and the product see the same thing.
  *  2. Reminder emails to the owner at each of `trialReminderDays` days left.
  *     Each threshold is claimed atomically on `subscription.trialRemindersSent`
  *     before sending, so a re-run (or two overlapping runs) never emails
@@ -75,7 +75,7 @@ async function ownerEmail(companyId: string): Promise<string | null> {
   return owner?.email ?? null;
 }
 
-const billingUrl = (slug: string) => `${companyAppBaseUrl(slug)}/workspace/settings/billing`;
+const billingUrl = (slug: string) => `${companyAppBaseUrl(slug)}/commandos/settings/billing`;
 const plural = (n: number) => `${n} day${n === 1 ? "" : "s"}`;
 const brandOf = (s: PlatformBillingSettings) => s.seller.tradeName || s.seller.legalName || "Our team";
 
@@ -264,7 +264,7 @@ export async function runTrialSweep(now: Date = new Date()): Promise<TrialSweepR
 }
 
 // ---------------------------------------------------------------------------
-// Extending a trial (Platform Panel → company detail).
+// Extending a trial (Platform Console → company detail).
 // ---------------------------------------------------------------------------
 
 export const MAX_TRIAL_EXTENSION_DAYS = 365;
@@ -281,7 +281,7 @@ export interface TrialOverview {
   canExtend: boolean;
 }
 
-/** The company's trial state for the Platform Panel; null for an unknown company or the platform owner. */
+/** The company's trial state for the Platform Console; null for an unknown company or the platform owner. */
 export async function getTrialOverview(companyId: string, now: Date = new Date()): Promise<TrialOverview | null> {
   const sub = await getCompanySubscription(companyId);
   if (!sub || sub.status === "internal") return null;

@@ -6,7 +6,7 @@ import { ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { SUCCESS_AUTO_HIDE_MS, useCareerApplySubmit } from "@/lib/useCareerApplySubmit";
 import { useStableCardHeight } from "@/lib/useStableCardHeight";
 import LeadSuccessState from "@/components/sections/LeadSuccessState";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 /**
  * /careers/apply — extracted verbatim from the former `careers/apply/Content.tsx`.

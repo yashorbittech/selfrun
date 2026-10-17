@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * A standalone mock of the OpenAI Responses API for the AI Intelligence panel.
+ * A standalone mock of the OpenAI Responses API for the AI Intelligence product.
  * It plays the MODEL, deterministically, for ~12 demo questions: it asks for the
  * right run_query calls, reads the real results the server sends back, and ends
  * with a final_answer whose numbers come from those results. No network, no key.

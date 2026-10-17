@@ -1,12 +1,12 @@
 /**
- * Workspace panel analytics for the SOP, Digi Locker, Online Tests, AI Bots,
- * Social Media, SEO and Website panels: every loader returns the numbers of
+ * Workspace product analytics for the SOP, Digi Locker, Online Tests, AI Bots,
+ * Social Media, SEO and Website products: every loader returns the numbers of
  * the CURRENT company from its own collections, never another company's, and
  * an empty company gives zeros without throwing. Runs against a throwaway
  * database that is dropped at the end.
  *
  *   MONGODB_URI=mongodb://127.0.0.1:27099/pa_test_$(date +%s) \
- *     npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-panel-analytics.ts
+ *     npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-product-analytics.ts
  */
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -23,8 +23,8 @@ import {
   getSmmsAnalytics,
   getSeoAnalytics,
   getCmsAnalytics,
-} from "@/lib/workspace/panel-analytics";
-import { NAV_KEYS } from "@/lib/workspace/nav";
+} from "@/lib/products/commandos/panel-analytics";
+import { NAV_KEYS } from "@/lib/products/commandos/nav";
 
 let passed = 0;
 async function check(name: string, fn: () => Promise<void> | void) {
@@ -234,7 +234,7 @@ async function main() {
 
   const NEW = ["sop", "dlms", "ots", "aibots", "smms", "seo", "cms"] as const;
   console.log("configuration");
-  await check("each of the seven panels has a config, and its analytics key is a guarded nav key", () => {
+  await check("each of the seven products has a config, and its analytics key is a guarded nav key", () => {
     for (const p of NEW) {
       assert.ok(isPanelKey(p), p);
       assert.equal(PANEL_CONFIGS[p].href, `/${p}`);
@@ -357,7 +357,7 @@ async function main() {
     });
   });
 
-  console.log(`panel analytics: all ${passed} checks passed`);
+  console.log(`product analytics: all ${passed} checks passed`);
 }
 
 main()

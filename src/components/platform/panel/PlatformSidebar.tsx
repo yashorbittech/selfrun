@@ -45,60 +45,60 @@ export interface PlatformNavFlags {
 type Icon = React.ComponentType<{ className?: string }>;
 
 /**
- * The Platform Panel's map of every SaaS area. `planned` entries are part of
- * the panel's scope but not built yet — they render greyed out (no dead
+ * The Platform Console's map of every SaaS area. `planned` entries are part of
+ * the product's scope but not built yet — they render greyed out (no dead
  * links), and become links as each one ships.
  */
 const SECTIONS: { label: string; items: { href: string; label: string; icon: Icon; exact?: boolean; planned?: boolean; badge?: "pendingApprovals" }[] }[] = [
-  { label: "", items: [{ href: "/platform", label: "Dashboard", icon: LayoutDashboard, exact: true }] },
+  { label: "", items: [{ href: "/console", label: "Dashboard", icon: LayoutDashboard, exact: true }] },
   {
     label: "Tenants",
     items: [
-      { href: "/platform/companies", label: "Companies", icon: Building2 },
-      { href: "/platform/panels", label: "Panels", icon: LayoutGrid },
-      { href: "/platform/signups", label: "Sign-ups & approvals", icon: UserPlus, badge: "pendingApprovals" },
-      { href: "/platform/domains", label: "Domains & SSL", icon: Globe },
+      { href: "/console/companies", label: "Companies", icon: Building2 },
+      { href: "/console/products", label: "Products", icon: LayoutGrid },
+      { href: "/console/signups", label: "Sign-ups & approvals", icon: UserPlus, badge: "pendingApprovals" },
+      { href: "/console/domains", label: "Domains & SSL", icon: Globe },
     ],
   },
   {
     label: "Billing",
     items: [
-      { href: "/platform/plans", label: "Plans & pricing", icon: Package },
-      { href: "/platform/costs", label: "Costs & pricing calculator", icon: Calculator },
-      { href: "/platform/subscriptions", label: "Subscriptions", icon: Repeat },
-      { href: "/platform/invoices", label: "SaaS invoices", icon: FileText },
-      { href: "/platform/coupons", label: "Coupons & discounts", icon: TicketPercent },
-      { href: "/platform/addons", label: "Add-ons", icon: Puzzle },
-      { href: "/platform/payments", label: "Payments & Razorpay", icon: CreditCard },
-      { href: "/platform/settings/billing", label: "Tax & invoicing", icon: Receipt },
+      { href: "/console/plans", label: "Plans & pricing", icon: Package },
+      { href: "/console/costs", label: "Costs & pricing calculator", icon: Calculator },
+      { href: "/console/subscriptions", label: "Subscriptions", icon: Repeat },
+      { href: "/console/invoices", label: "SaaS invoices", icon: FileText },
+      { href: "/console/coupons", label: "Coupons & discounts", icon: TicketPercent },
+      { href: "/console/addons", label: "Add-ons", icon: Puzzle },
+      { href: "/console/payments", label: "Payments & Razorpay", icon: CreditCard },
+      { href: "/console/settings/billing", label: "Tax & invoicing", icon: Receipt },
     ],
   },
   {
     label: "Analytics",
     items: [
-      { href: "/platform/revenue", label: "Revenue & subscriptions", icon: LineChart },
-      { href: "/platform/usage", label: "Usage & limits", icon: Gauge },
-      { href: "/platform/ai-usage", label: "AI token history", icon: Sparkles },
+      { href: "/console/revenue", label: "Revenue & subscriptions", icon: LineChart },
+      { href: "/console/usage", label: "Usage & limits", icon: Gauge },
+      { href: "/console/ai-usage", label: "AI token history", icon: Sparkles },
     ],
   },
   {
     label: "Support",
     items: [
-      { href: "/platform/support", label: "Support requests", icon: LifeBuoy, exact: true },
-      { href: "/platform/support/help", label: "Help content", icon: BookOpen },
-      { href: "/platform/support/settings", label: "Support settings", icon: SlidersHorizontal },
+      { href: "/console/resolveiq", label: "Support requests", icon: LifeBuoy, exact: true },
+      { href: "/console/resolveiq/help", label: "Help content", icon: BookOpen },
+      { href: "/console/resolveiq/settings", label: "Support settings", icon: SlidersHorizontal },
     ],
   },
   {
     label: "Administration",
     items: [
-      { href: "/platform/users", label: "Platform users & roles", icon: ShieldCheck },
-      { href: "/platform/integrations", label: "Integrations", icon: Plug },
-      { href: "/platform/audit", label: "Audit log", icon: ScrollText },
-      { href: "/platform/settings", label: "Platform settings", icon: Settings2, exact: true },
-      { href: "/platform/maintenance", label: "Maintenance", icon: Wrench },
-      { href: "/platform/incidents", label: "Incidents & status", icon: AlertTriangle },
-      { href: "/workspace", label: "Workspace", icon: LayoutGrid, exact: true },
+      { href: "/console/users", label: "Platform users & roles", icon: ShieldCheck },
+      { href: "/console/integrations", label: "Integrations", icon: Plug },
+      { href: "/console/audit", label: "Audit log", icon: ScrollText },
+      { href: "/console/settings", label: "Platform settings", icon: Settings2, exact: true },
+      { href: "/console/maintenance", label: "Maintenance", icon: Wrench },
+      { href: "/console/incidents", label: "Incidents & status", icon: AlertTriangle },
+      { href: "/commandos", label: "Workspace", icon: LayoutGrid, exact: true },
     ],
   },
 ];
@@ -165,7 +165,7 @@ function NavItem({
 
 export default function PlatformSidebar({ flags, onNavigate, collapsed = false }: { flags: PlatformNavFlags; onNavigate?: () => void; collapsed?: boolean }) {
   return (
-    <nav className="flex h-full flex-col gap-1 p-3" aria-label="Platform Panel">
+    <nav className="flex h-full flex-col gap-1 p-3" aria-label="Platform Console">
       {SECTIONS.map((section) => ({ ...section, items: section.items.filter((item) => !flags.hidden?.includes(item.href)) }))
         .filter((section) => section.items.length > 0)
         .map((section) => (

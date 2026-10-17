@@ -2,26 +2,26 @@ import Header, { type HeaderVariant } from "@/components/Header";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
 import WebPushPrompt from "@/components/webpush/WebPushPrompt";
 import SiteFooter from "@/components/footer/SiteFooter";
-import { layoutCss } from "@/lib/cms/component-variants";
-import { ThemeVariantsProvider } from "@/components/cms/ThemeVariantsContext";
-import { CollectionsProvider } from "@/components/cms/CollectionsContext";
-import { getSnapshot } from "@/lib/cms/collections/store";
+import { layoutCss } from "@/lib/products/sitecraft-ai/component-variants";
+import { ThemeVariantsProvider } from "@/components/products/sitecraft-ai/ThemeVariantsContext";
+import { CollectionsProvider } from "@/components/products/sitecraft-ai/CollectionsContext";
+import { getSnapshot } from "@/lib/products/sitecraft-ai/collections/store";
 import { Toaster } from "@/components/ui/sonner";
 import OfferPromotions from "@/components/offers/OfferPromotions";
 import ReferralWelcome from "@/components/offers/ReferralWelcome";
 import OfferClaimProvider from "@/components/offers/OfferClaimProvider";
-import ManagedJsonLd from "@/components/seo/ManagedJsonLd";
-import { getSeoSiteState } from "@/lib/seo-panel/public";
-import { getPublicNav } from "@/lib/cms/nav";
-import { getPublicFooter } from "@/lib/cms/footer";
-import { themeCssBlock } from "@/lib/cms/theme";
-import { resolveSiteThemeState } from "@/lib/cms/theme-preview";
-import SiteTracking from "@/components/cms/SiteTracking";
-import { getTracking } from "@/lib/cms/tracking";
-import ThemeImageFilters from "@/components/cms/ThemeImageFilters";
-import ThemePreviewBridge from "@/components/cms/theme/ThemePreviewBridge";
-import CmsAdminToolbar from "@/components/cms/CmsAdminToolbar";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import ManagedJsonLd from "@/components/products/rankmax-ai/ManagedJsonLd";
+import { getSeoSiteState } from "@/lib/products/rankmax-ai/public";
+import { getPublicNav } from "@/lib/products/sitecraft-ai/nav";
+import { getPublicFooter } from "@/lib/products/sitecraft-ai/footer";
+import { themeCssBlock } from "@/lib/products/sitecraft-ai/theme";
+import { resolveSiteThemeState } from "@/lib/products/sitecraft-ai/theme-preview";
+import SiteTracking from "@/components/products/sitecraft-ai/SiteTracking";
+import { getTracking } from "@/lib/products/sitecraft-ai/tracking";
+import ThemeImageFilters from "@/components/products/sitecraft-ai/ThemeImageFilters";
+import ThemePreviewBridge from "@/components/products/sitecraft-ai/theme/ThemePreviewBridge";
+import CmsAdminToolbar from "@/components/products/sitecraft-ai/CmsAdminToolbar";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 
 /** Tailwind's max-w-7xl (80rem) is the site's content width; on big screens it grows so the sides are not left empty. */
 const WIDE_CONTAINER_CSS =
@@ -66,7 +66,7 @@ export default async function SiteLayout({
       {preview && <ThemePreviewBridge themeName={preview.name} />}
       {/* Signed-in CMS users only (client-side; visitors never request it). */}
       <CmsAdminToolbar />
-      {/* Floating contact buttons — website only, never shown in panels. */}
+      {/* Floating contact buttons — website only, never shown in products. */}
       <FloatingContactButtons />
       <WebPushPrompt />
     </OfferClaimProvider>

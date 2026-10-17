@@ -11,7 +11,7 @@ import type { Coupon, CouponDuration, CouponRedemption } from "@/lib/platform/bi
 
 /**
  * Coupons (platform-level `billing_coupons`) and their redemptions
- * (`billing_coupon_redemptions`), managed in the Platform Panel.
+ * (`billing_coupon_redemptions`), managed in the Platform Console.
  *
  * CHECKOUT FLOW (the subscriptions/Razorpay workstream):
  *   1. `quoteCheckout({ planId, interval, companyId, couponCode })` — validates
@@ -316,7 +316,7 @@ export async function getRenewalRedemption(companyId: string): Promise<CouponRed
 }
 
 // ---------------------------------------------------------------------------
-// Platform Panel management
+// Platform Console management
 // ---------------------------------------------------------------------------
 
 export async function listCoupons(): Promise<Coupon[]> {

@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Ear, Loader2, RotateCcw, Volume2, VolumeX, Square, CircleDot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVoice, type VoicePhase } from "@/components/chat/VoiceProvider";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const PHASE = (tx: (key: string) => string): Record<
   VoicePhase,

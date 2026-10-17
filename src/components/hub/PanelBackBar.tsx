@@ -1,16 +1,16 @@
 import BillingNotice from "@/components/platform/BillingNotice";
 import PanelBackLink from "@/components/hub/PanelBackLink";
-import SetupBanner from "@/components/workspace/SetupBanner";
-import VerifyEmailBanner from "@/components/workspace/VerifyEmailBanner";
+import SetupBanner from "@/components/products/commandos/SetupBanner";
+import VerifyEmailBanner from "@/components/products/commandos/VerifyEmailBanner";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { showVerifyStrip } from "@/lib/platform/email-verification-rule";
 import { setupStripNeeded } from "@/lib/platform/onboarding/state";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 
 /**
- * The top action row every panel shares: "Back to Workspace" on the left; Verify email, Choose plan (billing) and
- * Setup on the right. Panels open in the same tab from the Workspace, so this is the way home. The back link and the
- * Verify / Setup strips show only to people signed in to the Workspace (panels also serve people who never see it).
+ * The top action row every product shares: "Back to Workspace" on the left; Verify email, Choose plan (billing) and
+ * Setup on the right. Products open in the same tab from the Workspace, so this is the way home. The back link and the
+ * Verify / Setup strips show only to people signed in to the Workspace (products also serve people who never see it).
  */
 export default async function PanelBackBar() {
   let user = null;

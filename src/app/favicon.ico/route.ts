@@ -1,6 +1,6 @@
 import { renderCompanyIcon } from "@/lib/platform/branding/icon";
-import { productIconResponse } from "@/lib/saas/static-icon";
-import { SAAS_BRAND } from "@/lib/saas/brand";
+import { productIconResponse } from "@/lib/platform/saas/static-icon";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
 /** Browsers still ask for /favicon.ico directly: the product's own logo on its hosts; otherwise the current company's icon (its logo, or its initials in the theme colour). */
 export async function GET() {

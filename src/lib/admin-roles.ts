@@ -1,9 +1,9 @@
 /**
- * The `super_admin` role (formerly the separate admin panel's role model). Access is gated on the shared
- * `admin_users.roles` array — the same store every other panel (HRMS/PMS/
- * PRMS/TMS/LMS/Messenger) uses. Unlike every other panel, this one grants
+ * The `super_admin` role (formerly the separate admin product's role model). Access is gated on the shared
+ * `admin_users.roles` array — the same store every other product (HRMS/PMS/
+ * PRMS/TMS/LMS/Messenger) uses. Unlike every other product, this one grants
  * access to `super_admin` ONLY: no module-scoped admin/manager role opens it,
- * since it aggregates financial and cross-module data every other panel
+ * since it aggregates financial and cross-module data every other product
  * deliberately keeps siloed.
  */
 

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { LogOut, MonitorSmartphone, ShieldCheck, UserCog } from "lucide-react";
 import AccountDrawer, { type AccountView } from "@/components/platform/panel/AccountDrawer";
-import { useSidebarCollapse } from "@/components/lms/SidebarCollapseContext";
+import { useSidebarCollapse } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ export interface UnifiedProfileMenuProps {
   roles?: string[];
   createdAt?: string;
   lastLoginAt?: string | null;
-  /** Where the account lives for a person without a Workspace account (the Client Portal); everyone else gets the side panel. */
+  /** Where the account lives for a person without a Workspace account (the Client Portal); everyone else gets the side product. */
   profileHref?: string;
   onLogout?: () => void;
   panelName?: string;
@@ -41,7 +41,7 @@ function initialsFor(emailOrName: string) {
   return (clean.slice(0, 2) || "IN").toUpperCase();
 }
 
-/** The only two navigation entries of the sidebar user block; everything else a panel offers lives in its sidebar. */
+/** The only two navigation entries of the sidebar user block; everything else a product offers lives in its sidebar. */
 const MENU = [
   { key: "sessions", label: "Sessions & Devices", icon: MonitorSmartphone },
   { key: "profile", label: "Profile & Settings", icon: UserCog },
@@ -54,7 +54,7 @@ export default function UnifiedProfileMenu({
   roles = ["admin"],
   createdAt,
   lastLoginAt = null,
-  profileHref = "/workspace/settings",
+  profileHref = "/commandos/settings",
   onLogout,
 }: UnifiedProfileMenuProps) {
   const { collapsed } = useSidebarCollapse();

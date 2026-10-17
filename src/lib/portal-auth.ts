@@ -9,7 +9,7 @@ import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
 /**
  * External User Portal authentication. A completely separate identity store
  * (`external_users`) and session store (`portal_sessions`) from every internal
- * panel — external people never touch `admin_users`. Mirrors the shape of
+ * product — external people never touch `admin_users`. Mirrors the shape of
  * `src/lib/prms-auth.ts`.
  */
 
@@ -38,7 +38,7 @@ export interface ExternalUserDoc {
   leadId?: string | null;
   /** Which lead's dashboard the portal currently renders (defaults to leadId). */
   activeLeadId?: string | null;
-  /** Wallet & Credits — this account's own shareable referral code, generated lazily on first `/portal/referrals` visit. */
+  /** Wallet & Credits — this account's own shareable referral code, generated lazily on first `/clientos/referrals` visit. */
   referralCode?: string | null;
   /** The referral code (if any) that was live in the visitor's browser when this account was created. */
   referredByCode?: string | null;

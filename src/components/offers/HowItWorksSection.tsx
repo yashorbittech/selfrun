@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MousePointerClick, FileText, PhoneCall, BadgePercent, Rocket } from "lucide-react";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const STEPS = (tx: (key: string) => string) => ([
   { title: tx("offers.howItWorksSection.choose-offer"), description: tx("offers.howItWorksSection.pick-the-service-training-or-hiring-offe"), icon: MousePointerClick },

@@ -16,7 +16,7 @@ export async function POST() {
     category: "alerts", // a test must arrive even in quiet hours or with a category off; "alerts" is the one that ignores both
     title: "Notifications are working",
     body: "You will get updates like this on this device.",
-    url: who.actor === "portal" ? "/portal/notifications" : "/workspace/notifications",
+    url: who.actor === "portal" ? "/clientos/notifications" : "/commandos/notifications",
     tag: "push-test",
   });
   return delivered > 0 ? NextResponse.json({ ok: true, delivered }) : NextResponse.json({ error: "No device could be reached. Turn notifications on for this device first." }, { status: 409 });

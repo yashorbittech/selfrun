@@ -10,7 +10,7 @@ import { staleThresholdDate } from "@/lib/stale-days";
 import { previousPeriodRange, computeGrowthPercent } from "@/lib/period-comparison";
 import { dateFormatFor, type DashboardGranularity } from "@/lib/granularity";
 import type { Job } from "@/types/content";
-import { getRuntimeRecords } from "@/lib/cms/collections/store";
+import { getRuntimeRecords } from "@/lib/products/sitecraft-ai/collections/store";
 
 export const APPLICATIONS_COLLECTION = "career_applications";
 const POSITIONS_COLLECTION = "job_positions";

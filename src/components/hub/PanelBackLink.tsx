@@ -11,7 +11,7 @@ export default function PanelBackLink() {
   return (
     <nav aria-label="Back to Workspace" className="flex shrink-0 items-center gap-3">
       <Link
-        href="/workspace"
+        href="/commandos"
         className="group inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/80 py-1.5 pl-2 pr-4 text-sm font-semibold text-foreground shadow-sm backdrop-blur-md transition-all hover:border-primary/40 hover:bg-primary/8 hover:text-primary"
       >
         <span className="flex size-6 items-center justify-center rounded-full bg-primary/12 text-primary transition-transform group-hover:-translate-x-0.5">

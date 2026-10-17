@@ -9,8 +9,8 @@ import { unavailablePanelKeys } from "@/lib/platform/panels/store";
 import type { AgentUser, Level } from "@/lib/ai/agent/types";
 
 /**
- * Who may use the agent in which panel. Panels keep their own role vocabularies; this maps them onto three levels:
- * `any` (can open the panel), `staff` (runs the panel's records) and `admin` (configures it). `super_admin` is everything.
+ * Who may use the agent in which product. Products keep their own role vocabularies; this maps them onto three levels:
+ * `any` (can open the product), `staff` (runs the product's records) and `admin` (configures it). `super_admin` is everything.
  */
 interface PanelRoles { any: string[]; staff: string[]; admin: string[] }
 
@@ -38,12 +38,12 @@ export const PANEL_ROLES: Record<string, PanelRoles> = {
   workspace: r(["workspace_admin", "workspace_member"], ["workspace_admin"], ["workspace_admin"]),
 };
 
-/** Panels the workspace-wide assistant spans (everything with records). */
+/** Products the workspace-wide assistant spans (everything with records). */
 export const DATA_PANELS = ["pms", "hrms", "fms", "lms", "tms", "prms", "smms", "sop", "dlms", "seo", "ots", "lpms", "aibots", "messenger", "intelligence"];
 
 export function hasLevel(roles: readonly string[], panel: string, level: Level): boolean {
   if (roles.includes("super_admin")) return true;
-  // The Platform Panel has its own permission model; the route gates entry and every tool checks its platform permission.
+  // The Platform Console has its own permission model; the route gates entry and every tool checks its platform permission.
   if (panel === "platform" || panel === "support" || panel === "portal") return true;
   const def = PANEL_ROLES[panel];
   if (!def) return false;
@@ -70,14 +70,14 @@ export async function onPlatformOwnerHost(): Promise<boolean> {
   return isPlatformOwnerContext();
 }
 
-/** Row filter for people who can open a panel but aren't staff: only rows tied to their own employee record. */
+/** Row filter for people who can open a product but aren't staff: only rows tied to their own employee record. */
 export function ownRows(field: string) {
   return (user: AgentUser): Record<string, unknown> | null => (user.employeeId ? { [field]: user.employeeId } : null);
 }
 
 /**
- * What the company's subscription lets the agent touch: panels outside the plan (or switched off) are blocked, and a suspended /
- * canceled subscription is read-only. The agent is one more way to use the panels, so it follows the same rules as their pages.
+ * What the company's subscription lets the agent touch: products outside the plan (or switched off) are blocked, and a suspended /
+ * canceled subscription is read-only. The agent is one more way to use the products, so it follows the same rules as their pages.
  */
 export async function agentPlanState(): Promise<{ blockedPanels: string[]; readOnly: boolean }> {
   const companyId = await currentCompanyIdOrNull();

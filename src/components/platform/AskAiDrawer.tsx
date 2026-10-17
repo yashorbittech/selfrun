@@ -47,7 +47,7 @@ function readStored(panelId: string): ChatMsg[] {
 }
 const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random()).slice(2));
 
-/** Ask AI: a real agent for this panel. Reads the company's data, understands screenshots and files, and changes things only after the person approves. */
+/** Ask AI: a real agent for this product. Reads the company's data, understands screenshots and files, and changes things only after the person approves. */
 export default function AskAiDrawer({ open, onClose, panelId, panelTitle, panelDescription }: AskAiDrawerProps) {
   const router = useRouter();
   const pathname = usePathname();

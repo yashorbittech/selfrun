@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { resolveHostInfo } from "@/lib/platform/tenancy/companies";
 import { normalizeHost } from "@/lib/platform/tenancy/companies";
-import { isSaasAppHost, isSaasHost } from "@/lib/saas/hosts";
+import { isSaasAppHost, isSaasHost } from "@/lib/platform/saas/hosts";
 import { clientIpFrom } from "@/lib/security/ip";
 import { ban, hit, isBanned } from "@/lib/security/memory-limit";
 import { rateLimit } from "@/lib/security/rate-limit";
@@ -11,7 +11,7 @@ import { rateLimit } from "@/lib/security/rate-limit";
  * The front door. Every request to `/api/*` (and every Server Action post) passes through here BEFORE any route code runs, and every page
  * view passes the bot / flood checks. It is deny-by-default:
  *
- *   1. The host must be one of the platform's own (a company's site / panels host or the product's) — nothing else is served.
+ *   1. The host must be one of the platform's own (a company's site / app host or the product's) — nothing else is served.
  *   2. The browser must say it is on one of those hosts too: a browser's `Origin` / `Sec-Fetch-Site` headers are checked, so another website
  *      (or a page on another company's domain) cannot make a visitor's browser call these APIs. No CORS header is ever sent.
  *   3. Scripted clients (curl, python, scrapers, headless browsers, …) are refused outright; so are IPs that probe for secrets files.
@@ -65,7 +65,7 @@ export function classify(pathname: string, method: string): Class {
 const SCRIPTED = /(curl|wget|python|requests|httpx|aiohttp|urllib|axios|node-fetch|undici|got\/|go-http|okhttp|java\/|libwww|perl|ruby|php|scrapy|mechanize|httpie|postman|insomnia|restsharp|apache-httpclient|headless|phantomjs|selenium|puppeteer|playwright|webdriver|cypress|lighthouse|chrome-lighthouse|spider|crawler|scraper|harvest|libcurl|powershell|winhttp|colly|jsdom|bot\b)/i;
 /**
  * AI assistants and AI search that read a public page when someone asks them about the product (ChatGPT, Claude, Perplexity). They are held
- * to the same terms as search engines: the public website only, never the panels or the API, at a polite rate. Blocking them made them
+ * to the same terms as search engines: the public website only, never the products or the API, at a polite rate. Blocking them made them
  * describe the product from guesses instead of from its own pages.
  */
 const SEARCH_BOTS = /(googlebot|chatgpt-user|oai-searchbot|gptbot|claude-user|claude-searchbot|claude-web|claudebot|perplexitybot|perplexity-user|bingbot|duckduckbot|slurp|baiduspider|yandexbot|applebot|facebookexternalhit|twitterbot|linkedinbot|whatsapp|telegrambot|slackbot|discordbot|pinterestbot|google-inspectiontool|adsbot-google|mediapartners-google|bingpreview)/i;
@@ -81,7 +81,8 @@ export function userAgentKind(ua: string): "browser" | "search-bot" | "scripted"
 }
 
 // ── Scanner traps: nothing here is real, so anyone asking is probing ───────────────────────────────────────────────────────────────────────
-const TRAPS = /(^|\/)(\.env(\.|$)|\.git(\/|$)|\.svn|\.aws|\.ssh|\.ds_store|wp-admin|wp-login|wp-content|wp-includes|xmlrpc\.php|phpmyadmin|pma\/|adminer|cgi-bin|phpinfo|vendor\/phpunit|composer\.(json|lock)|server-status|actuator|\.htpasswd|id_rsa|backup\.(sql|zip|tar)|dump\.sql|config\.(php|yml|yaml|ini)|web\.config|boaform|solr|jenkins|console\/|manager\/html)/i;
+// `/console` is a real Platform Console route. Never classify its subroutes as scanner probes.
+const TRAPS = /(^|\/)(\.env(\.|$)|\.git(\/|$)|\.svn|\.aws|\.ssh|\.ds_store|wp-admin|wp-login|wp-content|wp-includes|xmlrpc\.php|phpmyadmin|pma\/|adminer|cgi-bin|phpinfo|vendor\/phpunit|composer\.(json|lock)|server-status|actuator|\.htpasswd|id_rsa|backup\.(sql|zip|tar)|dump\.sql|config\.(php|yml|yaml|ini)|web\.config|boaform|solr|jenkins|manager\/html)/i;
 
 function json(status: number, body: Record<string, unknown>, extra: Record<string, string> = {}) {
   return NextResponse.json({ ok: false, ...body }, { status, headers: { "Cache-Control": "no-store", ...extra } });
@@ -145,15 +146,15 @@ function tooMany(retryAfter: number, api: boolean) {
 }
 
 /**
- * Page views: scanner traps, scripted scrapers and floods. `appSurface` = a panels host (signed-in work: no crawlers at all).
+ * Page views: scanner traps, scripted scrapers and floods. `appSurface` = a app host (signed-in work: no crawlers at all).
  * Returns a response to stop the request, or null to carry on.
  */
 export async function gatePage(req: NextRequest, appSurface: boolean): Promise<NextResponse | null> {
   const ip = clientIpFrom(req.headers);
-  if (isBanned(ip)) return new NextResponse("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
+  if (STRICT && isBanned(ip)) return new NextResponse("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
   const path = req.nextUrl.pathname;
   if (TRAPS.test(path)) {
-    ban(ip, 60);
+    if (STRICT) ban(ip, 60);
     return new NextResponse("Not found", { status: 404, headers: { "Cache-Control": "no-store" } });
   }
   const ua = req.headers.get("user-agent") ?? "";
@@ -176,7 +177,7 @@ export async function gatePage(req: NextRequest, appSurface: boolean): Promise<N
  */
 export async function gateApi(req: NextRequest, host: string, companyId: string | null, onSaas: boolean): Promise<NextResponse | null> {
   const ip = clientIpFrom(req.headers);
-  if (isBanned(ip)) return json(404, { error: "Not found" });
+  if (STRICT && isBanned(ip)) return json(404, { error: "Not found" });
   const method = req.method.toUpperCase();
   const path = req.nextUrl.pathname;
   const action = NEXT_ACTION(req) && !path.startsWith("/api/");
@@ -186,7 +187,7 @@ export async function gateApi(req: NextRequest, host: string, companyId: string 
   // 2. No CORS, ever: a cross-origin preflight is answered with nothing, so the browser refuses the real request.
   if (method === "OPTIONS") return new NextResponse(null, { status: 204, headers: { "Cache-Control": "no-store", Allow: "GET, HEAD, POST, PUT, PATCH, DELETE" } });
   if (!["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"].includes(method)) return json(405, { error: "Method not allowed" });
-  if (TRAPS.test(path)) { ban(ip, 60); return json(404, { error: "Not found" }); }
+  if (TRAPS.test(path)) { if (STRICT) ban(ip, 60); return json(404, { error: "Not found" }); }
 
   const cls = action ? "session" : classify(path, method);
   const ua = req.headers.get("user-agent") ?? "";

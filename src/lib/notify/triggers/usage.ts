@@ -6,7 +6,7 @@ import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 
 /**
  * "You are close to / at your plan limit" — raised when a meter CROSSES 80% or 100% (not on every use), once per period per level.
- * The Workspace admins are told; for AI tokens the AI panels' admins are told too, since it is their assistants that stop working.
+ * The Workspace admins are told; for AI tokens the AI products' admins are told too, since it is their assistants that stop working.
  */
 const crossed = (before: number, after: number, limit: number) => {
   for (const t of [1, 0.8]) if (before < limit * t && after >= limit * t) return t === 1 ? 100 : 80;
@@ -22,7 +22,7 @@ export async function checkAiTokenUsage(addedTokens: number): Promise<void> {
     if (!pct) return;
     const period = usagePeriod();
     await workspaceEvents.usage("AI tokens", pct, period);
-    const n = { type: "ai_usage", title: pct >= 100 ? "AI allowance used up for this month" : "AI allowance is 80% used", body: pct >= 100 ? "AI features pause until the 1st, or until you upgrade." : "Consider upgrading before AI features pause.", link: "/workspace/settings/billing", priority: pct >= 100 ? ("high" as const) : ("normal" as const), dedupeKey: `ai-usage:${period}:${pct}` };
+    const n = { type: "ai_usage", title: pct >= 100 ? "AI allowance used up for this month" : "AI allowance is 80% used", body: pct >= 100 ? "AI features pause until the 1st, or until you upgrade." : "Consider upgrading before AI features pause.", link: "/commandos/settings/billing", priority: pct >= 100 ? ("high" as const) : ("normal" as const), dedupeKey: `ai-usage:${period}:${pct}` };
     await Promise.all([notifyPanel("intelligence", n, { level: "admin" }), notifyPanel("aibots", { ...n, dedupeKey: `ai-usage-bots:${period}:${pct}` }, { level: "admin" })]);
   } catch (err) {
     console.error("[notify] ai usage check failed", err instanceof Error ? err.message : err);

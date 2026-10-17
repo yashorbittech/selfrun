@@ -7,7 +7,7 @@ import { usagePeriod } from "@/lib/platform/billing/usage";
 import type { SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
- * Platform Panel "Usage & limits": per company, what it uses against its
+ * Platform Console "Usage & limits": per company, what it uses against its
  * effective limits (plan + add-ons). Reads the raw platform database with
  * explicit `companyId` filters — registry-level counters only, never a
  * company's business data.

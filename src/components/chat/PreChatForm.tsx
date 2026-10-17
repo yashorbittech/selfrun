@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Bot, Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChat } from "@/components/chat/ChatProvider";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export function PreChatForm({ wide = false }: { wide?: boolean }) {
   const tx = useText();

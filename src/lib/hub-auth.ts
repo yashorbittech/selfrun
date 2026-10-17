@@ -10,15 +10,15 @@ import { recordLoginEvent } from "@/lib/security/store";
 import { touchLoginSession } from "@/lib/security/touch";
 
 /**
- * Workspace authentication — THE company sign-in (`/workspace/login`) for
+ * Workspace authentication — THE company sign-in (`/commandos/login`) for
  * every `admin_users` account. Its session (`hub_sessions`) is also accepted
- * by every staff panel's auth module (see `workspace-session.ts`), so there
+ * by every staff product's auth module (see `workspace-session.ts`), so there
  * is one sign-in for the whole company.
  *
  * `verifyHubCredentials` has NO role restriction — any account with valid
  * credentials can sign in here, same permissiveness as `lms-auth.ts`. Hub
  * itself has no role vocabulary; it exists to show each account whichever
- * OTHER panels its real roles already grant (see `cross-module-sso.ts`).
+ * OTHER products its real roles already grant (see `cross-module-sso.ts`).
  */
 
 export const HUB_SESSION_COOKIE = WORKSPACE_SESSION_COOKIE;
@@ -54,7 +54,7 @@ export interface CurrentHubUser {
   id: string;
   email: string;
   /** Raw `admin_users.roles` — Hub has no role vocabulary of its own; this is
-   * used only to decide which OTHER panels' dashboard tiles to show. */
+   * used only to decide which OTHER products' dashboard tiles to show. */
   roles: string[];
   /** The Super Admin's per-user capability overrides (`permission-overrides.ts`). */
   permissionOverrides?: Record<string, boolean>;

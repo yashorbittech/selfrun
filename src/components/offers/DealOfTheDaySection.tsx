@@ -6,7 +6,7 @@ import CampaignCountdown from "@/components/offers/CampaignCountdown";
 import { formatOfferBadge } from "@/lib/offers/constants";
 import { getCategoryLabel, getSubServices } from "@/lib/categories";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export default function DealOfTheDaySection({ offer, onClaim }: { offer: SerializedOffer; onClaim: (offer: SerializedOffer) => void }) {
   const tx = useText();

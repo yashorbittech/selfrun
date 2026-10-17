@@ -37,7 +37,7 @@ async function step(name, fn) {
 }
 
 async function signIn(page, email, password) {
-  await page.goto(`${BASE}/workspace/login`);
+  await page.goto(`${BASE}/commandos/login`);
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
@@ -53,7 +53,7 @@ const roleName = `E2E Role ${Date.now().toString(36)}`;
 try {
   await step("owner signs in and opens Platform users & roles", async () => {
     await signIn(page, EMAIL, PASSWORD);
-    await page.goto(`${BASE}/platform/users`);
+    await page.goto(`${BASE}/console/users`);
     await page.getByRole("heading", { name: "Platform users & roles", level: 1 }).waitFor();
     await page.locator(`li[data-platform-user="${EMAIL.toLowerCase()}"]`).waitFor();
   });
@@ -101,7 +101,7 @@ try {
   if (MEMBER_EMAIL && MEMBER_PASSWORD) {
     const member = MEMBER_EMAIL.toLowerCase();
     await step("give an existing team member the Support role", async () => {
-      await page.goto(`${BASE}/platform/users`);
+      await page.goto(`${BASE}/console/users`);
       await page.click("#add-platform-user");
       const option = page.locator("#pu-existing option", { hasText: member });
       await page.selectOption("#pu-existing", await option.getAttribute("value"));
@@ -116,20 +116,20 @@ try {
       const p2 = await ctx2.newPage();
       try {
         await signIn(p2, MEMBER_EMAIL, MEMBER_PASSWORD);
-        await p2.goto(`${BASE}/platform/companies`);
+        await p2.goto(`${BASE}/console/companies`);
         await p2.getByRole("heading", { name: "Companies", level: 1 }).waitFor();
-        await p2.goto(`${BASE}/platform/users`);
-        assert.equal(new URL(p2.url()).pathname, "/platform");
+        await p2.goto(`${BASE}/console/users`);
+        assert.equal(new URL(p2.url()).pathname, "/console");
         await p2.getByRole("alert").getByText("doesn't include access").waitFor();
-        await p2.goto(`${BASE}/platform/settings/billing`);
-        assert.equal(new URL(p2.url()).pathname, "/platform");
+        await p2.goto(`${BASE}/console/settings/billing`);
+        assert.equal(new URL(p2.url()).pathname, "/console");
       } finally {
         await ctx2.close();
       }
     });
 
-    await step("revoke the member; they lose the panel", async () => {
-      await page.goto(`${BASE}/platform/users`);
+    await step("revoke the member; they lose the product", async () => {
+      await page.goto(`${BASE}/console/users`);
       await page.getByRole("button", { name: `Revoke ${member}` }).click();
       await page.getByRole("button", { name: "Revoke access" }).click();
       await page.locator(`li[data-platform-user="${member}"]`).waitFor({ state: "detached", timeout: 30_000 });
@@ -137,8 +137,8 @@ try {
       const p3 = await ctx3.newPage();
       try {
         await signIn(p3, MEMBER_EMAIL, MEMBER_PASSWORD);
-        await p3.goto(`${BASE}/platform`);
-        assert.ok(!new URL(p3.url()).pathname.startsWith("/platform"), `still in the panel: ${p3.url()}`);
+        await p3.goto(`${BASE}/console`);
+        assert.ok(!new URL(p3.url()).pathname.startsWith("/console"), `still in the product: ${p3.url()}`);
       } finally {
         await ctx3.close();
       }
@@ -148,7 +148,7 @@ try {
   }
 
   await step("audit log shows the role changes", async () => {
-    await page.goto(`${BASE}/platform/audit`);
+    await page.goto(`${BASE}/console/audit`);
     await page.getByRole("heading", { name: "Audit log", level: 1 }).waitFor();
     await page.selectOption("#audit-action", "platform_role");
     await page.waitForURL((u) => u.searchParams.get("action") === "platform_role", { timeout: 30_000 });
@@ -169,14 +169,14 @@ try {
   });
 
   await step("CSV export downloads", async () => {
-    await page.goto(`${BASE}/platform/audit?action=platform_role`);
+    await page.goto(`${BASE}/console/audit?action=platform_role`);
     const [download] = await Promise.all([page.waitForEvent("download", { timeout: 30_000 }), page.click("#audit-export")]);
     assert.match(download.suggestedFilename(), /^platform-audit-\d{4}-\d{2}-\d{2}\.csv$/);
   });
 
   await step("no horizontal scroll at phone width, no page errors", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/platform/users", "/platform/users?tab=roles", "/platform/audit"]) {
+    for (const path of ["/console/users", "/console/users?tab=roles", "/console/audit"]) {
       await page.goto(`${BASE}${path}`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 1, `${path} scrolls horizontally by ${overflow}px`);

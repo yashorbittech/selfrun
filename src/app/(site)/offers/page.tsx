@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { jsonForScript } from "@/lib/security/json-script";
-import { withSeoOverrides } from "@/lib/seo-panel/public";
+import { withSeoOverrides } from "@/lib/products/rankmax-ai/public";
 import { cache } from "react";
 import { resolveOffersPage } from "@/lib/offers/state";
 import { dispatchCampaignStart } from "@/lib/offers/subscriptions";
@@ -13,7 +13,7 @@ import { tabForPortalRole } from "@/lib/offers/constants";
 import { PORTAL_ROLE_META } from "@/lib/portal-roles";
 import { breadcrumbJsonLd, faqJsonLd, socialMetadata } from "@/lib/seo";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 import OffersContent from "./Content";
 
 // This page's whole point is to reflect the live DB state (campaign status/dates set in the

@@ -1,6 +1,6 @@
 "use client";
 
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProductItem } from "@/types/content";
@@ -301,7 +301,7 @@ function MockupContent({ type }: { type: string }) {
           <div className="grid grid-cols-3 gap-3">
             <MetricWidget label={tx("catalog.productMockup.multi-platform-output")} value="6 Channels" change="IG, YT, LinkedIn, FB" icon={Share2} color="pink" />
             <MetricWidget label={tx("catalog.productMockup.ai-video-reels")} value="18 Generated" change="Scene Scripts Ready" icon={Play} color="rose" />
-            <MetricWidget label={tx("catalog.productMockup.brand-voice-compliance")} value="100% Context" change="Direct Panel Sync" icon={CheckCircle2} color="emerald" />
+            <MetricWidget label={tx("catalog.productMockup.brand-voice-compliance")} value="100% Context" change="Direct Product Sync" icon={CheckCircle2} color="emerald" />
           </div>
           <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2 text-xs">
             <div className="flex items-center justify-between font-semibold text-foreground">

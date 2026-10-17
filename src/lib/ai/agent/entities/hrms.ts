@@ -1,38 +1,38 @@
 import "server-only";
-import { createEmployee, updateEmployee, deleteEmployee, changeEmployeeStatus, getEmployee, employeeFullName, descendantEmployeeIds, wouldCreateCycle, type Employee } from "@/lib/hrms/employees";
-import { rebuildHierarchyFor, removeFromHierarchy } from "@/lib/hrms/hierarchy";
-import { createDepartment, updateDepartment, deleteDepartment, createDesignation, updateDesignation, deleteDesignation, createTeam, updateTeam, deleteTeam } from "@/lib/hrms/departments";
-import { createHoliday, updateHoliday, deleteHoliday, getHoliday } from "@/lib/hrms/holidays";
-import { createLeaveRequest, decideLeaveRequest, cancelLeaveRequest, getLeaveRequest, setAllocation, upsertLeaveType, deleteLeaveType, getLeaveType, listLeaveTypes, getBalances, getLeaveAnalytics, getLeaveCalendar, employeesOnLeave } from "@/lib/hrms/leave";
-import { recordAttendance, bulkMarkAttendance, getTodaySnapshot, getMonthlyReport, getAttendanceOverview, MANUAL_ATTENDANCE_STATUSES } from "@/lib/hrms/attendance";
-import { clockIn, clockOut, updateOwnContact } from "@/lib/hrms/self-service";
-import { createOffer, updateOfferStatus, updateOfferDetails, getOffer, markOfferJoined } from "@/lib/hrms/offers";
-import { getApplicationForConversion } from "@/lib/hrms/recruitment";
-import { upsertPayrollProfile, getPayrollProfile } from "@/lib/hrms/payroll";
-import { createRevision } from "@/lib/hrms/salary-revisions";
-import { createRun, deleteRun, approveRun, getRun, getPayslip, recomputePayslip, updatePayslipOverrides, isMonthLocked } from "@/lib/hrms/payroll-run";
-import { bulkInitiate, cancelPayout, retryPayout, recordManualResult } from "@/lib/hrms/salary-payouts";
-import { getOrgSettings, updateOrgSettings, isDateString } from "@/lib/hrms/settings";
-import { updatePayrollConfig, getPayrollConfig } from "@/lib/hrms/payroll-config";
-import { updateCompanyDetails, getCompanyDetails } from "@/lib/hrms/company";
-import { getHrmsDashboardStats } from "@/lib/hrms/dashboard";
-import { recordAudit, diffSummary } from "@/lib/hrms/audit";
-import { notify } from "@/lib/hrms/notifications";
+import { createEmployee, updateEmployee, deleteEmployee, changeEmployeeStatus, getEmployee, employeeFullName, descendantEmployeeIds, wouldCreateCycle, type Employee } from "@/lib/products/talentos/employees";
+import { rebuildHierarchyFor, removeFromHierarchy } from "@/lib/products/talentos/hierarchy";
+import { createDepartment, updateDepartment, deleteDepartment, createDesignation, updateDesignation, deleteDesignation, createTeam, updateTeam, deleteTeam } from "@/lib/products/talentos/departments";
+import { createHoliday, updateHoliday, deleteHoliday, getHoliday } from "@/lib/products/talentos/holidays";
+import { createLeaveRequest, decideLeaveRequest, cancelLeaveRequest, getLeaveRequest, setAllocation, upsertLeaveType, deleteLeaveType, getLeaveType, listLeaveTypes, getBalances, getLeaveAnalytics, getLeaveCalendar, employeesOnLeave } from "@/lib/products/talentos/leave";
+import { recordAttendance, bulkMarkAttendance, getTodaySnapshot, getMonthlyReport, getAttendanceOverview, MANUAL_ATTENDANCE_STATUSES } from "@/lib/products/talentos/attendance";
+import { clockIn, clockOut, updateOwnContact } from "@/lib/products/talentos/self-service";
+import { createOffer, updateOfferStatus, updateOfferDetails, getOffer, markOfferJoined } from "@/lib/products/talentos/offers";
+import { getApplicationForConversion } from "@/lib/products/talentos/recruitment";
+import { upsertPayrollProfile, getPayrollProfile } from "@/lib/products/talentos/payroll";
+import { createRevision } from "@/lib/products/talentos/salary-revisions";
+import { createRun, deleteRun, approveRun, getRun, getPayslip, recomputePayslip, updatePayslipOverrides, isMonthLocked } from "@/lib/products/talentos/payroll-run";
+import { bulkInitiate, cancelPayout, retryPayout, recordManualResult } from "@/lib/products/talentos/salary-payouts";
+import { getOrgSettings, updateOrgSettings, isDateString } from "@/lib/products/talentos/settings";
+import { updatePayrollConfig, getPayrollConfig } from "@/lib/products/talentos/payroll-config";
+import { updateCompanyDetails, getCompanyDetails } from "@/lib/products/talentos/company";
+import { getHrmsDashboardStats } from "@/lib/products/talentos/dashboard";
+import { recordAudit, diffSummary } from "@/lib/products/talentos/audit";
+import { notify } from "@/lib/products/talentos/notifications";
 import {
   validateEmployeeCreate, validateDepartment, validateDesignation, validateTeam, validatePayrollProfile,
-} from "@/lib/hrms/validation";
-import { validateHoliday, validateLeaveType, validateLeaveRequest, validateAttendanceEntry, validateOrgSettings, validateCompanyDetails } from "@/lib/hrms/validation-ops";
-import { validateSalaryRevision, validatePayslipOverrides, validateManualPayoutResult, validateOffer, validateOfferDetails, validateOwnContact, validatePayrollConfig } from "@/lib/hrms/validation-payroll";
-import { EMPLOYEE_STATUSES, EMPLOYMENT_TYPES, GENDERS, WORK_LOCATIONS, isValidEmployeeStatus } from "@/lib/hrms/employee-status";
-import { HOLIDAY_TYPES } from "@/lib/hrms/holiday-types";
-import { OFFER_STATUSES, isValidOfferStatus } from "@/lib/hrms/offers-status";
+} from "@/lib/products/talentos/validation";
+import { validateHoliday, validateLeaveType, validateLeaveRequest, validateAttendanceEntry, validateOrgSettings, validateCompanyDetails } from "@/lib/products/talentos/validation-ops";
+import { validateSalaryRevision, validatePayslipOverrides, validateManualPayoutResult, validateOffer, validateOfferDetails, validateOwnContact, validatePayrollConfig } from "@/lib/products/talentos/validation-payroll";
+import { EMPLOYEE_STATUSES, EMPLOYMENT_TYPES, GENDERS, WORK_LOCATIONS, isValidEmployeeStatus } from "@/lib/products/talentos/employee-status";
+import { HOLIDAY_TYPES } from "@/lib/products/talentos/holiday-types";
+import { OFFER_STATUSES, isValidOfferStatus } from "@/lib/products/talentos/offers-status";
 import { canApproveLeave, canManageAttendance, canManageEmployees, canManageHolidays, canManageMasters, canManagePayroll, canRunPayroll, canManageSettings, canViewAllEmployees, canViewAuditLog } from "@/lib/hrms-roles";
-import * as Bank from "@/app/hrms/(protected)/(staff)/employees/[id]/bank-actions";
+import * as Bank from "@/app/(products)/talentos/(protected)/(staff)/employees/[id]/bank-actions";
 import { check, fail, formInput, str, viaAction } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * HRMS for the agent: people, org structure, holidays, leave, attendance, recruitment offers, payroll, settings. Writes use the panel's
+ * HRMS for the agent: people, org structure, holidays, leave, attendance, recruitment offers, payroll, settings. Writes use the product's
  * own validators and functions and repeat what its screens do around them (reporting-line scope, payroll month locks, audit trail,
  * notifications). Managers act inside their reporting line; employees only on themselves.
  */
@@ -107,7 +107,7 @@ export const HRMS_ENTITIES: EntityDef[] = [
         const employee = await createEmployee(c.data, u.id, { recruitment: null });
         await rebuildHierarchyFor(employee._id);
         await audit(u, { action: "create", entity: "employee", entityId: employee._id, entityLabel: `${employeeFullName(employee)} (${employee.employeeCode})`, summary: "Employee created" });
-        await notify({ audience: "staff", type: "employee_added", title: `${employeeFullName(employee)} added`, body: employee.employeeCode, link: `/hrms/employees/${employee._id}`, entityType: "employee", entityId: employee._id });
+        await notify({ audience: "staff", type: "employee_added", title: `${employeeFullName(employee)} added`, body: employee.employeeCode, link: `/talentos/employees/${employee._id}`, entityType: "employee", entityId: employee._id });
         return { ok: true, id: employee._id, record: employee };
       },
       update: async (id, v, u) => {
@@ -152,7 +152,7 @@ export const HRMS_ENTITIES: EntityDef[] = [
         return { ok: true, id: d._id, record: d };
       },
       update: async (id, v, u) => {
-        const cur = (await (await import("@/lib/hrms/departments")).getDepartment(id)) as Json | null;
+        const cur = (await (await import("@/lib/products/talentos/departments")).getDepartment(id)) as Json | null;
         if (!cur) return fail("Department not found.");
         const c = check(validateDepartment(formInput(cur, v)));
         if (!c.ok) return c.error;
@@ -186,7 +186,7 @@ export const HRMS_ENTITIES: EntityDef[] = [
         return { ok: true, id: d._id, record: d };
       },
       update: async (id, v, u) => {
-        const rows = await (await import("@/lib/hrms/departments")).listDesignations();
+        const rows = await (await import("@/lib/products/talentos/departments")).listDesignations();
         const cur = rows.find((d) => d._id === id) as unknown as Json | undefined;
         if (!cur) return fail("Designation not found.");
         const c = check(validateDesignation(formInput(cur, v)));
@@ -221,7 +221,7 @@ export const HRMS_ENTITIES: EntityDef[] = [
         return { ok: true, id: t._id, record: t };
       },
       update: async (id, v, u) => {
-        const rows = await (await import("@/lib/hrms/departments")).listTeams();
+        const rows = await (await import("@/lib/products/talentos/departments")).listTeams();
         const cur = rows.find((t) => t._id === id) as unknown as Json | undefined;
         if (!cur) return fail("Team not found.");
         const c = check(validateTeam(formInput(cur, v)));
@@ -490,7 +490,7 @@ export const HRMS_ACTIONS: ActionDef[] = [
     key: "hrms.clock_in", panel: "hrms", label: "Clock in", description: "Record your own check-in for today.", level: "any", params: [],
     run: async (_v, u) => {
       if (!u.employeeId) return fail("Your login isn't linked to an employee record.");
-      const { nowInOrgTz } = await import("@/lib/hrms/time");
+      const { nowInOrgTz } = await import("@/lib/products/talentos/time");
       if (await isMonthLocked(nowInOrgTz((await getOrgSettings()).timezone).date.slice(0, 7))) return fail("Payroll for this month is finalised — attendance is locked.");
       const r = await clockIn(u.employeeId);
       if (!r.ok) return fail(r.error ?? "Could not clock in.");
@@ -536,7 +536,7 @@ export const HRMS_ACTIONS: ActionDef[] = [
       const r = await updateOfferStatus(String(v.offerId), status, u.id);
       if (!r.ok) return fail(r.error ?? "Could not change the offer.");
       await audit(u, { action: "status_change", entity: "offer", entityId: String(v.offerId), entityLabel: `${r.offer.candidateName} — ${r.offer.positionTitle}`, summary: `→ ${status}` });
-      await notify({ audience: "staff", type: "offer_status", title: `Offer ${status}: ${r.offer.candidateName}`, body: r.offer.positionTitle, link: "/hrms/recruitment", entityType: "offer", entityId: String(v.offerId) });
+      await notify({ audience: "staff", type: "offer_status", title: `Offer ${status}: ${r.offer.candidateName}`, body: r.offer.positionTitle, link: "/talentos/recruitment", entityType: "offer", entityId: String(v.offerId) });
       return { ok: true, id: String(v.offerId), result: `Offer is now ${status}.` };
     },
   },
@@ -558,7 +558,7 @@ export const HRMS_ACTIONS: ActionDef[] = [
       await rebuildHierarchyFor(employee._id);
       await audit(u, { action: "convert_from_applicant", entity: "employee", entityId: employee._id, entityLabel: `${employeeFullName(employee)} (${employee.employeeCode})`, summary: `Converted from application ${String(v.applicationId)}` });
       await markOfferJoined(String(v.applicationId), employee._id, u.id);
-      await notify({ audience: "staff", type: "employee_added", title: `${employeeFullName(employee)} added`, body: `${employee.employeeCode} · converted from a job application`, link: `/hrms/employees/${employee._id}`, entityType: "employee", entityId: employee._id });
+      await notify({ audience: "staff", type: "employee_added", title: `${employeeFullName(employee)} added`, body: `${employee.employeeCode} · converted from a job application`, link: `/talentos/employees/${employee._id}`, entityType: "employee", entityId: employee._id });
       return { ok: true, id: employee._id, result: `${employeeFullName(employee)} (${employee.employeeCode}) created.` };
     },
   },

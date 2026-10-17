@@ -16,7 +16,7 @@ const CORE = MODULES.filter((m) => m.core).map((m) => m.key);
 
 /**
  * What the current company may use right now — the single question every
- * panel and API asks (enforcement helpers: `enforce.ts`).
+ * product and API asks (enforcement helpers: `enforce.ts`).
  * Resolved once per request. The platform owner is unlimited.
  */
 export const getEntitlements = cache(async (): Promise<Entitlements> => entitlementsFor(await currentCompanyId()));
@@ -37,7 +37,7 @@ export async function entitlementsFor(companyId: string): Promise<Entitlements> 
   const { status } = effectiveSubscriptionStatus(sub, (await getBillingSettings()).billing.graceDays, now);
 
   const plan = await getPlan(sub.planId);
-  // Panels in the plan, plus any unlocked by module add-ons the company holds.
+  // Products in the plan, plus any unlocked by module add-ons the company holds.
   const modules = !plan || plan.modules === "all" ? null : new Set<string>([...CORE, ...plan.modules, ...(await getModuleUnlocks(companyId))]);
   // A company scheduled for deletion is read-only until the day it is deleted, or until the request is cancelled.
   const pendingDeletionAt = (await getCompany(companyId).catch(() => null))?.deletion?.purgeAt ?? null;
@@ -48,14 +48,14 @@ export async function entitlementsFor(companyId: string): Promise<Entitlements> 
     status,
     modules,
     limits: await effectiveLimitsFor(sub, plan),
-    // A plan that was deleted keeps its company running (no panel locked, no limits): flags follow the same rule.
+    // A plan that was deleted keeps its company running (no product locked, no limits): flags follow the same rule.
     flags: plan ? plan.flags ?? [] : null,
     readOnly: status === "suspended" || status === "canceled" || pendingDeletionAt !== null,
     trialDaysLeft: status === "trialing" && sub.trialEndsAt ? trialDaysLeft(sub.trialEndsAt, now) : null,
   };
 }
 
-/** Whether the company's plan includes a panel (core panels always). */
+/** Whether the company's plan includes a product (core products always). */
 export async function canUseModule(moduleKey: string): Promise<boolean> {
   const e = await getEntitlements();
   return e.modules === null || e.modules.has(moduleKey);

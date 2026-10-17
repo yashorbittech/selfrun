@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { ArrowRight, Calendar, Clock, CheckCircle2 } from "lucide-react";
 import type { BlogPostMeta } from "@/types/content";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 interface BlogCardProps {
   post: BlogPostMeta;

@@ -3,10 +3,10 @@ import { randomUUID } from "node:crypto";
 import { quoteCredits, chargeCredits } from "@/lib/wallet/api";
 import { refundRedemption } from "@/lib/wallet/reversals";
 import { formatCredits } from "@/lib/wallet/constants";
-import { getPaymentPlan, updatePaymentPlan, summarise } from "@/lib/tms/payments";
-import { listInvoicesForCustomer } from "@/lib/fms/invoices";
-import { invoiceBalance } from "@/lib/fms/constants";
-import { createCreditNote, issueCreditNote } from "@/lib/fms/credit-notes";
+import { getPaymentPlan, updatePaymentPlan, summarise } from "@/lib/products/cohort-ai/payments";
+import { listInvoicesForCustomer } from "@/lib/products/cashflow-ai/invoices";
+import { invoiceBalance } from "@/lib/products/cashflow-ai/constants";
+import { createCreditNote, issueCreditNote } from "@/lib/products/cashflow-ai/credit-notes";
 import type { CurrentPortalUser } from "@/lib/portal-auth";
 
 /**
@@ -39,7 +39,7 @@ export async function payTrainingFeeWithCredits(user: CurrentPortalUser, planId:
   const amount = Math.min(usable, Math.floor(pendingAmount));
   if (amount <= 0) return { ok: false, error: "Credits can't be applied to this fee right now." };
 
-  const charge = await chargeCredits({ userId: user.id, module: "training", amount, price: pendingAmount, referenceId: planId, idempotencyKey: `panel:training:${planId}:${randomUUID()}` });
+  const charge = await chargeCredits({ userId: user.id, module: "training", amount, price: pendingAmount, referenceId: planId, idempotencyKey: `product:training:${planId}:${randomUUID()}` });
   if (!charge.ok) return { ok: false, error: charge.error };
 
   try {
@@ -77,7 +77,7 @@ export async function payInvoiceWithCredits(user: CurrentPortalUser, invoiceNumb
   const amount = Math.min(usable, Math.floor(balance));
   if (amount <= 0) return { ok: false, error: "Credits can't be applied to this invoice right now." };
 
-  const charge = await chargeCredits({ userId: user.id, module: "projects", amount, price: balance, referenceId: inv._id, idempotencyKey: `panel:projects:${inv._id}:${randomUUID()}` });
+  const charge = await chargeCredits({ userId: user.id, module: "projects", amount, price: balance, referenceId: inv._id, idempotencyKey: `product:projects:${inv._id}:${randomUUID()}` });
   if (!charge.ok) return { ok: false, error: charge.error };
 
   const actor = `portal:${user.id}`;

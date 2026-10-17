@@ -43,7 +43,7 @@ async function step(name, fn) {
 }
 
 async function signIn(page, origin, email, password) {
-  await page.goto(`${origin}/workspace/login`);
+  await page.goto(`${origin}/commandos/login`);
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
@@ -52,8 +52,8 @@ async function signIn(page, origin, email, password) {
 
 /** A company whose setup is still open lands in the onboarding wizard first; skipping it is the way into the dashboard. */
 async function skipSetupIfShown(page) {
-  if (new URL(page.url()).pathname !== "/workspace/onboarding") return;
-  await Promise.all([page.waitForURL((u) => u.pathname === "/workspace", { timeout: 30_000 }), page.getByRole("button", { name: "Skip for now" }).click()]);
+  if (new URL(page.url()).pathname !== "/commandos/onboarding") return;
+  await Promise.all([page.waitForURL((u) => u.pathname === "/commandos", { timeout: 30_000 }), page.getByRole("button", { name: "Skip for now" }).click()]);
 }
 
 async function noHorizontalScroll(page, url) {
@@ -79,13 +79,13 @@ try {
   });
 
   await step("settings hub links to Automations, Import data and the Audit log", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings`);
-    for (const href of ["/workspace/settings/automations", "/workspace/settings/import", "/workspace/settings/audit-log"]) await page.locator(`a[href="${href}"]`).waitFor();
+    await page.goto(`${COMPANY_URL}/commandos/settings`);
+    for (const href of ["/commandos/settings/automations", "/commandos/settings/import", "/commandos/settings/audit-log"]) await page.locator(`a[href="${href}"]`).waitFor();
   });
 
   // ── Phase 3: automations ───────────────────────────────────────────────
   await step("add the “New lead → notify sales” template with one click", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/automations`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/automations`);
     await page.getByRole("heading", { name: "Automations" }).waitFor();
     assert.equal(await page.locator('[id^="automation-template-"]').count(), 4, "four templates");
     await page.click("#automation-template-lead-notify-sales");
@@ -143,7 +143,7 @@ try {
 
   let unreadBefore = 0;
   await step("creating a lead (public lead form API) triggers the automation", async () => {
-    await page.goto(`${COMPANY_URL}/workspace`);
+    await page.goto(`${COMPANY_URL}/commandos`);
     unreadBefore = Number(await page.locator("#hub-bell").getAttribute("data-unread"));
     // In the browser: Node can't resolve *.localhost company hosts.
     const res = await page.evaluate(
@@ -167,7 +167,7 @@ try {
     // The workflow runs after the response; allow it a few seconds.
     await assert.doesNotReject(async () => {
       for (let i = 0; i < 20; i++) {
-        await page.goto(`${COMPANY_URL}/workspace`);
+        await page.goto(`${COMPANY_URL}/commandos`);
         const unread = Number(await page.locator("#hub-bell").getAttribute("data-unread"));
         if (unread > unreadBefore) return;
         await page.waitForTimeout(1000);
@@ -179,7 +179,7 @@ try {
 
   await step("notifications page lists it; mark all as read clears the bell", async () => {
     await page.click("#hub-bell");
-    await page.waitForURL((u) => u.pathname === "/workspace/notifications");
+    await page.waitForURL((u) => u.pathname === "/commandos/notifications");
     const item = page.locator('#notifications-list li[data-read="false"]').filter({ hasText: `New lead: ${LEAD_NAME}` });
     await item.first().waitFor();
     await item.first().getByText(LEAD_EMAIL).waitFor();
@@ -192,7 +192,7 @@ try {
   });
 
   await step("the automation's history shows the real run", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/automations`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/automations`);
     await automationRow(page).locator("[data-history-automation]").click();
     const history = automationRow(page).locator("[data-run-history]");
     await history.getByText(LEAD_NAME).first().waitFor();
@@ -200,7 +200,7 @@ try {
   });
 
   await step("Cmd/Ctrl+K opens search and finds the lead; the search button opens it too", async () => {
-    await page.goto(`${COMPANY_URL}/workspace`);
+    await page.goto(`${COMPANY_URL}/commandos`);
     await page.locator("#hub-search-button").waitFor();
     await page.keyboard.press("Control+k");
     await page.locator("#hub-search-input").waitFor();
@@ -213,11 +213,11 @@ try {
     const hit = page.locator('#hub-search-results [data-hit-type="lead"]').filter({ hasText: LEAD_NAME });
     await hit.first().waitFor();
     await page.keyboard.press("Enter");
-    await page.waitForURL((u) => u.pathname.startsWith("/lms"), { timeout: 30_000 });
+    await page.waitForURL((u) => u.pathname.startsWith("/dealflow-ai"), { timeout: 30_000 });
   });
 
   await step("audit log (workspace events) shows the event and filters by type", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/audit-log?source=workspace`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/audit-log?source=workspace`);
     await page.getByRole("heading", { name: "Workspace events" }).waitFor();
     const row = page.locator('#activity-list li[data-event-type="lead.created"]').filter({ hasText: LEAD_NAME });
     await row.first().waitFor();
@@ -234,7 +234,7 @@ try {
   });
 
   await step("Staff Hub shows the company strip: KPIs, recent activity, and the Ask box answers", async () => {
-    await page.goto(`${COMPANY_URL}/workspace`);
+    await page.goto(`${COMPANY_URL}/commandos`);
     await page.locator("#company-today").waitFor();
     await page.locator('#company-kpis [data-kpi="open_leads"]').waitFor();
     await page.locator("#company-activity").getByText(LEAD_NAME).first().waitFor();
@@ -249,7 +249,7 @@ try {
 
   // ── Phase 5: import ────────────────────────────────────────────────────
   await step("sample CSV downloads with the right header", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/import`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/import`);
     await page.getByRole("heading", { name: "Import data" }).waitFor();
     for (const t of ["leads", "clients", "employees"]) await page.locator(`#import-type-${t}`).waitFor();
     const [download] = await Promise.all([page.waitForEvent("download"), page.click("#import-sample")]);
@@ -295,7 +295,7 @@ try {
     await page.locator('#import-preview-duplicates [data-line="2"]').getByText("already exists").waitFor();
     assert.equal(await page.locator("#import-run-button").count(), 0, "nothing to import");
 
-    await page.goto(`${COMPANY_URL}/workspace`);
+    await page.goto(`${COMPANY_URL}/commandos`);
     await page.click("#hub-search-button");
     await page.fill("#hub-search-input", `Import Two ${RUN}`);
     await page.locator('#hub-search-results [data-hit-type="lead"]').filter({ hasText: `Import Two ${RUN}` }).first().waitFor();
@@ -303,7 +303,7 @@ try {
   });
 
   await step("employees import offers invitations as an unticked opt-in", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/import`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/import`);
     await page.click("#import-type-employees");
     const csv = ["First name,Last name,Work email", `Test,Person,test.person.${RUN}@e2e-example.com`].join("\n");
     await page.setInputFiles("#import-file", { name: "employees.csv", mimeType: "text/csv", buffer: Buffer.from(csv, "utf8") });
@@ -318,15 +318,15 @@ try {
   await step("unsigned requests can't import or download samples", async () => {
     const anon = await browser.newContext();
     const ap = await anon.newPage();
-    await ap.goto(`${COMPANY_URL}/workspace/login`);
+    await ap.goto(`${COMPANY_URL}/commandos/login`);
     const res = await ap.evaluate(async () => {
-      const run = await fetch("/workspace/settings/import/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "leads", csv: "Name,Email,Phone\nA,a@b.co,+91 90000 00000", mapping: { name: 0, email: 1, phone: 2 }, dryRun: false }) });
-      const sample = await fetch("/workspace/settings/import/sample?type=leads");
+      const run = await fetch("/commandos/settings/import/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ type: "leads", csv: "Name,Email,Phone\nA,a@b.co,+91 90000 00000", mapping: { name: 0, email: 1, phone: 2 }, dryRun: false }) });
+      const sample = await fetch("/commandos/settings/import/sample?type=leads");
       return { run: run.status, sample: sample.status };
     });
     assert.equal(res.run, 401);
     assert.equal(res.sample, 403);
-    for (const path of ["/workspace/settings/automations", "/workspace/settings/audit-log?source=workspace", "/workspace/settings/import", "/workspace/notifications"]) {
+    for (const path of ["/commandos/settings/automations", "/commandos/settings/audit-log?source=workspace", "/commandos/settings/import", "/commandos/notifications"]) {
       await ap.goto(`${COMPANY_URL}${path}`);
       assert.ok(new URL(ap.url()).pathname.endsWith("/login"), `${path} → ${ap.url()}`);
     }
@@ -335,15 +335,15 @@ try {
 
   await step("no horizontal scroll at phone width", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/workspace", "/workspace/notifications", "/workspace/settings", "/workspace/settings/automations", "/workspace/settings/audit-log", "/workspace/settings/audit-log?source=workspace", "/workspace/settings/import"]) await noHorizontalScroll(page, `${COMPANY_URL}${path}`);
+    for (const path of ["/commandos", "/commandos/notifications", "/commandos/settings", "/commandos/settings/automations", "/commandos/settings/audit-log", "/commandos/settings/audit-log?source=workspace", "/commandos/settings/import"]) await noHorizontalScroll(page, `${COMPANY_URL}${path}`);
     // The editor and the search palette fit too.
-    await page.goto(`${COMPANY_URL}/workspace/settings/automations`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/automations`);
     await page.click("#automation-new");
     await page.click("#automation-add-condition");
     await page.locator("#automation-form").waitFor();
     let overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.ok(overflow <= 1, `automation editor scrolls horizontally by ${overflow}px`);
-    await page.goto(`${COMPANY_URL}/workspace`);
+    await page.goto(`${COMPANY_URL}/commandos`);
     await page.click("#hub-search-button");
     await page.fill("#hub-search-input", LEAD_NAME);
     await page.locator("#hub-search-results").waitFor();
@@ -354,7 +354,7 @@ try {
   });
 
   await step("clean up: delete the automation", async () => {
-    await page.goto(`${COMPANY_URL}/workspace/settings/automations`);
+    await page.goto(`${COMPANY_URL}/commandos/settings/automations`);
     const before = await page.locator("[data-automation]").filter({ hasText: TEMPLATE_NAME }).count();
     const row = automationRow(page);
     await row.getByRole("button", { name: `Delete ${TEMPLATE_NAME}` }).click();

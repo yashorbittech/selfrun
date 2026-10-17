@@ -1,10 +1,10 @@
-import CmsPageView from "@/components/cms/CmsPageView";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
 
 /**
  * Every CMS page without a dedicated route — i.e. almost the whole site, and
  * any new page created in the CMS. The page's content, SEO and structured
- * data all come from the CMS (see src/lib/cms/public.ts); routes that need
+ * data all come from the CMS (see src/lib/sitecraft-ai/public.ts); routes that need
  * request data (/login, /contact, …) have their own route files and take
  * precedence over this one.
  */

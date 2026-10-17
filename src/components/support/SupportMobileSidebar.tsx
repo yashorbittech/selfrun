@@ -3,7 +3,7 @@
 import { PanelName } from "@/components/platform/PanelsProvider";
 import { useState } from "react";
 import { Menu } from "lucide-react";
-import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
+import { MobileSidebarProfile } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SupportSidebar from "@/components/support/SupportSidebar";

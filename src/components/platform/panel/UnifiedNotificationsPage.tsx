@@ -4,15 +4,16 @@ import { getCurrentHubUser } from "@/lib/hub-auth";
 import { hasLevel } from "@/lib/ai/agent/access";
 import { listPanelNotifications, markPanelRead } from "@/lib/notify";
 import type { NotifyPanel } from "@/lib/notify/panels";
+import { productSlugFor } from "@/lib/platform/saas/product-routes";
 
 /**
- * A panel's Notifications page for panels that use the shared notification store (Finance, Leads, Legal, Website, Intelligence …).
- * Shows only THIS person's notifications of THIS panel, and only to someone whose roles open the panel.
+ * A product's Notifications page for products that use the shared notification store (Finance, Leads, Legal, Website, Intelligence …).
+ * Shows only THIS person's notifications of THIS product, and only to someone whose roles open the product.
  */
 export default async function UnifiedNotificationsPage({ panel, panelName, shortCode, description }: { panel: NotifyPanel; panelName: string; shortCode: string; description: string }) {
   const user = await getCurrentHubUser();
-  if (!user) redirect(`/${panel}/login`);
-  if (!hasLevel(user.roles, panel, "any")) redirect(`/${panel}/login`);
+  if (!user) redirect(`/${productSlugFor(panel)}/login`);
+  if (!hasLevel(user.roles, panel, "any")) redirect(`/${productSlugFor(panel)}/login`);
   const items = await listPanelNotifications(user.id, panel, 100);
 
   async function markRead(entries: { id: string }[]) {

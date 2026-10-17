@@ -2,14 +2,14 @@ import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { getPlatformOwnerCompanyId } from "@/lib/platform/tenancy/companies";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
-import { getCompanyDetails } from "@/lib/hrms/company";
+import { getCompanyDetails } from "@/lib/products/talentos/company";
 import { DEFAULT_TRIAL_DAYS, GRACE_DAYS, GST_RATE } from "@/lib/platform/billing/types";
 import { GST_STATE_CODES, SELECTABLE_GST_STATES, gstStateCode, gstinError, normalizeGstin, stateCodeFromGstin } from "@/lib/platform/billing/gst";
 
 /**
  * Platform-wide billing configuration — the seller identity on SaaS invoices,
  * tax, invoice numbering/text and billing defaults. Stored in
- * `platform_settings` (`_id: "billing"`), edited only in the Platform Panel.
+ * `platform_settings` (`_id: "billing"`), edited only in the Platform Console.
  * Nothing here is hard-coded: the constants in `types.ts` are first-run
  * fallbacks, and the seller identity is prefilled from the platform owner's
  * HRMS company details until someone saves it here.

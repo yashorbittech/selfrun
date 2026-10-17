@@ -4,7 +4,7 @@
  * cards, the audience selector, the claim modal). Server modules re-export
  * from here where convenient.
  *
- * Badge/dot class shapes mirror `src/lib/tms/constants.ts` so the shared
+ * Badge/dot class shapes mirror `src/lib/cohort-ai/constants.ts` so the shared
  * badge styling applies unchanged.
  */
 

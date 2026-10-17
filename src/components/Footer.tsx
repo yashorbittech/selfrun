@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/SocialIcons";
 import { FooterBrand, FooterContactLines, FooterSocialIcons, FooterCopyright, FooterLegalLinks, socialLinks } from "@/components/footer/FooterParts";
-import type { SiteInfo } from "@/lib/cms/site-info-shared";
-import type { PublicFooterColumn } from "@/lib/cms/footer";
+import type { SiteInfo } from "@/lib/products/sitecraft-ai/site-info-shared";
+import type { PublicFooterColumn } from "@/lib/products/sitecraft-ai/footer";
 
 export default function Footer({ cmsFooter, siteInfo }: { cmsFooter: PublicFooterColumn[]; siteInfo: SiteInfo }) {
   const { contact, footer, display } = siteInfo;

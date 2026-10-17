@@ -6,7 +6,7 @@ import { appUrlForCompany } from "@/lib/platform/tenancy/site-url";
 import { COMPANIES_COLLECTION, type Company } from "@/lib/platform/tenancy/companies";
 import { buildCompanyIdentity } from "@/lib/pwa/identity";
 import { resolvedRootDomain } from "@/lib/platform/integrations/store";
-import { saasAppOrigin } from "@/lib/saas/hosts";
+import { saasAppOrigin } from "@/lib/platform/saas/hosts";
 import { buildsCol, emptyPlatforms, overallStatus, platformsOf, recentBuilds, type BuildDoc } from "@/lib/apps/store";
 import { APP_PLATFORMS, SCOPE_PLATFORMS, type BuildTrigger, type GenerationScope } from "@/lib/apps/types";
 import { getAppSettings } from "@/lib/pwa/store";
@@ -32,7 +32,7 @@ export interface BuildInput {
   hash: string;
 }
 
-/** What an installer for this company would bake in right now (its panels address, name and icon), inside the company's scope. */
+/** What an installer for this company would bake in right now (its app address, name and icon), inside the company's scope. */
 export async function currentBuildInput(companyId: string): Promise<BuildInput> {
   return runAsCompany(companyId, async () => {
     const [identity, origin, company] = await Promise.all([

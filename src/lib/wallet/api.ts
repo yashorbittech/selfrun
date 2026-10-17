@@ -6,8 +6,8 @@ import type { WalletTransaction } from "@/lib/wallet/transactions";
 import { externalUsers } from "@/lib/portal-auth";
 
 /**
- * THE integration surface every panel uses to touch credits — there is one
- * wallet per user and no panel keeps its own balance. Earning goes through
+ * THE integration surface every product uses to touch credits — there is one
+ * wallet per user and no product keeps its own balance. Earning goes through
  * `awardCredits`; spending goes through `quoteCredits` (how much may be
  * applied) then `chargeCredits` (apply it). Both honour the admin-configured
  * usage rules for the user's account type and the module.

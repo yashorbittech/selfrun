@@ -104,7 +104,7 @@ export function InstallCard() {
 const SNOOZE_KEY = "install-banner-snoozed-until";
 const SNOOZE_MS = 14 * 24 * 60 * 60 * 1000;
 
-/** A small dismissible banner at the bottom of panels pages, only where the browser can install the app with one tap. */
+/** A small dismissible banner at the bottom of products pages, only where the browser can install the app with one tap. */
 export function InstallBanner() {
   const s = useInstallState();
   const [hidden, setHidden] = useState(true);

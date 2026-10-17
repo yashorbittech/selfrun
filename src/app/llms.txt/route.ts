@@ -1,16 +1,16 @@
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { formatMoney } from "@/lib/platform/billing/types";
-import { onSaasHost, saasOrigin } from "@/lib/saas/request";
-import { SAAS_BRAND } from "@/lib/saas/brand";
-import { LEGAL_EXTRA } from "@/lib/saas/site";
-import { getFeatureModules } from "@/lib/saas/modules";
+import { onSaasHost, saasOrigin } from "@/lib/platform/saas/request";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { LEGAL_EXTRA } from "@/lib/platform/saas/site";
+import { getFeatureModules } from "@/lib/platform/saas/modules";
 
 export const dynamic = "force-dynamic";
 
 /**
  * A plain-text summary of the product for AI assistants and AI search (the llms.txt convention): what it is, what it costs, and where each
- * question is answered. Built from the live plan catalogue and panel list, so it cannot drift from the website. Only on the product's host.
+ * question is answered. Built from the live plan catalogue and product list, so it cannot drift from the website. Only on the product's host.
  */
 export async function GET() {
   if (!(await onSaasHost())) return new Response("Not found", { status: 404 });
@@ -28,7 +28,7 @@ export async function GET() {
     `> ${SAAS_BRAND.description}`,
     "",
     "## What it is",
-    `${modules.length} panels in one product with one login and one database per company: ${modules.map((m) => m.name).join(", ")}. Every plan includes every panel and every feature; plans differ by number of people and by monthly allowances of storage, AI, email and voice.`,
+    `${modules.length} products in one product with one login and one database per company: ${modules.map((m) => m.name).join(", ")}. Every plan includes every product and every feature; plans differ by number of people and by monthly allowances of storage, AI, email and voice.`,
     "",
     "## Plans",
     ...planLines,

@@ -1,6 +1,6 @@
 import "server-only";
 import { ObjectId } from "mongodb";
-import { getLpmsDocumentsCollection } from "@/lib/lpms/db";
+import { getLpmsDocumentsCollection } from "@/lib/products/contractflow-ai/db";
 import { notifyRoles, notifyUsers } from "@/lib/notify";
 import { day, plural, short, today } from "@/lib/notify/triggers/format";
 
@@ -9,7 +9,7 @@ import { day, plural, short, today } from "@/lib/notify/triggers/format";
  * document's own owner and author. Whoever made the change is not told about it.
  */
 const APPROVERS = ["lpms_admin", "lpms_manager"];
-const link = (id: string) => `/lpms/documents/${id}`;
+const link = (id: string) => `/contractflow-ai/documents/${id}`;
 
 interface Doc { id: string; title: string; number?: string; owners: string[] }
 

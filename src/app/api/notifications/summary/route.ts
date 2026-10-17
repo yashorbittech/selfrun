@@ -4,7 +4,7 @@ import { unreadForPortal, unreadForStaff } from "@/lib/notify/counts";
 
 export const dynamic = "force-dynamic";
 
-/** Unread counts per panel for the signed-in person (only panels they can open). Used by every bell on load, focus and reconnect. */
+/** Unread counts per product for the signed-in person (only products they can open). Used by every bell on load, focus and reconnect. */
 export async function GET(req: NextRequest) {
   const v = await currentNotifyViewer(req.nextUrl.searchParams.get("as"));
   if (!v) return NextResponse.json({ error: "Not signed in." }, { status: 401, headers: { "Cache-Control": "no-store" } });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {

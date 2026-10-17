@@ -12,7 +12,7 @@ import { ChevronRight, ArrowRight, Terminal, LucideIcon } from "lucide-react";
  * genuinely distinct visual: dark/terminal aesthetic instead of the default
  * theme's warm photo-hero. This is the concrete proof that one CMS content
  * shape can render through two different components depending on the active
- * theme — see `src/lib/cms/theme-components.ts`.
+ * theme — see `src/lib/sitecraft-ai/theme-components.ts`.
  */
 
 interface AIPageHeroProps {

@@ -1,6 +1,6 @@
 /**
- * Browser test for Payments & Razorpay, Subscriptions (Platform Panel) and a
- * company's /workspace/settings/billing, against a RUNNING server (production build
+ * Browser test for Payments & Razorpay, Subscriptions (Platform Console) and a
+ * company's /commandos/settings/billing, against a RUNNING server (production build
  * recommended). No real checkout: it never clicks Subscribe, and it never
  * saves Razorpay keys (it only checks validation of an obviously wrong key).
  *
@@ -40,7 +40,7 @@ async function step(name, fn) {
 }
 
 async function signIn(page, base, email, password) {
-  await page.goto(`${base}/workspace/login`);
+  await page.goto(`${base}/commandos/login`);
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
@@ -64,7 +64,7 @@ try {
   });
 
   await step("Payments & Razorpay renders keys, webhook URL and events", async () => {
-    await page.goto(`${BASE}/platform/payments`);
+    await page.goto(`${BASE}/console/payments`);
     await page.getByRole("heading", { name: "Payments & Razorpay", level: 1 }).waitFor();
     await page.locator("#rzp-key-id").waitFor();
     await page.locator("#rzp-key-secret").waitFor();
@@ -92,11 +92,11 @@ try {
 
   let firstCompanyHref = null;
   await step("Subscriptions lists companies with plan, status and MRR", async () => {
-    await page.goto(`${BASE}/platform/subscriptions`);
+    await page.goto(`${BASE}/console/subscriptions`);
     await page.getByRole("heading", { name: "Subscriptions", level: 1 }).waitFor();
     await page.getByText("MRR (pre-tax)").waitFor();
     for (const col of ["Company", "Plan", "Cycle", "Status", "Trial ends", "Renews", "MRR"]) await page.getByRole("columnheader", { name: col }).first().waitFor();
-    firstCompanyHref = await page.locator('a[href^="/platform/subscriptions/"]').first().getAttribute("href");
+    firstCompanyHref = await page.locator('a[href^="/console/subscriptions/"]').first().getAttribute("href");
     assert.ok(firstCompanyHref, "at least one row");
   });
 
@@ -104,7 +104,7 @@ try {
     await page.locator("#subscriptions-search").fill("zzzz-no-such-company");
     await page.waitForURL((u) => u.searchParams.get("q") === "zzzz-no-such-company", { timeout: 10_000 });
     await page.getByText("No subscriptions match these filters.").waitFor();
-    await page.goto(`${BASE}/platform/subscriptions?status=trialing`);
+    await page.goto(`${BASE}/console/subscriptions?status=trialing`);
     await page.getByRole("heading", { name: "Subscriptions", level: 1 }).waitFor();
   });
 
@@ -119,9 +119,9 @@ try {
     }
   });
 
-  await step("panel pages fit a 390px screen", async () => {
+  await step("product pages fit a 390px screen", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/platform/payments", "/platform/subscriptions", firstCompanyHref]) {
+    for (const path of ["/console/payments", "/console/subscriptions", firstCompanyHref]) {
       await page.goto(`${BASE}${path}`);
       await page.waitForLoadState("networkidle");
       await noHorizontalScroll(page);
@@ -138,7 +138,7 @@ try {
 
     await step("company billing page shows plan, status and a quote-priced summary", async () => {
       await signIn(cpage, COMPANY_URL, COMPANY_EMAIL, COMPANY_PASSWORD);
-      await cpage.goto(`${COMPANY_URL}/workspace/settings/billing`);
+      await cpage.goto(`${COMPANY_URL}/commandos/settings/billing`);
       await cpage.getByRole("heading", { name: "Current plan" }).waitFor();
       await cpage.locator("#billing-total").waitFor({ timeout: 20_000 });
       const total = (await cpage.locator("#billing-total").textContent()) ?? "";
@@ -169,8 +169,8 @@ try {
       await noHorizontalScroll(cpage);
     });
 
-    await step("the Platform Panel doesn't exist on the company's host", async () => {
-      const res = await cpage.goto(`${COMPANY_URL}/platform/subscriptions`);
+    await step("the Platform Console doesn't exist on the company's host", async () => {
+      const res = await cpage.goto(`${COMPANY_URL}/console/subscriptions`);
       assert.equal(res?.status(), 404);
     });
     await cctx.close();

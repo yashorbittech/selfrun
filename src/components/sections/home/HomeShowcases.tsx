@@ -6,10 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import SectionHeader from "@/components/sections/SectionHeader";
 import SubscriptionCard from "@/components/sections/SubscriptionCard";
-import { useEngagementModels } from "@/components/cms/CollectionsContext";
+import { useEngagementModels } from "@/components/products/sitecraft-ai/CollectionsContext";
 import { HomeFooterLink } from "./HomeCardGrids";
 import type { HomeSectionHeaderProps } from "./types";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 /**
  * The homepage's three interactive/data-linked sections, extracted verbatim
@@ -147,7 +147,7 @@ export function HomeIndustries({
                     }`}>
                     <ind.icon className="w-5 h-5" />
                   </div>
-                  {/* Collapsed rotated text for inactive panels on desktop */}
+                  {/* Collapsed rotated text for inactive products on desktop */}
                   <div className={`hidden lg:block transition-all duration-500 origin-left ${activeIndustry === idx ? "opacity-0 max-h-0" : "opacity-100 -rotate-90 translate-y-32 translate-x-4"
                     }`}>
                     <h3 className="text-3xl font-bold text-white/80 whitespace-nowrap">

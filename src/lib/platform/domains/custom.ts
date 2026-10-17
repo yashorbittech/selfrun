@@ -66,7 +66,7 @@ export function parseCustomDomain(raw: string): { ok: true; host: string } | { o
   if (labels.length < 2) return { ok: false, error: "Enter a full domain including its ending, like yourcompany.com." };
   if (!labels.every((l) => LABEL_RE.test(l))) return { ok: false, error: "That doesn't look like a domain name." };
   if (!TLD_RE.test(labels[labels.length - 1])) return { ok: false, error: "That domain ending isn't valid." };
-  if (labels[0] === "app") return { ok: false, error: "Add your main domain (like yourcompany.com). The app. address for your panels is set up for you." };
+  if (labels[0] === "app") return { ok: false, error: "Add your main domain (like yourcompany.com). The app. address for your products is set up for you." };
   if (isPlatformHost(host)) return { ok: false, error: "Platform addresses can't be added. Your workspace address is already connected." };
   return { ok: true, host };
 }
@@ -76,13 +76,13 @@ function wwwCounterpart(host: string): string {
   return host.startsWith("www.") ? host.slice(4) : `www.${host}`;
 }
 
-/** Where a custom domain's panels live: `app.<domain>` (the domain itself serves only the website). */
+/** Where a custom domain's products live: `app.<domain>` (the domain itself serves only the website). */
 export function appHostOf(host: string): string {
   return `app.${host.replace(/^www\./, "")}`;
 }
 
 /**
- * Attaches / re-checks the panels host `app.<domain>` at the hosting provider and keeps its state on the domain's own document
+ * Attaches / re-checks the app host `app.<domain>` at the hosting provider and keeps its state on the domain's own document
  * (it has no document of its own), so the Domains page can show its ownership challenge and routing records next to the website's.
  */
 async function syncAppHost(domainHost: string, op: "add" | "status" | "verify") {
@@ -101,7 +101,7 @@ function sameRecord(a: DnsRecord, b: DnsRecord): boolean {
   return a.type === b.type && a.name === b.name && a.value === b.value;
 }
 
-/** The client-safe view of one domain record (also used by the Platform Panel overview). */
+/** The client-safe view of one domain record (also used by the Platform Console overview). */
 export function toView(d: CompanyDomain): CompanyDomainView {
   const kind = d.kind ?? "custom";
   const p = d.provider;
@@ -120,7 +120,7 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     }
   }
 
-  // The panels host `app.<domain>` is a second host at the hosting provider: it can demand its own ownership proof and needs its own
+  // The app host `app.<domain>` is a second host at the hosting provider: it can demand its own ownership proof and needs its own
   // routing record. Its records are listed with the website's so everything is published in one go.
   let app: CompanyDomainView["app"] = null;
   if (kind === "custom" && !localOnly) {
@@ -130,10 +130,10 @@ export function toView(d: CompanyDomain): CompanyDomainView {
       if (!records.some((x) => sameRecord(x, r))) records.push({ ...r, state });
     };
     if (ap && ap.id !== "manual") {
-      for (const r of ap.records ?? []) add({ ...r, reason: r.type === "TXT" ? `Proves you can serve ${appHost} (hosting provider)` : `Serves your panels at ${appHost}` }, "missing");
-      if (!ap.dnsConfigured && !(ap.records ?? []).some((r) => r.type !== "TXT")) add({ ...routingRecord(appHost), reason: `Serves your panels (Workspace and the rest) at ${appHost}` }, "missing");
+      for (const r of ap.records ?? []) add({ ...r, reason: r.type === "TXT" ? `Proves you can serve ${appHost} (hosting provider)` : `Serves your products at ${appHost}` }, "missing");
+      if (!ap.dnsConfigured && !(ap.records ?? []).some((r) => r.type !== "TXT")) add({ ...routingRecord(appHost), reason: `Serves your products (Workspace and the rest) at ${appHost}` }, "missing");
     } else {
-      add({ ...routingRecord(appHost), reason: `Serves your panels (Workspace and the rest) at ${appHost}` }, "unknown");
+      add({ ...routingRecord(appHost), reason: `Serves your products (Workspace and the rest) at ${appHost}` }, "unknown");
     }
     const appSsl: NonNullable<CompanyDomainView["app"]>["ssl"] = ap?.id === "manual" ? "manual" : ap?.error ? "error" : ap?.attached && ap.verified && ap.dnsConfigured ? "active" : "pending";
     app = { host: appHost, ssl: appSsl, verified: Boolean(ap?.verified), dnsConfigured: Boolean(ap?.dnsConfigured), error: ap?.error ?? null };
@@ -154,7 +154,7 @@ export function toView(d: CompanyDomain): CompanyDomainView {
     for (const e of [...(d.dnsLog ?? [])].sort((a, b) => b.seenAt.getTime() - a.seenAt.getTime())) remember(e.host, e, e.seenAt);
     remember(d._id, verificationRecord(d), null);
     remember(d._id, routingRecord(d._id), null);
-    remember(appHostOf(d._id), { ...routingRecord(appHostOf(d._id)), reason: "Serves your panels (Workspace and the rest)" }, null);
+    remember(appHostOf(d._id), { ...routingRecord(appHostOf(d._id)), reason: "Serves your products (Workspace and the rest)" }, null);
   }
 
   let ssl: CompanyDomainView["hosting"]["ssl"];
@@ -184,7 +184,7 @@ export async function listCompanyDomains(): Promise<CompanyDomainView[]> {
   const companyId = await currentCompanyId();
   const domains = await domainsCollection();
   let rows = await domains.find({ companyId }).toArray();
-  // A verified domain's panels host (`app.<domain>`) is attached and checked at the hosting provider on its own: whenever it has never
+  // A verified domain's app host (`app.<domain>`) is attached and checked at the hosting provider on its own: whenever it has never
   // been looked at, or is still waiting (ownership proof, DNS), fetch its state now so the records to publish are listed without
   // anyone having to press a button. Throttled, so reopening the page doesn't hammer the provider.
   const stale = rows.filter((d) => {

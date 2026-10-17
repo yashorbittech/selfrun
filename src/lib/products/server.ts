@@ -1,9 +1,9 @@
 import "server-only";
 import { notFound } from "next/navigation";
-import { getRecords } from "@/lib/cms/collections/store";
+import { getRecords } from "@/lib/products/sitecraft-ai/collections/store";
 import { cache } from "react";
-import { getSiteInfo } from "@/lib/cms/site-info";
-import { getPublicPage } from "@/lib/cms/public";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
+import { getPublicPage } from "@/lib/products/sitecraft-ai/public";
 import { resolveProductsText } from "@/lib/products/text";
 import { isProductsHref, type StoredProduct } from "@/lib/products/shared";
 

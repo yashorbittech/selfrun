@@ -2,17 +2,17 @@
 
 AI-powered business automation as a multi-tenant SaaS. A company signs up, gets its own workspace and website address, and
 runs its whole business from one place: people, projects, sales, finance, procurement, training, documents, marketing and
-support, with AI built into every panel.
+support, with AI built into every product.
 
 One Next.js app and one MongoDB database serve three audiences:
 
 | Who | What they use |
 | --- | --- |
 | **Visitors** | The product website: features, modules, pricing, resources, demo request and `/signup` |
-| **Customers** (companies) | Their public website on `<slug>.<root domain>` or their own domain, and their panels (workspace, portal, …) on a separate app address |
-| **Platform staff** | The Platform Panel: companies, plans, billing, coupons, domains, support and platform settings |
+| **Customers** (companies) | Their public website on `<slug>.<root domain>` or their own domain, and their products (workspace, portal, …) on a separate app address |
+| **Platform staff** | The Platform Console: companies, plans, billing, coupons, domains, support and platform settings |
 
-For what every panel does, see [docs/panels.md](./docs/panels.md). Architecture and deployment details are in
+For what every product does, see [docs/products.md](./docs/products.md). Architecture and deployment details are in
 [docs/architecture.md](./docs/architecture.md) and [docs/deploy-vercel.md](./docs/deploy-vercel.md).
 
 > **Next.js 16.** APIs and file conventions differ from older versions (for example `src/proxy.ts` replaces
@@ -42,10 +42,10 @@ For what every panel does, see [docs/panels.md](./docs/panels.md). Architecture 
 
 ## Product overview
 
-Every company gets the panels its plan includes. Panels are switched on or off per plan, and the platform staff manage the
+Every company gets the products its plan includes. Products are switched on or off per plan, and the platform staff manage the
 plans and prices.
 
-| Area | Panels |
+| Area | Products |
 | --- | --- |
 | **Core** | Workspace (dashboard, users, roles, branding, domains, billing, audit log), Team Chat |
 | **People and operations** | HR & Payroll, Projects, Procurement & Assets, Training, SOPs & Policies |
@@ -66,29 +66,29 @@ domains and SSL, support requests and help content, platform roles, audit log an
 
 ## How it works
 
-Every company has **two addresses**: one for its **website** and one for its **panels**. The website host serves only the
-website; the panels host serves only the panels. A page that belongs to the other side is redirected there.
+Every company has **two addresses**: one for its **website** and one for its **app**. The website host serves only the
+website; the app host serves the company's products. A page that belongs to the other side is redirected there.
 
-| Who | Website (public pages only) | Panels (Workspace, HR, Finance, … and the portal) |
+| Who | Website (public pages only) | App (Workspace and enabled products) |
 | --- | --- | --- |
-| SelfRun Business | `selfrunbusiness.com`, `www.selfrunbusiness.com` (product website, `/signup`, `/login`) | `app.selfrunbusiness.com` (Platform Panel and Workspace for platform staff) |
+| SelfRun Business | `selfrunbusiness.com`, `www.selfrunbusiness.com` (product website, `/signup`, `/login`) | `app.selfrunbusiness.com` (Platform Console and Workspace for platform staff) |
 | A customer on an automatic address | `<slug>.selfrunbusiness.com` | `<slug>-app.selfrunbusiness.com` |
 | A customer with its own domain | `acme.com` | `app.acme.com` |
 | Anything else | "No workspace here" | |
 
-In development: `localhost:3000` is the product website and `app.localhost:3000` its panels; a customer is
-`<slug>.localhost:3000` (website) and `<slug>-app.localhost:3000` (panels).
+In development: `localhost:3000` is the product website and `app.localhost:3000` the Platform Console; a customer is
+`<slug>.localhost:3000` (website) and `<slug>-app.localhost:3000` (app).
 
 - **Operator company.** The first start creates the company that runs the product (flagged as the platform owner) and the
-  first platform staff account. Staff sign in at `app.selfrunbusiness.com/workspace/login` and manage the product at `/platform`.
-- **Customers are all equal.** A company registers at `/signup` and gets a Super Admin account, its panels and a starter
+  first platform staff account. Staff sign in at `app.selfrunbusiness.com/workspace/login` and manage the platform at `/console`.
+- **Customers are all equal.** A company registers at `/signup` and gets a Super Admin account, its products and a starter
   website. Nothing is special-cased for any customer.
 - **Tenancy.** Data lives in shared collections scoped by `companyId`; the database layer adds the scope automatically, so a
   query cannot see another company's rows.
-- **Host routing.** `src/lib/saas/hosts.ts` decides which hosts serve the product (site and app); `src/proxy.ts` rewrites the
+- **Host routing.** `src/lib/platform/saas/hosts.ts` decides which hosts serve the product (site and app); `src/proxy.ts` rewrites the
   product website's marketing paths to `/saas/*` and sends a page to the other side's host when it is requested on the wrong one
-  (`src/lib/platform/tenancy/surfaces.ts`). Panels hosts are never indexed (`noindex`, `Disallow: /`).
-- **Slugs.** A workspace address can't end in `-app` (that is the panels host of another address).
+  (`src/lib/platform/tenancy/surfaces.ts`). App hosts are never indexed (`noindex`, `Disallow: /`).
+- **Slugs.** A workspace address can't end in `-app` (that is the app host of another address).
 
 ---
 
@@ -122,7 +122,7 @@ Prices change, so none are listed: the last column says how each one is billed. 
 | 3 | **Vercel Blob** (storage) | Resumes, documents, chat attachments, voice files | Yes | Paid | GB stored plus transfer |
 | 4 | **Resend** (email) | Verification, invitation, invoice and reminder emails | Yes | Free limit, then paid | Monthly plan after the free limit |
 | 5 | **Razorpay** (payments) | SaaS subscriptions and payments | Yes | Per transaction | About 2% plus GST per transaction, no monthly fee |
-| 6 | **Domain registrar** (your main domain) | The product address, `app.` and `*.` subdomains | Yes | Paid | Yearly |
+| 6 | **Domain registrar** (your main domain) | The app address, `app.` and `*.` subdomains | Yes | Paid | Yearly |
 | 7 | **Customers' custom domains** (e.g. `acme.com`) | A company's own address | When a company wants one | Paid by the customer | The customer's registrar fee. Your side: adding domains to the Vercel project (included in Pro) |
 | 8 | **OpenAI** | AI chatbot, assistants, Intelligence, SOP and social-post generation, file search | When AI is used | Paid | Per token, plus vector-store storage |
 | 9 | **ElevenLabs** | Voice / text to speech | When voice is used | Paid | Monthly plan or per character |
@@ -135,7 +135,7 @@ Prices change, so none are listed: the last column says how each one is billed. 
 | 17 | **Error monitoring** (e.g. Sentry) | Catching production errors | Recommended, not built in | Free to paid | Monthly |
 | 18 | **Uptime monitor** (UptimeRobot, Better Stack) | Alerts when the site is down | Recommended | Free to paid | Monthly |
 | 19 | **Web Push** (VAPID keys) | Notifications for the app and the website | Yes | Free | Generate the keys once |
-| 20 | **Google APIs** (Search Console, Indexing, OAuth) | SEO panel and Google sign-in | When SEO is used | Free | Service-account setup only |
+| 20 | **Google APIs** (Search Console, Indexing, OAuth) | SEO product and Google sign-in | When SEO is used | Free | Service-account setup only |
 | 21 | **Meta and LinkedIn APIs** | Social media publishing | When Social Media is used | Free | App review, no fee |
 | 22 | **Tawk.to** (live chat) | Website live-chat widget | Optional | Free tier | Free tier |
 
@@ -213,8 +213,8 @@ On the first start the server creates the operator company and the staff account
 | --- | --- |
 | `http://localhost:3000` | The SelfRun Business website |
 | `http://localhost:3000/signup` | Company sign-up |
-| `http://app.localhost:3000/workspace/login` | Staff sign-in (panels host) |
-| `http://app.localhost:3000/platform` | Platform Panel (staff only) |
+| `http://app.localhost:3000/workspace/login` | Staff sign-in (app host) |
+| `http://app.localhost:3000/console` | Platform Console (staff only) |
 
 `*.localhost` addresses resolve to your machine in Chrome; if your browser does not resolve them, add them to `/etc/hosts`.
 
@@ -222,9 +222,9 @@ On the first start the server creates the operator company and the staff account
 
 ### Plans and limits
 
-Every plan has every panel and feature; only the number of people and the allowance of each paid service change. The numbers come from
-`DEFAULT_PLANS` in `src/lib/platform/billing/plans.ts`, were worked out in Platform Panel → Costs & pricing calculator from the providers'
-official prices, and are loaded into an older catalogue once (revision `PRICING_REV`); later edits in the Platform Panel are kept. Prices are
+Every plan has every product and feature; only the number of people and the allowance of each paid service change. The numbers come from
+`DEFAULT_PLANS` in `src/lib/platform/billing/plans.ts`, were worked out in the Platform Console → Costs & pricing calculator from the providers'
+official prices, and are loaded into an older catalogue once (revision `PRICING_REV`); later edits in the Platform Console are kept. Prices are
 monthly, before GST; yearly is 10 × monthly.
 
 | Plan | Price | People | AI tokens / month | Files | Emails / month | Voice min / month | Domains |
@@ -240,11 +240,11 @@ monthly, before GST; yearly is 10 × monthly.
 1. Open `/signup`.
 2. Enter the company name, workspace address (slug), work email, password and business categories, and accept the terms.
 3. Confirm the email (in development with `EMAIL_PROVIDER=console`, the link is printed in the server log).
-4. The company is created with a Super Admin account on the Free plan, its panels and a starter website.
+4. The company is created with a Super Admin account on the Free plan, its products and a starter website.
 
 Its website is `http://<slug>.localhost:3000` in development and `https://<slug>.<PLATFORM_ROOT_DOMAIN>` in production; its
-panels are at `http://<slug>-app.localhost:3000` and `https://<slug>-app.<PLATFORM_ROOT_DOMAIN>`. After sign-up the owner is
-signed in on the panels address.
+app is at `http://<slug>-app.localhost:3000` and `https://<slug>-app.<PLATFORM_ROOT_DOMAIN>`. After sign-up the owner is
+signed in on the app address.
 
 ---
 
@@ -252,7 +252,7 @@ signed in on the panels address.
 
 There are two separate things:
 
-1. **The app, for the company's team** (and its portal users): the **panels** (every `app.…` / `<slug>-app.…` address) are an
+1. **The app, for the company's team** (and its portal users): the **products** (every `app.…` / `<slug>-app.…` address) are an
    installable app (PWA) with push notifications, so a business can be run from a phone.
 2. **Website push, for the company's visitors**: the public website can ask visitors for notification permission and the
    business sends them offers, rewards and news. See [Website push](#website-push-for-a-companys-visitors) below.
@@ -269,14 +269,14 @@ A company's website is **not** an installable app: it has no manifest and no off
 - **Every company's app is its own, and dynamic.** Name (`Acme — Workspace`), short name, logo or initials, status-bar colour
   (light and dark mode), splash background, start page, shortcuts and more all come from the company's branding and theme
   automatically, and a Super Admin can override each of them in **Workspace → Settings → Mobile app**: names, an app icon (the
-  Branding logo, an uploaded icon or initials) with its background, custom colours, which panel the app opens on, up to 4
+  Branding logo, an uploaded icon or initials) with its background, custom colours, which product the app opens on, up to 4
   long-press shortcuts, window style, orientation, the iPhone status bar and whether the install banner shows, with a live
-  preview. Icons (including maskable ones for Android) are generated from these settings. The product's own panels host is
+  preview. Icons (including maskable ones for Android) are generated from these settings. The product's own app host is
   “SelfRun Business — Workspace” and is fixed.
 - **Offline.** Installed or not, a lost connection shows a friendly offline page. Pages and data are never cached, so a shared
   device never shows another person's data.
 - **Push.** Business events, reminders, alerts, workflow updates, AI activity, messages and system notices that already appear in a
-  panel's bell are also pushed to that person's devices: HR, Projects, Procurement, Training, Team Chat, SOPs, Digi Locker, SEO,
+  product's bell are also pushed to that person's devices: HR, Projects, Procurement, Training, Team Chat, SOPs, Digi Locker, SEO,
   Social, AI assistants, Online Tests, automations and the client portal.
 - **Controls.** Each person opens Workspace → Notifications → **Settings** (portal: Notifications → Settings) to turn notifications on
   per device, switch each category on or off, set quiet hours with a time zone, send a test, and remove devices. Alerts ignore
@@ -349,7 +349,7 @@ business controls it in **CMS → Push notifications** (Super Admin or anyone wi
 
 ## Demo data
 
-One command fills a demo company with realistic data for every panel. It is for demos and development.
+One command fills a demo company with realistic data for every product. It is for demos and development.
 
 ```bash
 # 1. Register the demo company at /signup
@@ -361,12 +361,12 @@ npm run demo:seeders -- --company <slug>    # when there are several
 - **Scoped to one company.** Everything is written through the company-scoped database; other companies and the operator
   company are never read or changed. The operator company is refused.
 - **Safe to re-run.** It replaces the previous demo rows instead of duplicating them. Your own Super Admin login stays.
-- **All panels:** HR and payroll, projects, CRM and offers, finance, procurement, training, team chat, SOPs, legal
+- **All products:** HR and payroll, projects, CRM and offers, finance, procurement, training, team chat, SOPs, legal
   documents, Digi Locker, online tests, AI assistants, social media, SEO, website, portal and wallet, help and support.
   AI Intelligence answers from the same business data.
-- **Logins.** The command prints the demo accounts per panel at the end; they use `example.com` addresses and one shared
+- **Logins.** The command prints the demo accounts per product at the end; they use `example.com` addresses and one shared
   demo password, also printed there. Do not use this on a real company.
-- **Plan.** A panel shows in the sidebar only if the company's plan includes it (Platform Panel → Companies).
+- **Plan.** A product shows in the sidebar only if the company's plan includes it (Platform Console → Companies).
 - **AI assistants** get conversations and files as metadata only unless `OPENAI_API_KEY` is set.
 
 To start over, use a new empty database (change `MONGODB_URI`) and register the company again.
@@ -387,8 +387,8 @@ To start over, use a new empty database (change `MONGODB_URI`) and register the 
 5. Open `https://www.selfrunbusiness.com`. The first start creates the operator and logs it. Check `/`, `/pricing` and
    `/signup`.
 6. Add the domain `app.selfrunbusiness.com` to the project too, then sign in at `https://app.selfrunbusiness.com/workspace/login`
-   as the staff account, open `/platform`, and set up plans, prices and the Razorpay keys.
-7. Register a test company and confirm both its website (`<slug>.selfrunbusiness.com`) and its panels
+   as the staff account, open `/console`, and set up plans, prices and the Razorpay keys.
+7. Register a test company and confirm both its website (`<slug>.selfrunbusiness.com`) and its products
    (`<slug>-app.selfrunbusiness.com`) work.
 
 Notes:
@@ -414,7 +414,7 @@ Self-hosting: `npm run build && npm start` (port 3000; set `PORT` to change), an
 | `npm run build` | Production build |
 | `npm start` | Serve the production build |
 | `npm run lint` | ESLint |
-| `npm run demo:seeders` | Fill a demo company with realistic data for every panel |
+| `npm run demo:seeders` | Fill a demo company with realistic data for every product |
 
 `demo:seeders` loads `.env` automatically.
 
@@ -425,26 +425,23 @@ Self-hosting: `npm run build && npm start` (port 3000; set `PORT` to change), an
 ```
 src/
   app/
-    saas/              Product website (served on SaaS hosts through proxy rewrites)
-    (platform)/        Sign-up, Platform Panel, workspace-not-found
-    (site)/            Customer public website (CMS-driven)
-    workspace/ hrms/ pms/ prms/ tms/ fms/ lms/ messenger/ sop/ lpms/ dlms/ ots/ aibots/
-    intelligence/ smms/ seo/ cms/ support/
-    portal/            External user portal
-    api/               Route handlers
-  components/          UI by area
+    (platform)/        SaaS routes, Platform Console, sign-up and platform utilities
+    (products)/        Product apps and branded product API routes
+    (site)/            Customer public website (SelfRun Sites)
+  components/
+    platform/          Platform Console, SaaS marketing and shared platform UI
+    products/          Product-specific components by branded slug
   lib/
-    saas/              Brand, hosts, routes, theme, content and bootstrap of the product site
-    platform/          Tenancy, companies, billing, panel registry, domains, website starter
-    cms/               CMS collections, theme, content
-    …                  One folder per module
+    platform/          Tenancy, companies, billing, product registry, SaaS and domains
+    products/          Product-specific server logic by branded slug
+    …                  Shared application services
   instrumentation.ts   First-start operator setup
   proxy.ts             Request proxy (host routing and rewrites)
 desktop/               Electron desktop app and per-company build script
 mobile/                Android and iOS app build script (Capacitor)
 scripts/
   demo-seeders.ts      The demo data command
-  demo/                Demo data modules, one per panel
+  demo/                Demo data modules, one per product
   test-*.ts, e2e/      Verification scripts
 public/selfrun/        Logo, mark and favicon
 docs/                  Architecture and deployment guides
@@ -454,18 +451,18 @@ docs/                  Architecture and deployment guides
 
 ## Architecture notes
 
-- **Identity.** Internal users have a `roles` array per panel; external people sign in through the portal. Sessions are
-  separate cookies per panel, with single sign-on across the panels a user has a role in. Platform staff have their own
+- **Identity.** Internal users have a `roles` array per product; external people sign in through the portal. Sessions are
+  separate cookies per product, with single sign-on across the products a user has a role in. Platform staff have their own
   platform roles.
-- **Plans and panels.** The Panel Registry lists every panel with its name, route and on/off state; plans decide which
-  panels a company gets.
+- **Plans and products.** The Product Registry lists every product with its name, route and on/off state; plans decide which
+  products a company gets.
 - **Audit fields.** Documents use string ids and shared fields (`createdAt`, `updatedAt`, `createdBy`, `updatedBy`,
   `deletedAt` for soft delete).
 - **No multi-document transactions.** Atomicity comes from single-document updates with guard filters.
 - **Caching.** Company and CMS lookups are cached (up to an hour). After editing the database directly, restart the
   server and clear `.next` to see changes immediately.
 - **Server/client split.** Files importing `server-only` must not be imported by client components.
-- **Brand.** The product brand lives in `src/lib/saas/brand.ts`; a customer's own wordmark is rendered by `brandify()` in
+- **Brand.** The product brand lives in `src/lib/platform/saas/brand.ts`; a customer's own wordmark is rendered by `brandify()` in
   `src/lib/brand.tsx` from its Branding settings.
 
 More detail: [docs/architecture.md](./docs/architecture.md).
@@ -478,10 +475,10 @@ More detail: [docs/architecture.md](./docs/architecture.md).
 | --- | --- |
 | Production site shows a 404 with a small monogram header | The host is not recognised as a SaaS host. Set `SAAS_HOSTS` and `PLATFORM_ROOT_DOMAIN`, make the domain the production domain, then redeploy |
 | Staff cannot sign in | A `#` in an unquoted `SAAS_ADMIN_PASSWORD` truncates it. Quote the value and restart |
-| `localhost:3000/platform` redirects to `app.localhost:3000/platform` | Expected: panels are never served on the website host. Sign in there as the staff account from `SAAS_ADMIN_EMAIL` |
+| `localhost:3000/console` redirects to `app.localhost:3000/console` | Expected: the Platform Console is never served on the website host. Sign in there as the staff account from `SAAS_ADMIN_EMAIL` |
 | `E11000 duplicate key` on first start | Drop the new database and start again; the setup guards against the race |
 | A page shows empty data after a direct database change | Restart the server and delete `.next` (cached lookups) |
-| A panel is missing from a company's sidebar | The company's plan does not include it (Platform Panel → Companies → plan) |
+| A product is missing from a company's sidebar | The company's plan does not include it (Platform Console → Companies → plan) |
 | Bank details cannot be saved | Set the matching `*_ENCRYPTION_KEY` |
 | Chatbot unavailable | Set `OPENAI_API_KEY`, then re-index from CRM → Chatbot |
 | Calls connect only on the same network | Add a TURN server through the `MESSENGER_TURN_*` variables |

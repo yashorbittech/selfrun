@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 import { formatOfferBadge } from "@/lib/offers/constants";
 import LiveCountdown from "@/components/offers/LiveCountdown";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export default function FlashDealsStrip({ offers, onClaim }: { offers: SerializedOffer[]; onClaim: (offer: SerializedOffer) => void }) {
   const tx = useText();

@@ -3,7 +3,7 @@ import type { Collection } from "mongodb";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION } from "@/lib/platform/tenancy/companies";
 import { MODULES, type ModuleKey } from "@/lib/platform/onboarding/catalog";
-import { SAAS_BRAND } from "@/lib/saas/brand";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 import { currentPriceVersion, planIntervals, planPrice } from "@/lib/platform/billing/pricing";
 import {
@@ -19,7 +19,7 @@ import {
 
 /**
  * The plans catalogue (platform-level `billing_plans`), managed in the
- * Platform Panel. The list below only seeds an empty catalogue on first use
+ * Platform Console. The list below only seeds an empty catalogue on first use
  * (Starter ₹499, Growth ₹999, Business ₹1,999 per month; yearly = 10×
  * monthly) — after that, the database is the only source.
  */
@@ -31,12 +31,12 @@ type PlanSeed = Omit<Plan, "createdAt" | "updatedAt">;
 const ALL_FLAGS = ["customDomain", "whiteLabel", "apiAccess", "prioritySupport"];
 
 /**
- * The five plans, always. Every plan has every panel and every feature; the only things that change are how many people, and the allowance
+ * The five plans, always. Every plan has every product and every feature; the only things that change are how many people, and the allowance
  * of each paid third-party service (storage, AI, email, voice, domains — see `USAGE_SERVICES`). Nothing is sold separately: more of anything
  * means the next plan. `prices` are what is charged (monthly and yearly = 10 × monthly, two months free). No invented "usual" price is shown struck through: a plan shows an offer only if the operator sets a real list price.
  */
 /**
- * The paid plans' limits are what their price pays for at FULL use, worked out in the Platform Panel → Costs & pricing calculator from the
+ * The paid plans' limits are what their price pays for at FULL use, worked out in the Platform Console → Costs & pricing calculator from the
  * providers' official prices (shared bills spread over 50 paying companies, 200 free ones, Razorpay's 4.16% and a 10% buffer): a company that
  * uses every limit to the last unit still leaves the platform a little money. Every paid plan gives clearly more than Free (AI tokens, files, email), and Free keeps
  * enough AI tokens for the sign-up website to be written. Re-run the calculator when a provider changes a price.
@@ -53,7 +53,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "free",
     name: "Free",
-    description: "For one person. Every panel and feature, free for life.",
+    description: "For one person. Every product and feature, free for life.",
     currency: "INR",
     priceMonthly: 0,
     priceYearly: 0,
@@ -72,7 +72,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "starter",
     name: "Starter",
-    description: "For a small team. Up to 10 people, every panel and feature.",
+    description: "For a small team. Up to 10 people, every product and feature.",
     currency: "INR",
     priceMonthly: 49_900,
     priceYearly: 499_000,
@@ -92,7 +92,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "growth",
     name: "Growth",
-    description: "For a growing team. Up to 50 people, every panel and feature.",
+    description: "For a growing team. Up to 50 people, every product and feature.",
     currency: "INR",
     priceMonthly: 99_900,
     priceYearly: 999_000,
@@ -112,7 +112,7 @@ export const DEFAULT_PLANS: PlanSeed[] = [
   {
     _id: "business",
     name: "Business",
-    description: "For a company. Up to 200 people, every panel and feature.",
+    description: "For a company. Up to 200 people, every product and feature.",
     currency: "INR",
     priceMonthly: 199_900,
     priceYearly: 1_999_000,
@@ -240,7 +240,7 @@ export async function getDefaultPlan(): Promise<Plan | null> {
 }
 
 // ---------------------------------------------------------------------------
-// Managing the catalogue (Platform Panel, `/platform/plans`).
+// Managing the catalogue (Platform Console, `/console/plans`).
 //
 //  - Plan ids are stable, lowercase and never change once created.
 //  - Exactly one ACTIVE plan is the default. Making a plan the default clears
@@ -258,13 +258,13 @@ export async function getDefaultPlan(): Promise<Plan | null> {
 //    provider plans for NEW subscribers while existing provider subscriptions
 //    (fixed-amount) keep charging what they bought. A subscription records the
 //    version it bought (`CompanySubscription.priceVersion`), and
-//    `planPriceAtVersion()` answers what it pays. Panels, limits, highlights,
+//    `planPriceAtVersion()` answers what it pays. Products, limits, highlights,
 //    flags and trial days are not versioned: they apply to everyone on the
 //    plan right away (trial days only to trials started afterwards).
 //  - Every mutation writes the platform audit log.
 // ---------------------------------------------------------------------------
 
-/** What the Platform Panel submits for a plan (money already in paise). */
+/** What the Platform Console submits for a plan (money already in paise). */
 export interface PlanInput {
   _id: string;
   name: string;
@@ -298,7 +298,7 @@ export const MAX_TRIAL_DAYS = 365;
 export const MAX_HIGHLIGHTS = 12;
 export const MAX_CUSTOM_LIMITS = 10;
 const MAX_PRICE = 100_000_000_00; // ₹10 crore in paise — a sanity bound, not a business rule.
-/** Ids with a meaning elsewhere (the platform owner, the fallback trial) or in panel URLs. */
+/** Ids with a meaning elsewhere (the platform owner, the fallback trial) or in product URLs. */
 const RESERVED_PLAN_IDS = new Set(["internal", "trial", "new", "all", "none", "default"]);
 const SELECTABLE_MODULES = new Set<string>(MODULES.filter((m) => !m.core).map((m) => m.key));
 const KNOWN_LIMITS = new Map<string, (typeof PLAN_LIMIT_DEFS)[number]>(PLAN_LIMIT_DEFS.map((d) => [d.key, d]));
@@ -328,8 +328,8 @@ export function validatePlanInput(input: PlanInput, mode: "create" | "update"): 
   }
 
   if (input.modules !== "all") {
-    if (!Array.isArray(input.modules) || input.modules.length === 0) errors.modules = "Pick at least one panel, or include every panel.";
-    else if (input.modules.some((m) => !SELECTABLE_MODULES.has(m))) errors.modules = "Unknown panel selected.";
+    if (!Array.isArray(input.modules) || input.modules.length === 0) errors.modules = "Pick at least one product, or include every product.";
+    else if (input.modules.some((m) => !SELECTABLE_MODULES.has(m))) errors.modules = "Unknown product selected.";
   }
 
   if (!Array.isArray(input.highlights) || input.highlights.length > MAX_HIGHLIGHTS) errors.highlights = `Up to ${MAX_HIGHLIGHTS} highlights.`;
@@ -641,7 +641,7 @@ export async function applySimplePricing(actorId: string): Promise<{ ok: true; c
 
 
 /**
- * The five plans the pricing screens always show, in order: the catalogue's own version of each (so edits in the Platform Panel apply),
+ * The five plans the pricing screens always show, in order: the catalogue's own version of each (so edits in the Platform Console apply),
  * or the built-in one when it is missing or switched off. Missing plans are also written to the catalogue (existing ones are never
  * touched), so a fresh database sells the five plans from the first request. Never returns fewer than five.
  */

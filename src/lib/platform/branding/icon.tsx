@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { getCompanyBrand } from "@/lib/platform/branding";
-import { getActiveThemeState } from "@/lib/cms/theme";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
 import { brandInitials } from "@/lib/platform/branding/types";
 import { LOGO_ROUTE, readCompanyLogo } from "@/lib/platform/branding/logo";
 

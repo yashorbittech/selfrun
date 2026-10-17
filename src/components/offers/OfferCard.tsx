@@ -11,7 +11,7 @@ import { getUrgency, URGENCY_STYLES, claimProgress, nowMs } from "@/lib/offers/l
 import { getCategoryLabel, getSubServices } from "@/lib/categories";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function subServiceLabel(offer: SerializedOffer): string {
   if (offer.subService === "all") return getCategoryLabel(offer.category);

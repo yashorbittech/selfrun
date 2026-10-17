@@ -1,12 +1,12 @@
 import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/push/rate-limit";
-import { onAppSurface } from "@/lib/saas/request";
+import { onAppSurface } from "@/lib/platform/saas/request";
 import { buildAssetPack, type AssetGroup } from "@/lib/apps/assets";
 import { getCompanyBrand } from "@/lib/platform/branding";
 
 /**
- * The ZIP of every generated asset of one kind of app (`pwa`, `android`, `ios`, `desktop`, or `all`). Public on panels hosts like the
+ * The ZIP of every generated asset of one kind of app (`pwa`, `android`, `ios`, `desktop`, or `all`). Public on app hosts like the
  * single assets (they are the company's own branding), because the mobile and desktop builds download it; rate limited.
  */
 export const dynamic = "force-dynamic";

@@ -7,10 +7,10 @@ import { getDb } from "@/lib/mongodb";
 import { hasIntelligenceAccess } from "@/lib/intelligence-roles";
 
 /**
- * AI Intelligence authentication. The panel has NO sign-in or session store of
+ * AI Intelligence authentication. The product has NO sign-in or session store of
  * its own: it accepts the Workspace session (the one company sign-in) of an
- * `admin_users` account and applies the panel's own role rule to the account's
- * CURRENT roles on every request (revoking the role closes the panel at once).
+ * `admin_users` account and applies the product's own role rule to the account's
+ * CURRENT roles on every request (revoking the role closes the product at once).
  */
 
 export interface CurrentIntelligenceUser {
@@ -26,7 +26,7 @@ export interface CurrentIntelligenceUser {
   lastLoginAt: Date | null;
 }
 
-/** This panel's user for an `admin_users` account in the current company, under the panel's role rule. */
+/** This product's user for an `admin_users` account in the current company, under the product's role rule. */
 export async function getIntelligenceUserForAccount(adminId: ObjectId): Promise<CurrentIntelligenceUser | null> {
   const user = await (await getDb())
     .collection<{ _id: ObjectId; email: string; roles?: string[]; permissionOverrides?: Record<string, boolean>; employeeId?: string | null; mustChangePassword?: boolean; createdAt: Date; lastLoginAt: Date | null }>("admin_users")

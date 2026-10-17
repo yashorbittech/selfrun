@@ -288,7 +288,7 @@ export default function BillingManager({ view, plans, actions, plansSlot, usageS
 
       {!isInternal && plansSlot && (
         <section id="billing-plans-section" aria-labelledby="billing-plans" className="bl-section">
-          <SectionHead step={2} icon={Sparkles} title="Pick the plan that fits your team" desc="Every plan has every panel and feature. A bigger plan means more people and more storage, AI, email and voice." />
+          <SectionHead step={2} icon={Sparkles} title="Pick the plan that fits your team" desc="Every plan has every product and feature. A bigger plan means more people and more storage, AI, email and voice." />
           <span id="billing-plans" className="sr-only">Plans</span>
           {plansSlot}
         </section>

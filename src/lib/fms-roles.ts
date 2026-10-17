@@ -1,11 +1,11 @@
 /**
  * FMS (Finance Management System) role model. Like the HRMS, PMS, TMS and
- * PRMS panels, FMS access is gated on the shared `admin_users.roles` array —
- * there is no separate FMS user store. An account can sign into `/fms` only
+ * PRMS products, FMS access is gated on the shared `admin_users.roles` array —
+ * there is no separate FMS user store. An account can sign into `/cashflow-ai` only
  * if it carries at least one of these roles (see `verifyFmsCredentials` in
  * `fms-auth.ts`).
  *
- * `super_admin` is the same literal used by every other panel and implicitly
+ * `super_admin` is the same literal used by every other product and implicitly
  * grants full FMS access.
  *
  * Role set follows §35 of the FMS spec. Every FMS role here is a "staff"
@@ -87,7 +87,7 @@ export function normalizeFmsRoles(value: unknown): FmsRole[] {
   return Array.from(new Set(value.filter(isFmsRole)));
 }
 
-/** Can open the FMS panel at `/fms/*`. */
+/** Can open the FMS product at `/cashflow-ai/*`. */
 export function hasFmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeFmsRoles(roles).length > 0;
 }

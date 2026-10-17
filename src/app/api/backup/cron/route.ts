@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasBearer } from "@/lib/security/bearer";
-import { runLifecycleJobs } from "@/lib/workspace/data-lifecycle";
+import { runLifecycleJobs } from "@/lib/products/commandos/data-lifecycle";
 
 export const maxDuration = 300;
 

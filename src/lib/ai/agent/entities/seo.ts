@@ -1,21 +1,21 @@
 import "server-only";
-import * as A from "@/app/seo/(protected)/actions";
+import * as A from "@/app/(products)/rankmax-ai/(protected)/actions";
 import { seoCan, type SeoPermission } from "@/lib/seo-roles";
-import { getViewer as seoViewer } from "@/lib/seo-panel/viewer";
-import { runCrawl, CrawlBusyError } from "@/lib/seo-panel/crawler";
-import { notifySeoUsers } from "@/lib/seo-panel/notifications";
-import { getDashboard } from "@/lib/seo-panel/analytics";
-import { issueStats } from "@/lib/seo-panel/issues";
-import { taskStats, TASK_TYPES, TASK_STATUSES, TASK_PRIORITIES } from "@/lib/seo-panel/tasks";
-import { detectCannibalization } from "@/lib/seo-panel/keywords";
-import { ISSUE_STATUSES, SEVERITIES, CATEGORIES } from "@/lib/seo-panel/checks";
+import { getViewer as seoViewer } from "@/lib/products/rankmax-ai/viewer";
+import { runCrawl, CrawlBusyError } from "@/lib/products/rankmax-ai/crawler";
+import { notifySeoUsers } from "@/lib/products/rankmax-ai/notifications";
+import { getDashboard } from "@/lib/products/rankmax-ai/analytics";
+import { issueStats } from "@/lib/products/rankmax-ai/issues";
+import { taskStats, TASK_TYPES, TASK_STATUSES, TASK_PRIORITIES } from "@/lib/products/rankmax-ai/tasks";
+import { detectCannibalization } from "@/lib/products/rankmax-ai/keywords";
+import { ISSUE_STATUSES, SEVERITIES, CATEGORIES } from "@/lib/products/rankmax-ai/checks";
 import { peek } from "@/lib/ai/agent/records";
 import { viaAction, f, fail, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
  * Search engine optimisation (SEO) for the agent: run site audits, work issues and tasks, manage the page inventory with metadata overrides,
- * keywords and rankings, backlinks, competitors, structured data, sitemap and robots — through the panel's own actions and rules.
+ * keywords and rankings, backlinks, competitors, structured data, sitemap and robots — through the product's own actions and rules.
  */
 
 const ctx = (u: AgentUser) => ({ roles: u.roles, permissionOverrides: u.permissionOverrides });
@@ -62,7 +62,7 @@ export const SEO_ACTIONS: ActionDef[] = [
     run: async (_v, u) => {
       try {
         const run = await runCrawl({ trigger: "manual", actorId: u.id, actorEmail: u.email });
-        if (run.status === "completed") await notifySeoUsers([u.id], { type: "seo_audit_completed", title: `Website audit finished — score ${run.scores?.overall ?? "—"}`, body: `${run.pagesCrawled} pages`, link: "/seo/audit" } as never);
+        if (run.status === "completed") await notifySeoUsers([u.id], { type: "seo_audit_completed", title: `Website audit finished — score ${run.scores?.overall ?? "—"}`, body: `${run.pagesCrawled} pages`, link: "/rankmax-ai/audit" } as never);
         return run.status === "completed" ? { ok: true, result: `Audit finished: ${run.pagesCrawled} pages, overall score ${run.scores?.overall ?? "—"}.`, runId: run._id } : fail(run.error ?? "The audit did not complete.");
       } catch (e) {
         return fail(e instanceof CrawlBusyError ? e.message : "The audit could not be started.");

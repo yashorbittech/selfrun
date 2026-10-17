@@ -26,7 +26,7 @@ export async function isSlugTaken(slug: string): Promise<boolean> {
 }
 
 /**
- * The root domain company subdomains live under: Platform Panel →
+ * The root domain company subdomains live under: Platform Console →
  * Integrations, else `PLATFORM_ROOT_DOMAIN` (first entry), else `localhost`
  * in development. Synchronous — reads the integrations cache that the proxy
  * loads on every page request (async entry points call `loadIntegrationsDoc()` first).
@@ -48,7 +48,7 @@ export function companySubdomain(slug: string): string {
   return `${slug}.${platformRootDomain()}`;
 }
 
-/** `<slug>-app.<root>` — the address of a company's panels (Workspace, HRMS, …); its website stays on `<slug>.<root>`. */
+/** `<slug>-app.<root>` — the address of a company's products (Workspace, HRMS, …); its website stays on `<slug>.<root>`. */
 export function companyAppSubdomain(slug: string): string {
   return `${slug}${APP_SLUG_SUFFIX}.${platformRootDomain()}`;
 }
@@ -62,7 +62,7 @@ export function companyBaseUrl(slug: string, hostHint?: string | null): string {
   return baseUrlFor(slug, hostHint);
 }
 
-/** Absolute base URL of a company's PANELS host (`<slug>-app.<root>`): where Workspace and every other panel live. */
+/** Absolute base URL of a company's App host (`<slug>-app.<root>`): where Workspace and every other product live. */
 export function companyAppBaseUrl(slug: string, hostHint?: string | null): string {
   return baseUrlFor(`${slug}${APP_SLUG_SUFFIX}`, hostHint);
 }
@@ -103,7 +103,7 @@ export type ProvisionResult = { ok: true; companyId: string; adminId: string; ho
 export async function createCompanyWithOwner(input: NewCompany): Promise<ProvisionResult> {
   const slugError = slugFormatError(input.slug) ?? (await reservedSlugError(input.slug));
   if (slugError) return { ok: false, error: slugError };
-  // The root domain may be set in the Platform Panel; make sure it's loaded (scripts have no proxy).
+  // The root domain may be set in the Platform Console; make sure it's loaded (scripts have no proxy).
   await loadIntegrationsDoc();
   const host = companySubdomain(input.slug);
 
@@ -113,7 +113,7 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
   await companies.createIndex({ slug: 1 }, { unique: true });
 
   const now = new Date();
-  // Locale / time zone defaults come from Platform Panel → Platform settings.
+  // Locale / time zone defaults come from Platform Console → Platform settings.
   const defaults = await getPlatformSettings().catch(() => null);
   const company: Company = {
     _id: randomUUID(),
@@ -164,7 +164,7 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
     { $setOnInsert: { companyId: company._id, status: "verified", verificationToken: randomUUID(), isPrimary: true, kind: "subdomain", createdAt: now, verifiedAt: now } },
     { upsert: true },
   );
-  // Its panels host (`<slug>-app.<root>`) is derived from the slug and needs no record of its own, only the provider attach.
+  // Its app host (`<slug>-app.<root>`) is derived from the slug and needs no record of its own, only the provider attach.
   const [hostingError, appHostingError] = await Promise.all([attachAtProvider(host), attachAtProvider(companyAppSubdomain(input.slug))]);
   forgetCompanyRouting();
 

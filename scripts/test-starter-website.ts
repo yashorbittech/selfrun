@@ -9,9 +9,9 @@ import assert from "node:assert/strict";
 import { clientPromise, getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { createCompanyWithOwner } from "@/lib/platform/tenancy/provisioning";
-import { getPageByPath } from "@/lib/cms/pages";
-import { getSiteInfoForEdit } from "@/lib/cms/site-info";
-import { listNavItems } from "@/lib/cms/nav";
+import { getPageByPath } from "@/lib/products/sitecraft-ai/pages";
+import { getSiteInfoForEdit } from "@/lib/products/sitecraft-ai/site-info";
+import { listNavItems } from "@/lib/products/sitecraft-ai/nav";
 import { publishStarterWebsite, syncSiteContact } from "@/lib/platform/website/starter";
 import { hashPassword } from "@/lib/lms-auth";
 

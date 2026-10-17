@@ -5,7 +5,7 @@ import { Filter, RotateCcw, Search, Sparkles } from "lucide-react";
 
 /**
  * The standard "Search & Filters" card for list pages that have no filter bar of their own, in exactly the look of
- * every other panel's (title, subtitle, controls, Reset). It sits right under the page header and narrows the list
+ * every other product's (title, subtitle, controls, Reset). It sits right under the page header and narrows the list
  * below it in the browser: a text search over the rows, plus a drop-down for every table column that holds only a few
  * distinct values (status, type, category …). Pages whose lists filter on the server keep their own bar. The card is
  * always shown so every page looks the same; on pages with no table or card list (reports, dashboards) the search

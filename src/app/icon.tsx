@@ -1,6 +1,6 @@
 import { renderCompanyIcon } from "@/lib/platform/branding/icon";
-import { productIconResponse } from "@/lib/saas/static-icon";
-import { SAAS_BRAND } from "@/lib/saas/brand";
+import { productIconResponse } from "@/lib/platform/saas/static-icon";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
 export const size = { width: 64, height: 64 };
 export const contentType = "image/png";

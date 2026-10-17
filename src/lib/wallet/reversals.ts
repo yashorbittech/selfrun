@@ -5,7 +5,7 @@ import { applyBalanceDelta, insertLedgerRow, getWallet, claimIdempotencyKey, get
 import { getReferralsCollection } from "@/lib/wallet/referrals";
 import { updateStamp } from "@/lib/wallet/db";
 import { formatCredits } from "@/lib/wallet/constants";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { externalUsers } from "@/lib/portal-auth";
 
 const REVERSIBLE_TYPES = ["signup_bonus", "referral_bonus_referrer", "referral_bonus_referee", "activity_reward", "manual_adjustment"];
@@ -77,7 +77,7 @@ export async function reverseTransaction(txId: string, actorId: string, reason: 
       type: "wallet.credit_reversed",
       title: "Credits reversed",
       body: `${formatCredits(recovered)} were removed from your wallet.`,
-      link: "/portal/wallet",
+      link: "/clientos/wallet",
     });
   }
   return { ok: true, clawedBack: recovered, unrecovered: original.amount - recovered };
@@ -138,7 +138,7 @@ export async function refundRedemption(confirmedTxId: string, actorId: string, r
     type: "wallet.credit_refunded",
     title: "Credits refunded",
     body: `${formatCredits(original.amount)} were returned to your wallet.`,
-    link: "/portal/wallet",
+    link: "/clientos/wallet",
   });
   return { ok: true };
 }

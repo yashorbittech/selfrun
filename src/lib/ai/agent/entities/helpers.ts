@@ -5,12 +5,12 @@ export const fail = (error: string | undefined, extra: Json = {}): Json => ({ er
 export const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
 export const isObj = (v: unknown): v is Json => !!v && typeof v === "object" && !Array.isArray(v);
 
-/** Turns a panel validator's `{valid:false, errors}` into what the model sees (so it can ask the person for the right thing). */
+/** Turns a product validator's `{valid:false, errors}` into what the model sees (so it can ask the person for the right thing). */
 export function invalid(errors: Record<string, string>): Json {
   return fail("Some values are missing or invalid.", { problems: Object.entries(errors).map(([k, m]) => `${k}: ${m}`) });
 }
 
-/** Runs a `validateX(input)` function from a panel and returns either its data or a model-facing error. */
+/** Runs a `validateX(input)` function from a product and returns either its data or a model-facing error. */
 export function check<T>(v: { valid: true; data: T } | { valid: false; errors: Record<string, string> }): { ok: true; data: T } | { ok: false; error: Json } {
   return v.valid ? { ok: true, data: v.data } : { ok: false, error: invalid(v.errors) };
 }
@@ -22,16 +22,16 @@ export function formInput(current: Json, changes: Json): Json {
   return merged;
 }
 
-// ── Standard create / update / delete wiring for panels built the same way ──────────────────────────────────────────────────────────────
+// ── Standard create / update / delete wiring for products built the same way ──────────────────────────────────────────────────────────────
 
 import type { AgentUser, EntityDef } from "@/lib/ai/agent/types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// The data a panel validator returns differs per entity; the wiring below only passes it from the validator to the panel's own function.
+// The data a product validator returns differs per entity; the wiring below only passes it from the validator to the product's own function.
 type Validated = { valid: true; data: any } | { valid: false; errors: Record<string, string> };
 
 export interface CrudConfig<R extends { _id: unknown }> {
-  /** Name used in the panel's audit log, e.g. "program". */
+  /** Name used in the product's audit log, e.g. "program". */
   entity: string;
   validate: (input: any) => Validated;
   create?: (data: any, user: AgentUser, input: Json) => Promise<R>;
@@ -43,9 +43,9 @@ export interface CrudConfig<R extends { _id: unknown }> {
   /** A readable name for audit lines and messages. */
   label: (record: Json) => string;
   audit: (user: AgentUser, entry: { action: string; entity: string; entityId: string; entityLabel?: string | null; summary?: string | null }) => Promise<void>;
-  /** Extra rules the panel's screen enforces before saving (referenced rows exist, etc.). Return an error to stop. */
+  /** Extra rules the product's screen enforces before saving (referenced rows exist, etc.). Return an error to stop. */
   pre?: (data: any, user: AgentUser, mode: "create" | "update", id?: string) => Promise<Json | null>;
-  /** What the panel does after saving (notify students, sync a channel…). */
+  /** What the product does after saving (notify students, sync a channel…). */
   post?: (record: R, user: AgentUser, mode: "create" | "update", before?: R) => Promise<void>;
 }
 
@@ -110,10 +110,10 @@ export const f = {
 };
 export const values = (arr: readonly { value: string }[]): string[] => arr.map((x) => x.value);
 
-// ── Calling a panel's own server actions ───────────────────────────────────────────────────────────────────────────────────────────────
+// ── Calling a product's own server actions ───────────────────────────────────────────────────────────────────────────────────────────────
 
 /**
- * Runs one of a panel's own server-action functions as the signed-in person (they check the session cookie and the panel's permissions
+ * Runs one of a product's own server-action functions as the signed-in person (they check the session cookie and the product's permissions
  * themselves, exactly as when the screen calls them) and turns their result into what the model sees. Redirects they trigger count as success.
  */
 export async function viaAction(call: () => Promise<unknown>, success = "Done."): Promise<Json> {

@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Sparkles, LucideIcon } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 interface FeaturedListingCardProps {
   icon: LucideIcon;

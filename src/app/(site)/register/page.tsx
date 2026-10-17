@@ -1,6 +1,6 @@
-import CmsPageView from "@/components/cms/CmsPageView";
-import { cmsPageMetadata } from "@/lib/cms/page-route";
-import { getPublicPage, type PublicPage } from "@/lib/cms/public";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { cmsPageMetadata } from "@/lib/products/sitecraft-ai/page-route";
+import { getPublicPage, type PublicPage } from "@/lib/products/sitecraft-ai/public";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getCompanyBrand } from "@/lib/platform/branding";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
@@ -105,7 +105,7 @@ function buildDefaultRegisterPage(name: string, operator: boolean): PublicPage {
 }
 
 export default async function RegisterPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
-  if (await getCurrentPortalUser()) redirect("/portal");
+  if (await getCurrentPortalUser()) redirect("/clientos");
   const { ref } = await searchParams;
   const code = await resolveReferralCode(ref);
   const preview = code ? await getReferralPreview(code) : null;

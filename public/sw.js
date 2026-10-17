@@ -1,4 +1,4 @@
-/* Service worker of the installed app (panels hosts only; the website never registers it).
+/* Service worker of the installed app (app hosts only; the website never registers it).
  *
  *  - Offline: a navigation that fails shows /offline.html. Nothing about a signed-in session is ever cached: pages and API
  *    responses always come from the network, so a shared device never shows the previous person's data.

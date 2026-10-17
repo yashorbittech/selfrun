@@ -38,7 +38,7 @@ export type RecordState = "ok" | "missing" | "mismatch" | "unknown";
 
 /** One DNS record that was ever required for a domain, kept so the owner can look it up after it has been published. */
 export interface DnsHistoryEntry extends DnsRecord {
-  /** The hostname the record was asked for (the website host or its `app.` panels host). */
+  /** The hostname the record was asked for (the website host or its `app.` app host). */
   host: string;
   /** When it was first listed (ISO); null for records that are derived rather than logged. */
   seenAt: string | null;
@@ -63,7 +63,7 @@ export interface CompanyDomainView {
   lastCheckedAt: string | null;
   /** Every record this domain has needed (ownership proof, routing, the hosting provider's challenges), newest first. */
   history: DnsHistoryEntry[];
-  /** The panels address `app.<domain>` of a custom domain: it has its own hosting state, and its own records appear in `records`. */
+  /** The app address `app.<domain>` of a custom domain: it has its own hosting state, and its own records appear in `records`. */
   app: { host: string; ssl: "active" | "pending" | "manual" | "error"; verified: boolean; dnsConfigured: boolean; error: string | null } | null;
 }
 

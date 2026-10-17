@@ -68,16 +68,16 @@ async function withAction(click) {
 
 try {
   await step("signs in as the company owner", async () => {
-    await page.goto(`${BASE}/workspace/login`);
+    await page.goto(`${BASE}/commandos/login`);
     await page.getByLabel("Email").fill(EMAIL);
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
     await page.getByRole("button", { name: "Sign in" }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/workspace/login"));
+    await page.waitForURL((url) => !url.pathname.startsWith("/commandos/login"));
     assert.ok(!page.url().includes("/change-password"), "account has a forced password change pending");
   });
 
   await step("settings hub links to Payments & payouts", async () => {
-    await page.goto(`${BASE}/workspace/settings`);
+    await page.goto(`${BASE}/commandos/settings`);
     await page.getByRole("link", { name: /Payments & payouts/ }).click();
     await page.waitForURL(/\/workspace\/settings\/payments$/);
     await status().waitFor();
@@ -182,7 +182,7 @@ try {
   // Best-effort cleanup: never leave the fake keys connected.
   if (weConnected) {
     try {
-      await page.goto(`${BASE}/workspace/settings/payments`);
+      await page.goto(`${BASE}/commandos/settings/payments`);
       await page.locator("#pay-disconnect").click();
       await withAction(() => page.locator("#pay-disconnect-confirm").click());
       await status().getByText("Not connected").waitFor({ timeout: 10_000 });

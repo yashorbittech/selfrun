@@ -6,13 +6,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Building2, ChevronDown, LayoutDashboard, UserRound, UserPlus } from "lucide-react";
 import NavDropdown, { type DropdownNav } from "@/components/header/NavDropdown";
 import { PORTAL_SESSION_CHANGED_EVENT } from "@/components/chat/ChatProvider";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 type Session = { signedIn: boolean; firstName: string | null; companyLoginUrl?: string | null } | null;
 
 /**
  * Public-header account entry: an "Account" menu for visitors that keeps the two kinds of sign-in apart — the company's own team
- * (sent to the company's panels domain) and visitors/customers (the user login on this site) — and "Dashboard" for
+ * (sent to the company's products domain) and visitors/customers (the user login on this site) — and "Dashboard" for
  * signed-in portal users. Checked client-side (one tiny no-store request) so
  * the public pages stay statically renderable. Renders nothing until known,
  * so a signed-in user never sees a flash of "Login".
@@ -26,7 +26,7 @@ export default function PortalAuthLink({ variant, onNavigate, menuStyle = "defau
   const { header } = useSiteInfo();
 
   const refresh = useCallback(() => {
-    fetch("/api/portal/session", { cache: "no-store" })
+    fetch("/api/clientos/session", { cache: "no-store" })
       .then((r) => r.json())
       .then((j) => setSession(j))
       .catch(() => setSession({ signedIn: false, firstName: null }));
@@ -42,11 +42,11 @@ export default function PortalAuthLink({ variant, onNavigate, menuStyle = "defau
 
   if (session.signedIn) {
     return variant === "desktop" ? (
-      <Link href="/portal" className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
+      <Link href="/clientos" className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-primary/40 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground">
         <LayoutDashboard className="h-4 w-4" />{` ${header.dashboardLabel}`}
       </Link>
     ) : (
-      <Link href="/portal" onClick={onNavigate} className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-3.5 text-base font-semibold text-primary">
+      <Link href="/clientos" onClick={onNavigate} className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-3 py-3.5 text-base font-semibold text-primary">
         <LayoutDashboard className="h-5 w-5" />{` ${header.dashboardLabel}`}{session.firstName ? ` · ${session.firstName}` : ""}
       </Link>
     );
@@ -66,7 +66,7 @@ function accountNav(companyLoginUrl: string | null): DropdownNav {
   return { name: "Account", href: "/login", items };
 }
 
-/** Same trigger, hover behaviour and panel as the site's other menu items (the panel style comes from the theme's menu style). */
+/** Same trigger, hover behaviour and product as the site's other menu items (the product style comes from the theme's menu style). */
 function AccountMenu({ nav, menuStyle }: { nav: DropdownNav; menuStyle: string }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);

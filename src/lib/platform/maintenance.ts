@@ -53,7 +53,7 @@ export async function saveMaintenance(input: MaintenanceInput, actorId: string, 
   return { ok: true, state: companyId ? await getCompanyMaintenance(companyId) : await getMaintenanceState() };
 }
 
-/** Ends the window right now: every site and panel is back within seconds. */
+/** Ends the window right now: every site and product is back within seconds. */
 export async function endMaintenanceNow(actorId: string, companyId?: string): Promise<MaintenanceState> {
   const now = new Date();
   const db = await getPlatformDb();

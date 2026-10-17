@@ -302,7 +302,7 @@ async function main() {
   eq((await getCompanySubscription(a))!.status, "canceled", "cancelled → canceled");
   eq((await handleWebhook("evt_9", payload("subscription.charged", { ...active, id: "sub_unknown", notes: {} }))).status, "ignored", "unknown subscription ignored");
 
-  // ── Platform Panel owner actions ──
+  // ── Platform Console owner actions ──
   ok((await adminExtendTrial(b, 10, "admin1")).ok, "extend trial");
   const sb = (await getCompanySubscription(b))!;
   ok(sb.trialEndsAt!.getTime() > Date.now() + 39 * 86_400_000, "trial extended by 10 days");

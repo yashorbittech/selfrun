@@ -11,7 +11,7 @@ import type { ModuleKey } from "@/lib/platform/onboarding/catalog";
 import type { SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
- * Plan enforcement for the business panels: module gating, read-only mode,
+ * Plan enforcement for the business products: module gating, read-only mode,
  * and the seat / AI-token / storage limits. Everything reads the current
  * company's entitlements (`getEntitlements()`), so the platform owner
  * (`internal`) is never gated or blocked — only metered.
@@ -21,7 +21,7 @@ import type { SubscriptionStatus } from "@/lib/platform/billing/types";
  * `BillingLimitError` carrying the same message (HTTP 402 for API routes).
  */
 
-export const BILLING_SETTINGS_PATH = "/workspace/settings/billing";
+export const BILLING_SETTINGS_PATH = "/commandos/settings/billing";
 
 export type BillingBlockCode = "read_only" | "seats" | "ai_tokens" | "storage" | "module" | "upload_blocked";
 
@@ -47,29 +47,29 @@ const fmt = (n: number) => new Intl.NumberFormat("en-IN").format(n);
 // Module access
 // ---------------------------------------------------------------------------
 
-/** Friendly reason a panel is locked for the current company, or null when it's included. */
+/** Friendly reason a product is locked for the current company, or null when it's included. */
 export async function moduleBlockReason(moduleKey: ModuleKey | string): Promise<string | null> {
   const e = await getEntitlements();
   if (e.modules === null || e.modules.has(moduleKey)) return null;
-  return `This panel isn't included in your ${e.planName ?? "current"} plan. Upgrade in Settings → Billing to unlock it.`;
+  return `This product isn't included in your ${e.planName ?? "current"} plan. Upgrade in Settings → Billing to unlock it.`;
 }
 
 /**
- * Called at the top of a panel's protected layout. A panel outside the
+ * Called at the top of a product's protected layout. A product outside the
  * company's plan redirects to the "Upgrade to unlock" page. Fails open on a
  * lookup error (the layout's own data access fails on its own if the DB is down).
  */
 export async function requireModule(moduleKey: ModuleKey): Promise<void> {
   let locked = false;
   try {
-    // Switched off in the Panel Registry (everywhere, or for this company)? The proxy already blocks it; this is the second lock.
+    // Switched off in the Product Registry (everywhere, or for this company)? The proxy already blocks it; this is the second lock.
     if (!(await isPanelAvailable(await currentCompanyId(), moduleKey))) notFound();
     locked = (await moduleBlockReason(moduleKey)) !== null;
   } catch (err) {
     unstable_rethrow(err);
     console.error(`[billing] module check failed for ${moduleKey}`, err);
   }
-  if (locked) redirect(`/workspace/upgrade?module=${encodeURIComponent(moduleKey)}`);
+  if (locked) redirect(`/commandos/upgrade?module=${encodeURIComponent(moduleKey)}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -354,7 +354,7 @@ export async function meterStorage(deltaBytes: number, ctx?: { source: string; d
 }
 
 // ---------------------------------------------------------------------------
-// Billing notice (the banner shown in every panel)
+// Billing notice (the banner shown in every product)
 // ---------------------------------------------------------------------------
 
 export interface BillingNoticeInfo {
@@ -364,7 +364,7 @@ export interface BillingNoticeInfo {
   daysLeft: number | null;
 }
 
-/** What the panel banner should say for the current company, or null (active / internal). */
+/** What the product banner should say for the current company, or null (active / internal). */
 export async function getBillingNotice(): Promise<BillingNoticeInfo | null> {
   const e = await getEntitlements();
   if (e.pendingDeletionAt) return { status: "deleting", planName: e.planName, daysLeft: Math.max(0, Math.ceil((e.pendingDeletionAt.getTime() - Date.now()) / 86_400_000)) };

@@ -1,6 +1,6 @@
 /**
- * Browser test for Revenue & subscriptions (/platform/revenue) and the
- * revenue cards on the Platform Panel dashboard, against a RUNNING server
+ * Browser test for Revenue & subscriptions (/console/revenue) and the
+ * revenue cards on the Platform Console dashboard, against a RUNNING server
  * (production build recommended). Works on an empty platform too: it checks
  * structure, range handling and exports, not specific amounts.
  *
@@ -39,9 +39,9 @@ page.on("pageerror", (e) => pageErrors.push(e.message));
 
 try {
   await step("signed-out visitors can't reach revenue or its export", async () => {
-    await page.goto(`${BASE}/platform/revenue`);
-    assert.ok(new URL(page.url()).pathname.endsWith("/workspace/login"), page.url());
-    const res = await page.request.get(`${BASE}/platform/revenue/export`, { maxRedirects: 0 });
+    await page.goto(`${BASE}/console/revenue`);
+    assert.ok(new URL(page.url()).pathname.endsWith("/commandos/login"), page.url());
+    const res = await page.request.get(`${BASE}/console/revenue/export`, { maxRedirects: 0 });
     assert.notEqual(res.status(), 200, "export must not serve data signed out");
   });
 
@@ -52,14 +52,14 @@ try {
   });
 
   await step("dashboard keeps its KPIs and shows the revenue cards", async () => {
-    await page.goto(`${BASE}/platform`);
+    await page.goto(`${BASE}/console`);
     await page.getByRole("heading", { name: "Dashboard" }).waitFor();
     await page.getByText("Trials ending in 7 days").waitFor();
     await page.getByText("Awaiting approval", { exact: true }).waitFor();
     const revenue = page.getByRole("region", { name: "Revenue" });
     for (const label of ["MRR", "ARR", "ARPA (monthly)", "Trials ending (7 days)", "Past due", "In grace period"]) await revenue.getByText(label, { exact: true }).waitFor();
     await page.click("[data-testid=dashboard-revenue-link]");
-    await page.waitForURL((u) => u.pathname === "/platform/revenue");
+    await page.waitForURL((u) => u.pathname === "/console/revenue");
   });
 
   await step("revenue page renders every section", async () => {
@@ -99,7 +99,7 @@ try {
   await step("CSV export follows the selected range", async () => {
     const [download] = await Promise.all([page.waitForEvent("download"), page.click("#revenue-export-months")]);
     assert.match(download.suggestedFilename(), /^revenue-\d{4}-\d{2}-to-\d{4}-\d{2}\.csv$/);
-    const res = await page.request.get(`${BASE}/platform/revenue/export?range=6m`);
+    const res = await page.request.get(`${BASE}/console/revenue/export?range=6m`);
     assert.equal(res.status(), 200);
     assert.match(res.headers()["content-type"] ?? "", /text\/csv/);
     const lines = (await res.text()).replace(/^﻿/, "").trim().split(/\r\n/);
@@ -108,20 +108,20 @@ try {
   });
 
   await step("companies CSV export", async () => {
-    const res = await page.request.get(`${BASE}/platform/revenue/export?kind=companies`);
+    const res = await page.request.get(`${BASE}/console/revenue/export?kind=companies`);
     assert.equal(res.status(), 200);
     const text = (await res.text()).replace(/^﻿/, "");
     assert.match(text, /^Company,Slug,Status,Plan,Billing cycle,MRR,ARR/);
   });
 
-  await step("old /console/revenue link lands on the panel page", async () => {
+  await step("old /console/revenue link lands on the product page", async () => {
     await page.goto(`${BASE}/console/revenue`);
-    assert.equal(new URL(page.url()).pathname, "/platform/revenue");
+    assert.equal(new URL(page.url()).pathname, "/console/revenue");
   });
 
   await step("no horizontal scroll at phone width, no page errors", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/platform", "/platform/revenue", "/platform/revenue?range=24m"]) {
+    for (const path of ["/console", "/console/revenue", "/console/revenue?range=24m"]) {
       await page.goto(`${BASE}${path}`);
       await page.waitForLoadState("networkidle");
       const overflow = await page.evaluate(() => {

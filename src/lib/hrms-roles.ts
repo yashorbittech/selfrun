@@ -1,7 +1,7 @@
 /**
  * HRMS role model. Roles live on the shared `admin_users` document as a
  * `roles: string[]` array — there is no separate HRMS user store. An admin
- * account can only sign into the HRMS panel if it carries at least one of
+ * account can only sign into the HRMS product if it carries at least one of
  * these roles (see `verifyHrmsCredentials` in `hrms-auth.ts`).
  *
  * The capability predicates below (everything except `hasAnyHrmsRole`,
@@ -17,7 +17,7 @@ export const HRMS_ROLES = ["super_admin", "hr", "manager", "employee"] as const;
 
 export type HrmsRole = (typeof HRMS_ROLES)[number];
 
-/** Roles that grant access to the staff panel (`/hrms/*`). `employee` does not. */
+/** Roles that grant access to the staff product (`/talentos/*`). `employee` does not. */
 export const STAFF_ROLES: HrmsRole[] = ["super_admin", "hr", "manager"];
 
 export const HRMS_ROLE_META: Record<HrmsRole, { label: string; description: string }> = {
@@ -57,12 +57,12 @@ export function isSuperAdmin(roles: readonly HrmsRole[]): boolean {
   return roles.includes("super_admin");
 }
 
-/** Can open the staff panel at `/hrms/*` (dashboard, employees, payroll, …). */
+/** Can open the staff product at `/talentos/*` (dashboard, employees, payroll, …). */
 export function hasStaffRole(roles: readonly HrmsRole[]): boolean {
   return roles.some((r) => STAFF_ROLES.includes(r));
 }
 
-/** Only has the `employee` role — belongs in the `/hrms/me` portal. */
+/** Only has the `employee` role — belongs in the `/talentos/me` portal. */
 export function isEmployeeOnly(roles: readonly HrmsRole[]): boolean {
   return roles.length > 0 && !hasStaffRole(roles);
 }

@@ -9,11 +9,11 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { normalizeSmmsRoles, hasSmmsAccess } from "@/lib/smms-roles";
 
 /**
- * SMMS panel authentication. A separate cookie / session store from the LMS,
- * HRMS, PMS, TMS, PRMS and SOP panels so sign-in state is independent, but the
+ * SMMS product authentication. A separate cookie / session store from the LMS,
+ * HRMS, PMS, TMS, PRMS and SOP products so sign-in state is independent, but the
  * *identity* store is shared: users live in `admin_users`, and SMMS access is
  * gated on the `roles` array there: any account whose roles carry an
- * explicit `smms_*` role (Social Media access is never implied by another panel's role).
+ * explicit `smms_*` role (Social Media access is never implied by another product's role).
  */
 
 export const SMMS_SESSION_COOKIE = "smms_session";
@@ -151,8 +151,8 @@ export async function getSessionSmmsUser(token: string | undefined | null): Prom
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getSmmsUserForAccount(adminId: ObjectId): Promise<CurrentSmmsUser | null> {
   const users = await getAdminUsersCollection();
@@ -196,7 +196,7 @@ export async function getCurrentSmmsUser(): Promise<CurrentSmmsUser | null> {
   const store = await cookies();
   const own = await getSessionSmmsUser(store.get(SMMS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getSmmsUserForAccount(accountId) : null;
 }

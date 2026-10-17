@@ -9,14 +9,14 @@ import ArcadeStage from "@/components/game/ArcadeStage";
 import { buttonVariants } from "@/components/ui/button";
 
 /**
- * What a person sees when a page or a whole panel fails (a server error, a bug, a dropped connection mid-load): the same moving stage as
+ * What a person sees when a page or a whole product fails (a server error, a bug, a dropped connection mid-load): the same moving stage as
  * the 404 and offline pages — the company's own logo and name, the lost runner (and a game to play) — with plain words and the ways forward:
  * try again, reload, or go back to the start. Nothing technical is shown except a short reference code the support team can look up.
  *
  * Many of these failures are one-off (a database or network hiccup, a cold start): the screen quietly retries ONCE on its own before it
  * shows itself, so most people never see it at all. Every failure is reported to the server log with its reference code.
- *   scope "page"  — covers the whole viewport (website pages, anything outside a panel)
- *   scope "panel" — drawn inside the panel's content area, so the sidebar and top bar stay and the person can move on
+ *   scope "page"  — covers the whole viewport (website pages, anything outside a product)
+ *   scope "product" — drawn inside the product's content area, so the sidebar and top bar stay and the person can move on
  */
 export default function CrashScreen({ error, reset, scope }: { error: Error & { digest?: string }; reset: () => void; scope: "page" | "panel" }) {
   const pathname = usePathname() ?? "/";

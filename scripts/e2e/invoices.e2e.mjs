@@ -1,7 +1,7 @@
 /**
- * Browser test for SaaS invoices — Platform Panel /platform/invoices (list,
+ * Browser test for SaaS invoices — Platform Console /console/invoices (list,
  * filters, CSV, PDF, detail, mark paid, void, credit note) and the company
- * side /workspace/settings/billing/invoices (own invoices only; another company's PDF is
+ * side /commandos/settings/billing/invoices (own invoices only; another company's PDF is
  * a 404) — against a RUNNING server (production build recommended).
  *
  * It seeds its own invoices straight into the server's database, so
@@ -134,25 +134,25 @@ try {
   });
 
   await step("owner signs in and opens SaaS invoices", async () => {
-    await page.goto(`${BASE}/platform/invoices`);
+    await page.goto(`${BASE}/console/invoices`);
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="password"]', PASSWORD);
     await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
-    await page.goto(`${BASE}/platform/invoices`);
+    await page.goto(`${BASE}/console/invoices`);
     await page.getByRole("heading", { name: "SaaS invoices", level: 1 }).waitFor();
     await page.getByRole("link", { name: paidInv.number, exact: true }).waitFor();
   });
 
   await step("filters: status, company, FY, search", async () => {
-    await page.goto(`${BASE}/platform/invoices?status=unpaid&q=E2E${run}`);
+    await page.goto(`${BASE}/console/invoices?status=unpaid&q=E2E${run}`);
     await page.getByRole("link", { name: unpaidInv.number, exact: true }).waitFor();
     assert.equal(await page.getByRole("link", { name: paidInv.number, exact: true }).count(), 0, "paid hidden by the unpaid filter");
-    await page.goto(`${BASE}/platform/invoices?company=${encodeURIComponent(otherId)}`);
+    await page.goto(`${BASE}/console/invoices?company=${encodeURIComponent(otherId)}`);
     await page.getByRole("link", { name: foreignInv.number, exact: true }).waitFor();
     assert.equal(await page.getByRole("link", { name: paidInv.number, exact: true }).count(), 0, "company filter");
-    await page.goto(`${BASE}/platform/invoices?fy=1999-00`);
+    await page.goto(`${BASE}/console/invoices?fy=1999-00`);
     assert.equal(await page.getByRole("link", { name: paidInv.number, exact: true }).count(), 0, "FY filter");
-    await page.goto(`${BASE}/platform/invoices?q=E2E${run}`);
+    await page.goto(`${BASE}/console/invoices?q=E2E${run}`);
     await page.locator("#invoice-search").waitFor();
     await page.locator("#invoice-status").waitFor();
     await page.locator("#invoice-company").waitFor();
@@ -171,7 +171,7 @@ try {
   });
 
   await step("detail view + PDF download", async () => {
-    await page.goto(`${BASE}/platform/invoices/${paidInv._id}`);
+    await page.goto(`${BASE}/console/invoices/${paidInv._id}`);
     await page.getByRole("heading", { name: paidInv.number, level: 1 }).waitFor();
     await page.getByText("CGST @ 9%").waitFor();
     const res = await page.request.get(`${BASE}/api/platform/billing/invoices/${paidInv._id}/pdf?download=1`);
@@ -181,7 +181,7 @@ try {
   });
 
   await step("mark an unpaid invoice paid", async () => {
-    await page.goto(`${BASE}/platform/invoices/${unpaidInv._id}`);
+    await page.goto(`${BASE}/console/invoices/${unpaidInv._id}`);
     await page.locator("#invoice-action-paid").click();
     await page.fill("#invoice-paid-text", `NEFT-${run}`);
     await page.getByRole("button", { name: "Mark paid", exact: true }).last().click();
@@ -192,7 +192,7 @@ try {
   });
 
   await step("void an unpaid invoice (reason required)", async () => {
-    await page.goto(`${BASE}/platform/invoices/${voidInv._id}`);
+    await page.goto(`${BASE}/console/invoices/${voidInv._id}`);
     await page.locator("#invoice-action-void").click();
     await page.getByRole("button", { name: "Void invoice" }).click();
     await page.getByText("Give a reason for voiding.").waitFor({ timeout: 30_000 });
@@ -203,7 +203,7 @@ try {
   });
 
   await step("issue a partial then a full credit note", async () => {
-    await page.goto(`${BASE}/platform/invoices/${paidInv._id}`);
+    await page.goto(`${BASE}/console/invoices/${paidInv._id}`);
     await page.locator("#invoice-action-credit").click();
     await page.fill("#credit-amount", "180");
     await page.fill("#invoice-credit-text", "Partial refund (e2e)");
@@ -228,7 +228,7 @@ try {
 
   await step("no horizontal scroll at phone width, no page errors", async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    for (const path of ["/platform/invoices", `/platform/invoices/${paidInv._id}`]) {
+    for (const path of ["/console/invoices", `/console/invoices/${paidInv._id}`]) {
       await page.goto(`${BASE}${path}`);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       assert.ok(overflow <= 1, `${path} scrolls horizontally by ${overflow}px`);
@@ -240,11 +240,11 @@ try {
     const cctx = await browser.newContext();
     const cpage = await cctx.newPage();
     await step("company Super Admin sees its own invoices and credit notes", async () => {
-      await cpage.goto(`${COMPANY_URL}/workspace/login`);
+      await cpage.goto(`${COMPANY_URL}/commandos/login`);
       await cpage.fill('input[name="email"]', COMPANY_EMAIL);
       await cpage.fill('input[name="password"]', COMPANY_PASSWORD);
       await Promise.all([cpage.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), cpage.press('input[name="password"]', "Enter")]);
-      await cpage.goto(`${COMPANY_URL}/workspace/settings/billing/invoices`);
+      await cpage.goto(`${COMPANY_URL}/commandos/settings/billing/invoices`);
       await cpage.getByRole("heading", { name: "Invoices" }).or(cpage.getByText("Invoices", { exact: true })).first().waitFor();
       await cpage.locator(`[data-invoice-number="${paidInv.number}"]`).waitFor();
       assert.equal(await cpage.locator(`[data-invoice-number="${foreignInv.number}"]`).count(), 0, "no other company's invoice listed");
@@ -265,9 +265,9 @@ try {
     await step("company can't fetch another company's PDF (404)", async () => {
       assert.equal((await browserGet(`/api/platform/billing/invoices/${foreignInv._id}/pdf`)).status, 404);
     });
-    await step("company can't open the Platform Panel invoices or export", async () => {
-      assert.equal((await browserGet(`/platform/invoices/export`)).status, 404);
-      assert.equal((await cpage.goto(`${COMPANY_URL}/platform/invoices`))?.status(), 404);
+    await step("company can't open the Platform Console invoices or export", async () => {
+      assert.equal((await browserGet(`/console/invoices/export`)).status, 404);
+      assert.equal((await cpage.goto(`${COMPANY_URL}/console/invoices`))?.status(), 404);
     });
     await cctx.close();
   } else {

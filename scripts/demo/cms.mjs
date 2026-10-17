@@ -1,4 +1,4 @@
-// CMS panel demo data: CMS-role logins, the theme(s) (seeded from today's globals.css values,
+// CMS product demo data: CMS-role logins, the theme(s) (seeded from today's globals.css values,
 // already "published" and active by default, so activating the CMS theme engine changes nothing
 // visually until an admin explicitly switches themes), and a cms_pages draft/published doc per
 // migrated route.
@@ -202,7 +202,7 @@ export async function seedCms(db) {
       builtIn: false,
       tokens: AI_THEME_TOKENS,
       draftTokens: AI_THEME_TOKENS,
-      // Component variants (src/lib/cms/component-variants.ts): terminal-style hero, menu-only header, compact footer.
+      // Component variants (src/lib/sitecraft-ai/component-variants.ts): terminal-style hero, menu-only header, compact footer.
       components: { header: "menu", footer: "compact", sections: { "page-hero": "terminal" } },
       publishedAt: now,
       createdAt: now,

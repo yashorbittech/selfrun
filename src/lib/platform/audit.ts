@@ -3,7 +3,7 @@ import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 
 /**
  * The platform audit log (`platform_audit_log`): every change made in the
- * Platform Panel, and every billing event that changes a company's access.
+ * Platform Console, and every billing event that changes a company's access.
  * Write with `recordPlatformAudit`; never let a failed write break the action.
  */
 

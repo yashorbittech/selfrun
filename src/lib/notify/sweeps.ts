@@ -2,22 +2,22 @@ import "server-only";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { fmsEvents } from "@/lib/notify/triggers/fms";
 import { lmsEvents } from "@/lib/notify/triggers/lms";
-import { overdueInvoices, invoicesDueWithin } from "@/lib/fms/receivables";
-import { overdueBills } from "@/lib/fms/payables";
+import { overdueInvoices, invoicesDueWithin } from "@/lib/products/cashflow-ai/receivables";
+import { overdueBills } from "@/lib/products/cashflow-ai/payables";
 import { getStaleLeadsSummary } from "@/lib/leads";
 import { getStaleApplicationsSummary } from "@/lib/career-applications";
 import { lpmsEvents } from "@/lib/notify/triggers/lpms";
 import { getDb } from "@/lib/mongodb";
 import { notifyPanel } from "@/lib/notify";
 import { day, plural, short, today } from "@/lib/notify/triggers/format";
-import { runNotificationSweep as runHrmsSweep } from "@/lib/hrms/notifications";
-import { runDeadlineSweep as runPmsSweep } from "@/lib/pms/notifications";
-import { runPrmsSweep } from "@/lib/prms/notifications";
-import { runTmsSweep } from "@/lib/tms/notifications";
+import { runNotificationSweep as runHrmsSweep } from "@/lib/products/talentos/notifications";
+import { runDeadlineSweep as runPmsSweep } from "@/lib/products/sprintos/notifications";
+import { runPrmsSweep } from "@/lib/products/spendiq/notifications";
+import { runTmsSweep } from "@/lib/products/cohort-ai/notifications";
 import { forEachCompany } from "@/lib/platform/tenancy/context";
 
 /**
- * Time-based notifications ("this is overdue", "that is about to expire"). A panel runs its sweep when someone opens it; the sweep is
+ * Time-based notifications ("this is overdue", "that is about to expire"). A product runs its sweep when someone opens it; the sweep is
  * throttled per company (here, in memory, plus every notification carries a per-day dedupe key — so even if two servers sweep at once,
  * a person is told once per day, never twice).
  */
@@ -61,14 +61,14 @@ export const runCmsSweep = () =>
     const in2 = new Date(now.getTime() + 2 * 86_400_000);
     const in3 = new Date(now.getTime() + 3 * 86_400_000);
     const campaigns = await db.collection<{ _id: string; name: string; endDate: Date }>("offer_campaigns").find({ status: "active", deletedAt: null, endDate: { $gte: now, $lte: in2 } } as never).limit(20).toArray();
-    for (const c of campaigns) await notifyPanel("cms", { type: "cms_campaign_ending", title: `Offer campaign ending: ${short(c.name, 50)}`, body: `Ends ${day(c.endDate)}. Extend it or let it close.`, link: `/cms/offers/${c._id}`, priority: "high", dedupeKey: `cms-camp-end:${c._id}:${day(c.endDate)}` }, { level: "staff" });
+    for (const c of campaigns) await notifyPanel("cms", { type: "cms_campaign_ending", title: `Offer campaign ending: ${short(c.name, 50)}`, body: `Ends ${day(c.endDate)}. Extend it or let it close.`, link: `/sitecraft-ai/offers/${c._id}`, priority: "high", dedupeKey: `cms-camp-end:${c._id}:${day(c.endDate)}` }, { level: "staff" });
     const coupons = await db.collection<{ _id: string; code: string; endDate: Date; usageLimit?: number; usageCount: number }>("coupons").find({ isActive: true, deletedAt: null, $or: [{ endDate: { $gte: now, $lte: in3 } }, { usageLimit: { $gt: 0 } }] } as never).limit(100).toArray();
     for (const c of coupons) {
-      if (c.usageLimit && c.usageCount >= c.usageLimit) await notifyPanel("cms", { type: "cms_coupon_used_up", title: `Coupon ${c.code} is fully used`, body: `All ${c.usageLimit} uses are gone.`, link: "/cms/offers/coupons", dedupeKey: `cms-coupon-full:${c._id}` }, { level: "staff" });
-      else if (c.endDate && new Date(c.endDate) <= in3) await notifyPanel("cms", { type: "cms_coupon_expiring", title: `Coupon ${c.code} expires soon`, body: `Valid until ${day(c.endDate)}.`, link: "/cms/offers/coupons", dedupeKey: `cms-coupon-exp:${c._id}:${day(c.endDate)}` }, { level: "staff" });
+      if (c.usageLimit && c.usageCount >= c.usageLimit) await notifyPanel("cms", { type: "cms_coupon_used_up", title: `Coupon ${c.code} is fully used`, body: `All ${c.usageLimit} uses are gone.`, link: "/sitecraft-ai/offers/coupons", dedupeKey: `cms-coupon-full:${c._id}` }, { level: "staff" });
+      else if (c.endDate && new Date(c.endDate) <= in3) await notifyPanel("cms", { type: "cms_coupon_expiring", title: `Coupon ${c.code} expires soon`, body: `Valid until ${day(c.endDate)}.`, link: "/sitecraft-ai/offers/coupons", dedupeKey: `cms-coupon-exp:${c._id}:${day(c.endDate)}` }, { level: "staff" });
     }
     const waiting = await db.collection("referrals").countDocuments({ status: { $in: ["QUALIFIED", "FRAUD_HOLD"] } });
-    if (waiting > 0) await notifyPanel("cms", { type: "cms_referrals_waiting", title: `${plural(waiting, "referral")} waiting for a decision`, body: "Approve or reject them so rewards are paid correctly.", link: "/cms/wallet/referrals", dedupeKey: `cms-referrals:${today()}` }, { level: "admin" });
+    if (waiting > 0) await notifyPanel("cms", { type: "cms_referrals_waiting", title: `${plural(waiting, "referral")} waiting for a decision`, body: "Approve or reject them so rewards are paid correctly.", link: "/sitecraft-ai/wallet/referrals", dedupeKey: `cms-referrals:${today()}` }, { level: "admin" });
   });
 
 /** Everything time-based, for every company — the daily cron. Each sweep dedupes per day, so a repeat run is harmless. */

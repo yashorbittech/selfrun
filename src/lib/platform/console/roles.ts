@@ -45,7 +45,7 @@ export interface PlatformRole {
 }
 
 const BUILT_INS: { _id: string; name: string; description: string; permissions: string[] }[] = [
-  { _id: OWNER_ROLE_ID, name: "Platform Owner", description: "Everything in the Platform Panel, including users & roles.", permissions: ["*"] },
+  { _id: OWNER_ROLE_ID, name: "Platform Owner", description: "Everything in the Platform Console, including users & roles.", permissions: ["*"] },
   {
     _id: "billing",
     name: "Billing Manager",
@@ -125,7 +125,7 @@ export interface PlatformUserFields {
   platformRevokedAt?: Date | null;
 }
 
-/** The Platform Panel access an owner-company account has, or null for none. */
+/** The Platform Console access an owner-company account has, or null for none. */
 export async function resolvePlatformAccess(user: PlatformUserFields | null | undefined): Promise<PlatformAccess | null> {
   if (!user) return null;
   if (user.platformRoleId) {
@@ -192,7 +192,7 @@ export async function listPlatformUsers(): Promise<PlatformUserRow[]> {
   return rows;
 }
 
-/** Owner-company accounts that don't have Platform Panel access yet. */
+/** Owner-company accounts that don't have Platform Console access yet. */
 export async function listEligibleHubUsers(): Promise<{ id: string; email: string; name: string | null }[]> {
   const docs = await (await adminUsers()).find({}, { projection: PLATFORM_FIELDS }).sort({ email: 1 }).limit(1000).toArray();
   const out: { id: string; email: string; name: string | null }[] = [];
@@ -243,7 +243,7 @@ export async function revokePlatformAccess(userId: string, actor: Actor): Promis
   const doc = await col.findOne({ _id }, { projection: PLATFORM_FIELDS });
   if (!doc) return { ok: false, error: "That account isn't part of this company." };
   const current = await resolvePlatformAccess(doc);
-  if (!current) return { ok: false, error: `${doc.email} doesn't have Platform Panel access.` };
+  if (!current) return { ok: false, error: `${doc.email} doesn't have Platform Console access.` };
   if (!coversPermissions(actor.permissions, current.permissions)) return { ok: false, error: `You can't revoke ${doc.email} — their role has permissions you don't have.` };
   if (current.roleId === OWNER_ROLE_ID && (await countPlatformOwners()) <= 1) return { ok: false, error: "This is the last Platform Owner. Make someone else a Platform Owner first." };
   await col.updateOne({ _id }, { $set: { platformRoleId: null, platformRevokedAt: new Date() } });

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import { onAppSurface } from "@/lib/saas/request";
-import { listWorkspaceNotifications, workspaceUnreadCount } from "@/lib/workspace/notifications";
-import { listPortalNotifications, portalUnreadCount } from "@/lib/portal/notifications";
+import { onAppSurface } from "@/lib/platform/saas/request";
+import { listWorkspaceNotifications, workspaceUnreadCount } from "@/lib/products/commandos/notifications";
+import { listPortalNotifications, portalUnreadCount } from "@/lib/products/clientos/notifications";
 
 /**
  * What's new for the signed-in person, for the desktop app to show as native notifications. The desktop app can't use Web Push
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
   if (portal) {
     const [rows, unread] = await Promise.all([listPortalNotifications(portal.id, 30), portalUnreadCount(portal.id)]);
     return NextResponse.json(
-      { unread, items: rows.filter((n) => !n.read && n.createdAt.getTime() > after).map((n) => ({ id: `portal:${n._id}`, title: n.title, body: n.body ?? "", url: n.link ?? "/portal/notifications", createdAt: n.createdAt.toISOString() })) },
+      { unread, items: rows.filter((n) => !n.read && n.createdAt.getTime() > after).map((n) => ({ id: `portal:${n._id}`, title: n.title, body: n.body ?? "", url: n.link ?? "/clientos/notifications", createdAt: n.createdAt.toISOString() })) },
       { headers: noStore },
     );
   }

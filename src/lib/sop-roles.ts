@@ -1,5 +1,5 @@
 /**
- * SOP Panel role + permission model. Like every other panel, access is gated
+ * SOP Product role + permission model. Like every other product, access is gated
  * on the shared `admin_users.roles` array — there is no separate SOP user
  * store. HRMS stays the source of truth for who an employee is, so an
  * account's *effective* SOP roles are its explicit `sop_*` roles PLUS the
@@ -11,8 +11,8 @@
  * direct action for anyone holding `PUBLISH`.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
- * (catalog entries live in `src/lib/workspace/permission-catalog.ts`).
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * (catalog entries live in `src/lib/commandos/permission-catalog.ts`).
  *
  * This file is pure (no server-only imports) so client components can use it
  * to hide buttons — but hiding a button is never the security boundary; every
@@ -131,7 +131,7 @@ export function effectiveSopRoles(roles: readonly string[] | undefined | null): 
   return Array.from(new Set([...normalizeSopRoles(raw), ...impliedFromHrms(raw)]));
 }
 
-/** Can open the SOP panel at `/sop/*`. */
+/** Can open the SOP product at `/playbook-ai/*`. */
 export function hasSopAccess(roles: readonly string[] | undefined | null): boolean {
   return effectiveSopRoles(roles).length > 0;
 }

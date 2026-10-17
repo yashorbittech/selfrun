@@ -1,19 +1,19 @@
 /**
  * Messenger (Team Communication Platform) role model. Like the HRMS, PMS, TMS
- * and PRMS panels, Messenger access is gated on the shared `admin_users.roles`
+ * and PRMS products, Messenger access is gated on the shared `admin_users.roles`
  * array — there is no separate Messenger user store. An account can sign into
- * `/messenger` only if it carries at least one of these roles (see
+ * `/huddle-ai` only if it carries at least one of these roles (see
  * `verifyChatCredentials` in `messenger-auth.ts`).
  *
- * `super_admin` is the same literal used by every other panel and implicitly
+ * `super_admin` is the same literal used by every other product and implicitly
  * grants full Messenger access.
  *
- * Panel access is only the outer gate. Every channel / DM / group still enforces
- * its own per-conversation membership — see `src/lib/messenger/channels.ts` and
- * `src/lib/messenger/conversations.ts`.
+ * Product access is only the outer gate. Every channel / DM / group still enforces
+ * its own per-conversation membership — see `src/lib/huddle-ai/channels.ts` and
+ * `src/lib/huddle-ai/conversations.ts`.
  *
  * The capability predicates below (everything except `hasMessengerAccess`, the
- * outer panel-access tier gate) are Super-Admin-override-aware: each checks
+ * outer product-access tier gate) are Super-Admin-override-aware: each checks
  * `RoleContext.permissionOverrides` before falling back to its role-based
  * default. See `src/lib/permission-overrides.ts`.
  */
@@ -60,7 +60,7 @@ export function normalizeChatRoles(value: unknown): ChatRole[] {
   return Array.from(new Set(value.filter(isChatRole)));
 }
 
-/** Can open the Messenger panel at `/messenger/*`. */
+/** Can open the Messenger product at `/huddle-ai/*`. */
 export function hasMessengerAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeChatRoles(roles).length > 0;
 }

@@ -6,8 +6,8 @@ import { createPortal } from "react-dom";
 export const SHELL_KEY = "app-shell-last";
 
 /**
- * Takes a copy of the panel the person is looking at (its sidebar and header, with the page area emptied) just before they open another
- * panel. Called from `NavigationProgress` on the click. The copy is plain HTML in sessionStorage; nothing sensitive is in a sidebar's markup
+ * Takes a copy of the product the person is looking at (its sidebar and header, with the page area emptied) just before they open another
+ * product. Called from `NavigationProgress` on the click. The copy is plain HTML in sessionStorage; nothing sensitive is in a sidebar's markup
  * beyond what is on screen, and it is only ever shown to the same person in the same tab.
  */
 export function captureShell(): void {
@@ -27,7 +27,7 @@ export function captureShell(): void {
 }
 
 /**
- * The panel-opening screen after the app has already been on screen: the sidebar and header of the panel the person just left stay exactly
+ * The product-opening screen after the app has already been on screen: the sidebar and header of the product the person just left stay exactly
  * as they were (a copy taken by `captureShell`), and only the page area shows the loader. With no copy (first navigation of the tab, storage
  * blocked) it shows `fallback`. The first render is always `fallback`, so server HTML and hydration agree.
  */

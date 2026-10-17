@@ -4,7 +4,7 @@ import type { DnsRecord } from "@/lib/platform/domains/types";
 import { RESERVED_SLUGS } from "@/lib/platform/tenancy/slug";
 import { cachedIntegrationsDoc, loadIntegrationsDoc } from "@/lib/platform/integrations/store";
 import { productionRootDomain } from "@/lib/platform/tenancy/root-domain";
-import { saasAppHosts, saasHosts } from "@/lib/saas/hosts";
+import { saasAppHosts, saasHosts } from "@/lib/platform/saas/hosts";
 
 /**
  * The company (tenant) registry and host → company routing. Both
@@ -42,7 +42,7 @@ export interface Company {
   business?: BusinessSelection;
   /** What the sign-up request told us about where the owner is (country code, browser languages, time zone): used to pick the language and style of the AI-written website. */
   signupHints?: { country?: string; languages?: string; timezone?: string };
-  /** Panels the platform switched off for THIS company only (Platform Panel → Companies). The global switch lives in the Panel Registry. */
+  /** Products the platform switched off for THIS company only (Platform Console → Companies). The global switch lives in the Product Registry. */
   disabledPanels?: string[];
   /** Set when the Super Admin asked for the company to be deleted for good: it is deleted on `purgeAt`, and until then the request can be cancelled. */
   deletion?: { requestedAt: Date; purgeAt: Date; requestedBy: string };
@@ -73,7 +73,7 @@ export interface CompanyDomain {
     /** The provider demanded its own ownership proof at some point — see `domains/custom.ts`. */
     challenged?: boolean;
   };
-  /** The same, for the company's panels host `app.<domain>` of a custom domain (its own ownership challenge and routing). */
+  /** The same, for the company's app host `app.<domain>` of a custom domain (its own ownership challenge and routing). */
   appProvider?: {
     id: string;
     attached: boolean;
@@ -114,7 +114,7 @@ function platformHosts(): Set<string> {
   return new Set(["localhost", "127.0.0.1", ...roots, ...roots.map((r) => `www.${r}`), ...envList("PLATFORM_HOSTS", "VERCEL_URL", "VERCEL_BRANCH_URL")]);
 }
 
-/** `localhost`, every `PLATFORM_ROOT_DOMAIN` entry, and the root domain saved in Platform Panel → Integrations. */
+/** `localhost`, every `PLATFORM_ROOT_DOMAIN` entry, and the root domain saved in Platform Console → Integrations. */
 function platformRootDomains(): string[] {
   const saved = normalizeHost(cachedIntegrationsDoc()?.domains?.rootDomain);
   const configured = [...envList("PLATFORM_ROOT_DOMAIN"), ...(saved ? [saved] : [])];
@@ -147,7 +147,7 @@ const MISS_TTL_MS = 5_000;
 const VERSION_CHECK_MS = 2_000;
 const ROUTING_VERSION_ID = "routing";
 
-/** Which side of a company a host serves: its public website, or its panels (Workspace, HRMS, …). */
+/** Which side of a company a host serves: its public website, or its products (Workspace, HRMS, …). */
 export type HostSurface = "site" | "app";
 export interface HostInfo {
   companyId: string;
@@ -190,19 +190,19 @@ export async function getPlatformOwnerCompanyId(): Promise<string | null> {
   return owner?._id ?? null;
 }
 
-/** The label a company's panels host carries after its slug: `<slug>-app.<root>`. Slugs may not end with it (see slug.ts). */
+/** The label a company's app host carries after its slug: `<slug>-app.<root>`. Slugs may not end with it (see slug.ts). */
 export const APP_SLUG_SUFFIX = "-app";
 
 async function lookupHost(host: string): Promise<HostInfo | null> {
   const bare = host.startsWith("www.") ? host.slice(4) : host;
   // The SaaS product's own hosts run in the platform operator's company scope: the site hosts show its website, the
-  // `app.` hosts its panels (Platform Panel, Workspace, …).
+  // `app.` hosts its products (Platform Console, Workspace, …).
   if (saasHosts().has(host) || saasAppHosts().has(host)) {
     const id = await getPlatformOwnerCompanyId();
     return id ? { companyId: id, surface: saasAppHosts().has(host) ? "app" : "site" } : null;
   }
 
-  // Dev only: the ngrok host in DEV_TUNNEL_HOST (set in .env.local) serves the platform owner's panels (dev tunnel). Ignored in production.
+  // Dev only: the ngrok host in DEV_TUNNEL_HOST (set in .env.local) serves the platform owner's products (dev tunnel). Ignored in production.
   if (process.env.NODE_ENV !== "production" && process.env.DEV_TUNNEL_HOST && normalizeHost(process.env.DEV_TUNNEL_HOST) === host) {
     // No platform-owner company in this dev database: fall back to the first active company so the workspace still opens.
     const id = (await getPlatformOwnerCompanyId()) ?? (await listActiveCompanyIds())[0] ?? null;
@@ -215,11 +215,11 @@ async function lookupHost(host: string): Promise<HostInfo | null> {
 
   // A company's own verified domain wins over the generic platform hosts, so a customer can be served on a domain that
   // used to be the platform's (a deployment's production URL) without any special case. `app.<its domain>` is the same
-  // company's panels.
+  // company's products.
   const wwwHost = `www.${bare}`;
   const candidates = [host, bare, wwwHost]; // `acme.com` and `www.acme.com` are one site, whichever was added
   const appBase = host.startsWith("app.") ? host.slice(4) : null;
-  // `app.acme.com` is the panels of the company whose domain is `acme.com` OR `www.acme.com` (routing treats them as one).
+  // `app.acme.com` is the products of the company whose domain is `acme.com` OR `www.acme.com` (routing treats them as one).
   if (appBase) candidates.push(appBase, appBase.startsWith("www.") ? appBase.slice(4) : `www.${appBase}`);
   const domain = await db
     .collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION)

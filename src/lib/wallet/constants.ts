@@ -119,19 +119,19 @@ export const ACTIVITY_RULE_TYPES = [
 export type ActivityRuleType = (typeof ACTIVITY_RULE_TYPES)[number];
 
 export const EARN_WAY_META: Record<RewardRuleType, { description: string; repeat: "once" | "each" | "daily"; href: string; cta: string; subKeyLabel?: string }> = {
-  signup: { description: "Create your account.", repeat: "once", href: "/portal", cta: "Done" },
-  referral_referrer: { description: "A friend joins and qualifies through your link.", repeat: "each", href: "/portal/referrals", cta: "Invite friends" },
-  referral_referee: { description: "Join through a friend's referral link.", repeat: "once", href: "/portal/referrals", cta: "See referrals" },
-  referral_milestone: { description: "Bonus when your rewarded referrals reach a milestone (set the milestone in the rule's key, e.g. 3, 5, 10).", repeat: "each", href: "/portal/referrals", cta: "Invite friends", subKeyLabel: "Milestone (number of rewarded referrals)" },
-  stage_complete: { description: "Earn credits every time you complete a stage of your journey — application, enrolment, batch, project and more.", repeat: "each", href: "/portal/journey", cta: "View journey", subKeyLabel: "Stage key (blank = every stage)" },
-  daily_visit: { description: "Open your dashboard each day.", repeat: "daily", href: "/portal", cta: "Visit daily" },
-  streak_7: { description: "Visit 7 days in a row for a bonus.", repeat: "each", href: "/portal", cta: "Keep your streak" },
-  profile_complete: { description: "Add your name and a valid phone number to your profile.", repeat: "once", href: "/portal/profile", cta: "Complete profile" },
+  signup: { description: "Create your account.", repeat: "once", href: "/clientos", cta: "Done" },
+  referral_referrer: { description: "A friend joins and qualifies through your link.", repeat: "each", href: "/clientos/referrals", cta: "Invite friends" },
+  referral_referee: { description: "Join through a friend's referral link.", repeat: "once", href: "/clientos/referrals", cta: "See referrals" },
+  referral_milestone: { description: "Bonus when your rewarded referrals reach a milestone (set the milestone in the rule's key, e.g. 3, 5, 10).", repeat: "each", href: "/clientos/referrals", cta: "Invite friends", subKeyLabel: "Milestone (number of rewarded referrals)" },
+  stage_complete: { description: "Earn credits every time you complete a stage of your journey — application, enrolment, batch, project and more.", repeat: "each", href: "/clientos/journey", cta: "View journey", subKeyLabel: "Stage key (blank = every stage)" },
+  daily_visit: { description: "Open your dashboard each day.", repeat: "daily", href: "/clientos", cta: "Visit daily" },
+  streak_7: { description: "Visit 7 days in a row for a bonus.", repeat: "each", href: "/clientos", cta: "Keep your streak" },
+  profile_complete: { description: "Add your name and a valid phone number to your profile.", repeat: "once", href: "/clientos/profile", cta: "Complete profile" },
   first_offer_claim: { description: "Claim your first festival offer.", repeat: "once", href: "/offers", cta: "Browse offers" },
-  first_payment: { description: "Make your first payment.", repeat: "once", href: "/portal", cta: "View payments" },
-  interview_completed: { description: "Attend an interview round.", repeat: "each", href: "/portal/interviews", cta: "Interview schedule" },
-  assignment_submit: { description: "Submit an assignment on time.", repeat: "each", href: "/portal/assignments", cta: "My assignments" },
-  assignment_approved: { description: "Get an assignment approved by your mentor.", repeat: "each", href: "/portal/assignments", cta: "My assignments" },
+  first_payment: { description: "Make your first payment.", repeat: "once", href: "/clientos", cta: "View payments" },
+  interview_completed: { description: "Attend an interview round.", repeat: "each", href: "/clientos/interviews", cta: "Interview schedule" },
+  assignment_submit: { description: "Submit an assignment on time.", repeat: "each", href: "/clientos/assignments", cta: "My assignments" },
+  assignment_approved: { description: "Get an assignment approved by your mentor.", repeat: "each", href: "/clientos/assignments", cta: "My assignments" },
 };
 
 /** `PortalRole | "ALL"` without importing `portal-roles.ts` here (kept import-light and dependency-free). */
@@ -176,7 +176,7 @@ export const AUDIENCE_LABELS: Record<RewardRuleAudience, string> = {
   job_applicant: "Job Seeker / Hiring User",
 };
 
-/** Platform areas that can spend credits. Only `offers` is wired to a live checkout today; the others are configurable now and enforced by `chargeCredits` the moment a panel calls it. */
+/** Platform areas that can spend credits. Only `offers` is wired to a live checkout today; the others are configurable now and enforced by `chargeCredits` the moment a product calls it. */
 export const USAGE_MODULES = ["offers", "training", "projects", "hiring"] as const;
 export type UsageModule = (typeof USAGE_MODULES)[number];
 

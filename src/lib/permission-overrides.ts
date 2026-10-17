@@ -3,7 +3,7 @@
  * module's capability predicates (e.g. `canManageProjects` in `pms-roles.ts`)
  * are built on this: `super_admin` always bypasses overrides entirely (so a
  * bad override can never lock out a super_admin, including on another
- * super_admin's account — see `src/lib/workspace/admin-users.ts`), otherwise an
+ * super_admin's account — see `src/lib/commandos/admin-users.ts`), otherwise an
  * explicit override wins, otherwise the module's own role-based default
  * applies unchanged. Overrides are additive and absent-by-default: an
  * `admin_users` row with no `permissionOverrides` behaves exactly as before

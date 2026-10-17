@@ -77,7 +77,7 @@ export async function sendVerificationEmail(userId: string, origin: string): Pro
       brand,
       heading: "Verify your email address",
       paragraphs: [`Hi${user.name ? ` ${user.name}` : ""},`, `Confirm that ${user.email} is your email address for ${brand}.`],
-      action: { label: "Verify email", url: `${origin}/workspace/verify-email?token=${token}` },
+      action: { label: "Verify email", url: `${origin}/commandos/verify-email?token=${token}` },
       footnote: "This link expires in 24 hours. If you didn't create this account, ignore this email.",
     });
     const sent = await sendEmail({ to: user.email, subject: `Verify your email for ${brand}`, html, text });

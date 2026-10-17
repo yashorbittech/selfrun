@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Check, MessagesSquare, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useChat, type ChatSessionSummary } from "@/components/chat/ChatProvider";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function startOfDay(d: Date): number {
   const x = new Date(d);

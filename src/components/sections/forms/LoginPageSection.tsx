@@ -4,9 +4,9 @@ import Link from "next/link";
 import React, { useActionState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Eye, EyeOff, Loader2, ShieldCheck, Sparkles, type LucideIcon } from "lucide-react";
-import { portalLoginAction, type PortalLoginState } from "@/app/portal/login/actions";
+import { portalLoginAction, type PortalLoginState } from "@/app/(products)/clientos/login/actions";
 import { brandTokens } from "@/lib/brand";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 /**
  * /login — extracted verbatim from the former `login/Content.tsx`. The copy
@@ -113,7 +113,7 @@ export default function LoginPageSection(c: LoginPageCopy) {
                   <label className="flex items-center gap-2 text-muted-foreground">
                     <input type="checkbox" name="remember" className="accent-primary" />{` ${c.rememberLabel}`}
                   </label>
-                  <Link href="/portal/forgot-password" className="font-semibold text-primary hover:underline">{c.forgotLabel}</Link>
+                  <Link href="/clientos/forgot-password" className="font-semibold text-primary hover:underline">{c.forgotLabel}</Link>
                 </div>
                 {state?.error && <p role="alert" className="rounded-xl bg-red-500/10 px-4 py-3 text-center text-sm text-red-500">{state.error}</p>}
                 <button type="submit" disabled={pending} className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60">

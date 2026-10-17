@@ -7,7 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { CheckCircle2, LogOut, Monitor, MonitorSmartphone, Moon, ShieldAlert, ShieldCheck, Sun, UserCog, X, XCircle } from "lucide-react";
 import NotificationSettings from "@/components/pwa/NotificationSettings";
-import SessionsList from "@/app/workspace/(protected)/settings/security/SessionsList";
+import SessionsList from "@/app/(products)/commandos/(protected)/settings/security/SessionsList";
 import type { HistoryView, SessionView } from "@/lib/security/sessions";
 import type { PushPreferences } from "@/lib/push/categories";
 import { cn, formatDateTime } from "@/lib/utils";
@@ -213,7 +213,7 @@ function SessionsView({ fallbackHref, onClose }: { fallbackHref: string; onClose
   );
 }
 
-/** The signed-in person's account, in a side panel over the current page, like the Ask AI drawer: opening it never leaves the panel being used. */
+/** The signed-in person's account, in a side product over the current page, like the Ask AI drawer: opening it never leaves the product being used. */
 export default function AccountDrawer(props: AccountDrawerProps) {
   const { open, view, onViewChange, onClose } = props;
   const [mounted, setMounted] = useState(false);

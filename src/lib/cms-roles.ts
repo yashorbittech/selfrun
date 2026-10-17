@@ -1,13 +1,13 @@
 /**
- * Website CMS role + permission model. Like every other panel, access is
+ * Website CMS role + permission model. Like every other product, access is
  * gated on the shared `admin_users.roles` array — there is no separate CMS
- * user store. CMS access is never implied by another panel's role: it needs
+ * user store. CMS access is never implied by another product's role: it needs
  * an explicit `cms_*` role (or super_admin).
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in
- * `src/lib/workspace/permission-catalog.ts`).
+ * `src/lib/commandos/permission-catalog.ts`).
  *
  * This file is pure (no server-only imports) so client components can use it
  * to hide buttons — hiding a button is never the security boundary; every
@@ -83,7 +83,7 @@ export const CMS_PERMISSION_KEY: Record<CmsPermission, string> = {
 };
 
 export const CMS_PERMISSION_META: Record<CmsPermission, { label: string; description: string }> = {
-  VIEW: { label: "View", description: "Open the CMS panel and read every CMS dataset." },
+  VIEW: { label: "View", description: "Open the CMS product and read every CMS dataset." },
   PAGES_CREATE: { label: "Create pages", description: "Add new CMS-managed pages." },
   PAGES_EDIT: { label: "Edit pages", description: "Edit a page's draft sections in the builder." },
   PAGES_DELETE: { label: "Delete pages", description: "Remove a CMS-managed page." },
@@ -132,7 +132,7 @@ export function normalizeCmsRoles(value: unknown): CmsRole[] {
   return Array.from(new Set(value.filter(isCmsRole)));
 }
 
-/** Can open the CMS panel at `/cms/*`. */
+/** Can open the CMS product at `/sitecraft-ai/*`. */
 export function hasCmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeCmsRoles(roles ?? []).length > 0;
 }

@@ -7,7 +7,7 @@ import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { COMPANY_DOMAINS_COLLECTION, getCompany, type CompanyDomain } from "@/lib/platform/tenancy/companies";
 import { companyAppBaseUrl, companyBaseUrl, companySubdomain, platformRootDomain } from "@/lib/platform/tenancy/provisioning";
-import { saasAppOrigin } from "@/lib/saas/hosts";
+import { saasAppOrigin } from "@/lib/platform/saas/hosts";
 import { loadIntegrationsDoc } from "@/lib/platform/integrations/store";
 
 /**
@@ -44,7 +44,7 @@ function originOf(domain: CompanyDomain, slug: string, hostHint: string | null):
 }
 
 async function resolveSiteUrl(companyId: string, hostHint: string | null): Promise<string> {
-  // The subdomain root may come from Platform Panel → Integrations (crons and scripts have no proxy to load it).
+  // The subdomain root may come from Platform Console → Integrations (crons and scripts have no proxy to load it).
   const [company] = await Promise.all([getCompany(companyId), loadIntegrationsDoc()]);
   if (!company) throw new Error(`Unknown company ${companyId}`);
   const db = await getPlatformDb();
@@ -105,9 +105,9 @@ export async function companySiteHost(): Promise<string> {
 }
 
 /**
- * Where the current company's PANELS live (Workspace, HRMS, Platform Panel, …), as an origin without a trailing slash:
+ * Where the current company's PRODUCTS live (Workspace, HRMS, Platform Console, …), as an origin without a trailing slash:
  * `app.<primary custom domain>` when it has one, else `<slug>-app.<root>`; the platform operator's is `app.<SaaS host>`.
- * The public website (`siteUrlForCompany`) never serves panels.
+ * The public website (`siteUrlForCompany`) never serves products.
  */
 export async function appUrlForCompany(companyId: string, hostHint: string | null = null): Promise<string> {
   const [company] = await Promise.all([getCompany(companyId), loadIntegrationsDoc()]);

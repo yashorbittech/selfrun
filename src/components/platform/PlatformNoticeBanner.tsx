@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Megaphone, X } from "lucide-react";
 import { usePanels } from "@/components/platform/PanelsProvider";
 
-/** Company panels (signed-in workspace areas) — never the public site or the client portal. The list is the Panel Registry's. */
+/** Company products (signed-in workspace areas) — never the public site or the client portal. The list is the Product Registry's. */
 function isPanelPath(path: string | null, prefixes: string[]): boolean {
   if (!path) return false;
   if (/\/login$|\/handoff$/.test(path)) return false;
@@ -19,13 +19,13 @@ function storageKey(message: string): string {
 }
 
 /**
- * The platform-wide maintenance banner (Platform Panel → Platform settings),
- * shown on company panels while a message is set. Floating, so it never
- * changes the panels' full-height layout; dismissible per message.
+ * The platform-wide maintenance banner (Platform Console → Platform settings),
+ * shown on company products while a message is set. Floating, so it never
+ * changes the products' full-height layout; dismissible per message.
  */
 export default function PlatformNoticeBanner({ message }: { message: string }) {
   const pathname = usePathname();
-  // Every panel the registry lists, except the client portal and the public website.
+  // Every product the registry lists, except the client portal and the public website.
   const prefixes = Object.values(usePanels()).filter((p) => p.key !== "portal" && p.key !== "website").map((p) => p.route);
   const [dismissed, setDismissed] = useState(true);
 

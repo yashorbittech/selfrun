@@ -98,7 +98,7 @@ export async function purgeCompany(input: { companyId: string; actorId: string; 
 }
 
 /**
- * The deletion itself, with no confirmation of its own: only callers that have already confirmed it (the Platform Panel's multi-step flow, or
+ * The deletion itself, with no confirmation of its own: only callers that have already confirmed it (the Platform Console's multi-step flow, or
  * the daily sweep for a company whose 30-day period has ended) may call this.
  */
 export async function purgeCompanyNow(companyId: string): Promise<PurgeResult> {

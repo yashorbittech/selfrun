@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, MessageCircle, X } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/SocialIcons";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 import { loadAndToggleTawk } from "@/lib/tawk";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 
@@ -31,18 +31,18 @@ export default function FloatingContactButtons() {
     setOpen(false);
   };
 
-  // Hide on the LMS panel, the AI Bots panel (its own chat composer and save
+  // Hide on the LMS product, the AI Bots product (its own chat composer and save
   // buttons sit in this corner) and on the dedicated chat page (which has the
   // full experience inline — no need for the floating duplicate there).
   // Never on an exam page: tests are distraction-free and a chat widget would be an aid.
   if (!fd.enabled || !(showAssistant || showWhatsApp || showLiveChat)) return null;
-  if (pathname?.startsWith("/ots/take") || pathname?.startsWith("/portal/exam")) return null;
-  // SaaS administration screens (Platform Panel, company settings, setup, sign-up) aren't the public
+  if (pathname?.startsWith("/evaliq/take") || pathname?.startsWith("/clientos/exam")) return null;
+  // SaaS administration screens (Platform Console, company settings, setup, sign-up) aren't the public
   // site — the visitor chat/WhatsApp buttons don't belong there and sat on top of their controls.
-  if (/^\/(platform|console|signup|workspace\/(settings|onboarding))(\/|$)/.test(pathname ?? "") || pathname?.startsWith("/workspace/invite")) return null;
-  // The CMS is an admin panel too (its draft preview, /cms/preview, shows the site exactly as visitors see it).
-  const inCms = pathname?.startsWith("/cms") && !pathname.startsWith("/cms/preview");
-  // Every signed-in panel the Panel Registry lists is an app screen, not the public site.
+  if (/^\/(platform|console|signup|workspace\/(settings|onboarding))(\/|$)/.test(pathname ?? "") || pathname?.startsWith("/commandos/invite")) return null;
+  // The CMS is an admin product too (its draft preview, /sitecraft-ai/preview, shows the site exactly as visitors see it).
+  const inCms = pathname?.startsWith("/sitecraft-ai") && !pathname.startsWith("/sitecraft-ai/preview");
+  // Every signed-in product the Product Registry lists is an app screen, not the public site.
   const inPanel = Object.values(panels).some((p) => p.key !== "website" && p.key !== "portal" && p.route.length > 1 && (pathname === p.route || pathname?.startsWith(`${p.route}/`)));
   if (inPanel || inCms || pathname === "/ask") {
     return chatOpen ? <ChatWidget open={chatOpen} onClose={() => setChatOpen(false)} /> : null;

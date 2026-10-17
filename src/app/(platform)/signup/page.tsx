@@ -1,17 +1,17 @@
-import "@/app/saas/saas.css";
+import "@/app/(platform)/saas/saas.css";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getSignupMode } from "@/lib/platform/settings";
 import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
-import { getFeatureModules } from "@/lib/saas/modules";
-import SrRoot from "@/components/saas/SrRoot";
-import Header from "@/components/saas/Header";
-import Footer from "@/components/saas/Footer";
-import Interactions from "@/components/saas/Interactions";
-import { OfferTopBar } from "@/components/saas/OfferChrome";
-import MarketingShot from "@/components/saas/MarketingShot";
+import { getFeatureModules } from "@/lib/platform/saas/modules";
+import SrRoot from "@/components/platform/saas/SrRoot";
+import Header from "@/components/platform/saas/Header";
+import Footer from "@/components/platform/saas/Footer";
+import Interactions from "@/components/platform/saas/Interactions";
+import { OfferTopBar } from "@/components/platform/saas/OfferChrome";
+import MarketingShot from "@/components/platform/saas/MarketingShot";
 import SignupForm from "./SignupForm";
 
 // Creating a workspace also starts writing its website in the background (AI), which can take a couple of minutes.
@@ -52,7 +52,7 @@ export default async function SignupPage() {
               <h1 className="sr-h1 mt-6">
                 The business that <span className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-transparent">runs itself.</span>
               </h1>
-              <p className="sr-lead mt-5 max-w-xl">Create your workspace in a few seconds. Every panel and every feature is included — pay only when your team grows.</p>
+              <p className="sr-lead mt-5 max-w-xl">Create your workspace in a few seconds. Every product and every feature is included — pay only when your team grows.</p>
 
               <ul className="mt-8 space-y-4">
                 {POINTS.map((p) => (

@@ -1,7 +1,7 @@
 "use client";
 
 import UnifiedProfileMenu from "@/components/platform/panel/UnifiedProfileMenu";
-import { hubLogoutAction } from "@/app/workspace/(protected)/actions";
+import { hubLogoutAction } from "@/app/(products)/commandos/(protected)/actions";
 
 export default function HubProfileMenu({
   email,
@@ -14,8 +14,8 @@ export default function HubProfileMenu({
   lastLoginAt: string | null;
   links?: { href: string; label: string }[];
 }) {
-  // The workspace's nav lists the Platform Panel only for people who have platform access, so its link shows up here for them alone.
-  const platform = links?.find((l) => l.href === "/platform");
+  // The workspace's nav lists the Platform Console only for people who have platform access, so its link shows up here for them alone.
+  const platform = links?.find((l) => l.href === "/console");
 
   return (
     <UnifiedProfileMenu

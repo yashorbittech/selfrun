@@ -7,7 +7,7 @@ import type { VercelConfig } from "@/lib/platform/domains/vercel";
 /**
  * The effective email and domain provider configuration, resolved per field:
  *
- *   1. the value saved in Platform Panel → Integrations (`platform_settings`)
+ *   1. the value saved in Platform Console → Integrations (`platform_settings`)
  *   2. else the environment variable deployments have always used
  *   3. else the built-in default
  *

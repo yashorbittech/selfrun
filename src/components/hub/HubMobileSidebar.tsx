@@ -1,8 +1,8 @@
 "use client";
 
 import { PanelName } from "@/components/platform/PanelsProvider";
-import { MobileSidebarProfile } from "@/components/lms/SidebarCollapseContext";
-import type { NavSection } from "@/lib/workspace/nav";
+import { MobileSidebarProfile } from "@/components/products/dealflow-ai/SidebarCollapseContext";
+import type { NavSection } from "@/lib/products/commandos/nav";
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Coins, Gift, Loader2, Share2, Sparkles, UserPlus, type LucideIcon } from "lucide-react";
 import { useReferralCode } from "@/lib/useReferralCode";
 import { formatCredits } from "@/lib/wallet/constants";
-import { portalJoinAction, type PortalJoinState } from "@/app/portal/join/actions";
+import { portalJoinAction, type PortalJoinState } from "@/app/(products)/clientos/join/actions";
 
 /**
  * /register — extracted verbatim from the former `register/Content.tsx` into

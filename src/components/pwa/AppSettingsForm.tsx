@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { ImageUp, Loader2, RotateCcw, Save } from "lucide-react";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -118,7 +118,7 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="app-desc">Description</Label>
-            <Textarea id="app-desc" rows={2} maxLength={200} value={s.description} placeholder={`${company.name}: your team's workspace and panels.`} onChange={(e) => set({ description: e.target.value })} />
+            <Textarea id="app-desc" rows={2} maxLength={200} value={s.description} placeholder={`${company.name}: your team's workspace and products.`} onChange={(e) => set({ description: e.target.value })} />
           </div>
         </GlassCard>
 
@@ -207,7 +207,7 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
           </fieldset>
           <label className="flex items-start gap-2.5">
             <Checkbox checked={s.installPrompt} onCheckedChange={(v) => set({ installPrompt: v === true })} className="mt-0.5" />
-            <span><span className="block text-sm">Show the “Install the app” banner</span><span className="block text-xs text-muted-foreground">A small dismissible banner on panel pages in browsers that can install the app. The install card in Notification settings always stays.</span></span>
+            <span><span className="block text-sm">Show the “Install the app” banner</span><span className="block text-xs text-muted-foreground">A small dismissible banner on product pages in browsers that can install the app. The install card in Notification settings always stays.</span></span>
           </label>
         </GlassCard>
 
@@ -264,7 +264,7 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
           </div>
           <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
             <p className="font-medium text-foreground">{name}</p>
-            <p className="mt-0.5">{s.description || `${company.name}: your team's workspace and panels.`}</p>
+            <p className="mt-0.5">{s.description || `${company.name}: your team's workspace and products.`}</p>
             <p className="mt-1.5">{company.appUrl}</p>
           </div>
         </GlassCard>

@@ -168,19 +168,19 @@ export type StartSignupResult =
   | { ok: false; errors: SignupFieldErrors };
 
 /** One-time sign-in token for the new owner, redeemed on the company's own host. */
-/** A one-time sign-in link for a Platform Panel user to enter a company's panels as that company's Super Admin (`next` is where it lands). */
-export async function issueSupportHandoff(created: { companyId: string; adminId: string }, appBase: string, next = "/workspace?via=platform"): Promise<string> {
+/** A one-time sign-in link for a Platform Console user to enter a company's products as that company's Super Admin (`next` is where it lands). */
+export async function issueSupportHandoff(created: { companyId: string; adminId: string }, appBase: string, next = "/commandos?via=platform"): Promise<string> {
   const { handoffs } = await collections();
   const handoff = randomBytes(32).toString("hex");
   await handoffs.insertOne({ _id: sha256(handoff), companyId: created.companyId, adminId: created.adminId, next, expiresAt: new Date(Date.now() + HANDOFF_TTL_MS) });
-  return `${appBase}/workspace/handoff?token=${handoff}`;
+  return `${appBase}/commandos/handoff?token=${handoff}`;
 }
 
 async function issueHandoff(created: { companyId: string; adminId: string }, base: string): Promise<string> {
   const { handoffs } = await collections();
   const handoff = randomBytes(32).toString("hex");
-  await handoffs.insertOne({ _id: sha256(handoff), companyId: created.companyId, adminId: created.adminId, next: "/workspace", expiresAt: new Date(Date.now() + HANDOFF_TTL_MS) });
-  return `${base}/workspace/handoff?token=${handoff}`;
+  await handoffs.insertOne({ _id: sha256(handoff), companyId: created.companyId, adminId: created.adminId, next: "/commandos", expiresAt: new Date(Date.now() + HANDOFF_TTL_MS) });
+  return `${base}/commandos/handoff?token=${handoff}`;
 }
 
 /** Sends the verification link from the new company's context. Never throws and never fails the sign-up. */
@@ -199,7 +199,7 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
   if (mode === "closed") return { ok: false, errors: { form: "New sign-ups are paused right now. Please try again later." } };
 
   const errors = validateSignup(input);
-  // Subdomains reserved in Platform Panel → Platform settings, on top of the built-in list.
+  // Subdomains reserved in Platform Console → Platform settings, on top of the built-in list.
   if (!errors.slug) {
     const reserved = await reservedSlugError(input.slug);
     if (reserved) errors.slug = reserved;
@@ -292,7 +292,7 @@ async function sendWorkspaceReadyEmail(doc: PendingSignup, base: string, approve
     brand: doc.companyName,
     heading: approved ? "Your workspace has been approved" : "Your workspace is ready",
     paragraphs: [`Hi ${doc.name},`, `${doc.companyName} is set up. Sign in any time at your workspace address with the password you chose:`, base],
-    action: { label: "Open your workspace", url: `${base}/workspace/login` },
+    action: { label: "Open your workspace", url: `${base}/commandos/login` },
     ...(platform.supportLine ? { footnote: platform.supportLine } : {}),
   });
   return sendEmail({ to: doc.email, subject: `Welcome — ${doc.companyName} is ready`, html, text });

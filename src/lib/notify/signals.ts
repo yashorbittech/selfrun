@@ -4,7 +4,7 @@ import { getDb } from "@/lib/mongodb";
 import type { NotifyPanel, SignalItem } from "@/lib/notify/panels";
 
 /**
- * The realtime side of notifications. Every notification written anywhere (any panel's own store or the shared one) also appends a small
+ * The realtime side of notifications. Every notification written anywhere (any product's own store or the shared one) also appends a small
  * "signal" per recipient here; the stream route (`/api/notifications/stream`) tails them and pushes them to that person's open tabs.
  * The notification itself stays in its own store — a lost signal costs nothing but a delay, because every bell also recounts on
  * reconnect, on focus and once a minute.
@@ -50,7 +50,7 @@ export async function pullSignals(userId: string, actor: SignalActor, since: Dat
   return (await col()).find({ userId, actor, createdAt: { $gte: since } }).sort({ createdAt: 1 }).limit(limit).toArray();
 }
 
-/** Convenience for the panels' own stores: "someone just got this" in one call. */
+/** Convenience for the products' own stores: "someone just got this" in one call. */
 export async function signalNew(panel: NotifyPanel, userIds: string[], n: { type: string; title: string; body?: string | null; link?: string | null }, actor: SignalActor = "staff"): Promise<void> {
   const link = n.link && n.link.startsWith("/") && !n.link.startsWith("//") ? n.link : null;
   await signalUsers(panel, userIds, { id: randomUUID(), type: n.type, title: n.title, body: n.body ?? null, link, priority: "normal", createdAt: new Date().toISOString() }, actor, "new");

@@ -9,7 +9,7 @@ import type { Attachment } from "@/lib/support/types";
 /**
  * Screenshots and files on requests. Stored in the platform's private blob store under the platform owner's account (the
  * service is SelfRun AI's, so the files never count against a customer's storage plan) and served only through
- * `/api/support/attachments`, which checks the viewer may see the request the file belongs to.
+ * `/api/resolveiq/attachments`, which checks the viewer may see the request the file belongs to.
  */
 
 export const MAX_ATTACHMENTS = 5;

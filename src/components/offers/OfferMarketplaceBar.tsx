@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import { OFFER_TYPES, type OfferType } from "@/lib/offers/constants";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export type MarketplaceSort = "featured" | "ending" | "discount" | "popular";
 

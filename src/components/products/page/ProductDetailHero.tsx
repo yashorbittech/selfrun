@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, LogIn, Sparkles } from "lucide-react";
 import PageHero from "@/components/sections/PageHero";
 import { BTN_PRIMARY, BTN_SECONDARY } from "@/components/products/page/cta-styles";
-import { resolveIcon } from "@/lib/cms/icon-map";
+import { resolveIcon } from "@/lib/products/sitecraft-ai/icon-map";
 import { ctaTarget, hasOwnAi, pageContent, productHeroImage, resolveCtas, SIGNUP_PATH, type StoredProduct } from "@/lib/products/shared";
 import type { ProductCtaKind } from "@/types/content";
 

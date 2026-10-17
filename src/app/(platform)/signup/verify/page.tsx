@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { describePendingSignup } from "@/lib/platform/signup";
 import { companyAppBaseUrl, companyBaseUrl } from "@/lib/platform/tenancy/provisioning";
@@ -29,7 +29,7 @@ export default async function VerifySignupPage({ searchParams }: { searchParams:
                 <CardTitle className="text-xl">Create {pending.companyName}</CardTitle>
                 <CardDescription>
                   Email confirmed for <strong className="text-foreground">{pending.email}</strong>. Your website will be at{" "}
-                  <strong className="text-foreground">{companyBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong> and your panels at{" "}
+                  <strong className="text-foreground">{companyBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong> and your products at{" "}
                   <strong className="text-foreground">{companyAppBaseUrl(pending.slug).replace(/^https?:\/\//, "")}</strong>.
                 </CardDescription>
               </CardHeader>

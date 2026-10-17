@@ -1,16 +1,16 @@
 import "server-only";
-import * as Co from "@/app/(platform)/platform/companies/[id]/actions";
-import * as Free from "@/app/(platform)/platform/companies/[id]/free-access-actions";
-import * as Sign from "@/app/(platform)/platform/signups/actions";
-import * as Coupon from "@/app/(platform)/platform/coupons/actions";
-import * as Addon from "@/app/(platform)/platform/addons/actions";
-import * as Plan from "@/app/(platform)/platform/plans/actions";
-import * as Sup from "@/app/(platform)/platform/support/actions";
-import * as Subs from "@/app/(platform)/platform/subscriptions/[id]/actions";
-import * as Inv from "@/app/(platform)/platform/invoices/[id]/actions";
-import * as Maint from "@/app/(platform)/platform/maintenance/actions";
-import * as Panels from "@/app/(platform)/platform/panels/actions";
-import * as Users from "@/app/(platform)/platform/users/actions";
+import * as Co from "@/app/(platform)/console/companies/[id]/actions";
+import * as Free from "@/app/(platform)/console/companies/[id]/free-access-actions";
+import * as Sign from "@/app/(platform)/console/signups/actions";
+import * as Coupon from "@/app/(platform)/console/coupons/actions";
+import * as Addon from "@/app/(platform)/console/addons/actions";
+import * as Plan from "@/app/(platform)/console/plans/actions";
+import * as Sup from "@/app/(platform)/console/support/actions";
+import * as Subs from "@/app/(platform)/console/subscriptions/[id]/actions";
+import * as Inv from "@/app/(platform)/console/invoices/[id]/actions";
+import * as Maint from "@/app/(platform)/console/maintenance/actions";
+import * as Panels from "@/app/(platform)/console/products/actions";
+import * as Users from "@/app/(platform)/console/users/actions";
 import { listPanels } from "@/lib/platform/panels/store";
 import { getMaintenanceState } from "@/lib/platform/maintenance-state";
 import { listPlatformUsers, listRoles } from "@/lib/platform/console/roles";
@@ -35,8 +35,8 @@ import { viaAction, f, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * The Platform Panel (the SaaS owner's console) for the agent. Everything is gated by the person's platform permission, both when the
- * tool is offered and again inside the panel's own action. Company deletion, role administration and payment keys stay in the panel.
+ * The Platform Console (the SaaS owner's console) for the agent. Everything is gated by the person's platform permission, both when the
+ * tool is offered and again inside the product's own action. Company deletion, role administration and payment keys stay in the product.
  */
 
 const can = (u: AgentUser, p: PlatformPermission) => hasPermission(u.platformPermissions, p);
@@ -52,7 +52,7 @@ const act = (key: string, label: string, description: string, perm: PlatformPerm
 const page = f.num("page", "Page (starts at 1)");
 
 export const PLATFORM_REPORTS: ReportDef[] = [
-  rep("platform.panels", "Panel registry", "Every panel (module) and whether it is on.", "panels.read", [], () => listPanels()),
+  rep("platform.panels", "Product registry", "Every product (module) and whether it is on.", "panels.read", [], () => listPanels()),
   rep("platform.maintenance", "Maintenance status", "Whether platform-wide maintenance is on or scheduled.", "settings.read" as PlatformPermission, [], () => getMaintenanceState()),
   rep("platform.team", "Platform team and roles", "Who has platform access with which role, and the roles available.", "users.read" as PlatformPermission, [], async () => ({ users: await listPlatformUsers(), roles: await listRoles() })),
   rep("platform.help_articles", "Help articles", "All help-centre articles including drafts.", "support.read", [], () => listAllArticles()),
@@ -81,12 +81,12 @@ export const PLATFORM_ACTIONS: ActionDef[] = [
   act("platform.issue_credit_note", "Issue a credit note", "Credit part or all of an invoice (amount in rupees; leave blank for the full amount).", "invoices.manage", [f.str("invoiceId", "Invoice id", true), f.str("amountRupees", "Amount in rupees"), f.text("reason", "Reason", true)], (v) => Inv.creditNoteAction(String(v.invoiceId), String(v.amountRupees ?? ""), String(v.reason ?? "")), "Credit note issued.", true),
   act("platform.set_maintenance", "Start or schedule maintenance", "Announce or enforce maintenance for the whole platform, or for one company (give companyId). mode: banner (notice only) or takeover (site shows a maintenance page).", "settings.manage", [f.str("companyId", "Company id (leave out for the whole platform)"), f.text("message", "Message shown to visitors"), f.enum("mode", "Mode", ["banner", "takeover"], true), f.enum("appliesTo", "Applies to", ["both", "sites", "apps"]), f.date("startsAt", "Starts at (leave out for now)"), f.num("durationHours", "Duration in hours", true)], (v) => Maint.saveMaintenanceAction({ enabled: true, message: String(v.message ?? ""), mode: v.mode as "banner", appliesTo: (v.appliesTo as "both") ?? "both", startsAt: String(v.startsAt ?? ""), durationHours: Number(v.durationHours) }, str(v.companyId) ?? undefined), "Maintenance saved.", true),
   act("platform.end_maintenance", "End maintenance now", "Switch maintenance off immediately (platform-wide, or for one company).", "settings.manage", [f.str("companyId", "Company id (leave out for the whole platform)")], (v) => Maint.endMaintenanceAction(str(v.companyId) ?? undefined), "Maintenance ended.", false),
-  act("platform.set_panel_active", "Turn a panel on or off for everyone", "Switch a panel (module) on or off across the platform.", "panels.manage", [f.str("panelKey", "Panel key", true), f.bool("active", "Active")], (v) => Panels.setPanelActiveAction(String(v.panelKey), v.active !== false), "Panel updated.", true),
-  act("platform.set_company_panel_active", "Turn a panel on or off for one company", "Switch a panel on or off for a single company.", "panels.manage", [f.str("companyId", "Company id", true), f.str("panelKey", "Panel key", true), f.bool("active", "Active")], (v) => Panels.setCompanyPanelActiveAction(String(v.companyId), String(v.panelKey), v.active !== false), "Panel updated.", true),
+  act("platform.set_panel_active", "Turn a product on or off for everyone", "Switch a product (module) on or off across the platform.", "panels.manage", [f.str("panelKey", "Product key", true), f.bool("active", "Active")], (v) => Panels.setPanelActiveAction(String(v.panelKey), v.active !== false), "Product updated.", true),
+  act("platform.set_company_panel_active", "Turn a product on or off for one company", "Switch a product on or off for a single company.", "panels.manage", [f.str("companyId", "Company id", true), f.str("panelKey", "Product key", true), f.bool("active", "Active")], (v) => Panels.setCompanyPanelActiveAction(String(v.companyId), String(v.panelKey), v.active !== false), "Product updated.", true),
   act("platform.save_addon", "Create or edit an add-on", "Paise prices. type: limit (adds capacity: limitKey + amountPerUnit) or module (unlocks moduleKey). Leave id out to create.", "addons.manage", [f.str("id", "Add-on id to edit (leave out to create)"), f.str("name", "Name", true), f.text("description", "Description"), f.num("priceMonthly", "Monthly price in paise", true), f.num("priceYearly", "Yearly price in paise", true), f.enum("type", "Type", ["limit", "module"], true), f.str("limitKey", "Limit key (limit add-ons)"), f.num("amountPerUnit", "Amount per unit (limit add-ons)"), f.str("moduleKey", "Module key (module add-ons)"), f.list("plans", "Plan ids (empty = all plans)"), f.num("maxQuantity", "Max quantity"), f.bool("active", "Active"), f.num("sortOrder", "Sort order")], (v) => Addon.saveAddonAction(str(v.id), { name: String(v.name ?? ""), description: String(v.description ?? ""), priceMonthly: Number(v.priceMonthly), priceYearly: Number(v.priceYearly), type: v.type as "limit", limitKey: (str(v.limitKey) as never) ?? null, amountPerUnit: v.amountPerUnit === undefined ? null : Number(v.amountPerUnit), moduleKey: str(v.moduleKey), plans: Array.isArray(v.plans) && (v.plans as unknown[]).length ? (v.plans as string[]) : "all", maxQuantity: v.maxQuantity === undefined ? null : Number(v.maxQuantity), active: v.active !== false, sortOrder: Number(v.sortOrder ?? 0) }), "Add-on saved.", true),
   act("platform.save_plan", "Create or edit a plan", "values = the plan form: {id, name, description, currency, cycles:[{id:'monthly'|'yearly', enabled, price (rupees as text), list}], allModules, modules[], highlights (one per line), flags[], limits{key:'' = unlimited}, customLimits[{key,value}], trialDays, active, isDefault, offerLabel, lifetimeFree, contactSales}. Read platform.plans first and change a copy of an existing plan.", "plans.manage", [f.enum("mode", "Mode", ["create", "update"], true), f.json("values", "Plan form values", true)], (v) => Plan.savePlanAction(v.mode === "create" ? "create" : "update", v.values as never), "Plan saved.", true),
   act("platform.delete_plan", "Delete a plan", "Delete a plan nobody is on.", "plans.manage", [f.str("planId", "Plan id", true)], (v) => Plan.deletePlanAction(String(v.planId)), "Plan deleted.", true),
-  act("platform.save_help_article", "Create or edit a help article", "Articles the support assistant and help centre are grounded on.", "support.manage", [f.str("id", "Article id to edit (leave out to create)"), f.str("title", "Title", true), f.text("summary", "Summary"), f.text("body", "Body (markdown)", true), f.str("category", "Category"), f.str("tags", "Tags, comma separated"), f.str("panels", "Panel keys, comma separated"), f.enum("status", "Status", ["draft", "published"], true)], (v) => Sup.saveArticleAction({ id: str(v.id) ?? undefined, title: String(v.title ?? ""), summary: String(v.summary ?? ""), body: String(v.body ?? ""), category: String(v.category ?? ""), tags: String(v.tags ?? ""), panels: String(v.panels ?? ""), status: v.status as "draft" }), "Article saved.", true),
+  act("platform.save_help_article", "Create or edit a help article", "Articles the support assistant and help centre are grounded on.", "support.manage", [f.str("id", "Article id to edit (leave out to create)"), f.str("title", "Title", true), f.text("summary", "Summary"), f.text("body", "Body (markdown)", true), f.str("category", "Category"), f.str("tags", "Tags, comma separated"), f.str("panels", "Product keys, comma separated"), f.enum("status", "Status", ["draft", "published"], true)], (v) => Sup.saveArticleAction({ id: str(v.id) ?? undefined, title: String(v.title ?? ""), summary: String(v.summary ?? ""), body: String(v.body ?? ""), category: String(v.category ?? ""), tags: String(v.tags ?? ""), panels: String(v.panels ?? ""), status: v.status as "draft" }), "Article saved.", true),
   act("platform.delete_help_article", "Delete a help article", "Remove a help article.", "support.manage", [f.str("id", "Article id", true)], (v) => Sup.deleteArticleAction(String(v.id)), "Article deleted.", true),
   act("platform.assign_platform_role", "Give a person platform access", "Give an existing account a platform role (ids from platform.team).", "users.manage", [f.str("userId", "User id", true), f.str("roleId", "Role id", true)], (v) => Users.assignRoleAction(String(v.userId), String(v.roleId)), "Access updated.", true),
   act("platform.revoke_platform_access", "Remove a person's platform access", "Remove their platform role.", "users.manage", [f.str("userId", "User id", true)], (v) => Users.revokeAccessAction(String(v.userId)), "Access revoked.", true),

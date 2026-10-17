@@ -708,9 +708,9 @@ export async function seedOts(db) {
   const portalN = [];
   for (const n of notices) {
     if (n.ref.kind === "employee" && staffByEmp.has(n.ref.id))
-      staffN.push({ _id: `${D}n-${staffN.length + 1}`, recipientUserId: staffByEmp.get(n.ref.id), type: "ots_assigned", title: n.title, body: null, link: `/ots/my-tests/${n.a._id}`, read: false, dedupeKey: `ots_assigned:${n.a._id}:${staffByEmp.get(n.ref.id)}`, createdAt: n.when });
+      staffN.push({ _id: `${D}n-${staffN.length + 1}`, recipientUserId: staffByEmp.get(n.ref.id), type: "ots_assigned", title: n.title, body: null, link: `/evaliq/my-tests/${n.a._id}`, read: false, dedupeKey: `ots_assigned:${n.a._id}:${staffByEmp.get(n.ref.id)}`, createdAt: n.when });
     if ((n.ref.kind === "applicant" && n.ref.id === appId.toString()) || (n.ref.kind === "student" && n.ref.id === studentId))
-      portalN.push({ _id: `${D}pn-${portalN.length + 1}`, recipientUserId: n.ref.kind === "applicant" ? `${D}portal-1` : `${D}portal-2`, type: "ots_assigned", title: n.title, body: n.a.dueAt ? "Complete it before the due date." : null, link: `/portal/tests/${n.a._id}`, read: false, dedupeKey: null, createdAt: n.when });
+      portalN.push({ _id: `${D}pn-${portalN.length + 1}`, recipientUserId: n.ref.kind === "applicant" ? `${D}portal-1` : `${D}portal-2`, type: "ots_assigned", title: n.title, body: n.a.dueAt ? "Complete it before the due date." : null, link: `/clientos/tests/${n.a._id}`, read: false, dedupeKey: null, createdAt: n.when });
   }
   await db.collection("chat_notifications").deleteMany({ _id: new RegExp(`^${D}`) });
   if (staffN.length) await db.collection("chat_notifications").insertMany(staffN);

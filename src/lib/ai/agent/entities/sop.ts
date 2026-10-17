@@ -1,17 +1,17 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import * as A from "@/app/sop/(protected)/actions";
+import * as A from "@/app/(products)/playbook-ai/(protected)/actions";
 import { sopCan, type SopPermission } from "@/lib/sop-roles";
-import { requireViewer } from "@/lib/sop/viewer";
-import { getReadableSop } from "@/lib/sop/sops";
-import { CONFIDENTIALITY_LEVELS, SOP_PRIORITIES, SOP_STATUSES, type SopBlock, type SopSection } from "@/lib/sop/constants";
+import { requireViewer } from "@/lib/products/playbook-ai/viewer";
+import { getReadableSop } from "@/lib/products/playbook-ai/sops";
+import { CONFIDENTIALITY_LEVELS, SOP_PRIORITIES, SOP_STATUSES, type SopBlock, type SopSection } from "@/lib/products/playbook-ai/constants";
 import { viaAction, f, fail, str, values } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
  * SOPs for the agent: create, write and publish procedures, assign them, collect acknowledgements and feedback, and manage the
- * department / function / process / category structure, templates and settings — through the panel's own actions, so scope, confidentiality
- * and the audit trail are the panel's.
+ * department / function / process / category structure, templates and settings — through the product's own actions, so scope, confidentiality
+ * and the audit trail are the product's.
  */
 
 const ctx = (u: AgentUser) => ({ roles: u.roles, permissionOverrides: u.permissionOverrides });

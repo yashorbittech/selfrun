@@ -1,5 +1,5 @@
 /**
- * Workspace Panel role model. Access is gated on `admin_users.roles`.
+ * Workspace Product role model. Access is gated on `admin_users.roles`.
  */
 
 import { resolvePermission, type RoleContext } from "@/lib/permission-overrides";
@@ -15,7 +15,7 @@ export const WORKSPACE_ROLE_META: Record<WorkspaceRole, { label: string; descrip
   },
   workspace_admin: {
     label: "Workspace Admin",
-    description: "Manage workspace settings, department analytics, and employee panel access.",
+    description: "Manage workspace settings, department analytics, and employee product access.",
   },
   workspace_member: {
     label: "Workspace Member",

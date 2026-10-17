@@ -1,16 +1,16 @@
 import "server-only";
 import { getCurrentPortalUser, type CurrentPortalUser } from "@/lib/portal-auth";
 import { PORTAL_ROLE_META } from "@/lib/portal-roles";
-import { getActivePortalLead, listPortalLeadSummaries } from "@/lib/portal/lead";
-import { getApplicantOverview } from "@/lib/portal/applicant";
-import { getLearnerOverview } from "@/lib/portal/student";
-import { getClientOverview } from "@/lib/portal/client";
-import { getWalletOverview } from "@/lib/portal/wallet";
-import { listPortalNotifications } from "@/lib/portal/notifications";
-import { listPortalDocuments } from "@/lib/portal/documents";
-import { listInterviewsForLead } from "@/lib/portal/interviews";
-import { markAllPortalNotificationsReadAction, switchPortalLeadAction } from "@/app/portal/(app)/actions";
-import { sendPortalMessageAction } from "@/app/portal/(app)/messages/actions";
+import { getActivePortalLead, listPortalLeadSummaries } from "@/lib/products/clientos/lead";
+import { getApplicantOverview } from "@/lib/products/clientos/applicant";
+import { getLearnerOverview } from "@/lib/products/clientos/student";
+import { getClientOverview } from "@/lib/products/clientos/client";
+import { getWalletOverview } from "@/lib/products/clientos/wallet";
+import { listPortalNotifications } from "@/lib/products/clientos/notifications";
+import { listPortalDocuments } from "@/lib/products/clientos/documents";
+import { listInterviewsForLead } from "@/lib/products/clientos/interviews";
+import { markAllPortalNotificationsReadAction, switchPortalLeadAction } from "@/app/(products)/clientos/(app)/actions";
+import { sendPortalMessageAction } from "@/app/(products)/clientos/(app)/messages/actions";
 import { f, fail, viaAction } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, Json, ReportDef } from "@/lib/ai/agent/types";
 

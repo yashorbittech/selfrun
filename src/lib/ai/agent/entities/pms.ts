@@ -1,29 +1,29 @@
 import "server-only";
-import { getClient, createClient, updateClient, deleteClient, type Client } from "@/lib/pms/clients";
-import { getProject, createProject, updateProject, deleteProject, changeProjectStatus } from "@/lib/pms/projects";
-import { getTask, createTask, updateTask, deleteTask, recomputeProjectProgress } from "@/lib/pms/tasks";
-import { getMilestone, createMilestone, updateMilestone, deleteMilestone } from "@/lib/pms/milestones";
-import { getMember, upsertMember, updateMember, removeMember, projectIdsForEmployee } from "@/lib/pms/project-members";
-import { createEntry, updateEntry, deleteEntry, getEntry, submitEntries, reviewEntry, listEntries, isDuplicate, hasOverlap, dayHoursTotal } from "@/lib/pms/timesheets";
-import { addComment, deleteComment } from "@/lib/pms/task-comments";
-import { computeProjectFinancials, getPortfolioCosting, updateCostingConfig } from "@/lib/pms/costing";
-import { buildProjectReport } from "@/lib/pms/reports";
-import { getPmsDashboardStats } from "@/lib/pms/dashboard";
-import { getPmsSettings, normalizeSettingsInput, updatePmsSettings } from "@/lib/pms/settings";
-import { checkProjectAccess } from "@/lib/pms/access";
-import { recordActivity, diffSummary } from "@/lib/pms/activity";
-import { notifyEmployees } from "@/lib/pms/notifications";
-import { validateClient, validateProject, validateTask, validateMilestone, validateMember, validateTimesheet, validateCostingConfig } from "@/lib/pms/validation";
-import { isTaskDone, getTaskStatusMeta, getProjectStatusMeta, getMemberRoleLabel, EDITABLE_TIMESHEET_STATUSES, PRIORITIES, PROJECT_STATUSES, TASK_STATUSES, PROJECT_MEMBER_ROLES, CLIENT_STATUSES, MILESTONE_STATUSES } from "@/lib/pms/constants";
+import { getClient, createClient, updateClient, deleteClient, type Client } from "@/lib/products/sprintos/clients";
+import { getProject, createProject, updateProject, deleteProject, changeProjectStatus } from "@/lib/products/sprintos/projects";
+import { getTask, createTask, updateTask, deleteTask, recomputeProjectProgress } from "@/lib/products/sprintos/tasks";
+import { getMilestone, createMilestone, updateMilestone, deleteMilestone } from "@/lib/products/sprintos/milestones";
+import { getMember, upsertMember, updateMember, removeMember, projectIdsForEmployee } from "@/lib/products/sprintos/project-members";
+import { createEntry, updateEntry, deleteEntry, getEntry, submitEntries, reviewEntry, listEntries, isDuplicate, hasOverlap, dayHoursTotal } from "@/lib/products/sprintos/timesheets";
+import { addComment, deleteComment } from "@/lib/products/sprintos/task-comments";
+import { computeProjectFinancials, getPortfolioCosting, updateCostingConfig } from "@/lib/products/sprintos/costing";
+import { buildProjectReport } from "@/lib/products/sprintos/reports";
+import { getPmsDashboardStats } from "@/lib/products/sprintos/dashboard";
+import { getPmsSettings, normalizeSettingsInput, updatePmsSettings } from "@/lib/products/sprintos/settings";
+import { checkProjectAccess } from "@/lib/products/sprintos/access";
+import { recordActivity, diffSummary } from "@/lib/products/sprintos/activity";
+import { notifyEmployees } from "@/lib/products/sprintos/notifications";
+import { validateClient, validateProject, validateTask, validateMilestone, validateMember, validateTimesheet, validateCostingConfig } from "@/lib/products/sprintos/validation";
+import { isTaskDone, getTaskStatusMeta, getProjectStatusMeta, getMemberRoleLabel, EDITABLE_TIMESHEET_STATUSES, PRIORITIES, PROJECT_STATUSES, TASK_STATUSES, PROJECT_MEMBER_ROLES, CLIENT_STATUSES, MILESTONE_STATUSES } from "@/lib/products/sprintos/constants";
 import { hasLevel } from "@/lib/ai/agent/access";
 import { canManageClients, canManageProjects, canReviewTimesheets, canViewCosting, canManageSettings } from "@/lib/pms-roles";
 import { check, fail, formInput, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * PMS for the agent. Every write goes through the panel's own validators and functions and repeats what its screens do around
+ * PMS for the agent. Every write goes through the product's own validators and functions and repeats what its screens do around
  * them: activity log, notifications, project progress, messenger channel sync. Employees (pms_employee) see and change only
- * their own work, exactly as in the panel's "My work" screens.
+ * their own work, exactly as in the product's "My work" screens.
  */
 
 const soft = { deletedAt: null };
@@ -39,7 +39,7 @@ const isAdmin = (u: AgentUser) => hasLevel(u.roles, "pms", "admin");
 
 async function syncMessenger(projectId: string): Promise<void> {
   try {
-    const { syncProjectChannel } = await import("@/lib/messenger/projects");
+    const { syncProjectChannel } = await import("@/lib/products/huddle-ai/projects");
     await syncProjectChannel(projectId);
   } catch { /* the messenger link is optional */ }
 }
@@ -197,7 +197,7 @@ export const PMS_ENTITIES: EntityDef[] = [
         if (!c.ok) return c.error;
         const created = await createTask(project._id, c.data, u.id);
         if (created.assigneeId) {
-          await notifyEmployees([created.assigneeId], (uid) => ({ recipientUserId: uid, type: "task_assigned", title: `You were assigned: ${created.title}`, body: `${project.name} · ${created.taskCode}`, link: `/pms/projects/${project._id}/tasks/${created._id}`, projectId: project._id }), u.id);
+          await notifyEmployees([created.assigneeId], (uid) => ({ recipientUserId: uid, type: "task_assigned", title: `You were assigned: ${created.title}`, body: `${project.name} · ${created.taskCode}`, link: `/sprintos/projects/${project._id}/tasks/${created._id}`, projectId: project._id }), u.id);
         }
         await recordActivity({ actorId: u.id, actorEmail: u.email, action: "create", entity: "task", entityId: created._id, entityLabel: `${created.taskCode} · ${c.data.title}`, projectId: project._id });
         await recomputeProjectProgress(project._id);
@@ -213,10 +213,10 @@ export const PMS_ENTITIES: EntityDef[] = [
         await recordActivity({ actorId: u.id, actorEmail: u.email, action: "update", entity: "task", entityId: id, entityLabel: c.data.title, projectId: before.projectId, summary: diffSummary({ status: before.status, assignee: before.assigneeId, priority: before.priority, due: before.dueDate }, { status: c.data.status, assignee: c.data.assigneeId, priority: c.data.priority, due: c.data.dueDate }, ["status", "assignee", "priority", "due"]) });
         await recomputeProjectProgress(before.projectId);
         if (c.data.assigneeId && c.data.assigneeId !== before.assigneeId) {
-          await notifyEmployees([c.data.assigneeId], (uid) => ({ recipientUserId: uid, type: "task_assigned", title: `You were assigned: ${c.data.title}`, body: `${project?.name ?? ""} · ${before.taskCode}`, link: `/pms/projects/${before.projectId}/tasks/${id}`, projectId: before.projectId }), u.id);
+          await notifyEmployees([c.data.assigneeId], (uid) => ({ recipientUserId: uid, type: "task_assigned", title: `You were assigned: ${c.data.title}`, body: `${project?.name ?? ""} · ${before.taskCode}`, link: `/sprintos/projects/${before.projectId}/tasks/${id}`, projectId: before.projectId }), u.id);
         }
         if (isTaskDone(c.data.status) && !isTaskDone(before.status) && project?.projectManagerId) {
-          await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "task_completed", title: `Task completed: ${c.data.title}`, body: `${project.name} · ${before.taskCode}`, link: `/pms/projects/${before.projectId}/tasks/${id}`, projectId: before.projectId }), u.id);
+          await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "task_completed", title: `Task completed: ${c.data.title}`, body: `${project.name} · ${before.taskCode}`, link: `/sprintos/projects/${before.projectId}/tasks/${id}`, projectId: before.projectId }), u.id);
         }
         return { ok: true, id, record: updated };
       },
@@ -261,7 +261,7 @@ export const PMS_ENTITIES: EntityDef[] = [
         const updated = await updateMilestone(id, c.data, u.id);
         await recordActivity({ actorId: u.id, actorEmail: u.email, action: "update", entity: "milestone", entityId: id, entityLabel: c.data.name, projectId: before.projectId, summary: diffSummary({ name: before.name, status: before.status, due: before.dueDate, links: before.linkedTaskIds.length }, { name: c.data.name, status: c.data.status, due: c.data.dueDate, links: c.data.linkedTaskIds.length }, ["name", "status", "due", "links"]) });
         if (c.data.status === "completed" && before.status !== "completed" && project?.projectManagerId) {
-          await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "milestone_completed", title: `Milestone completed: ${c.data.name}`, body: project.name, link: `/pms/projects/${before.projectId}`, projectId: before.projectId }), u.id);
+          await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "milestone_completed", title: `Milestone completed: ${c.data.name}`, body: project.name, link: `/sprintos/projects/${before.projectId}`, projectId: before.projectId }), u.id);
         }
         return { ok: true, id, record: updated };
       },
@@ -394,7 +394,7 @@ export const PMS_ENTITIES: EntityDef[] = [
         const comment = await addComment({ taskId: task._id, projectId: task.projectId, authorId: u.id, authorEmail: u.email, body: text });
         const project = await getProject(task.projectId);
         const targets = [task.assigneeId, project?.projectManagerId ?? null].filter((x): x is string => Boolean(x));
-        if (targets.length) await notifyEmployees(targets, (uid) => ({ recipientUserId: uid, type: "comment_added", title: `New comment on ${task.taskCode}`, body: `${u.email}: ${text.slice(0, 120)}`, link: `/pms/projects/${task.projectId}/tasks/${task._id}`, projectId: task.projectId }), u.id);
+        if (targets.length) await notifyEmployees(targets, (uid) => ({ recipientUserId: uid, type: "comment_added", title: `New comment on ${task.taskCode}`, body: `${u.email}: ${text.slice(0, 120)}`, link: `/sprintos/projects/${task.projectId}/tasks/${task._id}`, projectId: task.projectId }), u.id);
         await recordActivity({ actorId: u.id, actorEmail: u.email, action: "comment", entity: "task_comment", entityId: task._id, entityLabel: task.title, projectId: task.projectId });
         return { ok: true, id: comment._id, record: comment };
       },
@@ -426,7 +426,7 @@ export const PMS_ACTIONS: ActionDef[] = [
       await recomputeProjectProgress(task.projectId);
       if (isTaskDone(status) && !isTaskDone(task.status)) {
         const project = await getProject(task.projectId);
-        if (project?.projectManagerId) await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "task_completed", title: `Task completed: ${task.title}`, body: `${project.name} · ${task.taskCode}`, link: `/pms/projects/${task.projectId}/tasks/${task._id}`, projectId: task.projectId }), u.id);
+        if (project?.projectManagerId) await notifyEmployees([project.projectManagerId], (uid) => ({ recipientUserId: uid, type: "task_completed", title: `Task completed: ${task.title}`, body: `${project.name} · ${task.taskCode}`, link: `/sprintos/projects/${task.projectId}/tasks/${task._id}`, projectId: task.projectId }), u.id);
       }
       return { ok: true, id: task._id, result: `Task is now ${getTaskStatusMeta(status).label}.` };
     },
@@ -440,10 +440,10 @@ export const PMS_ACTIONS: ActionDef[] = [
       const res = await changeProjectStatus(before._id, v.status as never, u.id);
       if (!res.ok) return fail(res.reason);
       await recordActivity({ actorId: u.id, actorEmail: u.email, action: "status_change", entity: "project", entityId: before._id, entityLabel: res.project.name, projectId: before._id, summary: `status: ${before.status} → ${String(v.status)}` });
-      const { listProjectMembers } = await import("@/lib/pms/project-members");
+      const { listProjectMembers } = await import("@/lib/products/sprintos/project-members");
       const members = await listProjectMembers(before._id);
       const recipients = Array.from(new Set([...members.map((m) => m.employeeId), res.project.projectManagerId].filter((x): x is string => Boolean(x))));
-      if (recipients.length) await notifyEmployees(recipients, (uid) => ({ recipientUserId: uid, type: "project_status_changed", title: `${res.project.name} is now ${getProjectStatusMeta(String(v.status)).label}`, body: `Changed by ${u.email}`, link: `/pms/projects/${before._id}`, projectId: before._id }), u.id);
+      if (recipients.length) await notifyEmployees(recipients, (uid) => ({ recipientUserId: uid, type: "project_status_changed", title: `${res.project.name} is now ${getProjectStatusMeta(String(v.status)).label}`, body: `Changed by ${u.email}`, link: `/sprintos/projects/${before._id}`, projectId: before._id }), u.id);
       await syncMessenger(before._id);
       return { ok: true, id: before._id, result: `Project is now ${getProjectStatusMeta(String(v.status)).label}.` };
     },
@@ -474,7 +474,7 @@ export const PMS_ACTIONS: ActionDef[] = [
         const project = await getProject(pid);
         if (project?.projectManagerId) pmIds.add(project.projectManagerId);
       }
-      if (pmIds.size) await notifyEmployees(Array.from(pmIds), (uid) => ({ recipientUserId: uid, type: "timesheet_submitted", title: `${u.email} submitted ${n} timesheet ${n === 1 ? "entry" : "entries"}`, body: "Awaiting your review", link: "/pms/timesheets" }), u.id);
+      if (pmIds.size) await notifyEmployees(Array.from(pmIds), (uid) => ({ recipientUserId: uid, type: "timesheet_submitted", title: `${u.email} submitted ${n} timesheet ${n === 1 ? "entry" : "entries"}`, body: "Awaiting your review", link: "/sprintos/timesheets" }), u.id);
       return { ok: true, result: `${n} ${n === 1 ? "entry" : "entries"} submitted.` };
     },
   },
@@ -494,7 +494,7 @@ export const PMS_ACTIONS: ActionDef[] = [
         const updated = await reviewEntry(id, v.decision as "approved", str(v.note), u.id);
         if (!updated) { problems.push(`${id}: no longer awaiting review`); continue; }
         done += 1;
-        await notifyEmployees([updated.employeeId], (uid) => ({ recipientUserId: uid, type: "timesheet_reviewed", title: `Timesheet ${String(v.decision)}: ${updated.hours}h on ${updated.date}`, body: str(v.note), link: "/pms/me/timesheet", projectId: updated.projectId }), u.id);
+        await notifyEmployees([updated.employeeId], (uid) => ({ recipientUserId: uid, type: "timesheet_reviewed", title: `Timesheet ${String(v.decision)}: ${updated.hours}h on ${updated.date}`, body: str(v.note), link: "/sprintos/me/timesheet", projectId: updated.projectId }), u.id);
       }
       return done ? { ok: true, result: `${done} entr${done === 1 ? "y" : "ies"} ${String(v.decision)}.`, ...(problems.length ? { skipped: problems } : {}) } : fail("Nothing was reviewed.", { problems });
     },

@@ -7,7 +7,7 @@ import { SEAT_FILTER, countSeatsUsed, storageUsedBytes } from "@/lib/platform/bi
 import { getUsage, USAGE_EVENTS_COLLECTION, usagePeriod } from "@/lib/platform/billing/usage";
 import { AI_USAGE_COLLECTION } from "@/lib/platform/billing/ai-usage-log";
 import { meterLevel } from "@/lib/platform/billing/usage-report";
-import { roleLabelsForRoles } from "@/lib/workspace/role-catalog";
+import { roleLabelsForRoles } from "@/lib/products/commandos/role-catalog";
 import { METRICS, storageSourceLabel, UNATTRIBUTED_KEY, UNATTRIBUTED_LABEL, type ActorShareRow, type DomainRow, type PeopleUsage, type PeopleUsageRow, type PersonDetail, type MetricDetail, type MetricOverview, type ModelRow, type MonthRow, type PersonRow, type SeriesPoint, type SourceRow, type UsageEventRow, type UsageMetricKey, type UsageOverview } from "@/lib/platform/billing/usage-history-shared";
 
 /**

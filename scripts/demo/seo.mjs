@@ -1,6 +1,6 @@
-// SEO panel demo data: SEO-role logins, keyword groups + tracked keywords (with a few manual position readings),
+// SEO product demo data: SEO-role logins, keyword groups + tracked keywords (with a few manual position readings),
 // backlinks (unverified — run "Verify all" to check them for real), one competitor with estimated metrics and
-// positions, and a handful of tasks. Crawl data is NOT seeded: run a website audit from /seo/audit for real results.
+// positions, and a handful of tasks. Crawl data is NOT seeded: run a website audit from /rankmax-ai/audit for real results.
 // Idempotent: everything it creates has a `demo-seo-` id (or the demo email) and is replaced on each run.
 import { ObjectId } from "mongodb";
 import { hashPassword, ago, dayAgo, audit } from "./lib.mjs";

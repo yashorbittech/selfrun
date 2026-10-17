@@ -1,5 +1,5 @@
 /**
- * Browser test for Platform Panel → Domains & SSL, Integrations and Platform
+ * Browser test for Platform Console → Domains & SSL, Integrations and Platform
  * settings, against a RUNNING server (production build recommended) whose
  * database is a throwaway test DB — it saves settings.
  *
@@ -41,16 +41,16 @@ page.on("pageerror", (e) => pageErrors.push(e.message));
 
 try {
   await step("owner signs in", async () => {
-    await page.goto(`${BASE}/platform`);
+    await page.goto(`${BASE}/console`);
     await page.fill('input[name="email"]', EMAIL);
     await page.fill('input[name="password"]', PASSWORD);
     await Promise.all([page.waitForURL((u) => !u.pathname.endsWith("/login"), { timeout: 60_000 }), page.press('input[name="password"]', "Enter")]);
-    await page.goto(`${BASE}/platform`);
+    await page.goto(`${BASE}/console`);
     await page.getByRole("heading", { name: "Dashboard" }).waitFor();
   });
 
   await step("Domains & SSL lists every company's domains", async () => {
-    await page.goto(`${BASE}/platform/domains`);
+    await page.goto(`${BASE}/console/domains`);
     await page.getByRole("heading", { name: "Domains & SSL", level: 1 }).waitFor();
     await page.getByText("Pending verification").first().waitFor();
     await page.locator("#domains-search").waitFor();
@@ -66,7 +66,7 @@ try {
   });
 
   await step("re-check a domain from the row menu", async () => {
-    await page.goto(`${BASE}/platform/domains`);
+    await page.goto(`${BASE}/console/domains`);
     await page.getByRole("button", { name: /^Actions for / }).first().click();
     await page.getByRole("menuitem", { name: "Re-check DNS & SSL" }).click();
     // Either outcome is a toast (verified, or not yet with the reason).
@@ -74,14 +74,14 @@ try {
   });
 
   await step("company page still shows its domains with actions", async () => {
-    await page.goto(`${BASE}/platform/companies`);
-    await page.locator('a[href^="/platform/companies/"]').first().click();
+    await page.goto(`${BASE}/console/companies`);
+    await page.locator('a[href^="/console/companies/"]').first().click();
     await page.getByText("Domains", { exact: true }).waitFor();
     await page.getByRole("link", { name: "All domains" }).waitFor();
   });
 
   await step("integrations page renders effective config", async () => {
-    await page.goto(`${BASE}/platform/integrations`);
+    await page.goto(`${BASE}/console/integrations`);
     await page.getByRole("heading", { name: "Integrations", level: 1 }).waitFor();
     await page.locator("#int-email-provider").waitFor();
     await page.locator("#int-vercel-project").waitFor();
@@ -111,14 +111,14 @@ try {
   });
 
   await step("integrations validation shows field errors", async () => {
-    await page.goto(`${BASE}/platform/integrations`);
+    await page.goto(`${BASE}/console/integrations`);
     await page.locator("#int-root-domain").fill("not a domain");
     await page.locator("#int-save").click();
     await page.getByText("Enter a domain, e.g. example.com.").waitFor({ timeout: 30_000 });
   });
 
   await step("platform settings: sign-up mode lives here and saves", async () => {
-    await page.goto(`${BASE}/platform/settings`);
+    await page.goto(`${BASE}/console/settings`);
     await page.getByRole("heading", { name: "Platform settings", level: 1 }).waitFor();
     const group = page.getByRole("radiogroup", { name: "Sign-up mode" });
     const current = await group.locator("input:checked").inputValue();
@@ -135,13 +135,13 @@ try {
   });
 
   await step("the old sign-ups page points to Platform settings", async () => {
-    await page.goto(`${BASE}/platform/signups`);
+    await page.goto(`${BASE}/console/signups`);
     await page.getByText("Who can create a company", { exact: true }).waitFor();
     await page.getByRole("link", { name: "Platform settings" }).first().waitFor();
   });
 
   await step("platform settings save (identity, defaults, reserved subdomains)", async () => {
-    await page.goto(`${BASE}/platform/settings`);
+    await page.goto(`${BASE}/console/settings`);
     const name = await page.locator("#ps-name").inputValue();
     const reserved = await page.locator("#ps-reserved").inputValue();
     await page.locator("#ps-support-email").fill("support@e2e.test");

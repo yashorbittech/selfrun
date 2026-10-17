@@ -1,7 +1,7 @@
 import { getPwaIdentity } from "@/lib/pwa/identity";
 
 /**
- * The web app manifest of the CURRENT panels host (see `lib/pwa/identity.ts`). Website hosts have none (404): only the app is
+ * The web app manifest of the CURRENT app host (see `lib/pwa/identity.ts`). Website hosts have none (404): only the app is
  * installable. Installable on Android and desktop Chrome/Edge/Brave/Samsung Internet/Opera, iOS and iPadOS Safari
  * ("Add to Home Screen") and macOS Safari ("Add to Dock"); Firefox on Android installs it too.
  */
@@ -13,7 +13,7 @@ export async function GET() {
   const id = await getPwaIdentity();
   if (!id) return new Response("Not found", { status: 404 });
   const manifest = {
-    id: "/workspace",
+    id: "/commandos",
     name: id.name,
     short_name: id.shortName,
     description: id.description,

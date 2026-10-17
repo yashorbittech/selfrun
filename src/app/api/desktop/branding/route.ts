@@ -5,7 +5,7 @@ import { getPwaIdentity } from "@/lib/pwa/identity";
  * Everything the desktop app (Windows, macOS, Linux) needs to look like THIS company's app, read live on every start: name,
  * colours (light and dark), icon, start page and shortcuts. It is the same identity as the mobile app's manifest, so changing
  * Workspace → Settings → Mobile app changes the desktop app too. Public (it holds only what the app's manifest already shows)
- * and only on panels hosts.
+ * and only on app hosts.
  */
 export const dynamic = "force-dynamic";
 

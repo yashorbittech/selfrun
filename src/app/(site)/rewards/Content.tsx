@@ -8,7 +8,7 @@ import type { AudienceGuide, RewardsGuide } from "@/lib/wallet/guide";
 import type { GuideAudience } from "@/lib/wallet/earn-guide";
 
 import { brandify } from "@/lib/brand";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import { BrandName } from "@/components/platform/BrandProvider";
 const fadeIn = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } };
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } };
@@ -71,7 +71,7 @@ export default function RewardsContent({
             <motion.p variants={fadeIn} className="text-xl leading-8 text-muted-foreground">
               {tx("rewards.content.earn-credits-for-signing-up-completing-e")}</motion.p>
             <motion.div variants={fadeIn} className="mt-8 flex flex-wrap gap-3">
-              <Link href={signedIn ? "/portal/wallet" : "/register"} className="group inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90">
+              <Link href={signedIn ? "/clientos/wallet" : "/register"} className="group inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90">
                 {signedIn ? "Open my wallet" : "Create free account"} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Link>
               <Link href="/offers" className="inline-flex items-center gap-2 rounded-xl border border-border px-7 py-3.5 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary">
@@ -336,7 +336,7 @@ export default function RewardsContent({
             <h3 className="text-2xl font-bold text-foreground">{tx("rewards.content.ready-to-start-earning")}</h3>
             <p className="mx-auto mt-2 max-w-xl text-muted-foreground">{tx("rewards.content.create-your-free-account-and-your-welcom")}</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Link href={signedIn ? "/portal/wallet" : "/register"} className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90">
+              <Link href={signedIn ? "/clientos/wallet" : "/register"} className="inline-flex items-center gap-2 rounded-xl bg-primary px-7 py-3.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90">
                 {signedIn ? "Open my wallet" : "Create free account"} <ArrowRight className="h-4 w-4" />
               </Link>
               {!signedIn && <Link href="/login" className="inline-flex items-center rounded-xl border border-border px-7 py-3.5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary">{tx("rewards.content.log-in")}</Link>}

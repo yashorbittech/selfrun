@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { TextProvider } from "@/components/cms/TextContext";
+import { TextProvider } from "@/components/products/sitecraft-ai/TextContext";
 import ProductMockup from "@/components/products/ProductMockup";
-import { productsCollection } from "@/lib/cms/collections/products-def";
+import { productsCollection } from "@/lib/products/sitecraft-ai/collections/products-def";
 import type { StoredProduct } from "@/lib/products/shared";
 
 /**

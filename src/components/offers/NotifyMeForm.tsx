@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useReferralCode } from "@/lib/useReferralCode";
 import type { SubscriptionSource } from "@/lib/offers/subscription-validation";
 import type { Audience } from "@/lib/offers/constants";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const INTERESTS = (tx: (key: string) => string): { value: Audience; label: string }[] => ([
   { value: "CLIENT", label: tx("offers.notifyMeForm.software-ai-projects") },

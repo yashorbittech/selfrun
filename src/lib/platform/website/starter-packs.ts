@@ -93,7 +93,7 @@ export const STARTER_PACKS: StarterPack[] = [
     services: [
       svc("Web Applications", "Fast, secure, built to scale.", "Custom web platforms, portals and dashboards built with modern frameworks.", "Code2", IMG.code, ["Web apps", "Portals", "Dashboards"]),
       svc("Mobile Apps", "iOS, Android and cross-platform.", "Native and cross-platform apps with clean design and reliable releases.", "Smartphone", IMG.mobile, ["iOS", "Android", "Cross-platform"]),
-      svc("SaaS Platforms", "From MVP to multi-tenant.", "Subscription products with billing, roles, analytics and an admin panel built in.", "Layers", IMG.dashboard, ["MVP", "Billing", "Multi-tenant"]),
+      svc("SaaS Platforms", "From MVP to multi-tenant.", "Subscription products with billing, roles, analytics and an admin product built in.", "Layers", IMG.dashboard, ["MVP", "Billing", "Multi-tenant"]),
       svc("UI/UX Design", "Products that feel obvious.", "Research, wireframes, design systems and prototypes you can test before building.", "Palette", IMG.design, ["Research", "Design systems", "Prototypes"]),
       svc("APIs & Integrations", "Connect everything.", "Clean APIs and integrations with the payment, messaging and CRM tools you already use.", "Plug", IMG.chip, ["REST", "Webhooks", "Payments"]),
       svc("Support & Growth", "We stay after launch.", "Monitoring, fixes and an ongoing roadmap so your product keeps improving.", "LifeBuoy", IMG.support, ["Monitoring", "Fixes", "Roadmap"]),

@@ -5,10 +5,10 @@ import { BILLING_SETTINGS_PATH, getBillingNotice, type BillingNoticeInfo } from 
 import { cn } from "@/lib/utils";
 
 /**
- * Compact subscription pill shown at the top of every business panel: trial days
+ * Compact subscription pill shown at the top of every business product: trial days
  * left, payment overdue, grace period, suspended / ended (read-only). Renders
  * nothing for an active subscription or the platform owner, and never breaks
- * the panel — a lookup failure just hides it.
+ * the product — a lookup failure just hides it.
  */
 
 const days = (n: number | null) => (n === null ? "" : n <= 0 ? "ends today" : `${n} day${n === 1 ? "" : "s"} left`);
@@ -49,7 +49,7 @@ export default async function BillingNotice({ className }: { className?: string 
   if (!notice) return null;
   const c = copy(notice);
   const Icon = notice.status === "trialing" ? Timer : notice.status === "suspended" || notice.status === "canceled" || notice.status === "deleting" ? Lock : AlertTriangle;
-  const href = notice.status === "deleting" ? "/workspace/settings/backups" : BILLING_SETTINGS_PATH;
+  const href = notice.status === "deleting" ? "/commandos/settings/backups" : BILLING_SETTINGS_PATH;
 
   return (
     <div id="billing-notice" role="status" data-status={notice.status} title={c.body} className={cn("inline-flex max-w-full shrink-0 items-center gap-2 self-start rounded-full border py-1 pl-3 pr-1 text-xs backdrop-blur-md", TONES[c.tone], className)}>

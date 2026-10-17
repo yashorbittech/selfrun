@@ -1,6 +1,6 @@
 "use client";
 
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 import * as React from "react";
 
 export interface ChatCitation {

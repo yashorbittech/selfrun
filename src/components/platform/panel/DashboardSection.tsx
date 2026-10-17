@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * A titled group on a dashboard (heading + its KPIs / charts). In light mode it sits on a soft gray panel so the
+ * A titled group on a dashboard (heading + its KPIs / charts). In light mode it sits on a soft gray product so the
  * white cards inside stand out; dark mode keeps the plain page surface. The cards, KPI tiles and tables inside are unchanged.
  */
 export default function DashboardSection({ className, children }: { className?: string; children: React.ReactNode }) {

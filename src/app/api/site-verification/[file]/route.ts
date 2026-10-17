@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getTracking, VERIFICATION_FILE_RE } from "@/lib/cms/tracking";
+import { getTracking, VERIFICATION_FILE_RE } from "@/lib/products/sitecraft-ai/tracking";
 
 /**
  * Serves the company's search-engine verification files at its site root

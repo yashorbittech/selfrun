@@ -8,12 +8,12 @@ import { signalUsers } from "@/lib/notify/signals";
 import type { NotifyPanel, NotifyPriority, SignalItem } from "@/lib/notify/panels";
 
 /**
- * The notification system for every panel that has no store of its own (Finance, Leads, Legal, Website, Intelligence, Support,
- * Platform …) and for any new trigger. One row per recipient, each tagged with its panel, so:
- *   - a person only ever gets notifications addressed to them, and only inside the panel the event belongs to;
- *   - panel-wide events go only to people whose role can open that panel (see `audience.ts`);
+ * The notification system for every product that has no store of its own (Finance, Leads, Legal, Website, Intelligence, Support,
+ * Platform …) and for any new trigger. One row per recipient, each tagged with its product, so:
+ *   - a person only ever gets notifications addressed to them, and only inside the product the event belongs to;
+ *   - product-wide events go only to people whose role can open that product (see `audience.ts`);
  *   - each one also raises a realtime signal (the bell and toast update at once) and a Web Push (per the person's own preferences).
- * The panels that already had their own store (HRMS, Projects, Procurement, Training, Team Chat and the chat-store panels, Portal) keep
+ * The products that already had their own store (HRMS, Projects, Procurement, Training, Team Chat and the chat-store products, Portal) keep
  * it; they raise the same realtime signal through `signalUsers`.
  */
 export const PANEL_NOTIFICATIONS = "panel_notifications";
@@ -66,7 +66,7 @@ const safeLink = (l: string | null | undefined) => (l && l.startsWith("/") && !l
 const clip = (s: string | null | undefined, n: number) => (s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
 
 /**
- * Notify specific people (admin_users ids) inside `panel`. People who can no longer open the panel are dropped. Never throws:
+ * Notify specific people (admin_users ids) inside `product`. People who can no longer open the product are dropped. Never throws:
  * a notification must not fail the action that raised it. Returns how many people were notified.
  */
 export async function notifyUsers(panel: NotifyPanel, userIds: string[], n: NotifyInput): Promise<number> {
@@ -101,13 +101,13 @@ export async function notifyUsers(panel: NotifyPanel, userIds: string[], n: Noti
   }
 }
 
-/** Notify everyone whose role opens `panel` at `level` (default: people who run it), except `exceptUserId` (usually the person who did it). */
+/** Notify everyone whose role opens `product` at `level` (default: people who run it), except `exceptUserId` (usually the person who did it). */
 export async function notifyPanel(panel: NotifyPanel, n: NotifyInput, opts: { level?: Audience; extraRoles?: string[]; exceptUserId?: string | null } = {}): Promise<number> {
   try {
     const ids = (await audienceUserIds(panel, opts.level ?? "staff", opts.extraRoles)).filter((i) => i !== opts.exceptUserId);
     return await notifyUsers(panel, ids, n);
   } catch (err) {
-    console.error("[notify] could not notify panel", err instanceof Error ? err.message : err);
+    console.error("[notify] could not notify product", err instanceof Error ? err.message : err);
     return 0;
   }
 }

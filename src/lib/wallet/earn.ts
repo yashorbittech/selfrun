@@ -4,7 +4,7 @@ import { creditWallet } from "@/lib/wallet/wallets";
 import { TRANSACTIONS_COLLECTION, type WalletTransaction } from "@/lib/wallet/transactions";
 import { resolveActiveRewardRule, listRewardRules } from "@/lib/wallet/reward-rules";
 import { externalUsers, type CurrentPortalUser } from "@/lib/portal-auth";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { stageMeta } from "@/lib/lead-management/workflows";
 import {
   REWARD_RULE_TYPE_LABELS,
@@ -60,7 +60,7 @@ export async function awardActivity(input: {
       type: "wallet.credit_earned",
       title: `🪙 +${rule.amount.toLocaleString("en-IN")} credits`,
       body: `${label} — you earned ${formatCredits(rule.amount)}.`,
-      link: "/portal/wallet",
+      link: "/clientos/wallet",
       dedupeKey: `wallet.activity:${input.type}:${input.key}`,
     });
     return true;

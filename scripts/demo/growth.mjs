@@ -329,7 +329,7 @@ export async function seedGrowth(db, tms, pms, people) {
     }
     if (u._fixed || chance(0.06)) addEv(uid, { ts: ago(rint(3, 25)), type: "manual_adjustment", direction: "credit", amount: pick([50, 100]), days: 60, key: `manual_adjustment:${randomUUID()}`, refType: "admin_adjustment", reason: pick(["Goodwill credit for delayed response", "Contest winner reward", "Compensation for scheduling change"]) });
   }
-  for (const pu of planUpdates) addEv(pu.uid, { ts: pu.ts, type: "redemption_confirmed", direction: "debit", amount: pu.amount, key: `panel:training:${pu.planId}:${pu.uid}`, refType: "module_charge", refId: pu.planId, metadata: { module: "training", price: 20000 }, plan: pu });
+  for (const pu of planUpdates) addEv(pu.uid, { ts: pu.ts, type: "redemption_confirmed", direction: "debit", amount: pu.amount, key: `product:training:${pu.planId}:${pu.uid}`, refType: "module_charge", refId: pu.planId, metadata: { module: "training", price: 20000 }, plan: pu });
 
   // client credit redemptions on invoices (spend recorded first so it lands in the ledger)
   const invoiceCredits = [];
@@ -338,7 +338,7 @@ export async function seedGrowth(db, tms, pms, people) {
     if (!inv) continue;
     const amt = pick([200, 300, 500]);
     invoiceCredits.push({ inv, amt, uid: u._id });
-    addEv(u._id, { ts: ago(rint(2, 25)), type: "redemption_confirmed", direction: "debit", amount: amt, key: `panel:projects:${inv._id}:${u._id}`, refType: "module_charge", refId: inv._id, metadata: { module: "projects", price: inv.totalAmount }, invoice: { inv, amt } });
+    addEv(u._id, { ts: ago(rint(2, 25)), type: "redemption_confirmed", direction: "debit", amount: amt, key: `product:projects:${inv._id}:${u._id}`, refType: "module_charge", refId: inv._id, metadata: { module: "projects", price: inv.totalAmount }, invoice: { inv, amt } });
     addEv(u._id, { ts: ago(rint(30, 60)), type: "manual_adjustment", direction: "credit", amount: 600, days: 90, key: `manual_adjustment:${randomUUID()}`, refType: "admin_adjustment", reason: "Loyalty credit" });
   }
 
@@ -396,7 +396,7 @@ export async function seedGrowth(db, tms, pms, people) {
     wallets.push({ _id: u._id, role: u.role, balances: { available: bal, pending: 0, locked: 0, lifetimeEarned: earned, lifetimeRedeemed: redeemed, lifetimeExpired: expired, lifetimeReversed: 0 }, currency: "INR", status: frozen.has(u._id) ? "frozen" : "active", ...audit(u.createdAt) });
 
     for (const t of ledger.filter((x) => x.userId === u._id && x.direction === "credit").slice(-3)) {
-      notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "wallet.credit_earned", title: `🪙 +${t.amount.toLocaleString("en-IN")} credits`, body: `${t.reason ?? "Credits added"} — you earned ${t.amount} YO Credits.`, link: "/portal/wallet", read: chance(0.6), dedupeKey: null, createdAt: t.createdAt });
+      notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "wallet.credit_earned", title: `🪙 +${t.amount.toLocaleString("en-IN")} credits`, body: `${t.reason ?? "Credits added"} — you earned ${t.amount} YO Credits.`, link: "/clientos/wallet", read: chance(0.6), dedupeKey: null, createdAt: t.createdAt });
     }
   }
 

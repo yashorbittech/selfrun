@@ -1,7 +1,7 @@
 import "server-only";
 import { articlesCol, type ArticleDoc } from "@/lib/support/db";
 
-/** Help content: managed by SelfRun AI in the Platform Panel, read by every company. */
+/** Help content: managed by SelfRun AI in the Platform Console, read by every company. */
 
 export type ArticleView = Omit<ArticleDoc, "createdAt" | "updatedAt"> & { createdAt: string; updatedAt: string };
 
@@ -19,7 +19,7 @@ const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const STOP = new Set(["the", "a", "an", "how", "do", "i", "to", "is", "in", "on", "of", "and", "or", "my", "can", "what", "why", "does", "this", "for", "with", "it", "me", "where", "get", "are", "be"]);
 export const tokens = (q: string) => [...new Set(q.toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2 && !STOP.has(w)))].slice(0, 12);
 
-/** Published articles ranked by how well they match `query` (title > tags > summary > body), with a boost for the user's panel. */
+/** Published articles ranked by how well they match `query` (title > tags > summary > body), with a boost for the user's product. */
 export async function searchArticles(query: string, opts: { limit?: number; panel?: string | null } = {}): Promise<ArticleView[]> {
   const words = tokens(query);
   const col = await articlesCol();

@@ -76,7 +76,7 @@ export async function openSubscriptionCheckout(opts: {
       name: opts.name,
       description: opts.description,
       prefill: opts.prefill,
-      // The company's theme colour (the active theme's --primary), so checkout matches the panel.
+      // The company's theme colour (the active theme's --primary), so checkout matches the product.
       theme: { color: getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || undefined },
       handler: (response) => resolve(response),
       modal: { ondismiss: () => resolve(null) },

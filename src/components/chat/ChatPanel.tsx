@@ -4,7 +4,7 @@ import { Bot, Plus, X } from "lucide-react";
 import { useChat } from "@/components/chat/ChatProvider";
 import { ChatConversation } from "@/components/chat/ChatConversation";
 import { ChatDock } from "@/components/chat/ChatDock";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 /** Widget chrome (used by the floating ChatWidget). The full-page /ask
  * experience uses ChatWorkspace instead. */

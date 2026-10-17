@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Globe, LayoutDashboard } from "lucide-react";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
  * One of the company's two addresses, shown large and copyable: the public WEBSITE (what visitors see) or the APP (where the team signs in
- * to the Workspace and every panel).
+ * to the Workspace and every product).
  */
 export default function AddressCard({
   kind,

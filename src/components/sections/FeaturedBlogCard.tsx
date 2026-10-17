@@ -5,8 +5,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Calendar, Clock, Sparkles, CheckCircle2 } from "lucide-react";
 import type { BlogPostMeta } from "@/types/content";
-import DynamicIcon from "@/components/cms/DynamicIcon";
-import { useUiLabels } from "@/components/cms/SiteInfoContext";
+import DynamicIcon from "@/components/products/sitecraft-ai/DynamicIcon";
+import { useUiLabels } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });

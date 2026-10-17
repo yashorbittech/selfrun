@@ -1,11 +1,11 @@
 import { lmsEvents } from "@/lib/notify/triggers/lms";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
-import { newId } from "@/lib/portal/db";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { newId } from "@/lib/products/clientos/db";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { recordLeadEvent } from "@/lib/lead-management/timeline";
 import { getLeadRecord, markLeadPortalReplyReceived, LEAD_RECORDS_COLLECTION } from "@/lib/lead-management/records";
-import { emit } from "@/lib/messenger/events";
+import { emit } from "@/lib/products/huddle-ai/events";
 import type { LeadMessage, LeadMessageAttachment, LeadMessageChannel, SerializedLeadMessage, LeadRecord, LeadType } from "@/lib/lead-management/types";
 import type { CurrentPortalUser } from "@/lib/portal-auth";
 import { getCompanyBrand } from "@/lib/platform/branding";
@@ -91,7 +91,7 @@ export async function postLeadMessage(input: {
         type: channel === "document_request" ? "document_request" : "message",
         title: channel === "document_request" ? "A document was requested" : `New message from ${(await getCompanyBrand()).name}`,
         body: body.length > 160 ? `${body.slice(0, 160)}…` : body,
-        link: "/portal/messages",
+        link: "/clientos/messages",
       });
     }
     if (lead && input.authorType === "portal") {
@@ -161,7 +161,7 @@ export interface LeadConversationSummary {
 
 /**
  * One row per lead with at least one portal-visible message, newest activity
- * first — the LMS-wide inbox at `/lms/messages`. Deliberately scoped to
+ * first — the LMS-wide inbox at `/dealflow-ai/messages`. Deliberately scoped to
  * `visibility: "portal"` only: internal-only notes never start a conversation
  * a portal user can see, so a lead with only internal notes doesn't belong
  * in an inbox of things staff needs to reply to.

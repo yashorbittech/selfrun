@@ -45,7 +45,7 @@ async function allCols(def: EntityDef) {
   return names.map((n) => ({ name: n, c: db.collection<Json>(n) }));
 }
 
-/** Ids are stored as uuid strings or ObjectIds depending on the panel; an entity that doesn't say matches either. */
+/** Ids are stored as uuid strings or ObjectIds depending on the product; an entity that doesn't say matches either. */
 function idValue(def: EntityDef, id: string): unknown {
   if (def.idType === "string") return id;
   if (def.idType === "objectId") return HEX24.test(id) ? new ObjectId(id) : id;
@@ -304,7 +304,7 @@ export async function logAgentAction(user: AgentUser, panel: string, entry: Json
   }
 }
 
-// ── Write dispatch: the panel's own function when it has one ─────────────────────────────────────────────────────────────────────
+// ── Write dispatch: the product's own function when it has one ─────────────────────────────────────────────────────────────────────
 
 export const canCreate = (d: EntityDef) => Boolean(d.fields && d.write && (d.ops?.create || d.rawWrite));
 export const canUpdate = (d: EntityDef) => Boolean(d.fields && d.write && (d.ops?.update || d.rawWrite));

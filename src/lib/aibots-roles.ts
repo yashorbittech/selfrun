@@ -1,15 +1,15 @@
 /**
- * AI Bots (AIBOTS) role + permission model. Like every other panel, access is
+ * AI Bots (AIBOTS) role + permission model. Like every other product, access is
  * gated on the shared `admin_users.roles` array — there is no separate user
  * store. AIBOTS access needs an explicit `aibots_*` role (or super_admin).
  *
  * Two independent gates decide what a person can do with a bot:
  *   1. the PERMISSION (what kind of action — use / edit / manage files …), and
  *   2. the BOT'S OWN ACCESS LIST (which bots) — see `canUseBot` in
- *      `lib/aibots/bots.ts`. Anyone who can edit bots can use every bot.
+ *      `lib/agentos/bots.ts`. Anyone who can edit bots can use every bot.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -105,7 +105,7 @@ export function normalizeAibotsRoles(value: unknown): AibotsRole[] {
   return Array.from(new Set(value.filter(isAibotsRole)));
 }
 
-/** Can open the AI Bots panel at `/aibots/*`. */
+/** Can open the AI Bots product at `/agentos/*`. */
 export function hasAibotsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeAibotsRoles(roles).length > 0;
 }

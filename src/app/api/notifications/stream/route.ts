@@ -16,7 +16,7 @@ const OVERLAP_MS = 4000;
 
 /**
  * Realtime notifications: Server-Sent Events carrying "a notification arrived" / "recount" signals for the signed-in person only.
- * The signed-in account is re-read from its own cookie, never from the URL, and a signal for a panel the person's roles no longer
+ * The signed-in account is re-read from its own cookie, never from the URL, and a signal for a product the person's roles no longer
  * open is dropped. Signals carry just enough to show a toast; the bell recounts from `/api/notifications/summary`.
  */
 export async function GET(req: NextRequest) {

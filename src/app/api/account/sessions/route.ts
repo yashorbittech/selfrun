@@ -5,7 +5,7 @@ import { listActiveSessions, listLoginHistory } from "@/lib/security/sessions";
 
 export const dynamic = "force-dynamic";
 
-/** The signed-in person's own devices and sign-in history, for the account drawer in every panel's sidebar. */
+/** The signed-in person's own devices and sign-in history, for the account drawer in every product's sidebar. */
 export async function GET() {
   const user = await getCurrentHubUser();
   if (!user || !ObjectId.isValid(user.id)) return NextResponse.json({ error: "Sign in to see your sessions." }, { status: 401 });

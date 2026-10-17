@@ -10,8 +10,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { FMS_ROLES, normalizeFmsRoles, type FmsRole } from "@/lib/fms-roles";
 
 /**
- * FMS panel authentication. A separate cookie / session store from the LMS,
- * HRMS, PMS, TMS and PRMS panels so sign-in state is independent, but the
+ * FMS product authentication. A separate cookie / session store from the LMS,
+ * HRMS, PMS, TMS and PRMS products so sign-in state is independent, but the
  * *identity* store is shared: users live in `admin_users`, and FMS access is
  * gated on the `roles` array there. Mirrors `src/lib/prms-auth.ts`.
  */
@@ -48,7 +48,7 @@ export interface CurrentFmsUser {
   email: string;
   roles: FmsRole[];
   /** Raw, unfiltered `admin_users.roles` — used only to decide whether this
-   * account also has access to OTHER panels (cross-panel nav links), never
+   * account also has access to OTHER products (cross-product nav links), never
    * as FMS's own gate (use `roles` above for that). */
   allRoles: string[];
   /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
@@ -152,8 +152,8 @@ export async function getSessionFmsUser(token: string | undefined | null): Promi
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getFmsUserForAccount(adminId: ObjectId): Promise<CurrentFmsUser | null> {
   const users = await getAdminUsersCollection();
@@ -197,7 +197,7 @@ export async function getCurrentFmsUser(): Promise<CurrentFmsUser | null> {
   const store = await cookies();
   const own = await getSessionFmsUser(store.get(FMS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getFmsUserForAccount(accountId) : null;
 }
@@ -246,7 +246,7 @@ export { FMS_ROLES };
 /** Page guard for a section of FMS: the signed-in user when `allowed(user)`, else back to the FMS home (or sign-in). */
 export async function requireFmsPage(allowed: (user: { roles: readonly string[]; permissionOverrides?: Record<string, boolean> | null }) => boolean): Promise<CurrentFmsUser> {
   const user = await getCurrentFmsUser();
-  if (!user) redirect("/fms/login");
-  if (!allowed(user)) redirect("/fms");
+  if (!user) redirect("/cashflow-ai/login");
+  if (!allowed(user)) redirect("/cashflow-ai");
   return user;
 }

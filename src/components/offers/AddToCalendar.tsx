@@ -1,8 +1,8 @@
 "use client";
 
 import { CalendarPlus } from "lucide-react";
-import { useText } from "@/components/cms/TextContext";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 function stamp(d: Date): string {
   return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");

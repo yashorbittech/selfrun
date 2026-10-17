@@ -1,4 +1,4 @@
-import type { PageSection } from "@/lib/cms/section-registry";
+import type { PageSection } from "@/lib/products/sitecraft-ai/section-registry";
 import { fillName, type StarterBlock, type StarterPack } from "@/lib/platform/website/starter-packs";
 
 /**

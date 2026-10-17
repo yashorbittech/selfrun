@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CornerDownLeft, Database, LayoutGrid, Loader2, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { usePanelMeta } from "@/components/platform/PanelsProvider";
-import { hubSearchAction } from "@/app/workspace/hub-actions";
+import { hubSearchAction } from "@/app/(products)/commandos/hub-actions";
 import { cn } from "@/lib/utils";
 
 interface Entry {
@@ -16,14 +16,14 @@ interface Entry {
 }
 
 /**
- * ⌘K / Ctrl+K search for the panel you are in: every page in its sidebar (so exactly what this person may open) plus
- * the records that live in this panel (leads, clients, projects, tasks, people, invoices) when the Workspace can find them.
+ * ⌘K / Ctrl+K search for the product you are in: every page in its sidebar (so exactly what this person may open) plus
+ * the records that live in this product (leads, clients, projects, tasks, people, invoices) when the Workspace can find them.
  */
 export default function PanelSearch({ variant = "pill" }: { variant?: "pill" | "field" }) {
   const router = useRouter();
   const pathname = usePathname();
   const panel = pathname.split("/")[1] ?? "";
-  const name = usePanelMeta(panel)?.name ?? "this panel";
+  const name = usePanelMeta(panel)?.name ?? "this product";
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [screens, setScreens] = useState<Entry[]>([]);
@@ -48,7 +48,7 @@ export default function PanelSearch({ variant = "pill" }: { variant?: "pill" | "
     };
   }, []);
 
-  // The panel's own sidebar is the list of screens this person can open.
+  // The product's own sidebar is the list of screens this person can open.
   useEffect(() => {
     if (!open) return;
     const seen = new Set<string>();

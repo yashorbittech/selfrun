@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { SerializedPaymentLink } from "@/lib/fms/payments/links";
+import { SerializedPaymentLink } from "@/lib/products/cashflow-ai/payments/links";
 import { ShieldCheck, CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import BrandMark from "@/components/BrandMark";
-import { formatMoney } from "@/lib/fms/constants";
+import { formatMoney } from "@/lib/products/cashflow-ai/constants";
 import { BrandName } from "@/components/platform/BrandProvider";
 import { useBrand } from "@/components/platform/BrandProvider";
 
@@ -27,7 +27,7 @@ export default function PublicCheckoutClient({ link }: { link: SerializedPayment
     setErrorMsg("");
 
     try {
-      const intentRes = await fetch("/api/fms/payments/create-intent", {
+      const intentRes = await fetch("/api/cashflow-ai/payments/create-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -54,7 +54,7 @@ export default function PublicCheckoutClient({ link }: { link: SerializedPayment
       const intentId = intentData.paymentIntent._id;
 
       // Verify payment
-      const verifyRes = await fetch("/api/fms/payments/verify", {
+      const verifyRes = await fetch("/api/cashflow-ai/payments/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ intentId }),

@@ -1,19 +1,19 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { getCompanyBrand } from "@/lib/platform/branding";
-import { getActiveThemeState } from "@/lib/cms/theme";
-import { FALLBACK_THEME } from "@/lib/cms/theme-shared";
-import { SAAS_BRAND } from "@/lib/saas/brand";
-import { SAAS_THEME } from "@/lib/saas/theme";
-import { onAppSurface, onSaasHost } from "@/lib/saas/request";
+import { getActiveThemeState } from "@/lib/products/sitecraft-ai/theme";
+import { FALLBACK_THEME } from "@/lib/products/sitecraft-ai/theme-shared";
+import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { SAAS_THEME } from "@/lib/platform/saas/theme";
+import { onAppSurface, onSaasHost } from "@/lib/platform/saas/request";
 import { getAppSettings } from "@/lib/pwa/store";
 import { availableAppPanels } from "@/lib/pwa/panels";
 import type { AppSettings } from "@/lib/pwa/settings";
 
 /**
- * What the installed APP is called and looks like on THIS host. Only panels hosts are installable: the website (the
+ * What the installed APP is called and looks like on THIS host. Only app hosts are installable: the website (the
  * product's or a company's) is never an app and has no manifest, service worker or install prompt.
- *  - `app.selfrunbusiness.com`: the product's own panels (fixed identity);
+ *  - `app.selfrunbusiness.com`: the product's own products (fixed identity);
  *  - `<slug>-app.…` / `app.<custom domain>`: that company's app. Everything is dynamic: its name, logo, colours (from its
  *    theme, light and dark), start page and shortcuts, each overridable in Workspace → Settings → Mobile app.
  */
@@ -56,11 +56,11 @@ export async function getPwaIdentity(): Promise<PwaIdentity | null> {
       themeColor: SAAS_THEME.colors.primary,
       themeColorDark: SAAS_THEME.colorsDark.background,
       backgroundColor: SAAS_THEME.colors.background,
-      startUrl: "/workspace",
+      startUrl: "/commandos",
       shortcuts: [
-        { name: "Workspace", url: "/workspace" },
-        { name: "Platform Panel", url: "/platform" },
-        { name: "Notifications", url: "/workspace/notifications" },
+        { name: "Workspace", url: "/commandos" },
+        { name: "Platform Console", url: "/console" },
+        { name: "Notifications", url: "/commandos/notifications" },
       ],
       display: "standalone",
       orientation: "any",
@@ -95,7 +95,7 @@ export async function buildCompanyIdentity(): Promise<PwaIdentity> {
   const backgroundColor = settings.backgroundColor.mode === "custom" ? settings.backgroundColor.value : tokens.colors.background;
 
   const shortcuts = settings.shortcuts
-    .map((key) => (key === "notifications" ? { name: "Notifications", url: "/workspace/notifications" } : byKey.has(key) ? { name: clip(byKey.get(key)!.shortName, 24), url: byKey.get(key)!.route } : null))
+    .map((key) => (key === "notifications" ? { name: "Notifications", url: "/commandos/notifications" } : byKey.has(key) ? { name: clip(byKey.get(key)!.shortName, 24), url: byKey.get(key)!.route } : null))
     .filter((x): x is { name: string; url: string } => x !== null);
   const start = byKey.get(settings.startPage);
 
@@ -108,11 +108,11 @@ export async function buildCompanyIdentity(): Promise<PwaIdentity> {
     scope: "company-app",
     name: settings.name || clip(company, 45),
     shortName: settings.shortName || clip(company, 12),
-    description: settings.description || `${company}: your team's workspace and panels.`,
+    description: settings.description || `${company}: your team's workspace and products.`,
     themeColor,
     themeColorDark,
     backgroundColor,
-    startUrl: start?.route ?? "/workspace",
+    startUrl: start?.route ?? "/commandos",
     shortcuts,
     display: settings.display,
     orientation: settings.orientation,

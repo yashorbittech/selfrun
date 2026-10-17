@@ -7,7 +7,7 @@ import { decideProposal, runAgent } from "@/lib/ai/agent/engine";
 import { MAX_ATTACHMENTS } from "@/lib/ai/agent/attachments";
 import type { AgentUser, Attachment, ClientMessage } from "@/lib/ai/agent/types";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
-import { getViewer } from "@/lib/cms/viewer";
+import { getViewer } from "@/lib/products/sitecraft-ai/viewer";
 import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 
@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
 
   const lang = detectLanguage(cleanMessages(body.messages).filter((m) => m.role === "user").map((m) => m.content));
   const panel = typeof body.panel === "string" ? body.panel : "";
-  if (!panel || (!OPEN_PANELS.has(panel) && !PANEL_ROLES[panel])) return NextResponse.json({ error: "Unknown panel." }, { status: 400 });
+  if (!panel || (!OPEN_PANELS.has(panel) && !PANEL_ROLES[panel])) return NextResponse.json({ error: "Unknown product." }, { status: 400 });
 
-  // The portal is for external people with their own sign-in (never a workspace account); every other panel needs a workspace sign-in.
+  // The portal is for external people with their own sign-in (never a workspace account); every other product needs a workspace sign-in.
   let user: AgentUser | null;
   if (panel === "portal") {
     const p = await getCurrentPortalUser();
@@ -61,13 +61,13 @@ export async function POST(req: NextRequest) {
     const plan = await agentPlanState();
     user.blockedPanels = plan.blockedPanels;
     user.readOnly = plan.readOnly;
-    if (plan.blockedPanels.includes(panel)) return NextResponse.json({ error: "This panel isn't included in your plan. Upgrade in Settings → Billing to use it." }, { status: 403 });
+    if (plan.blockedPanels.includes(panel)) return NextResponse.json({ error: "This product isn't included in your plan. Upgrade in Settings → Billing to use it." }, { status: 403 });
   }
 
   if (panel === "platform") {
     if (!(await isPlatformOwnerContext())) return NextResponse.json({ error: "This assistant is for the platform team." }, { status: 403 });
     const access = await getPlatformAccessForUser(user.id);
-    if (!access) return NextResponse.json({ error: "Platform Panel access required." }, { status: 403 });
+    if (!access) return NextResponse.json({ error: "Platform Console access required." }, { status: 403 });
     user.platformPermissions = access.permissions;
   } else if (panel === "cms") {
     const viewer = await getViewer();

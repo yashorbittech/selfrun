@@ -6,7 +6,7 @@ import { INCIDENT_COMPONENTS, INCIDENT_IMPACTS, INCIDENT_STATUSES, type Incident
 
 /**
  * The incident record behind the public status page: what went wrong, when, how it was handled and when it ended. Written by platform staff
- * in the Platform Panel (Administration → Incidents) and shown on /status; platform-wide, never per company.
+ * in the Platform Console (Administration → Incidents) and shown on /status; platform-wide, never per company.
  */
 export const INCIDENTS_COLLECTION = "status_incidents";
 

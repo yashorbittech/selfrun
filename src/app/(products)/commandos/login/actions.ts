@@ -1,0 +1,48 @@
+"use server";
+
+import { redirect } from "next/navigation";
+import {
+  verifyHubCredentials,
+  createHubSession,
+  setHubSessionCookie,
+  getSessionHubUser,
+} from "@/lib/hub-auth";
+import { safeNextPath } from "@/lib/workspace-session";
+import { provisionAccessibleSessions } from "@/lib/cross-module-sso";
+import { startLoginSession } from "@/lib/security/sessions";
+import { loginLanding } from "@/lib/platform/onboarding/state";
+
+export interface HubLoginState {
+  error?: string;
+  /** The password was right and the account has two-step sign-in: the form now asks for the code. */
+  needsCode?: boolean;
+}
+
+export async function hubLoginAction(_prevState: HubLoginState, formData: FormData): Promise<HubLoginState> {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+
+  if (!email || !password) {
+    return { error: "Enter your email and password." };
+  }
+
+  const result = await verifyHubCredentials(email, password, String(formData.get("code") ?? ""));
+  if (!result.ok) {
+    return { error: result.error, needsCode: result.needsCode };
+  }
+
+  const startedAt = new Date();
+  const token = await createHubSession(result.adminId);
+  await setHubSessionCookie(token);
+
+  // Mint a real session in every other product this account's roles actually
+  // grant access to, so no separate login is needed to open them.
+  await provisionAccessibleSessions(result.adminId, "hub");
+  await startLoginSession(result.adminId, { startedAt, email, via: "password" });
+
+  const user = await getSessionHubUser(token);
+  if (user?.mustChangePassword) redirect("/commandos/change-password");
+  // Back to the product the person came from — validated again here, the form field is user input.
+  // An explicit, validated `next` wins; otherwise an owner with open setup lands on the onboarding wizard.
+  redirect(await loginLanding(user?.roles ?? [], safeNextPath(formData.get("next")), user?.id));
+}

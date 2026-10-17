@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Clock } from "lucide-react";
 import { nowMs, getUrgency, splitDuration, pad2, URGENCY_STYLES } from "@/lib/offers/live";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 /**
  * Remaining time to `endDate`, ticking exactly on the second boundary and

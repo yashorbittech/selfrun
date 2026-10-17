@@ -2,10 +2,10 @@ import { getCurrentPortalUser } from "@/lib/portal-auth";
 import { jsonForScript } from "@/lib/security/json-script";
 import { getRewardsGuide } from "@/lib/wallet/guide";
 import { GUIDE_FAQS } from "@/lib/wallet/earn-guide";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
 import RewardsContent from "./Content";
 
-/** SEO + structured data: the CMS page "/rewards". The guide itself comes from the Wallet panel's reward rules. */
+/** SEO + structured data: the CMS page "/rewards". The guide itself comes from the Wallet product's reward rules. */
 export const generateMetadata = () => cmsPageMetadata("/rewards");
 
 // Amounts come from the live reward rules, so this page is rendered per request.

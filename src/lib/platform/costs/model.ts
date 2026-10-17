@@ -2,7 +2,7 @@ import { RAZORPAY } from "@/lib/platform/costs/catalog";
 import { APP_BUILD, ELEVENLABS, FILE_SEARCH_TOKENS_PER_CALL, GITHUB_ACTIONS, IMAGE_PRICES, MONGODB, OPENAI_FILE_SEARCH, OPENAI_MODELS, RESEND, STORES, VERCEL, VERCEL_REGIONS } from "@/lib/platform/costs/catalog";
 
 /**
- * The cost model behind the Platform Panel's Costs & pricing calculator. Pure functions (no database), so the page recomputes
+ * The cost model behind the Platform Console's Costs & pricing calculator. Pure functions (no database), so the page recomputes
  * instantly as the operator changes an assumption. Money is in rupees here; a plan's stored price is in paise.
  *
  * What the platform really pays, per company per month:

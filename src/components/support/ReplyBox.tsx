@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { replyRequestAction } from "@/app/support/actions";
+import { replyRequestAction } from "@/app/(products)/resolveiq/actions";
 import { AttachmentPicker, useAttachments } from "@/components/support/attachments";
 
 export default function ReplyBox({ requestId, closed, resolved }: { requestId: string; closed: boolean; resolved: boolean }) {

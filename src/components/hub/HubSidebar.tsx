@@ -43,7 +43,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import type { NavIcon, NavSection } from "@/lib/workspace/nav";
+import type { NavIcon, NavSection } from "@/lib/products/commandos/nav";
 
 const ICONS: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   help: LifeBuoy,
@@ -152,7 +152,7 @@ function isActive(pathname: string | null, href: string): boolean {
 /**
  * The Workspace sidebar. It renders exactly the sections and items the server
  * resolved for this user (`resolveWorkspaceNav`) — no access rule lives here.
- * Sections marked `sidebar: false` (the panels: they are opened from the
+ * Sections marked `sidebar: false` (the products: they are opened from the
  * Staff Hub tiles) are left out of the desktop, collapsed and mobile sidebars.
  */
 export default function HubSidebar({
@@ -190,7 +190,7 @@ export default function HubSidebar({
                   href={item.href}
                   label={item.label}
                   icon={ICONS[item.icon]}
-                  exact={item.href === "/workspace" || item.href === "/workspace/settings/billing"}
+                  exact={item.href === "/commandos" || item.href === "/commandos/settings/billing"}
                   external={item.external}
                   collapsed={collapsed}
                   onNavigate={onNavigate}

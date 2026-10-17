@@ -4,7 +4,7 @@ import BrandMark from "@/components/BrandMark";
 import { BrandName, useBrand } from "@/components/platform/BrandProvider";
 
 /**
- * The brand at the top of a panel sidebar. On the SelfRun product host it is the full SelfRun Business logo (the same one as the website
+ * The brand at the top of a product sidebar. On the SelfRun product host it is the full SelfRun Business logo (the same one as the website
  * header, light or dark to suit the theme); for every company it is that company's own mark and name, unchanged.
  */
 export default function SidebarBrand({ collapsed = false }: { collapsed?: boolean }) {

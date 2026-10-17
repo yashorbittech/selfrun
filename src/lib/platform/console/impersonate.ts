@@ -9,8 +9,8 @@ import { recordPlatformAudit } from "@/lib/platform/audit";
 export type LoginAsCompanyResult = { ok: true; url: string } | { ok: false; error: string };
 
 /**
- * "Login as company": gives a Platform Panel user a one-time link that signs them in to a company's panels as that company's Super
- * Admin — every panel, no further permission. The link works once, for two minutes, only on that company's own host. Every use is audited
+ * "Login as company": gives a Platform Console user a one-time link that signs them in to a company's products as that company's Super
+ * Admin — every product, no further permission. The link works once, for two minutes, only on that company's own host. Every use is audited
  * with the platform user's id (the company's own audit trail shows its Super Admin, as the session is theirs).
  */
 export async function loginAsCompany(companyId: string, actorId: string, hostHint: string | null): Promise<LoginAsCompanyResult> {

@@ -16,7 +16,7 @@ export interface ActivityChatPayload {
 
 /**
  * Automatically formats and posts a structured Chat Message into the user's
- * Communication Center thread (/portal/messages and LMS lead chat) whenever
+ * Communication Center thread (/clientos/messages and LMS lead chat) whenever
  * there is any activity, status change, or progress update in the portal.
  */
 export async function sendActivityChatMessage(payload: ActivityChatPayload): Promise<void> {

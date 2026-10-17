@@ -106,7 +106,7 @@ export async function seedDlms(db) {
     cred("client", id, `${short} — CMS admin`, "admin", "admin", `https://${short.toLowerCase()}.example.com/wp-admin`, `Demo-${short}-Cms#${i}`, null);
     if (i === 1) cred("client", id, `${short} — old FTP (retired)`, "database", "ftp-user", null, `Demo-${short}-Ftp$${i}`, dayAgo(30), "Retired — delete after handover.");
     link("client", id, `${short} — production site`, "website", c.website || `https://${short.toLowerCase()}.example.com`, null, null, null);
-    link("client", id, `${short} — hosting panel`, "hosting", "https://hosting.example.com", `${short}-acct`, host, i === 0 ? dayAhead(14) : null);
+    link("client", id, `${short} — hosting product`, "hosting", "https://hosting.example.com", `${short}-acct`, host, i === 0 ? dayAhead(14) : null);
     note("client", id, `${short} — deployment notes`, "deployment", `Deploys go out on Tuesdays after client sign-off.\nStaging: staging.${short.toLowerCase()}.example.com`);
     doc("client", id, `${short} — master services agreement`, "agreements", "Signed MSA", i === 0 ? dayAhead(25) : dayAhead(300));
     if (i === 0) doc("client", id, `${short} — KYC pack`, "kyc", "Company KYC documents", null);

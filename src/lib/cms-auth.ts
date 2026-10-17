@@ -9,8 +9,8 @@ import { verifyPassword, hashPassword } from "@/lib/lms-auth";
 import { normalizeCmsRoles, hasCmsAccess } from "@/lib/cms-roles";
 
 /**
- * CMS panel authentication. A separate cookie / session store from every
- * other panel, but the *identity* store is shared: users live in
+ * CMS product authentication. A separate cookie / session store from every
+ * other product, but the *identity* store is shared: users live in
  * `admin_users`, and CMS access is gated on the `roles` array there: any
  * account whose roles carry an explicit `cms_*` role (or `super_admin`).
  * Mirrors `src/lib/seo-auth.ts` field-for-field.
@@ -153,8 +153,8 @@ export async function getSessionCmsUser(token: string | undefined | null): Promi
 }
 
 /**
- * This panel's user for an `admin_users` account, under the panel's own role
- * rule — shared by the panel's session and the Workspace session.
+ * This product's user for an `admin_users` account, under the product's own role
+ * rule — shared by the product's session and the Workspace session.
  */
 export async function getCmsUserForAccount(adminId: ObjectId): Promise<CurrentCmsUser | null> {
   const users = await getAdminUsersCollection();
@@ -202,7 +202,7 @@ export async function getCurrentCmsUser(): Promise<CurrentCmsUser | null> {
   const store = await cookies();
   const own = await getSessionCmsUser(store.get(CMS_SESSION_COOKIE)?.value);
   if (own) return own;
-  // One company sign-in: the Workspace session of the same account opens this panel too (same role rule).
+  // One company sign-in: the Workspace session of the same account opens this product too (same role rule).
   const accountId = await workspaceSessionAccountId(store.get(WORKSPACE_SESSION_COOKIE)?.value);
   return accountId ? getCmsUserForAccount(accountId) : null;
 }

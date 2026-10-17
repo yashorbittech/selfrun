@@ -22,7 +22,7 @@ import {
 } from "@/lib/platform/integrations/resolve";
 
 /**
- * Platform Panel → Integrations: the email and domain providers, stored in
+ * Platform Console → Integrations: the email and domain providers, stored in
  * `platform_settings` (`_id: "integrations"`). Secrets are encrypted with
  * `encryptPlatformSecret` and only their last four characters ever leave
  * the server. What's effective is resolved per field, DB → env → default
@@ -35,7 +35,7 @@ export type { ConfigSource } from "@/lib/platform/integrations/resolve";
 // ── View (client-safe: no secrets, no ciphertext) ────────────────────────────
 
 export interface SecretView {
-  /** A value is stored in the Platform Panel. */
+  /** A value is stored in the Platform Console. */
   saved: boolean;
   /** Where the effective value comes from; null = none anywhere. */
   source: ConfigSource | null;
@@ -45,7 +45,7 @@ export interface SecretView {
 }
 
 export interface FieldView {
-  /** What's stored in the Platform Panel ("" = nothing; env/default applies). */
+  /** What's stored in the Platform Console ("" = nothing; env/default applies). */
   saved: string;
   effective: string;
   source: ConfigSource;
@@ -228,7 +228,7 @@ export async function sendIntegrationsTestEmail(to: string, actorId: string): Pr
   const { html, text } = renderEmail({
     brand: platform.name,
     heading: "Test email",
-    paragraphs: ["This is a test from Platform Panel → Integrations. If you can read it, outgoing email works."],
+    paragraphs: ["This is a test from Platform Console → Integrations. If you can read it, outgoing email works."],
     footnote: `Sent ${new Date().toUTCString()}.`,
   });
   const res = await sendEmail({ to, subject: `${platform.name}: test email`, html, text });

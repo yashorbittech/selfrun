@@ -7,7 +7,7 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 
 /**
  * Append-only history of every AI call (one row per call) with the company it ran for. Lives in the platform
- * database so the Platform Panel can list usage company by company. Rows are never updated or deleted.
+ * database so the Platform Console can list usage company by company. Rows are never updated or deleted.
  */
 export const AI_USAGE_COLLECTION = "ai_usage_events";
 

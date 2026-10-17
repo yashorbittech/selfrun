@@ -9,7 +9,7 @@ import SnapshotShell from "@/components/ui/SnapshotShell";
 const PAGE_STEPS = ["Fetching your data", "Putting the page together", "Polishing the details", "Nearly there"];
 
 /**
- * Shown the instant a panel page is requested, inside the panel's shell (sidebar and top bar stay, so a click answers immediately): a
+ * Shown the instant a product page is requested, inside the product's shell (sidebar and top bar stay, so a click answers immediately): a
  * compact version of the opening screen — the company's mark, the cartoon runner and a moving status line — centred in the content
  * area. Theme tokens and the company's own brand only. Server component, no data access.
  */
@@ -26,7 +26,7 @@ export function PageLoading() {
 }
 
 /**
- * Shown before a panel's shell exists (first load, the installed app opening): the company's own brand on a moving stage. Its logo (or
+ * Shown before a product's shell exists (first load, the installed app opening): the company's own brand on a moving stage. Its logo (or
  * monogram) on a tilt-able glass tile with a ring and orbiting lights, its name, a cartoon runner hopping a crate, and a status line
  * that moves on. Everything — logo, name, colours — comes from the company of the host (the theme and `BrandProvider`); on a host with
  * no company it is neutral. Respects reduced motion. Server component, no data access.
@@ -49,9 +49,9 @@ function AppSplash() {
 }
 
 /**
- * What a panel shows while it opens AFTER the app has already been on screen (workspace to another panel and back): the panel's frame —
+ * What a product shows while it opens AFTER the app has already been on screen (workspace to another product and back): the product's frame —
  * the company's own sidebar (logo, name, menu rows) and header — stays, and only the content area shows the loader. The frame is drawn with
- * the same surfaces and spacing as the real panels, so when the real page arrives it simply fills in. Company brand and theme only.
+ * the same surfaces and spacing as the real products, so when the real page arrives it simply fills in. Company brand and theme only.
  */
 function ShellLoading() {
   return (
@@ -91,7 +91,7 @@ function ShellLoading() {
 }
 
 /**
- * The panel-opening loader (every panel's top-level `loading.tsx`): the full splash the first time, the panel's frame (sidebar and header)
+ * The product-opening loader (every product's top-level `loading.tsx`): the full splash the first time, the product's frame (sidebar and header)
  * afterwards. Both are in the markup and plain CSS shows one of them, by the `data-app-shell-seen` attribute that `NavigationProgress` puts on
  * <html> once the app has been on screen in this tab (it is gone again on a full reload). No script decides during render, so the server's
  * HTML and the client always agree.

@@ -1,7 +1,7 @@
 /**
  * Generates the hero artwork of every page of the product website: public/selfrun/hero/<id>.webp.
  * Each image is composed from the product's real screenshots (public/selfrun/screens, public/selfrun/guide) on laptop and
- * browser frames, with floating chips that state what the panel really does (taken from src/lib/saas/content.ts).
+ * browser frames, with floating chips that state what the product really does (taken from src/lib/saas/content.ts).
  *
  *   node scripts/hero-art.mjs [id ...]      (needs Google Chrome and Python with Pillow)
  *
@@ -27,10 +27,10 @@ const W = 1400, H = 980, DPR = 1.6;
 
 const NAMES = { workspace: "Workspace", hrms: "HR & Payroll", lms: "CRM & Sales", fms: "Finance", pms: "Projects", prms: "Procurement & Assets", tms: "Training", messenger: "Team Chat", sop: "SOPs & Policies", lpms: "Legal & Documents", dlms: "Digi Locker", ots: "Online Tests", aibots: "AI Assistants", intelligence: "AI Intelligence", smms: "Social Media", seo: "SEO", cms: "Website", website: "Public Website", portal: "Client & Student Portal", support: "Help & Support" };
 const PANEL_ICON = { workspace: "Zap", hrms: "Users", lms: "Target", fms: "Wallet", pms: "Layers", prms: "ShoppingCart", tms: "GraduationCap", messenger: "MessageSquare", sop: "BookOpen", lpms: "FileText", dlms: "Lock", ots: "Check", aibots: "Bot", intelligence: "Brain", smms: "Megaphone", seo: "Search", cms: "Globe", website: "Globe", portal: "Building2", support: "MessageSquare" };
-/** Second and third screens shown beside the main one, per panel. */
+/** Second and third screens shown beside the main one, per product. */
 const EXTRA = { lms: ["lms-leads"], hrms: ["hrms-employees", "hrms-payroll"], fms: ["fms-invoices", "fms-profit-and-loss"], pms: ["pms-projects"], prms: ["prms-purchase-orders"], tms: ["tms-students"], sop: ["sop-library"], seo: ["seo-keywords"], smms: ["smms-posts"], cms: ["cms-pages", "cms-theme"], website: ["cms-pages", "domains"], messenger: ["messenger-channels"], dlms: ["dlms-credentials"], ots: ["ots-tests"], aibots: ["aibots-bots", "chatbot"], lpms: ["lpms-documents"], workspace: ["workspace-users", "workspace-audit"], intelligence: ["automations"], portal: ["workspace"], support: ["workspace"] };
 
-// the product's own copy: automations per panel, read from content.ts
+// the product's own copy: automations per product, read from content.ts
 const copy = fs.readFileSync(path.join(ROOT, "src/lib/saas/content.ts"), "utf8");
 function automationsOf(key) {
   const m = copy.match(new RegExp(`\\n  ${key}: \\{[\\s\\S]*?automations: \\[([^\\]]*)\\]`));
@@ -91,7 +91,7 @@ const page = (inner) => `<!doctype html><meta charset="utf-8"><style>${css}</sty
 
 /* ───────── compositions ───────── */
 const SPECS = {};
-/** a panel: laptop with its screen, two more screens beside it, what it does as chips */
+/** a product: laptop with its screen, two more screens beside it, what it does as chips */
 function panelArt(key, v = 0) {
   const ex = EXTRA[key] ?? [];
   const autos = automationsOf(key);
@@ -105,7 +105,7 @@ function panelArt(key, v = 0) {
     ${autos[0] ? chip(v ? 40 : 800, v ? 80 : 760, "Zap", "Runs on its own", autos[0], v ? -3 : 3) : ""}
     ${autos[1] ? chip(v ? 760 : 60, v ? 800 : 70, "Check", "Handled for you", autos[1], v ? 2 : -2) : ""}`);
 }
-for (const k of Object.keys(NAMES)) SPECS[`panel-${k}`] = () => panelArt(k, Object.keys(NAMES).indexOf(k) % 2);
+for (const k of Object.keys(NAMES)) SPECS[`product-${k}`] = () => panelArt(k, Object.keys(NAMES).indexOf(k) % 2);
 
 SPECS.home = () => page(`${bgGlows(0)}
   ${laptop(shot("workspace"), 150, 150, 940)}
@@ -114,15 +114,15 @@ SPECS.home = () => page(`${bgGlows(0)}
   ${card(shot("lms-leads"), 960, 610, 360, "rotate(4deg)", "CRM & Sales · Leads")}
   ${badge(90, 90, "Zap")}
   ${chip(500, 800, "Check", "Deal won", "Client created · team notified — automatically", -2)}
-  ${pill(1010, 440, "Brain", "Ask AI in every panel")}
-  ${pill(60, 420, "Workflow", "20 panels · one login")}`);
+  ${pill(1010, 440, "Brain", "Ask AI in every product")}
+  ${pill(60, 420, "Workflow", "20 products · one login")}`);
 
 SPECS.features = () => {
   const keys = ["lms", "hrms", "fms", "pms", "seo"];
   const cards = keys.map((k, i) => card(shot(k), 70 + i * 215, 180 + Math.abs(i - 2) * 38, 440, `perspective(1800px) rotateY(${-22 + i * 11}deg) rotateZ(${-4 + i * 2}deg)`, NAMES[k])).join("");
   return page(`${bgGlows(1)}${cards}
   ${pill(110, 700, "Target", "CRM & Sales")}${pill(420, 800, "Users", "HR & Payroll")}${pill(740, 740, "Wallet", "Finance")}${pill(1050, 680, "Layers", "Projects")}
-  ${badge(1170, 90, "Layers")}${chip(60, 70, "Check", "20 panels", "Every feature in every plan", -2)}`);
+  ${badge(1170, 90, "Layers")}${chip(60, 70, "Check", "20 products", "Every feature in every plan", -2)}`);
 };
 
 SPECS.pricing = () => {
@@ -131,11 +131,11 @@ SPECS.pricing = () => {
     <div style="padding:30px 28px;font-family:Inter,sans-serif">
       <div style="display:flex;align-items:center;gap:12px"><span class="d" style="width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:${dark ? "rgba(255,255,255,.18)" : `linear-gradient(135deg,${P},${A})`}">${icon("Rocket", 24)}</span><b style="font-size:26px;letter-spacing:-.02em">${name}</b></div>
       <div style="margin-top:22px;font-weight:900;font-size:50px;letter-spacing:-.04em">${line}</div>
-      <div style="margin-top:22px;display:grid;gap:13px;font-size:16px;font-weight:600;opacity:.92">${["Every panel", "Every feature", "Your own brand"].map((t) => `<div style="display:flex;gap:10px;align-items:center"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${dark ? "#fff" : `linear-gradient(135deg,${P},${A})`}">${icon("Check", 13, dark ? P : "#fff", 3.4)}</span>${t}</div>`).join("")}</div>
+      <div style="margin-top:22px;display:grid;gap:13px;font-size:16px;font-weight:600;opacity:.92">${["Every product", "Every feature", "Your own brand"].map((t) => `<div style="display:flex;gap:10px;align-items:center"><span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${dark ? "#fff" : `linear-gradient(135deg,${P},${A})`}">${icon("Check", 13, dark ? P : "#fff", 3.4)}</span>${t}</div>`).join("")}</div>
       <div style="margin-top:26px;height:50px;border-radius:999px;background:${dark ? "#fff" : INK};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:${dark ? INK : "#fff"}">Get started</div>
     </div></div>`;
   return page(`${bgGlows(1)}${plan(110, 330, "Free", "₹0", false, -7)}${plan(430, 230, "Growth", "Best", true, -1)}${plan(760, 330, "Business", "Scale", false, 6)}
-  ${chip(930, 90, "Check", "Free forever", "No card needed · every panel", 3)}${chip(60, 120, "Zap", "Simple pricing", "The price you see is the price you pay", -3)}${badge(1180, 790, "Rocket", 10)}`);
+  ${chip(930, 90, "Check", "Free forever", "No card needed · every product", 3)}${chip(60, 120, "Zap", "Simple pricing", "The price you see is the price you pay", -3)}${badge(1180, 790, "Rocket", 10)}`);
 };
 for (const plan of ["free", "starter", "growth", "business", "enterprise"]) {
   SPECS[`plan-${plan}`] = () => SPECS.pricing().replace(/Best<\/div>/, `${plan[0].toUpperCase()}${plan.slice(1)}</div>`);
@@ -154,7 +154,7 @@ SPECS.about = () => {
   ${bub}
   <div class="abs" style="left:${cx - 150}px;top:${cy - 150}px;width:300px;height:300px;border-radius:50%;background:#fff;box-shadow:0 50px 90px -30px ${P},0 0 0 10px rgba(67,56,202,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Inter,sans-serif">
     <div style="width:84px;height:84px;border-radius:26px;background:linear-gradient(135deg,${P},${A});display:flex;align-items:center;justify-content:center">${icon("Zap", 44, "#fff", 2)}</div>
-    <b style="margin-top:14px;font-size:30px;letter-spacing:-.03em;color:${INK}">SelfRun AI</b><span style="color:#5b6478;font-weight:600;font-size:17px">20 panels · one login</span></div>
+    <b style="margin-top:14px;font-size:30px;letter-spacing:-.03em;color:${INK}">SelfRun AI</b><span style="color:#5b6478;font-weight:600;font-size:17px">20 products · one login</span></div>
   ${card(shot("workspace"), 40, 640, 330, "rotate(-6deg)", "Workspace")}${card(shot("intelligence"), 1010, 90, 330, "rotate(6deg)", "AI Intelligence")}`);
 };
 
@@ -174,7 +174,7 @@ SPECS.demo = () => page(`${bgGlows(0)}
 
 SPECS.docs = () => page(`${bgGlows(1)}
   ${laptop(shot("hrms-employees"), 310, 200, 860, "perspective(2400px) rotateY(9deg) rotateX(4deg)")}
-  ${["Open the panel", "Click Employees", "Fill the form"].map((t, i) => `<div class="pill" style="left:${[60, 40, 120][i]}px;top:${[180, 400, 620][i]}px;font-size:18px;padding:14px 24px 14px 14px"><span class="d" style="width:34px;height:34px;font-weight:900;color:#fff;font-size:17px">${i + 1}</span>${t}</div>`).join("")}
+  ${["Open the product", "Click Employees", "Fill the form"].map((t, i) => `<div class="pill" style="left:${[60, 40, 120][i]}px;top:${[180, 400, 620][i]}px;font-size:18px;padding:14px 24px 14px 14px"><span class="d" style="width:34px;height:34px;font-weight:900;color:#fff;font-size:17px">${i + 1}</span>${t}</div>`).join("")}
   ${chip(840, 790, "BookOpen", "Step by step", "With the real screen", -2)}${badge(1190, 110, "BookOpen")}${card(shot("fms-invoices"), 1000, 600, 330, "rotate(5deg)", "Finance · Invoices")}`);
 
 SPECS.gallery = () => {

@@ -1,5 +1,5 @@
 import "server-only";
-import * as A from "@/app/lpms/(protected)/actions";
+import * as A from "@/app/(products)/contractflow-ai/(protected)/actions";
 import { lpmsCan, type LpmsPermission } from "@/lib/lpms-roles";
 import { viaAction, f, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json } from "@/lib/ai/agent/types";

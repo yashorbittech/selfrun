@@ -135,11 +135,11 @@ async function run(db: import("mongodb").Db) {
   const { runAsCompany } = await import("@/lib/platform/tenancy/context");
   const { encryptPlatformSecret, decryptPlatformSecret } = await import("@/lib/platform/crypto");
   const pay = await import("@/lib/platform/integrations/payments");
-  const { createPaymentIntent, getPaymentIntent } = await import("@/lib/fms/payments/intents");
-  const { processPaymentWebhook } = await import("@/lib/fms/payments/webhooks");
-  const { getPayoutProvider } = await import("@/lib/hrms/payout-provider");
-  const fmsRoute = await import("@/app/api/fms/webhooks/[provider]/[companyId]/route");
-  const hrmsRoute = await import("@/app/api/hrms/payroll/webhook/[companyId]/route");
+  const { createPaymentIntent, getPaymentIntent } = await import("@/lib/products/cashflow-ai/payments/intents");
+  const { processPaymentWebhook } = await import("@/lib/products/cashflow-ai/payments/webhooks");
+  const { getPayoutProvider } = await import("@/lib/products/talentos/payout-provider");
+  const fmsRoute = await import("@/app/api/cashflow-ai/webhooks/[provider]/[companyId]/route");
+  const hrmsRoute = await import("@/app/api/talentos/payroll/webhook/[companyId]/route");
 
   const as = <T>(id: string, fn: () => Promise<T>) => runAsCompany(id, fn);
   const raw = db.collection<{ _id: string; companyId?: string } & Record<string, unknown>>(pay.PAYMENT_ACCOUNTS_COLLECTION);
@@ -195,8 +195,8 @@ async function run(db: import("mongodb").Db) {
   });
   await check("webhook URLs carry the company id on its automatic subdomain", async () => {
     const view = await as(A, () => pay.getPaymentAccountView());
-    assert.equal(view.webhookUrls.payments, `https://alpha.demo.test/api/fms/webhooks/razorpay/${A}`);
-    assert.equal(view.webhookUrls.payouts, `https://alpha.demo.test/api/hrms/payroll/webhook/${A}`);
+    assert.equal(view.webhookUrls.payments, `https://alpha.demo.test/api/cashflow-ai/webhooks/razorpay/${A}`);
+    assert.equal(view.webhookUrls.payouts, `https://alpha.demo.test/api/talentos/payroll/webhook/${A}`);
   });
   await check("blank secret on save keeps the stored one; new key id requires a new secret", async () => {
     const keep = await save(A, { keyId: ACCT_A.keyId, payoutsEnabled: true });
@@ -253,7 +253,7 @@ async function run(db: import("mongodb").Db) {
     assert.equal(x?.accountNumber, process.env.RAZORPAY_ACCOUNT_NUMBER);
     const view = await as(OWNER, () => pay.getPaymentAccountView());
     assert.deepEqual(view.usingPlatformEnv, { payments: true, payouts: true });
-    assert.equal(view.webhookUrls.payments.endsWith(`/api/fms/webhooks/razorpay/${OWNER}`), true);
+    assert.equal(view.webhookUrls.payments.endsWith(`/api/cashflow-ai/webhooks/razorpay/${OWNER}`), true);
   });
   await check("owner webhook secret falls back to the key secret, as before", async () => {
     const saved = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -345,7 +345,7 @@ async function run(db: import("mongodb").Db) {
   });
   await check("per-company route: A's secret on A's URL marks A's intent paid; duplicate event ignored", async () => {
     const body = capturedBody();
-    const req = () => new Request(`https://alpha.demo.test/api/fms/webhooks/razorpay/${A}`, { method: "POST", body, headers: { "x-razorpay-signature": sign(ACCT_A.webhookSecret, body), "x-razorpay-event-id": "evt_A_1" } });
+    const req = () => new Request(`https://alpha.demo.test/api/cashflow-ai/webhooks/razorpay/${A}`, { method: "POST", body, headers: { "x-razorpay-signature": sign(ACCT_A.webhookSecret, body), "x-razorpay-event-id": "evt_A_1" } });
     const res = await fmsRoute.POST(req(), { params: Promise.resolve({ provider: "razorpay", companyId: A }) });
     assert.equal(res.status, 200, await res.clone().text());
     assert.equal((await as(A, () => getPaymentIntent(intentA)))?.status, "SUCCESS");

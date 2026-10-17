@@ -38,7 +38,7 @@ function fingerprint(req: NextRequest) {
 function refused(req: NextRequest, api: boolean) {
   const res = api
     ? NextResponse.json({ ok: false, error: "Your session is no longer valid. Please sign in again." }, { status: 401, headers: { "Cache-Control": "no-store" } })
-    : NextResponse.redirect(new URL("/workspace/login", req.url), { status: 303, headers: { "Cache-Control": "no-store" } });
+    : NextResponse.redirect(new URL("/commandos/login", req.url), { status: 303, headers: { "Cache-Control": "no-store" } });
   for (const n of SESSION_COOKIES) if (req.cookies.has(n)) res.cookies.set(n, "", { path: "/", maxAge: 0 });
   return res;
 }

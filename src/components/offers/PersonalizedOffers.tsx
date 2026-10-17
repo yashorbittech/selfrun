@@ -6,7 +6,7 @@ import OfferCard from "@/components/offers/OfferCard";
 import { PUBLIC_AUDIENCE_TABS, type PublicAudienceTabKey } from "@/lib/offers/constants";
 import { claimProgress, nowMs } from "@/lib/offers/live";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 export interface OffersViewer {
   firstName: string | null;

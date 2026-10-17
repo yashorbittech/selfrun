@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentHubUser } from "@/lib/hub-auth";
-import { onAppSurface } from "@/lib/saas/request";
+import { onAppSurface } from "@/lib/platform/saas/request";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getAppsOverview } from "@/lib/apps/overview";
 

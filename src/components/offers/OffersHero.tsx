@@ -6,7 +6,7 @@ import CampaignCountdown from "@/components/offers/CampaignCountdown";
 import CampaignBackdrop from "@/components/offers/CampaignBackdrop";
 import { PUBLIC_AUDIENCE_TABS, getThemePreset, type PublicAudienceTabKey } from "@/lib/offers/constants";
 import type { SerializedCampaign } from "@/lib/offers/campaigns";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },

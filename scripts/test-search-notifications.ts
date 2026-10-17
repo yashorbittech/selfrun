@@ -21,7 +21,7 @@ import { globalSearch } from "@/lib/platform/search";
 import { getCompanyKpis, getRecentActivity } from "@/lib/platform/dashboard";
 import { emitEvent } from "@/lib/platform/events";
 import { listNotifications, markAllRead, markRead, notify, safeInternalUrl, unreadCount, NOTIFICATIONS_COLLECTION } from "@/lib/platform/notifications";
-import { todayDateString } from "@/lib/hrms/time";
+import { todayDateString } from "@/lib/products/talentos/time";
 
 let passed = 0;
 async function check(name: string, fn: () => Promise<void> | void) {
@@ -62,7 +62,7 @@ async function main() {
   if (!/test/.test(db.databaseName)) throw new Error(`Refusing to run against "${db.databaseName}"`);
 
   const now = new Date();
-  const A = randomUUID(); // no subscription → unlimited, every panel
+  const A = randomUUID(); // no subscription → unlimited, every product
   const B = randomUUID();
   const STARTER = randomUUID(); // plan without Finance
   const NOPMS = randomUUID(); // Projects switched off in onboarding
@@ -70,7 +70,7 @@ async function main() {
   const company = (id: string, slug: string, extra: Record<string, unknown> = {}) => ({ _id: id as never, slug, name: slug[0].toUpperCase() + slug.slice(1), status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now, ...extra });
   await db.collection("companies").insertMany([company(A, "alpha"), company(B, "beta"), company(STARTER, "starter"), company(NOPMS, "nopms", { enabledModules: ["hrms", "lms", "fms"] }), company(TINY, "tiny")]);
   await listPlans();
-  // Every real plan has every panel; this test needs a plan without Finance, so Starter is narrowed here (test database only).
+  // Every real plan has every product; this test needs a plan without Finance, so Starter is narrowed here (test database only).
   await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms", "lms"] } });
   await db.collection("billing_plans").insertOne({ _id: "tiny" as never, name: "Tiny", description: "test", currency: "INR", priceMonthly: 100, priceYearly: 1000, modules: "all", limits: { seats: 5, aiTokensPerMonth: 100, storageMb: 10 }, trialDays: 30, active: true, isDefault: false, sortOrder: 99, createdAt: now, updatedAt: now });
   const sub = (planId: string) => ({ subscription: { planId, status: "active", interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now } });
@@ -120,14 +120,14 @@ async function main() {
   const types = (hits: { type: string }[]) => [...new Set(hits.map((h) => h.type))].sort();
 
   console.log("access");
-  await check("areas follow each panel's own company-wide tier", async () => {
+  await check("areas follow each product's own company-wide tier", async () => {
     await runAsCompany(A, async () => {
       assert.deepEqual([...(await accessibleAreas(admin))].sort(), ["clients", "employees", "invoices", "leads", "leave", "projects", "tasks"]);
       assert.deepEqual([...(await accessibleAreas(sales))], ["leads"]);
       assert.deepEqual([...(await accessibleAreas(pm))].sort(), ["clients", "projects", "tasks"]);
       assert.deepEqual([...(await accessibleAreas(hr))].sort(), ["employees", "leave"]);
       assert.deepEqual([...(await accessibleAreas(finance))], ["invoices"]);
-      assert.equal((await accessibleAreas(dev)).size, 0, "panel-portal roles get nothing company-wide");
+      assert.equal((await accessibleAreas(dev)).size, 0, "product-portal roles get nothing company-wide");
       assert.equal((await accessibleAreas(nobody)).size, 0);
     });
   });
@@ -137,12 +137,12 @@ async function main() {
     const hits = await runAsCompany(A, () => globalSearch(admin, "asha"));
     assert.deepEqual(types(hits), ["client", "employee", "invoice", "lead", "project", "task"]);
     const by = Object.fromEntries(hits.map((h) => [h.type, h]));
-    assert.equal(by.lead.url, `/lms/leads/${tagA}-l1`);
-    assert.equal(by.client.url, `/pms/clients/${tagA}-c1`);
-    assert.equal(by.project.url, `/pms/projects/${tagA}-p1`);
-    assert.equal(by.task.url, `/pms/projects/${tagA}-p1/tasks/${tagA}-t1`);
-    assert.equal(by.employee.url, `/hrms/employees/${tagA}-e1`);
-    assert.equal(by.invoice.url, `/fms/invoices/${tagA}-i1`);
+    assert.equal(by.lead.url, `/dealflow-ai/leads/${tagA}-l1`);
+    assert.equal(by.client.url, `/sprintos/clients/${tagA}-c1`);
+    assert.equal(by.project.url, `/sprintos/projects/${tagA}-p1`);
+    assert.equal(by.task.url, `/sprintos/projects/${tagA}-p1/tasks/${tagA}-t1`);
+    assert.equal(by.employee.url, `/talentos/employees/${tagA}-e1`);
+    assert.equal(by.invoice.url, `/cashflow-ai/invoices/${tagA}-i1`);
     assert.equal(by.employee.title, "Asha Menon");
     assert.ok(!hits.some((h) => h.title === "Asha Deleted"), "deleted records are excluded");
   });
@@ -182,7 +182,7 @@ async function main() {
       assert.equal((await globalSearch(sales, "INV-2026-0001")).length, 0, "sales can't find an invoice by number");
     });
   });
-  await check("plan and switched-off panels are respected", async () => {
+  await check("plan and switched-off products are respected", async () => {
     assert.deepEqual(types(await runAsCompany(STARTER, () => globalSearch(admin, "asha"))), ["client", "employee", "lead", "project", "task"], "Finance isn't in the Starter plan");
     assert.equal((await runAsCompany(STARTER, () => globalSearch(finance, "asha"))).length, 0);
     assert.deepEqual(types(await runAsCompany(NOPMS, () => globalSearch(admin, "asha"))), ["employee", "invoice", "lead"], "Projects is switched off");
@@ -211,9 +211,9 @@ async function main() {
   });
   await check("recent activity is limited to the areas a person may see", async () => {
     await runAsCompany(A, async () => {
-      await emitEvent("lead.created", { entity: { type: "lead", id: "l", label: "Asha Verma", url: "/lms/leads/l" }, data: {} });
-      await emitEvent("invoice.paid", { entity: { type: "invoice", id: "i", label: "INV-1", url: "/fms/invoices/i" }, data: {} });
-      await emitEvent("task.completed", { entity: { type: "task", id: "t", label: "Task", url: "/pms/projects/p/tasks/t" }, data: {} });
+      await emitEvent("lead.created", { entity: { type: "lead", id: "l", label: "Asha Verma", url: "/dealflow-ai/leads/l" }, data: {} });
+      await emitEvent("invoice.paid", { entity: { type: "invoice", id: "i", label: "INV-1", url: "/cashflow-ai/invoices/i" }, data: {} });
+      await emitEvent("task.completed", { entity: { type: "task", id: "t", label: "Task", url: "/sprintos/projects/p/tasks/t" }, data: {} });
       assert.equal((await getRecentActivity(admin)).length, 3);
       assert.deepEqual((await getRecentActivity(sales)).map((e) => e.type), ["lead.created"]);
       assert.deepEqual((await getRecentActivity(finance)).map((e) => e.type), ["invoice.paid"]);
@@ -239,7 +239,7 @@ async function main() {
   });
   await check("notify a user and a role; unread counts", async () => {
     await runAsCompany(A, async () => {
-      assert.equal(await notify({ to: { userId: String(u1) }, title: "Hello", body: "World", url: "/hrms/leave" }), 1);
+      assert.equal(await notify({ to: { userId: String(u1) }, title: "Hello", body: "World", url: "/talentos/leave" }), 1);
       assert.equal(await notify({ to: { role: "hr" }, title: "Team", url: "https://evil.example/x" }), 2);
       assert.equal(await notify({ to: { role: "nobody_has_this" }, title: "x" }), 0);
       assert.equal(await notify({ to: { userId: "not-an-id" }, title: "x" }), 0);
@@ -248,13 +248,13 @@ async function main() {
       assert.equal(await unreadCount(String(u2)), 1);
       const list = await listNotifications(String(u1));
       assert.deepEqual(list.map((n) => n.title), ["Team", "Hello"]);
-      assert.equal(list[1].url, "/hrms/leave");
+      assert.equal(list[1].url, "/talentos/leave");
       assert.equal(list[0].url, null, "off-site links are dropped");
       assert.equal(list[1].read, false);
     });
   });
   await check("only same-site paths are kept as links", () => {
-    assert.equal(safeInternalUrl("/lms/leads/1"), "/lms/leads/1");
+    assert.equal(safeInternalUrl("/dealflow-ai/leads/1"), "/dealflow-ai/leads/1");
     for (const u of ["https://x.y/z", "//evil.example", "javascript:alert(1)", "/\\evil.example", "", null, undefined]) assert.equal(safeInternalUrl(u), null, String(u));
   });
   await check("mark read: own notifications only", async () => {
@@ -290,14 +290,14 @@ async function main() {
 
   const rounds = () => mock.requests.filter((r) => !JSON.stringify(r.input ?? "").includes("strict gatekeeper")); // the assistant first asks a scope check, which is not a tool round
   console.log("AI assistant (mock OpenAI)");
-  const mock = await mockOpenAI({ calls: [{ name: "search_records", arguments: JSON.stringify({ query: "asha" }) }, { name: "get_company_kpis", arguments: "{}" }], answer: "You have 8 open leads, including [Asha Verma](/lms/leads/x)." });
+  const mock = await mockOpenAI({ calls: [{ name: "search_records", arguments: JSON.stringify({ query: "asha" }) }, { name: "get_company_kpis", arguments: "{}" }], answer: "You have 8 open leads, including [Asha Verma](/dealflow-ai/leads/x)." });
   process.env.OPENAI_API_KEY = "sk-test-not-real";
   process.env.OPENAI_BASE_URL = mock.url;
   const { askBusiness, runAssistantTool } = await import("@/lib/platform/ai/assistant");
   try {
     await check("answers after calling tools; nothing is stored; tool results go back as data", async () => {
       const reply = await runAsCompany(A, () => askBusiness(admin, "How many open leads do we have, and who is Asha?"));
-      assert.deepEqual(reply, { ok: true, answer: "You have 8 open leads, including [Asha Verma](/lms/leads/x)." });
+      assert.deepEqual(reply, { ok: true, answer: "You have 8 open leads, including [Asha Verma](/dealflow-ai/leads/x)." });
       assert.equal(rounds().length, 3, "two tool rounds, then the answer");
       const first = rounds()[0];
       assert.equal(first.store, false, "no server-side conversation storage");

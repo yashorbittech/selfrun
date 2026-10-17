@@ -9,7 +9,7 @@ import { creditWallet } from "@/lib/wallet/wallets";
 import { awardActivity } from "@/lib/wallet/earn";
 import { resolveActiveRewardRule } from "@/lib/wallet/reward-rules";
 import { externalUsers } from "@/lib/portal-auth";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { resolveCampaign, DEFAULT_CAMPAIGN_SETTINGS } from "@/lib/wallet/campaigns";
 import type { RewardRuleAudience, ReferralQualifyingEvent } from "@/lib/wallet/constants";
 
@@ -93,7 +93,7 @@ export async function listAllReferrals(limit = 200): Promise<Referral[]> {
 }
 
 /**
- * Lazily generated on first `/portal/referrals` visit — a random 8-char
+ * Lazily generated on first `/clientos/referrals` visit — a random 8-char
  * code, never an internal id. Relies on the unique sparse index on
  * `external_users.referralCode` (added in `portal-auth.ts`): a collision
  * with another user's code throws a duplicate-key error here, caught and
@@ -245,7 +245,7 @@ export async function attributeAndRewardReferral(
       type: "wallet.referral_pending",
       title: "Someone joined with your referral link",
       body: "You'll earn your reward once they complete their first step.",
-      link: "/portal/referrals",
+      link: "/clientos/referrals",
       dedupeKey: `wallet.referral_pending:${referral._id}`,
     });
   }
@@ -297,7 +297,7 @@ export async function rewardReferral(referralId: string, refereeRoleHint?: Rewar
         type: "wallet.referral_rewarded",
         title: "🎉 Your referral qualified",
         body: `You earned ${formatCredits(referrerRule.amount)} for a successful referral.`,
-        link: "/portal/referrals",
+        link: "/clientos/referrals",
         dedupeKey: `wallet.referral_referrer:${referralId}`,
       });
     }
@@ -322,7 +322,7 @@ export async function rewardReferral(referralId: string, refereeRoleHint?: Rewar
         type: "wallet.credit_earned",
         title: "🎉 Referral welcome bonus",
         body: `You earned ${formatCredits(refereeRule.amount)} for joining via a referral.`,
-        link: "/portal/wallet",
+        link: "/clientos/wallet",
         dedupeKey: `wallet.referral_referee:${referralId}`,
       });
     }
@@ -348,7 +348,7 @@ export async function rewardReferral(referralId: string, refereeRoleHint?: Rewar
   return true;
 }
 
-/** Call from any panel when a referred user completes a qualifying step. Cheap no-op for everyone who wasn't referred. */
+/** Call from any product when a referred user completes a qualifying step. Cheap no-op for everyone who wasn't referred. */
 export async function qualifyReferralOnEvent(refereeUserId: string, event: ReferralQualifyingEvent): Promise<void> {
   const collection = await getCollection();
   const pending = await collection.findOne({ refereeUserId, status: "REGISTERED", qualifyingEvent: event });

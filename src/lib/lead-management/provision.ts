@@ -2,10 +2,10 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { hashPassword } from "@/lib/lms-auth";
 import { externalUsers, type ExternalUserDoc } from "@/lib/portal-auth";
-import { newId } from "@/lib/portal/db";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { newId } from "@/lib/products/clientos/db";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { sendActivityChatMessage } from "@/lib/lead-management/activity-notifier";
-import { recordPortalAudit } from "@/lib/portal/audit";
+import { recordPortalAudit } from "@/lib/products/clientos/audit";
 import { PORTAL_ROLE_META } from "@/lib/portal-roles";
 import { createLeadRecord } from "@/lib/lead-management/records";
 import { recordLeadEvent } from "@/lib/lead-management/timeline";
@@ -166,7 +166,7 @@ export async function provisionLeadAndAccount(input: ProvisionInput): Promise<Pr
       body: isNewAccount
         ? "Your account is ready. Track everything here — it updates live as our team progresses your request."
         : `A new request (${lead.code}) has been added to your portal.`,
-      link: "/portal",
+      link: "/clientos",
     });
     await sendActivityChatMessage({
       leadId: lead._id,

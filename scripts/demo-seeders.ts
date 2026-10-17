@@ -1,5 +1,5 @@
 /**
- * Fills ONE company with realistic demo data for every panel (HR, projects, CRM, finance, procurement, training, chat,
+ * Fills ONE company with realistic demo data for every product (HR, projects, CRM, finance, procurement, training, chat,
  * SOPs, legal documents, Digi Locker, online tests, AI bots, social media, SEO, website, portal, support, AI Intelligence reads
  * the same business data). Meant for a demo company registered at /signup.
  *
@@ -81,7 +81,7 @@ async function main() {
   const pms = await step("Projects and finance (PMS / FMS)", () => seedPmsFms(seedDb));
   const people = await step("Portal accounts, leads, recruitment", () => seedPeople(seedDb, tms, pms));
   await step("Offers, wallet and referrals", () => seedGrowth(seedDb, tms, pms, people));
-  await step("Cross-panel repair, HRMS, FMS, audit trails", () => seedPanels(seedDb, tms, pms));
+  await step("Cross-product repair, HRMS, FMS, audit trails", () => seedPanels(seedDb, tms, pms));
   await step("Team chat (Messenger)", () => seedMessenger(seedDb, pms));
   await step("Website chatbot", () => seedChatbot(seedDb));
   await step("Procurement (PRMS)", () => seedProcurement(seedDb, pms));
@@ -102,24 +102,24 @@ async function main() {
   const owner = await seedDb.collection("admin_users").findOne({ roles: "super_admin", email: { $not: /@example\.com$/ } }, { projection: { _id: 1, email: 1 } });
   await step("Help and support", () => seedSupport(seedDb, { companyId, companyName, owner: { id: String(owner?._id ?? "demo-owner"), email: String(owner?.email ?? "owner@example.com") } }), (r: any) => `${r.requests} requests`);
 
-  console.log("\n✓ Every panel now has demo data. AI Intelligence answers from the same business data.");
+  console.log("\n✓ Every product now has demo data. AI Intelligence answers from the same business data.");
   console.log("\nDemo logins (password for all of them: Demo@12345). Your own Super Admin login is unchanged.");
   const groups: [string, string, { email: string; label: string }[]][] = [
     ["Client / student portal", "/login", DEMO_ACCOUNTS],
-    ["SOPs", "/sop/login", SOP_DEMO_ACCOUNTS],
-    ["SEO", "/seo/login", SEO_DEMO_ACCOUNTS],
-    ["Digi Locker", "/dlms/login", DLMS_DEMO_ACCOUNTS],
-    ["AI assistants", "/aibots/login", AIBOTS_DEMO_ACCOUNTS],
-    ["Social media", "/smms/login", SMMS_DEMO_ACCOUNTS],
-    ["Online tests", "/ots/login", [...OTS_DEMO_ACCOUNTS, ...OTS_PORTAL_ACCOUNTS]],
-    ["Website", "/cms/login", CMS_DEMO_ACCOUNTS],
-    ["Legal", "/lpms/login", LPMS_DEMO_ACCOUNTS],
+    ["SOPs", "/playbook-ai/login", SOP_DEMO_ACCOUNTS],
+    ["SEO", "/rankmax-ai/login", SEO_DEMO_ACCOUNTS],
+    ["Digi Locker", "/cybervault/login", DLMS_DEMO_ACCOUNTS],
+    ["AI assistants", "/agentos/login", AIBOTS_DEMO_ACCOUNTS],
+    ["Social media", "/viralpulse-ai/login", SMMS_DEMO_ACCOUNTS],
+    ["Online tests", "/evaliq/login", [...OTS_DEMO_ACCOUNTS, ...OTS_PORTAL_ACCOUNTS]],
+    ["Website", "/sitecraft-ai/login", CMS_DEMO_ACCOUNTS],
+    ["Legal", "/contractflow-ai/login", LPMS_DEMO_ACCOUNTS],
   ];
   for (const [label, path, list] of groups) {
     console.log(`\n  ${label} (${path})`);
     for (const a of list) console.log(`    ${a.label.padEnd(36)} ${a.email}`);
   }
-  console.log("\nA panel only appears in the sidebar if the company's plan includes it (Platform Panel → Companies → plan).");
+  console.log("\nA product only appears in the sidebar if the company's plan includes it (Platform Console → Companies → plan).");
 }
 
 main()

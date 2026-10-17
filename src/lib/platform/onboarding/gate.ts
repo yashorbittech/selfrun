@@ -4,20 +4,20 @@
  *
  *  - LOGIN LANDING (`postLoginTarget`): when the company's owner (a Super Admin of
  *    a customer company) signs in and setup is neither completed nor skipped, they
- *    land on `/workspace/onboarding` — unless a valid `next` was explicitly asked
- *    for (a deep link, a panel's `/login?next=/hrms`), which always wins. Invited
+ *    land on `/commandos/onboarding` — unless a valid `next` was explicitly asked
+ *    for (a deep link, a product's `/login?next=/talentos`), which always wins. Invited
  *    employees, other roles and the platform owner's company never land there.
- *  - There is NO redirect on any Workspace page: `/workspace` always shows the
+ *  - There is NO redirect on any Workspace page: `/commandos` always shows the
  *    dashboard, and everything in the Workspace works with setup unfinished.
  *  - THE STRIP (`showSetupStrip`): while setup is not completed (skipped or not),
  *    the owner sees a "Complete setup" strip on every Workspace page except the
  *    wizard itself. "Skip for now" only stops the login landing.
  *  Loops are impossible: the only redirect happens once, at sign-in.
  */
-export const ONBOARDING_PATH = "/workspace/onboarding";
+export const ONBOARDING_PATH = "/commandos/onboarding";
 /** The screen right after registration: the company's website and app addresses, with a button on to the wizard. */
-export const WELCOME_PATH = "/workspace/welcome";
-export const WORKSPACE_HOME = "/workspace";
+export const WELCOME_PATH = "/commandos/welcome";
+export const WORKSPACE_HOME = "/commandos";
 
 export interface SetupFacts {
   /** `super_admin` of the company. */

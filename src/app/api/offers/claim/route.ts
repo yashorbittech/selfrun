@@ -169,7 +169,7 @@ export async function POST(req: NextRequest) {
         const { token } = await createPortalSession(result.externalUserId, false);
         await setPortalSessionCookie(token, false);
       }
-      portal = { redirect: result.isNewAccount ? "/portal" : "/login", isNewAccount: result.isNewAccount, tempPassword: result.tempPassword };
+      portal = { redirect: result.isNewAccount ? "/clientos" : "/login", isNewAccount: result.isNewAccount, tempPassword: result.tempPassword };
     } catch (provErr) {
       console.error("Offer claim: lead provisioning failed (claim still saved)", provErr);
     }

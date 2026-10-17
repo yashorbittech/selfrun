@@ -46,7 +46,7 @@ function dataTools(ctx: Ctx) {
   const tools = [];
   if (ctx.entities.length) {
     tools.push(
-      fn("list_entities", "List the kinds of records you can work with here (keys, what they are, what you may do with them).", { panel: { type: "string", description: "Optional: only this panel, e.g. pms" } }),
+      fn("list_entities", "List the kinds of records you can work with here (keys, what they are, what you may do with them).", { panel: { type: "string", description: "Optional: only this product, e.g. pms" } }),
       fn("describe_entity", "Show an entity's fields (names, types, allowed values, which are required). Call before creating or updating a kind of record you have not used.", { entity: { type: "string" } }, ["entity"]),
       fn("find_records", "Search records. Use q for a text search across the name-like fields; filters is {field: value} (equal), {field: [a,b]} (any of) or {field: {gte|lte|gt|lt|ne: value}} (dates as YYYY-MM-DD). Max 25 per call; use skip to page.", {
         entity: { type: "string" }, q: { type: "string" }, filters: { type: "object" }, sort: { type: "string", description: "Field to sort by (default createdAt)" }, descending: { type: "boolean" }, limit: { type: "number" }, skip: { type: "number" },
@@ -58,19 +58,19 @@ function dataTools(ctx: Ctx) {
     if (ctx.entities.some((e) => canWrite(ctx.user, e) && canUpdate(e))) tools.push(fn("update_record", "Propose changing fields of a record. Only the fields to change go in `values`. The person approves first.", { entity: { type: "string" }, id: { type: "string" }, values: { type: "object" } }, ["entity", "id", "values"]));
     if (ctx.entities.some((e) => canWrite(ctx.user, e) && canRemove(e))) tools.push(fn("delete_record", "Propose deleting a record. Needs the person's explicit approval and a second confirmation.", { entity: { type: "string" }, id: { type: "string" } }, ["entity", "id"]));
   }
-  if (ctx.reports.length) tools.push(fn("run_report", `Run one of the panel's own calculations (same numbers as its dashboards). Available: ${ctx.reports.map((r) => `${r.key} — ${r.label}: ${r.description}`).join("; ")}. Give its parameters in values.`, { report: { type: "string" }, values: { type: "object" } }, ["report"]));
+  if (ctx.reports.length) tools.push(fn("run_report", `Run one of the product's own calculations (same numbers as its dashboards). Available: ${ctx.reports.map((r) => `${r.key} — ${r.label}: ${r.description}`).join("; ")}. Give its parameters in values.`, { report: { type: "string" }, values: { type: "object" } }, ["report"]));
   if (ctx.actions.length) tools.push(fn("run_action", `Propose a business action (not plain create/edit): ${ctx.actions.map((a) => `${a.key} — ${a.label}`).join("; ")}. The person approves first.`, { action: { type: "string" }, values: { type: "object" } }, ["action", "values"]));
   return tools;
 }
 
 const askTool = fn("ask_user", "Ask the person ONE short question when you need information you cannot look up (a missing required value, a choice between options, which of several matches they mean). Give `choices` when the answers are a small known set. Use this instead of guessing.", { question: { type: "string" }, choices: { type: "array", items: { type: "string" } } }, ["question"]);
 
-/** The Platform Panel's guide is only for the platform team. */
+/** The Platform Console's guide is only for the platform team. */
 const guidePanels = (ctx: Ctx) => (ctx.panel === "platform" ? GUIDE_PANELS : GUIDE_PANELS.filter((p) => p !== "platform"));
 
 const guideTools = (ctx: Ctx) => [
-  fn("panel_guide", `Look up how this product works: what a panel is for, how to do something step by step, which screen to open. Use it for any "how do I…", "where is…", "what does… mean" question instead of answering from memory. panel is one of: ${guidePanels(ctx).join(", ")}${ctx.panel === "workspace" ? "" : ` (default: ${ctx.panel})`}.`, { panel: { type: "string" }, topic: { type: "string", description: "What the person wants to know, as short ENGLISH keywords even if they asked in Hindi or Hinglish (the guide is written in English), e.g. 'approve leave' or 'import clients'" } }),
-  fn("find_screen", "Find the screen (page) in the panels where something is done, by keywords. Returns paths you can give the person as links.", { query: { type: "string", description: "ENGLISH keywords, even if the person asked in Hindi or Hinglish (screen names are in English)" }, panel: { type: "string" } }, ["query"]),
+  fn("panel_guide", `Look up how this product works: what a product is for, how to do something step by step, which screen to open. Use it for any "how do I…", "where is…", "what does… mean" question instead of answering from memory. product is one of: ${guidePanels(ctx).join(", ")}${ctx.panel === "workspace" ? "" : ` (default: ${ctx.panel})`}.`, { panel: { type: "string" }, topic: { type: "string", description: "What the person wants to know, as short ENGLISH keywords even if they asked in Hindi or Hinglish (the guide is written in English), e.g. 'approve leave' or 'import clients'" } }),
+  fn("find_screen", "Find the screen (page) in the products where something is done, by keywords. Returns paths you can give the person as links.", { query: { type: "string", description: "ENGLISH keywords, even if the person asked in Hindi or Hinglish (screen names are in English)" }, panel: { type: "string" } }, ["query"]),
 ];
 
 export function toolSchemas(ctx: Ctx): OpenAI.Chat.ChatCompletionTool[] {
@@ -111,7 +111,7 @@ function guidePanel(ctx: Ctx, a: Json): string {
 async function runRead(name: string, a: Json, ctx: Ctx): Promise<Json> {
   if (name === "panel_guide") {
     const panel = guidePanel(ctx, a);
-    if (!guidePanels(ctx).includes(panel)) return err(`Unknown panel "${panel}". Panels: ${guidePanels(ctx).join(", ")}.`);
+    if (!guidePanels(ctx).includes(panel)) return err(`Unknown product "${panel}". Products: ${guidePanels(ctx).join(", ")}.`);
     return panelGuide(panel, typeof a.topic === "string" ? a.topic : undefined) as unknown as Json;
   }
   if (name === "run_report") {
@@ -198,7 +198,7 @@ async function checkWrite(callId: string, tool: string, a: Json, ctx: Ctx): Prom
   if (!canWrite(ctx.user, def)) return { ok: false, error: err(`You don't have permission to change ${def.label.toLowerCase()} records.`) };
 
   if (tool === "create_record") {
-    if (!canCreate(def)) return { ok: false, error: err(`${def.label} records can't be created from here. Use the panel itself.`) };
+    if (!canCreate(def)) return { ok: false, error: err(`${def.label} records can't be created from here. Use the product itself.`) };
     const prep = prepare(def, a.values, "create");
     if (!prep.ok) return { ok: false, error: err("Some values are missing or invalid.", { problems: prep.problems }) };
     for (const f of def.fields ?? []) if (f.type === "ref" && f.ref && prep.values[f.key] != null) {
@@ -216,7 +216,7 @@ async function checkWrite(callId: string, tool: string, a: Json, ctx: Ctx): Prom
   const name = titleOf(def, current);
 
   if (tool === "update_record") {
-    if (!canUpdate(def)) return { ok: false, error: err(`${def.label} records can't be edited from here. Use the panel itself.`) };
+    if (!canUpdate(def)) return { ok: false, error: err(`${def.label} records can't be edited from here. Use the product itself.`) };
     const prep = prepare(def, a.values, "update");
     if (!prep.ok) return { ok: false, error: err("Some values are missing or invalid.", { problems: prep.problems }) };
     const fields = await Promise.all(Object.keys(prep.values).map(async (k) => {
@@ -227,7 +227,7 @@ async function checkWrite(callId: string, tool: string, a: Json, ctx: Ctx): Prom
   }
 
   // delete_record
-  if (!canRemove(def)) return { ok: false, error: err(`${def.label} records can't be deleted from here. Use the panel itself.`) };
+  if (!canRemove(def)) return { ok: false, error: err(`${def.label} records can't be deleted from here. Use the product itself.`) };
   return { ok: true, args: { entity: def.key, id }, card: { id: callId, tool, title: `Delete ${def.label.toLowerCase()}: ${name}`, kind: "delete", destructive: true, fields: [{ label: def.label, value: `${name} (${id.slice(0, 8)}…)` }] } };
 }
 
@@ -358,7 +358,7 @@ async function stepLoop(ctx: Ctx, run: Run): Promise<AgentResponse> {
 
 // ── Public entry points ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Panels whose reach differs from "this company's records": said plainly so the model neither over-promises nor goes looking in the wrong place. */
+/** Products whose reach differs from "this company's records": said plainly so the model neither over-promises nor goes looking in the wrong place. */
 const SCOPE_NOTES: Record<string, string> = {
   platform: "\n\nScope: this is the platform owner's console. You see ALL companies on the platform (not one company's records): use run_report to read companies, subscriptions, invoices, revenue, plans, coupons, add-ons, usage, AI token history, sign-ups, support requests and the audit log, and run_action to change them. There are no generic records here. Every tool is limited by the person's platform role; a missing tool means their role does not allow it. Deleting a company, changing payment keys and platform integrations are done on their own screens, never by you. Money and access changes are significant: state the company and the exact change in your reply.",
   portal: "\n\nScope: you are talking to an EXTERNAL person (an applicant, intern, trainee or client of this company), not staff. Help them with their own request, progress, interviews, messages, documents, wallet and notifications only. Never mention or reveal anything about other people, the company's internal records, staff or other customers. You cannot change anything except sending a message to the team, switching their active request and marking notifications read.",
@@ -374,7 +374,7 @@ async function systemPrompt(ctx: Ctx, page?: string): Promise<string> {
   const list = ctx.entities.map((e) => `- ${e.key}: ${e.label} — ${e.description}${canWrite(ctx.user, e) ? ` [${[canCreate(e) && "create", canUpdate(e) && "edit", canRemove(e) && "delete"].filter(Boolean).join("/") || "read"}]` : " [read only]"}`).join("\n");
   const reps = ctx.reports.map((r) => `- ${r.key}: ${r.label} — ${r.description}`).join("\n");
   const acts = ctx.actions.map((a) => `- ${a.key}: ${a.label} — ${a.description}`).join("\n");
-  const where = ctx.panel === "workspace" ? "the Workspace (it spans every panel you have access to)" : ctx.panel === "platform" ? "the Platform Panel (the SaaS owner's console)" : ctx.panel === "portal" ? "the external user Portal" : ctx.panel === "support" ? "the Help & Support centre" : `the ${ctx.panel.toUpperCase()} panel`;
+  const where = ctx.panel === "workspace" ? "the Workspace (it spans every product you have access to)" : ctx.panel === "platform" ? "the Platform Console (the SaaS owner's console)" : ctx.panel === "portal" ? "the external user Portal" : ctx.panel === "support" ? "the Help & Support centre" : `the ${ctx.panel.toUpperCase()} product`;
   const scope = SCOPE_NOTES[ctx.panel] ?? "";
   return `You are the AI agent inside ${where} of "${brand.name}". Today is ${new Date().toISOString().slice(0, 10)}. You act as ${ctx.user.email} (roles: ${ctx.user.roles.join(", ") || "none"}), with exactly their permissions${ctx.panel === "platform" ? "" : ", only inside this company"}.${page ? `\nThe person is on this page: ${page}.` : ""}
 
@@ -386,10 +386,10 @@ How to work:
 3. After the result comes back, say exactly what happened (name, code, id). If it failed, say why in plain words and what to do. Never claim something was done unless the tool result says so.
 4. For attachments: read them carefully. If a screenshot shows a record or a form, you can explain it, answer questions about it, or use its data to fill a record; when a value is unclear or illegible, ask rather than guess.
 5. For "how do I…", "where is…" or "what does… mean" questions, call panel_guide (and find_screen) and answer from it with the exact screen as a link; offer to do it for them when you can. Questions about numbers ("how many", "total") are answered from real data with find_records / group_records, not from memory. If nothing is found, say so.
-6. Never invent facts. Never reveal passwords, tokens, keys or bank/ID numbers. If something is not possible here (not in your tools, or you lack permission), say so and point to where in the panel it is done.
+6. Never invent facts. Never reveal passwords, tokens, keys or bank/ID numbers. If something is not possible here (not in your tools, or you lack permission), say so and point to where in the product it is done.
 7. Be brief and concrete; use short lists for several items. The LANGUAGE and SCOPE sections below are binding.
 
-${ctx.panel !== "workspace" && routeSummary(ctx.panel) ? `\nScreens in this panel (give them as markdown links, e.g. [Projects](/pms/projects)):\n${routeSummary(ctx.panel)}\n` : ""}${ctx.cms ? "" : list ? `Records you can work with (${panels.join(", ")}):\n${list}\n` : reps || acts ? "" : "In this panel you have no record tools. You can answer how-to questions from the guide (panel_guide), read what the person attaches or pastes, explain it, and help them think it through; for anything that needs the panel's data or a change, tell them plainly you can't do that from here and which panel can.\n"}${reps ? `\nReports (use run_report):\n${reps}\n` : ""}${acts ? `\nActions (use run_action, needs approval):\n${acts}\n` : ""}\n${scopeBlock(scopeKind(ctx.panel))}\n\n${languageBlock(ctx.lang)}`;
+${ctx.panel !== "workspace" && routeSummary(ctx.panel) ? `\nScreens in this product (give them as markdown links, e.g. [Projects](/sprintos/projects)):\n${routeSummary(ctx.panel)}\n` : ""}${ctx.cms ? "" : list ? `Records you can work with (${panels.join(", ")}):\n${list}\n` : reps || acts ? "" : "In this product you have no record tools. You can answer how-to questions from the guide (panel_guide), read what the person attaches or pastes, explain it, and help them think it through; for anything that needs the product's data or a change, tell them plainly you can't do that from here and which product can.\n"}${reps ? `\nReports (use run_report):\n${reps}\n` : ""}${acts ? `\nActions (use run_action, needs approval):\n${acts}\n` : ""}\n${scopeBlock(scopeKind(ctx.panel))}\n\n${languageBlock(ctx.lang)}`;
 }
 
 function historyMessages(history: ClientMessage[], attachedParts: { parts: OpenAI.Chat.ChatCompletionContentPart[] }[]): Msg[] {

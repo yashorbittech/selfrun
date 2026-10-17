@@ -11,7 +11,7 @@ export type { EmailMessage, EmailResult } from "@/lib/platform/email/types";
 
 /**
  * Outgoing email, behind a provider chosen at the platform level — never by
- * application code. Configured in Platform Panel → Integrations, falling back
+ * application code. Configured in Platform Console → Integrations, falling back
  * to `EMAIL_PROVIDER` (`resend` | `console`) / `RESEND_API_KEY` /
  * `EMAIL_FROM`; with nothing set it's Resend when an API key exists, else the
  * console adapter (development: the message is printed, nothing is sent).

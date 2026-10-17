@@ -2,7 +2,7 @@
 
 import { formatOfferBadge } from "@/lib/offers/constants";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 /** Lightweight always-accessible CTA on mobile — mirrors the spec's "sticky CTA" requirement. */
 export default function StickyMobileClaimBar({

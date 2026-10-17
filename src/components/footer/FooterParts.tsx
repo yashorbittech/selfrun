@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Mail, Phone } from "lucide-react";
 import SiteLogo from "@/components/SiteLogo";
 import { socialIconFor } from "@/components/icons/social-icon-for";
-import type { SiteInfo, SiteSocialLink } from "@/lib/cms/site-info-shared";
+import type { SiteInfo, SiteSocialLink } from "@/lib/products/sitecraft-ai/site-info-shared";
 
 /** Social links to show: the Site Identity list, plus the LinkedIn page when it isn't already in it. */
 export function socialLinks(info: SiteInfo): SiteSocialLink[] {

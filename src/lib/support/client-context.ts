@@ -28,7 +28,7 @@ function parseUa(ua: string): { browser: string | null; browserVersion: string |
   return { browser, browserVersion, os, device };
 }
 
-/** Where the user is right now, read from the browser and the URL — nothing is mapped by hand, so new panels just work. */
+/** Where the user is right now, read from the browser and the URL — nothing is mapped by hand, so new products just work. */
 export function captureContext(): RequestContext {
   const path = window.location.pathname;
   const segments = path.split("/").filter(Boolean);

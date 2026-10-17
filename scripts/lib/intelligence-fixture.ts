@@ -1,26 +1,26 @@
 /**
  * Seeded business data for the AI Intelligence tests and the demo seeder. Every
- * document is typed against the owning panel's own interface, so a renamed
+ * document is typed against the owning product's own interface, so a renamed
  * field breaks compilation here. Amounts are in rupees. Dates are relative to
  * "today" in Asia/Kolkata, so the examples (this month, this year, delayed …)
  * stay true whenever it runs.
  */
 import { getDb } from "@/lib/mongodb";
-import { addDays, isoDay, zonedDayStart } from "@/lib/intelligence/dates";
-import type { Client } from "@/lib/pms/clients";
-import type { Project } from "@/lib/pms/projects";
-import type { ProjectMember } from "@/lib/pms/project-members";
-import type { Task } from "@/lib/pms/tasks";
-import type { TimesheetEntry } from "@/lib/pms/timesheets";
-import type { Employee } from "@/lib/hrms/employees";
-import type { Department } from "@/lib/hrms/departments";
-import type { LeaveRequest } from "@/lib/hrms/leave";
+import { addDays, isoDay, zonedDayStart } from "@/lib/products/databrain-ai/dates";
+import type { Client } from "@/lib/products/sprintos/clients";
+import type { Project } from "@/lib/products/sprintos/projects";
+import type { ProjectMember } from "@/lib/products/sprintos/project-members";
+import type { Task } from "@/lib/products/sprintos/tasks";
+import type { TimesheetEntry } from "@/lib/products/sprintos/timesheets";
+import type { Employee } from "@/lib/products/talentos/employees";
+import type { Department } from "@/lib/products/talentos/departments";
+import type { LeaveRequest } from "@/lib/products/talentos/leave";
 import type { LeadRecord } from "@/lib/lead-management/types";
-import type { Invoice } from "@/lib/fms/invoices";
-import type { Receipt } from "@/lib/fms/receipts";
-import type { Expense } from "@/lib/prms/expenses";
-import type { Vendor } from "@/lib/prms/vendors";
-import type { PurchaseOrder } from "@/lib/prms/purchase-orders";
+import type { Invoice } from "@/lib/products/cashflow-ai/invoices";
+import type { Receipt } from "@/lib/products/cashflow-ai/receipts";
+import type { Expense } from "@/lib/products/spendiq/expenses";
+import type { Vendor } from "@/lib/products/spendiq/vendors";
+import type { PurchaseOrder } from "@/lib/products/spendiq/purchase-orders";
 
 export const TZ = "Asia/Kolkata";
 export const today = isoDay(new Date(), TZ);
@@ -39,7 +39,7 @@ const gone = { ...stamp, deletedAt: new Date() };
 
 export type Fixture = { c: Client[]; p: Project[]; m: ProjectMember[]; t: Task[]; ts: TimesheetEntry[]; e: Employee[]; d: Department[]; lv: LeaveRequest[]; l: LeadRecord[]; i: Invoice[]; r: Receipt[]; x: Expense[]; v: Vendor[]; po: PurchaseOrder[] };
 
-/** Typed against the panels' own interfaces, so a renamed field breaks compilation here. */
+/** Typed against the products' own interfaces, so a renamed field breaks compilation here. */
 export function fixture(tag: string, k: { amount: number; extraActive: number }): Fixture {
   const id = (s: string) => `${tag}-${s}`;
   const contact = { name: "X", email: "x@example.com", phone: "1", designation: null };

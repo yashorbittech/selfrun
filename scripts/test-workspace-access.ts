@@ -38,17 +38,17 @@ import { getSmmsUserForAccount } from "@/lib/smms-auth";
 import { getAibotsUserForAccount } from "@/lib/aibots-auth";
 import { getIntelligenceUserForAccount } from "@/lib/intelligence-auth";
 import { getChatUserForAccount } from "@/lib/messenger-auth";
-import { delegatedManagerBlock } from "@/lib/workspace/admin-users";
+import { delegatedManagerBlock } from "@/lib/products/commandos/admin-users";
 import { notify as notifyWorkspace } from "@/lib/platform/notifications";
-import { notify as notifyPms } from "@/lib/pms/notifications";
-import { listWorkspaceNotifications, markAllWorkspaceNotificationsRead, markWorkspaceNotificationRead, seesPanelNotifications, workspaceUnreadCount } from "@/lib/workspace/notifications";
-import { MANAGE_PERMISSIONS, NAV_KEYS, NAV_SECTIONS, canViewAuditLog, canViewCommandCenter, canViewWorkspaceEvents } from "@/lib/workspace/nav";
-import { loadExecutiveOverview } from "@/lib/workspace/executive-overview";
-import { allowedAuditSources, resolveAuditSource } from "@/lib/workspace/activity-log-shared";
-import { checkWorkspaceAccess, resolveWorkspaceNav, type WorkspaceUser } from "@/lib/workspace/access";
-import { getCompanyBillingHistory, getCompanySecurity, getCompanyUsage, listCompanyIntegrations, paymentsFromInvoices } from "@/lib/workspace/company";
-import { ALL_KNOWN_ROLES } from "@/lib/workspace/role-catalog";
-import { ALL_PERMISSION_KEYS } from "@/lib/workspace/permission-catalog";
+import { notify as notifyPms } from "@/lib/products/sprintos/notifications";
+import { listWorkspaceNotifications, markAllWorkspaceNotificationsRead, markWorkspaceNotificationRead, seesPanelNotifications, workspaceUnreadCount } from "@/lib/products/commandos/notifications";
+import { MANAGE_PERMISSIONS, NAV_KEYS, NAV_SECTIONS, canViewAuditLog, canViewCommandCenter, canViewWorkspaceEvents } from "@/lib/products/commandos/nav";
+import { loadExecutiveOverview } from "@/lib/products/commandos/executive-overview";
+import { allowedAuditSources, resolveAuditSource } from "@/lib/products/commandos/activity-log-shared";
+import { checkWorkspaceAccess, resolveWorkspaceNav, type WorkspaceUser } from "@/lib/products/commandos/access";
+import { getCompanyBillingHistory, getCompanySecurity, getCompanyUsage, listCompanyIntegrations, paymentsFromInvoices } from "@/lib/products/commandos/company";
+import { ALL_KNOWN_ROLES } from "@/lib/products/commandos/role-catalog";
+import { ALL_PERMISSION_KEYS } from "@/lib/products/commandos/permission-catalog";
 
 let passed = 0;
 async function check(name: string, fn: () => Promise<void> | void) {
@@ -58,7 +58,7 @@ async function check(name: string, fn: () => Promise<void> | void) {
 }
 
 const MANAGE_KEYS = NAV_KEYS.filter((k) => k.startsWith("manage."));
-/** Growth has no Training panel, so its registers are not offered either. */
+/** Growth has no Training product, so its registers are not offered either. */
 const GROWTH_MANAGE_KEYS = MANAGE_KEYS.filter((k) => !k.startsWith("manage.tms."));
 const COMPANY_KEYS = NAV_KEYS.filter((k) => k.startsWith("company."));
 
@@ -67,14 +67,14 @@ async function main() {
   if (!/test/.test(db.databaseName)) throw new Error(`Refusing to run against "${db.databaseName}"`);
 
   const now = new Date();
-  const owner = randomUUID(); // runs the platform: no plan, every panel
+  const owner = randomUUID(); // runs the platform: no plan, every product
   const acme = randomUUID(); // Growth plan
   const small = randomUUID(); // Starter plan: no Finance
   const beta = randomUUID(); // a second tenant with nothing in it
   const company = (id: string, slug: string, isPlatformOwner = false) => ({ _id: id as never, slug, name: slug[0].toUpperCase() + slug.slice(1), status: "active", isPlatformOwner, createdAt: now, updatedAt: now });
   await db.collection("companies").insertMany([company(owner, "owner", true), company(acme, "acme"), company(small, "small"), company(beta, "beta")]);
   await listPlans(); // seeds the default catalogue
-  // Every real plan has every panel; these checks cover plans with fewer, so Starter and Growth are narrowed here (test database only).
+  // Every real plan has every product; these checks cover plans with fewer, so Starter and Growth are narrowed here (test database only).
   await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms", "lms", "sop", "cms"] } });
   await db.collection("billing_plans").updateOne({ _id: "growth" as never }, { $set: { modules: ["hrms", "pms", "lms", "fms", "prms", "sop", "lpms", "dlms", "cms", "seo", "portal", "ots", "intelligence"] } });
   const sub = (planId: string) => ({ planId, status: "active", interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now });
@@ -153,7 +153,7 @@ async function main() {
   console.log("who sees what");
   const ownerKeys = await allowed(owner, ownerAdmin);
   const noRolesNav = await allowed(acme, noRoles);
-  await check("company super admin: every company and management item of the plan's panels, no Platform link", async () => {
+  await check("company super admin: every company and management item of the plan's products, no Platform link", async () => {
     const a = await allowed(acme, admin);
     for (const k of [...COMPANY_KEYS, ...GROWTH_MANAGE_KEYS, "dashboard", "account.documents", "account.notifications", "account.password"]) assert.ok(a.has(k), k);
     for (const k of MANAGE_KEYS.filter((x) => x.startsWith("manage.tms."))) assert.ok(!a.has(k), `${k}: Training is not in the plan`);
@@ -162,24 +162,24 @@ async function main() {
     assert.ok(!a.has("platform.panel"), "tenant never sees the Platform link");
     const nav = await navOf(acme, admin);
     assert.deepEqual(nav.sections.map((s) => s.key), ["dashboard", "panels", "analytics", "manage", "company", "account"]);
-    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "company"], "the sidebar lists everything but the panels");
+    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "company"], "the sidebar lists everything but the products");
     // Growth has no Training / Social / AI Bots: locked on the hub, absent from the nav.
     assert.ok(!a.has("panel.tms") && nav.lockedPanels.includes("tms"));
     assert.ok(!a.has("analytics.tms"));
   });
-  await check("HR manager: HR panel and analytics, nothing of company admin or company settings", async () => {
+  await check("HR manager: HR product and analytics, nothing of company admin or company settings", async () => {
     const a = await allowed(acme, hr);
     for (const k of ["panel.hrms", "panel.lms", "panel.messenger", "panel.sop", "panel.ots", "analytics.hrms", "analytics.messenger", "analytics.workspace"]) assert.ok(a.has(k), k);
     for (const k of [...COMPANY_KEYS, ...MANAGE_KEYS, "panel.pms", "panel.fms", "analytics.fms", "analytics.pms", "analytics.lms", "analytics.portal", "platform.panel"]) assert.ok(!a.has(k), k);
     assert.deepEqual((await navOf(acme, hr)).sections.map((s) => s.key), ["dashboard", "panels", "analytics", "account"]);
     assert.deepEqual((await navOf(acme, hr)).sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard"]);
   });
-  await check("PMS employee: own panels only; lead and portal analytics are not theirs", async () => {
+  await check("PMS employee: own products only; lead and portal analytics are not theirs", async () => {
     const a = await allowed(acme, dev);
     for (const k of ["panel.pms", "panel.hrms", "panel.prms", "panel.dlms", "analytics.pms", "analytics.hrms", "analytics.prms"]) assert.ok(a.has(k), k);
     for (const k of ["panel.fms", "analytics.fms", "analytics.lms", "analytics.portal", "account.documents", "company.audit", "company.billing", "company.users"]) assert.ok(!a.has(k), k);
   });
-  await check("finance user: Finance panel and analytics", async () => {
+  await check("finance user: Finance product and analytics", async () => {
     const a = await allowed(acme, finance);
     assert.ok(a.has("panel.fms") && a.has("analytics.fms"));
     assert.ok(!a.has("panel.pms") && !a.has("company.invoices") && !a.has("manage.prms.payments"));
@@ -200,7 +200,7 @@ async function main() {
     const a = await allowed(acme, noRoles);
     assert.deepEqual([...a].sort(), ["account.notifications", "account.password", "account.sessions", "dashboard", "panel.lms", "panel.support", "panel.website"]);
   });
-  await check("plan without Finance: the panel is locked, its analytics hidden — for the finance user and the super admin", async () => {
+  await check("plan without Finance: the product is locked, its analytics hidden — for the finance user and the super admin", async () => {
     for (const u of [smallFinance, smallAdmin]) {
       const nav = await navOf(small, u);
       assert.ok(nav.lockedPanels.includes("fms"), "locked tile");
@@ -211,7 +211,7 @@ async function main() {
     assert.ok(!(await allowed(small, smallAdmin)).has("analytics.portal"), "portal is not in Starter");
     assert.ok((await allowed(small, smallAdmin)).has("company.billing"), "the company still manages its plan");
   });
-  await check("a panel the company switched off disappears (not locked)", async () => {
+  await check("a product the company switched off disappears (not locked)", async () => {
     await db.collection("companies").updateOne({ _id: beta as never }, { $set: { enabledModules: ["workspace", "admin", "messenger", "hrms"] } });
     const nav = await navOf(beta, betaAdmin);
     assert.ok(nav.allowed.includes("panel.hrms") && !nav.allowed.includes("panel.pms") && !nav.allowed.includes("analytics.pms"));
@@ -219,83 +219,83 @@ async function main() {
     await db.collection("companies").updateOne({ _id: beta as never }, { $unset: { enabledModules: "" } });
   });
 
-  console.log("sidebar without the panels; analytics for every panel");
+  console.log("sidebar without the products; analytics for every product");
   const NEW_ANALYTICS = ["sop", "dlms", "ots", "aibots", "smms", "seo", "cms"];
-  await check("the Panels section is never in the sidebar, yet every panel.* key still resolves and guards", async () => {
+  await check("the Products section is never in the sidebar, yet every product.* key still resolves and guards", async () => {
     assert.equal(NAV_SECTIONS.find((s) => s.key === "panels")?.sidebar, false);
     assert.deepEqual(NAV_SECTIONS.filter((s) => s.sidebar === false).map((s) => s.key), ["panels", "analytics", "manage", "account"], "the Staff Hub tiles and the Workspace settings replace these in the sidebar");
     for (const [name, companyId, u] of everyone) {
       const nav = await navOf(companyId, u);
       const sidebar = nav.sections.filter((s) => s.sidebar);
-      assert.ok(!sidebar.some((s) => s.key === "panels"), `${name}: Panels in the sidebar`);
-      assert.ok(!sidebar.flatMap((s) => s.items).some((i) => i.key.startsWith("panel.")), `${name}: a panel link in the sidebar`);
+      assert.ok(!sidebar.some((s) => s.key === "panels"), `${name}: Products in the sidebar`);
+      assert.ok(!sidebar.flatMap((s) => s.items).some((i) => i.key.startsWith("panel.")), `${name}: a product link in the sidebar`);
       const panels = nav.sections.find((s) => s.key === "panels");
-      assert.deepEqual((panels?.items ?? []).map((i) => i.key).sort(), nav.allowed.filter((k) => k.startsWith("panel.")).sort(), `${name}: the panels still resolve for the Staff Hub tiles`);
-      assert.ok(panels && panels.items.length > 0 && panels.sidebar === false, `${name}: panels section is resolved but not for the sidebar`);
+      assert.deepEqual((panels?.items ?? []).map((i) => i.key).sort(), nav.allowed.filter((k) => k.startsWith("panel.")).sort(), `${name}: the products still resolve for the Staff Hub tiles`);
+      assert.ok(panels && panels.items.length > 0 && panels.sidebar === false, `${name}: products section is resolved but not for the sidebar`);
     }
     const a = await navOf(acme, admin);
     for (const k of ["panel.hrms", "panel.pms", "panel.sop", "panel.dlms", "panel.ots", "panel.seo", "panel.cms"]) assert.equal(await runAsCompany(acme, () => checkWorkspaceAccess(admin.user, k)), true, k);
-    assert.ok(a.lockedPanels.includes("smms") && a.lockedPanels.includes("aibots") && a.lockedPanels.includes("tms"), "locked panels are still reported for the upgrade tiles");
+    assert.ok(a.lockedPanels.includes("smms") && a.lockedPanels.includes("aibots") && a.lockedPanels.includes("tms"), "locked products are still reported for the upgrade tiles");
     assert.equal(await runAsCompany(acme, () => checkWorkspaceAccess(noRoles.user, "panel.hrms")), false);
   });
-  await check("every panel has an analytics item, in the section's alphabetical order", async () => {
+  await check("every product has an analytics item, in the section's alphabetical order", async () => {
     const keys = NAV_KEYS.filter((k) => k.startsWith("analytics."));
-    assert.deepEqual(keys, [...keys].sort(), "ordered by panel key");
+    assert.deepEqual(keys, [...keys].sort(), "ordered by product key");
     // AI Intelligence is a conversation and Help & Support a help desk, not registers: they deliberately have no company-wide analytics page.
-    const NO_ANALYTICS = ["panel.intelligence", "panel.support", "panel.website"]; // the website panel is analysed under analytics.cms
+    const NO_ANALYTICS = ["panel.intelligence", "panel.support", "panel.website"]; // the website product is analysed under analytics.cms
     for (const p of NAV_KEYS.filter((k) => k.startsWith("panel.") && !NO_ANALYTICS.includes(k))) assert.ok(keys.includes(p.replace("panel.", "analytics.")), `${p} has no analytics`);
     assert.ok(!keys.includes("analytics.intelligence"));
     const labels = Object.fromEntries((await navOf(owner, ownerAdmin)).sections.find((s) => s.key === "analytics")!.items.map((i) => [i.key, [i.label, i.href]]));
     assert.deepEqual(
       NEW_ANALYTICS.map((p) => labels[`analytics.${p}`]),
-      [["SOPs & Policies Analytics", "/workspace/analytics/sop"], ["Digi Locker Analytics", "/workspace/analytics/dlms"], ["Online Tests Analytics", "/workspace/analytics/ots"], ["AI Assistants Analytics", "/workspace/analytics/aibots"], ["Social Media Analytics", "/workspace/analytics/smms"], ["SEO Analytics", "/workspace/analytics/seo"], ["Website Analytics", "/workspace/analytics/cms"]],
+      [["SOPs & Policies Analytics", "/commandos/analytics/sop"], ["Digi Locker Analytics", "/commandos/analytics/dlms"], ["Online Tests Analytics", "/commandos/analytics/ots"], ["AI Assistants Analytics", "/commandos/analytics/aibots"], ["Social Media Analytics", "/commandos/analytics/smms"], ["SEO Analytics", "/commandos/analytics/seo"], ["Website Analytics", "/commandos/analytics/cms"]],
     );
   });
-  await check("AI Intelligence: a panel tile for its own roles only, gated by plan, no analytics, and it grants no data by itself", async () => {
+  await check("AI Intelligence: a product tile for its own roles only, gated by plan, no analytics, and it grants no data by itself", async () => {
     const analyst = await account(acme, "analyst@acme.test", ["intelligence_user"]);
     const intelAdmin = await account(acme, "intel-admin@acme.test", ["intelligence_admin"]);
     assert.ok((await allowed(acme, analyst)).has("panel.intelligence"));
     assert.ok((await allowed(acme, intelAdmin)).has("panel.intelligence"));
     assert.ok((await allowed(acme, admin)).has("panel.intelligence"), "Super Admin");
-    for (const u of [hr, dev, finance, sales, noRoles]) assert.ok(!(await allowed(acme, u)).has("panel.intelligence"), "other roles don't get the panel");
+    for (const u of [hr, dev, finance, sales, noRoles]) assert.ok(!(await allowed(acme, u)).has("panel.intelligence"), "other roles don't get the product");
     assert.ok(![...(await allowed(acme, admin))].some((k) => k === "analytics.intelligence"));
-    // Starter's plan does not include it: locked (upgrade tile), not accessible; the owner company has every panel.
+    // Starter's plan does not include it: locked (upgrade tile), not accessible; the owner company has every product.
     assert.equal(await runAsCompany(small, () => checkWorkspaceAccess(smallAdmin.user, "panel.intelligence")), false);
     assert.ok((await navOf(small, smallAdmin)).lockedPanels.includes("intelligence"));
     assert.ok((await allowed(owner, ownerAdmin)).has("panel.intelligence"));
-    // The panel role opens the panel only — the panel's own auth accepts the Workspace session and re-checks the roles.
+    // The product role opens the product only — the product's own auth accepts the Workspace session and re-checks the roles.
     const intelUser = (token: string) => runAsCompany(acme, async () => { const id = await workspaceSessionAccountId(token); return id ? getIntelligenceUserForAccount(id) : null; });
     assert.ok(await intelUser(analyst.hubToken));
     assert.equal(await intelUser(hr.hubToken), null);
     // The role is a Super-Admin-assignable role with a permission-catalogue entry.
-    const { ROLE_GROUPS } = await import("@/lib/workspace/role-catalog");
+    const { ROLE_GROUPS } = await import("@/lib/products/commandos/role-catalog");
     assert.ok(ROLE_GROUPS.some((g) => g.module === "AI Intelligence" && g.roles.map((r) => r.value).join() === "intelligence_admin,intelligence_user"));
-    const { PERMISSION_GROUPS } = await import("@/lib/workspace/permission-catalog");
+    const { PERMISSION_GROUPS } = await import("@/lib/products/commandos/permission-catalog");
     assert.ok(PERMISSION_GROUPS.some((g) => g.module === "AI Intelligence" && g.permissions.some((p) => p.key === "intelligence.canUse")));
     await runAsCompany(acme, async () => (await getDb()).collection("admin_users").deleteMany({ _id: { $in: [analyst._id, intelAdmin._id] } }));
   });
-  await check("new analytics: open to the panel's own role, closed to every other role and to the panel's per-person tier", async () => {
-    // In the owner company (every panel in the plan), one account per panel role.
+  await check("new analytics: open to the product's own role, closed to every other role and to the product's per-person tier", async () => {
+    // In the owner company (every product in the plan), one account per product role.
     const HOLDERS: [panel: string, role: string][] = [["sop", "sop_manager"], ["dlms", "dlms_manager"], ["ots", "ots_manager"], ["aibots", "aibots_manager"], ["smms", "smms_specialist"], ["seo", "seo_employee"], ["cms", "cms_viewer"]];
     const made: ObjectId[] = [];
     for (const [panel, role] of HOLDERS) {
       const u = await account(owner, `${role}@owner.test`, [role]);
       made.push(u._id);
       const a = await allowed(owner, u);
-      assert.ok(a.has(`panel.${panel}`), `${role} opens the ${panel} panel`);
+      assert.ok(a.has(`product.${panel}`), `${role} opens the ${panel} product`);
       for (const other of NEW_ANALYTICS) assert.equal(a.has(`analytics.${other}`), other === panel, `${role} → analytics.${other}`);
       for (const other of NEW_ANALYTICS) assert.equal(await runAsCompany(owner, () => checkWorkspaceAccess(u.user, `analytics.${other}`)), other === panel, `guard: ${role} → analytics.${other}`);
     }
-    // People who only see their own slice of a panel don't get its company-wide numbers.
+    // People who only see their own slice of a product don't get its company-wide numbers.
     const SCOPED: [panel: string, role: string][] = [["sop", "sop_employee"], ["sop", "sop_author"], ["dlms", "dlms_employee"], ["ots", "ots_candidate"], ["aibots", "aibots_user"], ["smms", "smms_employee"]];
     for (const [panel, role] of SCOPED) {
       const u = await account(owner, `${role}@owner.test`, [role]);
       made.push(u._id);
       const a = await allowed(owner, u);
-      assert.ok(a.has(`panel.${panel}`), `${role} still opens the ${panel} panel`);
+      assert.ok(a.has(`product.${panel}`), `${role} still opens the ${panel} product`);
       for (const other of NEW_ANALYTICS) assert.ok(!a.has(`analytics.${other}`), `${role} must not get analytics.${other}`);
     }
-    // A single permission grant opens the analytics, exactly like inside the panel.
+    // A single permission grant opens the analytics, exactly like inside the product.
     const granted = await account(owner, "smms-granted@owner.test", ["smms_employee"], { permissionOverrides: { "smms.canViewAnalytics": true } });
     const denied = await account(owner, "smms-denied@owner.test", ["smms_manager"], { permissionOverrides: { "smms.canViewAnalytics": false } });
     made.push(granted._id, denied._id);
@@ -310,12 +310,12 @@ async function main() {
     assert.deepEqual(NEW_ANALYTICS.filter((p) => (noRolesNav.has(`analytics.${p}`))), []);
     await runAsCompany(owner, async () => (await getDb()).collection("admin_users").deleteMany({ _id: { $in: made } }));
   });
-  await check("new analytics: the Command Center holder and the super admin get all seven; the plan and the panel switch hide them", async () => {
-    assert.ok(NEW_ANALYTICS.every((p) => ownerKeys.has(`analytics.${p}`)), "super admin of a company with every panel");
+  await check("new analytics: the Command Center holder and the super admin get all seven; the plan and the product switch hide them", async () => {
+    assert.ok(NEW_ANALYTICS.every((p) => ownerKeys.has(`analytics.${p}`)), "super admin of a company with every product");
     const exec = await account(owner, "exec@owner.test", preset("developer"), { permissionOverrides: { "workspace.viewCommandCenter": true } });
     const e = await allowed(owner, exec);
     assert.deepEqual(NEW_ANALYTICS.filter((p) => e.has(`analytics.${p}`)), NEW_ANALYTICS);
-    assert.ok(!e.has("panel.smms") && !e.has("panel.aibots") && !e.has("panel.seo") && !e.has("panel.cms"), "analytics without the panel itself");
+    assert.ok(!e.has("panel.smms") && !e.has("panel.aibots") && !e.has("panel.seo") && !e.has("panel.cms"), "analytics without the product itself");
     await runAsCompany(owner, async () => (await getDb()).collection("admin_users").deleteOne({ _id: exec._id }));
 
     // Growth has no Social Media / AI Bots; Starter has only SOP and Website of the seven.
@@ -325,12 +325,12 @@ async function main() {
     assert.deepEqual(NEW_ANALYTICS.filter((p) => starter.has(`analytics.${p}`)), ["sop", "cms"]);
     for (const p of ["smms", "aibots"]) assert.equal(await runAsCompany(acme, () => checkWorkspaceAccess(admin.user, `analytics.${p}`)), false, `Growth: analytics.${p}`);
     for (const p of ["dlms", "ots", "seo", "smms", "aibots"]) assert.equal(await runAsCompany(small, () => checkWorkspaceAccess(smallAdmin.user, `analytics.${p}`)), false, `Starter: analytics.${p}`);
-    // Analytics of a panel outside the plan is hidden, not a locked tile of its own.
+    // Analytics of a product outside the plan is hidden, not a locked tile of its own.
     assert.ok((await navOf(acme, admin)).lockedPanels.every((p) => !growth.has(`analytics.${p}`)));
 
     await db.collection("companies").updateOne({ _id: beta as never }, { $set: { enabledModules: ["workspace", "admin", "messenger", "hrms", "sop"] } });
     const off = await allowed(beta, betaAdmin);
-    assert.deepEqual(NEW_ANALYTICS.filter((p) => off.has(`analytics.${p}`)), ["sop"], "switched-off panels lose their analytics");
+    assert.deepEqual(NEW_ANALYTICS.filter((p) => off.has(`analytics.${p}`)), ["sop"], "switched-off products lose their analytics");
     assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(betaAdmin.user, "analytics.cms")), false);
     await db.collection("companies").updateOne({ _id: beta as never }, { $unset: { enabledModules: "" } });
     assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(betaAdmin.user, "analytics.cms")), true);
@@ -351,10 +351,10 @@ async function main() {
     await runAsCompany(owner, async () => (await getDb()).collection("admin_users").updateOne({ _id: ownerHr._id }, { $unset: { platformRoleId: "" } }));
     assert.ok((await allowed(owner, ownerRevoked)).has("company.billing"), "revoked platform access keeps company management");
   });
-  await check("the nav never contains a Platform Panel page other than the single link", async () => {
+  await check("the nav never contains a Platform Console page other than the single link", async () => {
     const nav = await navOf(owner, ownerAdmin);
-    const platformLinks = nav.sections.flatMap((s) => s.items).filter((i) => i.href.startsWith("/platform"));
-    assert.deepEqual(platformLinks.map((i) => i.href), ["/platform"]);
+    const platformLinks = nav.sections.flatMap((s) => s.items).filter((i) => i.href.startsWith("/console"));
+    assert.deepEqual(platformLinks.map((i) => i.href), ["/console"]);
   });
 
   console.log("moved pages, actions and APIs are guarded with their own nav key");
@@ -397,11 +397,11 @@ async function main() {
     }
     assert.ok(actions >= 80, `${actions} actions`);
   });
-  await check("every /api/workspace route authorizes with the key of its page; no /api/admin left", () => {
-    const routes = walk(path.join(ROOT, "api/workspace")).filter((f) => f.endsWith("route.ts"));
+  await check("every /api/commandos route authorizes with the key of its page; no /api/admin left", () => {
+    const routes = walk(path.join(ROOT, "api/commandos")).filter((f) => f.endsWith("route.ts"));
     assert.equal(routes.length, 35);
     for (const file of routes) {
-      const key = keyOf(path.relative(path.join(ROOT, "api/workspace"), file));
+      const key = keyOf(path.relative(path.join(ROOT, "api/commandos"), file));
       assert.ok(NAV_KEYS.includes(key), `${file}: ${key}`);
       const src = fs.readFileSync(file, "utf8");
       assert.ok(src.includes(`authorizeWorkspaceApi("${key}")`) && src.includes("if (!auth.ok) return auth.response;"), `${file} must authorize with ${key}`);
@@ -416,15 +416,15 @@ async function main() {
       assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(hr.user, key)), false, "roles of another company's user change nothing here");
     }
   });
-  await check("registers of a panel outside the plan or switched off are closed even to the super admin (F12)", async () => {
+  await check("registers of a product outside the plan or switched off are closed even to the super admin (F12)", async () => {
     for (const k of ["manage.pms.projects", "manage.crm.clients", "manage.crm.leads", "company.users", "company.audit", "account.documents"]) assert.ok((await allowed(small, smallAdmin)).has(k), k);
     for (const k of ["manage.prms.vendors", "manage.tms.students", "manage.portal.users"]) assert.equal(await runAsCompany(small, () => checkWorkspaceAccess(smallAdmin.user, k)), false, k);
     await db.collection("companies").updateOne({ _id: beta as never }, { $set: { enabledModules: ["workspace", "admin", "messenger", "hrms"] } });
     assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(betaAdmin.user, "manage.pms.projects")), false);
-    assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(betaAdmin.user, "manage.teamchat.channels")), true, "core panel");
+    assert.equal(await runAsCompany(beta, () => checkWorkspaceAccess(betaAdmin.user, "manage.teamchat.channels")), true, "core product");
     await db.collection("companies").updateOne({ _id: beta as never }, { $unset: { enabledModules: "" } });
   });
-  await check("the Command Center permission opens the full analytics of every panel in the plan", async () => {
+  await check("the Command Center permission opens the full analytics of every product in the plan", async () => {
     const exec = await account(acme, "exec@acme.test", preset("developer"), { permissionOverrides: { "workspace.viewCommandCenter": true } });
     const a = await allowed(acme, exec);
     for (const k of ["analytics.fms", "analytics.lms", "analytics.portal"]) assert.ok(a.has(k), k);
@@ -450,34 +450,34 @@ async function main() {
     ["tms", getTmsUserForAccount], ["ots", getOtsUserForAccount], ["sop", getSopUserForAccount], ["dlms", getDlmsUserForAccount], ["cms", getCmsUserForAccount],
     ["seo", getSeoUserForAccount], ["smms", getSmmsUserForAccount], ["aibots", getAibotsUserForAccount], ["intelligence", getIntelligenceUserForAccount], ["messenger", getChatUserForAccount],
   ];
-  /** What a panel's auth resolves for a request that carries only the Workspace session cookie. */
+  /** What a product's auth resolves for a request that carries only the Workspace session cookie. */
   const panelUser = (companyId: string, hubToken: string | null, load: (id: ObjectId) => Promise<unknown>) =>
     runAsCompany(companyId, async () => {
       const id = await workspaceSessionAccountId(hubToken);
       return id ? load(id) : null;
     });
-  await check("the Workspace session opens all 15 panels for a super admin", async () => {
+  await check("the Workspace session opens all 15 products for a super admin", async () => {
     for (const [name, load] of PANELS) assert.ok(await panelUser(acme, admin.hubToken, load), name);
   });
-  await check("for other roles it opens exactly the panels their roles allow", async () => {
+  await check("for other roles it opens exactly the products their roles allow", async () => {
     const opens = async (u: { hubToken: string }) => (await Promise.all(PANELS.map(async ([name, load]) => ((await panelUser(acme, u.hubToken, load)) ? name : null)))).filter(Boolean);
     assert.deepEqual(await opens(hr), ["hrms", "lms", "ots", "sop", "messenger"]);
     assert.deepEqual(await opens(dev), ["hrms", "pms", "lms", "prms", "ots", "sop", "dlms", "messenger"]);
     assert.deepEqual(await opens(noRoles), ["lms"], "the CRM has no role gate; nothing else opens");
     for (const u of [hr, dev, noRoles]) {
       const nav = await allowed(acme, u);
-      // The sidebar offers a panel only when the panel's own auth would let the account in (the plan can hide more).
-      for (const [name, load] of PANELS) if (nav.has(`panel.${name}`)) assert.ok(await panelUser(acme, u.hubToken, load), `${name} is listed but would refuse`);
+      // The sidebar offers a product only when the product's own auth would let the account in (the plan can hide more).
+      for (const [name, load] of PANELS) if (nav.has(`product.${name}`)) assert.ok(await panelUser(acme, u.hubToken, load), `${name} is listed but would refuse`);
     }
   });
-  await check("another company's session, no session and a made-up token open no panel", async () => {
+  await check("another company's session, no session and a made-up token open no product", async () => {
     for (const [name, load] of PANELS) {
       assert.equal(await panelUser(beta, admin.hubToken, load), null, `${name}: other company's session`);
       assert.equal(await panelUser(acme, null, load), null, name);
       assert.equal(await panelUser(acme, "bogus", load), null, name);
     }
   });
-  await check("an old admin-panel session grants nothing", async () => {
+  await check("an old admin-product session grants nothing", async () => {
     const token = randomBytes(32).toString("hex");
     await runAsCompany(acme, async () =>
       (await getDb()).collection("admin_sessions").insertOne({ tokenHash: createHash("sha256").update(token).digest("hex"), adminId: admin._id, createdAt: now, expiresAt: new Date(now.getTime() + 86_400_000) }),
@@ -489,7 +489,7 @@ async function main() {
     assert.deepEqual(reads.map((f) => path.basename(f)), ["cross-module-sso.ts"], "the cookie is only ever deleted");
     assert.ok(!fs.existsSync(path.join(process.cwd(), "src/lib/admin-auth.ts")));
   });
-  await check("losing a role closes the panel and the pages for the existing session at once", async () => {
+  await check("losing a role closes the product and the pages for the existing session at once", async () => {
     const temp = await account(acme, "temp@acme.test", ["super_admin"]);
     assert.ok(await panelUser(acme, temp.hubToken, getFmsUserForAccount));
     await runAsCompany(acme, async () => (await getDb()).collection("admin_users").updateOne({ _id: temp._id }, { $set: { roles: preset("hr") } }));
@@ -498,7 +498,7 @@ async function main() {
     for (const k of ["company.billing", "company.users", "company.audit", "account.documents"]) assert.equal(await runAsCompany(acme, () => checkWorkspaceAccess(fresh!, k)), false, k);
     await runAsCompany(acme, async () => (await getDb()).collection("admin_users").deleteOne({ _id: temp._id }));
   });
-  await check("every panel's /login is a redirect to the Workspace sign-in; no panel keeps its own form", () => {
+  await check("every product's /login is a redirect to the Workspace sign-in; no product keeps its own form", () => {
     for (const [name] of PANELS) {
       const dir = path.join(ROOT, name, "login");
       assert.deepEqual(fs.readdirSync(dir), ["page.tsx"], name);
@@ -506,19 +506,19 @@ async function main() {
     }
   });
   await check("return path after sign-in: same-origin paths only", () => {
-    for (const ok of ["/hrms", "/pms/projects?tab=1", "/workspace/users"]) assert.equal(safeNextPath(ok), ok);
-    for (const bad of ["//evil.example", "https://evil.example", "/\\evil.example", "hrms", "", "/workspace/login", "/workspace/login?next=/x", "/a\nb", "/x?u=http://evil.example", ["/hrms"], null, undefined, "/" + "a".repeat(600)]) assert.equal(safeNextPath(bad), null, String(bad));
-    assert.equal(workspaceLoginUrl("/hrms"), "/workspace/login?next=%2Fhrms");
-    assert.equal(workspaceLoginUrl("//evil.example"), "/workspace/login");
+    for (const ok of ["/talentos", "/sprintos/projects?tab=1", "/commandos/users"]) assert.equal(safeNextPath(ok), ok);
+    for (const bad of ["//evil.example", "https://evil.example", "/\\evil.example", "hrms", "", "/commandos/login", "/commandos/login?next=/x", "/a\nb", "/x?u=http://evil.example", ["/talentos"], null, undefined, "/" + "a".repeat(600)]) assert.equal(safeNextPath(bad), null, String(bad));
+    assert.equal(workspaceLoginUrl("/talentos"), "/commandos/login?next=%2Fhrms");
+    assert.equal(workspaceLoginUrl("//evil.example"), "/commandos/login");
   });
 
   console.log("one notification feed");
-  await check("workspace and panel notifications in one list; mark-read goes to the right store", async () => {
+  await check("workspace and product notifications in one list; mark-read goes to the right store", async () => {
     await runAsCompany(acme, async () => {
-      await notifyWorkspace({ to: { userId: admin.user.id }, title: "From an automation", url: "/workspace" });
-      await notifyWorkspace({ to: { userId: hr.user.id }, title: "For HR", url: "/hrms" });
-      await notifyPms({ recipientUserId: admin.user.id, type: "task_assigned", title: "From Projects", body: null, link: "/pms" } as never);
-      await notifyPms({ recipientUserId: hr.user.id, type: "task_assigned", title: "HR's own PMS item", body: null, link: "/pms" } as never);
+      await notifyWorkspace({ to: { userId: admin.user.id }, title: "From an automation", url: "/commandos" });
+      await notifyWorkspace({ to: { userId: hr.user.id }, title: "For HR", url: "/talentos" });
+      await notifyPms({ recipientUserId: admin.user.id, type: "task_assigned", title: "From Projects", body: null, link: "/sprintos" } as never);
+      await notifyPms({ recipientUserId: hr.user.id, type: "task_assigned", title: "HR's own PMS item", body: null, link: "/sprintos" } as never);
 
       const adminUser = (await getSessionHubUser(admin.hubToken))!;
       const hrUser = (await getSessionHubUser(hr.hubToken))!;
@@ -611,7 +611,7 @@ async function main() {
   await check("integrations: status from the company's own gateway, webhooks and domains", async () => {
     const a = await runAsCompany(acme, () => listCompanyIntegrations());
     assert.deepEqual(a.map((i) => [i.key, i.connected]), [["razorpay", false], ["webhooks", true], ["domain", true]]);
-    assert.deepEqual(a.map((i) => i.href), ["/workspace/settings/payments", "/workspace/settings/automations", "/workspace/settings/domains"]);
+    assert.deepEqual(a.map((i) => i.href), ["/commandos/settings/payments", "/commandos/settings/automations", "/commandos/settings/domains"]);
     const b = await runAsCompany(beta, () => listCompanyIntegrations());
     assert.deepEqual(b.map((i) => i.connected), [false, false, false], "the second company sees none of the first's integrations");
   });
@@ -625,42 +625,42 @@ async function main() {
   });
 
 
-  console.log("one dashboard, one audit log, documents under Account, everything under /workspace");
+  console.log("one dashboard, one audit log, documents under Account, everything under /commandos");
   await check("the nav has one Dashboard and no Command Center; no audit item in Management; Documents in Account; Audit log in Company", async () => {
     const nav = await navOf(acme, admin);
     const items = nav.sections.flatMap((s) => s.items.map((i) => ({ ...i, section: s.key })));
     assert.equal(items.filter((i) => i.section === "dashboard").length, 1);
-    assert.deepEqual(items.filter((i) => /dashboard/i.test(i.label)).map((i) => i.href), ["/workspace"]);
+    assert.deepEqual(items.filter((i) => /dashboard/i.test(i.label)).map((i) => i.href), ["/commandos"]);
     assert.ok(!items.some((i) => /command center/i.test(i.label) || i.href.includes("command-center")), "no Command Center item");
     assert.ok(!NAV_KEYS.some((k) => k === "manage.command-center" || k === "manage.activity-log" || k === "manage.documents"), "old manage keys are gone");
     assert.ok(!items.filter((i) => i.section === "manage").some((i) => /audit|activity|documents/i.test(i.label)), "Management has no audit/activity/documents item");
     assert.deepEqual(items.filter((i) => i.section === "account").map((i) => [i.key, i.href]).sort(), [
-      ["account.documents", "/workspace/account/documents"],
-      ["account.notifications", "/workspace/notifications"],
-      ["account.password", "/workspace/change-password"],
-      ["account.sessions", "/workspace/account/sessions"],
+      ["account.documents", "/commandos/account/documents"],
+      ["account.notifications", "/commandos/notifications"],
+      ["account.password", "/commandos/change-password"],
+      ["account.sessions", "/commandos/account/sessions"],
     ]);
     const audit = items.filter((i) => i.section === "company" && /audit/i.test(i.label));
-    assert.deepEqual(audit.map((i) => [i.key, i.label, i.href]), [["company.audit", "Audit log", "/workspace/settings/audit-log"]]);
+    assert.deepEqual(audit.map((i) => [i.key, i.label, i.href]), [["company.audit", "Audit log", "/commandos/settings/audit-log"]]);
     assert.ok(!items.some((i) => i.section === "company" && i.key === "company.activity"), "the old Company activity item is gone");
   });
-  await check("every Workspace nav href (except panels and the Platform link) lives under /workspace and has a page", async () => {
+  await check("every Workspace nav href (except products and the Platform link) lives under /commandos and has a page", async () => {
     const nav = await navOf(owner, ownerAdmin);
     const PROTECTED = path.join(ROOT, "workspace/(protected)");
     for (const i of nav.sections.flatMap((s) => s.items)) {
-      if (i.external || i.href === "/platform" || i.key.startsWith("panel.")) continue;
-      assert.ok(i.href === "/workspace" || i.href.startsWith("/workspace/"), `${i.key}: ${i.href}`);
+      if (i.external || i.href === "/console" || i.key.startsWith("panel.")) continue;
+      assert.ok(i.href === "/commandos" || i.href.startsWith("/commandos/"), `${i.key}: ${i.href}`);
       assert.ok(!/^\/(settings|onboarding|upgrade)/.test(i.href), i.href);
       const rel = i.href.replace(/^\/workspace\/?/, "");
       const candidates = [path.join(PROTECTED, rel, "page.tsx"), path.join(ROOT, "workspace", rel, "page.tsx"), path.join(PROTECTED, rel.replace(/\/[^/]+$/, ""), "[panel]", "page.tsx"), path.join(PROTECTED, rel.replace(/\/[^/]+$/, ""), "[kind]", "page.tsx")];
       assert.ok(candidates.some((f) => fs.existsSync(f)), `${i.key}: no page for ${i.href}`);
     }
-    for (const old of ["command-center", "activity-log", "documents"]) assert.ok(!fs.existsSync(path.join(PROTECTED, old)), `old page /workspace/${old} is gone`);
+    for (const old of ["command-center", "activity-log", "documents"]) assert.ok(!fs.existsSync(path.join(PROTECTED, old)), `old page /commandos/${old} is gone`);
     for (const old of [["(platform)", "settings"], ["(platform)", "onboarding"], ["(platform)", "upgrade"]]) assert.ok(!fs.existsSync(path.join(ROOT, ...old)), `${old.join("/")} moved`);
   });
   await check("the company pages keep a server-side guard: their nav key, or the company Super Admin rule they always used", () => {
     const PROTECTED = path.join(ROOT, "workspace/(protected)");
-    const nameOf = (href: string) => href.replace("/workspace/", "");
+    const nameOf = (href: string) => href.replace("/commandos/", "");
     const guards = (file: string, key: string) => {
       const src = fs.readFileSync(file, "utf8");
       return src.includes(`requireWorkspaceAccess("${key}")`) || (src.includes('roles.includes("super_admin")') && src.includes("getCurrentHubUser"));
@@ -674,11 +674,11 @@ async function main() {
       assert.ok(NAV_KEYS.includes(key), key);
       assert.ok(guards(path.join(PROTECTED, rel, "page.tsx"), key), `${rel} must guard`);
     }
-    assert.ok(nameOf("/workspace/settings/audit-log") === "settings/audit-log");
+    assert.ok(nameOf("/commandos/settings/audit-log") === "settings/audit-log");
     assert.ok(fs.readFileSync(path.join(PROTECTED, "settings/audit-log/page.tsx"), "utf8").includes('requireWorkspaceAccess("company.audit")'));
     for (const f of ["import/run/route.ts", "import/sample/route.ts"]) assert.ok(fs.readFileSync(path.join(PROTECTED, "settings", f), "utf8").includes('"super_admin"'), f);
   });
-  await check("Audit log: panel activity needs the Audit log permission, workspace events the company Super Admin; the source can only narrow", async () => {
+  await check("Audit log: product activity needs the Audit log permission, workspace events the company Super Admin; the source can only narrow", async () => {
     const asCtx = (u: { user: WorkspaceUser }) => ({ roles: u.user.roles, permissionOverrides: u.user.permissionOverrides ?? null });
     const access = (u: { user: WorkspaceUser }) => ({ panels: canViewAuditLog(asCtx(u)), workspace: canViewWorkspaceEvents(asCtx(u)) });
     assert.deepEqual(access(admin), { panels: true, workspace: true });
@@ -706,14 +706,14 @@ async function main() {
     assert.ok(adminStats, "super admin gets them");
     await runAsCompany(acme, async () => (await getDb()).collection("admin_users").deleteOne({ _id: exec._id }));
   });
-  await check("next.config redirects: every old URL maps permanently to its new home; /api, /platform and panels are never captured", async () => {
+  await check("next.config redirects: every old URL maps permanently to its new home; /api, /platform and products are never captured", async () => {
     const cfg = (await import("../next.config")).default;
     const rules = (await cfg.redirects!()) as { source: string; destination: string; permanent: boolean }[];
     const dest = (src: string) => rules.find((r) => r.source === src);
     const expected: [string, string][] = [
-      ["/settings/:path*", "/workspace/settings/:path*"], ["/onboarding", "/workspace/onboarding"], ["/upgrade", "/workspace/upgrade"],
-      ["/workspace/command-center", "/workspace"], ["/workspace/documents", "/workspace/account/documents"],
-      ["/settings/activity", "/workspace/settings/audit-log?source=workspace"], ["/workspace/activity-log", "/workspace/settings/audit-log?source=panels"],
+      ["/settings/:path*", "/commandos/settings/:path*"], ["/onboarding", "/commandos/onboarding"], ["/upgrade", "/commandos/upgrade"],
+      ["/commandos/command-center", "/commandos"], ["/commandos/documents", "/commandos/account/documents"],
+      ["/settings/activity", "/commandos/settings/audit-log?source=workspace"], ["/commandos/activity-log", "/commandos/settings/audit-log?source=products"],
     ];
     for (const [src, to] of expected) {
       const r = dest(src);
@@ -722,8 +722,8 @@ async function main() {
       assert.equal(r!.permanent, true, `${src} is permanent`);
     }
     assert.ok(rules.findIndex((r) => r.source === "/settings/activity") < rules.findIndex((r) => r.source === "/settings/:path*"), "activity before the catch-all");
-    // Moved pages in panels (e.g. /fms/audit-logs, /lms/offers) have their own redirects; none may swallow /api, /platform or a whole panel.
-    for (const r of rules) assert.ok(!/^\/(api|platform)\b/.test(r.source) && !/^\/(hrms|pms|prms|tms|fms|lms|cms|portal)(\/:path\*)?$/.test(r.source), `${r.source} must not capture /api, /platform or a whole panel`);
+    // Moved pages in products (e.g. /cashflow-ai/audit-logs, /dealflow-ai/offers) have their own redirects; none may swallow /api, /platform or a whole product.
+    for (const r of rules) assert.ok(!/^\/(api|platform)\b/.test(r.source) && !/^\/(hrms|pms|prms|tms|fms|lms|cms|portal)(\/:path\*)?$/.test(r.source), `${r.source} must not capture /api, /platform or a whole product`);
   });
 
   console.log(`workspace access: all ${passed} checks passed`);

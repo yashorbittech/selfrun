@@ -16,24 +16,24 @@ import { clientPromise, getPlatformDb } from "@/lib/platform/tenancy/platform-db
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { getDb } from "@/lib/mongodb";
 import { listPlans } from "@/lib/platform/billing/plans";
-import { ENTITIES } from "@/lib/intelligence/catalog/registry";
-import { buildCatalogView, clearCatalogStatsCache } from "@/lib/intelligence/catalog/view";
-import { exampleQuestions } from "@/lib/intelligence/prompt";
-import { runPlan, type QueryResult } from "@/lib/intelligence/query/execute";
-import { validatePlan } from "@/lib/intelligence/query/validate";
-import { translate, assertSafePipeline } from "@/lib/intelligence/query/translate";
-import { LIMITS } from "@/lib/intelligence/query/plan";
-import { addDays } from "@/lib/intelligence/dates";
+import { ENTITIES } from "@/lib/products/databrain-ai/catalog/registry";
+import { buildCatalogView, clearCatalogStatsCache } from "@/lib/products/databrain-ai/catalog/view";
+import { exampleQuestions } from "@/lib/products/databrain-ai/prompt";
+import { runPlan, type QueryResult } from "@/lib/products/databrain-ai/query/execute";
+import { validatePlan } from "@/lib/products/databrain-ai/query/validate";
+import { translate, assertSafePipeline } from "@/lib/products/databrain-ai/query/translate";
+import { LIMITS } from "@/lib/products/databrain-ai/query/plan";
+import { addDays } from "@/lib/products/databrain-ai/dates";
 import { REVENUE_STATUSES, TZ, Y, fixture, lastMonth, lastMonthEnd, monthEnd, monthStart, seed, today } from "./lib/intelligence-fixture";
-import type { CatalogView } from "@/lib/intelligence/catalog/types";
-import { createClient } from "@/lib/pms/clients";
-import { createProject } from "@/lib/pms/projects";
-import { createTask } from "@/lib/pms/tasks";
-import { createEmployee } from "@/lib/hrms/employees";
-import { createDepartment } from "@/lib/hrms/departments";
-import { createInvoice } from "@/lib/fms/invoices";
-import { createExpense } from "@/lib/prms/expenses";
-import { createVendor } from "@/lib/prms/vendors";
+import type { CatalogView } from "@/lib/products/databrain-ai/catalog/types";
+import { createClient } from "@/lib/products/sprintos/clients";
+import { createProject } from "@/lib/products/sprintos/projects";
+import { createTask } from "@/lib/products/sprintos/tasks";
+import { createEmployee } from "@/lib/products/talentos/employees";
+import { createDepartment } from "@/lib/products/talentos/departments";
+import { createInvoice } from "@/lib/products/cashflow-ai/invoices";
+import { createExpense } from "@/lib/products/spendiq/expenses";
+import { createVendor } from "@/lib/products/spendiq/vendors";
 import { createLeadRecord } from "@/lib/lead-management/records";
 
 let passed = 0;
@@ -59,7 +59,7 @@ async function main() {
   const company = (id: string, slug: string, extra: Record<string, unknown> = {}) => ({ _id: id as never, slug, name: slug, status: "active", isPlatformOwner: false, createdAt: now, updatedAt: now, ...extra });
   await db.collection("companies").insertMany([company(A, "alpha"), company(B, "beta"), company(STARTER, "starter"), company(NOPMS, "nopms", { enabledModules: ["hrms", "lms", "fms"] }), company(REAL, "real")]);
   await listPlans();
-  // Every real plan has every panel; this test needs a plan without Finance and Procurement, so Starter is narrowed here (test database only).
+  // Every real plan has every product; this test needs a plan without Finance and Procurement, so Starter is narrowed here (test database only).
   await db.collection("billing_plans").updateOne({ _id: "starter" as never }, { $set: { modules: ["hrms", "pms", "lms", "sop", "cms"] } });
   await db.collection("companies").updateOne({ _id: STARTER as never }, { $set: { subscription: { planId: "starter", status: "active", interval: "monthly", trialEndsAt: null, currentPeriodStart: now, currentPeriodEnd: null, cancelAtPeriodEnd: false, graceEndsAt: null, provider: null, updatedAt: now } } });
 
@@ -91,7 +91,7 @@ async function main() {
   const vAdmin = await view(A, admin);
 
   console.log("registry");
-  await check("keys unique; entities typed; collections are the panels' own; relations resolve", () => {
+  await check("keys unique; entities typed; collections are the products' own; relations resolve", () => {
     const keys = new Set<string>();
     for (const e of ENTITIES) {
       assert.ok(!keys.has(e.key), `duplicate entity ${e.key}`);
@@ -124,7 +124,7 @@ async function main() {
     const risky = /salary|payroll|password|hash|token|secret|bankd|accountnumber|ifsc|\bpan\b|gstin|aadhaar|phone|email|costrate|billablerate|dateofbirth|reason|decisionnote|message|notes|description|contactperson|raisedby|transactionreference/i;
     for (const e of ENTITIES) for (const f of e.fields) if (risky.test(f.key) || risky.test(f.path)) assert.ok(f.sensitive, `${e.key}.${f.key} must be sensitive`);
   });
-  await check("every non-computed registry path exists in documents written by the panels' real create functions", async () => {
+  await check("every non-computed registry path exists in documents written by the products' real create functions", async () => {
     await runAsCompany(REAL, async () => {
       const actor = "tester";
       const dept = await createDepartment({ name: "Eng", code: "ENG" }, actor);
@@ -163,9 +163,9 @@ async function main() {
   await check("finance-only, PMS manager, HR, sales, procurement roles each get exactly their entities", async () => {
     assert.deepEqual(keysOf(await view(A, user(["finance_manager"]))), FIN);
     assert.deepEqual(keysOf(await view(A, user(["pms_admin"]))), PMS);
-    assert.deepEqual(keysOf(await view(A, user(["pms_manager"]))), ["clients", "employees", "timesheets"], "a project manager sees only their own projects in PMS, so no company-wide project/task/team data; clients and the timesheet review page (which shows everyone's) are panel-wide");
+    assert.deepEqual(keysOf(await view(A, user(["pms_manager"]))), ["clients", "employees", "timesheets"], "a project manager sees only their own projects in PMS, so no company-wide project/task/team data; clients and the timesheet review page (which shows everyone's) are product-wide");
     assert.equal((await view(A, user(["pms_manager"]))).restricted.some((r) => r.key === "projects"), true, "projects are listed as restricted by label");
-    assert.deepEqual(keysOf(await view(A, user(["pms_manager"], { "pms.canViewAllProjects": true }))), PMS, "the override that widens the PMS panel widens this too");
+    assert.deepEqual(keysOf(await view(A, user(["pms_manager"], { "pms.canViewAllProjects": true }))), PMS, "the override that widens the PMS product widens this too");
     assert.deepEqual(keysOf(await view(A, user(["pms_admin"], { "pms.canViewAllProjects": false }))), ["clients", "employees", "timesheets"], "and the one that narrows it narrows this (timesheet review is a separate capability in PMS)");
     assert.deepEqual(keysOf(await view(A, user(["hr"]))), HR);
     assert.deepEqual(keysOf(await view(A, user(["lms_manager"]))), ["leads"]);
@@ -174,7 +174,7 @@ async function main() {
     assert.deepEqual(keysOf(await view(A, user(["prms_admin"]))), ["expenses", "purchase_orders", "vendors"]);
     assert.deepEqual(keysOf(await view(A, user(["dept_manager"]))), [], "department managers only see their own department's spend in PRMS");
   });
-  await check("employee-tier users and users with no panel roles get an empty view (and nothing queryable)", async () => {
+  await check("employee-tier users and users with no product roles get an empty view (and nothing queryable)", async () => {
     for (const roles of [["pms_employee", "employee"], [], ["prms_employee"], ["intelligence_user"]]) {
       const v = await view(A, user(roles));
       assert.equal(v.entities.size, 0, roles.join());
@@ -202,7 +202,7 @@ async function main() {
   await check("a Super Admin override that removes 'see all employees' is honoured", async () => {
     assert.ok(keysOf(await view(A, user(["hr"], { "hrms.canViewAllEmployees": false }))).length === 0);
   });
-  await check("panels outside the plan, or switched off, are simply absent", async () => {
+  await check("products outside the plan, or switched off, are simply absent", async () => {
     assert.deepEqual(keysOf(await view(STARTER, admin)), ["clients", "departments", "employees", "leads", "leave_requests", "project_members", "projects", "tasks", "timesheets"], "Starter plan has no Finance/Procurement");
     assert.deepEqual(keysOf(await view(NOPMS, admin)), ["departments", "employees", "invoices", "leads", "leave_requests", "receipts"], "Projects switched off");
   });
@@ -420,7 +420,7 @@ async function main() {
     await rejected(A, vAdmin, { entity: "clients", aggregates: [{ op: "count" }], filters: [{ field: "industry", op: "in", value: Array.from({ length: 51 }, (_, n) => `i${n}`) }] });
     await rejected(A, vAdmin, { entity: "clients", select: [{ field: "companyName" }], limit: 0 });
     // The model is shown at most 60 rows (the server keeps up to 500).
-    const { resultForModel } = await import("@/lib/intelligence/query/execute");
+    const { resultForModel } = await import("@/lib/products/databrain-ai/query/execute");
     await runAsCompany(A, async () => void (await d.collection("lead_records").insertMany(Array.from({ length: 200 }, (_, n) => ({ ...fixture("A", { amount: 1, extraActive: 0 }).l[0], _id: `A-m${n}` as never, code: `M${n}` })) as never[])));
     const big = await ok(A, vAdmin, { entity: "leads", select: [{ field: "code" }], limit: 150 });
     const shown = resultForModel(big);
@@ -454,7 +454,7 @@ async function main() {
     }
   });
   await check("the query module has no write path at all (no write call exists in its source)", () => {
-    const dir = path.join(process.cwd(), "src/lib/intelligence");
+    const dir = path.join(process.cwd(), "src/lib/databrain-ai");
     const files: string[] = [];
     const walk = (p: string) => {
       for (const f of fs.readdirSync(p, { withFileTypes: true })) {

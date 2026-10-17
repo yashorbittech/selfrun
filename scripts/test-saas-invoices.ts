@@ -256,7 +256,7 @@ async function main() {
   eq((await getSaasInvoiceForViewer(r1!.id, { companyId: owner, isPlatformAdmin: true }))?._id, r1!.id, "platform admin → any");
   ok((await listCompanySaasInvoices(inter)).every((d) => d.companyId === inter), "company list only has its own documents");
 
-  // ── Panel list + filters + totals ──
+  // ── Product list + filters + totals ──
   const all = await listSaasInvoices();
   const cnCount = await db.collection("saas_invoices").countDocuments({ kind: "credit_note" });
   eq(all.totals.creditCount, cnCount, "credit notes counted");

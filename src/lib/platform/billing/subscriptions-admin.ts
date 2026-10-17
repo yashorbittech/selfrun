@@ -19,7 +19,7 @@ import {
 import type { BillingInterval, CompanySubscription, SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
- * Platform Panel → Subscriptions: every company's subscription, and the
+ * Platform Console → Subscriptions: every company's subscription, and the
  * owner's manual actions on one (all audited, all through `applyChange` so
  * revenue history stays right). Razorpay-backed changes go through the same
  * functions the company uses; manual ones (no Razorpay subscription) only
@@ -200,7 +200,7 @@ export async function adminExtendTrial(companyId: string, days: number, actorId:
 }
 
 /**
- * Complimentary = never billed, every panel, no limits (stored status
+ * Complimentary = never billed, every product, no limits (stored status
  * "internal"). A live Razorpay subscription is canceled first. Turning it off
  * puts the company on a fresh trial of its plan (default trial length), or — `after: "subscribe"` — straight to "must subscribe": no trial,
  * the workspace is read-only until it buys a plan.

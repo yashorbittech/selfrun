@@ -151,9 +151,9 @@ Before Vercel, the app wrote files to a folder. Go back to that: **one folder on
 | File | Change |
 | --- | --- |
 | `src/lib/storage/blob.ts` | Replace the body with the disk version below (same three function names, same results) |
-| `src/lib/cms/media.ts`, `src/lib/smms/media.ts` | Replace `head(pathname)` from `@vercel/blob` with `statObject(pathname)` below |
-| `src/app/api/cms/media/upload/route.ts`, `src/app/api/smms/media/upload/route.ts` | Accept the file in the request itself (multipart) instead of issuing a Blob token |
-| `src/lib/useCmsMediaUpload.ts`, `src/components/smms/useMediaUpload.ts` | `POST` the file to that route instead of calling Blob's `upload()` |
+| `src/lib/products/sitecraft-ai/media.ts`, `src/lib/products/viralpulse-ai/media.ts` | Replace `head(pathname)` from `@vercel/blob` with `statObject(pathname)` below |
+| `src/app/(products)/api/sitecraft-ai/media/upload/route.ts`, `src/app/(products)/api/viralpulse-ai/media/upload/route.ts` | Accept the file in the request itself (multipart) instead of issuing a Blob token |
+| `src/lib/useCmsMediaUpload.ts`, `src/components/products/viralpulse-ai/useMediaUpload.ts` | `POST` the file to that route instead of calling Blob's `upload()` |
 | `package.json` | Remove `@vercel/blob` |
 
 **The new `src/lib/storage/blob.ts`:**
@@ -221,7 +221,7 @@ export async function statObject(storageKey: string): Promise<{ size: number; co
 no such limit, so the browser can send the file to the app: in each `upload/route.ts` keep the existing sign-in check and the plan-limit
 check, then `const form = await req.formData(); const file = form.get("file") as File; await putObject(folder, name, Buffer.from(await file.arrayBuffer()), file.type)`,
 store the record in MongoDB exactly as today, and return the same JSON the page already expects. In the two upload hooks replace `upload(...)`
-with `fetch("/api/cms/media/upload", { method: "POST", body: formData })` (use `XMLHttpRequest` if you want a progress bar).
+with `fetch("/api/sitecraft-ai/media/upload", { method: "POST", body: formData })` (use `XMLHttpRequest` if you want a progress bar).
 
 > [!WARNING]
 > Files are private (HR documents, resumes, finance). They must stay behind the app's authenticated routes. The uploads folder is **never** served directly by Caddy.
@@ -238,11 +238,11 @@ import "server-only";
 /** The same ten daily jobs `vercel.json` ran (UTC), now run by the app itself. */
 const JOBS: { path: string; h: number; m: number }[] = [
   { path: "/api/wallet/expiry-sweep", h: 2, m: 30 },
-  { path: "/api/sop/cron", h: 3, m: 0 },
-  { path: "/api/seo/cron", h: 3, m: 30 },
-  { path: "/api/dlms/cron", h: 4, m: 0 },
-  { path: "/api/smms/cron", h: 4, m: 30 },
-  { path: "/api/ots/cron", h: 5, m: 0 },
+  { path: "/api/playbook-ai/cron", h: 3, m: 0 },
+  { path: "/api/rankmax-ai/cron", h: 3, m: 30 },
+  { path: "/api/cybervault/cron", h: 4, m: 0 },
+  { path: "/api/viralpulse-ai/cron", h: 4, m: 30 },
+  { path: "/api/evaliq/cron", h: 5, m: 0 },
   { path: "/api/platform/domains/cron", h: 5, m: 30 },
   { path: "/api/platform/billing/trials/cron", h: 6, m: 0 },
   { path: "/api/platform/billing/subscriptions/cron", h: 6, m: 0 },
@@ -875,12 +875,12 @@ Test **before** DNS changes. Send the real host names to the server without touc
   | --- | --- | --- |
   | 1 | Home, Features, Pricing, Offers, Gallery, Docs | Pages and images load; dark mode works |
   | 2 | Sign up a test company | Verification email arrives; workspace is created |
-  | 3 | Sign in to its panels at `<slug>-app.…` | Dashboard loads |
+  | 3 | Sign in to its products at `<slug>-app.…` | Dashboard loads |
   | 4 | Upload a logo, an HR document, a CMS image; download; delete | Works; file appears under `/data/uploads`; storage meter goes down on delete |
   | 5 | Team Chat in two browsers for 5+ minutes | Live updates keep flowing |
   | 6 | AI answer and a CSV import | Complete without a timeout |
   | 7 | Wrong password 10 times | Rate limit applies; the log shows your real IP, not the container's |
-  | 8 | Run one cron by hand: `docker exec selfrun-web node -e "fetch('http://127.0.0.1:3000/api/sop/cron',{headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(r=>r.text()).then(console.log)"` | JSON with `ok: true` |
+  | 8 | Run one cron by hand: `docker exec selfrun-web node -e "fetch('http://127.0.0.1:3000/api/playbook-ai/cron',{headers:{authorization:'Bearer '+process.env.CRON_SECRET}}).then(r=>r.text()).then(console.log)"` | JSON with `ok: true` |
   | 9 | `curl https://www.selfrunbusiness.com/api/internal/tls-ask?domain=x` (through Caddy) | `404` (hidden from outside) |
   | 10 | Reboot the server (`sudo reboot`) | Everything comes back by itself in about a minute |
   | 11 | Stop and start the web container while browsing | Site recovers; no data lost |
@@ -903,7 +903,7 @@ Test **before** DNS changes. Send the real host names to the server without touc
 | 3 | **Encryption keys, VAPID keys, secrets** | Vercel environment | `/opt/selfrun/.env` | Copy exactly (Part 5.2) |
 | 4 | **Automatic addresses** (`<slug>.selfrunbusiness.com`, `<slug>-app.…`) | Vercel wildcard | Route 53 wildcard → server | DNS switch at cut-over (Part 14) |
 | 5 | **Customers' own domains** (`acme.com`, `app.acme.com`) | Attached to the Vercel project; the customer's DNS points at Vercel | Server (Caddy on-demand HTTPS) | Bridge, then each customer changes DNS (Part 15) |
-| 6 | **Platform settings saved in the database** (Platform Panel → Integrations: Vercel token, email provider, payment keys) | Atlas (moves with 1) | same | Edit after the move (Part 14.9) |
+| 6 | **Platform settings saved in the database** (Platform Console → Integrations: Vercel token, email provider, payment keys) | Atlas (moves with 1) | same | Edit after the move (Part 14.9) |
 | 7 | **Scheduled jobs** | `vercel.json` | The in-app scheduler | Disable Vercel's at cut-over |
 | 8 | **Third-party callbacks** that point at your addresses (Razorpay webhooks, Google/Meta/LinkedIn redirect URLs) | The same domain names | unchanged | Re-check only |
 | 9 | **Desktop/mobile app builds** (GitHub Actions) | GitHub | unchanged | The app only calls GitHub's API |
@@ -1023,7 +1023,7 @@ Count: the number of blobs (`vercel blob list` or the script's `copied + skipped
 
 ### 13.5 Rehearse the app against the copy
 
-With the copied data in place, run the full Part 10 checklist **with real customer data** (use a company of your own, or a test company that exists in the copy). Check: a company's website loads, its panels load, its documents open, a payment page loads, the Domains page lists its domains.
+With the copied data in place, run the full Part 10 checklist **with real customer data** (use a company of your own, or a test company that exists in the copy). Check: a company's website loads, its products load, its documents open, a payment page loads, the Domains page lists its domains.
 
 > ✅ **Checkpoint:** the counts match, files open, and a real company works end to end on the new server (still reached only through your hosts-file entries).
 
@@ -1041,7 +1041,7 @@ With the copied data in place, run the full Part 10 checklist **with real custom
 
 **The cut-over** (follow in order; times are a guide)
 
-- **14.4** *Freeze writes on the old side.* Platform Panel → **Maintenance** → *takeover* for the window (visitors see the maintenance screen; APIs, webhooks and payment links keep working, which is fine because the freeze is about people changing data). Also pause outgoing jobs: in Vercel remove or empty `crons` for the final deploy (or pause the project's cron jobs) so no job runs from there again.
+- **14.4** *Freeze writes on the old side.* Platform Console → **Maintenance** → *takeover* for the window (visitors see the maintenance screen; APIs, webhooks and payment links keep working, which is fine because the freeze is about people changing data). Also pause outgoing jobs: in Vercel remove or empty `crons` for the final deploy (or pause the project's cron jobs) so no job runs from there again.
 - **14.5** *Final data copy.* Run Part 13.1 again (a fresh dump and restore with `--drop`), then Part 13.3 (files, only the new ones). Compare counts (Part 13.2, 13.4).
 - **14.6** *Start serving from the new server.* On the server: `cd /opt/selfrun && sudo docker compose up -d`. Confirm in the log: `[scheduler] 10 daily jobs scheduled (UTC)`, no errors, and `curl --resolve www.selfrunbusiness.com:443:<SERVER_IP> https://www.selfrunbusiness.com/api/health` is `{"ok":true}`.
 - **14.7** *Switch our DNS.* In **Route 53** the records from Part 3.3 already exist. Make them live:
@@ -1049,7 +1049,7 @@ With the copied data in place, run the full Part 10 checklist **with real custom
   - Otherwise at your **registrar** replace the name servers with the four **NS** values of the Route 53 zone (Part 3.1). With the 60-second TTL most resolvers follow within minutes; some take longer.
   Check: `dig +short www.selfrunbusiness.com` returns `<SERVER_IP>`, and `dig +short acme.selfrunbusiness.com` too.
 - **14.8** *Replace the Vercel app with the bridge.* In Vercel, **attach the bridge project to the same domains** the old project holds (Part 15.3) and remove them from the old project, so every customer domain now lands on the bridge. From this moment the old app and its database are no longer used by anyone.
-- **14.9** *Fix the platform's saved settings.* Platform Panel → **Integrations**: set the **domain provider to Manual** (remove the saved Vercel token) and set the **email provider to SES** (or leave Resend). These are stored in the database, so they override the `.env` values until you change them.
+- **14.9** *Fix the platform's saved settings.* Platform Console → **Integrations**: set the **domain provider to Manual** (remove the saved Vercel token) and set the **email provider to SES** (or leave Resend). These are stored in the database, so they override the `.env` values until you change them.
 - **14.10** *End maintenance mode.*
 - **14.11** *Watch for 30 minutes:* `docker compose logs -f web caddy`, a fresh sign-up end to end, a file upload, an email, a customer's own domain (it should work through the bridge), the Razorpay test or a payment page.
 - **14.12** *Keep the old side untouched* (Atlas cluster, Blob store, the old Vercel deployment as an unattached project) for **30 days** as the rollback copy.

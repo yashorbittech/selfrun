@@ -27,7 +27,7 @@ const ENTITIES: EntityDef[] = [...PMS_ENTITIES, ...HRMS_ENTITIES, ...LMS_ENTITIE
 const ACTIONS: ActionDef[] = [...HRMS_ACTIONS, ...FMS_ACTIONS, ...PMS_ACTIONS, ...LMS_ACTIONS, ...TMS_ACTIONS, ...PRMS_ACTIONS, ...SMMS_ACTIONS, ...SOP_ACTIONS, ...DLMS_ACTIONS, ...SEO_ACTIONS, ...OTS_ACTIONS, ...LPMS_ACTIONS, ...AIBOTS_ACTIONS, ...MESSENGER_ACTIONS, ...INTELLIGENCE_ACTIONS, ...WORKSPACE_ACTIONS, ...PLATFORM_ACTIONS, ...SUPPORT_ACTIONS, ...PORTAL_ACTIONS, ...CMS_EXTRA_ACTIONS];
 const REPORTS: ReportDef[] = [...PMS_REPORTS, ...HRMS_REPORTS, ...LMS_REPORTS, ...FMS_REPORTS, ...TMS_REPORTS, ...PRMS_REPORTS, ...SOP_REPORTS, ...SEO_REPORTS, ...OTS_REPORTS, ...MESSENGER_REPORTS, ...INTELLIGENCE_REPORTS, ...WORKSPACE_REPORTS, ...PLATFORM_REPORTS, ...SUPPORT_REPORTS, ...PORTAL_REPORTS, ...CMS_EXTRA_REPORTS];
 
-/** Which panels a given assistant spans: its own, or (from the workspace) every data panel. */
+/** Which products a given assistant spans: its own, or (from the workspace) every data product. */
 export function scopePanels(panel: string): string[] {
   return panel === "hub" || panel === "workspace" ? [...DATA_PANELS, "workspace", "support"] : [panel];
 }

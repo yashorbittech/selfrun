@@ -12,7 +12,7 @@ export function showVerifyStrip(f: { emailVerified: boolean; isPlatformOwnerComp
 
 /** The strip is hidden on the verification page itself. */
 export function verifyStripHiddenOn(pathname: string): boolean {
-  return pathname.startsWith("/workspace/verify-email");
+  return pathname.startsWith("/commandos/verify-email");
 }
 
 /**

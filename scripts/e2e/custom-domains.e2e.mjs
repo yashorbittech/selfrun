@@ -65,16 +65,16 @@ const addAlert = (text) => page.getByRole("alert").filter({ hasText: text }).wai
 
 try {
   await step("signs in as the company owner", async () => {
-    await page.goto(`${BASE}/workspace/login`);
+    await page.goto(`${BASE}/commandos/login`);
     await page.getByLabel("Email").fill(EMAIL);
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
     await page.getByRole("button", { name: "Sign in" }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/workspace/login"));
+    await page.waitForURL((url) => !url.pathname.startsWith("/commandos/login"));
     assert.ok(!page.url().includes("/change-password"), "account has a forced password change pending");
   });
 
   await step("settings hub links to Domains", async () => {
-    await page.goto(`${BASE}/workspace/settings`);
+    await page.goto(`${BASE}/commandos/settings`);
     await page.getByRole("link", { name: /Domains/ }).click();
     await page.waitForURL(/\/workspace\/settings\/domains$/);
     await page.getByText("Domains", { exact: true }).first().waitFor();

@@ -79,7 +79,7 @@ export function inQuietHours(q: QuietHours, now = new Date()): boolean {
 
 /**
  * Picks a category for a stored notification type. Callers that know better pass the category explicitly; this is the
- * fallback for the many panel-specific type names (`leave_requested`, `sop_overdue`, `test_assigned`, …).
+ * fallback for the many product-specific type names (`leave_requested`, `sop_overdue`, `test_assigned`, …).
  */
 export function categorizeType(type: string | null | undefined): PushCategory {
   const t = (type ?? "").toLowerCase();

@@ -2,7 +2,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
 import { getDb } from "@/lib/mongodb";
-import { recordAudit } from "@/lib/fms/audit";
+import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 import { decryptPlatformSecret, encryptPlatformSecret, isPlatformEncryptionConfigured, last4, type EncryptedValue } from "@/lib/platform/crypto";
 import { currentCompanyId, isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getCompany } from "@/lib/platform/tenancy/companies";
@@ -33,13 +33,13 @@ import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
  * views carry the last 4 characters only. Nothing here logs a secret.
  *
  * Webhooks: each company registers
- *   /api/fms/webhooks/razorpay/<companyId>   (customer payments)
- *   /api/hrms/payroll/webhook/<companyId>    (RazorpayX payouts)
+ *   /api/cashflow-ai/webhooks/razorpay/<companyId>   (customer payments)
+ *   /api/talentos/payroll/webhook/<companyId>    (RazorpayX payouts)
  * The company comes from the URL, not the Host header, so the URL keeps
  * working when the company adds, removes or re-points custom domains. The
  * id isn't a secret — the HMAC signature, checked with THAT company's
  * webhook secret, is what authenticates the call. The older host-based URLs
- * (`/api/fms/webhooks/razorpay`, `/api/hrms/payroll/webhook`) still work,
+ * (`/api/cashflow-ai/webhooks/razorpay`, `/api/talentos/payroll/webhook`) still work,
  * resolving the company from the Host — the platform owner's existing
  * Razorpay dashboard points at those.
  */
@@ -226,7 +226,7 @@ async function webhookOrigin(companyId: string): Promise<string> {
 
 export function paymentWebhookPaths(companyId: string): { payments: string; payouts: string } {
   const id = encodeURIComponent(companyId);
-  return { payments: `/api/fms/webhooks/razorpay/${id}`, payouts: `/api/hrms/payroll/webhook/${id}` };
+  return { payments: `/api/cashflow-ai/webhooks/razorpay/${id}`, payouts: `/api/talentos/payroll/webhook/${id}` };
 }
 
 export async function getPaymentAccountView(): Promise<PaymentAccountView> {

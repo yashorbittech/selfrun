@@ -33,7 +33,7 @@ export interface MultiOption {
 }
 
 /**
- * A searchable multi-select: pick any number of options from a long list. Chips show the choices, the panel has a
+ * A searchable multi-select: pick any number of options from a long list. Chips show the choices, the product has a
  * search box and (optionally) grouped options with per-group "all / none". Each choice is also rendered as a hidden
  * input named `name`, so a plain <form> submission carries them all.
  */
@@ -87,7 +87,7 @@ export default function SearchMultiSelect({
   const [notice, setNotice] = useState("");
   const draftRef = useRef<HTMLInputElement>(null);
   const [active, setActive] = useState(-1);
-  // Desktop: the panel is fixed to the screen at the field's position (so no card or section can clip it), opening upward when there is more room above.
+  // Desktop: the product is fixed to the screen at the field's position (so no card or section can clip it), opening upward when there is more room above.
   const [anchor, setAnchor] = useState<{ left: number; width: number; top?: number; bottom?: number; maxH: number } | null>(null);
   const close = () => {
     setOpen(false);

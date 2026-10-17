@@ -82,7 +82,7 @@ export interface Addon {
   /** Per unit, per cycle, pre-tax paise. */
   priceMonthly: number;
   priceYearly: number;
-  /** limit = raises a plan limit by `amountPerUnit` per unit; module = unlocks a panel. */
+  /** limit = raises a plan limit by `amountPerUnit` per unit; module = unlocks a product. */
   type: "limit" | "module";
   limitKey: AddonLimitKey | null;
   amountPerUnit: number | null;

@@ -1,10 +1,10 @@
 import "server-only";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { pickStarterPack } from "@/lib/platform/website/starter-packs";
-import { getActiveThemeKey, installThemePreset, listThemes, setActiveTheme } from "@/lib/cms/theme";
-import { THEME_PRESETS, getThemePreset } from "@/lib/cms/theme-presets";
-import type { ThemeTokens } from "@/lib/cms/theme-shared";
-import type { ThemeComponentSelections } from "@/lib/cms/component-variants";
+import { getActiveThemeKey, installThemePreset, listThemes, setActiveTheme } from "@/lib/products/sitecraft-ai/theme";
+import { THEME_PRESETS, getThemePreset } from "@/lib/products/sitecraft-ai/theme-presets";
+import type { ThemeTokens } from "@/lib/products/sitecraft-ai/theme-shared";
+import type { ThemeComponentSelections } from "@/lib/products/sitecraft-ai/component-variants";
 
 /** One selectable theme in the workspace theme picker (setup wizard and Settings → Branding). */
 export interface ThemeOption {
@@ -29,7 +29,7 @@ export async function listThemeOptions(): Promise<{ options: ThemeOption[]; acti
   return { options, activeKey, appliedKey };
 }
 
-/** Makes `key` the company's live theme — website and every panel — installing it from the library first if needed. */
+/** Makes `key` the company's live theme — website and every product — installing it from the library first if needed. */
 export async function applyTheme(key: string, actorId: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (getThemePreset(key)) {
     const installed = await installThemePreset(key, actorId);

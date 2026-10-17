@@ -21,7 +21,7 @@ const manualDomainProvider: DomainProvider = {
 const manualStatus: DomainStatus = { attached: true, verified: true, dnsConfigured: true, records: [] };
 
 /**
- * Platform Panel → Integrations, falling back to `DOMAIN_PROVIDER` (`vercel` |
+ * Platform Console → Integrations, falling back to `DOMAIN_PROVIDER` (`vercel` |
  * `manual`) and the `VERCEL_*` env vars; with nothing set it's Vercel when its
  * credentials exist, else manual.
  */

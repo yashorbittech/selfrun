@@ -1,10 +1,10 @@
 "use client";
 
-import { PanelHeading } from "@/components/platform/PanelsProvider";
+import { PanelHeading, ProductLauncherForPanel } from "@/components/platform/PanelsProvider";
 import HelpLauncher from "@/components/support/HelpLauncher";
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import type { NavSection } from "@/lib/workspace/nav";
+import type { NavSection } from "@/lib/products/commandos/nav";
 import HubMobileSidebar from "@/components/hub/HubMobileSidebar";
 import PanelSearch from "@/components/platform/PanelSearch";
 import NotificationBell from "@/components/platform/hub/NotificationBell";
@@ -16,11 +16,12 @@ export default function HubTopbar({ email, nav, unread = 0 }: { email: string; n
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <HubMobileSidebar nav={nav} />
-      <PanelHeading panel="workspace" fallbackTitle="Workspace" fallbackDescription="Your panels, analytics & settings" />
+      <PanelHeading panel="workspace" fallbackTitle="Workspace" fallbackDescription="Your products, analytics & settings" />
       <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <ProductLauncherForPanel panel="workspace" />
         <HelpLauncher />
         <button
           type="button"
@@ -38,7 +39,7 @@ export default function HubTopbar({ email, nav, unread = 0 }: { email: string; n
         onClose={() => setAiOpen(false)}
         panelId="hub"
         panelTitle="Workspace Hub"
-        panelDescription="Your panels, analytics & settings"
+        panelDescription="Your products, analytics & settings"
       />
     </header>
   );

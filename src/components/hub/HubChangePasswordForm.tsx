@@ -3,11 +3,11 @@
 import { useActionState, useId, useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import GlassCard from "@/components/lms/GlassCard";
+import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { changeHubPasswordAction, type ChangePasswordState } from "@/app/workspace/change-password/actions";
+import { changeHubPasswordAction, type ChangePasswordState } from "@/app/(products)/commandos/change-password/actions";
 
 const initial: ChangePasswordState = {};
 

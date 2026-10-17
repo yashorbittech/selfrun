@@ -17,7 +17,7 @@ import { formatDateTime, formatDate } from "@/lib/utils";
 import type { SerializedCampaign } from "@/lib/offers/campaigns";
 import type { SerializedOffer } from "@/lib/offers/offers";
 import type { UpcomingCampaign } from "@/lib/offers/state";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 function Unlocks({ startsAt }: { startsAt: string }) {
   const remaining = useRemaining(startsAt);

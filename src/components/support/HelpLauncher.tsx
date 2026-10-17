@@ -10,7 +10,7 @@ import HelpChat from "@/components/support/HelpChat";
 import { captureContext, rememberContext } from "@/lib/support/client-context";
 
 /**
- * The topbar Help button, present in every panel. It opens the AI Help chatbot as a side drawer that never blocks the page
+ * The topbar Help button, present in every product. It opens the AI Help chatbot as a side drawer that never blocks the page
  * (no backdrop), and remembers where the user was so answers and requests carry that context.
  */
 export default function HelpLauncher() {
@@ -55,12 +55,12 @@ export default function HelpLauncher() {
                       <LifeBuoy className="size-4" />
                     </span>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-foreground">SelfRun Assistant · {supportName}</p>
-                      <p className="truncate text-[11px] text-muted-foreground">AI help from the SelfRun AI team</p>
+                      <p className="truncate text-sm font-bold text-foreground">Help Assistant · {supportName}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">Workspace help and guidance</p>
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    <Link href="/support/assistant" onClick={() => setOpen(false)} title="Open the Help Center" aria-label="Open the Help Center" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+                    <Link href="/resolveiq/assistant" onClick={() => setOpen(false)} title="Open the Help Center" aria-label="Open the Help Center" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                       <ExternalLink className="size-4" />
                     </Link>
                     <button type="button" onClick={() => setOpen(false)} aria-label="Close help" className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">

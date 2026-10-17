@@ -1,6 +1,6 @@
 "use client";
 
-import { PanelHeading } from "@/components/platform/PanelsProvider";
+import { PanelHeading, ProductLauncherForPanel } from "@/components/platform/PanelsProvider";
 import { Sparkles } from "lucide-react";
 import { useAskAiOpen } from "@/lib/ai/use-ask-ai-open";
 import AskAiDrawer from "@/components/platform/AskAiDrawer";
@@ -13,11 +13,12 @@ export default function SupportTopbar({ openRequests, unread }: { openRequests: 
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <SupportMobileSidebar openRequests={openRequests} />
-      <PanelHeading panel="support" fallbackTitle="Help & Support" fallbackDescription="AI help, guides & requests to SelfRun AI" />
+      <PanelHeading panel="support" fallbackTitle="Help & Support" fallbackDescription="AI help, guides and support requests" />
       <div className="flex min-w-0 shrink-0 justify-end md:flex-1 md:shrink md:justify-center">
         <PanelSearch />
       </div>
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+        <ProductLauncherForPanel panel="support" />
         <button
           type="button"
           onClick={() => setAiOpen(!aiOpen)}
@@ -27,9 +28,9 @@ export default function SupportTopbar({ openRequests, unread }: { openRequests: 
         >
           <Sparkles className="size-4" />
         </button>
-        <PanelBellLink href="/support/notifications" unread={unread} />
+        <PanelBellLink href="/resolveiq/notifications" unread={unread} />
       </div>
-      <AskAiDrawer open={aiOpen} onClose={() => setAiOpen(false)} panelId="support" panelTitle="Help & Support" panelDescription="Get help using this panel" />
+      <AskAiDrawer open={aiOpen} onClose={() => setAiOpen(false)} panelId="support" panelTitle="Help & Support" panelDescription="Get help using this product" />
     </header>
   );
 }

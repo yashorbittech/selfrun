@@ -7,7 +7,7 @@ import { getPlatformAccessForUser, type PlatformAccess } from "./roles";
 import { hasPermission, type PlatformPermission } from "./permissions";
 
 /**
- * Platform Panel access. The panel is for the platform owner company's
+ * Platform Console access. The product is for the platform owner company's
  * accounts only: on any other company's host it doesn't exist (404) — a
  * workspace must not even learn it's there.
  *
@@ -40,15 +40,15 @@ async function gate(): Promise<PlatformUser> {
   const res = await loadPlatformUser();
   if ("user" in res) return res.user;
   if (res.reason === "not_owner") notFound();
-  if (res.reason === "signed_out") redirect("/workspace/login");
-  redirect("/workspace");
+  if (res.reason === "signed_out") redirect("/commandos/login");
+  redirect("/commandos");
 }
 
 export function can(user: Pick<PlatformUser, "platform"> | null | undefined, perm: PlatformPermission): boolean {
   return Boolean(user && hasPermission(user.platform.permissions, perm));
 }
 
-/** Any platform user — the panel shell and the dashboard. */
+/** Any platform user — the product shell and the dashboard. */
 export async function requirePlatformAccess(): Promise<PlatformUser> {
   return gate();
 }
@@ -56,7 +56,7 @@ export async function requirePlatformAccess(): Promise<PlatformUser> {
 /** Pages: needs `perm`; otherwise back to the dashboard with a notice. */
 export async function requirePlatformPermission(perm: PlatformPermission): Promise<PlatformUser> {
   const user = await gate();
-  if (!can(user, perm)) redirect(`/platform?denied=${encodeURIComponent(perm)}`);
+  if (!can(user, perm)) redirect(`/console?denied=${encodeURIComponent(perm)}`);
   return user;
 }
 
@@ -68,12 +68,12 @@ export async function checkPlatformPermission(perm: PlatformPermission): Promise
 }
 
 /**
- * Full Platform Panel access (Platform Owner, or a legacy super_admin). Kept
+ * Full Platform Console access (Platform Owner, or a legacy super_admin). Kept
  * for existing callers; pages not yet moved to a specific permission stay
  * owner-only, so a limited role never sees them by accident.
  */
 export async function requirePlatformAdmin(): Promise<PlatformUser> {
   const user = await gate();
-  if (!user.platform.permissions.includes("*")) redirect("/platform?denied=owner");
+  if (!user.platform.permissions.includes("*")) redirect("/console?denied=owner");
   return user;
 }

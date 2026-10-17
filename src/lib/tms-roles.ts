@@ -1,10 +1,10 @@
 /**
- * TMS (Training Management System) role model. Like the HRMS and PMS panels,
+ * TMS (Training Management System) role model. Like the HRMS and PMS products,
  * TMS access is gated on the shared `admin_users.roles` array — there is no
- * separate TMS user store. An account can sign into `/tms` only if it carries
+ * separate TMS user store. An account can sign into `/cohort-ai` only if it carries
  * at least one of these roles (see `verifyTmsCredentials` in `tms-auth.ts`).
  *
- * `super_admin` is the same literal used by the LMS / HRMS / PMS panels and
+ * `super_admin` is the same literal used by the LMS / HRMS / PMS products and
  * implicitly grants full TMS access.
  *
  * The capability predicates below (everything except `hasTmsAccess`,
@@ -19,7 +19,7 @@ export const TMS_ROLES = ["super_admin", "tms_admin", "tms_manager", "mentor", "
 
 export type TmsRole = (typeof TMS_ROLES)[number];
 
-/** Roles that open the full staff panel (dashboard, programs, batches, students…). */
+/** Roles that open the full staff product (dashboard, programs, batches, students…). */
 export const TMS_STAFF_ROLES: TmsRole[] = ["super_admin", "tms_admin", "tms_manager", "mentor"];
 
 export const TMS_ROLE_META: Record<TmsRole, { label: string; description: string }> = {
@@ -55,17 +55,17 @@ export function normalizeTmsRoles(value: unknown): TmsRole[] {
   return Array.from(new Set(value.filter(isTmsRole)));
 }
 
-/** Can open the TMS panel at `/tms/*` (staff panel or student portal). */
+/** Can open the TMS product at `/cohort-ai/*` (staff product or student portal). */
 export function hasTmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeTmsRoles(roles).length > 0;
 }
 
-/** Can open the full staff panel (dashboard, programs, batches, students, settings). */
+/** Can open the full staff product (dashboard, programs, batches, students, settings). */
 export function hasTmsStaffRole(roles: readonly TmsRole[]): boolean {
   return roles.some((r) => TMS_STAFF_ROLES.includes(r));
 }
 
-/** Only the `training_student` role — belongs in the `/tms/me` portal. */
+/** Only the `training_student` role — belongs in the `/cohort-ai/me` portal. */
 export function isStudentOnly(roles: readonly TmsRole[]): boolean {
   return roles.length > 0 && !hasTmsStaffRole(roles);
 }

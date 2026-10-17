@@ -1,5 +1,5 @@
 import "server-only";
-import * as S from "@/app/support/actions";
+import * as S from "@/app/(products)/resolveiq/actions";
 import { getCompanyCaller } from "@/lib/support/caller";
 import { countForCompany, getForCompany, listForCompany } from "@/lib/support/requests";
 import { getSupportConfig } from "@/lib/support/config";
@@ -13,7 +13,7 @@ const json = (v: unknown) => JSON.parse(JSON.stringify(v ?? null)) as Json;
 const rep = (key: string, label: string, description: string, params: ReportDef["params"], run: (v: Json) => Promise<unknown>): ReportDef => ({ key, panel: "support", label, description, level: "any", params, run: async (v) => json(await run(v)) });
 
 export const SUPPORT_REPORTS: ReportDef[] = [
-  rep("support.search_help", "Search help articles", "Find published help articles about a topic (use this before raising a request).", [f.str("query", "What the person needs help with", true)], async (v) => (await searchArticles(String(v.query ?? ""), { limit: 6 })).map((a) => ({ title: a.title, summary: a.summary, slug: a.slug, url: `/support/help/${a.slug}`, body: a.body.slice(0, 1500) }))),
+  rep("support.search_help", "Search help articles", "Find published help articles about a topic (use this before raising a request).", [f.str("query", "What the person needs help with", true)], async (v) => (await searchArticles(String(v.query ?? ""), { limit: 6 })).map((a) => ({ title: a.title, summary: a.summary, slug: a.slug, url: `/resolveiq/help/${a.slug}`, body: a.body.slice(0, 1500) }))),
   rep("support.request_form", "Request types and options", "The request types, priorities, categories and severities you can choose when raising a request.", [], async () => { const c = await getSupportConfig(); return { types: c.types.filter((t) => t.active), priorities: c.priorities.filter((p) => p.active), categories: c.categories.filter((x) => x.active), severities: c.severities.filter((s) => s.active) }; }),
   rep("support.my_requests", "Your company's support requests", "Requests raised by your company; give a request id for the whole conversation.", [f.str("requestId", "Request id"), f.enum("state", "State", ["all", "open", "waiting", "resolved", "closed"]), f.str("q", "Search")], async (v) => {
     const caller = await getCompanyCaller();

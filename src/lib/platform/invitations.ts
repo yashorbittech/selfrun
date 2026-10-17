@@ -5,19 +5,19 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getCompany } from "@/lib/platform/tenancy/companies";
-import { createEmployee } from "@/lib/hrms/employees";
+import { createEmployee } from "@/lib/products/talentos/employees";
 import { hashPassword } from "@/lib/lms-auth";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { ROLE_PRESETS, rolesForPreset } from "@/lib/platform/onboarding/catalog";
-import { computeEffective, getCustomRoles } from "@/lib/workspace/custom-roles";
+import { computeEffective, getCustomRoles } from "@/lib/products/commandos/custom-roles";
 import { newAccountBlockReason, rollbackIfOverSeats } from "@/lib/platform/billing/enforce";
 
 /**
  * Team invitations. Company-scoped (`company_invitations` goes through the
  * scoped data layer), so a token only resolves on the inviting company's own
  * host. Accepting creates the HRMS employee record AND the linked login in
- * one go — the invitee is a real employee in every panel from first sign-in.
+ * one go — the invitee is a real employee in every product from first sign-in.
  */
 
 const COLLECTION = "company_invitations";
@@ -35,7 +35,7 @@ export interface Invitation {
   customRoleIds?: string[];
   departmentId: string | null;
   designationId: string | null;
-  /** Platform Panel role granted on acceptance (owner company only; see console/roles.ts). */
+  /** Platform Console role granted on acceptance (owner company only; see console/roles.ts). */
   platformRoleId?: string | null;
   invitedBy: string;
   status: "pending" | "accepted" | "revoked";
@@ -62,7 +62,7 @@ export interface InviteInput {
   preset: string;
   departmentId?: string | null;
   designationId?: string | null;
-  /** Also grant this Platform Panel role on acceptance (owner company only). */
+  /** Also grant this Platform Console role on acceptance (owner company only). */
   platformRoleId?: string | null;
   /** Custom roles to grant on acceptance (the sender must be allowed to assign them — checked by the caller). */
   customRoleIds?: string[];
@@ -118,7 +118,7 @@ export async function inviteTeammate(input: InviteInput, inviter: { id: string; 
     brand: companyName,
     heading: `Join ${companyName}`,
     paragraphs: [`Hi${name ? ` ${name}` : ""},`, `${inviter.email} invited you to ${companyName}'s workspace as ${presetLabel}. Set your password to get started.`],
-    action: { label: "Accept invitation", url: `${baseUrl}/workspace/invite?token=${token}` },
+    action: { label: "Accept invitation", url: `${baseUrl}/commandos/invite?token=${token}` },
     footnote: "This invitation expires in 7 days.",
   });
   const sent = await sendEmail({ to: email, subject: `You're invited to join ${companyName}`, html, text, replyTo: inviter.email });

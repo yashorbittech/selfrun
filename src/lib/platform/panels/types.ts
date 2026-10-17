@@ -1,13 +1,14 @@
-import type { NavIcon } from "@/lib/workspace/nav";
+import type { NavIcon } from "@/lib/products/commandos/nav";
+import { productSlugFor } from "@/lib/platform/saas/product-routes";
 
 /**
- * The Panel Registry: the one place the platform keeps what each panel is called, how it is described, where it lives and
- * whether it is switched on. Every listing (Workspace, onboarding, plan editors, panel headers, search, back links …)
- * reads from it; the Platform Panel (Panels) is where it is edited.
+ * The Product Registry: the one place the platform keeps what each product is called, how it is described, where it lives and
+ * whether it is switched on. Every listing (Workspace, onboarding, plan editors, product headers, search, back links …)
+ * reads from it; the Platform Console (Products) is where it is edited.
  */
 
 export interface PanelRecord {
-  /** Route segment and stable id: `hrms` → `/hrms`. */
+  /** Route segment and stable id: `hrms` → `/talentos`. */
   key: string;
   /** The one name used everywhere (listings, headers, back link, search). */
   name: string;
@@ -16,24 +17,24 @@ export interface PanelRecord {
   /** The one description used everywhere. */
   description: string;
   /**
-   * Other names this panel is known by in screens that still carry the old wording ("HRMS", "Standard Operating
-   * Procedures"). Wherever one appears in a panel screen it is shown as the panel's current registry name instead:
+   * Other names this product is known by in screens that still carry the old wording ("HRMS", "Standard Operating
+   * Procedures"). Wherever one appears in a product screen it is shown as the product's current registry name instead:
    * an acronym becomes `shortName`, anything longer becomes `name`.
    */
   aliases: string[];
-  /** Panel header overrides; blank = use `name` / `description`. */
+  /** Product header overrides; blank = use `name` / `description`. */
   headerTitle: string;
   headerDescription: string;
   icon: NavIcon;
   route: string;
   order: number;
-  /** Core panels can't be switched off (the Workspace itself). */
+  /** Core products can't be switched off (the Workspace itself). */
   core: boolean;
   /** Global switch: off = hidden and inaccessible for EVERY company. */
   active: boolean;
 }
 
-/** What the browser needs for one panel (no admin fields). */
+/** What the browser needs for one product (no admin fields). */
 export interface PanelMeta {
   key: string;
   name: string;
@@ -50,9 +51,14 @@ export interface PanelMeta {
   available: boolean;
 }
 
+/** Remove the platform brand when a product name is shown inside a customer's white-label workspace. */
+export function whiteLabelProductName(name: string): string {
+  return name.replace(/^SelfRun\s+/i, "").trim();
+}
+
 /**
- * Old wording per panel (unambiguous panel names only — never a word that also names a feature, like "SEO" or "SOP").
- * These seed each panel's `aliases`; the Platform Panel can change them.
+ * Old wording per product (unambiguous product names only — never a word that also names a feature, like "SEO" or "SOP").
+ * These seed each product's `aliases`; the Platform Console can change them.
  */
 const ALIASES: Record<string, string[]> = {
   hrms: ["HRMS", "Human Resource Management System", "HR & Payroll", "SelfRun HR", "SelfRun People"],
@@ -75,7 +81,7 @@ const ALIASES: Record<string, string[]> = {
   support: ["Help & Support", "SelfRun Desk"],
   website: ["Public Website", "SelfRun Sites"],
 };
-/** The built-in aliases for a panel key (used for registry rows saved before aliases existed). */
+/** The built-in aliases for a product key (used for registry rows saved before aliases existed). */
 export const defaultAliases = (key: string): string[] => ALIASES[key] ?? [];
 
 const P = (key: string, name: string, shortName: string, description: string, icon: NavIcon, order: number, core = false): PanelRecord => ({
@@ -87,7 +93,7 @@ const P = (key: string, name: string, shortName: string, description: string, ic
   headerTitle: "",
   headerDescription: "",
   icon,
-  route: `/${key}`,
+  route: `/${productSlugFor(key)}`,
   order,
   core,
   active: true,
@@ -119,7 +125,7 @@ export const DEFAULT_PANELS: PanelRecord[] = [
 ];
 
 /**
- * Not a company panel: the Platform Panel belongs to the SaaS provider alone (it only exists on the platform owner's
+ * Not a company product: the Platform Console belongs to the SaaS provider alone (it only exists on the platform owner's
  * own host and is gated by platform roles), so it is never listed in the registry or offered to companies.
  */
 export const PLATFORM_ONLY_KEYS: readonly string[] = ["platform"];

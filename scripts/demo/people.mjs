@@ -83,7 +83,7 @@ export async function seedPeople(db, tms, pms) {
     for (let i = 1; i <= idx; i++) {
       ev("stage_changed", `Stage: ${flow[i][1]}`, null, stepTimes[i], "staff");
       if (flow[i][2] !== "lost") u._stageEvents.push({ key: flow[i][0], label: flow[i][1], ts: stepTimes[i], type });
-      notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "status_update", title: "Status updated", body: `Your request is now: ${flow[i][1]}.`, link: "/portal/journey", read: i < idx - 1 || chance(0.5), dedupeKey: null, createdAt: stepTimes[i] });
+      notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "status_update", title: "Status updated", body: `Your request is now: ${flow[i][1]}.`, link: "/clientos/journey", read: i < idx - 1 || chance(0.5), dedupeKey: null, createdAt: stepTimes[i] });
     }
     if (stageKey === "certificate_issued") ev("certificate_issued", "Certificate issued", null, stepTimes[idx]);
     if (stageKey === "offer_released") ev("offer_released", "Offer released", null, stepTimes[idx], "system", false);
@@ -167,13 +167,13 @@ export async function seedPeople(db, tms, pms) {
     const u = newUser({ role: "job_applicant", name, email, createdAgo: rint(20, 150), links: { applicationId }, rich: Boolean(fixed), fixed: fixed?.key });
     const lead = addLead(u, { type: "job_applicant", source: "job_portal", subService: posTitle, stageIdx, message: "Please consider my application.", links: { applicationId } });
     // interviews
-    if (fixed) interviews.push({ _id: `demo-iv-${interviews.length + 1}`, leadId: lead._id, applicationId, title: `Joining formalities — ${posTitle}`, round: "Onboarding call", mode: "video", scheduledAt: fromNow(3), durationMins: 30, location: null, meetingLink: "https://meet.google.com/demo-onboarding", panel: "HR team", status: "scheduled", notes: null, createdBy: null, createdAt: ago(2), updatedAt: ago(1) });
+    if (fixed) interviews.push({ _id: `demo-iv-${interviews.length + 1}`, leadId: lead._id, applicationId, title: `Joining formalities — ${posTitle}`, round: "Onboarding call", mode: "video", scheduledAt: fromNow(3), durationMins: 30, location: null, meetingLink: "https://meet.google.com/demo-onboarding", product: "HR team", status: "scheduled", notes: null, createdBy: null, createdAt: ago(2), updatedAt: ago(1) });
     if (stageIdx >= 3 && stageIdx !== 9) {
       const rounds = stageIdx >= 5 ? ["Screening", "Technical round", "HR round"] : stageIdx === 4 ? ["Screening", "Technical round"] : ["Screening"];
       rounds.forEach((round, r) => {
         const isLast = r === rounds.length - 1;
         const upcoming = !fixed && isLast && stageIdx <= 5 && chance(0.6);
-        interviews.push({ _id: `demo-iv-${interviews.length + 1}`, leadId: lead._id, applicationId, title: `${round} — ${posTitle}`, round, mode: pick(["video", "video", "onsite", "phone"]), scheduledAt: upcoming ? fromNow(rint(1, 6)) : ago(rint(2, 14) + (rounds.length - r) * 3), durationMins: pick([30, 45, 60]), location: null, meetingLink: "https://meet.google.com/demo-interview", panel: pick(["Engineering panel", "Hiring manager + tech lead", "HR team"]), status: upcoming ? "scheduled" : "completed", notes: null, createdBy: null, createdAt: ago(20), updatedAt: ago(2) });
+        interviews.push({ _id: `demo-iv-${interviews.length + 1}`, leadId: lead._id, applicationId, title: `${round} — ${posTitle}`, round, mode: pick(["video", "video", "onsite", "phone"]), scheduledAt: upcoming ? fromNow(rint(1, 6)) : ago(rint(2, 14) + (rounds.length - r) * 3), durationMins: pick([30, 45, 60]), location: null, meetingLink: "https://meet.google.com/demo-interview", product: pick(["Engineering product", "Hiring manager + tech lead", "HR team"]), status: upcoming ? "scheduled" : "completed", notes: null, createdBy: null, createdAt: ago(20), updatedAt: ago(2) });
       });
     }
     // offers
@@ -207,7 +207,7 @@ export async function seedPeople(db, tms, pms) {
 
   // welcome notifications for everyone
   for (const u of users) {
-    notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "welcome", title: `Welcome to the ${u.role === "client" ? "Client" : u.role === "job_applicant" ? "Applicant" : u.role === "intern" ? "Internship" : "Industrial Training"} Portal`, body: "Your account is ready. Everything here updates live as our team progresses your request.", link: "/portal", read: chance(0.8), dedupeKey: null, createdAt: u.createdAt });
+    notifications.push({ _id: `demo-nt-${notifications.length + 1}`, recipientUserId: u._id, type: "welcome", title: `Welcome to the ${u.role === "client" ? "Client" : u.role === "job_applicant" ? "Applicant" : u.role === "intern" ? "Internship" : "Industrial Training"} Portal`, body: "Your account is ready. Everything here updates live as our team progresses your request.", link: "/clientos", read: chance(0.8), dedupeKey: null, createdAt: u.createdAt });
   }
 
   const clean = (arr) => arr.map(({ _rich, _fixed, _leads, _stageEvents, _createdAgo, _business, ...rest }) => rest);

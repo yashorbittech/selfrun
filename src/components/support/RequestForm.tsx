@@ -5,7 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, MonitorSmartphone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { createRequestAction } from "@/app/support/actions";
+import { createRequestAction } from "@/app/(products)/resolveiq/actions";
 import { AttachmentPicker, useAttachments } from "@/components/support/attachments";
 import { currentContext } from "@/lib/support/client-context";
 import type { ChatTurn, OptionDef, RequestContext, RequestTypeDef } from "@/lib/support/types";
@@ -51,9 +51,9 @@ export default function RequestForm({ config, initial, chat, source = "form", co
     return (
       <div className="flex flex-col items-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
         <CheckCircle2 className="size-8 text-emerald-600" />
-        <p className="text-sm font-semibold text-foreground">Request #{created.number} sent to SelfRun AI</p>
+        <p className="text-sm font-semibold text-foreground">Request #{created.number} sent</p>
         <p className="text-xs text-muted-foreground">We&apos;ll reply here and notify you when there&apos;s an update.</p>
-        <Link href={`/support/requests/${created.id}`} className="mt-1 text-sm font-medium text-primary hover:underline">View request →</Link>
+        <Link href={`/resolveiq/requests/${created.id}`} className="mt-1 text-sm font-medium text-primary hover:underline">View request →</Link>
       </div>
     );
   }
@@ -156,13 +156,13 @@ export default function RequestForm({ config, initial, chat, source = "form", co
         <div className="flex items-start gap-2 rounded-xl border border-border/50 bg-muted/40 p-3 text-[11px] text-muted-foreground">
           <MonitorSmartphone className="mt-0.5 size-4 shrink-0 text-primary" />
           <p>
-            Sent automatically so you don&apos;t have to type it: {[context.panel && `panel ${context.panel}`, context.page && `page “${context.page}”`, context.browser && `${context.browser} ${context.browserVersion?.split(".")[0] ?? ""}`.trim(), context.os, context.device].filter(Boolean).join(" · ")}.
+            Sent automatically so you don&apos;t have to type it: {[context.panel && `product ${context.panel}`, context.page && `page “${context.page}”`, context.browser && `${context.browser} ${context.browserVersion?.split(".")[0] ?? ""}`.trim(), context.os, context.device].filter(Boolean).join(" · ")}.
           </p>
         </div>
       )}
 
       <Button type="submit" disabled={pending || !type || files.uploading > 0}>
-        {pending && <Loader2 className="size-4 animate-spin" />} Send to SelfRun AI
+        {pending && <Loader2 className="size-4 animate-spin" />} Send request
       </Button>
     </form>
   );

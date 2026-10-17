@@ -6,13 +6,13 @@ import { decryptPlatformSecret, encryptPlatformSecret, isPlatformEncryptionConfi
 /**
  * The platform owner's Razorpay account used to bill customer companies.
  * Stored in `platform_settings` (`_id: "billing_razorpay"`), edited only in
- * the Platform Panel (Payments & Razorpay). The key secret is encrypted with
- * `PLATFORM_ENCRYPTION_KEY` and never leaves the server — the panel shows its
+ * the Platform Console (Payments & Razorpay). The key secret is encrypted with
+ * `PLATFORM_ENCRYPTION_KEY` and never leaves the server — the product shows its
  * last 4 characters only.
  *
  * Env fallback (`RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`) is used only while
  * nothing has been saved here. The webhook secret stays env-only
- * (`RAZORPAY_BILLING_WEBHOOK_SECRET`); the panel only says whether it is set.
+ * (`RAZORPAY_BILLING_WEBHOOK_SECRET`); the product only says whether it is set.
  */
 
 export const RAZORPAY_CONFIG_DOC_ID = "billing_razorpay";
@@ -38,7 +38,7 @@ export interface RazorpayCredentials {
   source: "db" | "env";
 }
 
-/** What the Platform Panel may see — never the secret or its ciphertext. */
+/** What the Platform Console may see — never the secret or its ciphertext. */
 export interface RazorpayConfigView {
   keyId: string;
   secretLast4: string | null;
@@ -140,7 +140,7 @@ export async function saveRazorpayConfig(input: { keyId: string; keySecret: stri
   return { ok: true };
 }
 
-/** Remembers the last connection test (shown on the panel). */
+/** Remembers the last connection test (shown on the product). */
 export async function recordRazorpayTest(result: { ok: boolean; message: string }): Promise<void> {
   await (await col()).updateOne({ _id: RAZORPAY_CONFIG_DOC_ID, keyId: { $exists: true } }, { $set: { lastTest: { ...result, at: new Date() } } });
 }

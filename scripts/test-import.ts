@@ -200,7 +200,7 @@ async function main() {
   });
 
   console.log("import: clients");
-  await check("clients go through the Projects panel's validator and create function, with an activity log entry", async () => {
+  await check("clients go through the Projects product's validator and create function, with an activity log entry", async () => {
     const csv = ["Company,Contact name,Contact email,Phone,Industry,Website", "Northwind,Ravi Kumar,ravi@nw.test,+91 98111 22334,Retail,https://nw.test", ",Nobody,,,,", "Bad Site,Sara,sara@bs.test,,,not-a-url", "Northwind Two,Ravi Again,RAVI@nw.test,,,"].join("\n");
     const p = ok<ImportPreview>(await runAsCompany(A, () => previewImport(req("clients", csv))));
     assert.equal(p.valid, 1);
@@ -271,7 +271,7 @@ async function main() {
       assert.equal(await countSeatsUsed(), 1, "an invitation isn't an account until accepted");
     });
     assert.equal(mailed.filter((m) => /\/workspace\/invite\?token=/.test(m)).length >= 2, true, "invitation emails went out for the two seats");
-    assert.ok(mailed.some((m) => m.includes(`${ORIGIN}/workspace/invite?token=`)), "the link points at this workspace");
+    assert.ok(mailed.some((m) => m.includes(`${ORIGIN}/commandos/invite?token=`)), "the link points at this workspace");
 
     const full = ok<ImportPreview>(await runAsCompany(TINY, () => previewImport(req("employees", "First Name,Last Name,Email\nNew,Person,new@alpha.test", { sendInvites: true }))));
     assert.equal(full.seatsFree, 0);

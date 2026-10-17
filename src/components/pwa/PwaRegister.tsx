@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { initInstallCapture, isDesktopApp } from "@/lib/pwa/client";
 
 /**
- * Mounted only on panels hosts (the app), never on a website. Registers the service worker, keeps it fresh, captures the
+ * Mounted only on app hosts (the app), never on a website. Registers the service worker, keeps it fresh, captures the
  * browser's install prompt, and clears the home-screen badge when the app is opened.
  */
 export default function PwaRegister() {

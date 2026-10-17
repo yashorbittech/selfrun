@@ -1,5 +1,5 @@
 /**
- * DLMS (Digi Locker) role + permission model. Like every other panel, access
+ * DLMS (Digi Locker) role + permission model. Like every other product, access
  * is gated on the shared `admin_users.roles` array — there is no separate DLMS
  * user store. A vault holds credentials, so DLMS access is NEVER implied by an
  * HRMS role: it needs an explicit `dlms_*` role (or super_admin).
@@ -8,10 +8,10 @@
  *   1. the PERMISSION (what kind of action — view / edit / reveal …), and
  *   2. the SCOPE (which records — company, or specific clients). Managers and
  *      admins see every scope; a DLMS Employee only sees the client(s) and/or
- *      the company vault they were explicitly assigned (see `lib/dlms/access.ts`).
+ *      the company vault they were explicitly assigned (see `lib/cybervault/access.ts`).
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/workspace/users`
+ * Super Admin can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -110,7 +110,7 @@ export function normalizeDlmsRoles(value: unknown): DlmsRole[] {
   return Array.from(new Set(value.filter(isDlmsRole)));
 }
 
-/** Can open the DLMS panel at `/dlms/*`. */
+/** Can open the DLMS product at `/cybervault/*`. */
 export function hasDlmsAccess(roles: readonly string[] | undefined | null): boolean {
   return normalizeDlmsRoles(roles).length > 0;
 }

@@ -6,7 +6,7 @@ import { afterForCompany, currentCompanyIdOrNull } from "@/lib/platform/tenancy/
 import { eventDef, type EventArea, type EventType } from "@/lib/platform/events/catalog";
 
 /**
- * The company event bus. A panel's lib function calls `emitEvent()` after a
+ * The company event bus. A product's lib function calls `emitEvent()` after a
  * business change; it writes one row to the company's `platform_events`
  * (the activity log / audit trail, kept ~180 days) and runs the company's
  * matching workflows after the response.

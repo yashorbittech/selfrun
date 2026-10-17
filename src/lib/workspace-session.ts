@@ -4,17 +4,17 @@ import type { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
 /**
- * The one company sign-in. A person signs in at `/workspace/login`; that
+ * The one company sign-in. A person signs in at `/commandos/login`; that
  * Workspace session (cookie `hub_session`, collection `hub_sessions`, written
- * by `hub-auth.ts`) is accepted by every staff panel's own auth module
+ * by `hub-auth.ts`) is accepted by every staff product's own auth module
  * (`hrms-auth.ts`, `pms-auth.ts`, …) — each still applies ITS OWN role rule to
  * the account, so the session opens nothing the roles don't allow.
  *
- * Kept free of other auth imports so every panel's auth module can use it.
+ * Kept free of other auth imports so every product's auth module can use it.
  */
 
 export const WORKSPACE_SESSION_COOKIE = "hub_session";
-export const WORKSPACE_LOGIN_PATH = "/workspace/login";
+export const WORKSPACE_LOGIN_PATH = "/commandos/login";
 
 /** The `admin_users._id` behind a Workspace session token in the CURRENT company, or null. */
 export async function workspaceSessionAccountId(token: string | undefined | null): Promise<ObjectId | null> {

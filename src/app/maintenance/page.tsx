@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Wrench } from "lucide-react";
 import BrandMark from "@/components/BrandMark";
-import { getMaintenanceMode } from "@/lib/cms/settings";
-import { getSiteInfo } from "@/lib/cms/site-info";
+import { getMaintenanceMode } from "@/lib/products/sitecraft-ai/settings";
+import { getSiteInfo } from "@/lib/products/sitecraft-ai/site-info";
 
 /**
  * Shown in place of any public page while CMS maintenance mode is on — the
- * proxy rewrites to it (`src/lib/cms/maintenance-gate.ts`). Outside the
+ * proxy rewrites to it (`src/lib/sitecraft-ai/maintenance-gate.ts`). Outside the
  * `(site)` group on purpose: no header/footer/nav links into a site that's
- * currently unavailable. The message is edited at /cms/settings.
+ * currently unavailable. The message is edited at /sitecraft-ai/settings.
  */
 export async function generateMetadata(): Promise<Metadata> {
   const { title } = await getMaintenanceMode();

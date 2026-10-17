@@ -12,19 +12,19 @@ import { PORTAL_ROLES, isPortalRole } from "@/lib/portal-roles";
 import { getApplication, updateApplication, deleteApplication } from "@/lib/career-applications";
 import { validateApplicationUpdate } from "@/lib/career-application-validation";
 import { CAREER_APPLICATION_STATUSES } from "@/lib/career-application-status";
-import { createInterview, updateInterviewStatus, deleteInterview, type InterviewMode, type InterviewStatus } from "@/lib/portal/interviews";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { createInterview, updateInterviewStatus, deleteInterview, type InterviewMode, type InterviewStatus } from "@/lib/products/clientos/interviews";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { getCampaignAnalytics, undoImport, isValidPlatform, campaignKeyFor } from "@/lib/campaigns";
-import { getStudent } from "@/lib/tms/students";
-import { getClient } from "@/lib/pms/clients";
-import { getProject } from "@/lib/pms/projects";
+import { getStudent } from "@/lib/products/cohort-ai/students";
+import { getClient } from "@/lib/products/sprintos/clients";
+import { getProject } from "@/lib/products/sprintos/projects";
 import { canManageCampaigns, canViewLmsAnalytics, lmsCan, type LmsPermission } from "@/lib/lms-roles";
 import { check, fail, formInput, str } from "@/lib/ai/agent/entities/helpers";
 import { peek } from "@/lib/ai/agent/records";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * Leads (LMS) for the agent. Two things live here, as in the panel: website enquiries by category (status, notes, deal value) and
+ * Leads (LMS) for the agent. Two things live here, as in the product: website enquiries by category (status, notes, deal value) and
  * managed leads run through a stage workflow with a portal account, owner, messages and interviews; plus job applications and campaigns.
  */
 
@@ -130,7 +130,7 @@ const INTERVIEW_PARAMS = [
   { key: "scheduledAt", label: "Date and time (ISO, e.g. 2026-10-20T11:00)", type: "string" as const, required: true },
   { key: "durationMins", label: "Duration in minutes", type: "number" as const },
   { key: "round", label: "Round", type: "string" as const }, { key: "location", label: "Location", type: "string" as const },
-  { key: "meetingLink", label: "Meeting link", type: "string" as const }, { key: "panel", label: "Panel / interviewers", type: "string" as const }, { key: "notes", label: "Notes", type: "string" as const },
+  { key: "meetingLink", label: "Meeting link", type: "string" as const }, { key: "panel", label: "Product / interviewers", type: "string" as const }, { key: "notes", label: "Notes", type: "string" as const },
 ];
 
 const touchTimeline = (leadId: string, u: { id: string }, kind: string, title: string, detail: string | null, visible: boolean) =>
@@ -223,7 +223,7 @@ export const LMS_ACTIONS: ActionDef[] = [
       if (!String(v.title).trim() || isNaN(when.getTime())) return fail("Title and a valid date/time are required.");
       await createInterview(lead.applicationId ?? lead._id, { title: String(v.title), mode: String(v.mode) as InterviewMode, scheduledAt: when.toISOString(), durationMins: clampInt(v.durationMins, 45), round: str(v.round), location: str(v.location), meetingLink: str(v.meetingLink), panel: str(v.panel), notes: str(v.notes) }, u.id, lead._id);
       await touchTimeline(lead._id, u, "interview_scheduled", `Interview scheduled: ${String(v.title)}`, when.toLocaleString(), true);
-      await notifyPortalUser({ recipientUserId: lead.externalUserId, type: "interview", title: "Interview scheduled", body: `${String(v.title)} — ${when.toLocaleString()}`, link: "/portal/interviews" });
+      await notifyPortalUser({ recipientUserId: lead.externalUserId, type: "interview", title: "Interview scheduled", body: `${String(v.title)} — ${when.toLocaleString()}`, link: "/clientos/interviews" });
       return { ok: true, id: lead._id, result: "Interview scheduled." };
     },
   },
@@ -238,7 +238,7 @@ export const LMS_ACTIONS: ActionDef[] = [
       await createInterview(String(v.applicationId), { title: String(v.title), mode: String(v.mode) as InterviewMode, scheduledAt: when.toISOString(), durationMins: clampInt(v.durationMins, 45), round: str(v.round), location: str(v.location), meetingLink: str(v.meetingLink), panel: str(v.panel), notes: str(v.notes) }, u.id);
       const { externalUsers } = await import("@/lib/portal-auth");
       const account = await (await externalUsers()).findOne({ role: "job_applicant", applicationId: String(v.applicationId) });
-      if (account) await notifyPortalUser({ recipientUserId: account._id, type: "interview", title: "Interview scheduled", body: `${String(v.title)} — ${when.toLocaleString()}`, link: "/portal/interviews" });
+      if (account) await notifyPortalUser({ recipientUserId: account._id, type: "interview", title: "Interview scheduled", body: `${String(v.title)} — ${when.toLocaleString()}`, link: "/clientos/interviews" });
       return { ok: true, result: "Interview scheduled." };
     },
   },

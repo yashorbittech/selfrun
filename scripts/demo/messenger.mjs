@@ -1,5 +1,5 @@
 // Messenger (Team Chat) — direct conversations + messages, project & group channels, announcements, meetings, shared files.
-// The base seeder's DM / announcement docs used a different shape (they crash /messenger/dm and never appeared in the announcements hub).
+// The base seeder's DM / announcement docs used a different shape (they crash /huddle-ai/dm and never appeared in the announcements hub).
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { rint, pick, chance, weighted, shuffle, ago, fromNow, audit, insertAll } from "./lib.mjs";
@@ -68,7 +68,7 @@ export async function seedMessenger(db, pms) {
   // project channels — one per PMS project (first 8)
   for (const [i, p] of pms.projects.slice(0, 8).entries()) await addChannel(`demo-chan-proj-${i + 1}`, "project", `${p.projectCode.toLowerCase()} · ${p.name}`, `Delivery channel for ${p.name}`, shuffle(ids).slice(0, rint(4, 8)), { projectId: p._id });
   // group channels
-  for (const [i, [name, desc]] of [["Design Guild", "UX and design reviews"], ["Hiring Panel", "Interview coordination"], ["Release Managers", "Release readiness and go/no-go"], ["Customer Success", "Client health and escalations"]].entries()) await addChannel(`demo-chan-grp-${i + 1}`, "group", name, desc, shuffle(ids).slice(0, rint(4, 7)));
+  for (const [i, [name, desc]] of [["Design Guild", "UX and design reviews"], ["Hiring Product", "Interview coordination"], ["Release Managers", "Release readiness and go/no-go"], ["Customer Success", "Client health and escalations"]].entries()) await addChannel(`demo-chan-grp-${i + 1}`, "group", name, desc, shuffle(ids).slice(0, rint(4, 7)));
   // team channels
   for (const [i, [name, desc]] of [["engineering", "Engineering discussions"], ["announcements-discuss", "Chat about company announcements"], ["random", "Water-cooler talk"]].entries()) await addChannel(`demo-chan-team-${i + 1}`, "team", name, desc, shuffle(ids).slice(0, rint(8, 16)));
 

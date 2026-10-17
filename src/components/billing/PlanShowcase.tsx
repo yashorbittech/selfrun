@@ -217,7 +217,7 @@ export default function PlanShowcase({ plans, currentPlanId, defaultInterval = "
           </table>
         </div>
       </details>
-      <p className="mx-auto max-w-3xl text-center text-sm text-muted-foreground">Every plan includes every panel and feature. Plans differ only in how many people and how much storage, AI, email, voice and domains. Need more of anything? Move to the next plan. Prices exclude GST.</p>
+      <p className="mx-auto max-w-3xl text-center text-sm text-muted-foreground">Every plan includes every product and feature. Plans differ only in how many people and how much storage, AI, email, voice and domains. Need more of anything? Move to the next plan. Prices exclude GST.</p>
     </div>
   );
 }

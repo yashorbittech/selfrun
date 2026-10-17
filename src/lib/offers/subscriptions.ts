@@ -1,7 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/offers/db";
-import { notifyPortalUser } from "@/lib/portal/notifications";
+import { notifyPortalUser } from "@/lib/products/clientos/notifications";
 import { queueBroadcast } from "@/lib/webpush/send";
 import type { SubscriptionInput, SubscriptionSource } from "@/lib/offers/subscription-validation";
 import type { Audience } from "@/lib/offers/constants";

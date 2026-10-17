@@ -39,7 +39,7 @@ function candidates(input, rootDomain = DEFAULT_ROOT) {
   };
 
   if (!bare.includes(".")) {
-    // A workspace name: its panels address on the platform domain.
+    // A workspace name: its app address on the platform domain.
     add(`${bare}-app.${root}${port}`);
     return out;
   }

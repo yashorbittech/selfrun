@@ -10,7 +10,7 @@ import { claimProgress } from "@/lib/offers/live";
 import { getCategoryLabel } from "@/lib/categories";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type { SerializedOffer } from "@/lib/offers/offers";
-import { useText } from "@/components/cms/TextContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
 
 const STEPS = (tx: (key: string) => string) => ([
   "Tap “Claim Offer” and share your contact details.",

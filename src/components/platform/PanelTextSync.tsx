@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { usePanels } from "@/components/platform/PanelsProvider";
 
 /**
- * Keeps panel names consistent everywhere without editing every sentence. Inside a panel's screens, any of a panel's
- * registered aliases ("HRMS", "Standard Operating Procedures" …, set per panel in Platform Panel → Panels) that still
- * appears in the page text, placeholders or tooltips is shown as the panel's current registry name instead — an
- * acronym becomes the short name, a longer old name becomes the full name. Rename a panel once and the whole app follows.
+ * Keeps product names consistent everywhere without editing every sentence. Inside a product's screens, any of a product's
+ * registered aliases ("HRMS", "Standard Operating Procedures" …, set per product in Platform Console → Products) that still
+ * appears in the page text, placeholders or tooltips is shown as the product's current registry name instead — an
+ * acronym becomes the short name, a longer old name becomes the full name. Rename a product once and the whole app follows.
  *
- * It only ever changes what is displayed: form values, code blocks, the public website and the Platform Panel itself
+ * It only ever changes what is displayed: form values, code blocks, the public website and the Platform Console itself
  * are left untouched.
  */
 

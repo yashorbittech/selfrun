@@ -8,7 +8,7 @@ import { handleWebhook, type RazorpayWebhookPayload } from "@/lib/platform/billi
 /**
  * Razorpay webhook for PLATFORM subscription billing. Register
  * `https://<platform host>/api/platform/billing/webhook` in the platform
- * owner's Razorpay dashboard (the URL is shown in Platform Panel → Payments &
+ * owner's Razorpay dashboard (the URL is shown in Platform Console → Payments &
  * Razorpay) with secret `RAZORPAY_BILLING_WEBHOOK_SECRET` (env-only). Events:
  * subscription.authenticated/activated/charged/pending/halted/cancelled/
  * completed/updated and payment.failed.

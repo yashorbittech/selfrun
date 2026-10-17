@@ -1,28 +1,28 @@
 import "server-only";
-import { getProgram, createProgram, updateProgram, deleteProgram, type Program } from "@/lib/tms/programs";
-import { getBatch, createBatch, updateBatch, deleteBatch, type Batch } from "@/lib/tms/batches";
-import { getStudent, createStudent, updateStudent, getStudentByApplication, type Student } from "@/lib/tms/students";
-import { getApplication, createApplication, updateApplication, deleteApplication, setApplicationStatus, markApplicationConverted, type Application } from "@/lib/tms/applications";
-import { enrollStudent, updateEnrollment, getEnrollment } from "@/lib/tms/enrollments";
-import { getClass, createClass, updateClass, deleteClass, markAttendance, isValidAttendanceStatus, batchAttendanceSummary, type ClassSchedule } from "@/lib/tms/classes";
-import { getAssignment, createAssignment, updateAssignment, deleteAssignment, reviewSubmission, type Assignment } from "@/lib/tms/assignments";
-import { getLiveProject, createLiveProject, updateLiveProject, deleteLiveProject, toggleMilestone, type LiveProject } from "@/lib/tms/projects";
-import { getPlacement, createPlacement, updatePlacement, deletePlacement, type PlacementRecord } from "@/lib/tms/placements";
-import { getCertificate, issueCertificate, reissueCertificate, setCertificateRevoked, deleteCertificate } from "@/lib/tms/certificates";
-import { getPaymentPlan, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, addInstallment, removeInstallment, getPaymentAnalytics } from "@/lib/tms/payments";
-import { getTmsSettings, normalizeSettingsInput, updateTmsSettings } from "@/lib/tms/settings";
-import { getTmsDashboardStats } from "@/lib/tms/dashboard";
-import { buildReport, REPORT_TYPES } from "@/lib/tms/reports";
-import { notifyStudent, notifyBatchStudents } from "@/lib/tms/notifications";
-import { recordAudit } from "@/lib/tms/audit";
+import { getProgram, createProgram, updateProgram, deleteProgram, type Program } from "@/lib/products/cohort-ai/programs";
+import { getBatch, createBatch, updateBatch, deleteBatch, type Batch } from "@/lib/products/cohort-ai/batches";
+import { getStudent, createStudent, updateStudent, getStudentByApplication, type Student } from "@/lib/products/cohort-ai/students";
+import { getApplication, createApplication, updateApplication, deleteApplication, setApplicationStatus, markApplicationConverted, type Application } from "@/lib/products/cohort-ai/applications";
+import { enrollStudent, updateEnrollment, getEnrollment } from "@/lib/products/cohort-ai/enrollments";
+import { getClass, createClass, updateClass, deleteClass, markAttendance, isValidAttendanceStatus, batchAttendanceSummary, type ClassSchedule } from "@/lib/products/cohort-ai/classes";
+import { getAssignment, createAssignment, updateAssignment, deleteAssignment, reviewSubmission, type Assignment } from "@/lib/products/cohort-ai/assignments";
+import { getLiveProject, createLiveProject, updateLiveProject, deleteLiveProject, toggleMilestone, type LiveProject } from "@/lib/products/cohort-ai/projects";
+import { getPlacement, createPlacement, updatePlacement, deletePlacement, type PlacementRecord } from "@/lib/products/cohort-ai/placements";
+import { getCertificate, issueCertificate, reissueCertificate, setCertificateRevoked, deleteCertificate } from "@/lib/products/cohort-ai/certificates";
+import { getPaymentPlan, createPaymentPlan, updatePaymentPlan, deletePaymentPlan, addInstallment, removeInstallment, getPaymentAnalytics } from "@/lib/products/cohort-ai/payments";
+import { getTmsSettings, normalizeSettingsInput, updateTmsSettings } from "@/lib/products/cohort-ai/settings";
+import { getTmsDashboardStats } from "@/lib/products/cohort-ai/dashboard";
+import { buildReport, REPORT_TYPES } from "@/lib/products/cohort-ai/reports";
+import { notifyStudent, notifyBatchStudents } from "@/lib/products/cohort-ai/notifications";
+import { recordAudit } from "@/lib/products/cohort-ai/audit";
 import {
   validateProgram, validateBatch, validateApplication, validateStudent, validateClass, validateLiveProject, validateAssignment, validateCertificate, validatePaymentPlan, validateInstallment, validatePlacement,
-} from "@/lib/tms/validation";
+} from "@/lib/products/cohort-ai/validation";
 import {
   PROGRAM_CATEGORIES, PROGRAM_STATUSES, TRAINING_MODES, BATCH_STATUSES, APPLICATION_STATUSES, STUDENT_STATUSES, CLASS_STATUSES, ATTENDANCE_STATUSES, LIVE_PROJECT_STATUSES, CERTIFICATE_TYPES, PAYMENT_METHODS, PLACEMENT_TYPES, SUPPORTED_CURRENCIES,
   isValidApplicationStatus, isValidStudentStatus,
   type ApplicationStatus,
-} from "@/lib/tms/constants";
+} from "@/lib/products/cohort-ai/constants";
 import { canManageTraining, canManageProgramsBatches, canManageStudents, canIssueCertificates, canManagePayments, canManageSettings, canViewAuditLog } from "@/lib/tms-roles";
 import { check, crudOps, f, fail, values, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
@@ -94,7 +94,7 @@ export const TMS_ENTITIES: EntityDef[] = [
       entity: "class", validate: validateClass, get: getClass, label: L("topic"), audit,
       pre: async (d: Json) => ((await getBatch(String(d.batchId))) ? null : fail("That batch no longer exists.")),
       create: async (d, u) => createClass(d, (await getBatch(String((d as Json).batchId)))!.programId, u.id), update: (id, d, u) => updateClass(id, d, u.id), remove: (id, u) => deleteClass(id, u.id),
-      post: async (rec, _u, mode) => { if (mode === "create") await notifyBatchStudents(rec.batchId, { type: "class_scheduled", title: "Class scheduled", body: `${rec.topic} · ${rec.date}${rec.startTime ? ` ${rec.startTime}` : ""}`, link: "/tms/me/schedule", dedupeKey: `class_scheduled:${rec._id}` } as never); },
+      post: async (rec, _u, mode) => { if (mode === "create") await notifyBatchStudents(rec.batchId, { type: "class_scheduled", title: "Class scheduled", body: `${rec.topic} · ${rec.date}${rec.startTime ? ` ${rec.startTime}` : ""}`, link: "/cohort-ai/me/schedule", dedupeKey: `class_scheduled:${rec._id}` } as never); },
     }),
   },
   {
@@ -105,7 +105,7 @@ export const TMS_ENTITIES: EntityDef[] = [
       entity: "assignment", validate: validateAssignment, get: getAssignment, label: L("title"), audit,
       pre: async (d: Json) => ((await getBatch(String(d.batchId))) ? null : fail("That batch no longer exists.")),
       create: async (d, u) => createAssignment(d, (await getBatch(String((d as Json).batchId)))!.programId, u.id), update: (id, d, u) => updateAssignment(id, d, u.id), remove: (id, u) => deleteAssignment(id, u.id),
-      post: async (rec, _u, mode) => { if (mode === "create") await notifyBatchStudents(rec.batchId, { type: "assignment_posted", title: "New assignment", body: `${rec.title}${rec.dueDate ? ` · due ${rec.dueDate}` : ""}`, link: "/tms/me/assignments", dedupeKey: `assignment_posted:${rec._id}` } as never); },
+      post: async (rec, _u, mode) => { if (mode === "create") await notifyBatchStudents(rec.batchId, { type: "assignment_posted", title: "New assignment", body: `${rec.title}${rec.dueDate ? ` · due ${rec.dueDate}` : ""}`, link: "/cohort-ai/me/assignments", dedupeKey: `assignment_posted:${rec._id}` } as never); },
     }),
   },
   {
@@ -282,7 +282,7 @@ export const TMS_ACTIONS: ActionDef[] = [
       const r = await addInstallment(String(v.planId), c.data, u.id);
       if (!r.ok) return fail(r.reason);
       const plan = await getPaymentPlan(String(v.planId));
-      if (plan) await notifyStudent(plan.studentId, { type: "payment_recorded", title: "Payment received", body: `${c.data.amount} ${plan.currency} · receipt ${r.invoiceNumber}`, link: "/tms/me/payments", dedupeKey: `payment_recorded:${r.invoiceNumber}` } as never);
+      if (plan) await notifyStudent(plan.studentId, { type: "payment_recorded", title: "Payment received", body: `${c.data.amount} ${plan.currency} · receipt ${r.invoiceNumber}`, link: "/cohort-ai/me/payments", dedupeKey: `payment_recorded:${r.invoiceNumber}` } as never);
       await audit(u, { action: "record", entity: "payment", entityId: String(v.planId), entityLabel: r.invoiceNumber, summary: `${c.data.amount} received via ${c.data.method}` });
       return { ok: true, id: String(v.planId), result: `Payment recorded, receipt ${r.invoiceNumber}.` };
     },
@@ -307,7 +307,7 @@ export const TMS_ACTIONS: ActionDef[] = [
       if (!program) return fail("Program not found.");
       const cert = await issueCertificate(c.data, u.id);
       await audit(u, { action: "issue", entity: "certificate", entityId: cert._id, entityLabel: `${cert.certificateNumber} · ${student.fullName}`, summary: `${c.data.type} for ${program.name}` });
-      await notifyStudent(c.data.studentId, { type: "certificate_issued", title: "A certificate was issued to you", body: `${cert.certificateNumber} · ${program.name}`, link: "/tms/me/certificates", dedupeKey: `certificate_issued:${cert._id}` } as never);
+      await notifyStudent(c.data.studentId, { type: "certificate_issued", title: "A certificate was issued to you", body: `${cert.certificateNumber} · ${program.name}`, link: "/cohort-ai/me/certificates", dedupeKey: `certificate_issued:${cert._id}` } as never);
       return { ok: true, id: cert._id, result: `Certificate ${cert.certificateNumber} issued to ${student.fullName}.` };
     },
   },
@@ -361,5 +361,5 @@ export const TMS_REPORTS: ReportDef[] = [
   { key: "tms.dashboard", panel: "tms", label: "Training dashboard numbers", description: "Students, programs, batches, enrolments, revenue and trends.", level: "staff", params: [f.date("dateFrom", "From"), f.date("dateTo", "To"), f.ref("programId", "Program id", "tms.program")], run: async (v) => (await getTmsDashboardStats({ dateFrom: D(v.dateFrom), dateTo: v.dateTo ? new Date(`${String(v.dateTo)}T23:59:59`) : undefined, programId: str(v.programId) ?? undefined })) as unknown as Json },
   { key: "tms.fees_summary", panel: "tms", label: "Fee collection summary", description: "Total fees, collected, pending and the collection trend.", level: "staff", allow: canManagePayments, params: [], run: async () => (await getPaymentAnalytics()) as unknown as Json },
   { key: "tms.batch_attendance", panel: "tms", label: "Attendance rate of a batch", description: "Attendance summary across all classes of a batch.", level: "staff", params: [f.ref("batchId", "Batch id", "tms.batch", true)], run: async (v) => ({ summary: await batchAttendanceSummary(String(v.batchId)) }) as unknown as Json },
-  { key: "tms.report", panel: "tms", label: "Full report", description: `One of the panel's reports: ${REPORT_TYPES.map((r) => r.value).join(", ")}.`, level: "staff", params: [f.enum("type", "Report", REPORT_TYPES.map((r) => r.value as string), true)], run: async (v) => { const r = await buildReport(String(v.type) as never); return { title: r.title, meta: r.meta, rows: r.rows.slice(0, 200), totalRows: r.rows.length } as unknown as Json; } },
+  { key: "tms.report", panel: "tms", label: "Full report", description: `One of the product's reports: ${REPORT_TYPES.map((r) => r.value).join(", ")}.`, level: "staff", params: [f.enum("type", "Report", REPORT_TYPES.map((r) => r.value as string), true)], run: async (v) => { const r = await buildReport(String(v.type) as never); return { title: r.title, meta: r.meta, rows: r.rows.slice(0, 200), totalRows: r.rows.length } as unknown as Json; } },
 ];

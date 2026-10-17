@@ -144,12 +144,12 @@ function DnsHistory({ domain }: { domain: CompanyDomainView }) {
   );
 }
 
-/** The state of the panels address `app.<domain>`, which has its own verification and DNS. */
+/** The state of the app address `app.<domain>`, which has its own verification and DNS. */
 function AppPill({ app }: { app: NonNullable<CompanyDomainView["app"]> }) {
-  if (app.ssl === "active") return <Pill tone="green"><Lock className="size-3" /> Panels live at {app.host}</Pill>;
-  if (app.ssl === "manual") return <Pill tone="muted"><Lock className="size-3" /> Panels: managed by platform</Pill>;
-  if (app.ssl === "error") return <Pill tone="red"><AlertTriangle className="size-3" /> <span title={app.error ?? undefined}>Panels address: hosting error</span></Pill>;
-  return <Pill tone="amber"><CircleDashed className="size-3" /> {app.verified ? `Panels (${app.host}): waiting for DNS` : `Panels (${app.host}): needs its records`}</Pill>;
+  if (app.ssl === "active") return <Pill tone="green"><Lock className="size-3" /> Products live at {app.host}</Pill>;
+  if (app.ssl === "manual") return <Pill tone="muted"><Lock className="size-3" /> Products: managed by platform</Pill>;
+  if (app.ssl === "error") return <Pill tone="red"><AlertTriangle className="size-3" /> <span title={app.error ?? undefined}>Products address: hosting error</span></Pill>;
+  return <Pill tone="amber"><CircleDashed className="size-3" /> {app.verified ? `Products (${app.host}): waiting for DNS` : `Products (${app.host}): needs its records`}</Pill>;
 }
 
 function SslPill({ domain }: { domain: CompanyDomainView }) {
@@ -241,7 +241,7 @@ export default function DomainsManager({ initial, maxCustom, actions }: { initia
           </Button>
         </div>
         <p id="domain-host-help" className="text-xs text-muted-foreground">
-          {atLimit ? `You've connected the maximum of ${maxCustom} custom domains. Remove one to add another.` : "A domain you own, such as www.yourcompany.com. Your panels are set up for you at app.yourcompany.com. You'll verify the domain with a DNS record next (see the steps above)."}
+          {atLimit ? `You've connected the maximum of ${maxCustom} custom domains. Remove one to add another.` : "A domain you own, such as www.yourcompany.com. Your products are set up for you at app.yourcompany.com. You'll verify the domain with a DNS record next (see the steps above)."}
         </p>
         {addError && (
           <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">

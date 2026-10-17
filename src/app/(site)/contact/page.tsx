@@ -1,7 +1,7 @@
-import CmsPageView from "@/components/cms/CmsPageView";
-import { cmsPageMetadata, requirePublicPage } from "@/lib/cms/page-route";
+import CmsPageView from "@/components/products/sitecraft-ai/CmsPageView";
+import { cmsPageMetadata, requirePublicPage } from "@/lib/products/sitecraft-ai/page-route";
 import { getSubServices, isValidCategory, type CategorySlug } from "@/lib/categories";
-import { getContactFormFields } from "@/lib/cms/forms";
+import { getContactFormFields } from "@/lib/products/sitecraft-ai/forms";
 import { getLeadCategories } from "@/lib/lead-categories";
 
 export const generateMetadata = () => cmsPageMetadata("/contact");

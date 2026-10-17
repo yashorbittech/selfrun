@@ -1,7 +1,7 @@
 /**
  * Pure helpers (no server imports) for working out the platform's root domain — the domain every company's automatic
  * address `<slug>.<root>` lives under — without it being typed in anywhere, so a production deployment can never fall back
- * to `localhost`. Order used by `resolvedRootDomain()`: Platform Panel → Integrations, then `PLATFORM_ROOT_DOMAIN`, then
+ * to `localhost`. Order used by `resolvedRootDomain()`: Platform Console → Integrations, then `PLATFORM_ROOT_DOMAIN`, then
  * `productionRootDomain()` (Vercel production only), and `localhost` only in development.
  */
 

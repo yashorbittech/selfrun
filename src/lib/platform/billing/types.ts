@@ -25,7 +25,7 @@ export interface PlanLimits {
   aiTokensPerMonth: number | null;
   /** File storage in MB; null = unlimited. */
   storageMb: number | null;
-  /** Further numeric limits added in the Platform Panel (camelCase key); null = unlimited. */
+  /** Further numeric limits added in the Platform Console (camelCase key); null = unlimited. */
   [key: string]: number | null;
 }
 
@@ -41,7 +41,7 @@ export const PLAN_LIMIT_DEFS = [
 
 /**
  * Every third-party service the platform pays for, and the limit that caps a company's use of it. The limits are the only thing that
- * differs between plans (every plan has every panel and feature). More of anything means a bigger plan: nothing is sold separately.
+ * differs between plans (every plan has every product and feature). More of anything means a bigger plan: nothing is sold separately.
  */
 export interface UsageService {
   limitKey: string;
@@ -140,7 +140,7 @@ export interface Plan {
   lifetimeFree?: boolean;
   /** Not sold online: the pricing page shows "Contact support" instead of a price. */
   contactSales?: boolean;
-  /** Panels included; "all" = every panel. Core panels (see MODULES.core) are always included. */
+  /** Products included; "all" = every product. Core products (see MODULES.core) are always included. */
   modules: ModuleKey[] | "all";
   limits: PlanLimits;
   /** Free-trial length; null = the platform default (`getBillingSettings().billing.defaultTrialDays`). */
@@ -192,7 +192,7 @@ export interface CompanySubscription {
   lastPayment?: { id: string; amount: number; currency: string; at: Date; periodStart: Date | null; periodEnd: Date | null } | null;
   /** A checkout started but not yet confirmed by Razorpay: the quote it was created with. */
   checkout?: { subscriptionId: string; pricing: SubscriptionPricing } | null;
-  /** Set by the Platform Panel: never billed (status "internal") although not the platform owner. */
+  /** Set by the Platform Console: never billed (status "internal") although not the platform owner. */
   complimentary?: boolean;
   updatedAt: Date;
 }
@@ -233,12 +233,12 @@ export interface SubscriptionPricing {
 /** Usage metrics metered per company per calendar month. */
 export type UsageMetric = "ai_tokens" | "storage_mb" | "emails" | "voice_seconds";
 
-/** What the current company may do right now — the single question every panel asks. */
+/** What the current company may do right now — the single question every product asks. */
 export interface Entitlements {
   planId: string | null;
   planName: string | null;
   status: SubscriptionStatus;
-  /** null = all panels. */
+  /** null = all products. */
   modules: Set<string> | null;
   limits: PlanLimits;
   /** Capability flags the plan includes (`PLAN_FLAGS`); null = every flag (platform owner, demo). */
@@ -253,7 +253,7 @@ export interface Entitlements {
 
 /**
  * First-run fallbacks only. The live values are platform settings
- * (`getBillingSettings()` in `settings.ts`), edited in the Platform Panel.
+ * (`getBillingSettings()` in `settings.ts`), edited in the Platform Console.
  */
 export const GRACE_DAYS = 7;
 export const DEFAULT_TRIAL_DAYS = 30;

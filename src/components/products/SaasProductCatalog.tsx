@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ProductItem } from "@/types/content";
-import { TextProvider } from "@/components/cms/TextContext";
-import { useProducts } from "@/components/cms/useProducts";
+import { TextProvider } from "@/components/products/sitecraft-ai/TextContext";
+import { useProducts } from "@/components/products/sitecraft-ai/useProducts";
 import ProductCard from "@/components/products/ProductCard";
 import ProductDetailModal from "@/components/products/ProductDetailModal";
 import ProductMockup from "@/components/products/ProductMockup";
@@ -36,8 +36,8 @@ import {
 import { SUCCESS_AUTO_HIDE_MS, useLeadSubmit } from "@/lib/useLeadSubmit";
 import { useStableCardHeight } from "@/lib/useStableCardHeight";
 import LeadSuccessState from "@/components/sections/LeadSuccessState";
-import { useText } from "@/components/cms/TextContext";
-import { useSiteInfo } from "@/components/cms/SiteInfoContext";
+import { useText } from "@/components/products/sitecraft-ai/TextContext";
+import { useSiteInfo } from "@/components/products/sitecraft-ai/SiteInfoContext";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -240,8 +240,8 @@ export default function SaasProductCatalog({ categories }: { categories: string[
       a: "Yes. All 15 applications are built around a shared single sign-on (SSO) identity store, a unified design system, and a central permission matrix. You can deploy the complete platform or license specific application modules based on your business requirements.",
     },
     {
-      q: "How does Single Sign-On (SSO) work across the panels?",
-      a: "Logging into the Staff Hub or any individual panel automatically provisions authorized sessions across all other modules where your account has a designated role. No second passwords or URL juggling required.",
+      q: "How does Single Sign-On (SSO) work across the products?",
+      a: "Logging into the Staff Hub or any individual product automatically provisions authorized sessions across all other modules where your account has a designated role. No second passwords or URL juggling required.",
     },
     {
       q: "Can we train custom AI bots on our own company documents?",
@@ -253,7 +253,7 @@ export default function SaasProductCatalog({ categories }: { categories: string[
     },
     {
       q: "How is security and data isolation handled for external users?",
-      a: "External stakeholders (clients, job candidates, trainees) interact strictly through the Stakeholder Portal (`/portal`), which operates on a structurally isolated identity database. External accounts can never reach internal staff tooling by design.",
+      a: "External stakeholders (clients, job candidates, trainees) interact strictly through the Stakeholder Portal (`/clientos`), which operates on a structurally isolated identity database. External accounts can never reach internal staff tooling by design.",
     },
   ];
 

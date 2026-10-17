@@ -21,7 +21,7 @@ export const runtime = "nodejs";
  * attachment on a note about them that staff never sent them.
  *
  * An LMS session may read any lead's attachment (matches the existing
- * no-fine-grained-role convention on the rest of `/lms/leads`).
+ * no-fine-grained-role convention on the rest of `/dealflow-ai/leads`).
  */
 export async function GET(_req: NextRequest, ctx: RouteContext<"/api/lead-messages/files/[key]">) {
   const { key } = await ctx.params;

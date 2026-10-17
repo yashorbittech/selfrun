@@ -1,7 +1,7 @@
 /**
  * Indian GST for the platform's SaaS invoices. Client-safe, pure functions —
  * no data access, no configuration: the rate, SAC and whether prices include
- * tax come from the Platform Panel (`getBillingSettings()`) and are passed in.
+ * tax come from the Platform Console (`getBillingSettings()`) and are passed in.
  * Money is integer paise throughout, and every split adds up exactly.
  *
  * This is the ONE GSTIN validator for the platform layer (`settings.ts` uses it).

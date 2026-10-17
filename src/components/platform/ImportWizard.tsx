@@ -92,7 +92,7 @@ export default function ImportWizard({ leadTypes }: { leadTypes: { value: string
     setBusy(dryRun ? "preview" : "import");
     setError(null);
     try {
-      const res = await fetch("/workspace/settings/import/run", {
+      const res = await fetch("/commandos/settings/import/run", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ type, csv: file.csv, mapping, dryRun, leadType, sendInvites }),
@@ -158,7 +158,7 @@ export default function ImportWizard({ leadTypes }: { leadTypes: { value: string
             </button>
           ))}
         </div>
-        <a href={`/workspace/settings/import/sample?type=${type}`} id="import-sample" className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline" download>
+        <a href={`/commandos/settings/import/sample?type=${type}`} id="import-sample" className="inline-flex items-center gap-1 text-sm text-primary underline-offset-4 hover:underline" download>
           <Download className="size-3.5" /> Download a sample {def.label.toLowerCase()} CSV
         </a>
       </div>

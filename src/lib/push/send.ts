@@ -27,7 +27,7 @@ const CONCURRENCY = 10;
 
 function safePath(url: string | null | undefined): string {
   const u = (url ?? "").trim();
-  return u.startsWith("/") && !u.startsWith("//") && !u.includes("\\") && u.length <= 500 ? u : "/workspace/notifications";
+  return u.startsWith("/") && !u.startsWith("//") && !u.includes("\\") && u.length <= 500 ? u : "/commandos/notifications";
 }
 
 async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>): Promise<void> {
@@ -107,7 +107,7 @@ export async function queuePush(actor: PushActor, userIds: string[], message: Pu
   }
 }
 
-/** Staff accounts of the company holding any of `roles` (for panel broadcasts such as "tell HR"). */
+/** Staff accounts of the company holding any of `roles` (for product broadcasts such as "tell HR"). */
 export async function userIdsWithRoles(roles: string[]): Promise<string[]> {
   const rows = await (await getDb()).collection<{ _id: ObjectId }>("admin_users").find({ roles: { $in: roles } }, { projection: { _id: 1 } }).limit(200).toArray();
   return rows.map((r) => String(r._id));

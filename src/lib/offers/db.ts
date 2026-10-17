@@ -8,7 +8,7 @@ import { randomUUID } from "node:crypto";
  *  - carries `createdAt` / `updatedAt` / `createdBy` / `updatedBy` audit fields
  *  - is soft-deleted via a `deletedAt` timestamp (never hard-removed)
  *
- * Mirrors `src/lib/tms/db.ts`.
+ * Mirrors `src/lib/cohort-ai/db.ts`.
  */
 
 export type Id = string;

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import SidebarBrand from "@/components/SidebarBrand";
 import PlatformSidebar, { type PlatformNavFlags } from "@/components/platform/panel/PlatformSidebar";
-import { useSidebarCollapse, SidebarProfileSlot } from "@/components/lms/SidebarCollapseContext";
+import { useSidebarCollapse, SidebarProfileSlot } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import PlatformProfileMenu from "@/components/platform/panel/PlatformProfileMenu";
 import { cn } from "@/lib/utils";
 
