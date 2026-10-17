@@ -24,18 +24,24 @@ export default async function HubDashboardPage() {
   // The matrix numbers come from the executive loader (null for anyone without the Command Center permission).
   const executive = await loadExecutiveOverview({ roles: user.roles, permissionOverrides: user.permissionOverrides ?? null });
 
-  // Which products this person gets comes from the Workspace navigation (roles, permission overrides, plan, switched-on products).
+  // Product access comes from the Workspace navigation (roles and permission overrides).
   const session = await getWorkspaceNav();
   const allowed = new Set(session?.nav.allowed ?? []);
-  const locked = session?.nav.lockedPanels ?? [];
   const [registry, unavailable] = await Promise.all([listPanels(), currentCompanyId().then(unavailablePanelKeys)]);
   const registryNames = Object.fromEntries(registry.map((p) => [p.key, whiteLabelProductName(p.name)]));
   // Every product the Product Registry lists (and that is switched on for this company), in its display order.
   const shownPanels = registry.filter((p) => !unavailable.has(p.key)).map((p) => ({ ...p, name: whiteLabelProductName(p.name) }));
-  const visibleKeys = shownPanels.map((p) => p.key).filter((k) => allowed.has(`analytics.${k}`) || allowed.has(`product.${k}`));
-
-  const matrixPanels = visibleKeys;
-  const matrixLocked = locked.filter((k) => shownPanels.some((p) => p.key === k));
+  const dashboardPanels = shownPanels.filter((panel) => panel.key !== "workspace" && panel.key !== "website");
+  // The registry uses product keys, while a few navigation entries have
+  // established keys of their own (the dashboard, portal and service products).
+  const productNavKey = (key: string) => ({
+    workspace: "dashboard",
+    portal: "panel.portal",
+    support: "panel.support",
+    website: "panel.website",
+  }[key] ?? `product.${key}`);
+  const matrixPanels = dashboardPanels.map((p) => p.key).filter((k) => allowed.has(productNavKey(k)));
+  const analyticsPanels = dashboardPanels.map((p) => p.key).filter((k) => allowed.has(`analytics.${k}`));
 
   const headline = Object.fromEntries(
     await Promise.all(matrixPanels.filter(isPanelKey).map(async (k) => [k, await getPanelHeadlineStats(k)] as const)),
@@ -65,7 +71,7 @@ export default async function HubDashboardPage() {
 
       {/* Product performance matrix */}
       <section id="dashboard-overview" data-section="overview" className="space-y-6 rounded-3xl border border-border/60 border-t-2 border-t-primary/60 bg-muted/70 dark:bg-[color-mix(in_oklch,var(--background)_82%,black)] p-5 shadow-sm sm:p-6">
-        <PanelPerformanceMatrix modules={executive?.modules} stats={headline} panels={matrixPanels} locked={matrixLocked} names={registryNames} unavailable={[...unavailable]} registry={shownPanels.map((p) => ({ key: p.key, name: p.name, description: p.description, route: p.route }))} />
+        <PanelPerformanceMatrix modules={executive?.modules} stats={headline} panels={matrixPanels} analyticsPanels={analyticsPanels} names={registryNames} unavailable={[...unavailable]} registry={dashboardPanels.map((p) => ({ key: p.key, name: p.name, description: p.description, route: p.route }))} />
       </section>
 
     </div>

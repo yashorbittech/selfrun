@@ -39,7 +39,6 @@ import {
   ShieldCheck,
   MessagesSquare,
   LayoutDashboard,
-  Lock,
   FileText,
 } from "lucide-react";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -51,7 +50,8 @@ import CategoryBarChart from "@/components/products/dealflow-ai/CategoryBarChart
 import ExecutiveSection from "@/components/products/commandos/ExecutiveSection";
 import { AnalyticsFilterBar } from "@/components/products/commandos/AnalyticsFilterBar";
 import type { CommandCenterStats } from "@/lib/products/commandos/command-center";
-import { formatCurrency, cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
+import { productAnalyticsPath } from "@/lib/platform/saas/product-routes";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Product status grid config
@@ -62,7 +62,7 @@ const PANEL_GRID = [
     key: "fms",
     label: "Finance",
     icon: <Landmark className="size-5" />,
-    analyticsHref: "/commandos/analytics/fms",
+    analyticsHref: productAnalyticsPath("fms"),
     panelHref: "/cashflow-ai",
     color: "from-primary to-brand-accent",
   },
@@ -70,7 +70,7 @@ const PANEL_GRID = [
     key: "hrms",
     label: "HR",
     icon: <Users className="size-5" />,
-    analyticsHref: "/commandos/analytics/hrms",
+    analyticsHref: productAnalyticsPath("hrms"),
     panelHref: "/talentos",
     color: "from-brand-deep to-primary",
   },
@@ -78,7 +78,7 @@ const PANEL_GRID = [
     key: "lms",
     label: "Leads / CRM",
     icon: <LayoutGrid className="size-5" />,
-    analyticsHref: "/commandos/analytics/lms",
+    analyticsHref: productAnalyticsPath("lms"),
     panelHref: "/dealflow-ai",
     color: "from-primary to-brand-deep",
   },
@@ -86,7 +86,7 @@ const PANEL_GRID = [
     key: "messenger",
     label: "Messenger",
     icon: <MessagesSquare className="size-5" />,
-    analyticsHref: "/commandos/analytics/messenger",
+    analyticsHref: productAnalyticsPath("messenger"),
     panelHref: "/huddle-ai",
     color: "from-brand-deep to-brand-accent",
   },
@@ -94,7 +94,7 @@ const PANEL_GRID = [
     key: "pms",
     label: "Projects",
     icon: <FolderKanban className="size-5" />,
-    analyticsHref: "/commandos/analytics/pms",
+    analyticsHref: productAnalyticsPath("pms"),
     panelHref: "/sprintos",
     color: "from-brand-accent to-brand-deep",
   },
@@ -102,7 +102,7 @@ const PANEL_GRID = [
     key: "portal",
     label: "Portal",
     icon: <Globe className="size-5" />,
-    analyticsHref: "/commandos/analytics/portal",
+    analyticsHref: productAnalyticsPath("portal"),
     panelHref: "/clientos",
     color: "from-primary/80 to-brand-deep/80",
   },
@@ -110,7 +110,7 @@ const PANEL_GRID = [
     key: "prms",
     label: "Procurement",
     icon: <ShoppingCart className="size-5" />,
-    analyticsHref: "/commandos/analytics/prms",
+    analyticsHref: productAnalyticsPath("prms"),
     panelHref: "/spendiq",
     color: "from-brand-deep/80 to-primary/80",
   },
@@ -118,7 +118,7 @@ const PANEL_GRID = [
     key: "tms",
     label: "Training",
     icon: <GraduationCap className="size-5" />,
-    analyticsHref: "/commandos/analytics/tms",
+    analyticsHref: productAnalyticsPath("tms"),
     panelHref: "/cohort-ai",
     color: "from-brand-accent to-primary",
   },
@@ -126,7 +126,7 @@ const PANEL_GRID = [
     key: "workspace",
     label: "Workspace",
     icon: <LayoutDashboard className="size-5" />,
-    analyticsHref: "/commandos/analytics/workspace",
+    analyticsHref: productAnalyticsPath("workspace"),
     panelHref: "/commandos",
     color: "from-brand-deep to-brand-accent/80",
   },
@@ -134,7 +134,7 @@ const PANEL_GRID = [
     key: "aibots",
     label: "AI Bots",
     icon: <Bot className="size-5" />,
-    analyticsHref: "/commandos/analytics/aibots",
+    analyticsHref: productAnalyticsPath("aibots"),
     panelHref: "/agentos",
     color: "from-primary to-brand-accent",
   },
@@ -142,7 +142,7 @@ const PANEL_GRID = [
     key: "cms",
     label: "Website CMS",
     icon: <Globe className="size-5" />,
-    analyticsHref: "/commandos/analytics/cms",
+    analyticsHref: productAnalyticsPath("cms"),
     panelHref: "/sitecraft-ai",
     color: "from-brand-deep to-primary",
   },
@@ -150,7 +150,7 @@ const PANEL_GRID = [
     key: "dlms",
     label: "Digi Locker",
     icon: <Boxes className="size-5" />,
-    analyticsHref: "/commandos/analytics/dlms",
+    analyticsHref: productAnalyticsPath("dlms"),
     panelHref: "/cybervault",
     color: "from-primary to-brand-deep",
   },
@@ -158,7 +158,7 @@ const PANEL_GRID = [
     key: "ots",
     label: "Online Tests",
     icon: <GraduationCap className="size-5" />,
-    analyticsHref: "/commandos/analytics/ots",
+    analyticsHref: productAnalyticsPath("ots"),
     panelHref: "/evaliq",
     color: "from-brand-accent to-brand-deep",
   },
@@ -166,7 +166,7 @@ const PANEL_GRID = [
     key: "seo",
     label: "SEO",
     icon: <Activity className="size-5" />,
-    analyticsHref: "/commandos/analytics/seo",
+    analyticsHref: productAnalyticsPath("seo"),
     panelHref: "/rankmax-ai",
     color: "from-primary to-brand-accent",
   },
@@ -174,7 +174,7 @@ const PANEL_GRID = [
     key: "smms",
     label: "Social Media",
     icon: <MessagesSquare className="size-5" />,
-    analyticsHref: "/commandos/analytics/smms",
+    analyticsHref: productAnalyticsPath("smms"),
     panelHref: "/viralpulse-ai",
     color: "from-brand-deep to-primary",
   },
@@ -182,7 +182,7 @@ const PANEL_GRID = [
     key: "sop",
     label: "SOPs",
     icon: <ReceiptText className="size-5" />,
-    analyticsHref: "/commandos/analytics/sop",
+    analyticsHref: productAnalyticsPath("sop"),
     panelHref: "/playbook-ai",
     color: "from-primary to-brand-deep",
   },
@@ -190,11 +190,57 @@ const PANEL_GRID = [
     key: "lpms",
     label: "Legal & Documents",
     icon: <FileText className="size-5" />,
-    analyticsHref: "/commandos/analytics/lpms",
+    analyticsHref: productAnalyticsPath("lpms"),
     panelHref: "/contractflow-ai",
     color: "from-brand-deep to-brand-accent",
   },
 ];
+
+const PRODUCT_CARD_DESCRIPTIONS: Record<string, string> = {
+  workspace: "Bring company setup, people, finance, operations and product activity together in one workspace, with a central view of daily business work.",
+  hrms: "Manage employee records, recruitment, attendance, leave, payroll and HR documents from one place, with clear visibility into your workforce.",
+  pms: "Plan projects, assign tasks, track milestones and timesheets, and review delivery costs so teams can see progress and next steps.",
+  lms: "Capture and qualify leads, manage sales pipelines, coordinate campaigns and follow deals through closing and client onboarding.",
+  fms: "Create invoices, track income and expenses, collect payments, reconcile transactions and review financial activity in one connected ledger.",
+  prms: "Manage purchase requests, purchase orders, vendor bills, expenses and assets, with approval steps that keep spending organized.",
+  tms: "Organize training programs, cohorts and batches; share learning materials, track learner progress and issue completion certificates.",
+  messenger: "Keep company conversations in channels and direct messages, and bring teams together with voice meetings, calls and announcements.",
+  sop: "Create and maintain operating procedures and policies, track revisions, and give teams a consistent way to follow approved processes.",
+  lpms: "Prepare and manage contracts and legal documents, route them through approval steps, and collect signatures with a clear status trail.",
+  dlms: "Store sensitive credentials and business documents in protected lockers, manage access, and keep track of expiry dates.",
+  ots: "Build and run timed online assessments, review automated grading and integrity signals, and provide verifiable certificates to candidates.",
+  aibots: "Create AI agents and chatbots grounded in your business knowledge, then manage their content and conversations in one workspace.",
+  intelligence: "Explore business metrics with conversational queries and live data, helping teams find trends and answer operational questions.",
+  smms: "Plan social content, create campaign posts, organize a publishing calendar and review engagement across connected channels.",
+  seo: "Monitor search rankings, review technical SEO issues, manage backlinks and sitemaps, and prioritize improvements to organic visibility.",
+  cms: "Build and update your website without code, publish pages and blogs, customize the visual theme and manage lead capture forms.",
+  portal: "Give clients, students, partners and applicants a branded place to access their information, documents, messages and requests.",
+  support: "Help teams find answers through a searchable knowledge base and AI assistant, then track support requests and replies in one place.",
+  website: "Publish your company's public website on a custom domain, manage its pages and content, and keep it secured with automatic SSL.",
+};
+
+const PRODUCT_CARD_KEYWORDS: Record<string, string[]> = {
+  workspace: ["Operations", "Automation", "Overview", "Company setup", "Team activity", "Users", "Roles", "Workflows"],
+  hrms: ["Employees", "Attendance", "Payroll", "Recruitment", "Leave", "Employee records", "HR documents", "Workforce"],
+  pms: ["Projects", "Tasks", "Kanban", "Milestones", "Timesheets", "Delivery", "Team workload", "Cost tracking"],
+  lms: ["Leads", "Pipeline", "CRM", "Campaigns", "Follow-ups", "Deal tracking", "Sales", "Client onboarding"],
+  fms: ["Invoices", "Payments", "Accounting", "Expenses", "Ledger", "Reconciliation", "Receivables", "Financial records"],
+  prms: ["Procurement", "Vendors", "Purchase orders", "Vendor bills", "Expenses", "Assets", "Approvals", "Spend tracking"],
+  tms: ["Training", "Cohorts", "Batches", "Learning", "Curriculum", "Learner progress", "Certificates", "Programs"],
+  messenger: ["Chat", "Channels", "Direct messages", "Voice meetings", "Company calls", "Announcements", "Team updates", "Collaboration"],
+  sop: ["Procedures", "Policies", "Version history", "Approvals", "Staff compliance", "Acknowledgements", "Standards", "Operations"],
+  lpms: ["Contracts", "Legal documents", "Templates", "Approvals", "Signatures", "Agreements", "Document status", "Legal workflow"],
+  dlms: ["Credentials", "Documents", "Expiry alerts", "Secure lockers", "Access control", "Sensitive files", "Encrypted storage", "Vaults"],
+  ots: ["Assessments", "Question banks", "Timed tests", "Auto grading", "Anti-cheat", "Results", "Certificates", "Candidate testing"],
+  aibots: ["AI agents", "Knowledge base", "Chatbots", "Trained bots", "Business content", "Conversations", "Copilots", "AI assistance"],
+  intelligence: ["Analytics", "Live data", "Insights", "Natural language", "Business metrics", "Trend discovery", "Queries", "Decision support"],
+  smms: ["Social content", "Post generation", "Campaigns", "Publishing calendar", "Multi-channel", "Engagement", "Social analytics", "Content planning"],
+  seo: ["Rank tracking", "SEO audits", "Backlinks", "Sitemaps", "Technical SEO", "Search visibility", "Google rankings", "Organic growth"],
+  cms: ["Website builder", "Pages", "CMS", "Blogs", "Themes", "AI website creation", "Lead forms", "Content publishing"],
+  portal: ["Client access", "Student portal", "Applicant portal", "Documents", "Messages", "Requests", "Self-service", "Branded access"],
+  support: ["Help center", "AI assistant", "Knowledge base", "Support requests", "FAQs", "Troubleshooting", "Request tracking", "Customer support"],
+  website: ["Public website", "Custom domain", "SSL", "Company pages", "Website content", "Site publishing", "Domain hosting", "Online presence"],
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Module stat map (from command-center `modules` array)
@@ -347,7 +393,7 @@ export function PanelPerformanceMatrix({
   modules,
   stats,
   panels,
-  locked,
+  analyticsPanels,
   query,
   names,
   unavailable,
@@ -358,7 +404,8 @@ export function PanelPerformanceMatrix({
   stats?: Record<string, { label: string; value: number }[]>;
   /** Product keys this person may see; omitted = all. */
   panels?: string[];
-  locked?: string[];
+  /** Product keys whose analytics this person may open; omitted = all. */
+  analyticsPanels?: string[];
   /** Case-insensitive text matched against the product name. */
   query?: string;
   /** Product Registry names, so every card is titled like the product everywhere else. */
@@ -376,17 +423,18 @@ export function PanelPerformanceMatrix({
         return {
           key: r.key,
           label: r.name,
-          description: r.description,
+          description: PRODUCT_CARD_DESCRIPTIONS[r.key] ?? r.description,
           icon: known?.icon ?? <LayoutGrid className="size-5" />,
           color: known?.color ?? "from-primary to-brand-accent",
           analyticsHref: known?.analyticsHref ?? null,
           panelHref: r.route,
         };
       })
-    : PANEL_GRID.map((p) => ({ ...p, description: "", analyticsHref: p.analyticsHref as string | null }));
+    : PANEL_GRID.map((p) => ({ ...p, description: PRODUCT_CARD_DESCRIPTIONS[p.key] ?? "", analyticsHref: p.analyticsHref as string | null }));
   const grid = base
     .map((p) => ({ ...p, label: names?.[p.key] ?? p.label }))
     .filter((p) => !unavailable?.includes(p.key))
+    .filter((p) => !panels || panels.includes(p.key))
     .filter((p) => !q || p.label.toLowerCase().includes(q) || p.key.includes(q));
   return (
       <div className="space-y-4">
@@ -405,33 +453,41 @@ export function PanelPerformanceMatrix({
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {grid.map((panel) => {
             const mStats = moduleStats[panel.key] ?? [];
-            const isAllowed = panels ? panels.includes(panel.key) : true;
-            const isLocked = !isAllowed || (locked?.includes(panel.key) ?? false);
             return (
-              <GlassCard key={panel.key} className="h-full">
-                <CardHeader className="grid-cols-[auto_minmax(0,1fr)] items-start gap-3 pb-3">
+              <GlassCard
+                key={panel.key}
+                className="group relative flex h-[340px] flex-col overflow-hidden rounded-3xl border border-border/50 bg-gradient-to-br from-primary/[0.07] via-card/95 to-background shadow-sm transition-all duration-300 hover:border-primary/40 hover:shadow-[0_18px_48px_-24px_rgba(16,185,129,0.45)]"
+              >
+                <div aria-hidden="true" className="pointer-events-none absolute -right-12 -top-14 z-0 size-36 rounded-full bg-primary/10 blur-3xl transition-colors duration-300 group-hover:bg-primary/20" />
+                <CardHeader className="relative z-10 grid-cols-[auto_minmax(0,1fr)] items-start gap-3 pb-2">
                   <div
-                    className={`mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${panel.color} text-white shadow-sm`}
+                    className={`mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${panel.color} text-white shadow-md shadow-black/10 ring-1 ring-white/15 transition-transform duration-300 group-hover/gcard:scale-105`}
                   >
                     {panel.icon}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-base leading-5">{panel.label}</CardTitle>
-                      {isLocked && <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"><Lock className="size-2.5" />Locked</span>}
+                      <CardTitle className="line-clamp-2 text-base font-semibold leading-5 tracking-tight">{panel.label}</CardTitle>
                     </div>
-                    <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                    <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
                       {panel.description || `Open ${panel.label} to manage its work and latest activity.`}
                     </p>
+                    <div role="list" aria-label={`${panel.label} keywords`} className="mt-2 flex flex-wrap gap-1.5">
+                      {(PRODUCT_CARD_KEYWORDS[panel.key] ?? []).map((keyword) => (
+                        <span key={keyword} role="listitem" className="inline-flex h-5 items-center rounded-full border border-primary/15 bg-primary/[0.05] px-2 text-[9px] font-medium leading-none text-muted-foreground">
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="relative z-10 mt-auto space-y-3">
                   <dl className="grid grid-cols-3 gap-2">
                     {[0, 1, 2].map((i) => {
                       const s = mStats[i];
                       return (
-                        <div key={i} className="flex h-16 flex-col items-center justify-center rounded-lg border border-border/50 px-2 text-center">
-                          <dd className="text-base font-bold tabular-nums text-foreground">
+                        <div key={i} className="flex h-[68px] flex-col items-center justify-center rounded-xl border border-border/50 bg-background/45 px-2 text-center shadow-sm transition-colors duration-200 hover:border-primary/30 hover:bg-primary/[0.04]">
+                          <dd className="text-lg font-semibold tabular-nums tracking-tight text-foreground">
                             {s ? (s.value > 999 ? formatCurrency(s.value) : s.value.toLocaleString("en-IN")) : "—"}
                           </dd>
                           <dt className="mt-0.5 w-full truncate text-[10px] text-muted-foreground">{s?.label ?? "No data"}</dt>
@@ -439,26 +495,21 @@ export function PanelPerformanceMatrix({
                       );
                     })}
                   </dl>
-                  <div className="flex items-center gap-2 pt-1">
-                    {panel.analyticsHref && (
+                  <div className="flex items-center gap-2 pt-0.5">
+                    {panel.analyticsHref && (!analyticsPanels || analyticsPanels.includes(panel.key)) && (
                     <Link
-                      href={isLocked ? `/commandos/upgrade?module=${panel.key}` : panel.analyticsHref}
-                      className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border/50 px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-primary/8 hover:border-primary/40 hover:text-primary"
+                      href={panel.analyticsHref}
+                      className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl border border-border/60 bg-background/35 px-3 text-xs font-medium text-foreground transition-all hover:border-primary/40 hover:bg-primary/[0.07] hover:text-primary"
                     >
                       <Activity className="size-3" />
                       Analytics
                     </Link>
                     )}
                     <Link
-                      href={isLocked ? `/commandos/upgrade?module=${panel.key}` : panel.panelHref}
-                      className={cn(
-                        "inline-flex flex-1 items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
-                        isLocked
-                          ? "bg-amber-600/90 hover:bg-amber-700 text-white shadow-sm"
-                          : "bg-gradient-to-r from-primary/90 to-[var(--color-brand-accent)] text-white hover:opacity-90"
-                      )}
+                      href={panel.panelHref}
+                      className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-[var(--color-brand-accent)] px-3 text-xs font-semibold text-white shadow-sm shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-primary/25"
                     >
-                      {isLocked ? "Upgrade" : "Open"}
+                      Open
                       <ArrowUpRight className="size-3" />
                     </Link>
                   </div>

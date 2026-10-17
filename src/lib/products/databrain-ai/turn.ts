@@ -3,7 +3,7 @@ import { isOpenAIConfigured } from "@/lib/openai";
 import { sanitizeUserMessage } from "@/lib/prompt-safety";
 import { intelligenceCan } from "@/lib/intelligence-roles";
 import type { CurrentIntelligenceUser } from "@/lib/intelligence-auth";
-import { aiBlockReason, moduleBlockReason } from "@/lib/platform/billing/enforce";
+import { aiBlockReason } from "@/lib/platform/billing/enforce";
 import { emitEvent } from "@/lib/platform/events";
 import type { IntelMessage } from "@/lib/products/databrain-ai/blocks";
 import { addMessage, consumeQuestion, createConversation, getConversation, historyForModel, MAX_QUESTION_CHARS, QUESTIONS_PER_HOUR, toView, type ConversationDoc } from "@/lib/products/databrain-ai/conversations";
@@ -12,7 +12,7 @@ import { answerQuestion, friendlyTurnError } from "@/lib/products/databrain-ai/e
 
 /**
  * A question's whole life apart from HTTP: preflight checks (product access,
- * plan, AI limit / read-only, rate limit, conversation ownership), then the
+ * AI limit / read-only, rate limit, conversation ownership), then the
  * answer, its persistence and its audit event. The route streams around it;
  * tests call it directly.
  */
@@ -23,8 +23,6 @@ export type PreparedTurn =
 
 export async function prepareTurn(user: CurrentIntelligenceUser, body: { message?: unknown; conversationId?: unknown }): Promise<PreparedTurn> {
   if (!intelligenceCan(user, "USE")) return { ok: false, status: 403, error: "You don't have permission to use AI Intelligence." };
-  const moduleBlock = await moduleBlockReason("intelligence");
-  if (moduleBlock) return { ok: false, status: 403, error: moduleBlock };
   if (!(await isOpenAIConfigured())) return { ok: false, status: 503, error: "The AI assistant isn't set up for this workspace yet. Ask your platform administrator to add an OpenAI key." };
 
   const q = sanitizeUserMessage(body.message, MAX_QUESTION_CHARS);

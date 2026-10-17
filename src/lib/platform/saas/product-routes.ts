@@ -38,6 +38,11 @@ export function productAppPath(key: string): string {
   return `/${productSlugFor(key)}`;
 }
 
+/** Canonical Workspace analytics path for a product's public URL slug. */
+export function productAnalyticsPath(key: string): string {
+  return `/commandos/analytics/${productSlugFor(key)}`;
+}
+
 export function productPath(key: string): string {
   return `/products/${productSlugFor(key)}`;
 }

@@ -248,7 +248,7 @@ async function main() {
     const labels = Object.fromEntries((await navOf(owner, ownerAdmin)).sections.find((s) => s.key === "analytics")!.items.map((i) => [i.key, [i.label, i.href]]));
     assert.deepEqual(
       NEW_ANALYTICS.map((p) => labels[`analytics.${p}`]),
-      [["SOPs & Policies Analytics", "/commandos/analytics/sop"], ["Digi Locker Analytics", "/commandos/analytics/dlms"], ["Online Tests Analytics", "/commandos/analytics/ots"], ["AI Assistants Analytics", "/commandos/analytics/aibots"], ["Social Media Analytics", "/commandos/analytics/smms"], ["SEO Analytics", "/commandos/analytics/seo"], ["Website Analytics", "/commandos/analytics/cms"]],
+      [["SOPs & Policies Analytics", "/commandos/analytics/playbook-ai"], ["Digi Locker Analytics", "/commandos/analytics/cybervault"], ["Online Tests Analytics", "/commandos/analytics/evaliq"], ["AI Assistants Analytics", "/commandos/analytics/agentos"], ["Social Media Analytics", "/commandos/analytics/viralpulse-ai"], ["SEO Analytics", "/commandos/analytics/rankmax-ai"], ["Website Analytics", "/commandos/analytics/sitecraft-ai"]],
     );
   });
   await check("AI Intelligence: a product tile for its own roles only, gated by plan, no analytics, and it grants no data by itself", async () => {

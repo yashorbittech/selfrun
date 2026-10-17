@@ -99,6 +99,8 @@ export default async function AdminUsersPage({
         hasActiveFilters={hasActiveFilters}
         currentAdminId={admin.id}
         customRoles={customRoles}
+        planName={entitlements.planName}
+        seatLimit={seatLimit}
         filters={
           <UsersFilterBar
             initialSearch={sp.search ?? ""}

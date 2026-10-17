@@ -3,8 +3,6 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { getCurrentHubUser, type CurrentHubUser } from "@/lib/hub-auth";
-import { getEntitlements } from "@/lib/platform/billing/entitlements";
-import { enabledModules } from "@/lib/platform/onboarding/state";
 import { currentCompanyId, isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { whiteLabelProductName } from "@/lib/platform/panels/types";
@@ -14,7 +12,7 @@ import { navAllows, resolveNav, type NavContext, type ResolvedNav } from "@/lib/
 
 /**
  * Server side of the Workspace navigation (`nav.ts`): loads what the rules
- * need for a user of the CURRENT company (plan, switched-on products, platform
+ * need for a user of the CURRENT company (available products, platform
  * access) and answers "what may this user open" — for the sidebar, the Staff
  * Hub tiles and the settings cards — and "may this user open X" — for pages.
  * Both go through the same rule, so what is shown is what is enforced.
@@ -34,13 +32,11 @@ async function hasPlatformAccess(userId: string): Promise<boolean> {
 
 export async function loadNavContext(user: WorkspaceUser): Promise<NavContext> {
   const companyId = await currentCompanyId();
-  const [entitlements, enabled, platformAccess, unavailable, registry] = await Promise.all([getEntitlements(), enabledModules(), hasPlatformAccess(user.id), unavailablePanelKeys(companyId), listPanels()]);
+  const [platformAccess, unavailable, registry] = await Promise.all([hasPlatformAccess(user.id), unavailablePanelKeys(companyId), listPanels()]);
   return {
     unavailablePanels: unavailable,
     panels: Object.fromEntries(registry.map((p) => [p.key, { name: whiteLabelProductName(p.name), description: p.description }])),
     user: { roles: user.roles, permissionOverrides: user.permissionOverrides ?? null },
-    planModules: entitlements.modules,
-    enabledModules: enabled,
     platformAccess,
   };
 }

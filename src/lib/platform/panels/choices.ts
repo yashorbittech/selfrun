@@ -2,6 +2,7 @@ import "server-only";
 import { MODULES } from "@/lib/platform/onboarding/catalog";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { listPanels, unavailablePanelKeys } from "@/lib/platform/panels/store";
+import { whiteLabelProductName } from "@/lib/platform/panels/types";
 
 export interface PanelChoice {
   key: string;
@@ -22,7 +23,7 @@ export async function listPanelChoices(opts: { includeUnavailable?: boolean } = 
   // are always on for a company; the rest can be chosen / included in plans.
   return registry
     .filter((p) => !off.has(p.key))
-    .map((p) => ({ key: p.key, label: p.name, description: p.description, core: p.core || !planModules.has(p.key) }));
+    .map((p) => ({ key: p.key, label: opts.includeUnavailable ? p.name : whiteLabelProductName(p.name), description: p.description, core: p.core || !planModules.has(p.key) }));
 }
 
 /** Registry name per module key — for admin screens that list modules (plans, add-ons, companies). */

@@ -1,6 +1,6 @@
 import { checkAiTokenUsage, checkStorageUsage } from "@/lib/notify/triggers/usage";
 import "server-only";
-import { notFound, redirect, unstable_rethrow } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { getDb } from "@/lib/mongodb";
 import { currentCompanyId, currentCompanyIdOrNull, runAsCompany } from "@/lib/platform/tenancy/context";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
@@ -11,10 +11,11 @@ import type { ModuleKey } from "@/lib/platform/onboarding/catalog";
 import type { SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
- * Plan enforcement for the business products: module gating, read-only mode,
- * and the seat / AI-token / storage limits. Everything reads the current
+ * Plan enforcement for the business products: read-only mode and the seat /
+ * AI-token / storage limits. Everything reads the current
  * company's entitlements (`getEntitlements()`), so the platform owner
- * (`internal`) is never gated or blocked — only metered.
+ * (`internal`) is never gated or blocked — only metered. Product modules are
+ * available across plans; workspace roles and product availability control access.
  *
  * Two styles for every check: `…BlockReason()` returns a friendly message or
  * null (for code that returns `{ ok: false, error }`), `assert…()` throws a
@@ -55,21 +56,19 @@ export async function moduleBlockReason(moduleKey: ModuleKey | string): Promise<
 }
 
 /**
- * Called at the top of a product's protected layout. A product outside the
- * company's plan redirects to the "Upgrade to unlock" page. Fails open on a
- * lookup error (the layout's own data access fails on its own if the DB is down).
+ * Called at the top of a product's protected layout. Plans do not gate product
+ * access; the Product Registry can still disable a product globally or for a
+ * company. Fails open on lookup errors (the layout's own data access will fail
+ * on its own if the database is down).
  */
 export async function requireModule(moduleKey: ModuleKey): Promise<void> {
-  let locked = false;
   try {
     // Switched off in the Product Registry (everywhere, or for this company)? The proxy already blocks it; this is the second lock.
     if (!(await isPanelAvailable(await currentCompanyId(), moduleKey))) notFound();
-    locked = (await moduleBlockReason(moduleKey)) !== null;
   } catch (err) {
     unstable_rethrow(err);
     console.error(`[billing] module check failed for ${moduleKey}`, err);
   }
-  if (locked) redirect(`/commandos/upgrade?module=${encodeURIComponent(moduleKey)}`);
 }
 
 // ---------------------------------------------------------------------------

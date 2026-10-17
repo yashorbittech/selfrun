@@ -238,6 +238,8 @@ export default function UsersGrid({
   hasActiveFilters,
   currentAdminId,
   customRoles,
+  planName,
+  seatLimit,
 }: {
   rows: AdminUserRow[];
   total: number;
@@ -249,6 +251,8 @@ export default function UsersGrid({
   hasActiveFilters?: boolean;
   currentAdminId: string;
   customRoles: CustomRoleView[];
+  planName: string | null;
+  seatLimit: number | null;
 }) {
   const [detailUser, setDetailUser] = useState<AdminUserRow | null>(null);
   const [editRolesFor, setEditRolesFor] = useState<AdminUserRow | null>(null);
@@ -434,6 +438,8 @@ export default function UsersGrid({
 
       <CreateUserSheet
         customRoles={customRoles}
+        planName={planName}
+        seatLimit={seatLimit}
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(email, tempPassword) => setTempPasswordInfo({ email, tempPassword })}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useMemo } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import {
   User,
@@ -63,11 +64,15 @@ export default function CreateUserSheet({
   onOpenChange,
   onCreated,
   customRoles,
+  planName,
+  seatLimit,
 }: {
   customRoles: CustomRoleView[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (email: string, tempPassword: string) => void;
+  planName: string | null;
+  seatLimit: number | null;
 }) {
   const [email, setEmail] = useState("");
   const [userType, setUserType] = useState<"employee" | "contractor" | "partner" | "system">("employee");
@@ -139,6 +144,8 @@ export default function CreateUserSheet({
 
   const activeCategoryMeta = USER_TYPE_META.find((t) => t.value === userType) ?? USER_TYPE_META[0];
   const CategoryIcon = activeCategoryMeta.icon;
+  const isFreePlan = planName?.toLowerCase().includes("free") ?? false;
+  const isOnePersonPlan = seatLimit === 1 || isFreePlan;
 
   return (
     <Sheet
@@ -149,7 +156,7 @@ export default function CreateUserSheet({
       }}
     >
       <SheetContent side="right" className="w-full sm:max-w-lg md:max-w-xl flex flex-col p-0 gap-0">
-        <SheetHeader className="p-5 border-b border-border bg-gradient-to-r from-muted/50 to-muted/20">
+        <SheetHeader className="sticky top-0 z-20 p-5 border-b border-border bg-popover">
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
               <UserPlus className="size-5" />
@@ -161,6 +168,14 @@ export default function CreateUserSheet({
               </SheetDescription>
             </div>
           </div>
+          {isOnePersonPlan && (
+            <div className="mt-3 rounded-xl border border-amber-500/45 bg-amber-500/15 px-4 py-3 text-xs leading-relaxed text-amber-900 dark:text-amber-100">
+              <p className="font-bold">{isFreePlan ? "Free plan — one user account total" : "One-person plan — one user account total"}</p>
+              <p className="mt-1">
+                This plan is for one person. You can’t add another login, employee, or teammate account. <Link href="/commandos/settings/billing" className="font-bold underline underline-offset-2">Upgrade your plan</Link> to add users.
+              </p>
+            </div>
+          )}
         </SheetHeader>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-5">

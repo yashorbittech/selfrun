@@ -7,12 +7,9 @@
  * An item is available when ALL of these hold:
  *   1. `allow(user)` — a rule built from the existing role files
  *      (`*-roles.ts`) and the permission catalog (`permissionOverrides`,
- *      resolved by `resolvePermission`). No new role model lives here.
- *   2. `module` (when set) is in the company's plan and switched on.
+ *      resolved by `resolvePermission`). Super Admin has access across all products.
+ *   2. The product is switched on for this company and in the product registry.
  *   3. `platform` items: the Platform Console's own access check passed.
- *
- * A product that the user's roles allow but the plan doesn't include is returned
- * as `locked` (the Staff Hub shows it as an upgrade tile); it is not accessible.
  */
 import { normalizeRoles } from "@/lib/hrms-roles";
 import { normalizePmsRoles } from "@/lib/pms-roles";
@@ -21,7 +18,7 @@ import { normalizeTmsRoles } from "@/lib/tms-roles";
 import { normalizeFmsRoles } from "@/lib/fms-roles";
 import { normalizeChatRoles } from "@/lib/messenger-roles";
 import { hasAdminAccess } from "@/lib/admin-roles";
-import { productSlugFor } from "@/lib/platform/saas/product-routes";
+import { productAnalyticsPath, productSlugFor } from "@/lib/platform/saas/product-routes";
 import { hasSopAccess, sopCan } from "@/lib/sop-roles";
 import { hasLpmsAccess, isLpmsManagerTier, lpmsCan } from "@/lib/lpms-roles";
 import { hasSeoAccess, seoCan } from "@/lib/seo-roles";
@@ -123,7 +120,7 @@ const PANELS: NavItemDef[] = (
     ["seo", "SEO", "search", (u) => hasSeoAccess(u.roles)],
     ["cms", "Website", "website", (u) => hasCmsAccess(u.roles)],
   ] as [string, string, NavIcon, NavItemDef["allow"]][]
-).map(([key, label, icon, allow]) => ({ key: `product.${key}`, section: "panels", label, href: `/${productSlugFor(key)}`, icon, module: key, allow }));
+).map(([key, label, icon, allow]) => ({ key: `product.${key}`, section: "panels", label, href: `/${productSlugFor(key)}`, icon, module: key, allow: (u: RoleContext) => superAdmin(u) || allow(u) }));
 
 // ── Analytics: /commandos/analytics/[product] ─────────────────────────────────
 // Each page shows COMPANY-WIDE numbers, so a product whose own screens are scoped
@@ -154,11 +151,11 @@ const ANALYTICS: NavItemDef[] = (
   key: `analytics.${key}`,
   section: "analytics",
   label,
-  href: `/commandos/analytics/${key}`,
+  href: productAnalyticsPath(key),
   icon,
   module: key,
   // The Command Center permission includes every product's (full) analytics.
-  allow: (u: RoleContext) => canViewCommandCenter(u) || allow(u),
+  allow: (u: RoleContext) => superAdmin(u) || canViewCommandCenter(u) || allow(u),
 }));
 
 // ── Management: the company-wide registers (formerly the separate admin product) ──
@@ -285,7 +282,7 @@ const NAV_ITEMS: NavItemDef[] = [
   // Help & Support is the platform's own service for every company: no role gate and no plan module.
   { key: "panel.support", section: "panels", label: "Help & Support", href: "/resolveiq", icon: "help", panel: "support", allow: anyone },
   // The external portal and the company's public website are products in the registry too, so they are listed like the rest.
-  { key: "panel.portal", section: "panels", label: "Client & Student Portal", href: "/clientos", icon: "globe", module: "portal", allow: (u: RoleContext) => resolvePermission(u, "portal.isPortalAdmin", () => u.roles.includes("portal_admin")) },
+  { key: "panel.portal", section: "panels", label: "Client & Student Portal", href: "/clientos", icon: "globe", module: "portal", allow: (u: RoleContext) => superAdmin(u) || resolvePermission(u, "portal.isPortalAdmin", () => u.roles.includes("portal_admin")) },
   { key: "panel.website", section: "panels", label: "Public Website", href: "/", icon: "website", panel: "website", external: true, allow: anyone },
   ...ANALYTICS,
   ...MANAGE,
@@ -322,10 +319,6 @@ export const NAV_KEYS: string[] = NAV_ITEMS.map((i) => i.key);
 /** Everything a rule may look at. Loaded on the server by `access.ts`. */
 export interface NavContext {
   user: RoleContext;
-  /** Products in the company's plan; `null` = every product (unlimited plan, platform owner). */
-  planModules: ReadonlySet<string> | null;
-  /** Products the company switched on; `null` = no choice recorded → all on. */
-  enabledModules: ReadonlySet<string> | null;
   /** Result of the Platform Console's own access check (owner company + platform role). */
   platformAccess: boolean;
   /** Products the platform switched off (for everyone, or for this company): their items are hidden. */
@@ -334,17 +327,13 @@ export interface NavContext {
   panels?: Readonly<Record<string, { name: string; description: string }>>;
 }
 
-export type NavState = "open" | "locked" | "hidden";
+export type NavState = "open" | "hidden";
 
 function stateOf(item: NavItemDef, ctx: NavContext): NavState {
   if (item.platform) return ctx.platformAccess ? "open" : "hidden";
   if (!item.allow(ctx.user)) return "hidden";
   const panelKey = item.module ?? item.panel;
   if (panelKey && ctx.unavailablePanels?.has(panelKey)) return "hidden";
-  if (item.module) {
-    if (ctx.enabledModules && !ctx.enabledModules.has(item.module)) return "hidden";
-    if (ctx.planModules && !ctx.planModules.has(item.module)) return item.section === "panels" ? "locked" : "hidden";
-  }
   return "open";
 }
 
@@ -374,18 +363,14 @@ export interface ResolvedNav {
   sections: NavSection[];
   /** Keys of every item the user may open. */
   allowed: string[];
-  /** Product keys (e.g. "fms") the user's roles allow but the plan doesn't include. */
-  lockedPanels: string[];
 }
 
 /** Pure: what `ctx` may open. */
 export function resolveNav(ctx: NavContext): ResolvedNav {
   const open: NavItemDef[] = [];
-  const lockedPanels: string[] = [];
   for (const item of NAV_ITEMS) {
     const state = stateOf(item, ctx);
     if (state === "open") open.push(item);
-    else if (state === "locked" && item.module) lockedPanels.push(item.module);
   }
   const sections = NAV_SECTIONS.map((s) => ({
     key: s.key,
@@ -403,7 +388,7 @@ export function resolveNav(ctx: NavContext): ResolvedNav {
         return { key: i.key, label, title: named ?? i.title ?? i.label, description, href: i.href, icon: i.icon, group: (i.group && ctx.panels?.[GROUP_PANEL[i.group] ?? ""]?.name) || i.group || null, external: i.external === true };
       }),
   })).filter((s) => s.items.length > 0);
-  return { sections, allowed: open.map((i) => i.key), lockedPanels };
+  return { sections, allowed: open.map((i) => i.key) };
 }
 
 /** Pure: may `ctx` open the item `key`? Unknown keys are refused. */

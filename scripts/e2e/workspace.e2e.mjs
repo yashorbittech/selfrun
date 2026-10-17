@@ -338,7 +338,7 @@ try {
       ["/admin/users", "/commandos/users"],
       ["/admin/activity-log", "/commandos/settings/audit-log"],
       ["/admin/crm/leads", "/commandos/crm/leads"],
-      ["/admin/analytics/commandos", "/commandos/analytics/workspace"],
+      ["/admin/analytics/commandos", "/commandos/analytics/commandos"],
       ["/admin/notifications", "/commandos/notifications"],
       ["/admin/login", "/commandos"], // → /commandos/login, which forwards a signed-in user
     ]) {
