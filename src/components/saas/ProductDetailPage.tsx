@@ -25,8 +25,8 @@ async function load(key: string) {
   return i < 0 ? null : { m: all[i], all, prev: all[(i + all.length - 1) % all.length], next: all[(i + 1) % all.length] };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ key: string }> }): Promise<Metadata> {
-  const d = await load((await params).key);
+export async function generateProductMetadata(key: string): Promise<Metadata> {
+  const d = await load(key);
   if (!d) return {};
   return { title: `${d.m.name} — products`, description: `${d.m.headline}. ${d.m.summary}`, alternates: { canonical: productPath(d.m.key) } };
 }
@@ -42,8 +42,8 @@ const SECTIONS = [
   { id: "screens", label: "Screens" },
 ];
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ key: string }> }) {
-  const { key } = await params;
+export default async function ProductDetailPage({ productSlug }: { productSlug: string }) {
+  const key = productSlug;
   const d = await load(key);
   if (!d) notFound();
   const { m, all, prev, next } = d;
