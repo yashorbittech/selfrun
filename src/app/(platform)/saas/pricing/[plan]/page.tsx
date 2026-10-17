@@ -10,7 +10,7 @@ import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
-import { productPath } from "@/lib/platform/saas/product-routes";
+import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
   const yearly = plan.kind === "paid" ? plan.offer.yearly : null;
   return (
     <>
-      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${modules.length} products`, text: `${total}+ features included` }}>
+      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${SAAS_PRODUCT_COUNT} products`, text: `${total}+ features included` }}>
         <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started", href: plan.kind === "contact" ? "/contact" : "/signup" }} secondary={{ label: "All plans", href: "/pricing" }} />
       </PageHero>
 

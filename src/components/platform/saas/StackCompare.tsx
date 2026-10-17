@@ -1,34 +1,17 @@
 import Link from "next/link";
 import { ArrowRight, Check, Gift } from "lucide-react";
-import { COMPARE_UNPRICED, COMPARE_AS_OF, COMPARE_TEAM, COMPARE_USD_INR, compareStack } from "@/lib/platform/saas/compare";
+import { COMPARE_AS_OF, COMPARE_TEAM, COMPARE_USD_INR, compareStack } from "@/lib/platform/saas/compare";
 import Reveal from "@/components/platform/saas/Reveal";
 import ProductLogo from "@/components/products/ProductLogo";
-
-const PRODUCT_KEY: Record<string, string> = {
-  "SelfRun Huddle AI": "messenger",
-  "SelfRun TalentOS": "hrms",
-  "SelfRun DealFlow AI": "lms",
-  "SelfRun SprintOS": "pms",
-  "SelfRun CashFlow AI": "fms",
-  "SelfRun SpendIQ": "prms",
-  "SelfRun Cohort AI": "tms",
-  "SelfRun EvalIQ": "ots",
-  "SelfRun SiteCraft AI": "cms",
-  "SelfRun RankMax AI": "seo",
-  "SelfRun ViralPulse AI": "smms",
-  "SelfRun AgentOS": "aibots",
-  "SelfRun DataBrain AI": "intelligence",
-  "SelfRun CyberVault": "dlms",
-  "SelfRun Playbook AI": "sop",
-  "SelfRun ClientOS": "portal",
-  "SelfRun ContractFlow AI": "lpms",
-  "SelfRun ResolveIQ": "support",
-};
+import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 const inr = (n: number) => `₹${n.toLocaleString("en-IN")}`;
 
 /** The same jobs on separate tools (prices read from each vendor's own pricing page) next to the plan that covers a team of ten. */
-export default function StackCompare({ plan }: { plan: { name: string; price: string; monthly: number } | null }) {
+export default function StackCompare({ plan, products }: {
+  plan: { name: string; price: string; monthly: number } | null;
+  products: { key: string; name: string }[];
+}) {
   const c = compareStack(COMPARE_TEAM);
   return (
     <Reveal>
@@ -88,24 +71,18 @@ export default function StackCompare({ plan }: { plan: { name: string; price: st
             )}
 
             <div className="relative">
-              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>Independent products, together in one suite</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">{c.rows.length + COMPARE_UNPRICED.length} products</span></p>
+              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>Independent products, together in one suite</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">{SAAS_PRODUCT_COUNT} products</span></p>
               <div className="grid grid-cols-2 gap-2">
-                {c.rows.map((r) => {
+                {products.slice(0, SAAS_PRODUCT_COUNT).map((product) => {
                   return (
-                    <div key={r.panel} className="group flex items-center gap-2.5 rounded-xl bg-white/10 p-2.5 ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-white/[0.17]">
-                      <span className="flex h-8 w-8 flex-none items-center justify-center"><ProductLogo productKey={PRODUCT_KEY[r.panel] ?? "workspace"} size={32} title={r.panel} /></span>
+                    <div key={product.key} className="group flex items-center gap-2.5 rounded-xl bg-white/10 p-2.5 ring-1 ring-white/15 transition-all hover:-translate-y-0.5 hover:bg-white/[0.17]">
+                      <span className="flex h-8 w-8 flex-none items-center justify-center"><ProductLogo productKey={product.key} size={32} title={product.name} /></span>
                       <span className="min-w-0 leading-tight">
-                        <span className="block truncate text-[12px] font-bold">{r.panel}</span>
-                        <span className="block truncate text-[10px] text-emerald-200/90">replaces a separate tool</span>
+                        <span className="block truncate text-[12px] font-bold">{product.name}</span>
+                        <span className="block truncate text-[10px] text-emerald-200/90">included in the suite</span>
                       </span>
                     </div>
                   );
-                })}
-              </div>
-              <p className="mb-2 mt-3 text-[10px] font-bold uppercase tracking-wider text-white/60">Also included — no public price to compare</p>
-              <div className="flex flex-wrap gap-1.5">
-                {COMPARE_UNPRICED.map((n) => {
-                  return <span key={n} className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold ring-1 ring-white/15"><ProductLogo productKey={PRODUCT_KEY[n] ?? "workspace"} size={16} title={n} />{n}</span>;
                 })}
               </div>
             </div>

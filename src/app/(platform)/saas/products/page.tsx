@@ -6,7 +6,6 @@ import {
   BookOpen,
   CheckCircle2,
   Sparkles,
-  Zap,
 } from "lucide-react";
 import { AI_CAPABILITIES, INTEGRATIONS, SECURITY_POINTS } from "@/lib/platform/saas/content";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
@@ -19,7 +18,7 @@ import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import PanelShot from "@/components/platform/saas/PanelShot";
 import type { IconKey } from "@/lib/platform/saas/content";
-import { productPath } from "@/lib/platform/saas/product-routes";
+import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
@@ -110,7 +109,7 @@ export default async function ProductsPage() {
     <>
       <PageHero
         art="features"
-        eyebrow={`${all.length} standalone SaaS products · ${total}+ features`}
+        eyebrow={`${SAAS_PRODUCT_COUNT} standalone SaaS products · ${total}+ features`}
         title="Every software product."
         accent="Built for modern business."
         lead="Each product below is a complete, market-ready software engine engineered with native AI. Use and deploy products independently, or manage the suite from one place and configure the workflows you want between them."

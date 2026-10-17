@@ -15,6 +15,7 @@ import MarketingShot from "@/components/platform/saas/MarketingShot";
 import AboutHeroArtwork from "@/components/platform/saas/AboutHeroArtwork";
 import CustomerStoriesSection from "@/components/platform/saas/CustomerStoriesSection";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -80,7 +81,7 @@ export default async function AboutPage() {
               <p>Use the products separately or manage them from one place. AI works with the records available in its product, while configurable workflows can automate handoffs between products when you choose to connect them.</p>
               <p>The platform is multi-tenant by design. Every company is a customer of the same product, with the same features, the same onboarding and the same safeguards. There is no special version for anyone — and every company runs it under its own brand, on the web, as an installable app, on Android and iOS and on the desktop.</p>
             </div>
-            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(modules.length), l: "independent products" }, { v: "Own", l: "sign-in per product" }, { v: "Own", l: "database per product" }]} /></div>
+            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(SAAS_PRODUCT_COUNT), l: "independent products" }, { v: "Own", l: "sign-in per product" }, { v: "Own", l: "database per product" }]} /></div>
           </div>
           <Reveal><MarketingShot screenKey="workspace" name="SelfRun CommandOS" /></Reveal>
         </div>

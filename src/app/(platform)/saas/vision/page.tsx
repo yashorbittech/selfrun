@@ -155,7 +155,7 @@ const HORIZONS = [
 const PRODUCTS_SHOWCASE = [
   {
     key: "lms",
-    name: "DealFlow AI",
+    name: "SelfRun DealFlow AI",
     tagline: "CRM & Revenue Acceleration",
     desc: "Visual Kanban pipeline, omnichannel lead capture, campaign attribution, and AI deal scoring. Replaces Salesforce.",
     aura: "from-indigo-500/25 via-purple-500/10",
@@ -164,7 +164,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "hrms",
-    name: "TalentOS",
+    name: "SelfRun TalentOS",
     tagline: "HR, Payroll & Statutory Compliance",
     desc: "Employee records, biometric attendance, automated payroll with PF/ESI/PT/TDS. Replaces Keka, Darwinbox.",
     aura: "from-amber-500/25 via-orange-500/10",
@@ -173,7 +173,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "fms",
-    name: "CashFlow AI",
+    name: "SelfRun CashFlow AI",
     tagline: "Finance, GST & H2H Banking",
     desc: "Double-entry accounting, GST e-Invoicing, H2H bank payouts, and real-time P&L. Replaces QuickBooks, Tally.",
     aura: "from-emerald-500/25 via-teal-500/10",
@@ -182,7 +182,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "pms",
-    name: "SprintOS",
+    name: "SelfRun SprintOS",
     tagline: "Agile Projects & Timesheets",
     desc: "Kanban boards, Gantt timelines, billable timesheets, and project margin tracking. Replaces Jira, Asana.",
     aura: "from-blue-500/25 via-sky-500/10",
@@ -191,7 +191,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "aibots",
-    name: "AgentOS",
+    name: "SelfRun AgentOS",
     tagline: "Autonomous AI Agents & Copilots",
     desc: "Build specialized AI agents trained on your SOPs, with tool-calling powers over your live business data.",
     aura: "from-violet-500/25 via-fuchsia-500/10",
@@ -200,7 +200,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "intelligence",
-    name: "DataBrain AI",
+    name: "SelfRun DataBrain AI",
     tagline: "Conversational Business Intelligence",
     desc: "Ask 'What was last month's net revenue?' in plain language. Get a chart, the SQL, and the math shown.",
     aura: "from-purple-500/25 via-indigo-500/10",
@@ -209,7 +209,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "messenger",
-    name: "Huddle AI",
+    name: "SelfRun Huddle AI",
     tagline: "Enterprise Chat & Video Meetings",
     desc: "Channels, DMs, video calls, and broadcast announcements — all anchored to your business records, not isolated chat.",
     aura: "from-cyan-500/25 via-blue-500/10",
@@ -218,7 +218,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "tms",
-    name: "Cohort AI",
+    name: "SelfRun Cohort AI",
     tagline: "LMS & Verifiable Credentials",
     desc: "Course builder, batch scheduling, proctored online exams, and cryptographically verifiable certificates.",
     aura: "from-rose-500/25 via-pink-500/10",
@@ -227,7 +227,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "smms",
-    name: "ViralPulse AI",
+    name: "SelfRun ViralPulse AI",
     tagline: "AI Social Media Marketing",
     desc: "Generate, approve, and auto-publish content across LinkedIn, Instagram, Facebook, and X from one calendar.",
     aura: "from-fuchsia-500/25 via-pink-500/10",
@@ -236,7 +236,7 @@ const PRODUCTS_SHOWCASE = [
   },
   {
     key: "cms",
-    name: "SiteCraft AI",
+    name: "SelfRun SiteCraft AI",
     tagline: "Website Builder & CMS",
     desc: "Drag-and-drop page builder with brand theme designer, built-in forms → CRM sync, and instant publish.",
     aura: "from-sky-500/25 via-blue-500/10",

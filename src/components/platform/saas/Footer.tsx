@@ -40,12 +40,14 @@ export default async function Footer({}: { host?: string }) {
   const explore = [
     { href: "/ask", label: "Ask AI" },
     { href: "/pricing", label: "Pricing" },
+    { href: "/faqs", label: "FAQs" },
     { href: "/blog", label: "Blog" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact Us" },
     { href: "/docs", label: "Documentation" },
   ];
   const productLinks = [
+    { label: "Product Gallery", href: "/gallery" },
     { label: "Our Products", href: "/products" },
     { label: "Product Live Demo", href: "/demo" },
     { label: "Product Vision", href: "/vision" },

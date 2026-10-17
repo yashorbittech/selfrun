@@ -11,6 +11,7 @@ import Countdown from "@/components/platform/saas/Countdown";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
+import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -31,7 +32,7 @@ export default async function OffersPage() {
         eyebrow={o.topPct > 0 ? o.label : "Offers"}
         title={o.topPct > 0 ? `Save up to ${o.topPct}%` : "Free forever."}
         accent={o.topPct > 0 ? "on every paid plan." : "Pay only as your team grows."}
-        lead={`Every plan includes every one of the ${modules.length} products and ${total}+ features. The prices below are the prices you pay — plus a free plan that is free forever.`}
+        lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. The prices below are the prices you pay — plus a free plan that is free forever.`}
         photo="success" shot="fms" shotName="Finance"
       >
         {o.endsAt && (
@@ -100,7 +101,7 @@ export default async function OffersPage() {
               <div className="relative h-full overflow-hidden rounded-[2.25rem] border border-border/60 bg-background p-8 shadow-sm">
                 <Layers className="pointer-events-none absolute -bottom-8 -right-6 h-44 w-44 text-primary/[0.07]" />
                 <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-black uppercase tracking-wider"><Sparkles className="h-4 w-4 text-primary" />Nothing locked</span>
-                <p className="mt-5 text-5xl font-black tracking-tight">{modules.length} products · {total}+ features</p>
+                <p className="mt-5 text-5xl font-black tracking-tight">{SAAS_PRODUCT_COUNT} products · {total}+ features</p>
                 <p className="mt-2 text-muted-foreground">In every plan, including the free one. Plans differ only by team size and by storage, AI, email and voice allowances.</p>
                 <Link href="/products" className="group relative mt-6 inline-flex items-center gap-2 text-sm font-black text-primary">See every feature <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               </div>
@@ -117,7 +118,7 @@ export default async function OffersPage() {
           <section className="sr-section">
             <div className="sr-container">
               <SectionHead center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
-              <StackCompare plan={{ name: st.name, price: `₹${(m / 100).toLocaleString("en-IN")}`, monthly: m / 100 }} />
+              <StackCompare plan={{ name: st.name, price: `₹${(m / 100).toLocaleString("en-IN")}`, monthly: m / 100 }} products={modules} />
             </div>
           </section>
         ) : null;

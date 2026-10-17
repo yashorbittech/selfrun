@@ -22,6 +22,13 @@ export const PRODUCT_URL_SLUGS: Record<string, string> = {
   website: "sites",
 };
 
+export const SAAS_PRODUCT_COUNT = Object.keys(PRODUCT_URL_SLUGS).length;
+
+export function selfRunProductName(name: string): string {
+  const trimmedName = name.trim();
+  return /^SelfRun\b/i.test(trimmedName) ? trimmedName : `SelfRun ${trimmedName}`;
+}
+
 const KEY_BY_SLUG = new Map(Object.entries(PRODUCT_URL_SLUGS).map(([key, slug]) => [slug, key]));
 
 /** Accepts a registry key (legacy URL) or a public product slug. */

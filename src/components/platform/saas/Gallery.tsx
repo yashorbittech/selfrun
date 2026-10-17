@@ -21,7 +21,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
   const [open, setOpen] = useState<number | null>(null);
   const [mosaic, setMosaic] = useState(true);
   const counts = useMemo(() => { const m = new Map<string, number>(); for (const i of pool) m.set(i.panelKey, (m.get(i.panelKey) ?? 0) + 1); return m; }, [pool]);
-  const shownPanels = panels.filter((p) => counts.has(p.key)).map((p) => ({ ...p, count: counts.get(p.key) ?? 0 }));
+  const shownPanels = panels.map((p) => ({ ...p, count: counts.get(p.key) ?? 0 }));
   const max = Math.max(...shownPanels.map((p) => p.count), 1);
 
   const list = useMemo(() => {

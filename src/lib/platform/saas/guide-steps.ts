@@ -18,7 +18,13 @@ export function guideFor(panel: string, featureName: string, panelName: string, 
   const clean = (a: string[]) => a.filter((x) => !/[▼▲]|__|^\W*$/.test(x));
   steps.push({ title: `Open ${panelName}`, text: panel === "workspace" ? "Sign in to your company's Workspace. You see only what your role allows." : `Sign in and open the ${panelName} product from your Workspace dashboard (or sign in to it directly). You see only what your role allows.` });
   if (!facts) {
-    steps.push({ title: `Find ${featureName}`, text: `Inside ${panelName}, open ${q(featureName)} from the left menu or the product's start screen. ${featureText}${/[.!?]$/.test(featureText) ? "" : "."}` });
+    const route = routeKey ? r?.routes[routeKey] : undefined;
+    const routeText = route
+      ? route.includes("/:") ? `The mapped screen route is ${route}. Open the relevant record first, then use the available action to reach this screen.`
+        : `The mapped screen route is ${route}. Open it in the signed-in ${panelName} app.`
+      : `Open ${q(featureName)} in ${panelName}.`;
+    steps.push({ title: `Open ${featureName}`, text: routeText });
+    steps.push({ title: `Use ${featureName}`, text: `${featureText}${/[.!?]$/.test(featureText) ? "" : "."} The exact actions shown can depend on your role and the records available in your workspace.` });
     return { img: null, auto, steps, routeKey, tips: [] };
   }
   const img = `/selfrun/guide/${panel}/${routeKey}.webp`;

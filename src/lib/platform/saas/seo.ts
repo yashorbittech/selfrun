@@ -7,7 +7,7 @@ import { FEATURE_LISTS, featuresOf } from "@/lib/platform/saas/feature-lists";
 import { listPanels } from "@/lib/platform/panels/store";
 import { productDocsPath, productPath } from "@/lib/platform/saas/product-routes";
 
-const PAGES = ["", "/products", "/pricing", "/docs", "/about", "/contact", "/demo", "/gallery", "/offers", "/privacy", "/terms", "/security", "/status", "/sla", "/cookies", "/data-policy", "/refund-policy"];
+const PAGES = ["", "/products", "/pricing", "/faqs", "/docs", "/about", "/contact", "/demo", "/gallery", "/offers", "/privacy", "/terms", "/security", "/status", "/sla", "/cookies", "/data-policy", "/refund-policy"];
 
 export async function saasSitemap(origin: string): Promise<MetadataRoute.Sitemap> {
   const plans = ["free", "starter", "growth", "business", "enterprise"];

@@ -59,6 +59,6 @@ export async function getGallery(): Promise<{ items: GalleryItem[]; panels: { ke
   items.sort((a, b) => Number(b.featured) - Number(a.featured) || (order.get(a.panelKey) ?? 99) - (order.get(b.panelKey) ?? 99));
   const counts = new Map<string, number>();
   for (const i of items) counts.set(i.panelKey, (counts.get(i.panelKey) ?? 0) + 1);
-  const panels = mods.filter((m) => counts.has(m.key)).map((m) => ({ key: m.key, name: m.name, count: counts.get(m.key) ?? 0 }));
+  const panels = mods.map((m) => ({ key: m.key, name: m.name, count: counts.get(m.key) ?? 0 }));
   return { items, panels };
 }

@@ -5,6 +5,7 @@ import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import Gallery from "@/components/platform/saas/Gallery";
 import CountStats from "@/components/platform/saas/CountStats";
 import FaqSection from "@/components/platform/saas/FaqSection";
+import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -18,11 +19,11 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   const { items, panels } = await getGallery();
   return (
     <>
-      <PageHero art="gallery" eyebrow={`${items.length} real screens · ${panels.length} products`} title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `${items.length} screens`, text: "Captured from the real product" }}>
+      <PageHero art="gallery" eyebrow={`${items.length} real screens · ${SAAS_PRODUCT_COUNT} products`} title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `${items.length} screens`, text: "Captured from the real product" }}>
         <HeroCtas />
       </PageHero>
       <section className="border-b border-border/50 bg-background/60">
-        <div className="sr-container"><CountStats items={[{ v: `${items.length}`, l: "real screens" }, { v: `${panels.length}`, l: "products captured" }, { v: `${items.filter((i) => i.featured).length}`, l: "featured captures" }, { v: "0", l: "mock-ups — every one is the live product" }]} /></div>
+        <div className="sr-container"><CountStats items={[{ v: `${items.length}`, l: "real screens" }, { v: `${SAAS_PRODUCT_COUNT}`, l: "products in suite" }, { v: `${items.filter((i) => i.featured).length}`, l: "featured captures" }, { v: "0", l: "mock-ups — every one is the live product" }]} /></div>
       </section>
       <section className="sr-section pt-14">
         <div className="sr-container">

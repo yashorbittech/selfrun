@@ -16,7 +16,7 @@ const MOVED: Record<string, string> = {
   roadmap: "/vision",
   "product-vision": "/vision",
   help: "/docs",
-  faq: "/pricing#faq",
+  faq: "/faqs",
   tutorials: "/docs#walkthroughs",
   mission: "/about#mission",
   "what-we-do": "/about#what-we-do",

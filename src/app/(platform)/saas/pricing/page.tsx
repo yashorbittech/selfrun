@@ -14,7 +14,7 @@ import StackCompare from "@/components/platform/saas/StackCompare";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
 import Reveal from "@/components/platform/saas/Reveal";
 import { jsonForScript } from "@/lib/security/json-script";
-import { productPath } from "@/lib/platform/saas/product-routes";
+import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +34,7 @@ export default async function PricingPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(ld) }} />
-      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${modules.length} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
+      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>
 
@@ -59,7 +59,7 @@ export default async function PricingPage() {
                   </thead>
                   <tbody>
                     <tr className="border-b border-border/40"><td className="p-4 font-semibold">People</td>{plans.map((p) => <td key={p.id} className="p-4">{p.seats ? `Up to ${p.seats.toLocaleString("en-IN")}` : "Unlimited"}</td>)}</tr>
-                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />All {modules.length} products</span></td>)}</tr>
+                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />All {SAAS_PRODUCT_COUNT} products</span></td>)}</tr>
                     {rows.map((k, i) => (
                       <tr key={k} className={`border-b border-border/40 ${i % 2 ? "" : "bg-muted/20"}`}>
                         <td className="p-4 font-semibold">{plans[0].limits.find((l) => l.key === k)?.label}</td>
@@ -80,7 +80,7 @@ export default async function PricingPage() {
 
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Included in every plan" title={`All ${modules.length} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
+          <SectionHead center icon="layers" eyebrow="Included in every plan" title={`All ${SAAS_PRODUCT_COUNT} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
@@ -99,7 +99,7 @@ export default async function PricingPage() {
         <section className="sr-section bg-muted/10">
           <div className="sr-container">
             <SectionHead center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
-            <StackCompare plan={(() => { const st = plans.find((p) => p.id === "starter"); return st ? { name: st.name, price: st.offer.monthly ? `₹${(st.offer.monthly / 100).toLocaleString("en-IN")}` : "", monthly: (st.offer.monthly ?? 0) / 100 } : null; })()} />
+            <StackCompare plan={(() => { const st = plans.find((p) => p.id === "starter"); return st ? { name: st.name, price: st.offer.monthly ? `₹${(st.offer.monthly / 100).toLocaleString("en-IN")}` : "", monthly: (st.offer.monthly ?? 0) / 100 } : null; })()} products={modules} />
           </div>
         </section>
       )}

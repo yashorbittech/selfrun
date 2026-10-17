@@ -1,7 +1,9 @@
 import "server-only";
 import { listPanels } from "@/lib/platform/panels/store";
+import { DEFAULT_PANELS } from "@/lib/platform/panels/types";
 import { MODULE_COPY, type ModuleCopy } from "@/lib/platform/saas/content";
 import { FEATURE_GROUPS, type FeatureGroup } from "@/lib/platform/saas/site";
+import { selfRunProductName } from "@/lib/platform/saas/product-routes";
 
 export interface FeatureModule extends ModuleCopy {
   key: string;
@@ -9,12 +11,15 @@ export interface FeatureModule extends ModuleCopy {
   description: string;
 }
 
-/** Every active product module that has marketing copy, named and described by the Product Registry (the product itself), in registry order. */
+/** Every catalog product with marketing copy, named and described by the Product Registry, in registry order. */
 export async function getFeatureModules(): Promise<FeatureModule[]> {
   const panels = await listPanels().catch(() => []);
-  return panels
-    .filter((p) => p.active && MODULE_COPY[p.key])
-    .map((p) => ({ ...MODULE_COPY[p.key], key: p.key, name: p.name, description: p.description }));
+  const byKey = new Map(DEFAULT_PANELS.map((panel) => [panel.key, panel]));
+  for (const panel of panels) byKey.set(panel.key, panel);
+
+  return [...byKey.values()]
+    .filter((panel) => MODULE_COPY[panel.key])
+    .map((panel) => ({ ...MODULE_COPY[panel.key], key: panel.key, name: selfRunProductName(panel.name), description: panel.description }));
 }
 
 /** The feature groups with their modules resolved (empty groups dropped). */

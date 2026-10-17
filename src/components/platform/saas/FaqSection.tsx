@@ -33,7 +33,7 @@ export default function FaqSection({ topics, limit = 6, lead = "Still deciding? 
                 <p className="pb-5 pl-12 text-[15px] leading-relaxed text-muted-foreground">{f.a}</p>
               </details>
             ))}
-            <div className="px-6 py-5">{all ? <Link href="/contact" className="sr-link">Still unsure? Ask us <ArrowRight className="h-4 w-4" /></Link> : <Link href="/pricing#faq" className="sr-link">All FAQs <ArrowRight className="h-4 w-4" /></Link>}</div>
+            <div className="px-6 py-5">{all ? <Link href="/contact" className="sr-link">Still unsure? Ask us <ArrowRight className="h-4 w-4" /></Link> : <Link href="/faqs" className="sr-link">All FAQs <ArrowRight className="h-4 w-4" /></Link>}</div>
           </div>
         </Reveal>
       </div>

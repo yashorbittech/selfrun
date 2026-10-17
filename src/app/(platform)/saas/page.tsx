@@ -19,7 +19,7 @@ import PanelOrbit from "@/components/platform/saas/PanelOrbit";
 import PanelShot from "@/components/platform/saas/PanelShot";
 import MarketingShot from "@/components/platform/saas/MarketingShot";
 import FaqSection from "@/components/platform/saas/FaqSection";
-import { productPath } from "@/lib/platform/saas/product-routes";
+import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import StackCompare from "@/components/platform/saas/StackCompare";
 import WhyCompare from "@/components/platform/saas/WhyCompare";
 import BrandShowcase from "@/components/platform/saas/BrandShowcase";
@@ -30,6 +30,7 @@ import { ChipMarquee, TimelineSteps } from "@/components/platform/saas/Modern";
 import CountStats from "@/components/platform/saas/CountStats";
 import CapabilityExplorer from "@/components/platform/saas/CapabilityExplorer";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ export default async function SaasHome() {
         eyebrow="The AI-powered business automation platform"
         title="One software."
         accent="Your entire business, automated."
-        lead={<><span className="font-bold"><span className="text-foreground">SelfRun</span> <span className="text-primary">AI</span></span> replaces your CRM, HR, payroll, accounting, projects, website and {REPLACES.length - 6} more tools with one AI-powered platform — on web, Android, iOS, Windows, macOS and Linux, all under <b className="text-foreground">your own brand</b>.</>}
+        lead={<><span className="font-bold"><span className="text-foreground">SelfRun</span> <span className="text-primary">AI</span></span> brings {SAAS_PRODUCT_COUNT} purpose-built products for your CRM, HR, payroll, accounting, projects, website and more into one AI-powered platform — on web, Android, iOS, Windows, macOS and Linux, all under <b className="text-foreground">your own brand</b>.</>}
         photo="team-desk"
         shot="workspace"
         chip={{ title: "Deal won", text: "Client created · team notified — automatically" }}
@@ -72,7 +73,7 @@ export default async function SaasHome() {
       <section className="relative border-y border-border/50 bg-background/60 backdrop-blur">
         <div className="sr-container">
           <CountStats items={[
-            { v: `${REPLACES.length} → 1`, l: "kinds of software, one subscription" },
+            { v: `${SAAS_PRODUCT_COUNT} → 1`, l: "products, one subscription" },
             { v: `${totalFeatures}+`, l: "features — all on every plan" },
             { v: `${platforms}`, l: "platforms, your own apps" },
             { v: "₹0", l: "free forever" },
@@ -84,7 +85,7 @@ export default async function SaasHome() {
       {/* Replace the stack */}
       <section className="sr-section">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Independent products, one suite" title={`${REPLACES.length} kinds of software.`} accent="One place to manage." lead="Replace a collection of separate vendors with purpose-built products from SelfRun. Every product runs independently with its own sign-in and database, while the suite gives you one place to discover and manage them." />
+          <SectionHead center icon="layers" eyebrow="Independent products, one suite" title={`${SAAS_PRODUCT_COUNT} products.`} accent="One place to manage." lead="Replace a collection of separate vendors with purpose-built products from SelfRun. Every product runs independently with its own sign-in and database, while the suite gives you one place to discover and manage them." />
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
@@ -175,7 +176,7 @@ export default async function SaasHome() {
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-accent/15 blur-3xl" />
               <div className="relative space-y-8">
                 <ul className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {[`${modules.length} products and ${totalFeatures}+ features`, "AI and automation included", "Your own brand, domain and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
+                  {[`${SAAS_PRODUCT_COUNT} products and ${totalFeatures}+ features`, "AI and automation included", "Your own brand, domain and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
                     <li key={t} className="flex items-center gap-3 border-b border-border/50 py-3.5 text-[15px] font-semibold"><span className="sr-circle h-6 w-6"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>{t}</li>
                   ))}
                 </ul>
@@ -217,12 +218,15 @@ export default async function SaasHome() {
       <section className="sr-section relative overflow-hidden bg-muted/10">
         <div className="pointer-events-none absolute right-0 top-1/3 h-[700px] w-[700px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <div className="sr-container relative">
-          <SectionHead center icon="layers" eyebrow="No limits" title="Every product. Every feature." accent="On every plan." lead={`${modules.length} products and ${totalFeatures}+ features — CRM, HR, payroll, finance, projects, procurement, training, documents, website, AI and more. Nothing is locked behind a higher tier: plans differ only by team size and allowances.`} />
+          <SectionHead center icon="layers" eyebrow="No limits" title="Every product. Every feature." accent="On every plan." lead={`${SAAS_PRODUCT_COUNT} products and ${totalFeatures}+ features — CRM, HR, payroll, finance, projects, procurement, training, documents, website, AI and more. Nothing is locked behind a higher tier: plans differ only by team size and allowances.`} />
           <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
-            <ul className="space-y-3">
-              {["Choose products independently and add others any time", "Each product has its own sign-in and database", "Manage the suite from one place and configure automations when needed"].map((t) => (
-                <li key={t} className="flex gap-3 text-[15px]"><span className="sr-circle mt-0.5 h-5 w-5"><Check className="h-3 w-3" strokeWidth={3} /></span>{t}</li>
+            <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-1">
+              {modules.slice(0, SAAS_PRODUCT_COUNT).map((module) => (
+                <li key={module.key} className="flex gap-3 text-sm leading-relaxed">
+                  <span className="sr-circle mt-0.5 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span>
+                  <span><strong>{module.name}:</strong> {module.capabilities[0] ?? module.summary}</span>
+                </li>
               ))}
             </ul>
             <Link href="/products" className="sr-btn sr-btn-primary mt-8">See every feature <ArrowRight className="h-4 w-4" /></Link>
@@ -285,14 +289,14 @@ export default async function SaasHome() {
       {/* Why SelfRun AI */}
       <section className="sr-section relative overflow-hidden bg-muted/10">
         <div className="sr-container">
-          <SectionHead center icon="bolt" eyebrow="Why SelfRun AI" title="One platform that" accent="runs your business." lead="Six reasons companies put everything on one AI-powered platform instead of a stack of separate tools." />
+          <SectionHead center icon="bolt" eyebrow="Why SelfRun AI" title="One platform that" accent="runs your business." lead="20 purpose-built products bring your business tools together on one AI-powered platform." />
           <div className="grid gap-5 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto]">
             <Reveal className="lg:col-span-2 lg:row-span-2">
               <div className="sr-band relative flex h-full min-h-[22rem] flex-col justify-between rounded-[2rem] p-8 shadow-2xl shadow-primary/30 sm:p-10">
                 <div className="relative">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">One platform</p>
-                  <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">{REPLACES.length}<span className="mx-3 text-white/50">→</span>1</p>
-                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">{modules.length} independent products replace {REPLACES.length} kinds of separate software. Each product keeps its own data and sign-in, and the suite gives you one place to manage the tools you choose.</p>
+                  <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">{SAAS_PRODUCT_COUNT}<span className="mx-3 text-white/50">→</span>1</p>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">Explore all {SAAS_PRODUCT_COUNT} products from one platform. Each product keeps its own data and sign-in, and the suite gives you one place to manage the tools you choose.</p>
                 </div>
                 <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every product <ArrowRight className="h-4 w-4" /></Link>
               </div>
@@ -313,6 +317,24 @@ export default async function SaasHome() {
                 </div>
               </Reveal>
             ))}
+            <Reveal className="lg:col-span-4">
+              <div className="rounded-[2rem] border border-border/60 bg-background p-6 shadow-sm sm:p-8">
+                <h3 className="text-xl font-black">Explore all {SAAS_PRODUCT_COUNT} products</h3>
+                <ul className="mt-5 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+                  {modules.map((module) => (
+                    <li key={module.key} className="flex min-w-0 items-start gap-3 border-t border-border/50 py-4">
+                      <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center">
+                        <ProductLogo productKey={module.key} size={32} className="h-8 w-8 flex-none" title={module.name} />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-bold">{module.name}</span>
+                        <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{module.summary}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
             <Reveal delay={350} className="lg:col-span-4">
               <div className="relative flex flex-col items-start gap-6 overflow-hidden rounded-[2rem] border border-primary/20 bg-gradient-to-r from-primary/[0.08] via-background to-brand-accent/[0.10] p-8 sm:flex-row sm:items-center sm:p-10">
                 <span className="sr-icon h-16 w-16 flex-none rounded-3xl"><Icon name="workflow" className="h-7 w-7" /></span>
@@ -343,7 +365,7 @@ export default async function SaasHome() {
           <section className="sr-section bg-gradient-to-b from-muted/20 to-transparent">
             <div className="sr-container">
               <SectionHead center icon="wallet" eyebrow="What it costs" title="Sixteen tools. Sixteen bills." accent="Or one platform." lead="Add up what a team of ten pays for chat, HR, CRM, projects, accounting, purchasing, training, tests, website, SEO, social media, AI, document storage, a policy wiki and a help desk — then compare it with SelfRun." />
-              <StackCompare plan={{ name: st.name, price: `₹${m.toLocaleString("en-IN")}`, monthly: m }} />
+              <StackCompare plan={{ name: st.name, price: `₹${m.toLocaleString("en-IN")}`, monthly: m }} products={modules} />
             </div>
           </section>
         ) : null;

@@ -7,7 +7,7 @@ import { featuresOf } from "@/lib/platform/saas/feature-lists";
 import { PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import DocsSearch, { type DocEntry } from "@/components/platform/saas/DocsSearch";
 import Reveal from "@/components/platform/saas/Reveal";
-import { productDocsPath } from "@/lib/platform/saas/product-routes";
+import { productDocsPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
@@ -24,7 +24,7 @@ export default async function DocsPage() {
   const entries: DocEntry[] = panels.flatMap((m) => featuresOf(m.key).map((f) => ({ panelKey: m.key, panel: m.name, slug: f.slug, name: f.name, text: f.text })));
   return (
     <>
-      <PageHero art="docs" eyebrow={`${panels.length} products · ${total} guides`} title="Documentation" accent="step by step." lead="Pick a product, pick a feature. Every guide shows the real screen and the exact steps to follow." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ" />
+      <PageHero art="docs" eyebrow={`${SAAS_PRODUCT_COUNT} products · ${total} guides`} title="Documentation" accent="step by step." lead="Pick a product, pick a feature. Every guide shows the real screen and the exact steps to follow." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ" />
 
       <nav aria-label="Products" className="sticky top-[76px] z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
         <div className="sr-container flex flex-col gap-3 py-3 lg:flex-row lg:items-center">
@@ -37,7 +37,7 @@ export default async function DocsPage() {
 
       <section className="sr-section pb-0">
         <div className="sr-container">
-          <SectionHead icon="book" eyebrow="Choose a product" title="Find your" accent="product." lead={`${panels.length} products, ${total} step-by-step guides. Pick the product you work in.`} />
+          <SectionHead icon="book" eyebrow="Choose a product" title="Find your" accent="product." lead={`${SAAS_PRODUCT_COUNT} products, ${total} step-by-step guides. Pick the product you work in.`} />
           <ul className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-5">
             {panels.map((m, i) => (
               <Reveal key={m.key} as="li" delay={(i % 5) * 50}>
