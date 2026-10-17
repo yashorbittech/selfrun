@@ -89,7 +89,7 @@ export function ServicePillarsGrid({
                 <ListingCard
                   key={item.href}
                   index={i}
-                  icon={item.icon}
+                  icon={<item.icon className="w-7 h-7" />}
                   badge={item.badge ?? "Service Pillar"}
                   badgeIcon={item.badgeIcon ?? item.icon}
                   title={item.title}
@@ -168,7 +168,7 @@ export function ListingGrid({
             <ListingCard
               key={item.href}
               index={i}
-              icon={item.icon}
+              icon={<item.icon className="w-7 h-7" />}
               badge={badge}
               badgeIcon={badgeIcon}
               title={item.title}

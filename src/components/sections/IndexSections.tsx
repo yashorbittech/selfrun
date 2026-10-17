@@ -86,7 +86,7 @@ export function JobBoard({ badge, badgeIcon: BadgeIcon, allLabel, ctaLabel, imag
             <ListingCard
               key={job.slug}
               index={jobs.findIndex((j) => j.slug === job.slug)}
-              icon={job.icon}
+              icon={<job.icon className="w-7 h-7" />}
               badge={badge}
               badgeIcon={BadgeIcon}
               title={job.title}
@@ -225,4 +225,3 @@ export function FeaturedCardStack({ badge, badgeIcon, ctaLabel, items }: { badge
     </section>
   );
 }
-
