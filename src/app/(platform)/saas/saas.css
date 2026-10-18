@@ -264,6 +264,11 @@ details.sr-faq[open] .sr-faq-plus { background: var(--primary); color: var(--pri
 .sr .sr-band .text-primary { color: rgb(255 255 255 / .92); }
 .sr .sr-band .text-foreground { color: #fff; }
 
+/* ghost buttons (e.g. the demo popup's copy CTA): their hover swaps to the primary token, which is the colour the band's own
+   gradient is built from — the label and edge would vanish. Hover fills light instead. */
+.sr .sr-band button[class~="hover:text-primary"]:hover { color: #fff; background-color: rgb(255 255 255 / .16); border-color: rgb(255 255 255 / .55); }
+.sr .sr-band button[class~="hover:border-primary/40"]:hover { border-color: rgb(255 255 255 / .5); }
+
 /* range sliders on a dark band: a filled track and a glowing thumb */
 .sr .sr-range { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; outline: none; cursor: pointer; background: linear-gradient(90deg, #fff var(--pct, 0%), rgb(255 255 255 / .22) var(--pct, 0%)); }
 .sr .sr-range::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 0 0 6px rgb(255 255 255 / .22), 0 6px 14px rgb(0 0 0 / .4); transition: transform .15s; }
@@ -371,6 +376,9 @@ html:has(.sr[data-theme="dark"]) { background: #0b1020; color-scheme: dark; }
 .sr[data-theme="dark"] .sr-band [class*="text-white/"] { color: rgb(20 24 58 / .74); }
 .sr[data-theme="dark"] .sr-band .text-muted-foreground { color: rgb(20 24 58 / .7); }
 .sr[data-theme="dark"] .sr-band .text-primary { color: #4338ca; }
+/* dark band is pale, so its primary token reads too light on hover — deepen it and fill instead (see the light-mode ghost-button rule) */
+.sr[data-theme="dark"] .sr-band button[class~="hover:text-primary"]:hover { color: #4338ca; background-color: rgb(67 56 202 / .12); border-color: rgb(67 56 202 / .55); }
+.sr[data-theme="dark"] .sr-band button[class~="hover:border-primary/40"]:hover { border-color: rgb(67 56 202 / .5); }
 .sr[data-theme="dark"] .sr-band [class*="from-white"] { --tw-gradient-from: #4338ca; --tw-gradient-to: #0b8f68; }
 /* translucent white chips, glass and rings become translucent indigo */
 .sr[data-theme="dark"] .sr-band [class*="bg-white/"] { background-color: rgb(67 56 202 / .10); }

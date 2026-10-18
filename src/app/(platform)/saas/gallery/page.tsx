@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getGallery } from "@/lib/platform/saas/gallery";
-import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
+import { Blobs, CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import Gallery from "@/components/platform/saas/Gallery";
 import CountStats from "@/components/platform/saas/CountStats";
 import FaqSection from "@/components/platform/saas/FaqSection";
@@ -25,8 +25,10 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
       <section className="border-b border-border/50 bg-background/60">
         <div className="sr-container"><CountStats items={[{ v: `${items.length}`, l: "real screens" }, { v: `${SAAS_PRODUCT_COUNT}`, l: "products in suite" }, { v: `${items.filter((i) => i.featured).length}`, l: "featured captures" }, { v: "0", l: "mock-ups — every one is the live product" }]} /></div>
       </section>
-      <section className="sr-section pt-14">
-        <div className="sr-container">
+      <section className="sr-section relative pt-14">
+        <Blobs />
+        <div className="sr-grid-bg" aria-hidden />
+        <div className="sr-container relative">
           <Suspense fallback={null}><Gallery items={items} panels={panels} initialPanel={panel} /></Suspense>
         </div>
       </section>

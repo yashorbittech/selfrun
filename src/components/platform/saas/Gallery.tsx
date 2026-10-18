@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, ArrowUpRight, Grid3X3, LayoutDashboard, Maximize2, Search, Star, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, Grid3X3, LayoutDashboard, Maximize2, Search, Sparkles, Star, X } from "lucide-react";
 import { productPath } from "@/lib/platform/saas/product-routes";
+import Reveal from "@/components/platform/saas/Reveal";
 
 export interface GalleryEntry { id: string; src: string; title: string; panelKey: string; panel: string; featured: boolean }
 
@@ -51,61 +52,78 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
   return (
     <div className="grid gap-10 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-12">
       <aside className="xl:sticky xl:top-28 xl:self-start">
-        <label className="relative mb-4 block">
-          <span className="sr-only">Search the screens</span>
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <input value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} placeholder="Search screens…" className="sr-input" style={{ height: 48, paddingLeft: 42, borderRadius: 999 }} />
-        </label>
-        <p className="mb-3 hidden px-1 text-xs font-bold uppercase tracking-[0.18em] text-primary xl:block">Products</p>
-        <div className="sr-scroll-x flex gap-2 xl:block xl:space-y-0.5" role="tablist" aria-label="Products">
-          {[{ key: "all", name: "All screens", count: pool.length }, ...shownPanels].map((p) => {
-            const on = panel === p.key;
-            return (
-              <button key={p.key} role="tab" aria-selected={on} onClick={() => pick(p.key)} className={`group relative shrink-0 overflow-hidden rounded-full border px-4 py-2.5 text-left text-sm font-semibold transition-all xl:flex xl:w-full xl:items-center xl:justify-between xl:rounded-xl xl:border-0 xl:px-3.5 ${on ? "border-transparent bg-foreground text-background shadow-lg xl:bg-primary/10 xl:text-primary xl:shadow-none" : "border-border/60 bg-background text-foreground hover:border-primary/50 xl:bg-transparent xl:text-muted-foreground xl:hover:bg-muted/60 xl:hover:text-foreground"}`}>
-                <span className="relative z-10">{p.name}</span>
-                <span className={`relative z-10 ml-2 text-xs font-bold tabular-nums ${on ? "opacity-80" : "opacity-60"}`}>{p.count}</span>
-                {p.key !== "all" && <span className="absolute inset-x-3.5 bottom-1 hidden h-[3px] origin-left rounded-full bg-gradient-to-r from-primary to-brand-accent opacity-40 transition-opacity group-hover:opacity-80 xl:block" style={{ width: `calc(${(p.count / max) * 100}% - 1.75rem)` }} aria-hidden />}
-              </button>
-            );
-          })}
+        <div className="sr-card">
+          <label className="relative mb-4 block">
+            <span className="sr-only">Search the screens</span>
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <input value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} placeholder="Search screens…" className="sr-input" style={{ height: 48, paddingLeft: 42, borderRadius: 999 }} />
+          </label>
+          <p className="sr-eyebrow mb-3 hidden xl:block">Products</p>
+          <div className="sr-scroll-x flex gap-2 xl:block xl:space-y-1" role="tablist" aria-label="Products">
+            {[{ key: "all", name: "All screens", count: pool.length }, ...shownPanels].map((p) => {
+              const on = panel === p.key;
+              return (
+                <button key={p.key} role="tab" aria-selected={on} onClick={() => pick(p.key)} className={`group relative shrink-0 overflow-hidden rounded-full border px-4 py-2.5 text-left text-sm font-semibold transition-all xl:flex xl:w-full xl:items-center xl:justify-between xl:rounded-xl xl:border-0 xl:px-3.5 ${on ? "border-transparent bg-foreground text-background shadow-lg xl:bg-primary/10 xl:text-primary xl:shadow-none" : "border-border/60 bg-background text-foreground hover:border-primary/50 xl:bg-transparent xl:text-muted-foreground xl:hover:bg-muted/60 xl:hover:text-foreground"}`}>
+                  <span className="relative z-10">{p.name}</span>
+                  <span className={`relative z-10 ml-2 text-xs font-bold tabular-nums ${on ? "opacity-80" : "opacity-60"}`}>{p.count}</span>
+                  {p.key !== "all" && <span className="absolute inset-x-3.5 bottom-1 hidden h-[3px] origin-left rounded-full bg-gradient-to-r from-primary to-brand-accent opacity-40 transition-opacity group-hover:opacity-80 xl:block" style={{ width: `calc(${(p.count / max) * 100}% - 1.75rem)` }} aria-hidden />}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </aside>
 
       <div className="min-w-0">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="sticky top-[88px] z-20 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/50 bg-background/80 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-5">
           <p className="text-sm text-muted-foreground">Showing <b className="text-foreground">{visible.length}</b> of {list.length} real screens{panel !== "all" && <> in <b className="text-foreground">{panels.find((p) => p.key === panel)?.name}</b></>}</p>
-          <div className="inline-flex rounded-full border border-border/70 bg-background p-1 shadow-sm" role="group" aria-label="Layout">
-            <button type="button" onClick={() => setMosaic(true)} aria-pressed={mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${mosaic ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}><LayoutDashboard className="h-3.5 w-3.5" />Mosaic</button>
-            <button type="button" onClick={() => setMosaic(false)} aria-pressed={!mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${!mosaic ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}><Grid3X3 className="h-3.5 w-3.5" />Grid</button>
+          <div className="inline-flex rounded-full border border-border/60 bg-muted/30 p-1" role="group" aria-label="Layout">
+            <button type="button" onClick={() => setMosaic(true)} aria-pressed={mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${mosaic ? "bg-foreground text-background shadow" : "text-muted-foreground hover:text-foreground"}`}><LayoutDashboard className="h-3.5 w-3.5" />Mosaic</button>
+            <button type="button" onClick={() => setMosaic(false)} aria-pressed={!mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${!mosaic ? "bg-foreground text-background shadow" : "text-muted-foreground hover:text-foreground"}`}><Grid3X3 className="h-3.5 w-3.5" />Grid</button>
           </div>
         </div>
 
         {list.length === 0 ? (
-          <p className="py-24 text-center text-muted-foreground">No screen matches. Try another word.</p>
+          /* the system's EmptyState block, inlined (blocks.tsx is server-only) */
+          <div className="relative overflow-hidden rounded-[2rem] border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+            <div className="relative space-y-3">
+              <span className="sr-icon mx-auto"><Sparkles className="h-5 w-5" /></span>
+              <h3 className="text-xl font-bold">No screen matches</h3>
+              <p className="mx-auto max-w-md text-[15px] leading-relaxed text-muted-foreground">Nothing here matches that search. Try a different word, or jump back to every product&apos;s screens.</p>
+              <div className="flex flex-wrap justify-center gap-3 pt-3">
+                <button type="button" onClick={() => { setQ(""); pick("all"); }} className="sr-btn sr-btn-ghost sr-btn-sm">Reset the gallery</button>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className={`grid grid-flow-dense grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3 ${mosaic ? "sm:auto-rows-[230px]" : ""} lg:grid-cols-3`}>
             {visible.map((it, n) => (
-              <button key={it.id} type="button" onClick={() => setOpen(n)} aria-label={`Open ${it.title}`} className={`group relative flex flex-col overflow-hidden rounded-[1.75rem] border border-border/60 bg-card text-left shadow-md transition-all duration-500 hover:-translate-y-1 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/25 sm:block ${mosaic ? "sm:min-h-[230px]" : "sm:aspect-[16/10]"} ${span(n)}`}>
-                {/* phones: the whole screen on top, its name beneath; larger screens: the screen fills the tile with the name over it */}
-                <span className="relative block aspect-[16/10] w-full overflow-hidden bg-muted sm:absolute sm:inset-0 sm:aspect-auto">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={it.src} alt={`${it.panel}: ${it.title}`} width={1280} height={800} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-[900ms] group-hover:scale-[1.07]" />
-                  <span className="absolute inset-0 hidden bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100 sm:block" aria-hidden />
-                  {it.featured && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black shadow"><Star className="h-3 w-3 fill-amber-400 text-amber-400" />Featured</span>}
-                  <span className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 sm:scale-75"><Maximize2 className="h-4 w-4" /></span>
-                </span>
-                <span className="block p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-5 sm:text-white">
-                  <span className="mb-1.5 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary sm:bg-white/20 sm:text-white sm:backdrop-blur">{it.panel}</span>
-                  <span className="block text-base font-black leading-tight tracking-tight sm:text-lg">{it.title}</span>
-                </span>
-              </button>
+              <Reveal key={it.id} delay={(n % 4) * 80} className={`group relative ${span(n)} ${mosaic ? "sm:min-h-[230px]" : "sm:aspect-[16/10]"}`}>
+                {/* the system's gradient edge glow, lifting the tile off the page on hover (FeatureGrid pattern) */}
+                <span className="pointer-events-none absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/25 via-primary/0 to-brand-accent/25 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-100" aria-hidden />
+                <button type="button" onClick={() => setOpen(n)} aria-label={`Open ${it.title}`} className="relative flex h-full w-full flex-col overflow-hidden rounded-[1.75rem] border border-border/60 bg-card text-left shadow-md transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-2xl group-hover:shadow-primary/15 sm:block">
+                  {/* phones: the whole screen on top, its name beneath; larger screens: the screen fills the tile with the name over it */}
+                  <span className="relative block aspect-[16/10] w-full overflow-hidden bg-muted sm:absolute sm:inset-0 sm:aspect-auto">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={it.src} alt={`${it.panel}: ${it.title}`} width={1280} height={800} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover object-left-top transition-transform duration-[900ms] group-hover:scale-[1.07]" />
+                    <span className="absolute inset-0 hidden bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-80 transition-opacity group-hover:opacity-100 sm:block" aria-hidden />
+                    {it.featured && <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-black shadow"><Star className="h-3 w-3 fill-amber-400 text-amber-400" />Featured</span>}
+                    <span className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-black opacity-0 shadow-lg transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 sm:scale-75"><Maximize2 className="h-4 w-4" /></span>
+                  </span>
+                  <span className="block p-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:p-5 sm:text-white">
+                    <span className="mb-1.5 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary sm:bg-white/20 sm:text-white sm:backdrop-blur">{it.panel}</span>
+                    <span className="block text-base font-black leading-tight tracking-tight sm:text-lg">{it.title}</span>
+                  </span>
+                </button>
+              </Reveal>
             ))}
           </div>
         )}
 
         {shown < list.length && (
           <div className="mt-10 flex justify-center">
-            <button type="button" onClick={() => setShown((s) => s + PAGE)} className="inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-bold text-background shadow-xl transition-transform hover:scale-105">Show {Math.min(PAGE, list.length - shown)} more screens <ArrowRight className="h-4 w-4" /></button>
+            <button type="button" onClick={() => setShown((s) => s + PAGE)} className="group inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-105 active:scale-95">Show {Math.min(PAGE, list.length - shown)} more screens <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></button>
           </div>
         )}
       </div>
@@ -128,16 +146,22 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
             <img key={cur.id} src={cur.src} alt={`${cur.panel}: ${cur.title}`} onClick={(e) => e.stopPropagation()} className="max-h-full max-w-full rounded-2xl border border-border/70 bg-card object-contain shadow-[0_40px_100px_-30px] shadow-primary/40" style={{ animation: "sr-in .35s ease both" }} />
             <button type="button" onClick={(e) => { e.stopPropagation(); move(1); }} aria-label="Next" className="absolute right-2 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-border/70 bg-background/80 shadow-lg backdrop-blur transition-colors hover:border-primary/50 hover:text-primary sm:right-6"><ArrowRight className="h-5 w-5" /></button>
           </div>
-          <div className="sr-scroll-x relative flex justify-center gap-2.5 border-t border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl">
-            {list.slice(Math.max(0, (open ?? 0) - 6), Math.max(0, (open ?? 0) - 6) + 13).map((t, k) => {
-              const idx = Math.max(0, (open ?? 0) - 6) + k;
-              return (
-                <button key={t.id} type="button" onClick={() => setOpen(idx)} aria-label={t.title} className={`h-14 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition-all sm:h-16 sm:w-28 ${idx === open ? "ring-primary" : "opacity-60 ring-transparent hover:opacity-100"}`}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={t.src} alt="" loading="lazy" className="h-full w-full object-cover object-left-top" />
-                </button>
-              );
-            })}
+          <div className="sr-scroll-x relative border-t border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl">
+            <div className="mb-2.5 hidden items-center justify-center gap-5 text-xs text-muted-foreground sm:flex">
+              <span className="flex items-center gap-1.5"><kbd className="sr-kbd">←</kbd><kbd className="sr-kbd">→</kbd> browse screens</span>
+              <span className="flex items-center gap-1.5"><kbd className="sr-kbd">Esc</kbd> close</span>
+            </div>
+            <div className="flex justify-center gap-2.5">
+              {list.slice(Math.max(0, (open ?? 0) - 6), Math.max(0, (open ?? 0) - 6) + 13).map((t, k) => {
+                const idx = Math.max(0, (open ?? 0) - 6) + k;
+                return (
+                  <button key={t.id} type="button" onClick={() => setOpen(idx)} aria-label={t.title} className={`h-14 w-24 shrink-0 overflow-hidden rounded-lg ring-2 transition-all sm:h-16 sm:w-28 ${idx === open ? "ring-primary" : "opacity-60 ring-transparent hover:opacity-100"}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={t.src} alt="" loading="lazy" className="h-full w-full object-cover object-left-top" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
