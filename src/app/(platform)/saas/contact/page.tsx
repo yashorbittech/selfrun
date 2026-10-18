@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import InquiryForm from "@/components/platform/saas/InquiryForm";
-import { PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import { TimelineSteps } from "@/components/platform/saas/Modern";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import { requestHostOrNull } from "@/lib/platform/saas/request";
@@ -19,7 +19,9 @@ export default async function ContactPage() {
   ];
   return (
     <>
-      <PageHero art="contact" photo="colleagues" shot="support" shotName="SelfRun ResolveIQ" eyebrow="Contact Us" title="Let's talk about" accent="your business." lead="Questions about plans, how the platform fits your business, or security? Send a message and we'll reply within one business day." chip={{ title: "Reply within one business day", text: "From the people who build the platform" }} />
+      <PageHero art="contact" photo="colleagues" shot="support" shotName="SelfRun ResolveIQ" eyebrow="Contact Us" title="Let's talk about" accent="your business." lead="Questions about plans, how the platform fits your business, or security? Send a message and we'll reply within one business day." chip={{ title: "Reply within one business day", text: "From the people who build the platform" }}>
+        <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Request a demo", href: "/demo" }} />
+      </PageHero>
       <section className="sr-section">
         <div className="sr-container">
           <SectionHead icon="chat" eyebrow="Get in touch" title="Reach the" accent="right team." lead="Pick the address that fits, or send a message with the form and we will route it for you." />

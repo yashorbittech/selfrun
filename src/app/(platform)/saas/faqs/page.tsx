@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/platform/saas/blocks";
+import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import FaqHub from "@/components/platform/saas/FaqHub";
 import { FAQ_GROUPS } from "@/lib/platform/saas/faqs";
 
@@ -21,7 +21,9 @@ export default function FaqsPage() {
         photo="analytics"
         shot="workspace"
         shotName="SelfRun workspace"
-      />
+      >
+        <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
+      </PageHero>
       <FaqHub
         groups={FAQ_GROUPS.map(({ id, title, href, items }) => ({
           id,

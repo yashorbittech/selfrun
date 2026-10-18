@@ -2,7 +2,7 @@ import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
 import FindWorkspaceForm from "@/components/platform/saas/FindWorkspaceForm";
-import { Blobs, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { Blobs, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import Reveal from "@/components/platform/saas/Reveal";
 import { ArrowRight, Bot, BarChart3, Briefcase, Check, ClipboardList, FileText, Globe, GraduationCap, LayoutDashboard, MessageSquare, Package, Search, Share2, ShieldCheck, Headphones, Users, Wallet } from "lucide-react";
 
@@ -164,7 +164,7 @@ export default function LoginPage() {
         accent="your workspace."
         lead={<>Every company has its own workspace address. Enter yours and we&apos;ll take you to its sign-in page. New here? <Link href="/signup" className="font-bold text-primary">Get started free</Link>.</>}
       >
-        <div className="w-full max-w-md"><FindWorkspaceForm /></div>
+        <div className="flex w-full flex-col gap-5"><div className="w-full max-w-md"><FindWorkspaceForm /></div><div className="flex flex-wrap items-center gap-3"><HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Request a demo", href: "/demo" }} /></div></div>
       </PageHero>
 
       {/* ── How it works + form ── */}

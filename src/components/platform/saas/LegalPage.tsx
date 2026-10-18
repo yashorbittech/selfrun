@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { LEGAL_LINKS, type LegalDoc } from "@/lib/platform/saas/site";
-import { PageHero } from "@/components/platform/saas/blocks";
+import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import LegalToc from "@/components/platform/saas/LegalToc";
 import Reveal from "@/components/platform/saas/Reveal";
 
@@ -15,7 +15,9 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
   const toc = doc.sections.map((s) => ({ id: slug(s.heading), label: s.heading }));
   return (
     <>
-      <PageHero art="legal" photo="office" shot="dlms" shotName="Digi Locker" eyebrow="Legal" title={doc.title} lead={doc.intro} size="compact" />
+      <PageHero art="legal" photo="office" shot="dlms" shotName="Digi Locker" eyebrow="Legal" title={doc.title} lead={doc.intro} size="compact">
+        <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
+      </PageHero>
 
       <section className="sr-section">
         <div className="sr-container grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)_200px] lg:gap-10">

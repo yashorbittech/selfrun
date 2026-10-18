@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { PageHero } from "@/components/platform/saas/blocks";
+import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { listIncidents } from "@/lib/platform/status/incidents";
@@ -59,7 +59,9 @@ export default async function StatusPage() {
   const all = rows.every((r) => r.ok) && !open.some((i) => i.impact === "outage" || i.impact === "major");
   return (
     <>
-      <PageHero eyebrow="Status" title={all ? (open.length ? "Operational, with an open notice" : "All systems operational") : "Some systems are having trouble"} lead={`A live check of the website and the database that every ${SAAS_BRAND.name} workspace runs on, made when you opened this page (${new Date(checkedAt).toUTCString()}).`} photo="office" shot="workspace" shotName="Workspace" />
+      <PageHero eyebrow="Status" title={all ? (open.length ? "Operational, with an open notice" : "All systems operational") : "Some systems are having trouble"} lead={`A live check of the website and the database that every ${SAAS_BRAND.name} workspace runs on, made when you opened this page (${new Date(checkedAt).toUTCString()}).`} photo="office" shot="workspace" shotName="Workspace">
+        <HeroCtas primary={{ label: "Contact us", href: "/contact" }} secondary={{ label: "Read the docs", href: "/docs" }} />
+      </PageHero>
       <section className="sr-section">
         <div className="sr-container max-w-2xl">
           <ul className="divide-y divide-border/70 rounded-3xl border border-border/60 bg-background shadow-sm" aria-label="Live checks">

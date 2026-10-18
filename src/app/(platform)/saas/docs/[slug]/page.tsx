@@ -3,13 +3,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FEATURE_LISTS } from "@/lib/platform/saas/feature-lists";
-import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowRight, Lightbulb } from "lucide-react";
 import { DOCS, DOC_CATEGORIES, docBySlug } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { screenFor } from "@/lib/platform/saas/screens";
-import { CtaBand, PageHero } from "@/components/platform/saas/blocks";
+import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
+import DocsGuideSidebar from "@/components/platform/saas/DocsGuideSidebar";
+import ScrollToTop from "@/components/platform/saas/product/ScrollToTop";
 import Reveal from "@/components/platform/saas/Reveal";
 import Icon from "@/components/platform/saas/Icon";
 import { productKeyFromSlug, productPath } from "@/lib/platform/saas/product-routes";
@@ -42,22 +44,15 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
   const variant = (i % 6) as SceneVariant;
   return (
     <>
-      <PageHero art="docs" eyebrow={`${g.category} · ${g.readMinutes} min read`} title={g.title} lead={g.summary} photo="laptop-talk" shot={g.shot} shotName={g.title} />
+      <PageHero art="docs" eyebrow={`${g.category} · ${g.readMinutes} min read`} title={g.title} lead={g.summary} photo="laptop-talk" shot={g.shot} shotName={g.title}>
+        <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "All documentation", href: "/docs" }} />
+      </PageHero>
+      <ScrollToTop pageKey={g.slug} />
       <section className="sr-section">
-        <div className="sr-container grid gap-12 lg:grid-cols-[250px_minmax(0,1fr)_220px]">
-          <aside className="hidden lg:block">
-            <div className="sticky top-28 space-y-6">
-              <Link href="/docs" className="sr-link"><ArrowLeft className="h-4 w-4" /> All guides</Link>
-              {DOC_CATEGORIES.filter((c) => c.name === g.category).map((c) => (
-                <div key={c.name}>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{c.name}</p>
-                  <ul className="space-y-1">
-                    {DOCS.filter((x) => x.category === c.name).map((x) => (
-                      <li key={x.slug}><Link href={`/docs/${x.slug}`} className={`block rounded-lg px-3 py-2 text-sm leading-snug transition-colors ${x.slug === g.slug ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"}`}>{x.title}</Link></li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+        <div data-hop-target className="sr-container grid gap-12 lg:grid-cols-[300px_minmax(0,1fr)_220px]">
+          <aside className="hidden lg:block" aria-label="All guides">
+            <div className="sticky top-28">
+              <DocsGuideSidebar key={g.category} groups={DOC_CATEGORIES.map((c) => ({ name: c.name, items: DOCS.filter((x) => x.category === c.name).map((x) => ({ slug: x.slug, title: x.title, readMinutes: x.readMinutes })) })).filter((c) => c.items.length)} activeSlug={g.slug} activeCategory={g.category} />
             </div>
           </aside>
 

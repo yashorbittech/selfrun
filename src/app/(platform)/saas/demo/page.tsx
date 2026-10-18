@@ -2,7 +2,7 @@ import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
 import InquiryForm from "@/components/platform/saas/InquiryForm";
-import { Blobs, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { Blobs, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import Reveal from "@/components/platform/saas/Reveal";
 import DemoExperience from "@/components/platform/saas/DemoExperience";
 import DemoAgenda from "@/components/platform/saas/DemoAgenda";
@@ -16,7 +16,9 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <>
-      <PageHero art="demo" photo="presentation" shot="workspace" shotName="SelfRun CommandOS" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }} />
+      <PageHero art="demo" photo="presentation" shot="workspace" shotName="SelfRun CommandOS" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }}>
+        <HeroCtas primary={{ label: "Try the interactive demo", href: "#self-guided-demo" }} secondary={{ label: "Get started free", href: "/signup" }} />
+      </PageHero>
       <DemoExperience />
       <section className="sr-section relative bg-muted/10">
         <Blobs />

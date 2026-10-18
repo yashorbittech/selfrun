@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, Layers, Lightbulb, ListChecks, Monitor, Plug, Route, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Check, ChevronRight, Layers, Lightbulb, ListChecks, Monitor, Plug, Route, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { PANEL_VALUE, featuresOf } from "@/lib/platform/saas/feature-lists";
 import { PANEL_DETAIL } from "@/lib/platform/saas/panel-detail";
 import { guideFor } from "@/lib/platform/saas/guide-steps";
 import FaqSection from "@/components/platform/saas/FaqSection";
-import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
+import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import DocsNav from "@/components/platform/saas/DocsNav";
 import { productDocsPath, productKeyFromSlug, productSlugFor } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
+import ScrollToTop from "@/components/platform/saas/product/ScrollToTop";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,17 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
   const onScreen = ft ? [
     { t: "Tabs", v: ft.tabs }, { t: ft.labels.some((l) => /\*$/.test(l)) ? "Form fields" : "Search and filters", v: [...ft.placeholders.slice(0, 1), ...clean(ft.labels)] }, { t: "Columns in the list", v: ft.headers }, { t: "Buttons", v: clean(ft.buttons).filter((b) => !/^(previous|next|columns)$/i.test(b)) }, { t: "Sections", v: ft.headings },
   ].filter((x) => x.v.length) : [];
+  const textEnd = /[.!?]$/.test(f.text) ? f.text : `${f.text}.`;
+  const heroLead = (
+    <>
+      <span className="block">{textEnd}</span>
+      <span className="mt-3 block text-[0.95em]">
+        It is part of <b className="text-foreground">{f.group}</b> in {m.name}.{fit ? ` Where it fits in your work, ${fit.title}: ${fit.text}${/[.!?]$/.test(fit.text) ? "" : "."}` : ""}{" "}
+        {guide.auto ? "It works on its own, so this guide shows you where to see it." : `This guide takes you through it in ${guide.steps.length} short steps, from opening ${m.name} to using ${f.name}.`}
+      </span>
+    </>
+  );
+  const heroNotes = [`Part of ${f.group}`, guide.auto ? "Works on its own" : `${guide.steps.length} steps`, ...(guide.img ? ["Real screen included"] : []), ...(guide.tips.length ? [`${guide.tips.length} ${guide.tips.length === 1 ? "tip" : "tips"}`] : [])];
   const navPanels = all.map((p) => {
     const fs = featuresOf(p.key);
     return { key: p.key, name: p.name, icon: p.icon, groups: [...new Set(fs.map((x) => x.group))].map((g) => ({ name: g, items: fs.filter((x) => x.group === g).map((x) => ({ slug: x.slug, name: x.name })) })) };
@@ -78,20 +90,21 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
   ].filter((x) => x.show);
   return (
     <>
-    <PageHero art={`product-${m.key}`} eyebrow={`${m.name} · ${f.group}`} title={f.name} lead={f.text} photo="laptop-talk" shot={m.key} shotName={m.name} chip={{ title: guide.auto ? "Works on its own" : `${guide.steps.length} simple steps`, text: "With the real screen" }}>
+    <PageHero art={`product-${m.key}`} eyebrow={`${m.name} · ${f.group}`} title={f.name} lead={heroLead} notes={heroNotes} photo="laptop-talk" shot={m.key} shotName={m.name} chip={{ title: guide.auto ? "Works on its own" : `${guide.steps.length} simple steps`, text: "With the real screen" }}>
       <HeroCtas primary={{ label: guide.auto ? "See how it works" : "Start the steps", href: "#steps" }} secondary={{ label: `All ${m.name} guides`, href: `/docs#${m.key}` }} />
     </PageHero>
+    <ScrollToTop pageKey={`${m.key}/${f.slug}`} />
     <section className="sr-section">
-      <div className="sr-container grid max-w-[calc(var(--sr-max)+12rem)] gap-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[340px_minmax(0,1fr)_280px] 2xl:grid-cols-[380px_minmax(0,1fr)_300px]">
+      <div data-hop-target className="sr-container grid max-w-[calc(var(--sr-max)+12rem)] gap-10 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[340px_minmax(0,1fr)_280px] 2xl:grid-cols-[380px_minmax(0,1fr)_300px]">
       <aside className="hidden xl:block">
-        <div className="sticky top-28 flex max-h-[calc(100vh-8rem)] flex-col rounded-3xl border border-border/60 bg-background p-4 shadow-sm">
+        <div className="sticky top-28 flex max-h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-3xl border border-border/60 bg-background shadow-sm">
           <DocsNav panels={navPanels} currentPanel={m.key} currentSlug={f.slug} />
         </div>
       </aside>
       <div className="min-w-0 space-y-12">
         <details className="group rounded-2xl border border-border/60 bg-background shadow-sm xl:hidden">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold"><span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" />Browse all documentation</span><ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" /></summary>
-          <div className="max-h-[70vh] border-t border-border/60 p-3 [&>nav]:max-h-[65vh]"><DocsNav panels={navPanels} currentPanel={m.key} currentSlug={f.slug} /></div>
+          <div className="max-h-[70vh] overflow-hidden border-t border-border/60 [&>nav]:max-h-[70vh]"><DocsNav panels={navPanels} currentPanel={m.key} currentSlug={f.slug} /></div>
         </details>
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
           <Link href="/docs" className="hover:text-primary">Documentation</Link><ChevronRight className="h-3.5 w-3.5" />
@@ -201,14 +214,31 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
           </section>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[{ p: prev, d: "Previous guide" }, { p: next, d: "Next guide" }].map(({ p, d: dir }, k) => (
-            <Link key={dir} href={productDocsPath(m.key, p.slug)} className={`rounded-2xl border border-border/60 p-4 transition-all hover:border-primary/40 ${k ? "sm:text-right" : ""}`}>
-              <span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">{dir}</span><span className="mt-1 block font-black leading-snug">{p.name}</span>
-            </Link>
-          ))}
-        </div>
-        <Link href={`/docs#${m.key}`} className="sr-link"><ArrowLeft className="h-4 w-4" /> All {m.name} guides <ArrowRight className="h-4 w-4" /></Link>
+        <section aria-label="Continue reading" className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 bg-gradient-to-br from-primary/[0.08] via-card to-brand-accent/[0.08] px-5 py-4 sm:px-6">
+            <p className="text-sm font-black">Keep going with {m.name}</p>
+            <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground">
+              <span>Guide {i + 1} of {list.length}</span>
+              <span className="h-1.5 w-28 overflow-hidden rounded-full bg-border" aria-hidden><span className="block h-full rounded-full bg-gradient-to-r from-primary to-brand-accent" style={{ width: `${((i + 1) / list.length) * 100}%` }} /></span>
+            </div>
+          </div>
+          <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-6">
+            {[{ p: prev, d: "Previous guide" }, { p: next, d: "Next guide" }].map(({ p, d: dir }, k) => (
+              <Link key={dir} data-product-link href={productDocsPath(m.key, p.slug)} className={`group relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-border/60 bg-background p-5 transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 ${k ? "sm:items-end sm:text-right" : ""}`}>
+                <span className={`flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary ${k ? "sm:flex-row-reverse" : ""}`}>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform"><ArrowRight className={`h-4 w-4 ${k ? "group-hover:translate-x-0.5" : "rotate-180 group-hover:-translate-x-0.5"}`} /></span>{dir}
+                </span>
+                <span className="text-lg font-black leading-snug transition-colors group-hover:text-primary">{p.name}</span>
+                <span className="line-clamp-2 text-sm leading-snug text-muted-foreground">{p.text}</span>
+                <span className="mt-1 inline-block w-fit rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-bold text-muted-foreground">{p.group}</span>
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 bg-muted/30 px-5 py-4 sm:px-6">
+            <Link href={`/docs#${m.key}`} className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"><Layers className="h-4 w-4" />All {m.name} guides</Link>
+            <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-transform hover:-translate-y-0.5">Try it free <ArrowRight className="h-4 w-4" /></Link>
+          </div>
+        </section>
       </div>
       <aside className="hidden lg:block">
         <div className="sticky top-28 space-y-5">
@@ -228,6 +258,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
       </aside>
       </div>
     </section>
+    <CtaBand title={`Run ${m.name} — and every other product — free.`} lead="Every product and every feature is included in every plan, starting free, no card needed." />
     <FaqSection
       topics={["Setup", "Support", "General"]}
       limit={3}

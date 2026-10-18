@@ -137,6 +137,16 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
     ],
   };
 
+  const endDot = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
+  const heroLead = (
+    <>
+      <span className="block">{endDot(m.summary)}</span>
+      <span className="mt-3 block text-[0.95em]">
+        {endDot(m.description)}{detail?.intro ? ` ${endDot(detail.intro)}` : ""}{value ? ` It stands in for ${soft(value.replaces)}.` : ""}
+      </span>
+    </>
+  );
+  const heroNotes = [`${total} features`, ...(groups.length ? [`${groups.length} feature groups`] : []), ...(detail?.workflow.length ? [`${detail.workflow.length}-step workflow`] : []), "Included in every plan"];
   const glance = [
     { icon: <Layers className="h-5 w-5" />, q: "What it does", a: m.headline },
     detail && { icon: <Users className="h-5 w-5" />, q: "Who uses it", a: detail.audience.map((a) => a.who).join(", ") },
@@ -147,7 +157,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(ld) }} />
-      <PageHero art={`product-${m.key}`} eyebrow={`${total} features · ${m.headline}`} title={m.name} lead={m.summary} photo="analytics" shot={m.key} shotName={m.name}>
+      <PageHero art={`product-${m.key}`} eyebrow={`${total} features · ${m.headline}`} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
         <HeroCtas />
       </PageHero>
 

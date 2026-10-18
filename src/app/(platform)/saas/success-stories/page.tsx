@@ -29,6 +29,7 @@ export default async function SuccessStoriesPage() {
         shotName="SelfRun CommandOS"
       >
         <Link href="/contact" className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-sm font-bold text-background">Talk with our team <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+        <Link href="/signup" className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-6 py-3.5 text-sm font-bold">Get started free</Link>
       </PageHero>
       <section className="sr-section"><div className="sr-container"><CustomerStoriesSection /></div></section>
       <section className="sr-section bg-muted/10">

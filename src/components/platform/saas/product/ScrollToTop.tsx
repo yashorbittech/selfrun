@@ -23,11 +23,17 @@ export default function ScrollToTop({ pageKey }: { pageKey: string }) {
     let hop = false;
     try { hop = sessionStorage.getItem(FLAG) === "1"; sessionStorage.removeItem(FLAG); } catch { /* ignore */ }
     if (!hop || window.location.hash) return;
-    const nav = document.querySelector("[data-product-nav]");
-    if (!nav) return;
-    const stick = parseFloat(getComputedStyle(nav).top) || 0;
-    const top = nav.getBoundingClientRect().top + window.scrollY - stick + 24;
-    window.scrollTo({ top, left: 0, behavior: "instant" });
+    const go = () => {
+      const nav = document.querySelector("[data-product-nav], [data-hop-target]");
+      if (!nav) return;
+      const cs = getComputedStyle(nav);
+      const offset = cs.position === "sticky" ? (parseFloat(cs.top) || 0) - 24 : 100;
+      window.scrollTo({ top: nav.getBoundingClientRect().top + window.scrollY - offset, left: 0, behavior: "instant" });
+    };
+    // the router also scrolls after a navigation, so land again once it has settled
+    go();
+    const timers = [window.setTimeout(go, 50), window.setTimeout(go, 200)];
+    return () => timers.forEach(window.clearTimeout);
   }, [pageKey]);
   return null;
 }

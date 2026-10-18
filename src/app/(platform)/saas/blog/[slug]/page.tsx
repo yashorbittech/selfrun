@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Calendar,
   CheckCircle2,
   ChevronRight,
@@ -14,8 +13,10 @@ import {
   User,
 } from "lucide-react";
 import { POSTS, type BlogPost } from "@/lib/platform/saas/site";
-import { PageHero } from "@/components/platform/saas/blocks";
+import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import { screenFor } from "@/lib/platform/saas/screens";
+import BlogSidebar from "@/components/platform/saas/BlogSidebar";
+import ScrollToTop from "@/components/platform/saas/product/ScrollToTop";
 import Reveal from "@/components/platform/saas/Reveal";
 import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
 
@@ -68,6 +69,7 @@ export default async function BlogPostPage({
 
   return (
     <article className="min-h-screen bg-background">
+      <ScrollToTop pageKey={post.slug} />
       {/* Hero Banner: Exactly matches all other site pages (features, pricing, docs, about) */}
       <PageHero
         eyebrow={`${post.tag} · ${post.readMinutes} min read`}
@@ -79,6 +81,7 @@ export default async function BlogPostPage({
         chip={{ title: `${post.readMinutes} min practical read`, text: `Published on ${post.date}` }}
         notes={[`Written by ${post.author}`, "Zero fluff & 100% practical", "Verified product workflows"]}
       >
+        <HeroCtas />
         <Link
           href="/blog"
           className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-5 py-3 text-xs font-bold text-foreground shadow-sm backdrop-blur transition-all hover:bg-muted"
@@ -98,117 +101,10 @@ export default async function BlogPostPage({
 
       {/* Main Layout: Left Sidebar + Article Body */}
       <div className="sr-container max-w-7xl py-12 lg:py-16">
-        <div className="grid grid-cols-1 items-stretch gap-10 md:grid-cols-12 lg:gap-12">
+        <div data-hop-target className="grid grid-cols-1 items-start gap-10 md:grid-cols-12 lg:gap-12">
           {/* Left Sidebar: sticky */}
-          <aside className="md:col-span-5 lg:col-span-4 xl:col-span-4 md:sticky md:top-28 md:self-start">
-            {/* Mobile View (< 768px): Open with full natural list */}
-            <details open className="mb-8 rounded-3xl border border-border/60 bg-muted/20 p-5 md:hidden">
-              <summary className="flex cursor-pointer items-center justify-between text-base font-bold text-foreground">
-                <span className="flex items-center gap-2.5">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                  All 20 Blog Guides
-                </span>
-                <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">
-                  Tap to collapse
-                </span>
-              </summary>
-              <nav className="mt-5 space-y-3">
-                {POSTS.map((p, idx) => {
-                  const isActive = p.slug === post.slug;
-                  return (
-                    <Link
-                      key={p.slug}
-                      href={`/blog/${p.slug}`}
-                      className={`block rounded-2xl p-4 transition-all border ${
-                        isActive
-                          ? "bg-primary text-primary-foreground border-primary font-bold shadow-md shadow-primary/20"
-                          : "bg-card border-border/50 text-foreground hover:border-primary/40 hover:bg-muted/30"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-xs font-semibold opacity-80">
-                        <span className="font-mono">Guide #{String(idx + 1).padStart(2, "0")} • {p.tag}</span>
-                        <span>{p.readMinutes} min read</span>
-                      </div>
-                      <div className="mt-1.5 text-sm sm:text-base font-bold leading-snug">{p.title}</div>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </details>
-
-            {/* Desktop & Tablet View (>= 768px): Matches Full Height of Blog Content */}
-            <div className="hidden md:block">
-              <div className="flex flex-col rounded-3xl border border-border/60 bg-card p-6 shadow-xl">
-                <div className="mb-5 flex flex-none items-center justify-between border-b border-border/50 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
-                      <BookOpen className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-base font-black text-foreground">All Guides & Tutorials</h3>
-                      <p className="text-xs text-muted-foreground">{POSTS.length} published articles</p>
-                    </div>
-                  </div>
-                  <Link
-                    href="/blog"
-                    className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
-                  >
-                    All Posts
-                  </Link>
-                </div>
-
-                {/* Full natural list matching blog content height */}
-                <nav
-                  aria-label="Blog posts navigation"
-                  className="space-y-3 max-h-[70vh] overflow-y-auto pr-1"
-                >
-                  {POSTS.map((p, idx) => {
-                    const isActive = p.slug === post.slug;
-                    return (
-                      <Link
-                        key={p.slug}
-                        href={`/blog/${p.slug}`}
-                        className={`group block rounded-2xl p-4 transition-all duration-200 border ${
-                          isActive
-                            ? "border-primary bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                            : "border-border/50 bg-muted/15 text-muted-foreground hover:border-primary/50 hover:bg-muted/40 hover:text-foreground hover:shadow-sm"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between text-xs">
-                          <span
-                            className={`font-mono font-bold ${
-                              isActive
-                                ? "text-primary-foreground/90"
-                                : "text-primary"
-                            }`}
-                          >
-                            #{String(idx + 1).padStart(2, "0")} • {p.tag}
-                          </span>
-                          <span
-                            className={
-                              isActive
-                                ? "text-primary-foreground/80 font-medium"
-                                : "text-muted-foreground font-medium"
-                            }
-                          >
-                            {p.readMinutes} min read
-                          </span>
-                        </div>
-                        <div
-                          className={`mt-2 text-sm sm:text-[15px] font-bold leading-snug transition-colors ${
-                            isActive
-                              ? "text-white font-black"
-                              : "text-foreground group-hover:text-primary"
-                          }`}
-                        >
-                          {p.title}
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </nav>
-              </div>
-            </div>
+          <aside className="md:col-span-5 lg:col-span-4 md:sticky md:top-28 md:self-start" aria-label="All guides">
+            <BlogSidebar posts={POSTS.map((p) => ({ slug: p.slug, title: p.title, tag: p.tag, readMinutes: p.readMinutes }))} activeSlug={post.slug} />
           </aside>
 
           {/* Main Article Content */}
@@ -292,6 +188,7 @@ export default async function BlogPostPage({
                 {/* Previous Blog Post CTA */}
                 {prevPost && (
                   <Link
+                    data-product-link
                     href={`/blog/${prevPost.slug}`}
                     className="group relative flex flex-col justify-between rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-muted/10 hover:shadow-lg"
                   >
@@ -318,6 +215,7 @@ export default async function BlogPostPage({
                 {/* Next Blog Post CTA */}
                 {nextPost && (
                   <Link
+                    data-product-link
                     href={`/blog/${nextPost.slug}`}
                     className="group relative flex flex-col justify-between rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:bg-muted/10 hover:shadow-lg sm:text-right"
                   >
