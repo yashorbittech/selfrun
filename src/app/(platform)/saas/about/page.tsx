@@ -4,12 +4,16 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { INDUSTRIES, SECURITY_POINTS, USE_CASES } from "@/lib/platform/saas/content";
 import { GROWTH } from "@/lib/platform/saas/site";
+import { DOCS } from "@/lib/platform/saas/docs";
+import { TUTORIALS } from "@/lib/platform/saas/tutorials";
+import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
-import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import { panelColor } from "@/lib/platform/saas/palette";
 import Icon from "@/components/platform/saas/Icon";
-import { IconColumns, NumberedRows } from "@/components/platform/saas/Modern";
+import { NumberedRows } from "@/components/platform/saas/Modern";
 import CountStats from "@/components/platform/saas/CountStats";
+import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Reveal from "@/components/platform/saas/Reveal";
 import MarketingShot from "@/components/platform/saas/MarketingShot";
 import AboutHeroArtwork from "@/components/platform/saas/AboutHeroArtwork";
@@ -44,10 +48,25 @@ const NAV = [
   { id: "about", label: "About us" },
   { id: "mission", label: "Our mission" },
   { id: "what-we-do", label: "What we do" },
+  { id: "numbers", label: "What we have built" },
+  { id: "who", label: "Who it is for" },
   { id: "growth", label: "How you grow" },
-  { id: "stories", label: "Customer stories & workflows" },
+  { id: "stories", label: "Stories and workflows" },
   { id: "values", label: "Our values" },
+  { id: "commitments", label: "Our commitments" },
+  { id: "connect", label: "Get in touch" },
 ];
+
+function Head({ id, title, accent, lead, dark = false }: { id: string; title: string; accent?: string; lead?: string; dark?: boolean }) {
+  const n = String(NAV.findIndex((x) => x.id === id) + 1).padStart(2, "0");
+  return (
+    <Reveal className="mx-auto mb-12 max-w-3xl text-center">
+      <p className={`mb-4 flex flex-col items-center gap-3 text-xs font-black uppercase tracking-[0.2em] ${dark ? "text-white/80" : "text-primary"}`}><span className="flex h-12 min-w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent px-3 text-lg tracking-normal text-white shadow-lg shadow-primary/30">{n}</span>{NAV.find((x) => x.id === id)?.label}</p>
+      <h2 className="text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">{title}{accent && <> <span className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-transparent">{accent}</span></>}</h2>
+      {lead && <p className={`mt-4 text-lg leading-relaxed ${dark ? "text-white/75" : "text-muted-foreground"}`}>{lead}</p>}
+    </Reveal>
+  );
+}
 
 export default async function AboutPage() {
   const groups = await getFeatureGroups();
@@ -64,16 +83,12 @@ export default async function AboutPage() {
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
       </PageHero>
 
-      <nav aria-label="On this page" className="sticky top-[76px] z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
-        <div className="sr-container sr-scroll-x flex gap-1.5 py-3">
-          {NAV.map((n) => <a key={n.id} href={`#${n.id}`} className="sr-tab shrink-0">{n.label}</a>)}
-        </div>
-      </nav>
+      <SectionScrollNav items={NAV} label="On this page" numbered />
 
       {/* About us */}
       <section id="about" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="building" eyebrow="About us" title="One platform for" accent="the whole company." />
+          <Head id="about" title="One platform for" accent="the whole company." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <div>
             <div className="sr-prose">
@@ -91,7 +106,7 @@ export default async function AboutPage() {
       {/* Mission */}
       <section id="mission" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="target" eyebrow="Our mission" title="Give every business a platform" accent="that runs the routine." lead="From a ten-person firm to a growing enterprise: one intelligent system that handles the repetitive parts of running a company, so people can focus on what only people can do — customers, craft and growth." />
+          <Head id="mission" title="Give every business a platform" accent="that runs the routine." lead="From a ten-person firm to a growing enterprise: one intelligent system that handles the repetitive parts of running a company, so people can focus on what only people can do — customers, craft and growth." />
           <NumberedRows items={PRINCIPLES.map((p) => ({ title: p.title, text: p.body }))} />
         </div>
       </section>
@@ -99,7 +114,7 @@ export default async function AboutPage() {
       {/* What we do */}
       <section id="what-we-do" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="What we do" title="Seven areas of your business," accent="one platform." lead="We build and run the platform your company works in. Each area below is a set of products — all included in every plan." />
+          <Head id="what-we-do" title="Seven areas of your business," accent="one platform." lead="We build and run the platform your company works in. Each area below is a set of products — all included in every plan." />
           <div className="mb-20">
             <ul className="grid gap-x-10 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((g, i) => (
@@ -116,15 +131,44 @@ export default async function AboutPage() {
               ))}
             </ul>
           </div>
-          <div className="mb-10 text-center"><p className="sr-eyebrow">Who it is for</p></div>
-          <div className="grid gap-x-12 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+        </div>
+      </section>
+
+      {/* What we have built */}
+      <section id="numbers" className="sr-section" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <Head id="numbers" title="What we have built," accent="in numbers." lead="Counted from the live product, not rounded up for effect." />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { v: String(modules.length), l: "independent products", x: "Each with its own sign-in and its own data." },
+              { v: `${modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0)}+`, l: "features", x: "All included in every plan, starting free." },
+              { v: String(groups.length), l: "areas of your business", x: "From sales and people to finance and your website." },
+              { v: String(DOCS.length + TUTORIALS.length), l: "guides and walkthroughs", x: "Step by step, with the real screen." },
+            ].map((n, i) => (
+              <Reveal key={n.l} delay={i * 60}>
+                <div className="h-full rounded-3xl border border-border/60 bg-gradient-to-br from-primary/[0.07] via-card to-brand-accent/[0.07] p-7 text-center shadow-sm">
+                  <p className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-6xl font-black leading-none tracking-tighter text-transparent">{n.v}</p>
+                  <p className="mt-3 text-lg font-black">{n.l}</p>
+                  <p className="mt-1 text-sm leading-snug text-muted-foreground">{n.x}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Who it is for */}
+      <section id="who" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <Head id="who" title="Built for the way" accent="you work." lead="The same platform serves very different companies. Here are the kinds of business it fits, and what each of them gets from it." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {INDUSTRIES.map((x, i) => (
               <Reveal key={x.slug} delay={(i % 3) * 70}>
-                <div className="relative space-y-3 border-t-2 border-primary/40 pt-6">
-                  <span className="sr-outline absolute right-0 top-3 hidden text-5xl font-black leading-none xl:block" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="text-xl font-black">{x.name}</h3>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
-                  <ul className="space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
+                <div className="group h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-brand-accent text-sm font-black text-white shadow-md shadow-primary/25">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="text-xl font-black leading-snug">{x.name}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
+                  <ul className="mt-4 space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
                 </div>
               </Reveal>
             ))}
@@ -135,7 +179,7 @@ export default async function AboutPage() {
       {/* Growth */}
       <section id="growth" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="rocket" eyebrow="How your company grows" title="From day one to a company" accent="that runs itself." lead="A suggested path, not a rule: launch in a day, get organised in a week, automate in a month — then see, grow and scale. Switch on a few products at each step." />
+          <Head id="growth" title="From day one to a company" accent="that runs itself." lead="A suggested path, not a rule: launch in a day, get organised in a week, automate in a month — then see, grow and scale. Switch on a few products at each step." />
           <ol className="relative mx-auto max-w-5xl space-y-12 lg:space-y-0">
             <span className="absolute bottom-0 left-[27px] top-0 w-px bg-gradient-to-b from-primary/60 via-primary/25 to-transparent lg:left-1/2" aria-hidden />
             {GROWTH.map((p, i) => (
@@ -156,7 +200,7 @@ export default async function AboutPage() {
       <section id="stories" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container relative space-y-16">
           <CustomerStoriesSection tone="dark" />
-          <SectionHead tone="dark" center icon="chart" eyebrow="Stories from the product" title="Stories built around" accent="how work gets done." lead="Explore realistic workflow narratives based on capabilities in the product. They show how SelfRun connects teams and records without presenting invented customers or outcomes." />
+          <Head id="stories" title="Stories built around" accent="how work gets done." lead="Explore realistic workflow narratives based on capabilities in the product. They show how SelfRun connects teams and records without presenting invented customers or outcomes." dark />
           <div className="grid gap-5 lg:grid-cols-2">
             {USE_CASES.map((u, i) => (
               <Reveal key={u.slug} delay={(i % 2) * 80}>
@@ -172,21 +216,61 @@ export default async function AboutPage() {
         </div>
       </section>
 
-      {/* Values and commitments */}
+      {/* Values */}
       <section id="values" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
-        <div className="sr-container space-y-20">
-          <div>
-            <SectionHead center icon="shield" eyebrow="Our values" title="What we hold" accent="ourselves to." />
-            <IconColumns cols={3} items={VALUES.map((v) => ({ title: v.title, text: v.body, icon: v.icon }))} />
-          </div>
-          <div>
-            <SectionHead center icon="lock" eyebrow="Our commitments" title="Control and protection" accent="built in." />
-            <IconColumns cols={3} items={SECURITY_POINTS.map((x) => ({ title: x.title, text: x.body, icon: x.icon }))} />
-            <p className="mt-10 text-center text-sm text-muted-foreground">Read <Link href="/security" className="font-bold text-primary">security &amp; trust</Link>, the <Link href="/data-policy" className="font-bold text-primary">data policy</Link> and <Link href="/privacy" className="font-bold text-primary">privacy policy</Link>. Questions? <Link href="/contact" className="font-bold text-primary">Talk to us <ArrowRight className="inline h-3.5 w-3.5" /></Link></p>
+        <div className="sr-container">
+          <Head id="values" title="What we hold" accent="ourselves to." lead="Six values that decide how we build and how we talk about the product." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {VALUES.map((v, i) => (
+              <Reveal key={v.title} delay={(i % 3) * 60}>
+                <div className="group h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="sr-icon mb-4 h-12 w-12 transition-transform group-hover:scale-110"><Icon name={v.icon} className="h-5 w-5" /></span>
+                  <h3 className="text-lg font-black leading-snug">{v.title}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{v.body}</p>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
+      {/* Commitments */}
+      <section id="commitments" className="sr-section" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <Head id="commitments" title="Control and protection" accent="built in." lead="What protects your company's data and keeps you in charge of it." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {SECURITY_POINTS.map((x, i) => (
+              <Reveal key={x.title} delay={(i % 3) * 60}>
+                <div className="flex h-full gap-4 rounded-3xl border border-border/60 bg-card p-6 shadow-sm"><span className="sr-icon h-12 w-12 flex-none"><Icon name={x.icon} className="h-5 w-5" /></span><span><span className="block font-black leading-snug">{x.title}</span><span className="mt-1 block text-[15px] leading-relaxed text-muted-foreground">{x.body}</span></span></div>
+              </Reveal>
+            ))}
+          </div>
+          <p className="mt-10 text-center text-sm text-muted-foreground">Read <Link href="/security" className="font-bold text-primary">security &amp; trust</Link>, the <Link href="/data-policy" className="font-bold text-primary">data policy</Link> and the <Link href="/sla" className="font-bold text-primary">service level</Link>.</p>
+        </div>
+      </section>
+
+      {/* Get in touch */}
+      <section id="connect" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <Head id="connect" title="Let's talk about" accent="your business." lead="Start free on your own, see the platform with your scenarios, or ask us anything first." />
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              { icon: "rocket" as const, t: "Start free", x: "Register with your work email and switch on the products you need. No card needed.", href: "/signup", c: "Get started free" },
+              { icon: "target" as const, t: "See it with your scenarios", x: "Bring one process you want to improve and we will show how the platform handles it.", href: "/demo", c: "Request a demo" },
+              { icon: "chat" as const, t: "Ask us anything", x: "Questions about plans, fit or security? Send a message and we reply within one business day.", href: "/contact", c: "Contact us" },
+            ].map((c, i) => (
+              <Reveal key={c.t} delay={i * 70}>
+                <Link href={c.href} className="group flex h-full flex-col rounded-3xl border border-border/60 bg-card p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="sr-icon mb-5 h-14 w-14 transition-transform group-hover:scale-110"><Icon name={c.icon} className="h-6 w-6" /></span>
+                  <h3 className="text-xl font-black">{c.t}</h3>
+                  <p className="mt-2 flex-1 leading-relaxed text-muted-foreground">{c.x}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 font-bold text-primary">{c.c}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <CtaBand title="Talk to the team — or just start." lead="We'd love to hear how your business runs today and where it loses time." />
       <FaqSection topics={["General", "Data & security", "Your brand"]} limit={6} />
