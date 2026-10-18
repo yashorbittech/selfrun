@@ -52,8 +52,18 @@ export function serializePaymentLink(pl: PaymentLink): SerializedPaymentLink {
     createdAt: pl.createdAt.toISOString(),
     updatedAt: pl.updatedAt.toISOString(),
     deletedAt: pl.deletedAt ? pl.deletedAt.toISOString() : null,
-    expiresAt: pl.expiresAt ? pl.expiresAt.toISOString() : null,
+    expiresAt: serializeDate(pl.expiresAt),
   };
+}
+
+function serializeDate(value: unknown): string | null {
+  const date =
+    value instanceof Date
+      ? value
+      : typeof value === "string"
+        ? new Date(value)
+        : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toISOString() : null;
 }
 
 let indexesEnsured = false;

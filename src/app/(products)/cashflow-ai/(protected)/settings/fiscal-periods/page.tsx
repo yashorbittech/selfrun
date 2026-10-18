@@ -12,6 +12,7 @@ import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManageFiscalPeriods } from "@/lib/fms-roles";
 import { listFiscalPeriods } from "@/lib/products/cashflow-ai/fiscal-periods";
 import { createFiscalPeriodAction, closeFiscalPeriodAction, reopenFiscalPeriodAction } from "./actions";
+import { formatDate } from "@/lib/utils";
 
 export default async function FiscalPeriodsPage() {
   const user = await getCurrentFmsUser();
@@ -71,8 +72,8 @@ export default async function FiscalPeriodsPage() {
               {periods.map((p) => (
                 <TableRow key={p._id}>
                   <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell>{p.startDate.toLocaleDateString()}</TableCell>
-                  <TableCell>{p.endDate.toLocaleDateString()}</TableCell>
+                  <TableCell>{formatFiscalDate(p.startDate)}</TableCell>
+                  <TableCell>{formatFiscalDate(p.endDate)}</TableCell>
                   <TableCell>
                     <Badge
                       className={
@@ -112,4 +113,10 @@ export default async function FiscalPeriodsPage() {
       </GlassCard>
     </div>
   );
+}
+
+function formatFiscalDate(value: Date | string | null | undefined): string {
+  if (value == null) return "—";
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? "—" : formatDate(date);
 }

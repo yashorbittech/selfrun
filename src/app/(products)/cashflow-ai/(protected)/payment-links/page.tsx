@@ -71,14 +71,15 @@ export default async function PaymentLinksPage({
           { key: "date", header: "Created", sortable: true },
         ]}
         rows={result.items.map(serializePaymentLink).map((pl) => {
-          const publicUrl = `${baseUrl}/pay/${pl.token}`;
+          const token = typeof pl.token === "string" ? pl.token : "";
+          const publicUrl = token ? `${baseUrl}/pay/${token}` : null;
           return {
             id: pl._id,
             cells: {
               title: (
                 <div>
                   <p className="font-bold text-xs">{pl.title}</p>
-                  <p className="font-mono text-[10px] text-muted-foreground">Token: {pl.token.slice(0, 12)}...</p>
+                  <p className="font-mono text-[10px] text-muted-foreground">Token: {token ? `${token.slice(0, 12)}...` : "Unavailable"}</p>
                 </div>
               ),
               customer: (
@@ -103,15 +104,17 @@ export default async function PaymentLinksPage({
                   {pl.status}
                 </Badge>
               ),
-              url: (
+              url: publicUrl ? (
                 <a
-                  href={`/pay/${pl.token}`}
+                  href={`/pay/${token}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs text-primary hover:underline flex items-center gap-1 font-mono font-medium"
                 >
-                  /pay/{pl.token.slice(0, 8)}...
+                  /pay/{token.slice(0, 8)}...
                 </a>
+              ) : (
+                <span className="text-xs text-muted-foreground">Unavailable</span>
               ),
               date: formatDate(pl.createdAt),
             },

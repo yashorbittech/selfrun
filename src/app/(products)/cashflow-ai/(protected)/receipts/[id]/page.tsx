@@ -72,7 +72,7 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
         <GlassCard>
           <CardHeader><CardTitle>Payment</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <Row label="Method" value={receipt.method.replace(/_/g, " ")} />
+            <Row label="Method" value={receipt.method?.replace(/_/g, " ") ?? "—"} />
             <Row label="Transaction Reference" value={receipt.transactionReference ?? "—"} />
             <Row label="Receipt Date" value={formatDateTime(receipt.receiptDate)} />
             <Row label="Unapplied Advance" value={formatMoney(receipt.advanceAmount, receipt.currency)} />
