@@ -21,7 +21,7 @@ function demourls(): { website: string; workspace: string } {
   const bare = isLocal ? "localhost" : root;
   return {
     website: `${protocol}//${SLUG}.${bare}${p}/`,
-    workspace: `${protocol}//${SLUG}-app.${bare}${p}/`,
+    workspace: `${protocol}//${SLUG}-app.${bare}${p}/commandos/login?demo=1`,
   };
 }
 

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowUpRight, ExternalLink, Globe2, KeyRound, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { ArrowRight, Globe2, KeyRound, LayoutDashboard, LockKeyhole, Sparkles } from "lucide-react";
 import CopyDemoValue from "@/components/platform/saas/CopyDemoValue";
 import { Blobs, SectionHead } from "@/components/platform/saas/blocks";
 import Reveal from "@/components/platform/saas/Reveal";
 import { DEMO_ACCESS } from "@/components/platform/saas/demo-access";
+import { DemoWorkspaceCta, DemoWindowHost, DemoWorkspaceLink, DemoWebsiteLink } from "@/components/platform/saas/DemoLinks";
 
 /** The system's gradient edge glow that blooms behind a card on hover (FeatureGrid pattern). */
 function Glow() {
@@ -16,64 +17,118 @@ export default function DemoExperience() {
       <Blobs />
       <div className="sr-grid-bg" aria-hidden />
       <div className="sr-container relative">
-        <SectionHead icon="layers" eyebrow="Self-guided product tour" title="Explore the full product" accent="at your own pace." lead="Visit the public website, then sign in to the demo workspace to explore the product interface and connected business modules for yourself." />
+        <Reveal>
+          <SectionHead icon="layers" eyebrow="Self-guided product tour" title="Try it for yourself" accent="in seconds." lead="No signup required. Open the live workspace with the shared demo credentials, or preview the public site first." />
+        </Reveal>
 
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Reveal className="group relative">
-            <Glow />
-            <article className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 sm:p-8">
-              <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" aria-hidden />
-              <span className="sr-icon mb-5"><Globe2 className="h-5 w-5" /></span>
-              <p className="sr-eyebrow">Public website</p>
-              <h3 className="mt-2 text-2xl font-black">See the product from the outside</h3>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">Explore the demo company’s public website and see how its customer-facing experience connects with the workspace.</p>
-              <a href={DEMO_ACCESS.website} target="_blank" rel="noopener noreferrer" className="group/cta mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background shadow-lg shadow-foreground/15 transition-all group-hover:scale-[1.02] active:scale-95">Open demo website <ExternalLink className="h-4 w-4 transition-transform group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5" /></a>
-            </article>
-          </Reveal>
-
-          <Reveal delay={80} className="group relative">
-            <Glow />
-            <article className="relative flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 sm:p-8">
-              <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-brand-accent/10 blur-3xl" aria-hidden />
-              <span className="sr-icon mb-5"><LayoutDashboard className="h-5 w-5" /></span>
-              <p className="sr-eyebrow">Interactive workspace</p>
-              <h3 className="mt-2 text-2xl font-black">Explore how the platform works</h3>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">Sign in with the shared demo account to navigate the workspace and inspect the available product areas and workflows.</p>
-              <a href={DEMO_ACCESS.workspace} target="_blank" rel="noopener noreferrer" className="group/cta mt-6 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background shadow-lg shadow-foreground/15 transition-all group-hover:scale-[1.02] active:scale-95">Open demo workspace <ExternalLink className="h-4 w-4 transition-transform group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5" /></a>
-            </article>
-          </Reveal>
-        </div>
-
-        <Reveal delay={160} className="group relative mt-6">
+        {/* Primary live demo card */}
+        <Reveal delay={80} className="group relative">
           <Glow />
-          <div className="relative grid gap-6 overflow-hidden rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 lg:grid-cols-[0.9fr_1.1fr] lg:p-8">
-            <div className="flex flex-col justify-center">
-              <span className="sr-icon mb-5"><KeyRound className="h-5 w-5" /></span>
-              <p className="sr-eyebrow">Demo access</p>
-              <h3 className="mt-2 text-2xl font-black">Use these sign-in details</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">The demo account is shared with visitors. Use it to explore the product; avoid entering personal, confidential or payment information.</p>
-            </div>
-            <div className="sr-window">
-              <div className="sr-window-bar" aria-hidden>
-                <span className="sr-dot" /><span className="sr-dot" /><span className="sr-dot" />
-                <span className="sr-mono ml-2 truncate text-xs text-muted-foreground">demo.selfrun.app/sign-in</span>
+          <div className="relative overflow-hidden rounded-[2rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 sm:p-8 lg:p-10">
+            <span className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-[120px]" aria-hidden />
+            <span className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-brand-accent/10 blur-[120px]" aria-hidden />
+
+            <div className="relative grid gap-8 lg:grid-cols-[1fr_minmax(0,1fr)] lg:items-start lg:gap-12">
+              <div className="flex flex-col">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="sr-chip"><Sparkles className="h-3.5 w-3.5" />Recommended</span>
+                  <span className="sr-chip">No signup required</span>
+                </div>
+                <h3 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">Open the live demo workspace</h3>
+                <p className="mt-3 max-w-xl text-base leading-relaxed text-muted-foreground">
+                  Jump straight into the actual product. Sign in with the shared demo account to explore every module, workflow, and connected experience as if it were yours.
+                </p>
+
+                <DemoWorkspaceCta />
+
+                <div className="mt-8 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <LockKeyhole className="h-3.5 w-3.5 text-primary" />
+                    Shared demo access • safe to explore
+                  </span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>Works in any modern browser</span>
+                </div>
               </div>
-              <div className="space-y-3 p-4 sm:p-5">
-                <Credential label="Email" value={DEMO_ACCESS.email} />
-                <Credential label="Password" value={DEMO_ACCESS.password} />
-                <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3 text-xs leading-relaxed text-muted-foreground">
-                  <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                  <p>This is shared demo access. Please don’t save personal data or change account and security settings.</p>
+
+              <div className="sr-window self-start">
+                <div className="sr-window-bar" aria-hidden>
+                  <span className="sr-dot" />
+                  <span className="sr-dot" />
+                  <span className="sr-dot" />
+                  <DemoWindowHost />
+                </div>
+                <div className="space-y-3 p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="sr-icon mt-0.5 shrink-0">
+                      <KeyRound className="h-4 w-4" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">Demo credentials</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">Copy and paste these when signing in</p>
+                    </div>
+                  </div>
+
+                  <Credential label="Email" value={DEMO_ACCESS.email} />
+                  <Credential label="Password" value={DEMO_ACCESS.password} />
+
+                  <div className="flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-3 text-xs leading-relaxed text-muted-foreground">
+                    <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/15">
+                      <LockKeyhole className="h-3 w-3 text-amber-600" />
+                    </span>
+                    <p>Please don't save personal data or change account/security settings.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </Reveal>
 
-        <Reveal delay={240} className="mt-5">
+        {/* Two paths side by side */}
+        <div className="mt-6 grid gap-5 lg:grid-cols-2">
+          <Reveal delay={160} className="group relative h-full">
+            <Glow />
+            <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 sm:p-7">
+              <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-3xl" aria-hidden />
+              <span className="sr-icon mb-5">
+                <LayoutDashboard className="h-5 w-5" />
+              </span>
+              <p className="sr-eyebrow">Path 1 • Live experience</p>
+              <h3 className="mt-2 text-2xl font-black tracking-tight">Explore the actual workspace</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                See connected business modules, approvals, and automation working together in the real product.
+              </p>
+              <DemoWorkspaceLink />
+            </div>
+          </Reveal>
+
+          <Reveal delay={240} className="group relative h-full">
+            <Glow />
+            <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card p-6 shadow-sm transition-all duration-500 group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10 sm:p-7">
+              <span className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-brand-accent/10 blur-3xl" aria-hidden />
+              <span className="sr-icon mb-5">
+                <Globe2 className="h-5 w-5" />
+              </span>
+              <p className="sr-eyebrow">Path 2 • Quick preview</p>
+              <h3 className="mt-2 text-2xl font-black tracking-tight">See the public website first</h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                Get oriented with the demo company's public presence before diving into the interactive workspace.
+              </p>
+              <DemoWebsiteLink />
+            </div>
+          </Reveal>
+        </div>
+
+        <Reveal delay={320} className="mt-6">
           <div className="flex flex-col gap-3 rounded-2xl border border-primary/15 bg-primary/[0.04] p-5 transition-colors sm:flex-row sm:items-center sm:justify-between">
-            <div><p className="font-bold">Want a walkthrough tailored to your business?</p><p className="mt-1 text-sm text-muted-foreground">Our team can map the product to your processes and answer questions.</p></div>
-            <Link href="/contact" className="sr-link">Talk to our team <ArrowUpRight className="h-4 w-4" /></Link>
+            <div>
+              <p className="font-bold">Want a walkthrough tailored to your business?</p>
+              <p className="mt-1 text-sm text-muted-foreground">We'll map the product to your actual processes and answer your specific questions.</p>
+            </div>
+            <Link href="/contact" className="sr-link">
+              Talk to our team
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
         </Reveal>
       </div>
@@ -84,7 +139,10 @@ export default function DemoExperience() {
 function Credential({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-3">
-      <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-muted-foreground">{label}</p><code className="mt-1 block break-all text-sm font-semibold">{value}</code></div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+        <code className="mt-1 block break-all text-sm font-semibold">{value}</code>
+      </div>
       <CopyDemoValue value={value} />
     </div>
   );

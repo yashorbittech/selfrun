@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useState } from "react";
+import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, LayoutDashboard } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -12,19 +12,26 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { hubLoginAction, type HubLoginState } from "./actions";
 import { BrandName } from "@/components/platform/BrandProvider";
+import { DEMO_ACCESS } from "@/components/platform/saas/demo-access";
 
 const initialState: HubLoginState = {};
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginForm({ next = null }: { next?: string | null }) {
+export default function LoginForm({ next = null, demo = false }: { next?: string | null; demo?: boolean }) {
   const [state, formAction, pending] = useActionState(hubLoginAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(demo ? DEMO_ACCESS.email : "");
+  const [password, setPassword] = useState(demo ? DEMO_ACCESS.password : "");
+  const formRef = useRef<HTMLFormElement>(null);
   const codeId = useId();
   const emailId = useId();
   const passwordId = useId();
+
+  // Auto-submit once fields are filled for demo mode
+  useEffect(() => {
+    if (demo) formRef.current?.requestSubmit();
+  }, [demo]);
 
   const emailInvalid = emailTouched && email.length > 0 && !EMAIL_RE.test(email);
 
@@ -40,7 +47,7 @@ export default function LoginForm({ next = null }: { next?: string | null }) {
           <CardDescription>Sign in once to reach every product you have access to.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={formAction} className="space-y-4" noValidate>
+          <form ref={formRef} action={formAction} className="space-y-4" noValidate>
             {next && <input type="hidden" name="next" value={next} />}
             <div className="space-y-1.5">
               <Label htmlFor={emailId}>Email</Label>

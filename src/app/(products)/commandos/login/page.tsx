@@ -9,17 +9,14 @@ import { loginLanding } from "@/lib/platform/onboarding/state";
 import { BrandName } from "@/components/platform/BrandProvider";
 import { whiteLabelProductName } from "@/lib/platform/panels/types";
 
-export default async function HubLoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[] }> }) {
+export default async function HubLoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[]; demo?: string }> }) {
   // The headline products come from the Product Registry (the first few active, non-core business products).
   const panelList = (await listPanels().catch(() => [])).filter((p) => p.active && !p.core && !(["website", "support", "portal"] as string[]).includes(p.key)).slice(0, 5).map((p) => whiteLabelProductName(p.name)).join(", ");
   // Where to go after sign-in: only a same-origin path survives `safeNextPath` (no open redirect).
-  const next = safeNextPath((await searchParams).next);
+  const sp = await searchParams;
+  const next = safeNextPath(sp.next);
+  const isDemo = sp.demo === "1";
   const user = await getCurrentHubUser();
-  // Already signed in (including the moment right after the login action sets the cookie and this page
-  // refreshes): the same landing rule as the login action, so an owner with open setup is never sent past
-  // the onboarding wizard by this redirect.
-  // (No user id here on purpose: only a fresh sign-in or hand-off lands on the Platform Console. A signed-in person who opens this page is
-  // sent to the Workspace, so this page and /platform can never send each other back and forth.)
   if (user) redirect(user.mustChangePassword ? "/commandos/change-password" : await loginLanding(user.roles, next));
 
   return (
@@ -52,7 +49,7 @@ export default async function HubLoginPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="flex w-full flex-col items-center justify-center px-4 py-12 lg:w-1/2">
-        <LoginForm next={next} />
+        <LoginForm next={next} demo={isDemo} />
       </div>
     </div>
   );
