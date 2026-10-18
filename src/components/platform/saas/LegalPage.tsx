@@ -2,9 +2,7 @@ import Link from "next/link";
 import { ArrowRight, MessageCircle } from "lucide-react";
 import { LEGAL_LINKS, type LegalDoc } from "@/lib/platform/saas/site";
 import { PageHero } from "@/components/platform/saas/blocks";
-import { IconColumns } from "@/components/platform/saas/Modern";
 import LegalToc from "@/components/platform/saas/LegalToc";
-import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
 
 const slug = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -17,23 +15,14 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
   const toc = doc.sections.map((s) => ({ id: slug(s.heading), label: s.heading }));
   return (
     <>
-      <PageHero art="legal" photo="office" shot="dlms" shotName="Digi Locker" eyebrow="Legal" title={doc.title} lead={doc.intro} />
-
-      {doc.highlights && doc.highlights.length > 0 && (
-        <section className="border-b border-border/50 bg-muted/10 py-14">
-          <div className="sr-container">
-            <p className="sr-eyebrow mb-8 text-center">At a glance</p>
-            <IconColumns cols={3} items={doc.highlights} />
-          </div>
-        </section>
-      )}
+      <PageHero art="legal" photo="office" shot="dlms" shotName="Digi Locker" eyebrow="Legal" title={doc.title} lead={doc.intro} size="compact" />
 
       <section className="sr-section">
-        <div className="sr-container grid gap-12 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-16">
+        <div className="sr-container grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)_200px] lg:gap-10">
+
+          {/* Left: Other policies */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">On this page</p>
-            <LegalToc items={toc} />
-            <p className="mb-3 mt-8 text-xs font-bold uppercase tracking-[0.18em] text-primary">Other policies</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">All policies</p>
             <ul className="space-y-0.5">
               {LEGAL_LINKS.map((l) => (
                 <li key={l.href}><Link href={l.href} aria-current={doc.title === l.label ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${doc.title === l.label ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{l.label}</Link></li>
@@ -41,6 +30,7 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
             </ul>
           </aside>
 
+          {/* Center: content */}
           <div className="min-w-0 max-w-3xl">
             {doc.sections.map((s, i) => (
               <Reveal key={s.heading}>
@@ -74,10 +64,16 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
               <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">Contact us <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
+
+          {/* Right: On this page */}
+          <aside className="lg:sticky lg:top-28 lg:self-start">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">On this page</p>
+            <LegalToc items={toc} />
+          </aside>
+
         </div>
       </section>
 
-      <FaqSection topics={["Data & security", "General"]} limit={4} tone="muted" title="Common" accent="questions." lead="What people ask about data, privacy and the service." />
     </>
   );
 }

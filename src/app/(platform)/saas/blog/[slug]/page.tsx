@@ -17,6 +17,7 @@ import { POSTS, type BlogPost } from "@/lib/platform/saas/site";
 import { PageHero } from "@/components/platform/saas/blocks";
 import { screenFor } from "@/lib/platform/saas/screens";
 import Reveal from "@/components/platform/saas/Reveal";
+import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,7 @@ export default async function BlogPostPage({
   const post = POSTS[postIndex];
   const nextPost = POSTS[(postIndex + 1) % POSTS.length];
   const prevPost = POSTS[(postIndex - 1 + POSTS.length) % POSTS.length];
+  const variant = (postIndex % 6) as SceneVariant;
 
   return (
     <article className="min-h-screen bg-background">
@@ -97,8 +99,8 @@ export default async function BlogPostPage({
       {/* Main Layout: Left Sidebar + Article Body */}
       <div className="sr-container max-w-7xl py-12 lg:py-16">
         <div className="grid grid-cols-1 items-stretch gap-10 md:grid-cols-12 lg:gap-12">
-          {/* Left Sidebar: Blog Navigation & Listing - Matches Full Article Height */}
-          <aside className="md:col-span-5 lg:col-span-4 xl:col-span-4 h-full flex flex-col">
+          {/* Left Sidebar: sticky */}
+          <aside className="md:col-span-5 lg:col-span-4 xl:col-span-4 md:sticky md:top-28 md:self-start">
             {/* Mobile View (< 768px): Open with full natural list */}
             <details open className="mb-8 rounded-3xl border border-border/60 bg-muted/20 p-5 md:hidden">
               <summary className="flex cursor-pointer items-center justify-between text-base font-bold text-foreground">
@@ -135,8 +137,8 @@ export default async function BlogPostPage({
             </details>
 
             {/* Desktop & Tablet View (>= 768px): Matches Full Height of Blog Content */}
-            <div className="hidden md:flex md:flex-col md:h-full">
-              <div className="flex h-full flex-col rounded-3xl border border-border/60 bg-card p-6 shadow-xl">
+            <div className="hidden md:block">
+              <div className="flex flex-col rounded-3xl border border-border/60 bg-card p-6 shadow-xl">
                 <div className="mb-5 flex flex-none items-center justify-between border-b border-border/50 pb-4">
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
@@ -158,7 +160,7 @@ export default async function BlogPostPage({
                 {/* Full natural list matching blog content height */}
                 <nav
                   aria-label="Blog posts navigation"
-                  className="space-y-3 flex-1"
+                  className="space-y-3 max-h-[70vh] overflow-y-auto pr-1"
                 >
                   {POSTS.map((p, idx) => {
                     const isActive = p.slug === post.slug;
@@ -211,6 +213,13 @@ export default async function BlogPostPage({
 
           {/* Main Article Content */}
           <main className="md:col-span-7 lg:col-span-8 xl:col-span-8 min-w-0">
+            {/* Device Scene Image */}
+            {screenFor(post.shot) && (
+              <Reveal className="mb-12">
+                <DeviceScene screenKey={post.shot} name={post.title} variant={variant} priority />
+              </Reveal>
+            )}
+
             {/* Key Takeaways Box */}
             {post.keyTakeaways && post.keyTakeaways.length > 0 && (
               <Reveal className="mb-10 rounded-3xl border border-primary/20 bg-primary/5 p-6 shadow-sm sm:p-8">

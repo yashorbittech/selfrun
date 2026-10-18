@@ -54,7 +54,7 @@ export function PageHero({
   shotName?: string;
   chip?: { title: string; text: string };
   notes?: string[];
-  size?: "home" | "page";
+  size?: "home" | "page" | "compact";
   hero?: 0 | 1 | 2 | 3 | 4 | 5;
   /** The page's own generated hero artwork (see scripts/hero-art.mjs). When present it replaces the photo and the framed screen. */
   art?: string;
@@ -62,12 +62,13 @@ export function PageHero({
   artContent?: React.ReactNode;
 }) {
   const home = size === "home";
+  const compact = size === "compact";
   const artSrc = art ? heroFor(art) : null;
   const hasArtwork = Boolean(artSrc || artContent);
   const bgSrc = art ? heroFor(`bg-${art}`) : null;
   const bgDark = art ? heroFor(`bg-${art}-dark`) : null;
   return (
-    <section className={`relative flex items-center overflow-hidden border-b border-border/50 ${home ? "py-20 lg:min-h-[780px] lg:py-24" : "py-16 lg:min-h-[560px] lg:py-20"}`}>
+    <section className={`relative flex items-center overflow-hidden border-b border-border/50 ${home ? "py-20 lg:min-h-[780px] lg:py-24" : compact ? "py-8 lg:py-10" : "py-16 lg:min-h-[560px] lg:py-20"}`}>
       {bgSrc && (
         <div className="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -98,7 +99,7 @@ export function PageHero({
             </span>
           </Reveal>
           <Reveal delay={80}>
-            <h1 className={`mb-6 font-black leading-[1.08] tracking-tighter text-foreground ${home ? "text-5xl sm:text-7xl" : "text-4xl sm:text-6xl"}`}>
+            <h1 className={`mb-6 font-black leading-[1.08] tracking-tighter text-foreground ${home ? "text-5xl sm:text-7xl" : compact ? "text-3xl sm:text-4xl" : "text-4xl sm:text-6xl"}`}>
               {title}
               {accent && <><br /><span className="sr-grad">{accent}</span></>}
             </h1>
