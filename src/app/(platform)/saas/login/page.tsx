@@ -4,7 +4,7 @@ import Link from "next/link";
 import FindWorkspaceForm from "@/components/platform/saas/FindWorkspaceForm";
 import { Blobs, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import Reveal from "@/components/platform/saas/Reveal";
-import { ArrowRight, Bot, BarChart3, Briefcase, Check, Globe, LayoutDashboard, MessageSquare, ShieldCheck, Users, Wallet } from "lucide-react";
+import { ArrowRight, Bot, BarChart3, Briefcase, Check, ClipboardList, FileText, Globe, GraduationCap, LayoutDashboard, MessageSquare, Package, Search, Share2, ShieldCheck, Headphones, Users, Wallet } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Log in",
@@ -32,14 +32,114 @@ const HOW_IT_WORKS = [
 ];
 
 const PRODUCTS = [
-  { icon: Users,         label: "HR & Payroll",       text: "Employees, attendance, leave, payroll, recruitment" },
-  { icon: Briefcase,     label: "Projects",            text: "Clients, tasks, timesheets, costing, approvals" },
-  { icon: BarChart3,     label: "CRM & Sales",         text: "Leads, pipeline, campaigns, offers, wallet" },
-  { icon: Wallet,        label: "Finance",             text: "Invoices, payments, accounting, reports" },
-  { icon: MessageSquare, label: "Team Chat",           text: "Channels, DMs, calls, announcements" },
-  { icon: Globe,         label: "Website & SEO",       text: "Pages, blog, forms, SEO, custom domain" },
-  { icon: Bot,           label: "AI Assistants",       text: "Custom bots trained on your business data" },
-  { icon: LayoutDashboard, label: "Command Center",    text: "Users, roles, billing, audit log, settings" },
+  {
+    icon: Users,
+    label: "HR & Payroll",
+    text: "Run your entire people operation from hire to retire — without spreadsheets.",
+    detail: ["Attendance, leave & payroll", "Recruitment & offer letters", "Employee self-service portal"],
+  },
+  {
+    icon: Briefcase,
+    label: "Projects",
+    text: "Deliver client work on time with tasks, timesheets, budgets and approvals in one place.",
+    detail: ["Tasks, milestones & Gantt", "Timesheets & costing", "Client billing & reports"],
+  },
+  {
+    icon: BarChart3,
+    label: "CRM & Sales",
+    text: "Move leads through your pipeline and close deals with AI-assisted follow-ups and campaigns.",
+    detail: ["Lead pipeline & stages", "Campaigns & offers", "Client wallet & credits"],
+  },
+  {
+    icon: Wallet,
+    label: "Finance",
+    text: "Invoices, payments, expenses and accounting — live numbers, not month-end surprises.",
+    detail: ["Invoices & payment links", "Expense tracking", "P&L and cash-flow reports"],
+  },
+  {
+    icon: MessageSquare,
+    label: "Team Chat",
+    text: "Channels, direct messages, voice calls and announcements — all inside your workspace.",
+    detail: ["Channels & direct messages", "Voice & video calls", "File sharing & reactions"],
+  },
+  {
+    icon: Globe,
+    label: "Website & SEO",
+    text: "A full website builder with blog, forms, SEO tools and your own domain — live in minutes.",
+    detail: ["Pages, blog & forms", "SEO audits & sitemaps", "Custom domain + auto SSL"],
+  },
+  {
+    icon: Bot,
+    label: "AI Assistants",
+    text: "Custom AI bots trained on your business data — answer team and client questions instantly.",
+    detail: ["Train on your own docs", "Embed on your website", "Voice mode with ElevenLabs"],
+  },
+  {
+    icon: LayoutDashboard,
+    label: "Command Center",
+    text: "Users, roles, billing, audit log and every workspace setting — all in one control panel.",
+    detail: ["Role-based permissions", "Billing & plan management", "Full audit trail"],
+  },
+  {
+    icon: Search,
+    label: "SEO",
+    text: "Rank higher with audits, keyword tracking, sitemaps and Google Search Console built in.",
+    detail: ["Site audits & keyword tracking", "Auto sitemap & robots.txt", "Google Search Console sync"],
+  },
+  {
+    icon: Share2,
+    label: "Social Media",
+    text: "Schedule and publish posts across platforms with AI-generated captions and analytics.",
+    detail: ["Multi-platform publishing", "AI caption generation", "Post analytics & history"],
+  },
+  {
+    icon: FileText,
+    label: "Contracts",
+    text: "Draft, send, e-sign and store contracts and legal documents — fully paperless.",
+    detail: ["Template library", "E-signature workflow", "Secure document vault"],
+  },
+  {
+    icon: Headphones,
+    label: "Support",
+    text: "AI help chatbot, help center articles and support tickets — all in one place.",
+    detail: ["AI-powered help chatbot", "Help center & articles", "Support ticket tracking"],
+  },
+  {
+    icon: ClipboardList,
+    label: "Assessments",
+    text: "Create online tests and quizzes for hiring, training or client certifications.",
+    detail: ["Question bank & auto-grading", "Timed & proctored tests", "Certificates on completion"],
+  },
+  {
+    icon: Package,
+    label: "Procurement",
+    text: "Purchase orders, vendor management and asset tracking from request to delivery.",
+    detail: ["Purchase order workflow", "Vendor & supplier registry", "Asset lifecycle tracking"],
+  },
+  {
+    icon: GraduationCap,
+    label: "Training",
+    text: "Build courses, assign learning paths and track completion across your team.",
+    detail: ["Course builder & modules", "Assigned learning paths", "Progress & completion reports"],
+  },
+  {
+    icon: ShieldCheck,
+    label: "Credentials",
+    text: "Securely store and share verified documents, IDs and certificates in a digital locker.",
+    detail: ["Encrypted document storage", "Verified credential sharing", "Expiry alerts & reminders"],
+  },
+  {
+    icon: Users,
+    label: "Client Portal",
+    text: "Give clients, students and applicants their own login to track work, pay and communicate.",
+    detail: ["Client & student logins", "Project & invoice access", "Messaging & file sharing"],
+  },
+  {
+    icon: Globe,
+    label: "Sites",
+    text: "A full website builder with pages, blog, forms and your own domain — live in minutes.",
+    detail: ["Drag-and-drop page builder", "Blog, forms & pop-ups", "Custom domain + auto SSL"],
+  },
 ];
 
 const TRUST = [
@@ -150,15 +250,29 @@ export default function LoginPage() {
             lead="Sign in once and your sidebar shows every product your plan includes and your role gives you access to — no separate logins, no switching accounts."
           />
           <Reveal>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              {PRODUCTS.map(({ icon: Icon, label, text }) => (
-                <div key={label} className="group flex flex-col gap-3 rounded-[1.5rem] border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
-                  <span className="sr-icon h-10 w-10 shrink-0">
-                    <Icon className="h-4.5 w-4.5" />
-                  </span>
-                  <div>
-                    <p className="font-black leading-snug">{label}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{text}</p>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {PRODUCTS.map(({ icon: Icon, label, text, detail }, i) => (
+                <div key={label} className="group relative">
+                  <div className="pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br from-primary/25 via-primary/0 to-brand-accent/25 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="sr-card relative h-full overflow-hidden group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10">
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-brand-accent/10 opacity-70" />
+                    <span className="pointer-events-none absolute -right-1 -top-3 select-none text-5xl font-black text-muted-foreground/[0.07] transition-colors duration-500 group-hover:text-primary/10">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div className="relative">
+                      <span className="sr-icon mb-5 h-11 w-11">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <p className="font-black leading-snug">{label}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{text}</p>
+                      <ul className="mt-3 space-y-1">
+                        {detail.map((d) => (
+                          <li key={d} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <Check className="h-3 w-3 shrink-0 text-primary" />{d}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -34,21 +34,6 @@ export const metadata: Metadata = {
 
 /* ─── DATA ─────────────────────────────────────────────────────── */
 
-const PAIN_TOOLS = [
-  { name: "Salesforce", price: "₹12,000", color: "from-blue-500/20 to-blue-600/10" },
-  { name: "Jira", price: "₹800", color: "from-blue-400/20 to-indigo-500/10" },
-  { name: "QuickBooks", price: "₹2,500", color: "from-green-500/20 to-emerald-600/10" },
-  { name: "Slack", price: "₹600", color: "from-purple-500/20 to-violet-600/10" },
-  { name: "BambooHR", price: "₹3,500", color: "from-rose-500/20 to-pink-600/10" },
-  { name: "Moodle LMS", price: "₹1,200", color: "from-amber-500/20 to-orange-600/10" },
-  { name: "Zendesk", price: "₹2,000", color: "from-yellow-500/20 to-amber-600/10" },
-  { name: "DocuSign", price: "₹1,800", color: "from-cyan-500/20 to-teal-600/10" },
-  { name: "HubSpot", price: "₹4,200", color: "from-orange-500/20 to-red-600/10" },
-  { name: "Ahrefs", price: "₹8,000", color: "from-fuchsia-500/20 to-purple-600/10" },
-  { name: "Webflow", price: "₹2,400", color: "from-teal-500/20 to-cyan-600/10" },
-  { name: "+ 9 More", price: "₹6,000+", color: "from-gray-500/20 to-slate-600/10" },
-];
-
 const LEAD_SOURCES = [
   { label: "Meta Ads", icon: "📱", desc: "Facebook & Instagram lead forms → instant pipeline sync" },
   { label: "Google Ads", icon: "🔍", desc: "Search & Display leads via Google Ads Conversions API" },
@@ -78,7 +63,7 @@ const BUSINESS_SCENARIOS = [
     automation: ["Biometric attendance auto-sync daily", "PF, ESI, PT calculated in one click", "GST e-Invoice generated with IRN", "Bulk vendor payout via H2H API"],
   },
   {
-    type: "Agency Owner",
+    type: "Digital Agency",
     icon: "🎯",
     gradient: "from-amber-500/20 via-orange-500/10 to-transparent",
     border: "border-amber-500/30",
@@ -91,7 +76,127 @@ const BUSINESS_SCENARIOS = [
     gradient: "from-rose-500/20 via-pink-500/10 to-transparent",
     border: "border-rose-500/30",
     story: "Akash's coding institute runs 12 batches. SelfRun manages admissions from LinkedIn ads, collects fees, conducts proctored assessments, and issues blockchain-verified certificates.",
-    automation: ["LinkedIn lead → admission in one flow", "Fee installment link sent automatically", "Proctored online assessment in minutes", "Blockchain certificate issued on graduation"],
+    automation: ["LinkedIn lead → admission in one flow", "Fee installment link sent automatically", "Proctored online assessment in minutes", "Certificate issued on graduation"],
+  },
+  {
+    type: "Real Estate Firm",
+    icon: "🏢",
+    gradient: "from-sky-500/20 via-blue-500/10 to-transparent",
+    border: "border-sky-500/30",
+    story: "Vikram's property firm tracks 200+ leads from 99acres and MagicBricks, auto-assigns them to agents, manages site visits, and sends payment reminders — all without a CRM team.",
+    automation: ["Portal leads auto-imported to pipeline", "Site visit scheduled via AI agent", "Payment milestone reminders sent", "Commission calculated on deal close"],
+  },
+  {
+    type: "Healthcare Clinic",
+    icon: "🏥",
+    gradient: "from-teal-500/20 via-cyan-500/10 to-transparent",
+    border: "border-teal-500/30",
+    story: "Dr. Meena's multi-specialty clinic uses SelfRun to manage staff attendance, patient billing, insurance claims, and appointment reminders — replacing 4 separate software tools.",
+    automation: ["Appointment reminder sent 24h before", "Staff attendance & payroll automated", "Insurance claim document generated", "Patient invoice with GST in one click"],
+  },
+  {
+    type: "E-commerce Brand",
+    icon: "🛍️",
+    gradient: "from-fuchsia-500/20 via-pink-500/10 to-transparent",
+    border: "border-fuchsia-500/30",
+    story: "Neha's fashion brand runs on SelfRun — her website captures orders, the AI handles customer queries, finance tracks every payout, and social media posts go out on schedule.",
+    automation: ["Order → invoice → payout tracked", "AI handles returns & queries 24/7", "Social posts auto-scheduled weekly", "Influencer campaign tracked in CRM"],
+  },
+  {
+    type: "Law Firm",
+    icon: "⚖️",
+    gradient: "from-indigo-500/20 via-violet-500/10 to-transparent",
+    border: "border-indigo-500/30",
+    story: "Rajesh's 8-partner law firm uses SelfRun to manage client retainers, e-sign NDAs and agreements, track billable hours per case, and store all documents in an encrypted vault.",
+    automation: ["NDA e-signed in under 2 minutes", "Billable hours tracked per case", "Retainer invoice sent on the 1st", "Documents stored in encrypted vault"],
+  },
+  {
+    type: "Logistics Company",
+    icon: "🚚",
+    gradient: "from-orange-500/20 via-amber-500/10 to-transparent",
+    border: "border-orange-500/30",
+    story: "Deepak's fleet of 60 trucks uses SelfRun to manage driver attendance, fuel expense claims, client invoicing, and vendor purchase orders — all from one dashboard.",
+    automation: ["Driver attendance via mobile app", "Fuel expense claim auto-approved", "Client invoice on trip completion", "Vendor PO raised with one click"],
+  },
+  {
+    type: "Chartered Accountant",
+    icon: "📊",
+    gradient: "from-green-500/20 via-emerald-500/10 to-transparent",
+    border: "border-green-500/30",
+    story: "CA Sunita manages 80 client files. SelfRun tracks deadlines, stores client documents in a Digi Locker, sends automated reminders for ITR and GST filings, and bills clients monthly.",
+    automation: ["Filing deadline reminders automated", "Client documents in encrypted locker", "Monthly retainer invoice auto-sent", "Team task assigned per filing type"],
+  },
+  {
+    type: "Restaurant Chain",
+    icon: "🍽️",
+    gradient: "from-red-500/20 via-rose-500/10 to-transparent",
+    border: "border-red-500/30",
+    story: "Amit's 5-outlet restaurant chain uses SelfRun for staff scheduling, vendor procurement, daily expense tracking, and loyalty wallet campaigns — cutting admin time by 70%.",
+    automation: ["Staff shift schedule auto-published", "Vendor PO raised on low stock", "Daily expense report generated", "Loyalty wallet offer sent to regulars"],
+  },
+  {
+    type: "IT Services Company",
+    icon: "💻",
+    gradient: "from-blue-500/20 via-indigo-500/10 to-transparent",
+    border: "border-blue-500/30",
+    story: "Kiran's 30-person IT firm tracks sprints in Projects, manages client contracts in Legal, runs payroll with TDS, and uses AI Intelligence to answer 'Which client is most profitable?' instantly.",
+    automation: ["Sprint tasks linked to client billing", "TDS deducted automatically on payroll", "Client contract renewed with e-sign", "AI answers profitability queries live"],
+  },
+  {
+    type: "Coaching & Consulting",
+    icon: "🎯",
+    gradient: "from-violet-500/20 via-purple-500/10 to-transparent",
+    border: "border-violet-500/30",
+    story: "Meera's business coaching firm onboards clients via a portal, tracks session notes, sends automated follow-up tasks, and invoices monthly retainers without lifting a finger.",
+    automation: ["Client onboarding via portal in minutes", "Session notes stored per client", "Follow-up tasks auto-assigned after call", "Monthly retainer invoice auto-sent"],
+  },
+  {
+    type: "Construction Firm",
+    icon: "🏗️",
+    gradient: "from-yellow-500/20 via-amber-500/10 to-transparent",
+    border: "border-yellow-500/30",
+    story: "Ramesh's construction company manages 8 live sites. SelfRun tracks labour attendance, raises purchase orders for materials, monitors project budgets, and sends client progress reports automatically.",
+    automation: ["Labour attendance tracked per site", "Material PO raised on low stock", "Project budget vs actual tracked live", "Client progress report auto-generated"],
+  },
+  {
+    type: "Event Management",
+    icon: "🎉",
+    gradient: "from-pink-500/20 via-rose-500/10 to-transparent",
+    border: "border-pink-500/30",
+    story: "Preethi's event agency manages 20+ events a year. SelfRun handles vendor contracts, team assignments, client invoicing, and post-event feedback collection — all from one dashboard.",
+    automation: ["Vendor contract e-signed in minutes", "Team assigned per event automatically", "Client invoice on event completion", "Feedback form sent to attendees"],
+  },
+  {
+    type: "Pharma Distributor",
+    icon: "💊",
+    gradient: "from-cyan-500/20 via-teal-500/10 to-transparent",
+    border: "border-cyan-500/30",
+    story: "Harish's pharma distribution business tracks 500+ SKUs, manages retailer credit limits, auto-generates GST invoices on dispatch, and alerts the team when stock falls below reorder level.",
+    automation: ["Stock level alerts on reorder point", "GST invoice generated on dispatch", "Retailer credit limit enforced", "Expiry date tracked per batch"],
+  },
+  {
+    type: "Architecture Studio",
+    icon: "🏙️",
+    gradient: "from-slate-500/20 via-gray-500/10 to-transparent",
+    border: "border-slate-500/30",
+    story: "Nandini's 12-person architecture studio tracks project milestones, stores client-approved drawings in a secure vault, bills by phase, and manages contractor purchase orders in one place.",
+    automation: ["Project phase billed on milestone", "Drawings stored in encrypted vault", "Contractor PO raised with one click", "Client approval tracked per revision"],
+  },
+  {
+    type: "NGO & Non-Profit",
+    icon: "🤝",
+    gradient: "from-lime-500/20 via-green-500/10 to-transparent",
+    border: "border-lime-500/30",
+    story: "Kavya's NGO manages 200 volunteers, tracks grant utilisation, runs training programs for beneficiaries, and generates donor reports automatically — with zero admin overhead.",
+    automation: ["Volunteer attendance & hours tracked", "Grant utilisation report auto-generated", "Training completion certificates issued", "Donor impact report sent monthly"],
+  },
+  {
+    type: "Recruitment Agency",
+    icon: "🔍",
+    gradient: "from-indigo-500/20 via-blue-500/10 to-transparent",
+    border: "border-indigo-500/30",
+    story: "Sanjay's recruitment firm tracks candidates through a hiring pipeline, sends automated interview reminders, manages client contracts, and invoices placement fees on joining confirmation.",
+    automation: ["Candidate pipeline tracked per client", "Interview reminder sent automatically", "Placement contract e-signed instantly", "Invoice raised on joining confirmation"],
   },
 ];
 
@@ -496,10 +601,16 @@ export default function VisionPage() {
       </nav>
 
       {/* ══════════════════════════════════════════════════════════
-          SECTION 1: THE PROBLEM — "The ₹45,000/Month Trap"
+          SECTION 1: THE PROBLEM — "₹45,000/Month Trap"
       ══════════════════════════════════════════════════════════ */}
-      <section id="problem" className="sr-section border-b border-border/50" style={{ scrollMarginTop: 140 }}>
+      <section id="problem" className="sr-section border-b border-border/50 overflow-hidden" style={{ scrollMarginTop: 140 }}>
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute right-0 top-0 h-[600px] w-[800px] bg-gradient-to-bl from-rose-500/10 to-transparent blur-3xl" />
+          <div className="absolute left-0 bottom-0 h-[400px] w-[600px] bg-gradient-to-tr from-orange-500/6 to-transparent blur-3xl" />
+        </div>
+
         <div className="sr-container">
+          {/* Header */}
           <Reveal>
             <div className="mx-auto max-w-3xl text-center mb-16">
               <span className="inline-block rounded-full bg-rose-500/10 border border-rose-500/20 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-rose-500 mb-6">
@@ -512,45 +623,153 @@ export default function VisionPage() {
                 </span>
               </h2>
               <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-                Every great business idea is buried under a mountain of software bills.
-                A 20-person startup today pays ₹45,000–₹1,20,000 every single month —
-                just to keep 16 disconnected tools running. That&apos;s money that should go into growth.
+                A 10-person Indian team today pays{" "}
+                <span className="font-black text-rose-500">₹1,29,534 every month</span>{" "}
+                just to keep 16 disconnected tools running — each with its own login, its own database,
+                and its own support queue. That money should be building your business, not feeding SaaS vendors.
               </p>
             </div>
           </Reveal>
 
-          {/* Tool cost grid */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 mb-12">
-            {PAIN_TOOLS.map((tool, i) => (
-              <Reveal key={tool.name} delay={i * 40}>
-                <div className={`group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br ${tool.color} p-4 transition-all hover:scale-105 hover:shadow-lg`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-foreground">{tool.name}</span>
-                    <span className="font-mono text-xs font-black text-rose-500">{tool.price}/mo</span>
+          {/* Main grid */}
+          <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+
+            {/* Left: tool rows */}
+            <Reveal>
+              <div className="overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-xl">
+                {/* Table header */}
+                <div className="grid grid-cols-[1fr_auto_auto] gap-4 border-b border-border/50 bg-muted/40 px-5 py-3">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Job to be done</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tool</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-right">Cost/mo</span>
+                </div>
+
+                <div className="divide-y divide-border/40">
+                  {[
+                    { job: "Team chat & calls",          vendor: "Slack Pro",                    inr: 2453  },
+                    { job: "HR & payroll",               vendor: "greytHR Essential",             inr: 2495  },
+                    { job: "Sales & CRM",                vendor: "monday CRM Basic",              inr: 11580 },
+                    { job: "Projects & tasks",           vendor: "monday Work Basic",             inr: 8685  },
+                    { job: "Accounting & invoicing",     vendor: "Zoho Books Premium",            inr: 2999  },
+                    { job: "Purchasing & inventory",     vendor: "Zoho Inventory Plus",           inr: 4999  },
+                    { job: "Training courses",           vendor: "Thinkific Basic",               inr: 3860  },
+                    { job: "Online tests",               vendor: "TestGorilla Core",              inr: 20748 },
+                    { job: "Company website",            vendor: "Wix Light",                    inr: 1715  },
+                    { job: "SEO audits & tracking",      vendor: "Semrush SEO",                  inr: 11322 },
+                    { job: "Social media posting",       vendor: "Buffer Essentials",             inr: 2413  },
+                    { job: "AI chatbot for customers",   vendor: "Chatbase Standard",             inr: 11580 },
+                    { job: "AI assistant for the team",  vendor: "ChatGPT Business",              inr: 19300 },
+                    { job: "Secure document storage",    vendor: "Dropbox Business",              inr: 14475 },
+                    { job: "SOPs & policy wiki",         vendor: "Notion Plus",                  inr: 9650  },
+                    { job: "Customer help desk & portal",vendor: "Zoho Desk Express",             inr: 1260  },
+                  ].map((row, i) => (
+                    <div key={row.job} className="group grid grid-cols-[1fr_auto_auto] items-center gap-4 px-5 py-3 transition-colors hover:bg-rose-500/[0.03]">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-[10px] font-mono text-muted-foreground/40 w-5 shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                        <span className="text-sm font-medium text-foreground truncate">{row.job}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">{row.vendor}</span>
+                      <span className="font-mono text-sm font-bold text-rose-500 text-right whitespace-nowrap">
+                        ₹{row.inr.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total row */}
+                <div className="border-t-2 border-dashed border-border/60 mx-5" />
+                <div className="flex items-center justify-between px-5 py-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">16 tools · team of 10 · per month</p>
+                    <p className="font-black text-foreground mt-0.5">Total monthly SaaS bill</p>
                   </div>
-                  <div className="mt-1.5 h-1 w-full rounded-full bg-rose-500/20">
-                    <div className="h-1 rounded-full bg-gradient-to-r from-rose-500 to-orange-500 transition-all duration-700 group-hover:w-full" style={{ width: `${60 + i * 3}%` }} />
+                  <div className="text-right">
+                    <p className="font-mono text-3xl font-black text-rose-500">₹1,29,534</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">₹15,54,408 / year</p>
+                  </div>
+                </div>
+                <p className="border-t border-border/40 bg-muted/20 px-5 py-2.5 text-[10px] text-muted-foreground">
+                  Prices from each vendor&apos;s public pricing page, popular paid plan, before tax. Dollar prices at ₹96.5/$. Checked Oct 2026.
+                </p>
+              </div>
+            </Reveal>
+
+            {/* Right: hidden costs + answer */}
+            <div className="flex flex-col gap-5">
+              {/* Hidden costs */}
+              <Reveal delay={80}>
+                <div className="rounded-[1.75rem] border border-border/60 bg-card p-6 shadow-sm">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Hidden costs nobody bills you for</p>
+                  <div className="space-y-4">
+                    {[
+                      { icon: "⏱", label: "23 min lost per context switch", body: "Your team switches tools 16× a day. That’s 6+ hours of deep work gone every week." },
+                      { icon: "🔗", label: "Integration debt compounds", body: "Every new tool needs a Zapier zap or a developer. When one breaks, everything breaks." },
+                      { icon: "📊", label: "Decisions on stale data", body: "Your CRM doesn’t know what Finance knows. You’re always working from yesterday’s numbers." },
+                      { icon: "🧠", label: "16 onboarding curves", body: "Every new hire needs 16 logins, 16 tutorials, and weeks before they’re productive." },
+                    ].map((item) => (
+                      <div key={item.label} className="flex gap-3">
+                        <span className="text-xl leading-none shrink-0 mt-0.5">{item.icon}</span>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">{item.label}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.body}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </Reveal>
-            ))}
-          </div>
 
-          {/* Big impact number */}
-          <Reveal>
-            <div className="relative overflow-hidden rounded-[2.5rem] border border-rose-500/30 bg-gradient-to-br from-rose-500/10 via-orange-500/5 to-transparent p-10 text-center shadow-2xl">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,68,68,0.08)_0%,transparent_70%)]" />
-              <p className="text-7xl font-black text-rose-500 sm:text-9xl">₹45K+</p>
-              <p className="mt-2 text-2xl font-black text-foreground sm:text-3xl">wasted every month on fragmented SaaS</p>
-              <p className="mt-4 text-muted-foreground">
-                For a 20-person team. Plus hidden costs: integration consultants, data migration, broken automations, and 16 different learning curves.
-              </p>
-              <div className="mt-8 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-8 py-4">
-                <span className="text-2xl font-black text-emerald-500">SelfRun AI: ₹0/month</span>
-                <span className="rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">Free Forever</span>
-              </div>
+              {/* SelfRun answer */}
+              <Reveal delay={140}>
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-emerald-500/30 bg-gradient-to-br from-emerald-500/12 via-teal-500/5 to-transparent p-6">
+                  <div className="pointer-events-none absolute -right-4 -top-4 text-[110px] font-black text-emerald-500/6 select-none leading-none">₹0</div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-4">SelfRun replaces all 16</p>
+
+                  {/* Savings bar */}
+                  <div className="mb-5 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 text-[10px] font-bold text-muted-foreground">16 tools</span>
+                      <div className="flex-1 h-3 rounded-full bg-rose-500/80" />
+                      <span className="text-xs font-mono font-bold text-rose-500">₹1,29,534</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-16 text-[10px] font-bold text-muted-foreground">SelfRun</span>
+                      <div className="flex-1 h-3 rounded-full bg-muted/40 relative">
+                        <div className="absolute inset-y-0 left-0 w-[1.5%] rounded-full bg-emerald-500" />
+                      </div>
+                      <span className="text-xs font-mono font-bold text-emerald-500">₹0</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-3 mb-5">
+                    <p className="text-xs text-muted-foreground">You save every month</p>
+                    <p className="text-3xl font-black text-emerald-500 mt-0.5">₹1,29,534</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">₹1,55,44,080 over 10 years</p>
+                  </div>
+
+                  <div className="space-y-2 mb-5">
+                    {[
+                      "One login for your entire team",
+                      "All 20 products share one database",
+                      "No integrations, no webhooks, no CSV exports",
+                      "AI built into every module from day one",
+                    ].map((t) => (
+                      <p key={t} className="flex items-center gap-2 text-sm text-foreground">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" />{t}
+                      </p>
+                    ))}
+                  </div>
+
+                  <Link
+                    href="/signup"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-black text-white shadow-lg shadow-emerald-500/25 transition-all hover:scale-[1.02] hover:bg-emerald-600"
+                  >
+                    Start free — ₹0, no card <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </Reveal>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 
@@ -860,7 +1079,7 @@ export default function VisionPage() {
             </div>
           </Reveal>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {BUSINESS_SCENARIOS.map((scenario, i) => (
               <Reveal key={scenario.type} delay={i * 80}>
                 <div className={`group relative overflow-hidden rounded-[2rem] border ${scenario.border} bg-gradient-to-br from-card via-card/95 to-muted/20 p-8 shadow-xl transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl`}>
