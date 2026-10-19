@@ -5,6 +5,7 @@ import { onSaasHost, saasOrigin } from "@/lib/platform/saas/request";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { LEGAL_EXTRA } from "@/lib/platform/saas/site";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
+import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +47,21 @@ export async function GET() {
     `- Cookie Policy: ${origin}/cookies`,
     `- Refund & Cancellation Policy: ${origin}/refund-policy`,
     `- Pricing: ${origin}/pricing`,
-    `- Features: ${origin}/features`,
+    `- All products: ${origin}/products`,
     `- Documentation: ${origin}/docs`,
+    `- FAQs: ${origin}/faqs`,
+    `- Product gallery: ${origin}/gallery`,
+    `- Blog and guides: ${origin}/blog`,
+    `- Product vision: ${origin}/vision`,
+    `- Product roadmap: ${origin}/roadmap`,
+    `- Customer stories and workflows: ${origin}/success-stories`,
+    `- Getting a business onboarded: ${origin}/onboarded-businesses`,
+    `- About: ${origin}/about`,
+    `- Request a demo: ${origin}/demo`,
     `- Contact: ${origin}/contact`,
+    "",
+    "## Products",
+    ...modules.map((m) => `- ${m.name}: ${m.headline}. ${origin}${productPath(m.key)}`),
     "",
   ].join("\n");
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=3600" } });

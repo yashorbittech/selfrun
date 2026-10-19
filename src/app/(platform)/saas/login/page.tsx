@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -11,12 +12,7 @@ import { productShort } from "@/lib/platform/saas/product-short";
 import Reveal from "@/components/platform/saas/Reveal";
 import { ArrowRight, Check, ShieldCheck } from "lucide-react";
 
-export const metadata: Metadata = {
-  title: "Log in",
-  description: "Sign in to your SelfRun AI workspace.",
-  alternates: { canonical: "/login" },
-  robots: { index: false },
-};
+export const metadata: Metadata = pageMeta({ path: "/login", title: "Log In to Your Workspace", description: "Sign in to your SelfRun AI workspace with your company's own address. New here? Create a free workspace in minutes.", keywords: ["SelfRun AI login", "business software sign in"], tag: "Log in", noindex: true });
 
 const HOW_IT_WORKS = [
   {

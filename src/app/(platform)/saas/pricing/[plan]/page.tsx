@@ -1,3 +1,7 @@
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,7 +27,7 @@ async function load(id: string) {
 
 export async function generateMetadata({ params }: { params: Promise<{ plan: string }> }): Promise<Metadata> {
   const d = await load((await params).plan);
-  return d ? { title: `${d.plan.name} plan`, description: `${d.plan.name}: ${d.plan.description} Every product and every feature included.`, alternates: { canonical: `/pricing/${d.plan.id}` } } : {};
+  return d ? pageMeta({ path: `/pricing/${d.plan.id}`, title: `${d.plan.name} Plan: Pricing and Allowances`, description: `${d.plan.name}: ${d.plan.description} Every product and every feature included.`, keywords: [`${d.plan.name} plan`, `${d.plan.name} plan pricing`, "business software plan", "SaaS plan comparison", "free business software plan"], tag: "Pricing" }) : {};
 }
 
 export default async function PlanDetailPage({ params }: { params: Promise<{ plan: string }> }) {
@@ -36,6 +40,10 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
   const yearly = plan.kind === "paid" ? plan.offer.yearly : null;
   return (
     <>
+      <JsonLd data={[
+        webPage({ path: `/pricing/${plan.id}`, name: `${plan.name} plan`, description: plan.description }),
+        breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }, { name: `${plan.name} plan`, path: `/pricing/${plan.id}` }]),
+      ]} />
       <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${SAAS_PRODUCT_COUNT} products`, text: `${total}+ features included` }}>
         <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started", href: plan.kind === "contact" ? "/contact" : "/signup" }} secondary={{ label: "All plans", href: "/pricing" }} />
       </PageHero>

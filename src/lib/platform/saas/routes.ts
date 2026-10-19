@@ -51,6 +51,7 @@ const EXACT = new Set([
   "/robots.txt",
   "/sitemap.xml",
   "/opengraph-image",
+  "/og",
 ]);
 
 const PREFIXES = ["/products/", "/features/", "/docs/", "/pricing/", "/blog/", "/tutorials/", "/modules/", "/use-cases/", "/industries/", "/resources/", "/vision/", "/product-vision/"];

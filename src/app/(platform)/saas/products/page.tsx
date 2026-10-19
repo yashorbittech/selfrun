@@ -1,3 +1,6 @@
+import { breadcrumbList, itemList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -15,12 +18,7 @@ import { productShort } from "@/lib/platform/saas/product-short";
 import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Products",
-  description:
-    "Every product of SelfRun AI at a glance — CRM, HR & payroll, finance, projects, procurement, training, documents, website, AI and automation — each with a details page covering every feature.",
-  alternates: { canonical: "/products" },
-};
+export const metadata: Metadata = pageMeta({ path: "/products", title: "All 20 Business Software Products", description: "Explore all 20 SelfRun AI products: CRM, HR and payroll, accounting, project management, procurement, training, document vault, AI chatbots, SEO and a website builder. Free to start.", keywords: ["business software products", "CRM software", "HR and payroll software", "accounting software", "project management software", "procurement software", "helpdesk software", "website builder", "AI chatbot for business", "SEO software", "contract management software", "online test software"], tag: "Products" });
 
 function IconList({
   items,
@@ -56,6 +54,7 @@ export default async function ProductsPage() {
 
   return (
     <>
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/products", name: "Products", description: "Explore all 20 SelfRun AI products: CRM, HR and payroll, accounting, project management, procurement, training, document vault, AI chatbots, SEO and a website builder. Free to start." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }]), itemList({ name: "SelfRun AI products", items: all.map((m) => ({ name: m.name, path: productPath(m.key) })) })]} />
       <PageHero
         art="features"
         eyebrow={`${SAAS_PRODUCT_COUNT} standalone SaaS products · ${total}+ features`}

@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { itemList, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { ArrowRight, Check } from "lucide-react";
 import { AI_CAPABILITIES, HOW_IT_WORKS, INDUSTRIES, SECURITY_POINTS } from "@/lib/platform/saas/content";
 import { AI_BENEFITS, CAPABILITIES, COMPARISON, DEVICES, FLOWS, REPLACES, RUNS_ITSELF, YOUR_BRAND } from "@/lib/platform/saas/site";
@@ -34,6 +38,19 @@ import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
+
+const HOME_TITLE = "SelfRun AI: Business Automation for CRM, HR & Finance";
+const HOME_DESC = `SelfRun AI is one AI-powered platform with ${SAAS_PRODUCT_COUNT} products for CRM, HR and payroll, accounting, projects, procurement, training and your website. Free to start, every product in every plan.`;
+export const metadata: Metadata = {
+  ...pageMeta({
+    path: "/",
+    title: HOME_TITLE,
+    description: HOME_DESC,
+    keywords: ["business automation software", "AI business automation platform", "CRM software", "HR and payroll software", "accounting and invoicing software", "project management software", "procurement software", "website builder", "AI chatbot for business", "white label business software", "free business software", "all-in-one business management software", "ERP alternative for small business", "software for startups and SMEs"],
+    tag: "AI business platform",
+  }),
+  title: { absolute: HOME_TITLE },
+};
 
 /** The real marketing image that goes with each capability area. */
 const CAP_SHOT: Record<string, string> = { AI: "intelligence", Automation: "automations", "Your brand": "branding", "Every device": "apps", Control: "workspace-users", "Data & insight": "workspace", "Website & growth": "cms-pages", "People & portals": "hrms" };
@@ -79,6 +96,11 @@ export default async function SaasHome() {
 
   return (
     <>
+      <JsonLd data={[
+        webPage({ path: "/", name: HOME_TITLE, description: HOME_DESC, about: "Business automation software" }),
+        softwareApplication({ path: "/", name: "SelfRun AI", description: HOME_DESC, features: ["CRM and lead management", "HR and payroll", "Accounting and invoicing", "Project management", "Procurement", "Training management", "Website builder and CMS", "AI assistants", "Workflow automation", "White-label branding"] }),
+        itemList({ name: "SelfRun AI products", items: modules.map((m) => ({ name: m.name, path: productPath(m.key) })) }),
+      ]} />
       {/* Hero */}
       <PageHero art="home"
         size="home"

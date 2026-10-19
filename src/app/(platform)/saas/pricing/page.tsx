@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Minus } from "lucide-react";
@@ -8,29 +11,22 @@ import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import PricingPlans from "@/components/platform/saas/PricingPlans";
-import FaqSection, { pickFaqs } from "@/components/platform/saas/FaqSection";
+import FaqSection from "@/components/platform/saas/FaqSection";
 import StackCompare from "@/components/platform/saas/StackCompare";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
-import { jsonForScript } from "@/lib/security/json-script";
 import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Pricing",
-  description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances.",
-  alternates: { canonical: "/pricing" },
-};
+export const metadata: Metadata = pageMeta({ path: "/pricing", title: "Pricing: Free Forever, Pay as Your Team Grows", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances.", keywords: ["business software pricing", "free CRM and HR software", "free business software forever", "SaaS pricing plans", "affordable business software for small business", "free ERP alternative", "business software free plan", "pricing for all-in-one business platform", "pay as your team grows software"], tag: "Pricing" });
 
 export default async function PricingPage() {
   const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules()]);
   const endsAt = (await getOffers().catch(() => null))?.endsAt ?? null;
   const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
-  const faqs = pickFaqs(["Plans & pricing", "General"], 6);
-  const ld = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
   const has = plans.length > 0;
   const SEC = [
     { id: "plans", label: "Plans", show: true },
@@ -46,7 +42,7 @@ export default async function PricingPage() {
   const rows = plans[0]?.limits.map((l) => l.key) ?? [];
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(ld) }} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/pricing", name: "Pricing", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }])]} />
       <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>

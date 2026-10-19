@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,11 +16,7 @@ import Reveal from "@/components/platform/saas/Reveal";
 import DemoExperience from "@/components/platform/saas/DemoExperience";
 import DemoAgenda from "@/components/platform/saas/DemoAgenda";
 
-export const metadata: Metadata = {
-  title: "Request a demo",
-  description: "See SelfRun AI in action. We'll walk you through the platform using your own business scenarios — CRM, HR, finance, projects, AI and automation.",
-  alternates: { canonical: "/demo" },
-};
+export const metadata: Metadata = pageMeta({ path: "/demo", title: "Request a Demo or Try the Live Workspace", description: "See SelfRun AI run your own scenarios: CRM, HR, finance, projects, AI and automation. Book a guided session or explore the live demo workspace on your own.", keywords: ["business software demo", "CRM demo", "HR software demo", "free software demo", "live demo workspace", "request a software demo", "try business software free", "book a demo"], tag: "Demo" });
 
 const NAV = [
   { id: "self-guided-demo", label: "Self-guided tour" },
@@ -34,6 +33,7 @@ export default async function DemoPage() {
   const groups = await getFeatureGroups();
   return (
     <>
+      <JsonLd data={[webPage({ type: "WebPage", path: "/demo", name: "Request a demo", description: "See SelfRun AI run your own scenarios: CRM, HR, finance, projects, AI and automation. Book a guided session or explore the live demo workspace on your own." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Demo", path: "/demo" }])]} />
       <PageHero art="demo" photo="presentation" shot="workspace" shotName="SelfRun CommandOS" eyebrow="Request a demo" title="See your business" accent="running on SelfRun." lead="In a 30-minute session we map the platform to your own processes and show how much of the repetitive work it can take over." chip={{ title: "30-minute walkthrough", text: "Built around your own scenarios" }}>
         <HeroCtas primary={{ label: "Try the interactive demo", href: "#self-guided-demo" }} secondary={{ label: "Get started free", href: "/signup" }} />
       </PageHero>

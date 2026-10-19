@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Quote, X } from "lucide-react";
@@ -16,11 +19,7 @@ import { PANEL_DETAIL } from "@/lib/platform/saas/panel-detail";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Product Vision",
-  description: "Where SelfRun AI is heading and why: a business that runs its own routine, with independent products, automation you can trust, AI inside your permissions and your own brand on everything.",
-  alternates: { canonical: "/vision" },
-};
+export const metadata: Metadata = pageMeta({ path: "/vision", title: "Product Vision: A Business That Runs Itself", description: "Where SelfRun AI is heading and why: independent products, automation you can trust, AI inside your permissions and your own brand on everything.", keywords: ["SelfRun AI vision", "future of business automation", "AI-first business platform", "autonomous business software", "business operating system vision", "automation with human approval"], tag: "Vision" });
 
 const NAV = [
   { id: "vision", label: "The vision" },
@@ -89,6 +88,7 @@ export default async function VisionPage() {
   const features = products.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   return (
     <>
+      <JsonLd data={[webPage({ type: "AboutPage", path: "/vision", name: "Product vision", description: "Where SelfRun AI is heading and why: independent products, automation you can trust, AI inside your permissions and your own brand on everything." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Product vision", path: "/vision" }])]} />
       <PageHero
         art="features"
         eyebrow="Product vision"

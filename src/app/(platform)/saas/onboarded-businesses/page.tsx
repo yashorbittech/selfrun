@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Check, FileSpreadsheet, LockKeyhole, MessageCircle, Sparkles } from "lucide-react";
@@ -13,11 +16,7 @@ import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Onboarded Businesses and Clients",
-  description: "How a business gets started on SelfRun AI: create a workspace, brand it, invite the team, choose the products and bring your data. Customer identities are shared only with permission.",
-  alternates: { canonical: "/onboarded-businesses" },
-};
+export const metadata: Metadata = pageMeta({ path: "/onboarded-businesses", title: "Get Your Business Onboarded in Minutes", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed.", keywords: ["business software onboarding", "set up company workspace", "how to onboard business to software", "free business workspace", "import leads and employees from CSV", "business software setup guide", "start using CRM and HR software"], tag: "Onboarding" });
 
 const NAV = [
   { id: "what", label: "What onboarding is" },
@@ -50,6 +49,7 @@ export default async function OnboardedBusinessesPage() {
 
   return (
     <>
+      <JsonLd data={[webPage({ type: "WebPage", path: "/onboarded-businesses", name: "Onboarded businesses", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Onboarded businesses", path: "/onboarded-businesses" }])]} />
       <PageHero
         art="features"
         eyebrow="Businesses & clients"

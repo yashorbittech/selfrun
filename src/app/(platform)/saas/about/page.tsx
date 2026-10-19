@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -22,11 +25,7 @@ import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "About Us",
-  description: "Who we are, our mission, what SelfRun AI does, how companies grow on it and the scenarios it automates — on one page.",
-  alternates: { canonical: "/about" },
-};
+export const metadata: Metadata = pageMeta({ path: "/about", title: "About SelfRun AI: Our Mission and Values", description: "We believe a business should run itself. Learn what SelfRun AI builds, who it is for, how companies grow on it and the values behind 20 independent products.", keywords: ["about SelfRun AI", "business automation company", "AI software company India", "who makes SelfRun AI", "business software mission", "SaaS company values", "all-in-one business platform company"], tag: "About" });
 
 const VALUES = [
   { title: "Built for every business", body: "We design for the many companies that use the platform, never for one special case. If one customer needs something, it becomes a feature everyone can use.", icon: "building" as const },
@@ -74,6 +73,7 @@ export default async function AboutPage() {
   const orbitPanels = modules.map((module) => ({ ...module, color: panelColor(module.key) }));
   return (
     <>
+      <JsonLd data={[webPage({ type: "AboutPage", path: "/about", name: "About us", description: "We believe a business should run itself. Learn what SelfRun AI builds, who it is for, how companies grow on it and the values behind 20 independent products." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "About us", path: "/about" }])]} />
       <PageHero artContent={<AboutHeroArtwork panels={orbitPanels} brand={SAAS_BRAND.name} />}
         eyebrow="About SelfRun AI"
         title="We believe a business"

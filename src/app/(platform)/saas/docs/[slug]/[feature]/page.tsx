@@ -1,3 +1,7 @@
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -36,7 +40,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const key = productKeyFromSlug(slug);
   if (!key) return {};
   const d = await load(key, feature);
-  return d ? { title: `${d.f.name} — ${d.m.name} guide`, description: `Step-by-step guide to ${d.f.name} in ${d.m.name}: ${d.f.text}`, alternates: { canonical: productDocsPath(d.m.key, feature) } } : {};
+  if (!d) return {};
+  const bare = d.m.name.replace(/^SelfRun\s+/i, "");
+  const seo = PRODUCT_SEO[d.m.key];
+  return pageMeta({
+    path: productDocsPath(d.m.key, feature),
+    title: `${d.f.name}: ${bare} Step-by-Step Guide`,
+    description: `Step-by-step guide to ${d.f.name} in ${d.m.name}: ${d.f.text}${/[.!?]$/.test(d.f.text) ? "" : "."} Follow every step with the real screen.`,
+    keywords: [`how to use ${d.f.name}`, `${d.f.name} in ${bare}`, `${d.f.name} guide`, `${d.f.name} ${bare}`, `${bare} tutorial`, ...(seo?.keywords ?? []).slice(0, 6)],
+    tag: "Guide",
+  });
 }
 
 export default async function FeatureGuidePage({ params }: { params: Promise<{ slug: string; feature: string }> }) {
@@ -90,6 +103,11 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
   ].filter((x) => x.show);
   return (
     <>
+    <JsonLd data={[
+      howTo({ path: productDocsPath(m.key, f.slug), name: `How to use ${f.name} in ${m.name}`, description: f.text, steps: guide.steps.map((st) => ({ name: st.title, text: st.text })) }),
+      webPage({ path: productDocsPath(m.key, f.slug), name: `${f.name}: ${m.name} guide`, description: f.text, about: m.name }),
+      breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }, { name: m.name, path: `/docs#${m.key}` }, { name: f.name, path: productDocsPath(m.key, f.slug) }]),
+    ]} />
     <PageHero art={`product-${m.key}`} eyebrow={`${m.name} · ${f.group}`} title={f.name} lead={heroLead} notes={heroNotes} photo="laptop-talk" shot={m.key} shotName={m.name} chip={{ title: guide.auto ? "Works on its own" : `${guide.steps.length} simple steps`, text: "With the real screen" }}>
       <HeroCtas primary={{ label: guide.auto ? "See how it works" : "Start the steps", href: "#steps" }} secondary={{ label: `All ${m.name} guides`, href: `/docs#${m.key}` }} />
     </PageHero>

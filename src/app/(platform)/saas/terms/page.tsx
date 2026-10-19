@@ -1,12 +1,9 @@
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import LegalPage from "@/components/platform/saas/LegalPage";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
-export const metadata: Metadata = {
-  title: "Terms of Service",
-  description: "The terms that apply when you use the SelfRun AI website and service.",
-  alternates: { canonical: "/terms" },
-};
+export const metadata: Metadata = pageMeta({ path: "/terms", title: "Terms of Service", description: "The terms that apply when you use the SelfRun AI website and service: accounts, plans, acceptable use and your responsibilities. Read them before you start.", keywords: ["terms of service", "SaaS terms and conditions", "software terms of use"], tag: "Legal" });
 
 export default function TermsPage() {
   const us = SAAS_BRAND.operator || SAAS_BRAND.name;

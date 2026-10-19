@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, CircleSlash, Clock, Compass, MessageSquareText, Sparkles } from "lucide-react";
@@ -14,11 +17,7 @@ import { productPath } from "@/lib/platform/saas/product-routes";
 import { productShort } from "@/lib/platform/saas/product-short";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Product Roadmap",
-  description: "What the SelfRun AI roadmap is, how to read it, everything that is available today, and how your feedback decides what we work on next. We publish commitments only when they are ready to communicate clearly.",
-  alternates: { canonical: "/roadmap" },
-};
+export const metadata: Metadata = pageMeta({ path: "/roadmap", title: "Product Roadmap: What Is Available Today", description: "What the SelfRun AI roadmap is, everything available today, what we are exploring and how your feedback decides what comes next. No made-up release dates.", keywords: ["SelfRun AI roadmap", "product roadmap", "business software roadmap", "what is new in SelfRun AI", "software release notes", "product updates"], tag: "Roadmap" });
 
 const NAV = [
   { id: "what", label: "What it is" },
@@ -116,6 +115,7 @@ export default async function RoadmapPage() {
 
   return (
     <>
+      <JsonLd data={[webPage({ type: "WebPage", path: "/roadmap", name: "Product roadmap", description: "What the SelfRun AI roadmap is, everything available today, what we are exploring and how your feedback decides what comes next. No made-up release dates." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Roadmap", path: "/roadmap" }])]} />
       <PageHero
         art="features"
         eyebrow="Product roadmap"

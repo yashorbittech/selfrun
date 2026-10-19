@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Check, FileText, ShieldCheck, Sparkles } from "lucide-react";
@@ -16,11 +19,7 @@ import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Customer Success Stories",
-  description: "Customer stories published with the business's approval, and product stories that show how connected workflows run. Every story is grounded in what the product does, with no invented names, quotes or results.",
-  alternates: { canonical: "/success-stories" },
-};
+export const metadata: Metadata = pageMeta({ path: "/success-stories", title: "Customer Stories and Business Workflows", description: "See how work can connect across teams: customer stories published with approval, and product stories grounded in what SelfRun AI really does.", keywords: ["business automation use cases", "lead to cash workflow", "hire to retire process", "procure to pay workflow", "customer success stories software", "business workflow examples", "SaaS case studies", "automation examples for small business"], tag: "Stories" });
 
 const NAV = [
   { id: "read", label: "How to read them" },
@@ -60,6 +59,7 @@ export default async function SuccessStoriesPage() {
 
   return (
     <>
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/success-stories", name: "Customer stories", description: "See how work can connect across teams: customer stories published with approval, and product stories grounded in what SelfRun AI really does." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Success stories", path: "/success-stories" }])]} />
       <PageHero
         art="features"
         eyebrow="Customer stories & workflows"

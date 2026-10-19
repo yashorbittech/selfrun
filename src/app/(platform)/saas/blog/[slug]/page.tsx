@@ -1,3 +1,7 @@
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -31,26 +35,17 @@ export async function generateMetadata({
   const post = POSTS.find((p) => p.slug === slug);
   if (!post) return { title: "Blog Post Not Found" };
 
-  return {
-    title: `${post.title} — SelfRun AI`,
+  return pageMeta({
+    path: `/blog/${post.slug}`,
+    title: post.title,
     description: post.summary,
-    alternates: { canonical: `/blog/${post.slug}` },
-    openGraph: {
-      title: post.title,
-      description: post.summary,
-      url: `/blog/${post.slug}`,
-      type: "article",
-      publishedTime: post.date,
-      images: [
-        {
-          url: screenFor(post.shot) || `/selfrun/photos/${post.photo}.jpg`,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
-    },
-  };
+    keywords: [post.title.toLowerCase(), post.tag, `${post.tag} guide`, `${post.tag} tips`, "business guide", ...post.keyTakeaways.slice(0, 3).map((k) => k.toLowerCase().slice(0, 60))],
+    tag: post.tag,
+    type: "article",
+    publishedTime: post.date,
+    authors: [post.author],
+    section: post.tag,
+  });
 }
 
 export default async function BlogPostPage({
@@ -70,6 +65,10 @@ export default async function BlogPostPage({
 
   return (
     <article className="min-h-screen bg-background">
+      <JsonLd data={[
+        article({ path: `/blog/${post.slug}`, title: post.title, description: post.summary, date: post.date, author: post.author, section: post.tag, image: `/og?title=${encodeURIComponent(post.title.slice(0, 90))}&tag=${encodeURIComponent(post.tag)}`, keywords: [post.tag] }),
+        breadcrumbList([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }, { name: post.title, path: `/blog/${post.slug}` }]),
+      ]} />
       <ScrollToTop pageKey={post.slug} />
       {/* Hero Banner: Exactly matches all other site pages (features, pricing, docs, about) */}
       <PageHero

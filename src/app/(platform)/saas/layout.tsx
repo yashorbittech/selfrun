@@ -6,7 +6,7 @@ import Interactions from "@/components/platform/saas/Interactions";
 import { OfferTopBar } from "@/components/platform/saas/OfferChrome";
 import { onSaasHost, requestHostOrNull, saasOrigin } from "@/lib/platform/saas/request";
 import { saasCanonicalHost } from "@/lib/platform/saas/hosts";
-import { SAAS_BRAND } from "@/lib/platform/saas/brand";
+import { SAAS_BRAND, saasContact } from "@/lib/platform/saas/brand";
 import { jsonForScript } from "@/lib/security/json-script";
 import FreeForeverToast from "@/components/platform/saas/FreeForeverToast";
 import SrRoot from "@/components/platform/saas/SrRoot";
@@ -19,6 +19,9 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
   if (!(await onSaasHost())) notFound();
   const host = saasCanonicalHost(await requestHostOrNull());
   const origin = await saasOrigin();
+  const contact = saasContact(host);
+  /** The brand's own profiles (`SAAS_SOCIAL_URLS`, comma separated): LinkedIn, X, YouTube, Facebook, Instagram. Only real ones are listed. */
+  const sameAs = (process.env.SAAS_SOCIAL_URLS ?? "").split(",").map((u) => u.trim()).filter((u) => /^https:\/\//.test(u));
   const org = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -26,8 +29,15 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     url: origin,
     logo: `${origin}${SAAS_BRAND.assets.mark}`,
     description: SAAS_BRAND.description,
+    slogan: SAAS_BRAND.tagline,
+    ...(sameAs.length ? { sameAs } : {}),
+    knowsAbout: ["Business automation", "CRM", "HR and payroll", "Accounting", "Project management", "Procurement", "AI assistants", "Website building"],
+    contactPoint: [
+      { "@type": "ContactPoint", contactType: "sales", email: contact.sales, availableLanguage: ["English"] },
+      { "@type": "ContactPoint", contactType: "customer support", email: contact.support, availableLanguage: ["English"] },
+    ],
   };
-  const site = { "@context": "https://schema.org", "@type": "WebSite", name: SAAS_BRAND.name, url: origin };
+  const site = { "@context": "https://schema.org", "@type": "WebSite", name: SAAS_BRAND.name, url: origin, inLanguage: "en-IN", publisher: { "@type": "Organization", name: SAAS_BRAND.name } };
   // The product's own colours (light by default, dark when chosen), set on the wrapper.
   return (
     <SrRoot>

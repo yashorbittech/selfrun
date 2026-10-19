@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getGallery } from "@/lib/platform/saas/gallery";
@@ -13,11 +16,7 @@ import { ArrowRight } from "lucide-react";
 import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Product gallery",
-  description: "Every real screen of SelfRun AI in one place — filter by product, search and open any screen full size.",
-  alternates: { canonical: "/gallery" },
-};
+export const metadata: Metadata = pageMeta({ path: "/gallery", title: "Product Gallery: Real Screens of Every Product", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size.", keywords: ["business software screenshots", "CRM software screenshots", "HR software demo screens", "accounting software interface", "project management software screenshots", "business dashboard examples", "SaaS product gallery", "software UI screens"], tag: "Gallery" });
 
 const NAV = [
   { id: "browse", label: "Browse the screens" },
@@ -31,6 +30,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   const { items, panels } = await getGallery();
   return (
     <>
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/gallery", name: "Product gallery", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }])]} />
       <PageHero art="gallery" eyebrow={`${items.length} real screens · ${SAAS_PRODUCT_COUNT} products`} title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `${items.length} screens`, text: "Captured from the real product" }}>
         <HeroCtas />
       </PageHero>

@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
@@ -8,11 +11,7 @@ import { ArrowRight } from "lucide-react";
 import FaqHub from "@/components/platform/saas/FaqHub";
 import { FAQ_GROUPS } from "@/lib/platform/saas/faqs";
 
-export const metadata: Metadata = {
-  title: "FAQs",
-  description: "Answers about SelfRun AI and verified, product-specific FAQs for all 20 business products.",
-  alternates: { canonical: "/faqs" },
-};
+export const metadata: Metadata = pageMeta({ path: "/faqs", title: "FAQs: Answers for Every Product", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers.", keywords: ["SelfRun AI FAQ", "business software FAQs", "CRM software questions", "HR software questions", "payroll software FAQ", "accounting software FAQ", "how does business automation software work", "SaaS security questions", "white label software FAQ"], tag: "FAQs" });
 
 const NAV = [
   { id: "browse", label: "Browse answers" },
@@ -24,6 +23,7 @@ const NAV = [
 export default function FaqsPage() {
   return (
     <>
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/faqs", name: "FAQs", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }])]} />
       <PageHero
         art="features"
         eyebrow="SelfRun answers"

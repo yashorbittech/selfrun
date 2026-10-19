@@ -1,3 +1,6 @@
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -19,12 +22,7 @@ import type { IconKey } from "@/lib/platform/saas/content";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Blog & Guides",
-  description:
-    "Practical business automation guides, productivity advice, and operational tutorials for founders, managers, and growing teams. Simple language, realistic examples, and actionable steps.",
-  alternates: { canonical: "/blog" },
-};
+export const metadata: Metadata = pageMeta({ path: "/blog", title: "Blog and Guides for Running a Business", description: "Practical guides on lead management, payroll, invoicing, social media, websites and automation: how to run and grow a business with SelfRun AI.", keywords: ["business automation blog", "small business tips", "how to automate invoicing", "how to manage leads", "how to run payroll", "business productivity tips", "website for business guide", "social media planning guide", "SME growth guides"], tag: "Blog" });
 
 /** Tag → module key + icon mapping for product pill badges. */
 const TAG_META: Record<string, { key: string; icon: IconKey }> = {
@@ -71,6 +69,7 @@ export default function BlogIndexPage() {
 
   return (
     <>
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/blog", name: "Blog", description: "Practical guides on lead management, payroll, invoicing, social media, websites and automation: how to run and grow a business with SelfRun AI." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }])]} />
       <PageHero
         eyebrow="Practical Business Guides"
         title="Simple, proven advice"

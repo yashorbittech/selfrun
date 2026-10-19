@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
 import { FAQS, FAQS_MORE } from "@/lib/platform/saas/content";
 import { SectionHead } from "@/components/platform/saas/blocks";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { faqPage } from "@/lib/platform/saas/jsonld";
 import Reveal from "@/components/platform/saas/Reveal";
 
 /** The questions of the given topics (all when none are given), drawn from the site's real FAQ list. */
@@ -20,6 +22,7 @@ export default function FaqSection({ topics, limit = 6, lead = "Still deciding? 
   if (items.length === 0) return null;
   return (
     <section id="faq" style={{ scrollMarginTop: 140 }} className={`sr-section ${tone === "muted" ? "bg-muted/10" : ""}`}>
+      <JsonLd data={faqPage(items)} />
       <div className="sr-container">
         <SectionHead center icon="chat" n={n} eyebrow="FAQs" title={title} accent={accent} lead={lead} />
         <Reveal>

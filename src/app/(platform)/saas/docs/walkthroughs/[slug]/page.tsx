@@ -1,3 +1,7 @@
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -16,7 +20,7 @@ export function generateStaticParams() {
 }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const t = tutorialBySlug((await params).slug);
-  return t ? { title: t.title, description: t.summary, alternates: { canonical: `/docs/walkthroughs/${t.slug}` } } : {};
+  return t ? pageMeta({ path: `/docs/walkthroughs/${t.slug}`, title: `${t.title}: Step-by-Step Walkthrough`, description: `${t.summary} A ${t.minutes}-minute walkthrough in ${t.steps.length} steps, with the real screen beside each step.`, keywords: [t.title, `how to ${t.title.toLowerCase()}`, `${t.title.toLowerCase()} tutorial`, "step by step walkthrough", "business software tutorial", "beginner guide to business software"], tag: "Walkthrough" }) : {};
 }
 
 export default async function WalkthroughPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -27,6 +31,11 @@ export default async function WalkthroughPage({ params }: { params: Promise<{ sl
   const guides = t.next.map((s) => docBySlug(s)).filter((x): x is NonNullable<typeof x> => !!x);
   return (
     <>
+    <JsonLd data={[
+      howTo({ path: `/docs/walkthroughs/${t.slug}`, name: t.title, description: t.summary, totalMinutes: t.minutes, steps: t.steps.map((st) => ({ name: st.title, text: st.text })) }),
+      webPage({ path: `/docs/walkthroughs/${t.slug}`, name: t.title, description: t.summary }),
+      breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }, { name: "Walkthroughs", path: "/docs#walkthroughs" }, { name: t.title, path: `/docs/walkthroughs/${t.slug}` }]),
+    ]} />
       <PageHero art="docs" eyebrow={`Walkthrough · ${t.level}`} title={t.title} lead={t.summary} photo="team-work" shot={t.shot} shotName={t.title} chip={{ title: `${t.steps.length} steps`, text: `About ${t.minutes} minutes` }}>
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "All documentation", href: "/docs#walkthroughs" }} />
       </PageHero>

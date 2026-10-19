@@ -1,3 +1,7 @@
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -25,7 +29,7 @@ export function generateStaticParams() {
 }
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const g = docBySlug((await params).slug);
-  return g ? { title: g.title, description: g.summary, alternates: { canonical: `/docs/${g.slug}` } } : {};
+  return g ? pageMeta({ path: `/docs/${g.slug}`, title: g.title, description: `${g.summary} A step-by-step ${g.category.toLowerCase()} guide from SelfRun AI, with the real screen.`, keywords: [g.title, g.category, `${g.category} guide`, "business software guide", "how to set up business software", "SaaS documentation"], tag: "Guide" }) : {};
 }
 
 export default async function DocArticle({ params }: { params: Promise<{ slug: string }> }) {
@@ -44,6 +48,10 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
   const variant = (i % 6) as SceneVariant;
   return (
     <>
+      <JsonLd data={[
+        article({ type: "TechArticle", path: `/docs/${g.slug}`, title: g.title, description: g.summary, date: "2026-01-01", author: "SelfRun AI", authorOrg: true, section: g.category }),
+        breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }, { name: g.title, path: `/docs/${g.slug}` }]),
+      ]} />
       <PageHero art="docs" eyebrow={`${g.category} · ${g.readMinutes} min read`} title={g.title} lead={g.summary} photo="laptop-talk" shot={g.shot} shotName={g.title}>
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "All documentation", href: "/docs" }} />
       </PageHero>

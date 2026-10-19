@@ -13,14 +13,12 @@ const MOVED: Record<string, string> = {
   industries: "/about#what-we-do",
   resources: "/docs",
   changelog: "/about",
-  roadmap: "/vision",
   "product-vision": "/vision",
   help: "/docs",
   faq: "/faqs",
   tutorials: "/docs#walkthroughs",
   mission: "/about#mission",
   "what-we-do": "/about#what-we-do",
-  "success-stories": "/about#stories",
 };
 
 export default async function LegacyRedirect({ params }: { params: Promise<{ legacy: string[] }> }) {

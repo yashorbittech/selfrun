@@ -13,10 +13,13 @@ import Reveal from "@/components/platform/saas/Reveal";
 import DeviceScene from "@/components/platform/saas/DeviceScene";
 import { productDocsPath, productKeyFromSlug, productPath, productSlugFor } from "@/lib/platform/saas/product-routes";
 import { productShort } from "@/lib/platform/saas/product-short";
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
+import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { breadcrumbList, faqPage, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { productFaqs } from "@/lib/platform/saas/product-faq";
 import { DOCS } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
-import { jsonForScript } from "@/lib/security/json-script";
 import ProductSidebar from "@/components/platform/saas/ProductSidebar";
 import ProductFaqList from "@/components/platform/saas/ProductFaq";
 import ProductScrollNav from "@/components/platform/saas/product/ProductScrollNav";
@@ -42,7 +45,17 @@ async function load(key: string) {
 export async function generateProductMetadata(key: string): Promise<Metadata> {
   const d = await load(key);
   if (!d) return {};
-  return { title: `${d.m.name} — products`, description: `${d.m.headline}. ${d.m.summary}`, alternates: { canonical: productPath(d.m.key) } };
+  const { m } = d;
+  const seo = PRODUCT_SEO[m.key];
+  const value = PANEL_VALUE[m.key];
+  const bare = m.name.replace(/^SelfRun\s+/i, "");
+  return pageMeta({
+    path: productPath(m.key),
+    title: seo?.title ?? `${bare}: ${m.headline}`,
+    description: `${m.name}: ${m.headline}. ${m.summary}${value ? ` Replaces ${value.replaces}.` : ""} Free to start.`,
+    keywords: [m.name, bare, `${m.name} features`, `${bare} free`, `${bare} software`, ...(seo?.keywords ?? [])],
+    tag: "Product",
+  });
 }
 
 const SECTIONS = [
@@ -129,13 +142,13 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
     return { id, n: num(id), total: numbered.length, label: numbered[i]?.label ?? "", next: nx ? { id: nx.id, label: nx.label } : { id: "faq", label: "Questions" }, tint: i % 2 === 1 };
   };
 
-  const ld = {
-    "@context": "https://schema.org",
-    "@graph": [
-      { "@type": "SoftwareApplication", name: m.name, applicationCategory: "BusinessApplication", operatingSystem: "Web, Android, iOS, Windows, macOS, Linux", description: `${m.headline}. ${m.summary}`, url: productPath(m.key), offers: { "@type": "Offer", price: "0", priceCurrency: "INR", description: "Free plan available; every product is included in every plan." } },
-      { "@type": "FAQPage", mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
-    ],
-  };
+  const seoKeywords = PRODUCT_SEO[m.key]?.keywords ?? [];
+  const ld = [
+    softwareApplication({ path: productPath(m.key), name: m.name, description: `${m.headline}. ${m.summary}`, features: m.capabilities, keywords: seoKeywords }),
+    webPage({ path: productPath(m.key), name: `${m.name}: ${PRODUCT_SEO[m.key]?.title ?? m.headline}`, description: `${m.headline}. ${m.summary}`, about: m.name }),
+    breadcrumbList([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }, { name: m.name, path: productPath(m.key) }]),
+    faqPage(faqs),
+  ];
 
   const endDot = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
   const heroLead = (
@@ -156,7 +169,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(ld) }} />
+      <JsonLd data={ld} />
       <PageHero art={`product-${m.key}`} eyebrow={`${total} features · ${m.headline}`} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
         <HeroCtas />
       </PageHero>
@@ -178,7 +191,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                   <span className="flex h-20 w-20 flex-none items-center justify-center rounded-3xl border border-border/60 bg-card shadow-lg shadow-primary/10"><ProductLogo productKey={m.key} size={56} title={m.name} /></span>
                   <div className="min-w-0">
                     <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary"><Sparkles className="h-3.5 w-3.5" />Included in every plan</span>
-                    <h1 className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">{m.name}</h1>
+                    <h2 className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">{m.name}</h2>
                     <p className="mt-1 text-base leading-snug text-muted-foreground sm:text-lg">{productShort(m.key, m.summary)}</p>
                   </div>
                 </div>

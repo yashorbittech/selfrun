@@ -1,12 +1,9 @@
+import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
 import LegalPage from "@/components/platform/saas/LegalPage";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "How SelfRun AI collects, uses and protects personal information on this website and in the service.",
-  alternates: { canonical: "/privacy" },
-};
+export const metadata: Metadata = pageMeta({ path: "/privacy", title: "Privacy Policy", description: "How SelfRun AI collects, uses and protects personal information on this website and in the service. Read what we collect, why, and the choices you have.", keywords: ["privacy policy for business software", "SaaS privacy policy", "data privacy SaaS", "how personal data is handled"], tag: "Legal" });
 
 export default function PrivacyPage() {
   const us = SAAS_BRAND.operator || SAAS_BRAND.name;

@@ -4,6 +4,8 @@ import { LEGAL_LINKS, type LegalDoc } from "@/lib/platform/saas/site";
 import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import LegalToc from "@/components/platform/saas/LegalToc";
 import ScrollToTop from "@/components/platform/saas/product/ScrollToTop";
+import JsonLd from "@/components/platform/saas/JsonLd";
+import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
 import Reveal from "@/components/platform/saas/Reveal";
 
 const slug = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -14,8 +16,10 @@ const slug = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
  */
 export default function LegalPage({ doc }: { doc: { title: string; intro: React.ReactNode; sections: LegalDoc["sections"]; highlights?: LegalDoc["highlights"] } }) {
   const toc = doc.sections.map((s) => ({ id: slug(s.heading), label: s.heading }));
+  const href = LEGAL_LINKS.find((l) => l.label === doc.title)?.href ?? "/";
   return (
     <>
+      <JsonLd data={[webPage({ path: href, name: doc.title, description: typeof doc.intro === "string" ? doc.intro : doc.title }), breadcrumbList([{ name: "Home", path: "/" }, { name: doc.title, path: href }])]} />
       <PageHero art="legal" photo="office" shot="dlms" shotName="Digi Locker" eyebrow="Legal" title={doc.title} lead={doc.intro} size="compact">
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
       </PageHero>

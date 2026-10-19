@@ -32,6 +32,7 @@ import NavigationProgress from "@/components/pwa/NavigationProgress";
 import { InstallBanner } from "@/components/pwa/InstallApp";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { SAAS_THEME } from "@/lib/platform/saas/theme";
+import { BASE_KEYWORDS } from "@/lib/platform/saas/product-seo";
 
 function verificationMetadata(t: TrackingSettings): Metadata["verification"] {
   const other: Record<string, string[]> = {};
@@ -90,8 +91,16 @@ async function siteWideMetadata(): Promise<Metadata> {
       title: { default: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, template: `%s | ${SAAS_BRAND.name}` },
       description: SAAS_BRAND.description,
       applicationName: SAAS_BRAND.name,
+      keywords: BASE_KEYWORDS,
+      category: "Business software",
+      authors: [{ name: SAAS_BRAND.name }],
+      creator: SAAS_BRAND.name,
+      publisher: SAAS_BRAND.name,
+      formatDetection: { telephone: false, email: false, address: false },
+      robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 } },
+      verification: { google: process.env.GOOGLE_SITE_VERIFICATION || undefined, other: process.env.BING_SITE_VERIFICATION ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION } : undefined },
       icons: { icon: [{ url: SAAS_BRAND.assets.faviconIco, sizes: "any" }, { url: SAAS_BRAND.assets.faviconSmall, type: "image/png", sizes: "16x16" }, { url: SAAS_BRAND.assets.favicon, type: "image/png", sizes: "32x32" }], shortcut: SAAS_BRAND.assets.faviconIco, apple: SAAS_BRAND.assets.appleTouch },
-      openGraph: { type: "website", siteName: SAAS_BRAND.name, title: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, description: SAAS_BRAND.description, images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: SAAS_BRAND.name }] },
+      openGraph: { type: "website", locale: "en_IN", url: "/", siteName: SAAS_BRAND.name, title: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, description: SAAS_BRAND.description, images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: SAAS_BRAND.name }] },
       twitter: { card: "summary_large_image", title: `${SAAS_BRAND.name} — ${SAAS_BRAND.tagline}`, description: SAAS_BRAND.description },
     };
   }
@@ -145,7 +154,7 @@ export default async function RootLayout({
   const notice = platformSettings?.maintenanceBanner ?? "";
 
   return (
-    <html lang="en" suppressHydrationWarning data-ui={modernUi ? "modern" : undefined} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={saasHost ? "en-IN" : "en"} suppressHydrationWarning data-ui={modernUi ? "modern" : undefined} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <head>
         {/* The active theme, for the website and every product. */}
         {/* `themeCss` is "" with no company: `"" && …` would put a text node in <head> (hydration error, page left unstyled). */}
