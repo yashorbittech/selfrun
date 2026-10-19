@@ -18,11 +18,12 @@ export function Blobs({ strong = false }: { strong?: boolean }) {
 }
 
 /** Section heading in the default theme's style: optional icon tile, primary eyebrow, bold title with a gradient accent. */
-export function SectionHead({ eyebrow, title, accent, lead, center = true, icon, tone }: { eyebrow?: string; title: React.ReactNode; accent?: string; lead?: React.ReactNode; center?: boolean; icon?: IconKey | React.ReactNode; tone?: "dark" }) {
+export function SectionHead({ eyebrow, title, accent, lead, center = true, icon, tone, n }: { n?: string; eyebrow?: string; title: React.ReactNode; accent?: string; lead?: React.ReactNode; center?: boolean; icon?: IconKey | React.ReactNode; tone?: "dark" }) {
   const dark = tone === "dark";
   return (
     <Reveal className={`${center ? "mx-auto text-center" : ""} mb-12 max-w-2xl sm:mb-14`}>
-      {icon && (
+      {n && <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-lg font-black text-white shadow-lg shadow-primary/30 ${center ? "mx-auto" : ""}`}>{n}</span>}
+      {icon && !n && (
         <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border shadow-sm ${center ? "mx-auto" : ""} ${dark ? "border-white/25 bg-white/10 text-white backdrop-blur" : "border-border/50 bg-muted/40"}`}>
           {typeof icon === "string" ? <Icon name={icon as IconKey} className={`h-6 w-6 ${dark ? "text-white" : "text-primary"}`} /> : icon}
         </div>

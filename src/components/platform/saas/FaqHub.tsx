@@ -36,9 +36,10 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
   const showDirectory = activeId === "all" && normalizedQuery.length === 0;
 
   return (
-    <section className="sr-section bg-muted/10">
+    <section id="browse" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
       <div className="sr-container">
         <div className="mx-auto mb-9 max-w-3xl text-center">
+          <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-lg font-black text-white shadow-lg shadow-primary/30">01</span>
           <p className="sr-eyebrow">Browse verified answers</p>
           <h2 className="sr-h2 mt-3">Find answers for <span className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-transparent">your product.</span></h2>
           <p className="sr-lead mt-4">Choose a product or search across the system. Answers describe features currently documented in SelfRun.</p>
@@ -59,33 +60,36 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
         </div>
 
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-          <aside aria-label="FAQ sections" className="lg:sticky lg:top-24 lg:self-start">
-            <h3 className="mb-3 text-sm font-black uppercase tracking-wider text-muted-foreground">Browse topics</h3>
-            <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
-              {[
-                { id: "all", title: "All FAQs", general: true },
-                ...groups.map((group) => ({ id: group.id, title: group.title, general: group.id === "general" })),
-              ].map((topic) => (
-                <button
-                  key={topic.id}
-                  type="button"
-                  onClick={() => setActiveId(topic.id)}
-                  aria-pressed={activeId === topic.id}
-                  className={`flex min-h-11 flex-none items-center gap-2.5 rounded-xl border px-3 py-2 text-left text-sm font-semibold transition-colors lg:w-full ${
-                    activeId === topic.id
-                      ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-border/50 bg-background hover:border-primary/30 hover:bg-muted/40"
-                  }`}
-                >
-                  <span className="flex h-7 w-7 flex-none items-center justify-center">
-                    {topic.general
-                      ? <Layers className="h-4 w-4" aria-hidden />
-                      : <ProductLogo productKey={topic.id} size={26} title={topic.title} />}
-                  </span>
-                  <span className="whitespace-nowrap lg:whitespace-normal">{topic.title}</span>
-                </button>
-              ))}
-            </nav>
+          <aside aria-label="FAQ sections" className="lg:sticky lg:top-28 lg:self-start">
+            <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
+              <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
+                <p className="flex items-center gap-2 text-sm font-black"><Layers className="h-4 w-4 text-primary" />Browse topics<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{groups.length}</span></p>
+                <p className="mt-1 text-xs text-muted-foreground">{groups.reduce((c, g) => c + g.items.length, 0)} answers in total</p>
+              </div>
+              <nav className="sr-scroll-x flex gap-2 p-2.5 lg:block lg:max-h-[calc(100vh-17rem)] lg:space-y-1 lg:overflow-y-auto lg:[scrollbar-width:thin]">
+                {[
+                  { id: "all", title: "All FAQs", general: true, n: groups.reduce((c, g) => c + g.items.length, 0) },
+                  ...groups.map((group) => ({ id: group.id, title: group.title, general: group.id === "general", n: group.items.length })),
+                ].map((topic) => {
+                  const on = activeId === topic.id;
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      onClick={() => setActiveId(topic.id)}
+                      aria-pressed={on}
+                      className={`flex flex-none items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-bold transition-all lg:w-full lg:border-transparent ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/60 hover:border-primary/40 hover:bg-muted/60 lg:border-transparent"}`}
+                    >
+                      <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl border ${on ? "border-white/30 bg-white/20" : "border-border/60 bg-background"}`}>
+                        {topic.general ? <Layers className="h-4 w-4" aria-hidden /> : <ProductLogo productKey={topic.id} size={26} title={topic.title} />}
+                      </span>
+                      <span className="min-w-0 flex-1 whitespace-nowrap leading-tight lg:whitespace-normal">{topic.title}</span>
+                      <span className={`text-xs font-black tabular-nums ${on ? "opacity-90" : "text-muted-foreground"}`}>{topic.n}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
           </aside>
 
           <div className="min-w-0">

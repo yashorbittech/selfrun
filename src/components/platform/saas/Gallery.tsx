@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, ArrowUpRight, Grid3X3, LayoutDashboard, Maximize2, Search, Sparkles, Star, X } from "lucide-react";
 import { productPath } from "@/lib/platform/saas/product-routes";
+import ProductLogo from "@/components/products/ProductLogo";
 import Reveal from "@/components/platform/saas/Reveal";
 
 export interface GalleryEntry { id: string; src: string; title: string; panelKey: string; panel: string; featured: boolean }
@@ -51,22 +52,24 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
 
   return (
     <div className="grid gap-10 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-12">
-      <aside className="xl:sticky xl:top-28 xl:self-start">
-        <div className="sr-card">
-          <label className="relative mb-4 block">
-            <span className="sr-only">Search the screens</span>
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <input value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} placeholder="Search screens…" className="sr-input" style={{ height: 48, paddingLeft: 42, borderRadius: 999 }} />
-          </label>
-          <p className="sr-eyebrow mb-3 hidden xl:block">Products</p>
-          <div className="sr-scroll-x flex gap-2 xl:block xl:space-y-1" role="tablist" aria-label="Products">
+      <aside className="xl:sticky xl:top-28 xl:self-start" aria-label="Filter screens">
+        <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
+          <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
+            <p className="mb-3 flex items-center gap-2 text-sm font-black"><Grid3X3 className="h-4 w-4 text-primary" />All screens<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{pool.length}</span></p>
+            <label className="relative block">
+              <span className="sr-only">Search the screens</span>
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+              <input value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} type="search" placeholder="Search screens" className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-3 text-sm outline-none focus:border-primary" />
+            </label>
+          </div>
+          <div className="sr-scroll-x flex gap-2 p-2.5 xl:block xl:max-h-[calc(100vh-18rem)] xl:space-y-1 xl:overflow-y-auto xl:[scrollbar-width:thin]" role="tablist" aria-label="Products">
             {[{ key: "all", name: "All screens", count: pool.length }, ...shownPanels].map((p) => {
               const on = panel === p.key;
               return (
-                <button key={p.key} role="tab" aria-selected={on} onClick={() => pick(p.key)} className={`group relative shrink-0 overflow-hidden rounded-full border px-4 py-2.5 text-left text-sm font-semibold transition-all xl:flex xl:w-full xl:items-center xl:justify-between xl:rounded-xl xl:border-0 xl:px-3.5 ${on ? "border-transparent bg-foreground text-background shadow-lg xl:bg-primary/10 xl:text-primary xl:shadow-none" : "border-border/60 bg-background text-foreground hover:border-primary/50 xl:bg-transparent xl:text-muted-foreground xl:hover:bg-muted/60 xl:hover:text-foreground"}`}>
-                  <span className="relative z-10">{p.name}</span>
-                  <span className={`relative z-10 ml-2 text-xs font-bold tabular-nums ${on ? "opacity-80" : "opacity-60"}`}>{p.count}</span>
-                  {p.key !== "all" && <span className="absolute inset-x-3.5 bottom-1 hidden h-[3px] origin-left rounded-full bg-gradient-to-r from-primary to-brand-accent opacity-40 transition-opacity group-hover:opacity-80 xl:block" style={{ width: `calc(${(p.count / max) * 100}% - 1.75rem)` }} aria-hidden />}
+                <button key={p.key} role="tab" aria-selected={on} onClick={() => pick(p.key)} className={`group relative flex shrink-0 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-bold transition-all xl:w-full xl:border-transparent ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/60 hover:border-primary/40 hover:bg-muted/60 xl:border-transparent"}`}>
+                  <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl border ${on ? "border-white/30 bg-white/20" : "border-border/60 bg-background"}`}>{p.key === "all" ? <Grid3X3 className="h-4 w-4" /> : <ProductLogo productKey={p.key} size={26} title={p.name} />}</span>
+                  <span className="min-w-0 flex-1"><span className="block whitespace-nowrap leading-tight xl:whitespace-normal">{p.name}</span>{p.key !== "all" && <span className={`mt-1.5 hidden h-1 overflow-hidden rounded-full xl:block ${on ? "bg-white/25" : "bg-border"}`}><span className={`block h-full rounded-full ${on ? "bg-white" : "bg-gradient-to-r from-primary to-brand-accent"}`} style={{ width: `${(p.count / max) * 100}%` }} /></span>}</span>
+                  <span className={`text-xs font-black tabular-nums ${on ? "opacity-90" : "text-muted-foreground"}`}>{p.count}</span>
                 </button>
               );
             })}

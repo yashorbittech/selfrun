@@ -102,7 +102,7 @@ function Head({ id, title, lead }: { id: string; title: string; lead?: string })
   const n = String(NAV.findIndex((x) => x.id === id) + 1).padStart(2, "0");
   return (
     <Reveal className="mx-auto mb-12 max-w-3xl text-center">
-      <p className="mb-4 flex flex-col items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-primary"><span className="flex h-12 min-w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent px-3 text-lg tracking-normal text-white shadow-lg shadow-primary/30">{n}</span>{NAV.find((x) => x.id === id)?.label}</p>
+      <p className="mb-4 flex flex-col items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-primary"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-lg tracking-normal text-white shadow-lg shadow-primary/30">{n}</span>{NAV.find((x) => x.id === id)?.label}</p>
       <h2 className="text-3xl font-black leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">{title}</h2>
       {lead && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{lead}</p>}
     </Reveal>

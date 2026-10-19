@@ -15,13 +15,13 @@ export function pickFaqs(topics?: string[], limit = 6) {
  * The FAQ section every page ends with: icon, heading, description, then a single accordion. Same look on every page.
  * Pass `topics` to choose which of the site's FAQs belong on this page.
  */
-export default function FaqSection({ topics, limit = 6, lead = "Still deciding? These are the things people ask before they start.", title = "Questions,", accent = "answered.", tone, extra = [], all = false }: { topics?: string[]; limit?: number; lead?: string; title?: string; accent?: string; tone?: "muted"; extra?: { q: string; a: string }[]; all?: boolean }) {
+export default function FaqSection({ topics, limit = 6, lead = "Still deciding? These are the things people ask before they start.", title = "Questions,", accent = "answered.", tone, extra = [], all = false, n }: { n?: string; topics?: string[]; limit?: number; lead?: string; title?: string; accent?: string; tone?: "muted"; extra?: { q: string; a: string }[]; all?: boolean }) {
   const items = [...extra, ...pickFaqs(topics, limit).filter((f) => !extra.some((e) => e.q === f.q))];
   if (items.length === 0) return null;
   return (
     <section id="faq" style={{ scrollMarginTop: 140 }} className={`sr-section ${tone === "muted" ? "bg-muted/10" : ""}`}>
       <div className="sr-container">
-        <SectionHead center icon="chat" eyebrow="FAQs" title={title} accent={accent} lead={lead} />
+        <SectionHead center icon="chat" n={n} eyebrow="FAQs" title={title} accent={accent} lead={lead} />
         <Reveal>
           <div className="mx-auto max-w-3xl divide-y divide-border/50 overflow-hidden rounded-3xl border border-border/60 bg-background shadow-sm">
             {items.map((f, i) => (

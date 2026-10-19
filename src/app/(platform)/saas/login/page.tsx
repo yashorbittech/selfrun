@@ -3,8 +3,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FindWorkspaceForm from "@/components/platform/saas/FindWorkspaceForm";
 import { Blobs, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
+import ProductLogo from "@/components/products/ProductLogo";
+import { getFeatureModules } from "@/lib/platform/saas/modules";
+import { productPath } from "@/lib/platform/saas/product-routes";
+import { productShort } from "@/lib/platform/saas/product-short";
 import Reveal from "@/components/platform/saas/Reveal";
-import { ArrowRight, Bot, BarChart3, Briefcase, Check, ClipboardList, FileText, Globe, GraduationCap, LayoutDashboard, MessageSquare, Package, Search, Share2, ShieldCheck, Headphones, Users, Wallet } from "lucide-react";
+import { ArrowRight, Check, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Log in",
@@ -31,116 +36,6 @@ const HOW_IT_WORKS = [
   },
 ];
 
-const PRODUCTS = [
-  {
-    icon: Users,
-    label: "HR & Payroll",
-    text: "Run your entire people operation from hire to retire — without spreadsheets.",
-    detail: ["Attendance, leave & payroll", "Recruitment & offer letters", "Employee self-service portal"],
-  },
-  {
-    icon: Briefcase,
-    label: "Projects",
-    text: "Deliver client work on time with tasks, timesheets, budgets and approvals in one place.",
-    detail: ["Tasks, milestones & Gantt", "Timesheets & costing", "Client billing & reports"],
-  },
-  {
-    icon: BarChart3,
-    label: "CRM & Sales",
-    text: "Move leads through your pipeline and close deals with AI-assisted follow-ups and campaigns.",
-    detail: ["Lead pipeline & stages", "Campaigns & offers", "Client wallet & credits"],
-  },
-  {
-    icon: Wallet,
-    label: "Finance",
-    text: "Invoices, payments, expenses and accounting — live numbers, not month-end surprises.",
-    detail: ["Invoices & payment links", "Expense tracking", "P&L and cash-flow reports"],
-  },
-  {
-    icon: MessageSquare,
-    label: "Team Chat",
-    text: "Channels, direct messages, voice calls and announcements — all inside your workspace.",
-    detail: ["Channels & direct messages", "Voice & video calls", "File sharing & reactions"],
-  },
-  {
-    icon: Globe,
-    label: "Website & SEO",
-    text: "A full website builder with blog, forms, SEO tools and your own domain — live in minutes.",
-    detail: ["Pages, blog & forms", "SEO audits & sitemaps", "Custom domain + auto SSL"],
-  },
-  {
-    icon: Bot,
-    label: "AI Assistants",
-    text: "Custom AI bots trained on your business data — answer team and client questions instantly.",
-    detail: ["Train on your own docs", "Embed on your website", "Voice mode with ElevenLabs"],
-  },
-  {
-    icon: LayoutDashboard,
-    label: "Command Center",
-    text: "Users, roles, billing, audit log and every workspace setting — all in one control panel.",
-    detail: ["Role-based permissions", "Billing & plan management", "Full audit trail"],
-  },
-  {
-    icon: Search,
-    label: "SEO",
-    text: "Rank higher with audits, keyword tracking, sitemaps and Google Search Console built in.",
-    detail: ["Site audits & keyword tracking", "Auto sitemap & robots.txt", "Google Search Console sync"],
-  },
-  {
-    icon: Share2,
-    label: "Social Media",
-    text: "Schedule and publish posts across platforms with AI-generated captions and analytics.",
-    detail: ["Multi-platform publishing", "AI caption generation", "Post analytics & history"],
-  },
-  {
-    icon: FileText,
-    label: "Contracts",
-    text: "Draft, send, e-sign and store contracts and legal documents — fully paperless.",
-    detail: ["Template library", "E-signature workflow", "Secure document vault"],
-  },
-  {
-    icon: Headphones,
-    label: "Support",
-    text: "AI help chatbot, help center articles and support tickets — all in one place.",
-    detail: ["AI-powered help chatbot", "Help center & articles", "Support ticket tracking"],
-  },
-  {
-    icon: ClipboardList,
-    label: "Assessments",
-    text: "Create online tests and quizzes for hiring, training or client certifications.",
-    detail: ["Question bank & auto-grading", "Timed & proctored tests", "Certificates on completion"],
-  },
-  {
-    icon: Package,
-    label: "Procurement",
-    text: "Purchase orders, vendor management and asset tracking from request to delivery.",
-    detail: ["Purchase order workflow", "Vendor & supplier registry", "Asset lifecycle tracking"],
-  },
-  {
-    icon: GraduationCap,
-    label: "Training",
-    text: "Build courses, assign learning paths and track completion across your team.",
-    detail: ["Course builder & modules", "Assigned learning paths", "Progress & completion reports"],
-  },
-  {
-    icon: ShieldCheck,
-    label: "Credentials",
-    text: "Securely store and share verified documents, IDs and certificates in a digital locker.",
-    detail: ["Encrypted document storage", "Verified credential sharing", "Expiry alerts & reminders"],
-  },
-  {
-    icon: Users,
-    label: "Client Portal",
-    text: "Give clients, students and applicants their own login to track work, pay and communicate.",
-    detail: ["Client & student logins", "Project & invoice access", "Messaging & file sharing"],
-  },
-  {
-    icon: Globe,
-    label: "Sites",
-    text: "A full website builder with pages, blog, forms and your own domain — live in minutes.",
-    detail: ["Drag-and-drop page builder", "Blog, forms & pop-ups", "Custom domain + auto SSL"],
-  },
-];
 
 const TRUST = [
   "Role-based access — each person sees only what their role allows",
@@ -151,7 +46,18 @@ const TRUST = [
   "Data never shared between companies — scoped at the database layer",
 ];
 
-export default function LoginPage() {
+
+const NAV = [
+  { id: "signin", label: "How sign-in works" },
+  { id: "inside", label: "What is inside" },
+  { id: "trust", label: "Security" },
+  { id: "help", label: "Need help" },
+  { id: "new", label: "New here" },
+  { id: "faq", label: "FAQs" },
+];
+
+export default async function LoginPage() {
+  const modules = await getFeatureModules();
   return (
     <>
       <PageHero
@@ -168,11 +74,13 @@ export default function LoginPage() {
       </PageHero>
 
       {/* ── How it works + form ── */}
-      <section className="sr-section relative bg-muted/10">
+      <SectionScrollNav items={NAV} label="Sign-in sections" numbered />
+      <section id="signin" className="sr-section relative bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <Blobs />
         <div className="sr-grid-bg" aria-hidden />
         <div className="sr-container relative">
           <SectionHead
+            n="01"
             icon="lock"
             eyebrow="How sign-in works"
             title="Your address,"
@@ -239,10 +147,11 @@ export default function LoginPage() {
       </section>
 
       {/* ── Products inside the workspace ── */}
-      <section className="sr-section relative">
+      <section id="inside" className="sr-section relative" style={{ scrollMarginTop: 140 }}>
         <Blobs />
         <div className="sr-container relative">
           <SectionHead
+            n="02"
             icon="layers"
             eyebrow="What's inside"
             title="Every product,"
@@ -251,30 +160,24 @@ export default function LoginPage() {
           />
           <Reveal>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-              {PRODUCTS.map(({ icon: Icon, label, text, detail }, i) => (
-                <div key={label} className="group relative">
+              {modules.map((m, i) => (
+                <Link key={m.key} href={productPath(m.key)} className="group relative block">
                   <div className="pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br from-primary/25 via-primary/0 to-brand-accent/25 opacity-0 blur-lg transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="sr-card relative h-full overflow-hidden group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:shadow-xl group-hover:shadow-primary/10">
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-brand-accent/10 opacity-70" />
-                    <span className="pointer-events-none absolute -right-1 -top-3 select-none text-5xl font-black text-muted-foreground/[0.07] transition-colors duration-500 group-hover:text-primary/10">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                    <span className="pointer-events-none absolute -right-1 -top-3 select-none text-5xl font-black text-muted-foreground/[0.07] transition-colors duration-500 group-hover:text-primary/10">{String(i + 1).padStart(2, "0")}</span>
                     <div className="relative">
-                      <span className="sr-icon mb-5 h-11 w-11">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <p className="font-black leading-snug">{label}</p>
-                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{text}</p>
+                      <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-border/60 bg-background shadow-sm"><ProductLogo productKey={m.key} size={40} title={m.name} /></span>
+                      <p className="font-black leading-snug">{m.name}</p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{productShort(m.key, m.summary)}</p>
                       <ul className="mt-3 space-y-1">
-                        {detail.map((d) => (
-                          <li key={d} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Check className="h-3 w-3 shrink-0 text-primary" />{d}
-                          </li>
+                        {m.capabilities.slice(0, 3).map((d) => (
+                          <li key={d} className="flex items-center gap-1.5 text-xs text-muted-foreground"><Check className="h-3 w-3 shrink-0 text-primary" />{d}</li>
                         ))}
                       </ul>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </Reveal>
@@ -282,11 +185,12 @@ export default function LoginPage() {
       </section>
 
       {/* ── Security & trust ── */}
-      <section className="sr-section relative bg-muted/10">
+      <section id="trust" className="sr-section relative bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <Blobs />
         <div className="sr-grid-bg" aria-hidden />
         <div className="sr-container relative">
           <SectionHead
+            n="03"
             icon="shield"
             eyebrow="Security & trust"
             title="Built for"
@@ -323,7 +227,42 @@ export default function LoginPage() {
         </div>
       </section>
 
-      <FaqSection topics={["Setup", "Data & security", "General"]} limit={5} />
+      {/* ── Need help ── */}
+      <section id="help" className="sr-section" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n="04" icon="chat" eyebrow="Need help" title="Can't sign in?" accent="Start here." lead="Most sign-in problems are one of these. If none fits, our team will help." />
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              { t: "Find your workspace address", x: "It is in your invitation email, in the link you use every day, or ask your company's Super Admin.", href: "/docs/getting-started", c: "Read the setup guide" },
+              { t: "Check the platform is up", x: "If sign-in is failing for everyone, an open incident notice will be shown on the status page.", href: "/status", c: "Open the status page" },
+              { t: "Ask our team", x: "Tell us your company name and what you see. We reply within one business day.", href: "/contact", c: "Contact support" },
+            ].map((c, i) => (
+              <Reveal key={c.t} delay={i * 70}>
+                <Link href={c.href} className="group flex h-full flex-col rounded-3xl border border-border/60 bg-card p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <h3 className="text-xl font-black">{c.t}</h3>
+                  <p className="mt-2 flex-1 leading-relaxed text-muted-foreground">{c.x}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 font-bold text-primary">{c.c}<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── New here ── */}
+      <section id="new" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n="05" icon="rocket" eyebrow="New here" title="No workspace yet?" accent="Create one free." lead="Register your company, brand it, invite your team and switch on the products you need." />
+          <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
+            {[{ t: "Register", x: "Use your work email. No card needed." }, { t: "Set up", x: "Name and brand the workspace, then invite your team with roles." }, { t: "Start working", x: "Switch on the products you need. Every product is in every plan." }].map((c, i) => (
+              <Reveal key={c.t} delay={i * 70}><div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm"><span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-lg font-black text-white">{i + 1}</span><h3 className="text-lg font-black">{c.t}</h3><p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{c.x}</p></div></Reveal>
+            ))}
+          </div>
+          <div className="mt-10 flex justify-center"><HeroCtas primary={{ label: "Create your workspace", href: "/signup" }} secondary={{ label: "Request a demo", href: "/demo" }} /></div>
+        </div>
+      </section>
+
+      <FaqSection n="06" topics={["Setup", "Data & security", "General"]} limit={5} />
     </>
   );
 }

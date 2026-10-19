@@ -13,12 +13,12 @@ function Glow() {
 
 export default function DemoExperience() {
   return (
-    <section id="self-guided-demo" className="sr-section relative scroll-mt-24 overflow-hidden bg-muted/10">
+    <section id="self-guided-demo" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
       <Blobs />
       <div className="sr-grid-bg" aria-hidden />
       <div className="sr-container relative">
         <Reveal>
-          <SectionHead icon="layers" eyebrow="Self-guided product tour" title="Try it for yourself" accent="in seconds." lead="No signup required. Open the live workspace with the shared demo credentials, or preview the public site first." />
+          <SectionHead n="01" icon="layers" eyebrow="Self-guided product tour" title="Try it for yourself" accent="in seconds." lead="No signup required. Open the live workspace with the shared demo credentials, or preview the public site first." />
         </Reveal>
 
         {/* Primary live demo card */}

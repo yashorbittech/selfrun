@@ -27,7 +27,7 @@ export default function ScrollToTop({ pageKey }: { pageKey: string }) {
       const nav = document.querySelector("[data-product-nav], [data-hop-target]");
       if (!nav) return;
       const cs = getComputedStyle(nav);
-      const offset = cs.position === "sticky" ? (parseFloat(cs.top) || 0) - 24 : 100;
+      const offset = cs.position === "sticky" ? (parseFloat(cs.top) || 0) - 24 : Number((nav as HTMLElement).dataset.hopOffset) || 100;
       window.scrollTo({ top: nav.getBoundingClientRect().top + window.scrollY - offset, left: 0, behavior: "instant" });
     };
     // the router also scrolls after a navigation, so land again once it has settled

@@ -3,6 +3,7 @@ import { ArrowRight, MessageCircle } from "lucide-react";
 import { LEGAL_LINKS, type LegalDoc } from "@/lib/platform/saas/site";
 import { HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import LegalToc from "@/components/platform/saas/LegalToc";
+import ScrollToTop from "@/components/platform/saas/product/ScrollToTop";
 import Reveal from "@/components/platform/saas/Reveal";
 
 const slug = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -19,15 +20,16 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Contact us", href: "/contact" }} />
       </PageHero>
 
+      <ScrollToTop pageKey={doc.title} />
       <section className="sr-section">
-        <div className="sr-container grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)_200px] lg:gap-10">
+        <div data-hop-target data-hop-offset="140" className="sr-container grid gap-12 lg:grid-cols-[220px_minmax(0,1fr)_200px] lg:gap-10">
 
           {/* Left: Other policies */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">All policies</p>
             <ul className="space-y-0.5">
               {LEGAL_LINKS.map((l) => (
-                <li key={l.href}><Link href={l.href} aria-current={doc.title === l.label ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${doc.title === l.label ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{l.label}</Link></li>
+                <li key={l.href}><Link data-product-link href={l.href} aria-current={doc.title === l.label ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${doc.title === l.label ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{l.label}</Link></li>
               ))}
             </ul>
           </aside>
