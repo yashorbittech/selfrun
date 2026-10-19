@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, itemList, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
@@ -43,7 +43,7 @@ export default async function DocsPage() {
 
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/docs", name: "Documentation", description: "Step-by-step guides and walkthroughs for every feature of every SelfRun AI product, with the real screen. Set up your workspace and learn each product." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/docs", name: "Documentation", description: "Step-by-step guides and walkthroughs for every feature of every SelfRun AI product, with the real screen. Set up your workspace and learn each product." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }]), itemList({ name: "SelfRun AI guides by product", items: panels.map((m) => ({ name: `${m.name} guides`, path: `/docs#${m.key}` })) }), itemList({ name: "SelfRun AI walkthroughs", items: TUTORIALS.map((t) => ({ name: t.title, path: `/docs/walkthroughs/${t.slug}` })) })]} />
       <PageHero art="docs" eyebrow={`${SAAS_PRODUCT_COUNT} products · ${total} guides · ${TUTORIALS.length} walkthroughs`} title="Documentation" accent="step by step." lead="Pick a product, pick a feature. Every guide shows the real screen and the exact steps to follow. New here? Start with the setup guide, or follow a walkthrough from start to finish." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ">
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Browse walkthroughs", href: "#walkthroughs" }} />
       </PageHero>

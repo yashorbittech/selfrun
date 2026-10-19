@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, organizationPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -36,7 +36,7 @@ export default async function ContactPage() {
   ];
   return (
     <>
-      <JsonLd data={[webPage({ type: "ContactPage", path: "/contact", name: "Contact us", description: "Talk to the SelfRun AI team about plans, a demo, support or security. Send a message and we reply within one business day." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Contact us", path: "/contact" }])]} />
+      <JsonLd data={[organizationPage({ type: "ContactPage", path: "/contact", name: "Contact us", description: "Talk to the SelfRun AI team about plans, a demo, support or security. Send a message and we reply within one business day." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Contact us", path: "/contact" }])]} />
       <PageHero art="contact" photo="colleagues" shot="support" shotName="SelfRun ResolveIQ" eyebrow="Contact Us" title="Let's talk about" accent="your business." lead="Questions about plans, how the platform fits your business, or security? Send a message and we'll reply within one business day." chip={{ title: "Reply within one business day", text: "From the people who build the platform" }}>
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Request a demo", href: "/demo" }} />
       </PageHero>

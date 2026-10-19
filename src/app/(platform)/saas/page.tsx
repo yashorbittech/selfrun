@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import JsonLd from "@/components/platform/saas/JsonLd";
-import { itemList, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
+import { itemList, planOffers, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { ArrowRight, Check } from "lucide-react";
 import { AI_CAPABILITIES, HOW_IT_WORKS, INDUSTRIES, SECURITY_POINTS } from "@/lib/platform/saas/content";
 import { AI_BENEFITS, CAPABILITIES, COMPARISON, DEVICES, FLOWS, REPLACES, RUNS_ITSELF, YOUR_BRAND } from "@/lib/platform/saas/site";
@@ -99,8 +99,7 @@ export default async function SaasHome() {
       <JsonLd data={[
         webPage({ path: "/", name: HOME_TITLE, description: HOME_DESC, about: "Business automation software" }),
         softwareApplication({ path: "/", name: "SelfRun AI", description: HOME_DESC, features: ["CRM and lead management", "HR and payroll", "Accounting and invoicing", "Project management", "Procurement", "Training management", "Website builder and CMS", "AI assistants", "Workflow automation", "White-label branding"] }),
-        itemList({ name: "SelfRun AI products", items: modules.map((m) => ({ name: m.name, path: productPath(m.key) })) }),
-      ]} />
+        itemList({ name: "SelfRun AI products", items: modules.map((m) => ({ name: m.name, path: productPath(m.key) })) }),, ...(plans.length ? [planOffers(plans.map((p) => ({ id: p.id, name: p.name, description: `${p.name} plan: every product and every feature.`, currency: p.currency, kind: p.kind, monthly: p.offer.monthly })))] : [])]} />
       {/* Hero */}
       <PageHero art="home"
         size="home"

@@ -25,9 +25,13 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
   const org = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${origin}/#organization`,
     name: SAAS_BRAND.name,
+    legalName: SAAS_BRAND.operator || undefined,
     url: origin,
-    logo: `${origin}${SAAS_BRAND.assets.mark}`,
+    logo: { "@type": "ImageObject", url: `${origin}${SAAS_BRAND.assets.mark}`, width: 512, height: 512 },
+    image: `${origin}${SAAS_BRAND.assets.logo}`,
+    brand: { "@type": "Brand", name: SAAS_BRAND.name },
     description: SAAS_BRAND.description,
     slogan: SAAS_BRAND.tagline,
     ...(sameAs.length ? { sameAs } : {}),
@@ -37,7 +41,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
       { "@type": "ContactPoint", contactType: "customer support", email: contact.support, availableLanguage: ["English"] },
     ],
   };
-  const site = { "@context": "https://schema.org", "@type": "WebSite", name: SAAS_BRAND.name, url: origin, inLanguage: "en-IN", publisher: { "@type": "Organization", name: SAAS_BRAND.name } };
+  const site = { "@context": "https://schema.org", "@type": "WebSite", "@id": `${origin}/#website`, name: SAAS_BRAND.name, alternateName: ["SelfRun", "SelfRun Business"], url: origin, inLanguage: "en-IN", publisher: { "@id": `${origin}/#organization` } };
   // The product's own colours (light by default, dark when chosen), set on the wrapper.
   return (
     <SrRoot>

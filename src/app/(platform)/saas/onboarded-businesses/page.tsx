@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -49,7 +49,7 @@ export default async function OnboardedBusinessesPage() {
 
   return (
     <>
-      <JsonLd data={[webPage({ type: "WebPage", path: "/onboarded-businesses", name: "Onboarded businesses", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Onboarded businesses", path: "/onboarded-businesses" }])]} />
+      <JsonLd data={[webPage({ type: "WebPage", path: "/onboarded-businesses", name: "Onboarded businesses", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Onboarded businesses", path: "/onboarded-businesses" }]), howTo({ path: "/onboarded-businesses", name: "How to get your business onboarded on SelfRun AI", description: first.goal, steps: first.actions.map((a, i) => ({ name: `Step ${i + 1}`, text: a })) })]} />
       <PageHero
         art="features"
         eyebrow="Businesses & clients"

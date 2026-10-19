@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, planOffers, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -42,7 +42,7 @@ export default async function PricingPage() {
   const rows = plans[0]?.limits.map((l) => l.key) ?? [];
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/pricing", name: "Pricing", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/pricing", name: "Pricing", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }]), planOffers(plans.map((p) => ({ id: p.id, name: p.name, description: p.description, currency: p.currency, kind: p.kind, monthly: p.offer.monthly, validUntil: endsAt ? new Date(endsAt).toISOString() : null })))]} />
       <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>

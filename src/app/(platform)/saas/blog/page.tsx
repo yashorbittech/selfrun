@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { blog, breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -69,7 +69,7 @@ export default function BlogIndexPage() {
 
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/blog", name: "Blog", description: "Practical guides on lead management, payroll, invoicing, social media, websites and automation: how to run and grow a business with SelfRun AI." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/blog", name: "Blog", description: "Practical guides on lead management, payroll, invoicing, social media, websites and automation: how to run and grow a business with SelfRun AI." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Blog", path: "/blog" }]), blog({ path: "/blog", name: "SelfRun AI blog and guides", description: "Practical guides on running and growing a business.", posts: POSTS.map((x) => ({ title: x.title, path: `/blog/${x.slug}`, date: x.date, author: x.author, description: x.summary })) })]} />
       <PageHero
         eyebrow="Practical Business Guides"
         title="Simple, proven advice"

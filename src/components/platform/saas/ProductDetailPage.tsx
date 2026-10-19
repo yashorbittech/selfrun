@@ -14,9 +14,9 @@ import DeviceScene from "@/components/platform/saas/DeviceScene";
 import { productDocsPath, productKeyFromSlug, productPath, productSlugFor } from "@/lib/platform/saas/product-routes";
 import { productShort } from "@/lib/platform/saas/product-short";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
-import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
+import { PRODUCT_AUDIENCE, PRODUCT_CATEGORY, PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
 import JsonLd from "@/components/platform/saas/JsonLd";
-import { breadcrumbList, faqPage, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, faqPage, howTo, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { productFaqs } from "@/lib/platform/saas/product-faq";
 import { DOCS } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
@@ -143,11 +143,18 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
   };
 
   const seoKeywords = PRODUCT_SEO[m.key]?.keywords ?? [];
+  const shots = [screenFor(m.key), ...extras.map((x) => screenFor(x.key))].filter((x): x is string => !!x);
+  const tagline = (PRODUCT_SEO[m.key]?.title ?? "").split(": ")[1] ?? "";
   const ld = [
-    softwareApplication({ path: productPath(m.key), name: m.name, description: `${m.headline}. ${m.summary}`, features: m.capabilities, keywords: seoKeywords }),
+    softwareApplication({
+      path: productPath(m.key), name: m.name, alternateName: m.name.replace(/^SelfRun\s+/i, ""), description: `${m.headline}. ${m.summary}`,
+      subCategory: PRODUCT_CATEGORY[m.key], audience: PRODUCT_AUDIENCE[m.key], features: m.capabilities, keywords: seoKeywords, screenshots: shots,
+      related: connects.map(({ o }) => ({ name: o.name, path: productPath(o.key) })),
+    }),
     webPage({ path: productPath(m.key), name: `${m.name}: ${PRODUCT_SEO[m.key]?.title ?? m.headline}`, description: `${m.headline}. ${m.summary}`, about: m.name }),
     breadcrumbList([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }, { name: m.name, path: productPath(m.key) }]),
     faqPage(faqs),
+    ...(detail?.workflow.length ? [howTo({ path: productPath(m.key), name: `How ${m.name} works`, description: `${m.headline}. ${m.summary}`, steps: detail.workflow.map((w) => ({ name: w.title, text: w.text })) })] : []),
   ];
 
   const endDot = (t: string) => (/[.!?]$/.test(t) ? t : `${t}.`);
@@ -170,7 +177,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
   return (
     <>
       <JsonLd data={ld} />
-      <PageHero art={`product-${m.key}`} eyebrow={`${total} features · ${m.headline}`} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
+      <PageHero art={`product-${m.key}`} eyebrow={`${tagline ? `${tagline} · ` : ""}${total} features`} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
         <HeroCtas />
       </PageHero>
 

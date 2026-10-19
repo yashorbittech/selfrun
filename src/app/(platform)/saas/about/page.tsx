@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, organizationPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
@@ -73,7 +73,7 @@ export default async function AboutPage() {
   const orbitPanels = modules.map((module) => ({ ...module, color: panelColor(module.key) }));
   return (
     <>
-      <JsonLd data={[webPage({ type: "AboutPage", path: "/about", name: "About us", description: "We believe a business should run itself. Learn what SelfRun AI builds, who it is for, how companies grow on it and the values behind 20 independent products." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "About us", path: "/about" }])]} />
+      <JsonLd data={[organizationPage({ type: "AboutPage", path: "/about", name: "About us", description: "We believe a business should run itself. Learn what SelfRun AI builds, who it is for, how companies grow on it and the values behind 20 independent products." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "About us", path: "/about" }])]} />
       <PageHero artContent={<AboutHeroArtwork panels={orbitPanels} brand={SAAS_BRAND.name} />}
         eyebrow="About SelfRun AI"
         title="We believe a business"

@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, imageGallery, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -30,7 +30,7 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   const { items, panels } = await getGallery();
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/gallery", name: "Product gallery", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/gallery", name: "Product gallery", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }]), imageGallery({ path: "/gallery", name: "SelfRun AI product gallery", description: "Real screens of every SelfRun AI product, captured in a demo workspace.", images: items.slice(0, 40).map((i) => ({ url: i.src, name: `${i.panel}: ${i.title}` })) })]} />
       <PageHero art="gallery" eyebrow={`${items.length} real screens · ${SAAS_PRODUCT_COUNT} products`} title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `${items.length} screens`, text: "Captured from the real product" }}>
         <HeroCtas />
       </PageHero>

@@ -107,3 +107,22 @@ export const BASE_KEYWORDS = [
   "business software for startups and SMEs",
   "automate business processes",
 ];
+
+/** schema.org `applicationSubCategory` for each product: what kind of software it is. */
+export const PRODUCT_CATEGORY: Record<string, string> = {
+  workspace: "Business automation software", hrms: "HR and payroll software", pms: "Project management software", lms: "CRM software",
+  fms: "Accounting and invoicing software", prms: "Procurement and asset management software", tms: "Learning and training management software",
+  messenger: "Team communication software", sop: "SOP and policy management software", lpms: "Contract management software",
+  dlms: "Document and password vault software", ots: "Online assessment software", aibots: "AI chatbot and assistant software",
+  intelligence: "Business intelligence software", smms: "Social media management software", seo: "SEO software",
+  cms: "Website builder and CMS", portal: "Client portal software", support: "Helpdesk and ticketing software", website: "Business website platform",
+};
+
+/** Who each product is for, as schema.org audiences. */
+export const PRODUCT_AUDIENCE: Record<string, string> = {
+  workspace: "Business owners and administrators", hrms: "HR teams and employees", pms: "Project managers, agencies and delivery teams", lms: "Sales teams and business owners",
+  fms: "Finance teams and business owners", prms: "Procurement and operations teams", tms: "Training institutes and corporate training teams", messenger: "Teams and companies",
+  sop: "Operations and compliance teams", lpms: "Legal, sales and operations teams", dlms: "Companies and IT administrators", ots: "Recruiters, institutes and trainers",
+  aibots: "Support teams and business owners", intelligence: "Managers and business owners", smms: "Marketing teams", seo: "Marketing teams and website owners",
+  cms: "Marketing teams and business owners", portal: "Agencies, institutes and service businesses", support: "Customer support teams", website: "Businesses of any size",
+};

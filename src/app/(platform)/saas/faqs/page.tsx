@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, faqPage, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -23,7 +23,7 @@ const NAV = [
 export default function FaqsPage() {
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/faqs", name: "FAQs", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/faqs", name: "FAQs", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }]), faqPage(FAQ_GROUPS.find((g) => g.id === "general")?.items.slice(0, 20).map(({ q, a }) => ({ q, a })) ?? [])]} />
       <PageHero
         art="features"
         eyebrow="SelfRun answers"

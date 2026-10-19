@@ -1,5 +1,4 @@
-import { PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
-import { article, breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, howTo, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";

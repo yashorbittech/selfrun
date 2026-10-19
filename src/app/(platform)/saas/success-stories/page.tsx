@@ -1,4 +1,4 @@
-import { breadcrumbList, webPage } from "@/lib/platform/saas/jsonld";
+import { breadcrumbList, itemList, webPage } from "@/lib/platform/saas/jsonld";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
@@ -59,7 +59,7 @@ export default async function SuccessStoriesPage() {
 
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/success-stories", name: "Customer stories", description: "See how work can connect across teams: customer stories published with approval, and product stories grounded in what SelfRun AI really does." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Success stories", path: "/success-stories" }])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/success-stories", name: "Customer stories", description: "See how work can connect across teams: customer stories published with approval, and product stories grounded in what SelfRun AI really does." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Success stories", path: "/success-stories" }]), itemList({ name: "SelfRun AI product stories", items: USE_CASES.map((u) => ({ name: u.title, path: "/success-stories#library" })) })]} />
       <PageHero
         art="features"
         eyebrow="Customer stories & workflows"
