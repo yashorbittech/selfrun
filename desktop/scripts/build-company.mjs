@@ -55,7 +55,8 @@ if (brand.app !== "selfrun-desktop") fail("That address is not a SelfRun workspa
 const host = new URL(brand.origin || origin).hostname;
 const slug = host.replace(/^app\./, "").replace(/-app(\.|$)/, "$1").replace(/\..*$/, "").replace(/[^a-z0-9-]/g, "") || "workspace";
 const productName = brand.name.replace(/[\\/:*?"<>|]/g, "").trim().slice(0, 60) || "Workspace";
-const appId = `com.selfrun.${slug.replace(/-/g, "")}`;
+// The app's identity is the company's own, never the platform's: its id comes from the company's address.
+const appId = `app.${/^[a-z]/.test(slug.replace(/-/g, "")) ? slug.replace(/-/g, "") : `c${slug.replace(/-/g, "")}`}.desktop`;
 const out = path.resolve(opt("out") || path.join(root, "dist-company", slug));
 const buildDir = path.join(root, "build", `company-${slug}`);
 
@@ -83,7 +84,8 @@ const config = {
   copyright: `© ${new Date().getFullYear()} ${productName}`,
   artifactName: `${productName.replace(/\s+/g, "-")}-\${version}-\${os}-\${arch}.\${ext}`,
   directories: { ...base.directories, output: out, buildResources: buildDir },
-  extraMetadata: { name: `${slug}-desktop`, productName, description: brand.description || `${productName} desktop app`, version: opt("version") || pkg.version },
+  extraMetadata: { name: `${slug}-desktop`, desktopName: `${slug}-desktop.desktop`, author: { name: productName, email: `noreply@${host.replace(/^app\./, "")}` }, homepage: brand.origin || origin, productName, description: brand.description || `${productName} desktop app`, version: opt("version") || pkg.version },
+  linux: { ...base.linux, executableName: `${slug}-desktop`, icon: path.join(buildDir, "icon.png"), maintainer: `${productName} <noreply@${host.replace(/^app\./, "")}>`, vendor: productName },
   nsis: { ...base.nsis, shortcutName: productName, uninstallDisplayName: productName },
 };
 const cfgFile = path.join(buildDir, "electron-builder.json");

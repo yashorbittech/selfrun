@@ -75,7 +75,7 @@ export function userAgentKind(ua: string): "browser" | "search-bot" | "scripted"
   if (!ua || ua.length < 8) return "scripted";
   if (AI_SCRAPERS.test(ua)) return "scripted";
   if (SEARCH_BOTS.test(ua)) return "search-bot";
-  if (/SelfRunDesktop\//.test(ua)) return "browser";
+  if (/WorkspaceDesktop\//.test(ua)) return "browser";
   if (SCRIPTED.test(ua)) return "scripted";
   return /mozilla\//i.test(ua) ? "browser" : "scripted";
 }
@@ -116,7 +116,7 @@ async function browserOrigin(req: NextRequest, host: string, companyId: string |
   const site = h.get("sec-fetch-site");
   if (site === "cross-site") return false;
   if (origin && origin !== "null") return sameTenant(host, origin, companyId);
-  if (origin === "null") return /SelfRunDesktop\//.test(h.get("user-agent") ?? "");
+  if (origin === "null") return /WorkspaceDesktop\//.test(h.get("user-agent") ?? "");
   if (site === "same-origin" || site === "same-site") return true;
   if (referer) return sameTenant(host, referer, companyId);
   if (site === "none") return null;

@@ -9,10 +9,10 @@ import { resolvedRootDomain } from "@/lib/platform/integrations/store";
 import { saasAppOrigin } from "@/lib/platform/saas/hosts";
 import { buildsCol, emptyPlatforms, overallStatus, platformsOf, recentBuilds, type BuildDoc } from "@/lib/apps/store";
 import { APP_PLATFORMS, SCOPE_PLATFORMS, type BuildTrigger, type GenerationScope } from "@/lib/apps/types";
-import { getAppSettings } from "@/lib/pwa/store";
 
 /**
- * Creates and starts a company's desktop-app build. The build itself runs on a build service (a GitHub Actions workflow, see
+ * Creates and starts a company's app build, ONLY when a person presses a Generate button (one per platform) on Settings → Apps:
+ * nothing is built automatically, not at onboarding, not after a rename, not by the daily job. The build itself runs on a build service (a GitHub Actions workflow, see
  * `.github/workflows/desktop.yml`) that this hands the work to and that reports back to `/api/apps/builds/callback`.
  * Needs three settings on the platform: GITHUB_DISPATCH_TOKEN (can start workflows), GITHUB_REPOSITORY (`owner/repo`) and
  * DESKTOP_BUILD_SECRET (shared with the workflow). Until they exist builds wait in the queue and start the moment they do.
@@ -44,25 +44,21 @@ export async function currentBuildInput(companyId: string): Promise<BuildInput> 
   });
 }
 
-export type EnqueueResult = { ok: true; id: string; created: boolean } | { ok: false; reason: "up-to-date" | "in-progress" | "automatic-off" | "error"; message: string };
-
-/** Whether this company lets the platform build its apps by itself. */
-export async function automaticEnabled(companyId: string): Promise<boolean> {
-  return runAsCompany(companyId, async () => (await getAppSettings()).settings.generation.automatic);
-}
+export type EnqueueResult = { ok: true; id: string; created: boolean } | { ok: false; reason: "up-to-date" | "in-progress" | "error"; message: string };
 
 export async function enqueueBuild(companyId: string, trigger: BuildTrigger, opts: { force?: boolean; scope?: GenerationScope } = {}): Promise<EnqueueResult> {
   const scope = opts.scope ?? "all";
   try {
-    // Everything except a person pressing Generate follows the company's "generate automatically" choice.
-    if (trigger !== "manual" && !(await automaticEnabled(companyId))) return { ok: false, reason: "automatic-off", message: "Automatic generation is switched off." };
     const col = await buildsCol();
-    const recent = await recentBuilds(companyId, 10);
-    const active = recent.find((b) => ["queued", "building"].includes(overallStatus(b)) && Date.now() - b.requestedAt.getTime() < BUILD_TIMEOUT_MS);
+    const recent = await recentBuilds(companyId, 20);
+    const wanted = new Set<string>(SCOPE_PLATFORMS[scope]);
+    // Only a build that covers one of the same platforms blocks this one: Android can be generated while Windows is building.
+    const covering = (b: BuildDoc) => SCOPE_PLATFORMS.all.some((p) => wanted.has(p) && platformsOf(b)[p].status !== "skipped" && !["ready", "failed"].includes(platformsOf(b)[p].status));
+    const active = recent.find((b) => ["queued", "building"].includes(overallStatus(b)) && Date.now() - b.requestedAt.getTime() < BUILD_TIMEOUT_MS && covering(b));
     if (active) {
       // Handed over nothing yet (no build service was connected): try again now.
       if (!active.dispatchedAt && buildsConfigured()) await dispatchBuild(active);
-      return { ok: false, reason: "in-progress", message: "A build is already in progress." };
+      return { ok: false, reason: "in-progress", message: "A build of this app is already in progress." };
     }
     const input = await currentBuildInput(companyId);
     const lastReady = recent.find((b) => overallStatus(b) === "ready" && SCOPE_PLATFORMS[scope].every((p) => platformsOf(b)[p].status === "ready"));
@@ -71,7 +67,7 @@ export async function enqueueBuild(companyId: string, trigger: BuildTrigger, opt
     const doc: BuildDoc = {
       _id: randomUUID(),
       companyId,
-      version: `1.0.${(await col.countDocuments({ companyId })) + 1}`,
+      version: `1.0.${(await col.countDocuments({ companyId, ...(SCOPE_PLATFORMS[scope].length === 1 ? { [`platforms.${SCOPE_PLATFORMS[scope][0]}.status`]: { $nin: ["skipped"] } } : {}) })) + 1}`,
       trigger,
       scope,
       input,
@@ -136,26 +132,19 @@ async function failStale(b: BuildDoc): Promise<void> {
 }
 
 export interface CronReport {
-  generated: number;
   dispatched: number;
-  retried: number;
   timedOut: number;
-  rebuilt: number;
 }
 
 /**
- * Daily housekeeping, so nothing depends on a person remembering:
- *  1. companies that finished onboarding and have no apps yet get them (covers companies finished before this existed);
- *  2. builds still waiting for a build service are handed over once one is connected;
- *  3. builds that never finished are failed, and retried (up to 3 attempts);
- *  4. companies whose name or icon changed get rebuilt installers (when their "automatic rebuild" option is on).
+ * Daily housekeeping for builds a person already asked for. It NEVER starts a build by itself:
+ *  1. builds that were requested while no build service was connected are handed over once one is;
+ *  2. builds that never finished are marked failed, so the Generate button comes back.
  */
 export async function runBuildCron(): Promise<CronReport> {
-  const report: CronReport = { generated: 0, dispatched: 0, retried: 0, timedOut: 0, rebuilt: 0 };
-  const platform = await getPlatformDb();
+  const report: CronReport = { dispatched: 0, timedOut: 0 };
   const col = await buildsCol();
 
-  // 3. timeouts first, so a company with a stuck build can get a fresh one below
   const stale = await col.find({ dispatchedAt: { $lt: new Date(Date.now() - BUILD_TIMEOUT_MS) }, finishedAt: null }).limit(200).toArray();
   for (const b of stale) {
     if (["ready", "failed"].includes(overallStatus(b))) continue;
@@ -163,33 +152,8 @@ export async function runBuildCron(): Promise<CronReport> {
     report.timedOut++;
   }
 
-  // 2. waiting for a build service
   if (buildsConfigured()) {
     for (const b of await col.find({ dispatchedAt: null, finishedAt: null }).limit(100).toArray()) if (await dispatchBuild(b)) report.dispatched++;
-  }
-
-  const companies = await platform
-    .collection<Company & { onboarding?: { completedAt?: Date | null } }>(COMPANIES_COLLECTION)
-    .find({ status: "active", isPlatformOwner: { $ne: true }, "onboarding.completedAt": { $ne: null } }, { projection: { _id: 1 } })
-    .limit(2000)
-    .toArray();
-  for (const c of companies) {
-    const recent = await recentBuilds(c._id, 5);
-    if (recent.length === 0) {
-      // 1. no apps yet
-      if ((await enqueueBuild(c._id, "onboarding")).ok) report.generated++;
-      continue;
-    }
-    const newest = recent[0];
-    const status = overallStatus(newest);
-    if (status === "failed" && newest.attempts < MAX_ATTEMPTS && !recent.some((b) => b !== newest && overallStatus(b) === "building")) {
-      if ((await enqueueBuild(c._id, "retry", { force: true })).ok) report.retried++;
-      continue;
-    }
-    if (status === "ready" && Date.now() - (newest.finishedAt ?? newest.requestedAt).getTime() > 60 * 60_000) {
-      const autoRebuild = await runAsCompany(c._id, async () => (await (await import("@/lib/pwa/store")).getAppSettings()).settings.desktop.autoRebuild);
-      if (autoRebuild && (await enqueueBuild(c._id, "branding")).ok) report.rebuilt++;
-    }
   }
   return report;
 }

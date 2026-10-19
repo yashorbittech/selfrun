@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { jsonForScript } from "@/lib/security/json-script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -74,9 +75,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-/** Phones: full-bleed under the notch (the app uses safe-area insets) and a themed browser/status bar in the app. */
+/**
+ * Phones: full-bleed under the notch and a themed browser/status bar in the app. The pages do not pad for the notch or the status bar,
+ * so inside the Android and iOS apps (their user agent ends with "WorkspaceNative", set in mobile/scripts/build-company-mobile.mjs)
+ * the page is not drawn under the system bars: without this the header sits under the status bar and cannot be tapped.
+ */
 export async function generateViewport(): Promise<Viewport> {
-  const base: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
+  const nativeShell = ((await headers()).get("user-agent") ?? "").includes("WorkspaceNative");
+  const base: Viewport = nativeShell ? { width: "device-width", initialScale: 1 } : { width: "device-width", initialScale: 1, viewportFit: "cover" };
   if (!(await onAppSurface())) return base;
   const pwa = await getPwaIdentity().catch(() => null);
   return pwa ? { ...base, themeColor: [{ media: "(prefers-color-scheme: light)", color: pwa.themeColor }, { media: "(prefers-color-scheme: dark)", color: pwa.themeColorDark }], colorScheme: "light dark" } : base;

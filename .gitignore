@@ -46,3 +46,14 @@ next-env.d.ts
 
 # Local setup notes with real values
 SETUP.local.md
+
+# Built apps (desktop and mobile)
+/desktop/node_modules
+/desktop/dist
+/desktop/dist-company
+/desktop/brand.json
+/desktop/brand.json.bak
+/desktop/build/company-*
+/mobile/node_modules
+/mobile/work
+/mobile/dist-mobile

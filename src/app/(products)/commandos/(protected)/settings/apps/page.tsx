@@ -15,7 +15,7 @@ import { getAppsOverview } from "@/lib/apps/overview";
 import { availableAppPanels } from "@/lib/pwa/panels";
 import { getAppSettings } from "@/lib/pwa/store";
 import { saveAppSettingsAction, resetAppSettingsAction, uploadAppIconAction } from "../app/actions";
-import { buildAppsAction, setAutomaticAction } from "./actions";
+import { buildAppAction } from "./actions";
 
 export const metadata: Metadata = { title: "Apps", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -41,13 +41,13 @@ export default async function AppsPage() {
       <PanelPageHeader
         breadcrumbs={[{ label: "Company settings", href: "/commandos/settings" }, { label: "Apps" }]}
         title={<>Apps</>}
-        description={<>{brand.name}&apos;s own apps: a PWA for every device, native Android and iOS apps, and Windows, macOS and Linux desktop apps. They are generated automatically when you finish setup (or manually, whenever you like), with your name, logo and colours.</>}
+        description={<>{brand.name}&apos;s own apps: a PWA for every device, native Android and iOS apps, and Windows, macOS and Linux desktop apps. Each one is generated only when you press its Generate button, with your name, logo and colours.</>}
       />
       <AppsTabs
         initial={overview}
         brand={{ name: identity.name, shortName: identity.shortName, description: identity.description, themeColor: identity.themeColor, backgroundColor: identity.backgroundColor, version: identity.version, logoUrl: brand.logoUrl, initials: brandInitials(brand.name) || "•", primary: tokens.colors.primary, primaryForeground: tokens.colors.primaryForeground }}
         qr={await qrSvg(`https://${overview.appAddress}`)}
-        actions={{ build: buildAppsAction, setAutomatic: setAutomaticAction }}
+        actions={{ build: buildAppAction }}
       />
       <div className="space-y-3">
         <div>

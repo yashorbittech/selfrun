@@ -215,10 +215,6 @@ export default function AppSettingsForm({ initial, company, theme, panels, actio
         <GlassCard containerClassName="h-auto" className="space-y-4 p-5">
           <h2 className="text-base font-semibold">Desktop apps</h2>
           <label className="flex items-start gap-2.5">
-            <Checkbox checked={s.desktop.autoRebuild} onCheckedChange={(v) => set({ desktop: { ...s.desktop, autoRebuild: v === true } })} className="mt-0.5" />
-            <span><span className="block text-sm">Rebuild the apps automatically when the name or icon changes</span><span className="block text-xs text-muted-foreground">New Windows, macOS, Linux, Android and iOS builds within a day (only while automatic generation is on). Everything else (colours, shortcuts, start page) already reaches every installed app without a new download.</span></span>
-          </label>
-          <label className="flex items-start gap-2.5">
             <Checkbox checked={s.desktop.closeToTray} onCheckedChange={(v) => set({ desktop: { ...s.desktop, closeToTray: v === true } })} className="mt-0.5" />
             <span><span className="block text-sm">Keep running in the tray when the window is closed</span><span className="block text-xs text-muted-foreground">So notifications keep arriving. This is the starting choice for each person; they can change it in the tray menu.</span></span>
           </label>

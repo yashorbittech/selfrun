@@ -34,7 +34,7 @@ export interface ClientInfo {
 }
 
 export function parseUserAgent(ua: string): DeviceInfo {
-  const app = /SelfRunDesktop\/[\d.]+/.test(ua) ? "Desktop app" : null;
+  const app = /WorkspaceDesktop\/[\d.]+/.test(ua) ? "Desktop app" : null;
   let browser = "Browser";
   if (/Edg(e|A|iOS)?\//.test(ua)) browser = "Edge";
   else if (/OPR\/|Opera/.test(ua)) browser = "Opera";

@@ -38,7 +38,7 @@ website and everything is created for them.
 12. [Test the whole flow](#12-test-the-whole-flow)
 13. [Optional: payments (Razorpay)](#13-optional-payments-razorpay)
 14. [Optional: customers' own domains](#14-optional-customers-own-domains)
-15. [Optional: automatic desktop and mobile apps](#15-optional-automatic-desktop-and-mobile-apps)
+15. [Optional: desktop and mobile apps](#15-optional-desktop-and-mobile-apps)
 16. [Scheduled jobs](#16-scheduled-jobs-cron)
 17. [Troubleshooting](#troubleshooting)
 18. [Appendix: every variable at a glance](#appendix-every-variable-at-a-glance)
@@ -61,7 +61,7 @@ website and everything is created for them.
 | 10 | Email (Resend) | 20 min | For sign-up emails | `RESEND_API_KEY` |
 | 11 | First sign-in and Platform Console | 10 min | Yes | Plans and settings |
 | 12 | Test the whole flow | 30 min | Recommended | Proof it works |
-| 13 to 15 | Payments, customers' domains, automatic apps | 20 + 15 + 40 min | Optional | Extras |
+| 13 to 15 | Payments, customers' domains, desktop and mobile apps | 20 + 15 + 40 min | Optional | Extras |
 
 > [!TIP]
 > Steps 1 to 9 put the product website live. You can stop after step 9 and come back for the rest.
@@ -520,7 +520,7 @@ Do this once after the first deployment. Use a throwaway company.
 - **12.7** **Website push.** In `testco`'s products open **CMS → Push notifications**, switch on *Website notifications*, save. On
   `https://testco.selfrunbusiness.com` a bell appears. Allow notifications, choose topics, then send one from the CMS page and check it arrives.
 
-- **12.8** **Apps page.** In `testco`'s products open **Settings → Apps & downloads**. The PWA tab shows the address, QR code and previews. (The Mobile and Desktop tabs build automatically once step 15 is done.)
+- **12.8** **Apps page.** In `testco`'s products open **Settings → Apps & downloads**. The PWA tab shows the address, QR code and previews. (The Mobile and Desktop tabs have a **Generate … App** button for each app; they build once step 15 is done.)
 
 - **12.9** (Optional) Fill the test company with demo data: put the production `MONGODB_URI` in a local `.env` **only for this throwaway company** and run `npm run demo:seeders -- --company testco`. Never do this for a real company.
 
@@ -583,12 +583,13 @@ You can see every company's domains in Platform Console → **Domains & SSL**.
 
 ---
 
-## 15. Optional: automatic desktop and mobile apps
+## 15. Optional: desktop and mobile apps
 
-⏱ *40 min · optional · you get: automatic desktop and mobile apps for every company*
+⏱ *40 min · optional · you get: Windows, macOS, Linux, Android and iOS apps that a company generates with one button each*
 
-Every company gets **Windows, macOS, Linux, Android and iOS** apps generated for it automatically when it completes onboarding (and
-again when its name or icon changes). A company can also press **Generate manually** on its Apps page. The platform hands each build to a
+A company gets **Windows, macOS, Linux, Android and iOS** apps with its own name, icon and colours. **Nothing is built automatically**: a Super Admin
+presses **Generate Android App**, **Generate iOS App**, **Generate Windows App**, **Generate macOS App** or **Generate Linux App** on **Settings → Apps**, and
+only that app is built. The platform hands each build to a
 **GitHub Actions workflow** (`.github/workflows/desktop.yml`), which builds the apps, publishes them to a public releases repository, and
 reports the download links back. Set this up once:
 
@@ -624,15 +625,14 @@ reports the download links back. Set this up once:
 
 Then **redeploy**.
 
-- **15.7** **Test.** Complete onboarding for a test company (or open its **Apps & downloads** page and press **Generate manually** on the Desktop tab). The page
+- **15.7** **Test.** Open a test company's **Apps & downloads** page and press **Generate Windows App** (or any other platform's button) on the Desktop or Mobile tab. Nothing builds until you press one. The page
   shows **Building**, and 10 to 20 minutes later download buttons appear. In GitHub → **Actions** you can watch the run.
 
 > ✅ **Checkpoint:** the run in GitHub Actions is green, the releases repository has a new release with the files, and the company's Apps page shows **Ready**.
 
 Until 15.6 is done, builds wait in the queue ("Waiting for the build service") and start by themselves once it is. Good to know:
-- Costs: GitHub Actions minutes (macOS minutes cost more). A build runs only when a company finishes onboarding, changes its name or icon, or presses Generate.
+- Costs: GitHub Actions minutes (macOS minutes cost more). A build runs only when a Super Admin presses a Generate button; nothing starts by itself.
 - The installers are not code-signed until you add certificates, so macOS and Windows show a warning the first time they are opened. The Android APK is debug-signed (install once allows "unknown apps"); iPhone apps are delivered as an Xcode project the company signs with its own Apple account.
-- Optional: `DESKTOP_DOWNLOAD_URL` (a page with the generic installer; `{address}` is replaced by the company's app address) shows as "Need it right now?" on the Apps page.
 
 ---
 
@@ -653,7 +653,7 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 | `/api/platform/domains/cron` | 05:30 | Re-checks custom domains |
 | `/api/platform/billing/trials/cron` | 06:00 | Trial reminders and expiry |
 | `/api/platform/billing/subscriptions/cron` | 06:00 | Renewals and grace periods |
-| `/api/apps/builds/cron` | 07:00 | Generates missing apps, restarts stuck builds, rebuilds after a rename or new icon |
+| `/api/apps/builds/cron` | 07:00 | Hands over builds a person already requested, and fails builds that never finished (never starts one) |
 
 To confirm they are registered: Vercel → project → **Settings → Cron Jobs**. Vercel's Hobby plan allows daily schedules only; these are all daily.
 
@@ -729,5 +729,5 @@ domains, team members). Every company uses two of your plan's domain slots if yo
 | `PLATFORM_WILDCARD_SUBDOMAINS` (`1`) | Option A | Step 8 A.6 |
 | `DOMAIN_PROVIDER` (`vercel`), `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` | Option B and customers' domains | Step 14 |
 | `RAZORPAY_BILLING_WEBHOOK_SECRET` | For billing | Step 13 |
-| `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET` | For automatic apps | Step 15 |
-| `DESKTOP_RELEASES_REPO`, `GITHUB_WORKFLOW_FILE`, `GITHUB_WORKFLOW_REF`, `DESKTOP_DOWNLOAD_URL` | Optional | Step 15 |
+| `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET` | For the Generate buttons | Step 15 |
+| `DESKTOP_RELEASES_REPO`, `GITHUB_WORKFLOW_FILE`, `GITHUB_WORKFLOW_REF` | Optional | Step 15 |

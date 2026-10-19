@@ -31,6 +31,8 @@ const rootDomain = () => store.loadConfig().rootDomain || embedded.rootDomain ||
 
 let win = null;
 let setupWin = null;
+/** The app's own icon, used by the connect screen and until a workspace has given its own. */
+const DEFAULT_ICON = nativeImage.createFromPath(path.join(__dirname, "assets", "icon.png"));
 let tray = null;
 let origin = null;
 let brand = null;
@@ -58,7 +60,7 @@ app.setAppUserModelId(embedded.appId || "com.selfrun.desktop");
 
 async function start() {
   const ua = session.defaultSession.getUserAgent().replace(/\sElectron\/\S+/, "");
-  session.defaultSession.setUserAgent(`${ua} SelfRunDesktop/${app.getVersion()}`);
+  session.defaultSession.setUserAgent(`${ua} WorkspaceDesktop/${app.getVersion()}`);
   lockDownPermissions();
 
   const wanted = embedded.address || arg("address") || process.env.SELFRUN_ADDRESS || store.loadConfig().origin;
@@ -158,7 +160,7 @@ function createWindow() {
     show: false,
     title: brand.name,
     backgroundColor: brand.backgroundColor,
-    ...(brand.icon && !isMac ? { icon: brand.icon.image } : {}),
+    ...(!isMac ? { icon: brand.icon ? brand.icon.image : DEFAULT_ICON } : {}),
     webPreferences: webPrefs(),
   });
   if (store.loadConfig().maximized) win.maximize();
@@ -341,7 +343,7 @@ function buildMenu() {
 
 function showSetup() {
   if (setupWin && !setupWin.isDestroyed()) return setupWin.focus();
-  setupWin = new BrowserWindow({ width: 480, height: 540, resizable: false, minimizable: false, maximizable: false, title: "Connect your workspace", webPreferences: webPrefs() });
+  setupWin = new BrowserWindow({ width: 640, height: 720, minWidth: 480, minHeight: 600, center: true, minimizable: true, maximizable: false, title: "Connect your workspace", ...(!isMac ? { icon: DEFAULT_ICON } : {}), webPreferences: webPrefs() });
   setupWin.setMenu(null);
   void setupWin.loadFile(path.join(__dirname, "pages", "setup.html"));
   setupWin.on("closed", () => {

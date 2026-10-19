@@ -13,7 +13,8 @@ One Next.js app and one MongoDB database serve three audiences:
 | **Platform staff** | The Platform Console: companies, plans, billing, coupons, domains, support and platform settings |
 
 For what every product does, see [docs/products.md](./docs/products.md). Architecture and deployment details are in
-[docs/architecture.md](./docs/architecture.md) and [docs/deploy-vercel.md](./docs/deploy-vercel.md).
+[docs/architecture.md](./docs/architecture.md) and [docs/deploy-vercel.md](./docs/deploy-vercel.md). To build and install the Linux, Windows, macOS,
+Android and iOS apps, follow [docs/build-apps.md](./docs/build-apps.md).
 
 > **Next.js 16.** APIs and file conventions differ from older versions (for example `src/proxy.ts` replaces
 > middleware). Read the relevant guide in `node_modules/next/dist/docs/` before writing framework-level code.
@@ -301,21 +302,23 @@ Every image the apps need is **generated from the company's own name, logo and c
 density and size, Android adaptive and round icons, Play Store icon and feature graphic, the iOS icon set, splash screens, and the
 desktop icons. Each tab has a downloadable asset pack (ZIP). Change the name, logo or colours and all of it follows.
 
-**Two ways to generate.** Each of the Mobile and Desktop tabs shows both:
+**One button per app, pressed by a person.** Nothing is ever built automatically: not when onboarding finishes, not after a rename or
+a new icon, not by a daily job. On the Mobile and Desktop tabs each platform has its own button, a Super Admin presses the ones needed,
+and only that app is built: **Generate Android App**, **Generate iOS App**, **Generate Windows App**, **Generate macOS App**,
+**Generate Linux App**. After an app exists the button reads **Regenerate …**. Android can be generated while Windows is building;
+the same app cannot be started twice at once.
 
-- **Automatic** (on by default, switchable): the moment a company completes onboarding, its apps are queued and handed to the
-  build service (a GitHub Actions workflow); after a rename or new icon they are rebuilt; a daily job fills in anything missing.
-  While an automatic build is running, the **Generate manually** button stays visible but paused, with a message saying why. If
-  automatic generation isn't producing anything (the build service isn't connected, or the last build failed), the button becomes
-  available with a message so the company can generate by hand. With automatic generation switched off, manual is the only way.
-- **Manual**: the **Generate manually** button starts a build of that tab's apps right now.
+A press hands the build to the build service (a GitHub Actions workflow). It reports back, and the download links appear on the Apps
+page, which updates while it waits. The daily job only hands over builds a person already asked for (when the build service was not yet
+connected) and marks builds that never finished as failed so the button comes back; it never starts one. If the company changes its name or
+icon, the page says so and offers **Regenerate**.
 
-Each platform of a build reports back and the download links appear on the Apps page, which updates while it waits. A daily
-job generates apps for companies that finished onboarding earlier, restarts builds that never finished (up to 3 tries), and
-rebuilds the apps when the company's name or icon changes (switchable).
-Colours, shortcuts and the start page need no rebuild: every installed desktop app reads them from the server. One-time platform setup:
-[docs/deploy-vercel.md](./docs/deploy-vercel.md#15-optional-automatic-desktop-and-mobile-apps). Until the build service is connected, builds wait in
-the queue and start by themselves once it is.
+**Every app is the company's own.** Name, short name, icon, splash, colours, start page and shortcuts all come from the company's branding
+and Workspace → Settings → Apps; the installers, the app ids (`app.<company>.desktop`, `app.<company>.mobile`), the publisher and maintainer
+fields and the window and notification names are the company's, and nothing of the platform's brand is shown. Colours, shortcuts and the
+start page need no rebuild: every installed app reads them from the server. One-time platform setup:
+[docs/deploy-vercel.md](./docs/deploy-vercel.md#15-optional-desktop-and-mobile-apps). Until the build service is connected, a press waits
+in the queue and starts by itself once it is.
 
 ### Desktop app (Windows, macOS, Linux)
 
@@ -444,7 +447,7 @@ scripts/
   demo/                Demo data modules, one per product
   test-*.ts, e2e/      Verification scripts
 public/selfrun/        Logo, mark and favicon
-docs/                  Architecture and deployment guides
+docs/                  Architecture, deployment and app build guides (build-apps.md)
 ```
 
 ---

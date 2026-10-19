@@ -413,7 +413,7 @@ export interface BrandPoint {
 }
 export const YOUR_BRAND: BrandPoint[] = [
   { key: "branding", title: "Your logo, name & colours", text: "Set once — applied across every product, email and PDF your company sends.", icon: "target", shot: "branding" },
-  { key: "apps", title: "Your own apps", text: "Your company's own apps for phones and for Windows, macOS and Linux — generated automatically, with your name and icon.", icon: "rocket", shot: "apps" },
+  { key: "apps", title: "Your own apps", text: "Your company's own apps for phones and for Windows, macOS and Linux — generated with one button each, with your name and icon.", icon: "rocket", shot: "apps" },
   { key: "domains", title: "Your own domain", text: "Your website and workspace on your domain, with automatic SSL.", icon: "globe", shot: "domains" },
   { key: "themes", title: "Multiple themes", text: "Pick and customise website themes with live preview — colours, fonts and layouts.", icon: "layers", shot: "cms-theme" },
   { key: "push", title: "Your push notifications", text: "Reach your team and your website visitors on their devices, in your name.", icon: "megaphone", shot: "cms-push" },

@@ -7,16 +7,29 @@ export type DesktopPlatform = (typeof DESKTOP_PLATFORMS)[number];
 export type MobilePlatform = (typeof MOBILE_PLATFORMS)[number];
 export type AppPlatform = (typeof APP_PLATFORMS)[number];
 
-/** What a generation covers. The PWA needs no build, so it isn't a scope. */
-export type GenerationScope = "all" | "desktop" | "mobile";
-export const SCOPE_PLATFORMS: Record<GenerationScope, readonly AppPlatform[]> = { all: APP_PLATFORMS, desktop: DESKTOP_PLATFORMS, mobile: MOBILE_PLATFORMS };
+/**
+ * What one press of a Generate button covers: a single platform. (`all`, `desktop` and `mobile` are kept for older records and
+ * for the build service; the Apps page only ever asks for one platform.) The PWA needs no build, so it isn't a scope.
+ */
+export type GenerationScope = "all" | "desktop" | "mobile" | AppPlatform;
+export const SCOPE_PLATFORMS: Record<GenerationScope, readonly AppPlatform[]> = {
+  all: APP_PLATFORMS,
+  desktop: DESKTOP_PLATFORMS,
+  mobile: MOBILE_PLATFORMS,
+  win: ["win"],
+  mac: ["mac"],
+  linux: ["linux"],
+  android: ["android"],
+  ios: ["ios"],
+};
+export const isAppPlatform = (v: unknown): v is AppPlatform => typeof v === "string" && (APP_PLATFORMS as readonly string[]).includes(v);
 
-export const PLATFORM_META: Record<AppPlatform, { label: string; hint: string }> = {
-  win: { label: "Windows", hint: "Windows 10 and 11" },
-  mac: { label: "macOS", hint: "macOS 11 or newer" },
-  linux: { label: "Linux", hint: "AppImage for any distribution, .deb for Debian and Ubuntu" },
-  android: { label: "Android", hint: "Android 7 or newer: an installable APK and the Android Studio project" },
-  ios: { label: "iOS", hint: "iPhone and iPad: the Xcode project, ready to sign with your Apple Developer account" },
+export const PLATFORM_META: Record<AppPlatform, { label: string; hint: string; /** The button's words. */ cta: string }> = {
+  win: { label: "Windows", hint: "Windows 10 and 11: an installer (.exe)", cta: "Generate Windows App" },
+  mac: { label: "macOS", hint: "macOS 11 or newer: a disk image (.dmg)", cta: "Generate macOS App" },
+  linux: { label: "Linux", hint: "AppImage for any distribution, .deb for Debian and Ubuntu", cta: "Generate Linux App" },
+  android: { label: "Android", hint: "Android 7 or newer: an installable APK and the Android Studio project", cta: "Generate Android App" },
+  ios: { label: "iOS", hint: "iPhone and iPad: the Xcode project, ready to sign with your Apple Developer account", cta: "Generate iOS App" },
 };
 
 /** `skipped`: this build was started for other platforms only. */
@@ -52,18 +65,14 @@ export interface BuildView {
   attempts: number;
 }
 
-/** Why the manual "Generate" button is, or isn't, available for a group of apps. */
-export type ManualState =
-  /** Nothing is running: generate whenever you like. */
+/** Whether one platform's Generate button can be pressed, and if not, why. */
+export type PlatformAction =
+  /** Press it whenever you like. */
   | { kind: "ready" }
-  /** Automatic generation is running right now. */
-  | { kind: "auto-running"; since: string }
-  /** Automatic generation is on but isn't producing anything (no build service, or it failed): generate by hand. */
-  | { kind: "auto-stalled"; reason: string }
-  /** Automatic generation is switched off for this company. */
-  | { kind: "auto-off" }
-  /** A manual build is running. */
-  | { kind: "manual-running"; since: string };
+  /** A build of this platform is running. */
+  | { kind: "running"; since: string }
+  /** The build service is not connected on this platform, so nothing can be built yet. */
+  | { kind: "unavailable"; reason: string };
 
 /** What the Apps page shows. */
 export interface AppsOverview {
@@ -71,16 +80,12 @@ export interface AppsOverview {
   configured: boolean;
   /** The company's name or icon changed since the installers were built. */
   outdated: boolean;
-  /** "Generate automatically": on onboarding, after a rename, and daily housekeeping. */
-  automatic: boolean;
-  onboardingDone: boolean;
   active: BuildView | null;
   /** The newest build, whatever its state (to show per-platform failures). */
   latest: BuildView | null;
   downloads: Record<AppPlatform, { version: string; builtAt: string; files: BuildFile[] } | null>;
-  manual: Record<"desktop" | "mobile", ManualState>;
-  /** Where the generic desktop installer is, when the platform provides one. */
-  genericUrl: string | null;
+  /** One Generate button per platform. Nothing is ever built unless a person presses one. */
+  actions: Record<AppPlatform, PlatformAction>;
   appAddress: string;
   lastError: string | null;
 }

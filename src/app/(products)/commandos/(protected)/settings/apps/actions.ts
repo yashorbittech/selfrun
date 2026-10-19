@@ -5,8 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { enqueueBuild } from "@/lib/apps/enqueue";
-import { getAppSettings, saveAppSettings } from "@/lib/pwa/store";
-import type { GenerationScope } from "@/lib/apps/types";
+import { isAppPlatform, PLATFORM_META, type AppPlatform } from "@/lib/apps/types";
 
 async function requireOwner() {
   const user = await getCurrentHubUser();
@@ -14,21 +13,16 @@ async function requireOwner() {
   if (!user.roles.includes("super_admin")) redirect("/commandos");
 }
 
-/** Manual generation: starts a build of the apps in `scope` right now. */
-export async function buildAppsAction(scope: GenerationScope): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+/**
+ * The Generate button of ONE platform (Generate Android App, Generate iOS App, Generate Windows App …). This is the only way an app
+ * is ever built: nothing runs on its own. Super Admins only.
+ */
+export async function buildAppAction(platform: AppPlatform): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
   await requireOwner();
-  const safe: GenerationScope = scope === "desktop" || scope === "mobile" ? scope : "all";
-  const res = await enqueueBuild(await currentCompanyId(), "manual", { force: true, scope: safe });
+  if (!isAppPlatform(platform)) return { ok: false, error: "Unknown app." };
+  const res = await enqueueBuild(await currentCompanyId(), "manual", { force: true, scope: platform });
   revalidatePath("/commandos/settings/apps");
-  if (res.ok) return { ok: true, message: "Building. This usually takes 10 to 20 minutes." };
-  return res.reason === "in-progress" ? { ok: true, message: "A build is already running." } : { ok: false, error: res.message };
-}
-
-/** The "generate automatically" switch. */
-export async function setAutomaticAction(on: boolean): Promise<{ ok: true }> {
-  await requireOwner();
-  const { settings } = await getAppSettings();
-  await saveAppSettings({ ...settings, generation: { ...settings.generation, automatic: on === true } });
-  revalidatePath("/commandos/settings/apps");
-  return { ok: true };
+  const label = PLATFORM_META[platform].label;
+  if (res.ok) return { ok: true, message: `Generating your ${label} app. This usually takes 10 to 20 minutes, and this page updates by itself.` };
+  return res.reason === "in-progress" ? { ok: true, message: `Your ${label} app is already being generated.` } : { ok: false, error: res.message };
 }

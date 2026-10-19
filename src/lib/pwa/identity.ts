@@ -37,7 +37,6 @@ export interface PwaIdentity {
   /** Changes only when what an installer bakes in changes (its name and icon). Colours, shortcuts and so on are read at run time. */
   buildHash: string;
   desktop: AppSettings["desktop"];
-  generation: AppSettings["generation"];
 }
 
 const clip = (s: string, n: number) => (s.length <= n ? s : s.slice(0, n).trimEnd());
@@ -68,8 +67,7 @@ export async function getPwaIdentity(): Promise<PwaIdentity | null> {
       installPrompt: true,
       version: "p1",
       buildHash: "p1",
-      desktop: { autoRebuild: false, closeToTray: true, launchAtLogin: false },
-      generation: { automatic: false },
+      desktop: { closeToTray: true, launchAtLogin: false },
     };
   }
   return buildCompanyIdentity();
@@ -87,7 +85,7 @@ export async function buildCompanyIdentity(): Promise<PwaIdentity> {
     availableAppPanels().catch(() => []),
   ]);
   const tokens = theme?.tokens ?? FALLBACK_THEME;
-  const company = brand?.name?.trim() || SAAS_BRAND.name;
+  const company = brand?.name?.trim() || "Workspace";
   const byKey = new Map(panels.map((p) => [p.key, p]));
 
   const themeColor = settings.themeColor.mode === "custom" ? settings.themeColor.value : tokens.colors.primary;
@@ -124,6 +122,5 @@ export async function buildCompanyIdentity(): Promise<PwaIdentity> {
       .digest("hex")
       .slice(0, 12),
     desktop: settings.desktop,
-    generation: settings.generation,
   };
 }

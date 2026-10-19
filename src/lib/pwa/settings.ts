@@ -34,15 +34,8 @@ export interface AppSettings {
   statusBar: "default" | "black-translucent" | "black";
   /** Show the "Install the app" banner on product pages. */
   installPrompt: boolean;
-  /** How the apps get built. */
-  generation: {
-    /** Build the apps by themselves: when onboarding is completed, after a rename or new icon, and daily housekeeping. Off = only when you press Generate. */
-    automatic: boolean;
-  };
   /** The desktop apps (Windows, macOS, Linux). */
   desktop: {
-    /** Rebuild the installers by themselves when the company's name or icon changes. */
-    autoRebuild: boolean;
     /** Defaults for each person on first start; they can change them in the tray menu. */
     closeToTray: boolean;
     launchAtLogin: boolean;
@@ -62,8 +55,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   orientation: "any",
   statusBar: "default",
   installPrompt: true,
-  generation: { automatic: true },
-  desktop: { autoRebuild: true, closeToTray: true, launchAtLogin: false },
+  desktop: { closeToTray: true, launchAtLogin: false },
 };
 
 export const MAX_SHORTCUTS = 4;
@@ -87,7 +79,6 @@ export function normalizeAppSettings(input: unknown, panelKeys?: readonly string
   const r = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
   const ri = (r.icon && typeof r.icon === "object" ? r.icon : {}) as Record<string, unknown>;
   const rb = (ri.background && typeof ri.background === "object" ? ri.background : {}) as { mode?: unknown; value?: unknown };
-  const rg = (r.generation && typeof r.generation === "object" ? r.generation : {}) as Record<string, unknown>;
   const rd = (r.desktop && typeof r.desktop === "object" ? r.desktop : {}) as Record<string, unknown>;
   const bgMode = rb.mode === "custom" ? "custom" : rb.mode === "white" ? "white" : "theme";
   const known = (k: string) => !panelKeys || k === "notifications" || panelKeys.includes(k);
@@ -114,9 +105,7 @@ export function normalizeAppSettings(input: unknown, panelKeys?: readonly string
     orientation: oneOf(r.orientation, ["any", "portrait", "landscape"] as const, d.orientation),
     statusBar: oneOf(r.statusBar, ["default", "black-translucent", "black"] as const, d.statusBar),
     installPrompt: typeof r.installPrompt === "boolean" ? r.installPrompt : d.installPrompt,
-    generation: { automatic: typeof rg.automatic === "boolean" ? rg.automatic : d.generation.automatic },
     desktop: {
-      autoRebuild: typeof rd.autoRebuild === "boolean" ? rd.autoRebuild : d.desktop.autoRebuild,
       closeToTray: typeof rd.closeToTray === "boolean" ? rd.closeToTray : d.desktop.closeToTray,
       launchAtLogin: typeof rd.launchAtLogin === "boolean" ? rd.launchAtLogin : d.desktop.launchAtLogin,
     },

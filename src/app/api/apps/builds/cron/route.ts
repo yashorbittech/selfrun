@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { hasBearer } from "@/lib/security/bearer";
 import { runBuildCron } from "@/lib/apps/enqueue";
 
-/** Daily (Vercel Cron, `Authorization: Bearer $CRON_SECRET`): generates missing apps, restarts stuck builds, rebuilds after a rename or new icon. */
+/** Daily (Vercel Cron, `Authorization: Bearer $CRON_SECRET`): hands over builds that were requested while no build service was connected, and fails builds that never finished. Never starts a build by itself. */
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 

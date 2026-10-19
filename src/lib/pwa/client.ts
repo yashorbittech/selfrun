@@ -35,9 +35,9 @@ export function detectBrowser(): BrowserKind {
   return "other";
 }
 
-/** Running inside the SelfRun desktop app (Electron, Windows/macOS/Linux): it adds `SelfRunDesktop/<version>` to the browser identity. */
+/** Running inside the SelfRun desktop app (Electron, Windows/macOS/Linux): it adds `WorkspaceDesktop/<version>` to the browser identity. */
 export function isDesktopApp(): boolean {
-  return typeof navigator !== "undefined" && /SelfRunDesktop\//.test(navigator.userAgent);
+  return typeof navigator !== "undefined" && /WorkspaceDesktop\//.test(navigator.userAgent);
 }
 
 /** Running as an installed app (standalone window / home-screen icon / desktop app). */

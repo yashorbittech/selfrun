@@ -11,7 +11,7 @@
  * ios:     writes the Xcode project ZIP (open it, choose your Apple Developer team, archive and submit to the App Store); iOS apps
  *          can't be installed without Apple signing, so the project is the deliverable.
  * Options: --no-build (android: make the project and ZIP but skip Gradle, e.g. when there is no Android SDK).
- * Android builds need JDK 17+ and the Android SDK; iOS projects need macOS.
+ * Android builds need JDK 21+ (Capacitor 8) and the Android SDK; iOS projects need macOS.
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -38,7 +38,8 @@ if (brand.app !== "selfrun-desktop") fail("That address is not a SelfRun workspa
 
 const host = new URL(brand.origin || origin).hostname;
 const slug = host.replace(/^app\./, "").replace(/-app(\.|$)/, "$1").replace(/\..*$/, "").replace(/[^a-z0-9]/g, "") || "workspace";
-const appId = `com.selfrun.${/^[a-z]/.test(slug) ? slug : `c${slug}`}`;
+// The app's identity is the company's own, never the platform's.
+const appId = `app.${/^[a-z]/.test(slug) ? slug : `c${slug}`}.mobile`;
 const appName = brand.name.replace(/[<>&"']/g, "").trim().slice(0, 30) || "Workspace";
 const fileBase = `${appName.replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "") || "App"}-${version}`;
 console.log(`Company: ${brand.name}\nAddress: ${brand.origin || origin}\nApp:     ${appName} (${appId}) v${version} for ${platform}`);
@@ -62,8 +63,11 @@ fs.writeFileSync(path.join(work, "capacitor.config.json"), JSON.stringify({
   appName,
   webDir: "www",
   server: { url: brand.origin || origin, cleartext: (brand.origin || origin).startsWith("http://"), allowNavigation: [host] },
-  android: { backgroundColor: brand.backgroundColor },
-  ios: { backgroundColor: brand.backgroundColor, contentInset: "always" },
+  // The user agent tells the workspace it is inside the app, so its pages are not drawn under the status bar and the navigation bar.
+  android: { backgroundColor: brand.backgroundColor, appendUserAgent: "WorkspaceNative" },
+  ios: { backgroundColor: brand.backgroundColor, contentInset: "always", appendUserAgent: "WorkspaceNative" },
+  // Android 15 draws apps edge to edge: `native` keeps the page inside the system bars (the page asks for no viewport-fit=cover).
+  plugins: { SystemBars: { insetsHandling: "native" } },
 }, null, 2));
 // Link this project to the Capacitor installed here (no second download of the native libraries).
 fs.symlinkSync(path.join(root, "node_modules"), path.join(work, "node_modules"), "junction");

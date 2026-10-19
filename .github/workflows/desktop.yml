@@ -5,7 +5,8 @@ name: Apps (desktop and mobile)
 #    version, platforms and callback_url are filled in. Each platform builds an app named and iconed as that company, publishes it to a
 #    GitHub release in the public releases repository, then reports the download links back to the platform. Nobody has to do anything.
 #  - Started by hand with an "address" (a workspace name or domain): the same for desktop, without reporting back.
-#  - Started by hand with nothing filled in: the generic desktop app (asks for the workspace address at first start).
+#  - Started by hand with nothing filled in: the apps open straight on the platform's own app (https://app.selfrunbusiness.com, or the
+#    repository variable SELFRUN_APP_ORIGIN). Tick "generic" for the desktop app that asks for the workspace address at first start.
 #
 # Repository settings needed for the automatic flow:
 #   secrets.DESKTOP_BUILD_SECRET   same value as DESKTOP_BUILD_SECRET on the platform
@@ -38,6 +39,11 @@ on:
         description: "By hand: company workspace name or domain (empty = generic desktop app)"
         required: false
         default: ""
+      generic:
+        description: "Desktop only: build the app that asks \"Connect your workspace\" instead of opening on the platform's app"
+        required: false
+        type: boolean
+        default: false
       root_domain:
         description: "Platform domain for workspace names"
         required: false
@@ -56,7 +62,7 @@ jobs:
           HAS_ORIGIN: ${{ inputs.origin != '' || inputs.address != '' }}
         run: |
           if [ -z "$WANTED" ]; then
-            if [ "$HAS_ORIGIN" = "true" ]; then WANTED="win,mac,linux,android,ios"; else WANTED="win,mac,linux"; fi
+            WANTED="win,mac,linux,android,ios"
           fi
           python3 - <<PY >> "$GITHUB_OUTPUT"
           import json, os
@@ -89,6 +95,8 @@ jobs:
       RELEASES_REPO: ${{ vars.DESKTOP_RELEASES_REPO }}
       GH_TOKEN: ${{ secrets.RELEASES_TOKEN }}
       DIST: ${{ github.workspace }}/app-dist
+      APP_ORIGIN: ${{ vars.SELFRUN_APP_ORIGIN || 'https://app.selfrunbusiness.com' }}
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -108,9 +116,17 @@ jobs:
       - run: npm install
         if: ${{ matrix.dir == 'mobile' }}
 
-      - name: Generic desktop app
+      - name: Desktop app (opens on the platform's app)
         if: ${{ matrix.dir == 'desktop' && inputs.origin == '' && inputs.address == '' }}
-        run: npx electron-builder --publish never --${{ matrix.platform }} --config.directories.output="$DIST"
+        shell: bash
+        run: |
+          if [ "${{ inputs.generic }}" != "true" ]; then
+            printf '{ "address": "%s", "appId": "com.selfrun.desktop", "built": "%s" }\n' "$APP_ORIGIN" "$(date -u +%FT%TZ)" > brand.json
+            echo "App address built in: $APP_ORIGIN"
+          fi
+          VER=()
+          if [ -n "${{ inputs.version }}" ]; then VER=(--config.extraMetadata.version="${{ inputs.version }}"); fi
+          npx electron-builder --publish never --${{ matrix.platform }} --config.directories.output="$DIST" "${VER[@]}"
       - name: Company desktop app
         if: ${{ matrix.dir == 'desktop' && (inputs.origin != '' || inputs.address != '') }}
         shell: bash
@@ -123,8 +139,9 @@ jobs:
         if: ${{ matrix.dir == 'mobile' }}
         shell: bash
         run: |
-          if [ -z "${{ inputs.origin }}" ]; then echo "Mobile apps need the company's panels address (origin)."; exit 1; fi
-          node scripts/build-company-mobile.mjs --origin "${{ inputs.origin }}" --platform ${{ matrix.platform }} --version "${{ inputs.version || '1.0.0' }}" --out "$DIST"
+          ORIGIN="${{ inputs.origin }}"
+          if [ -z "$ORIGIN" ]; then ORIGIN="$APP_ORIGIN"; fi
+          node scripts/build-company-mobile.mjs --origin "$ORIGIN" --platform ${{ matrix.platform }} --version "${{ inputs.version || '1.0.0' }}" --out "$DIST"
 
       - name: Publish and report the download links
         if: ${{ inputs.build_id != '' }}

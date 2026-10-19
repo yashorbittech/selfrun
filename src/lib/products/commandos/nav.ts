@@ -258,7 +258,7 @@ const COMPANY: NavItemDef[] = [
   company("invoices", "/commandos/settings/billing/invoices", "receipt", "Invoices & payments", "Tax invoices, credit notes and every payment made for your subscription."),
   company("usage", "/commandos/settings/usage", "gauge", "Usage", "Seats, AI tokens and file storage used against your plan's limits."),
   company("branding", "/commandos/settings/branding", "palette", "Branding", "Logo, name and colour across products, emails and PDFs."),
-  company("app", "/commandos/settings/apps", "smartphone", "Apps & downloads", "Your company's own apps for phones and Windows, macOS and Linux computers: settings and download links, generated automatically.", "Apps"),
+  company("app", "/commandos/settings/apps", "smartphone", "Apps & downloads", "Your company's own apps for phones and Windows, macOS and Linux computers: settings, and a Generate button and download link for each app.", "Apps"),
   company("website-domain", "/commandos/addresses/website", "website", "Website domain", "The address of your public website, ready to copy and share.", "Website domain"),
   company("app-domain", "/commandos/addresses/app", "smartphone", "App domain", "The address where you and your team sign in to the Workspace and every product.", "App domain"),
   company("domains", "/commandos/settings/domains", "globe", "Custom domains", "Your workspace address and your own custom domains, with automatic SSL.", "Domains"),

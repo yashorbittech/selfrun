@@ -7,7 +7,7 @@ import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { InstallCard } from "@/components/pwa/InstallApp";
-import { DESKTOP_PLATFORMS, MOBILE_PLATFORMS, PLATFORM_META, type AppPlatform, type AppsOverview, type GenerationScope, type ManualState } from "@/lib/apps/types";
+import { DESKTOP_PLATFORMS, MOBILE_PLATFORMS, PLATFORM_META, type AppPlatform, type AppsOverview } from "@/lib/apps/types";
 
 export interface AppsBrand {
   name: string;
@@ -24,8 +24,8 @@ export interface AppsBrand {
 }
 
 type Actions = {
-  build: (scope: GenerationScope) => Promise<{ ok: true; message: string } | { ok: false; error: string }>;
-  setAutomatic: (on: boolean) => Promise<{ ok: true }>;
+  /** Generates ONE platform's app. This is the only way an app is built. */
+  build: (platform: AppPlatform) => Promise<{ ok: true; message: string } | { ok: false; error: string }>;
 };
 
 const TABS = [
@@ -115,79 +115,47 @@ function AssetGrid({ brand, items, pack }: { brand: AppsBrand; items: { id: stri
   );
 }
 
-// ── generation: automatic and manual ────────────────────────────────────────
+// ── generation: one Generate button per platform ────────────────────────────────────────
 
 function ago(iso: string): string {
   const m = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 60000));
   return m < 1 ? "just now" : m < 60 ? `${m} min ago` : `${Math.round(m / 60)} h ago`;
 }
 
-function GenerationBar({ scope, o, actions, onChanged, packHref }: { scope: Exclude<GenerationScope, "all">; o: AppsOverview; actions: Actions; onChanged: () => void; packHref: string }) {
+/** The Generate button of one platform ("Generate Android App" …), with the reason when it can't be pressed. */
+function GenerateButton({ p, o, actions, onChanged, generated }: { p: AppPlatform; o: AppsOverview; actions: Actions; onChanged: () => void; generated: boolean }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
-  const m: ManualState = o.manual[scope];
-
+  const a = o.actions[p];
+  const label = generated ? PLATFORM_META[p].cta.replace("Generate", "Regenerate") : PLATFORM_META[p].cta;
   const run = () =>
     start(async () => {
       setMsg(null);
-      const r = await actions.build(scope);
+      const r = await actions.build(p);
       setMsg(r.ok ? { kind: "ok", text: r.message } : { kind: "error", text: r.error });
       onChanged();
     });
-  const toggle = (on: boolean) => start(async () => { await actions.setAutomatic(on); onChanged(); });
-
-  // The automatic side, in words.
-  let auto: { tone: "ok" | "run" | "warn" | "off"; text: string };
-  if (!o.automatic) auto = { tone: "off", text: "Switched off. Your apps are only generated when you press the button." };
-  else if (m.kind === "auto-running") auto = { tone: "run", text: `Running now (started ${ago(m.since)}). This usually takes 10 to 20 minutes and this page updates by itself.` };
-  else if (m.kind === "auto-stalled") auto = { tone: "warn", text: `Not generating: ${m.reason}` };
-  else if (m.kind === "manual-running") auto = { tone: "run", text: "Waiting: a manual build is running." };
-  else auto = { tone: "ok", text: o.onboardingDone ? "On. Your apps are rebuilt when your name or icon changes, and checked daily." : "On. Your apps are generated automatically the moment you finish setup." };
-
-  // The manual side: always shown, with a message that says why it is or isn't available.
-  let manual: { enabled: boolean; text: string };
-  if (m.kind === "auto-running") manual = { enabled: false, text: "Automatic generation is running, so manual generation is paused. If it never finishes, this button becomes available again." };
-  else if (m.kind === "manual-running") manual = { enabled: false, text: `A manual build is running (started ${ago(m.since)}).` };
-  else if (m.kind === "auto-stalled") manual = { enabled: o.configured, text: o.configured ? "Automatic generation isn't producing your apps. Generate them manually now." : "Automatic generation can't run because the platform's build service isn't connected yet. You can still download all the assets." };
-  else if (m.kind === "auto-off") manual = { enabled: o.configured, text: o.configured ? "Generate your apps now." : "The build service isn't connected yet, so apps can't be built here. You can still download all the assets." };
-  else manual = { enabled: o.configured, text: o.configured ? "Don't want to wait? Generate your apps now." : "The build service isn't connected yet; your apps will be built automatically once it is." };
-
-  const dot = { ok: "bg-emerald-500", run: "bg-primary animate-pulse", warn: "bg-amber-500", off: "bg-muted-foreground/40" }[auto.tone];
   return (
-    <GlassCard containerClassName="h-auto" className="p-0">
-      <div className="grid divide-y divide-border md:grid-cols-2 md:divide-x md:divide-y-0">
-        <div className="space-y-2 p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="flex items-center gap-2 text-sm font-semibold"><span className={`size-2 rounded-full ${dot}`} /> Automatic generation</h3>
-            <label className="flex items-center gap-2 text-xs text-muted-foreground"><Checkbox checked={o.automatic} onCheckedChange={(v) => toggle(v === true)} disabled={pending} /> {o.automatic ? "On" : "Off"}</label>
-          </div>
-          <p className="text-sm text-muted-foreground">{auto.text}</p>
-        </div>
-        <div className="space-y-2 p-5">
-          <h3 className="flex items-center gap-2 text-sm font-semibold"><Wand2 className="size-4 text-primary" /> Manual generation</h3>
-          <p className="text-sm text-muted-foreground">{manual.text}</p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" onClick={run} disabled={!manual.enabled || pending}>
-              {pending ? <Loader2 className="size-4 animate-spin" data-icon="inline-start" /> : <RefreshCw className="size-4" data-icon="inline-start" />} Generate manually
-            </Button>
-            {!manual.enabled && !o.configured ? <a href={packHref} className={buttonVariants({ variant: "outline", size: "sm" })}><PackageOpen className="size-4" data-icon="inline-start" /> Download assets</a> : null}
-          </div>
-          {msg ? <p role="status" className={`text-xs ${msg.kind === "error" ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}>{msg.text}</p> : null}
-        </div>
-      </div>
-    </GlassCard>
+    <div className="space-y-2">
+      <Button type="button" size="sm" className="w-full" onClick={run} disabled={a.kind !== "ready" || pending}>
+        {pending || a.kind === "running" ? <Loader2 className="size-4 animate-spin" data-icon="inline-start" /> : <Wand2 className="size-4" data-icon="inline-start" />}
+        {a.kind === "running" ? "Generating…" : label}
+      </Button>
+      {a.kind === "running" ? <p className="text-xs text-muted-foreground">Started {ago(a.since)}. This usually takes 10 to 20 minutes and this page updates by itself.</p> : null}
+      {a.kind === "unavailable" ? <p className="text-xs text-muted-foreground">{a.reason}</p> : null}
+      {msg ? <p role="status" className={`text-xs ${msg.kind === "error" ? "text-destructive" : "text-emerald-600 dark:text-emerald-400"}`}>{msg.text}</p> : null}
+    </div>
   );
 }
 
 // ── one platform card ───────────────────────────────────────────────────────
 
-function PlatformCard({ p, o, extra }: { p: AppPlatform; o: AppsOverview; extra?: React.ReactNode }) {
+function PlatformCard({ p, o, actions, onChanged, extra }: { p: AppPlatform; o: AppsOverview; actions: Actions; onChanged: () => void; extra?: React.ReactNode }) {
   const meta = PLATFORM_META[p];
   const Icon = PLATFORM_ICON[p];
   const ready = o.downloads[p];
   const st = o.latest?.platforms[p];
   const status = st && !["ready", "skipped"].includes(st.status) ? st.status : null;
-  const building = o.active !== null && o.active.platforms[p].status !== "skipped";
   return (
     <GlassCard containerClassName="h-auto" className="space-y-3 p-5">
       <div className="flex items-start gap-3">
@@ -197,7 +165,7 @@ function PlatformCard({ p, o, extra }: { p: AppPlatform; o: AppsOverview; extra?
             <h3 className="text-base font-semibold">{meta.label}</h3>
             {ready ? <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">Ready · v{ready.version}</span> : null}
             {status === "building" ? <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary"><Loader2 className="size-3 animate-spin" /> Building</span> : null}
-            {status === "queued" && building ? <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Queued</span> : null}
+            {status === "queued" && o.actions[p].kind === "running" ? <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Queued</span> : null}
             {status === "failed" ? <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive">Failed</span> : null}
           </div>
           <p className="text-sm text-muted-foreground">{meta.hint}</p>
@@ -216,8 +184,9 @@ function PlatformCard({ p, o, extra }: { p: AppPlatform; o: AppsOverview; extra?
       ) : status === "failed" ? (
         <p className="text-sm text-destructive">{st?.error ?? "This build failed."}</p>
       ) : (
-        <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">{building ? "Being generated for you…" : "Not generated yet."}</p>
+        <p className="rounded-lg border border-dashed border-border px-3 py-4 text-center text-sm text-muted-foreground">{o.actions[p].kind === "running" ? "Being generated for you…" : "Not generated yet. Press the button to generate it."}</p>
       )}
+      <GenerateButton p={p} o={o} actions={actions} onChanged={onChanged} generated={Boolean(ready)} />
       {extra}
     </GlassCard>
   );
@@ -318,11 +287,11 @@ export default function AppsTabs({ initial, brand, qr, actions }: { initial: App
       {/* 2. Mobile */}
       {tab === "mobile" ? (
         <div role="tabpanel" className="space-y-4">
-          <GenerationBar scope="mobile" o={o} actions={actions} onChanged={refresh} packHref="/api/apps/assets/pack/all" />
+          <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">Nothing is built automatically. Press <strong className="text-foreground">Generate</strong> on the app you need; it is made with your name, logo and colours.</p>
           <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
             <div className="grid gap-4 md:grid-cols-2">
               {MOBILE_PLATFORMS.map((p) => (
-                <PlatformCard key={p} p={p} o={o} extra={p === "ios" ? <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">iPhone apps must be signed with your own Apple Developer account. Open the project in Xcode, pick your team and submit to the App Store. For a one-tap install without the App Store, use the PWA.</p> : <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">The APK installs directly on Android (allow &ldquo;unknown apps&rdquo; once). For Google Play, open the Android Studio project, sign with your key and upload.</p>} />
+                <PlatformCard key={p} p={p} o={o} actions={actions} onChanged={refresh} extra={p === "ios" ? <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">iPhone apps must be signed with your own Apple Developer account. Open the project in Xcode, pick your team and submit to the App Store. For a one-tap install without the App Store, use the PWA.</p> : <p className="rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">The APK installs directly on Android (allow &ldquo;unknown apps&rdquo; once). For Google Play, open the Android Studio project, sign with your key and upload.</p>} />
               ))}
               <GlassCard containerClassName="h-auto" className="p-4 md:col-span-2"><p className="text-sm text-muted-foreground">These apps open your live workspace, so they are always current and need no update when your data or colours change. For push notifications on a phone, install the PWA: it supports them on Android and on iPhone (from the Home Screen).</p></GlassCard>
             </div>
@@ -339,20 +308,19 @@ export default function AppsTabs({ initial, brand, qr, actions }: { initial: App
       {/* 3. Desktop */}
       {tab === "desktop" ? (
         <div role="tabpanel" className="space-y-4">
-          <GenerationBar scope="desktop" o={o} actions={actions} onChanged={refresh} packHref="/api/apps/assets/pack/desktop" />
+          <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">Nothing is built automatically. Press <strong className="text-foreground">Generate</strong> on the app you need; it is made with your name, logo and colours.</p>
           <div className="grid gap-4 md:grid-cols-3">
-            {DESKTOP_PLATFORMS.map((p) => <PlatformCard key={p} p={p} o={o} />)}
+            {DESKTOP_PLATFORMS.map((p) => <PlatformCard key={p} p={p} o={o} actions={actions} onChanged={refresh} />)}
           </div>
           <GlassCard containerClassName="h-auto" className="space-y-2 p-4">
             <p className="text-sm text-muted-foreground">Desktop apps have their own window, a tray icon and native notifications, and open straight into your workspace. Colours, shortcuts and the start page reach every installed app without a new download.</p>
-            {o.genericUrl ? <a href={o.genericUrl} className="text-sm underline-offset-2 hover:underline" target="_blank" rel="noopener noreferrer">Need it right now? Get the generic desktop app and enter {o.appAddress}</a> : null}
           </GlassCard>
           <GlassCard containerClassName="h-auto" className="p-5"><AssetGrid brand={brand} items={desktopAssets} pack={{ href: "/api/apps/assets/pack/desktop", label: "Download desktop assets (.zip)" }} /></GlassCard>
         </div>
       ) : null}
 
       {o.outdated && tab !== "pwa" ? (
-        <p className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm"><AlertTriangle className="size-4 text-amber-600" /> Your name or icon changed since these apps were built. {o.automatic ? "They will be rebuilt automatically." : "Generate them again to update."}</p>
+        <p className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm"><AlertTriangle className="size-4 text-amber-600" /> Your name or icon changed since these apps were built. Press Regenerate on an app to update it.</p>
       ) : null}
       {o.lastError && !building && tab !== "pwa" ? (
         <p className="flex items-center gap-2 rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm"><AlertTriangle className="size-4 text-destructive" /> {o.lastError}</p>

@@ -1,6 +1,6 @@
 import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
-import { afterForCompany, currentCompanyId } from "@/lib/platform/tenancy/context";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { COMPANIES_COLLECTION, forgetCompanyRouting, type Company } from "@/lib/platform/tenancy/companies";
 import { getCompanyDetails, updateCompanyDetails } from "@/lib/products/talentos/company";
 import { syncSiteContact } from "@/lib/platform/website/starter";
@@ -8,7 +8,6 @@ import { createDepartment, createDesignation, listDepartments, listDesignations 
 import { isOnboardingOwner, postLoginTarget, showSetupStrip } from "@/lib/platform/onboarding/gate";
 import { unavailablePanelKeys } from "@/lib/platform/panels/store";
 import { getPlatformAccessForUser } from "@/lib/platform/console/roles";
-import { enqueueBuild } from "@/lib/apps/enqueue";
 import { COMPANY_SIZES, CURRENCIES, INDUSTRIES, MODULES, ONBOARDING_STEPS, type DepartmentTemplate, type Industry, type ModuleKey, type OnboardingStep } from "@/lib/platform/onboarding/catalog";
 
 /**
@@ -58,13 +57,8 @@ export async function markOnboardingStep(step: OnboardingStep): Promise<void> {
   await col.updateOne({ _id: id }, { $addToSet: { "onboarding.completedSteps": step }, $set: { updatedAt: new Date() } });
   const doc = await col.findOne({ _id: id }, { projection: { onboarding: 1 } });
   if (ONBOARDING_STEPS.every((s) => doc?.onboarding?.completedSteps.includes(s.key))) {
-    const done = await col.updateOne({ _id: id, "onboarding.completedAt": { $in: [null, undefined] } }, { $set: { "onboarding.completedAt": new Date() } });
-    // Setup just finished: generate the company's apps (desktop installers) by themselves. Never blocks or fails onboarding.
-    if (done.modifiedCount === 1) {
-      const start = () => enqueueBuild(id, "onboarding").catch((err) => console.error("[apps] automatic build failed to start", err));
-      // After the response (the request to the build service takes a moment); straight away outside a request.
-      await afterForCompany(start).catch(() => start());
-    }
+    // Setup finished. The company's apps are NOT built automatically: a Super Admin presses "Generate … App" in Settings → Apps.
+    await col.updateOne({ _id: id, "onboarding.completedAt": { $in: [null, undefined] } }, { $set: { "onboarding.completedAt": new Date() } });
   }
 }
 

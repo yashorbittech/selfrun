@@ -90,22 +90,23 @@ only, push-service allow-list). Every product's `notify()` (HR, Projects, Procur
 workflow notifications, and the client portal) calls `queuePush` after it stores the in-app notification, so a push never exists
 without its bell entry. People manage themselves at `/workspace/notifications/settings` and `/clientos/notifications/settings`.
 
-### Apps and automatic desktop builds
+### Apps and the Generate buttons
 
 `lib/apps/assets.tsx` draws every asset (PWA, Android, iOS, desktop icons, splash, feature graphic) from the company's brand and settings on demand;
 `/api/apps/assets/file/<id>.png` and `/api/apps/assets/pack/<kind>` (ZIP) serve them (public on app hosts, rate limited, because the mobile
 and desktop builds download them). `mobile/` builds Android and iOS projects from the pack (Capacitor). A build covers five platforms (`win`, `mac`,
-`linux`, `android`, `ios`) and a scope (`all`, `desktop`, `mobile`); out-of-scope platforms are `skipped`. `generation.automatic` (Mobile app settings)
-switches the automatic triggers; a person pressing Generate always works. `getAppsOverview` derives, per tab, whether manual generation is paused
-(automatic running), enabled because automatic is stalled (no build service or failed), or enabled because automatic is off.
+`linux`, `android`, `ios`); the Apps page only ever asks for one (scope = that platform), and out-of-scope platforms are `skipped`. **Nothing is built
+automatically**: the only way to start a build is a Super Admin pressing a platform's button (`buildAppAction`). A build blocks another only when they
+share a platform, so Android can be generated while Windows builds. `getAppsOverview` gives each platform an action: `ready`, `running` or `unavailable`
+(no build service connected).
 
 `lib/apps/`: `enqueue.ts` (`enqueueBuild`, `dispatchBuild`, `runBuildCron`), `callback.ts` (what the build service may report),
 `store.ts` (`app_builds`, a platform-level collection whose rows carry their `companyId`), `overview.ts` (what the Apps page shows).
-`markOnboardingStep` (`platform/onboarding/state.ts`) calls `enqueueBuild` the moment onboarding completes. A build is a row with
-a status per platform (win, mac, linux). `dispatchBuild` starts `.github/workflows/desktop.yml`, which builds each platform with
+Onboarding no longer starts builds. A build is a row with
+a status per platform (win, mac, linux, android, ios). `dispatchBuild` starts `.github/workflows/desktop.yml`, which builds each platform with
 `desktop/scripts/build-company.mjs`, publishes to the releases repository (`publish-build.mjs`) and POSTs to
 `/api/apps/builds/callback` (bearer `DESKTOP_BUILD_SECRET`; only GitHub release download links are accepted). `/api/apps/builds/cron`
-runs daily. What an installer bakes in (name, icon, address) is `PwaIdentity.buildHash`; everything else is read at run time.
+runs daily and only hands over builds that a person already requested and fails ones that never finished. What an installer bakes in (name, icon, address) is `PwaIdentity.buildHash`; everything else is read at run time.
 The page is Workspace → Settings → Apps (`workspace/(protected)/settings/apps`).
 
 ### Desktop app
@@ -113,7 +114,7 @@ The page is Workspace → Settings → Apps (`workspace/(protected)/settings/app
 `desktop/` (own `package.json`, plain CommonJS, not part of the Next.js build) is an Electron shell for any workspace. The server gives it
 two public-to-the-app endpoints on app hosts: `/api/desktop/branding` (the app identity from `lib/pwa/identity.ts`, so the same
 Mobile app settings drive the desktop app) and `/api/desktop/notifications` (the signed-in person's unread items, polled with the
-app's session because Electron has no Web Push). The app adds `SelfRunDesktop/<version>` to its user agent; the web app uses it
+app's session because Electron has no Web Push). The app adds `WorkspaceDesktop/<version>` to its user agent; the web app uses it
 (`isDesktopApp()` in `lib/pwa/client.ts`) to skip the service worker, install prompts and Web Push inside it.
 `desktop/scripts/build-company.mjs` builds installers for one company from its live branding.
 

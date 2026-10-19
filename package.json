@@ -7,7 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "demo:seeders": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env scripts/demo-seeders.ts"
+    "demo:seeders": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env scripts/demo-seeders.ts",
+    "apps:check": "node scripts/build-apps.mjs check",
+    "apps:install": "node scripts/build-apps.mjs install",
+    "build:linux": "node scripts/build-apps.mjs linux",
+    "build:windows": "node scripts/build-apps.mjs windows",
+    "build:macos": "node scripts/build-apps.mjs macos",
+    "build:android": "node scripts/build-apps.mjs android",
+    "build:ios": "node scripts/build-apps.mjs ios",
+    "build:desktop": "node scripts/build-apps.mjs desktop",
+    "build:apps": "node scripts/build-apps.mjs all"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
