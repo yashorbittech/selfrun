@@ -4,14 +4,15 @@ import { ArrowRight, Check, Minus } from "lucide-react";
 import { getOffers } from "@/lib/platform/saas/offers";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
-import { FAQS, FAQS_MORE } from "@/lib/platform/saas/content";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { featureCount } from "@/lib/platform/saas/feature-lists";
-import { CtaBand, EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import { EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import PricingPlans from "@/components/platform/saas/PricingPlans";
-import FaqSection from "@/components/platform/saas/FaqSection";
+import FaqSection, { pickFaqs } from "@/components/platform/saas/FaqSection";
 import StackCompare from "@/components/platform/saas/StackCompare";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
+import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
+import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
 import { jsonForScript } from "@/lib/security/json-script";
 import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
@@ -28,8 +29,20 @@ export default async function PricingPage() {
   const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules()]);
   const endsAt = (await getOffers().catch(() => null))?.endsAt ?? null;
   const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
-  const faqs = [...FAQS, ...FAQS_MORE];
+  const faqs = pickFaqs(["Plans & pricing", "General"], 6);
   const ld = { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) };
+  const has = plans.length > 0;
+  const SEC = [
+    { id: "plans", label: "Plans", show: true },
+    { id: "how", label: "How pricing works", show: true },
+    { id: "compare", label: "Compare plans", show: has },
+    { id: "included", label: "In every plan", show: true },
+    { id: "products", label: "All products", show: true },
+    { id: "stack", label: "One platform", show: has },
+    { id: "savings", label: "Savings", show: has },
+    { id: "faq", label: "FAQs", show: true },
+  ].filter((x) => x.show);
+  const no = (id: string) => String(SEC.findIndex((x) => x.id === id) + 1).padStart(2, "0");
   const rows = plans[0]?.limits.map((l) => l.key) ?? [];
   return (
     <>
@@ -38,16 +51,34 @@ export default async function PricingPage() {
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>
 
-      <section className="sr-section">
+      <SectionScrollNav items={SEC} label="Pricing sections" numbered />
+
+      <section id="plans" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
+          <SectionHead n={no("plans")} icon="wallet" eyebrow="Plans" title="Pick the size of" accent="your team." lead="Every plan has every product and every feature. You are choosing how many people, and how much storage, AI, email and voice." />
           {plans.length ? <PricingPlans plans={plans} endsAt={endsAt} /> : <EmptyState title="Plans are being updated" body="Pricing isn't available right now. Contact us and we'll share the current plans."><Link href="/contact" className="sr-btn sr-btn-primary">Contact us</Link></EmptyState>}
         </div>
       </section>
 
+      <section id="how" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n={no("how")} icon="check" eyebrow="How pricing works" title="Simple, with" accent="no hidden tiers." lead="Three rules explain the whole page." />
+          <div className="grid gap-5 md:grid-cols-3">
+            {[
+              { icon: "layers" as const, t: "Everything is included", x: `All ${SAAS_PRODUCT_COUNT} products and ${total}+ features are in every plan, including the free one. Nothing is locked behind a higher tier.` },
+              { icon: "users" as const, t: "Plans differ by team size", x: "A plan sets how many people can use the workspace. Start small and move up when your team grows." },
+              { icon: "chart" as const, t: "And by allowances", x: "Storage, AI, email and voice usage are set per plan, so you only pay for the capacity you use." },
+            ].map((c, i) => (
+              <Reveal key={c.t} delay={i * 70}><div className="h-full rounded-3xl border border-border/60 bg-card p-7 shadow-sm"><span className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-lg font-black text-white shadow-lg shadow-primary/30">{i + 1}</span><h3 className="text-xl font-black">{c.t}</h3><p className="mt-2 leading-relaxed text-muted-foreground">{c.x}</p></div></Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {plans.length > 0 && (
-        <section className="sr-section bg-muted/10">
+        <section id="compare" className="sr-section" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container">
-            <SectionHead center icon="chart" eyebrow="Compare plans" title="Every allowance," accent="side by side." lead="Open any plan for its full details." />
+            <SectionHead n={no("compare")} center icon="chart" eyebrow="Compare plans" title="Every allowance," accent="side by side." lead="Open any plan for its full details." />
             <Reveal>
               <div className="overflow-x-auto rounded-3xl border border-border/60 bg-background shadow-sm">
                 <table className="w-full min-w-[760px] border-collapse text-sm">
@@ -78,9 +109,27 @@ export default async function PricingPage() {
         </section>
       )}
 
-      <section className="sr-section">
+      <section id="included" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Included in every plan" title={`All ${SAAS_PRODUCT_COUNT} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
+          <SectionHead n={no("included")} icon="bolt" eyebrow="In every plan" title="What you always" accent="get." lead="Beyond the products, these come with every plan, from free upwards." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              { icon: "brain" as const, t: "AI and automation", x: "AI that works inside each person's permissions, and workflows that run on their own." },
+              { icon: "target" as const, t: "Your own brand", x: "Your logo, colours, domain, emails and apps on everything your team and clients see." },
+              { icon: "lock" as const, t: "Strict company isolation", x: "Your data is kept apart from every other company's, with roles and per-action permissions." },
+              { icon: "file" as const, t: "An audit trail", x: "Sign-ins, changes and administrative actions are recorded, with who, what and when." },
+              { icon: "rocket" as const, t: "Every device", x: "The same workspace in the browser, as an installable app and on your own phone and desktop apps." },
+              { icon: "book" as const, t: "Guides for everything", x: "Step-by-step documentation and walkthroughs, with the real screen." },
+            ].map((c, i) => (
+              <Reveal key={c.t} delay={(i % 3) * 60}><div className="flex h-full gap-4 rounded-3xl border border-border/60 bg-card p-6 shadow-sm"><span className="sr-icon h-12 w-12 flex-none"><Icon name={c.icon} className="h-5 w-5" /></span><span><span className="block font-black leading-snug">{c.t}</span><span className="mt-1 block text-[15px] leading-relaxed text-muted-foreground">{c.x}</span></span></div></Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="products" className="sr-section" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n={no("products")} center icon="layers" eyebrow="Included in every plan" title={`All ${SAAS_PRODUCT_COUNT} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
@@ -96,25 +145,24 @@ export default async function PricingPage() {
       </section>
 
       {plans.length > 0 && (
-        <section className="sr-section bg-muted/10">
+        <section id="stack" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container">
-            <SectionHead center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
+            <SectionHead n={no("stack")} center icon="chart" eyebrow="Compare" title="One platform instead of" accent="a pile of subscriptions." lead="The same jobs on separate tools, with each price taken from the vendor's own pricing page." />
             <StackCompare plan={(() => { const st = plans.find((p) => p.id === "starter"); return st ? { name: st.name, price: st.offer.monthly ? `₹${(st.offer.monthly / 100).toLocaleString("en-IN")}` : "", monthly: (st.offer.monthly ?? 0) / 100 } : null; })()} products={modules} />
           </div>
         </section>
       )}
 
       {plans.length > 0 && (
-        <section className="sr-band sr-section">
+        <section id="savings" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
           <div className="sr-container relative">
-            <SectionHead tone="dark" center icon="wallet" eyebrow="Cut your costs" title="What would you save?" accent="Do the maths." lead="Enter your own numbers: how many people, how many tools you pay for today and what they cost." />
+            <SectionHead n={no("savings")} tone="dark" center icon="wallet" eyebrow="Cut your costs" title="What would you save?" accent="Do the maths." lead="Enter your own numbers: how many people, how many tools you pay for today and what they cost." />
             <Reveal><SavingsCalculator plans={plans} /></Reveal>
           </div>
         </section>
       )}
 
-      <CtaBand title="Start free. Grow when you're ready." lead="Free forever — with every product and every feature." />
-      <FaqSection all limit={60} lead={`${faqs.length} answers about plans, your own brand and apps, AI and automation, devices, data and setup.`} />
+      <FaqSection n={no("faq")} topics={["Plans & pricing", "General"]} limit={6} lead="The questions people ask most about plans and pricing. More answers are on the FAQs page." />
     </>
   );
 }

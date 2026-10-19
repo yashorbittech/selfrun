@@ -8,7 +8,7 @@ import { productDocsPath } from "@/lib/platform/saas/product-routes";
 export interface DocEntry { panelKey: string; panel: string; slug: string; name: string; text: string }
 
 /** Instant search across every feature guide; the best matches open in a list under the box. */
-export default function DocsSearch({ entries }: { entries: DocEntry[] }) {
+export default function DocsSearch({ entries, large = false }: { entries: DocEntry[]; large?: boolean }) {
   const [q, setQ] = useState("");
   const [focus, setFocus] = useState(false);
   const hits = useMemo(() => {
@@ -22,11 +22,11 @@ export default function DocsSearch({ entries }: { entries: DocEntry[] }) {
       .map((x) => x.e);
   }, [q, entries]);
   return (
-    <div className="relative w-full lg:max-w-md" onFocus={() => setFocus(true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFocus(false); }}>
+    <div className={`relative w-full ${large ? "mx-auto max-w-2xl" : "lg:max-w-md"}`} onFocus={() => setFocus(true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setFocus(false); }}>
       <label className="relative block">
         <span className="sr-only">Search the guides</span>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${entries.length} guides…`} className="sr-input" style={{ height: 46, paddingLeft: 42, borderRadius: 999 }} />
+        <Search className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted-foreground ${large ? "left-5 h-5 w-5" : "left-4 h-4 w-4"}`} aria-hidden />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${entries.length} guides…`} className="sr-input" style={{ height: large ? 58 : 46, paddingLeft: large ? 52 : 42, borderRadius: 999, boxShadow: large ? "0 10px 30px -12px rgba(67,56,202,.25)" : undefined }} />
       </label>
       {focus && q.trim() !== "" && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border/70 bg-background p-2 shadow-2xl shadow-primary/15" style={{ animation: "sr-in .2s ease both" }}>

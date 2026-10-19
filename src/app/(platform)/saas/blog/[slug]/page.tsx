@@ -66,6 +66,7 @@ export default async function BlogPostPage({
   const nextPost = POSTS[(postIndex + 1) % POSTS.length];
   const prevPost = POSTS[(postIndex - 1 + POSTS.length) % POSTS.length];
   const variant = (postIndex % 6) as SceneVariant;
+  const sidebarPosts = POSTS.map((p) => ({ slug: p.slug, title: p.title, tag: p.tag, readMinutes: p.readMinutes }));
 
   return (
     <article className="min-h-screen bg-background">
@@ -104,7 +105,11 @@ export default async function BlogPostPage({
         <div data-hop-target className="grid grid-cols-1 items-start gap-10 md:grid-cols-12 lg:gap-12">
           {/* Left Sidebar: sticky */}
           <aside className="md:col-span-5 lg:col-span-4 md:sticky md:top-28 md:self-start" aria-label="All guides">
-            <BlogSidebar posts={POSTS.map((p) => ({ slug: p.slug, title: p.title, tag: p.tag, readMinutes: p.readMinutes }))} activeSlug={post.slug} />
+            <details className="group rounded-2xl border border-border/60 bg-card shadow-sm md:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black">All {POSTS.length} guides<span className="text-xs font-bold text-primary group-open:hidden">Tap to browse</span></summary>
+              <div className="border-t border-border/60 p-2"><BlogSidebar posts={sidebarPosts} activeSlug={post.slug} /></div>
+            </details>
+            <div className="hidden md:block"><BlogSidebar posts={sidebarPosts} activeSlug={post.slug} /></div>
           </aside>
 
           {/* Main Article Content */}

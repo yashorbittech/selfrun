@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FEATURE_LISTS } from "@/lib/platform/saas/feature-lists";
-import { ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronDown, Lightbulb } from "lucide-react";
 import { DOCS, DOC_CATEGORIES, docBySlug } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
@@ -55,6 +55,11 @@ export default async function DocArticle({ params }: { params: Promise<{ slug: s
               <DocsGuideSidebar key={g.category} groups={DOC_CATEGORIES.map((c) => ({ name: c.name, items: DOCS.filter((x) => x.category === c.name).map((x) => ({ slug: x.slug, title: x.title, readMinutes: x.readMinutes })) })).filter((c) => c.items.length)} activeSlug={g.slug} activeCategory={g.category} />
             </div>
           </aside>
+
+          <details className="group rounded-2xl border border-border/60 bg-card shadow-sm lg:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black"><span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" />Browse all guides</span><ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
+            <div className="border-t border-border/60 p-2"><DocsGuideSidebar key={`m-${g.category}`} groups={DOC_CATEGORIES.map((c) => ({ name: c.name, items: DOCS.filter((x) => x.category === c.name).map((x) => ({ slug: x.slug, title: x.title, readMinutes: x.readMinutes })) })).filter((c) => c.items.length)} activeSlug={g.slug} activeCategory={g.category} /></div>
+          </details>
 
           <article className="min-w-0 max-w-3xl">
             {screenFor(g.shot) && <Reveal className="mb-12"><DeviceScene screenKey={g.shot} name={g.title} variant={variant} priority /></Reveal>}

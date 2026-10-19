@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, LayoutGrid, Search, X } from "lucide-react";
+import { ArrowRight, ChevronDown, LayoutGrid, Search, X } from "lucide-react";
 import ProductLogo from "@/components/products/ProductLogo";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
@@ -29,9 +29,8 @@ export default function ProductSidebar({ groups, activeKey }: { groups: SidebarG
     if (box && el) box.scrollTop = Math.max(0, el.offsetTop - box.offsetTop - box.clientHeight / 2 + el.clientHeight / 2);
   }, [activeKey]);
 
-  return (
-    <aside className="hidden lg:block" aria-label="All products">
-      <div className="sticky top-28 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
+  const card = (
+      <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm lg:sticky lg:top-28">
         <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
             <p className="flex items-center gap-2 text-sm font-black"><LayoutGrid className="h-4 w-4 text-primary" />All products<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{total}</span></p>
@@ -82,6 +81,14 @@ export default function ProductSidebar({ groups, activeKey }: { groups: SidebarG
           <Link href="/signup" className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-transform hover:-translate-y-0.5">Start free · every product<ArrowRight className="h-4 w-4" /></Link>
         </div>
       </div>
-    </aside>
+  );
+  return (
+    <>
+      <details className="group rounded-2xl border border-border/60 bg-card shadow-sm lg:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black"><span className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-primary" />Browse all {total} products</span><ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
+        <div className="border-t border-border/60 p-2">{card}</div>
+      </details>
+      <aside className="hidden lg:block" aria-label="All products">{card}</aside>
+    </>
   );
 }

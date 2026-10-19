@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 import Icon from "@/components/platform/saas/Icon";
+import ProductLogo from "@/components/products/ProductLogo";
 import Reveal from "@/components/platform/saas/Reveal";
 import type { IconKey } from "@/lib/platform/saas/content";
 
@@ -83,7 +84,7 @@ export function IconColumns({ items, cols = 4 }: { items: { title: string; text?
 }
 
 /** Two endless rows of chips moving in opposite directions. */
-export function ChipMarquee({ rows }: { rows: { label: string; icon?: IconKey; struck?: boolean }[][] }) {
+export function ChipMarquee({ rows }: { rows: { label: string; icon?: IconKey; productKey?: string; struck?: boolean }[][] }) {
   return (
     <div className="space-y-4">
       {rows.map((row, r) => {
@@ -93,7 +94,7 @@ export function ChipMarquee({ rows }: { rows: { label: string; icon?: IconKey; s
             <div className={`sr-marquee ${r % 2 ? "sr-marquee-rev" : ""}`} style={{ animationDuration: "60s" }}>
               {doubled.map((c, i) => (
                 <span key={`${c.label}-${i}`} aria-hidden={i >= row.length} className={`inline-flex items-center gap-2.5 whitespace-nowrap rounded-full border px-5 py-3 text-[15px] font-semibold ${c.struck ? "border-border/70 bg-muted/40 text-muted-foreground line-through decoration-muted-foreground/40" : "border-primary/25 bg-background text-foreground shadow-sm"}`}>
-                  {c.icon && <Icon name={c.icon} className={`h-4 w-4 ${c.struck ? "" : "text-primary"}`} />}
+                  {c.productKey ? <ProductLogo productKey={c.productKey} size={24} title={c.label} /> : c.icon && <Icon name={c.icon} className={`h-4 w-4 ${c.struck ? "" : "text-primary"}`} />}
                   {c.label}
                 </span>
               ))}

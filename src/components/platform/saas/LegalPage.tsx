@@ -27,15 +27,19 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
           {/* Left: Other policies */}
           <aside className="lg:sticky lg:top-28 lg:self-start">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">All policies</p>
-            <ul className="space-y-0.5">
+            <ul className="sr-scroll-x flex gap-2 lg:block lg:space-y-0.5">
               {LEGAL_LINKS.map((l) => (
-                <li key={l.href}><Link data-product-link href={l.href} aria-current={doc.title === l.label ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${doc.title === l.label ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{l.label}</Link></li>
+                <li key={l.href} className="shrink-0"><Link data-product-link href={l.href} aria-current={doc.title === l.label ? "page" : undefined} className={`block rounded-xl px-3 py-2 text-sm transition-colors ${doc.title === l.label ? "bg-primary/10 font-bold text-primary" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"}`}>{l.label}</Link></li>
               ))}
             </ul>
           </aside>
 
           {/* Center: content */}
           <div className="min-w-0 max-w-3xl">
+            <details className="group mb-8 rounded-2xl border border-border/60 bg-card shadow-sm lg:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black">On this page<span className="text-xs font-bold text-primary group-open:hidden">Tap to open</span></summary>
+              <div className="border-t border-border/60 p-3"><LegalToc items={toc} /></div>
+            </details>
             {doc.sections.map((s, i) => (
               <Reveal key={s.heading}>
                 <section id={slug(s.heading)} className="scroll-mt-32 border-t border-border/70 py-10 first:border-t-0 first:pt-0">
@@ -70,7 +74,7 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
           </div>
 
           {/* Right: On this page */}
-          <aside className="lg:sticky lg:top-28 lg:self-start">
+          <aside className="hidden lg:sticky lg:top-28 lg:block lg:self-start">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">On this page</p>
             <LegalToc items={toc} />
           </aside>

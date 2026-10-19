@@ -116,7 +116,7 @@ export default async function SaasHome() {
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
-              REPLACES.map((r) => ({ label: byKey.get(r.panel)?.name ?? "Included", icon: r.icon })),
+              REPLACES.map((r) => ({ label: byKey.get(r.panel)?.name ?? "Included", icon: r.icon, productKey: r.panel })),
             ]} />
           </Reveal>
           <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See every product <ArrowRight className="h-4 w-4" /></Link></div>
