@@ -28,7 +28,7 @@ function demourls(): { website: string; workspace: string } {
 export default function DemoAccessPopup() {
   const path = usePathname() || "/";
   const [visible, setVisible] = useState(false);
-  const [urls, setUrls] = useState({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
+  const [urls, setUrls] = useState<{ website: string; workspace: string }>({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
 
   useEffect(() => {
     setUrls(demourls());

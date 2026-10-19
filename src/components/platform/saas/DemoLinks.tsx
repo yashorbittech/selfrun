@@ -21,7 +21,7 @@ function buildDemoUrls(): { workspace: string; website: string } {
 
 /** Primary CTA: "Open live demo workspace" + "Or preview the public website first" */
 export function DemoWorkspaceCta() {
-  const [urls, setUrls] = useState({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
+  const [urls, setUrls] = useState<{ website: string; workspace: string }>({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
   useEffect(() => { setUrls(buildDemoUrls()); }, []);
   return (
     <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -50,7 +50,7 @@ export function DemoWindowHost() {
 
 /** "Open live workspace" button on Path 1 card */
 export function DemoWorkspaceLink() {
-  const [urls, setUrls] = useState({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
+  const [urls, setUrls] = useState<{ website: string; workspace: string }>({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
   useEffect(() => { setUrls(buildDemoUrls()); }, []);
   return (
     <a
@@ -67,7 +67,7 @@ export function DemoWorkspaceLink() {
 
 /** "View public website" button on Path 2 card */
 export function DemoWebsiteLink() {
-  const [urls, setUrls] = useState({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
+  const [urls, setUrls] = useState<{ website: string; workspace: string }>({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
   useEffect(() => { setUrls(buildDemoUrls()); }, []);
   return (
     <a
