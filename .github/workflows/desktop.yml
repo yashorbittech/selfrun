@@ -98,7 +98,7 @@ jobs:
       APP_ORIGIN: ${{ vars.SELFRUN_APP_ORIGIN || 'https://app.selfrunbusiness.com' }}
       CSC_IDENTITY_AUTO_DISCOVERY: "false"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22
