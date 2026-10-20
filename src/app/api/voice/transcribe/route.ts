@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { voiceBlockReason } from "@/lib/platform/billing/enforce";
 import { recordUsage } from "@/lib/platform/billing/usage";
@@ -12,7 +13,7 @@ export const maxDuration = 30;
 
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // ~12 MB (roughly 2–3 min of Opus/webm)
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const config = await getChatbotConfig();
 
   if (!config.voice.enabled) {
@@ -100,3 +101,5 @@ export async function POST(req: NextRequest) {
   });
   return applyChatCookies(res, cookiesToSet);
 }
+
+export const POST = withTransport(handlePOST);

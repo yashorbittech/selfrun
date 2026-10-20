@@ -165,6 +165,7 @@ tickets or docs.
 | `PLATFORM_ROOT_DOMAIN` | Production: the domain under which company addresses live (`<slug>.<domain>`) |
 | `PLATFORM_WILDCARD_SUBDOMAINS` | `1` once `*.<root domain>` is served by Vercel (see the deploy guide) |
 | `PLATFORM_ENCRYPTION_KEY` | Encrypts platform secrets stored in the database. Generate once and keep it |
+| `API_TRANSPORT_SECRET` | Seals API request/response bodies between browser and server (see [docs/compliance/api-transport-encryption.md](docs/compliance/api-transport-encryption.md)). Falls back to `PLATFORM_ENCRYPTION_KEY` |
 | `CRON_SECRET` | Bearer secret protecting cron endpoints |
 | `NEXT_PUBLIC_APP_URL` | Public base URL |
 | `SAAS_OPERATOR_NAME` | Optional legal name shown in the footer and legal pages |
@@ -451,6 +452,12 @@ docs/                  Architecture, deployment and app build guides (build-apps
 ```
 
 ---
+
+## Security and compliance
+
+Security policy and vulnerability reporting: [SECURITY.md](SECURITY.md). The compliance work (country-wise legal register, standards mapping, data
+inventory, policies, gap assessment, release criteria) is in [docs/compliance/](docs/compliance/README.md). Checks: `npm run typecheck`,
+`npm run security:scan`, `npm run security:audit`, `npm run test:password`.
 
 ## Architecture notes
 

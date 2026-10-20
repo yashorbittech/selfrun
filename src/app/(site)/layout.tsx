@@ -17,6 +17,8 @@ import { getPublicFooter } from "@/lib/products/sitecraft-ai/footer";
 import { themeCssBlock } from "@/lib/products/sitecraft-ai/theme";
 import { resolveSiteThemeState } from "@/lib/products/sitecraft-ai/theme-preview";
 import SiteTracking from "@/components/products/sitecraft-ai/SiteTracking";
+import SiteConsent from "@/components/products/sitecraft-ai/SiteConsent";
+import { trackingNeedsConsent } from "@/lib/products/sitecraft-ai/consent";
 import { getTracking } from "@/lib/products/sitecraft-ai/tracking";
 import ThemeImageFilters from "@/components/products/sitecraft-ai/ThemeImageFilters";
 import ThemePreviewBridge from "@/components/products/sitecraft-ai/theme/ThemePreviewBridge";
@@ -51,7 +53,8 @@ export default async function SiteLayout({
       <style id="cms-theme-vars" dangerouslySetInnerHTML={{ __html: themeCssBlock(theme) + layoutCss(components) + WIDE_CONTAINER_CSS }} />
       {components.images === "themed" && <ThemeImageFilters tokens={theme} />}
       {/* The company's own analytics / tracking — never while a CMS user is previewing a theme. */}
-      {!preview && <SiteTracking t={tracking} />}
+      {/* …and only after the visitor has agreed: nothing that tracks loads before that (and nothing is asked when nothing tracks). */}
+      {!preview && (trackingNeedsConsent(tracking) ? <SiteConsent><SiteTracking t={tracking} /></SiteConsent> : <SiteTracking t={tracking} />)}
       <ManagedJsonLd schemas={schemas} />
       <OfferPromotions />
       <ReferralWelcome />

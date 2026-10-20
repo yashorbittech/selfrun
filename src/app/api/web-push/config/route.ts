@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { siteGuard } from "@/lib/webpush/api";
 import { getWebPushSettings } from "@/lib/webpush/store";
@@ -7,7 +8,7 @@ import { pushConfigured, vapidPublicKey } from "@/lib/push/vapid";
 /** What the website's notification prompt needs: whether it should appear, its text, the topics and the public key. */
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   const blocked = await siteGuard(req, "wp-config", 120);
   if (blocked) return blocked;
   const s = await getWebPushSettings();
@@ -24,3 +25,5 @@ export async function GET(req: Request) {
     { headers: { "Cache-Control": "public, max-age=60" } },
   );
 }
+
+export const GET = withTransport(handleGET);

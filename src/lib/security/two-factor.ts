@@ -6,6 +6,7 @@ import { getDb } from "@/lib/mongodb";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { decryptPlatformSecret, encryptPlatformSecret, isPlatformEncryptionConfigured, type EncryptedValue } from "@/lib/platform/crypto";
 import { newTotpSecret, otpauthUri, verifyTotp } from "@/lib/security/totp";
+import { getCompanyBrand } from "@/lib/platform/branding";
 
 /**
  * Two-step sign-in. A person turns it on under Security & sessions with an authenticator app; from then on a password alone does not sign
@@ -23,7 +24,6 @@ interface Pending { secret: EncryptedValue; at: Date }
 interface UserTf { _id: ObjectId; email: string; twoFactor?: TwoFactorDoc | null; twoFactorPending?: Pending | null }
 
 const SETUP_TTL_MS = 15 * 60_000;
-const ISSUER = "SelfRun";
 const hashCode = (c: string) => createHash("sha256").update(c.trim().toLowerCase().replace(/[\s-]/g, "")).digest("hex");
 const ctx = async (adminId: ObjectId | string) => `2fa:${await currentCompanyId()}:${String(adminId)}`;
 const users = async () => (await getDb()).collection<UserTf>("admin_users");
@@ -48,7 +48,7 @@ export async function startTwoFactorSetup(adminId: ObjectId, email: string): Pro
   if (u?.twoFactor) return { ok: false, error: "Two-step sign-in is already on. Turn it off first to set it up again." };
   const secret = newTotpSecret();
   await col.updateOne({ _id: adminId }, { $set: { twoFactorPending: { secret: encryptPlatformSecret(secret, await ctx(adminId)), at: new Date() } } });
-  const qr = await QRCode.toDataURL(otpauthUri(secret, email, ISSUER), { margin: 1, width: 192 });
+  const qr = await QRCode.toDataURL(otpauthUri(secret, email, await issuerName()), { margin: 1, width: 192 });
   return { ok: true, secret, qr };
 }
 
@@ -106,4 +106,23 @@ export async function disableTwoFactor(adminId: ObjectId, code: string): Promise
 /** A Super Admin switching two-step off for someone who lost their device (they can set it up again). */
 export async function resetTwoFactor(adminId: ObjectId): Promise<void> {
   await (await users()).updateOne({ _id: adminId }, { $unset: { twoFactor: "", twoFactorPending: "" } });
+}
+
+/** The name an authenticator app shows beside the code: the company's own name, never the platform's. */
+async function issuerName(): Promise<string> {
+  const brand = await getCompanyBrand().catch(() => null);
+  return brand?.name?.trim() || "Workspace";
+}
+
+/**
+ * Privileged accounts (a company's Super Admins and every Platform Console user) must use two-step sign-in. This says whether the person
+ * still has to set it up. Switched off with REQUIRE_PRIVILEGED_MFA=0, and not enforced where two-step cannot work yet (no encryption key).
+ */
+export async function mustSetUpTwoFactor(user: { id: string; roles?: readonly string[] }, opts: { alwaysPrivileged?: boolean } = {}): Promise<boolean> {
+  if (process.env.REQUIRE_PRIVILEGED_MFA === "0" || !twoFactorAvailable()) return false;
+  const privileged = opts.alwaysPrivileged || (user.roles ?? []).includes("super_admin");
+  if (!privileged) return false;
+  const { ObjectId } = await import("mongodb");
+  if (!ObjectId.isValid(user.id)) return false;
+  return !(await twoFactorStatus(new ObjectId(user.id))).enabled;
 }

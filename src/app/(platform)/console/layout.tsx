@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { mustSetUpTwoFactor } from "@/lib/security/two-factor";
 import { can, requirePlatformAccess } from "@/lib/platform/console/access";
 import { ROUTE_PERMISSIONS } from "@/lib/platform/console/permissions";
 import { unreadCount } from "@/lib/platform/notifications";
@@ -20,6 +22,8 @@ export const metadata: Metadata = { title: { default: "Platform Console", templa
  */
 export default async function PlatformPanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePlatformAccess();
+  // Everyone who can use the Platform Console must use two-step sign-in.
+  if (await mustSetUpTwoFactor({ id: user.id }, { alwaysPrivileged: true })) redirect("/commandos/two-factor-setup");
   const flags: PlatformNavFlags = {
     pendingApprovals: can(user, "signups.read") ? await countAwaitingApproval() : 0,
     unreadNotifications: await unreadCount(user.id).catch(() => 0),

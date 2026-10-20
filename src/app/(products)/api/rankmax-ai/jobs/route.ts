@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/rankmax-ai/viewer";
 import type { SeoPermission } from "@/lib/seo-roles";
@@ -39,7 +40,7 @@ const JOBS: Record<string, { permission: SeoPermission; label: string; run: (bod
   },
 };
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Your session has expired — please sign in again." }, { status: 401 });
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
@@ -63,3 +64,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "The job failed." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

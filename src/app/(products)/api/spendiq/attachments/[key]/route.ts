@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
 import { hasPrmsStaffRole } from "@/lib/prms-roles";
@@ -11,7 +12,7 @@ type Context = { params: Promise<{ key: string }> };
  * file that is referenced by a requisition they can see (their own, or any
  * if they hold a staff role).
  */
-export async function GET(_req: NextRequest, { params }: Context) {
+async function handleGET(_req: NextRequest, { params }: Context) {
   const user = await getCurrentPrmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -42,3 +43,5 @@ export async function GET(_req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

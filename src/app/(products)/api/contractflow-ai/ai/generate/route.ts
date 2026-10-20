@@ -1,8 +1,9 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentLpmsUser } from '@/lib/lpms-auth';
 import { lpmsCan } from '@/lib/lpms-roles';
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const user = await getCurrentLpmsUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -28,3 +29,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'AI generation not yet configured' }, { status: 501 });
   }
 }
+
+export const POST = withTransport(handlePOST);

@@ -210,6 +210,7 @@ const TITLES: Record<LoginEventDoc["type"], { title: string; tone: HistoryView["
   logout: { title: "Signed out", tone: "neutral" },
   logout_everywhere: { title: "Signed out of every device", tone: "warn" },
   session_revoked: { title: "A device was signed out", tone: "warn" },
+  password_reset: { title: "Password was reset", tone: "warn" },
 };
 
 export async function listLoginHistory(adminId: ObjectId, email: string, limit = 60): Promise<HistoryView[]> {

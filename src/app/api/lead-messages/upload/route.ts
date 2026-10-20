@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
@@ -21,7 +22,7 @@ export const runtime = "nodejs";
  * less-trusted caller and a client-supplied leadId here would let someone
  * attach files to a thread they don't own.
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const form = await request.formData();
     const file = form.get("file");
@@ -52,3 +53,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
+
+export const POST = withTransport(handlePOST);

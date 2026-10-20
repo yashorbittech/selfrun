@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getMedia } from "@/lib/products/sitecraft-ai/media";
 import { getObject } from "@/lib/storage/blob";
@@ -13,7 +14,7 @@ type Context = { params: Promise<{ id: string }> };
  * here is sensitive, it's marketing image content by definition. Upload and
  * delete still require a CMS session (see `/api/sitecraft-ai/media/upload`).
  */
-export async function GET(_req: NextRequest, { params }: Context) {
+async function handleGET(_req: NextRequest, { params }: Context) {
   const { id } = await params;
   const media = await getMedia(id);
   if (!media) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -30,3 +31,5 @@ export async function GET(_req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

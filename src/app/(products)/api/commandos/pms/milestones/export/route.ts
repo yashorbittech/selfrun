@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportAllMilestones } from "@/lib/products/commandos/pms-work-items";
@@ -5,7 +6,7 @@ import { exportProjects } from "@/lib/products/sprintos/projects";
 import { isValidMilestoneStatus, getMilestoneStatusMeta, type MilestoneStatus } from "@/lib/products/sprintos/constants";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.pms.milestones");
   if (!auth.ok) return auth.response;
 
@@ -40,3 +41,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getTracking, VERIFICATION_FILE_RE } from "@/lib/products/sitecraft-ai/tracking";
 
@@ -6,7 +7,7 @@ import { getTracking, VERIFICATION_FILE_RE } from "@/lib/products/sitecraft-ai/t
  * (`/google….html`, `/BingSiteAuth.xml`, `/ads.txt` … — rewritten here by next.config.ts).
  * The files are whatever the company saved in CMS → Settings → Tracking; anything else is a 404.
  */
-export async function GET(_req: Request, { params }: { params: Promise<{ file: string }> }) {
+async function handleGET(_req: Request, { params }: { params: Promise<{ file: string }> }) {
   const { file } = await params;
   if (!VERIFICATION_FILE_RE.test(file)) return new NextResponse("Not found", { status: 404 });
   const match = (await getTracking()).verificationFiles.find((f) => f.name === file);
@@ -21,3 +22,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ file: s
     },
   });
 }
+
+export const GET = withTransport(handleGET);

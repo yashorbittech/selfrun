@@ -14,7 +14,7 @@ const slug = (h: string) => h.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
  * A policy page: an at-a-glance row, the numbered sections with a table of contents that follows the reader, the other
  * policies one click away, and a way to ask a question.
  */
-export default function LegalPage({ doc }: { doc: { title: string; intro: React.ReactNode; sections: LegalDoc["sections"]; highlights?: LegalDoc["highlights"] } }) {
+export default function LegalPage({ doc, after }: { doc: { title: string; intro: React.ReactNode; sections: LegalDoc["sections"]; highlights?: LegalDoc["highlights"] }; /** Something to show under the sections, such as a form. */ after?: React.ReactNode }) {
   const toc = doc.sections.map((s) => ({ id: slug(s.heading), label: s.heading }));
   const href = LEGAL_LINKS.find((l) => l.label === doc.title)?.href ?? "/";
   return (
@@ -66,6 +66,8 @@ export default function LegalPage({ doc }: { doc: { title: string; intro: React.
                 </section>
               </Reveal>
             ))}
+
+            {after ? <div className="mt-6">{after}</div> : null}
 
             <div className="sr-band mt-8 flex flex-col items-start gap-5 rounded-[2rem] p-8 shadow-2xl shadow-primary/25 sm:flex-row sm:items-center sm:p-10">
               <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/30"><MessageCircle className="h-6 w-6" /></span>

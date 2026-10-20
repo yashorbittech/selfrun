@@ -51,9 +51,11 @@ const RULES: Rule[] = [
   { re: /^\/api\/smms\/oauth\/[^/]+\/callback$/, cls: "navigation" },
   { re: /^\/workspace\/(handoff|verify-email)/, cls: "navigation" },
   // The public website talking to its own backend (forms, chat, offers, push sign-up …).
-  { re: /^\/api\/(chat|careers|offers|referral|web-push|voice|game|client-error|push\/config|support\/public)(\/|$)/, cls: "public" },
+  { re: /^\/api\/(chat|careers|offers|referral|web-push|voice|game|client-error|consent|push\/config|support\/public)(\/|$)/, cls: "public" },
   { re: /^\/api\/leads\/[^/]+$/, methods: ["POST"], cls: "public" },
   { re: /^\/api\/cms\/theme-preview\/exit$/, cls: "public" },
+  // Server Actions travel sealed through here; the forwarded action is checked again by this gate as a normal action.
+  { re: /^\/api\/secure\/action$/, methods: ["POST"], cls: "public" },
 ];
 
 export function classify(pathname: string, method: string): Class {

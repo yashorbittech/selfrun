@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Loader2, LayoutDashboard } from "lucide-react";
 import { CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -95,6 +96,7 @@ export default function LoginForm({ next = null, demo = false }: { next?: string
                 {state.error}
               </p>
             )}
+            <p className="text-right text-sm"><Link href="/commandos/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot your password?</Link></p>
             <Button type="submit" className="w-full" disabled={pending}>
               {pending ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
             </Button>

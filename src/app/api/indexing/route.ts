@@ -1,9 +1,10 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { hasBearer } from "@/lib/security/bearer";
 import { notifyGoogleIndexing, IndexingNotificationType } from "@/lib/google-indexing";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   // Fail closed: with no secret configured nobody can call this (it used to be open), and the comparison is constant-time.
   if (!hasBearer(req, process.env.INDEXING_API_SECRET)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -41,3 +42,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export const POST = withTransport(handlePOST);

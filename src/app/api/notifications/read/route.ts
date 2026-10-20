@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { currentNotifyViewer } from "@/lib/notify/viewer";
 import { markPanelRead } from "@/lib/notify";
@@ -7,7 +8,7 @@ import { hasLevel } from "@/lib/ai/agent/access";
 const UNIFIED = new Set(["fms", "lms", "lpms", "cms", "intelligence", "support"]);
 
 /** Marks the person's OWN notifications of one product as read (the shared-store products). Ids that are not theirs simply don't match. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const v = await currentNotifyViewer(null);
   if (!v || v.actor !== "staff") return NextResponse.json({ error: "Not signed in." }, { status: 401 });
   const body = (await req.json().catch(() => ({}))) as { panel?: unknown; ids?: unknown };
@@ -17,3 +18,5 @@ export async function POST(req: NextRequest) {
   await markPanelRead(v.user.id, body.panel, ids);
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportPaymentPlans } from "@/lib/products/cohort-ai/payments";
 import { getPaymentStatusMeta } from "@/lib/products/cohort-ai/constants";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.tms.payments");
   if (!auth.ok) return auth.response;
 
@@ -34,3 +35,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

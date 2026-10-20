@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helpers";
 import { listMemberChannels } from "@/lib/products/huddle-ai/channels";
 import { listConversationsForUser } from "@/lib/products/huddle-ai/conversations";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/conversations — the caller's channels + DMs, for pickers (forward, share). */
-export async function GET() {
+async function handleGET() {
   try {
     const user = await requireSession();
     const [channels, convs] = await Promise.all([
@@ -30,3 +31,5 @@ export async function GET() {
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);

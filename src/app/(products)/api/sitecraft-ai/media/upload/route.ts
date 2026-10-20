@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getViewer, can } from "@/lib/products/sitecraft-ai/viewer";
@@ -9,7 +10,7 @@ import { UPLOAD_PATH, IMAGE_TYPES, MAX_IMAGE_BYTES } from "@/lib/products/sitecr
  * `/api/viralpulse-ai/media/upload`. The browser then calls `registerCmsMediaAction`,
  * which re-reads the blob's real type and size before trusting it.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Your session has expired — please sign in again." }, { status: 401 });
   if (!can(viewer, "MEDIA_UPLOAD")) return NextResponse.json({ error: "You don't have permission to upload media." }, { status: 403 });
@@ -42,3 +43,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: (err as Error).message.slice(0, 200) }, { status: 400 });
   }
 }
+
+export const POST = withTransport(handlePOST);

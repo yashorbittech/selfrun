@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getPwaIdentity } from "@/lib/pwa/identity";
 
@@ -9,7 +10,7 @@ import { getPwaIdentity } from "@/lib/pwa/identity";
  */
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   const id = await getPwaIdentity();
   if (!id) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const origin = new URL(req.url).origin;
@@ -36,3 +37,5 @@ export async function GET(req: Request) {
     { headers: { "Cache-Control": "no-store", "Access-Control-Allow-Origin": "*" } },
   );
 }
+
+export const GET = withTransport(handleGET);

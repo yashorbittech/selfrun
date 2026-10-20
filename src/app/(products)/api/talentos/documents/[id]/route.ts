@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { hasStaffRole } from "@/lib/hrms-roles";
@@ -7,7 +8,7 @@ import { isInlinePreviewable } from "@/lib/products/talentos/document-categories
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentHrmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -33,3 +34,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

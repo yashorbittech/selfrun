@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { saveAttachment } from "@/lib/products/huddle-ai/attachments";
@@ -16,7 +17,7 @@ export const runtime = "nodejs";
  * Storing here (not on message send) keeps the send payload small and lets the
  * composer show upload progress + previews before the message exists.
  */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const form = await request.formData();
@@ -39,3 +40,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

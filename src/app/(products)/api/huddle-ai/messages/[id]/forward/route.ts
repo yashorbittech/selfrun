@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { forwardMessage } from "@/lib/products/huddle-ai/messages";
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
  *   { fromScopeType, fromScopeId, toScopeType, toScopeId }
  * Copies the message into the target conversation as a "Forwarded from …" post.
  */
-export async function POST(request: NextRequest, ctx: RouteContext<"/api/huddle-ai/messages/[id]/forward">) {
+async function handlePOST(request: NextRequest, ctx: RouteContext<"/api/huddle-ai/messages/[id]/forward">) {
   try {
     const user = await requireSession();
     const { id } = await ctx.params;
@@ -53,3 +54,5 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/huddle-
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

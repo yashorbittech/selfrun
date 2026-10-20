@@ -6,7 +6,7 @@ import { parseInquiry, saveInquiry, type InquiryKind } from "@/lib/platform/saas
 import { rateLimit } from "@/lib/security/rate-limit";
 import { isSaasHost, saasCanonicalHost } from "@/lib/platform/saas/hosts";
 
-export type InquiryState = { ok: boolean; error?: string; field?: string };
+export type InquiryState = { ok: boolean; error?: string; field?: string; reference?: string };
 
 export async function submitInquiry(kind: InquiryKind, _prev: InquiryState | null, fd: FormData): Promise<InquiryState> {
   const h = await headers();
@@ -19,12 +19,12 @@ export async function submitInquiry(kind: InquiryKind, _prev: InquiryState | nul
   const parsed = parseInquiry(kind, fd);
   if (!parsed.ok) return { ok: false, error: parsed.error, field: parsed.field };
   try {
-    await saveInquiry(parsed.value, saasCanonicalHost(host));
+    const saved = await saveInquiry(parsed.value, saasCanonicalHost(host));
+    return { ok: true, reference: saved.reference };
   } catch (err) {
     console.error("[saas] inquiry not saved", err);
     return { ok: false, error: "Something went wrong on our side. Please try again in a moment." };
   }
-  return { ok: true };
 }
 
 /** Sign-in entry: find a workspace from its address (`acme`, `acme.selfrunbusiness.com` or its own domain) and send the visitor to that workspace's login. */

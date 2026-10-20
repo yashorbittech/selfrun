@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getChatbotConfig } from "@/lib/chatbot-config";
 import { isElevenLabsConfigured, streamTts } from "@/lib/elevenlabs";
@@ -15,7 +16,7 @@ const MAX_TTS_CHARS = 5000;
 // mp3 @ 128 kbps ≈ 16000 bytes/sec — used to estimate spoken duration.
 const MP3_BYTES_PER_SEC = 16000;
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const config = await getChatbotConfig();
 
   if (!config.voice.enabled) {
@@ -139,3 +140,5 @@ export async function POST(req: NextRequest) {
     },
   });
 }
+
+export const POST = withTransport(handlePOST);

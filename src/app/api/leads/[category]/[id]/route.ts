@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedLmsRequest } from "@/lib/api-auth";
 import {
@@ -17,7 +18,7 @@ const invalidCategoryResponse = () =>
     { status: 400 }
   );
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "VIEW_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest, { params }: Context) {
   return NextResponse.json({ data: lead });
 }
 
-export async function PATCH(req: NextRequest, { params }: Context) {
+async function handlePATCH(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "EDIT_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -63,7 +64,7 @@ export async function PATCH(req: NextRequest, { params }: Context) {
   return NextResponse.json({ data: updated });
 }
 
-export async function DELETE(req: NextRequest, { params }: Context) {
+async function handleDELETE(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "DELETE_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -75,3 +76,7 @@ export async function DELETE(req: NextRequest, { params }: Context) {
   if (!deleted) return NextResponse.json({ error: "Submission not found." }, { status: 404 });
   return NextResponse.json({ data: { deleted: true } });
 }
+
+export const GET = withTransport(handleGET);
+export const PATCH = withTransport(handlePATCH);
+export const DELETE = withTransport(handleDELETE);

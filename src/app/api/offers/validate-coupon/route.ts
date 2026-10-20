@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { readSafeJson } from "@/lib/security/safe-json";
@@ -6,7 +7,7 @@ import { validateCoupon } from "@/lib/offers/coupons";
 import { isValidAudience } from "@/lib/offers/constants";
 
 /** Read-only "Apply coupon" preview. The final claim submit always re-validates from scratch — this never redeems. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const limited = await limitOr429(req, "coupon-validate", 30, 600);
   if (limited) return limited;
   let body: Record<string, unknown>;
@@ -39,3 +40,5 @@ export async function POST(req: NextRequest) {
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: 422 });
   return NextResponse.json({ discountAmount: result.discountAmount });
 }
+
+export const POST = withTransport(handlePOST);

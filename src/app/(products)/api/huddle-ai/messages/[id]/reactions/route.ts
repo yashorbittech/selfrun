@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { toggleReaction } from "@/lib/products/huddle-ai/messages";
@@ -6,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/messages/[id]/reactions  { scopeType, scopeId, emoji } */
-export async function POST(request: NextRequest, ctx: RouteContext<"/api/huddle-ai/messages/[id]/reactions">) {
+async function handlePOST(request: NextRequest, ctx: RouteContext<"/api/huddle-ai/messages/[id]/reactions">) {
   try {
     const user = await requireSession();
     const { id } = await ctx.params;
@@ -20,3 +21,5 @@ export async function POST(request: NextRequest, ctx: RouteContext<"/api/huddle-
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { requireCallAccess } from "@/lib/products/huddle-ai/call-guard";
@@ -11,7 +12,7 @@ export const runtime = "nodejs";
  * Relays one WebRTC signaling payload to a specific peer over the call event log.
  * Short TTL — ICE candidates are high-volume and disposable.
  */
-export async function POST(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
     const { user } = await requireCallAccess(id);
@@ -34,3 +35,5 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ id: st
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

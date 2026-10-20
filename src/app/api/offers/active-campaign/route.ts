@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveCampaignForPage, getUpcomingCampaignForPage, type OfferCampaign } from "@/lib/offers/campaigns";
 import { getPopupTemplateMeta, audienceForPath } from "@/lib/offers/constants";
@@ -62,7 +63,7 @@ function buildDisplay(campaign: OfferCampaign, phase: "live" | "upcoming", conta
  * campaign so its "coming soon" countdown can be promoted site-wide before launch too —
  * not just once it goes live.
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const page = req.nextUrl.searchParams.get("page") || "/";
 
   try {
@@ -102,3 +103,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
   }
 }
+
+export const GET = withTransport(handleGET);

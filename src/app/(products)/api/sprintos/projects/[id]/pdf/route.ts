@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { hasPmsStaffRole } from "@/lib/pms-roles";
@@ -13,7 +14,7 @@ import {
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentPmsUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -106,3 +107,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

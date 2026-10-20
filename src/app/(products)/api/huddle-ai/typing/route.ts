@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError } from "@/lib/products/huddle-ai/route-helpers";
 import { emit } from "@/lib/products/huddle-ai/events";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/typing  { scopeType, scopeId }  — emits an ephemeral typing ping. */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as { scopeType?: string; scopeId?: string };
@@ -25,3 +26,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

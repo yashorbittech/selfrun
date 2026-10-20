@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentLpmsUser } from '@/lib/lpms-auth';
 import { getDb } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { lpmsCan } from '@/lib/lpms-roles';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+async function handleGET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentLpmsUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -22,3 +23,5 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   // For now return file metadata; actual streaming would use GridFS
   return NextResponse.json({ url: file.url, name: file.name });
 }
+
+export const GET = withTransport(handleGET);

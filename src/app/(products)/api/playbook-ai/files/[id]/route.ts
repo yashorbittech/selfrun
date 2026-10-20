@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer } from "@/lib/products/playbook-ai/viewer";
 import { getReadableSop } from "@/lib/products/playbook-ai/sops";
@@ -22,7 +23,7 @@ const SAFE_HEADERS = {
  * additionally need DOWNLOAD permission on an SOP that allows it, and are
  * written to the audit trail.
  */
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -85,3 +86,5 @@ export async function GET(req: NextRequest, { params }: Context) {
 
   return new NextResponse(object.stream, { headers });
 }
+
+export const GET = withTransport(handleGET);

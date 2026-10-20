@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { createPaymentLink, CreatePaymentLinkInput } from "@/lib/products/cashflow-ai/payments/links";
@@ -5,7 +6,7 @@ import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManagePaymentLinks } from "@/lib/fms-roles";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   // Creating a payment link (and stamping a transaction) is a finance-staff action — never public.
   const staff = await getCurrentFmsUser();
   if (!staff) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
@@ -77,3 +78,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

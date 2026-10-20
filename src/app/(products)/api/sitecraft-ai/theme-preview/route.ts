@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { cookies, draftMode } from "next/headers";
 import { redirect } from "next/navigation";
 import { getViewer, can } from "@/lib/products/sitecraft-ai/viewer";
@@ -12,7 +13,7 @@ import { THEME_PREVIEW_COOKIE, type ThemePreviewCookie } from "@/lib/products/si
  * Turns on Draft Mode for this browser, remembers the theme in a cookie, and
  * redirects to the public page — which then renders with that theme.
  */
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const viewer = await getViewer();
   if (!viewer || !can(viewer, "VIEW")) return new Response("Sign in to the CMS to preview themes.", { status: 401 });
 
@@ -47,3 +48,5 @@ export async function GET(request: Request) {
   });
   redirect(path);
 }
+
+export const GET = withTransport(handleGET);

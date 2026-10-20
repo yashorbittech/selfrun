@@ -1,5 +1,6 @@
 import "server-only";
-import { randomBytes, scryptSync } from "node:crypto";
+import { randomBytes } from "node:crypto";
+import { hashPassword } from "@/lib/security/password";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { getEmployee } from "@/lib/products/talentos/employees";
@@ -12,7 +13,6 @@ import { newAccountBlockReason, rollbackIfOverSeats } from "@/lib/platform/billi
  * the employee must change on first sign-in (`mustChangePassword`).
  */
 
-const SCRYPT_KEYLEN = 64;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface LmsUserDoc {
@@ -26,12 +26,6 @@ interface LmsUserDoc {
   roles?: string[];
   employeeId?: string | null;
   mustChangePassword?: boolean;
-}
-
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, SCRYPT_KEYLEN).toString("hex");
-  return `${salt}:${hash}`;
 }
 
 export function generateTempPassword(): string {

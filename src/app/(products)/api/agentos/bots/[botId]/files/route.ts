@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { isOpenAIConfigured } from "@/lib/openai";
@@ -14,7 +15,7 @@ export const maxDuration = 60;
  * new version of that file; absent → a new file. The bot comes from the URL,
  * and the file can only ever land in that bot's own vector store.
  */
-export async function POST(req: NextRequest, { params }: { params: Promise<{ botId: string }> }) {
+async function handlePOST(req: NextRequest, { params }: { params: Promise<{ botId: string }> }) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ ok: false, error: "Your session has expired — please sign in again." }, { status: 401 });
   if (!can(viewer, "UPLOAD_FILES")) return NextResponse.json({ ok: false, error: "You don't have permission to upload knowledge files." }, { status: 403 });
@@ -51,3 +52,5 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bot
     return NextResponse.json({ ok: false, error: "OpenAI rejected the upload. Please try again." }, { status: 502 });
   }
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import type OpenAI from "openai";
 import { isOpenAIConfigured } from "@/lib/openai";
@@ -30,7 +31,7 @@ function fail(error: string, status: number) {
  * user is, whether they may use this bot, and whether the chat is theirs. The
  * OpenAI key never leaves the server; the client only ever sees text deltas.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return fail("Your session has expired — please sign in again.", 401);
   if (!can(viewer, "USE_BOT") && !can(viewer, "EDIT_BOT")) return fail("You don't have permission to use AI bots.", 403);
@@ -202,3 +203,5 @@ export async function POST(req: NextRequest) {
     headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" },
   });
 }
+
+export const POST = withTransport(handlePOST);

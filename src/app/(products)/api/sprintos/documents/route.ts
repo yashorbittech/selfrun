@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { canManageProjects } from "@/lib/pms-roles";
@@ -7,7 +8,7 @@ import { saveDocumentFile } from "@/lib/products/sprintos/document-storage";
 import { isValidDocumentCategory, validateDocumentFile, DEFAULT_DOCUMENT_CATEGORY } from "@/lib/products/sprintos/document-categories";
 import { recordActivity } from "@/lib/products/sprintos/activity";
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const user = await getCurrentPmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canManageProjects(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -81,3 +82,5 @@ export async function POST(req: NextRequest) {
   });
   return NextResponse.json({ ok: true, id: doc._id }, { status: 201 });
 }
+
+export const POST = withTransport(handlePOST);

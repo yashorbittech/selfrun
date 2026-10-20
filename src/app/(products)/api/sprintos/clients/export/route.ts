@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedPmsRequest } from "@/lib/products/sprintos/api-auth";
 import { exportClients } from "@/lib/products/sprintos/clients";
 import { getClientStatusMeta, isValidClientStatus, type ClientStatus } from "@/lib/products/sprintos/constants";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   if (!(await isAuthorizedPmsRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -47,3 +48,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

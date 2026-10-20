@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { applicantDocument } from "@/lib/careers/applicant-profile";
@@ -10,7 +11,7 @@ type Context = { params: Promise<{ id: string; docId: string }> };
  * the LMS applicant profile. The document is re-checked to belong to THIS
  * applicant's portal account — never served by id alone.
  */
-export async function GET(_req: Request, { params }: Context) {
+async function handleGET(_req: Request, { params }: Context) {
   const user = await requireLms("VIEW_CAREERS");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, docId } = await params;
@@ -27,3 +28,5 @@ export async function GET(_req: Request, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

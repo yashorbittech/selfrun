@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
 import { recordOfferEvent } from "@/lib/offers/analytics";
@@ -10,7 +11,7 @@ import { isValidCategory } from "@/lib/categories";
  * event should never surface as visible UI failure); malformed bodies are
  * just silently ignored.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
     body = (await readSafeJson(req)) as typeof body;
@@ -40,3 +41,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true }, { status: 202 });
 }
+
+export const POST = withTransport(handlePOST);

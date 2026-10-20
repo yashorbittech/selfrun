@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getCurrentTmsUser } from "@/lib/tms-auth";
 import { hasTmsStaffRole } from "@/lib/tms-roles";
@@ -10,7 +11,7 @@ import { renderInvoicePdf } from "@/components/products/cohort-ai/InvoicePdf";
 
 type Context = { params: Promise<{ invoiceNumber: string }> };
 
-export async function GET(_req: Request, { params }: Context) {
+async function handleGET(_req: Request, { params }: Context) {
   const user = await getCurrentTmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -64,3 +65,5 @@ export async function GET(_req: Request, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

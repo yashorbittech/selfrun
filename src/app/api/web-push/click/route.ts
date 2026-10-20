@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { siteGuard } from "@/lib/webpush/api";
 import { broadcastsCol } from "@/lib/webpush/store";
@@ -5,7 +6,7 @@ import { broadcastsCol } from "@/lib/webpush/store";
 export const dynamic = "force-dynamic";
 
 /** Counts a tap on a notification (sent by the website's service worker). Anonymous, only a counter. */
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const blocked = await siteGuard(req, "wp-click", 60);
   if (blocked) return blocked;
   const body = (await req.json().catch(() => null)) as { id?: unknown } | null;
@@ -13,3 +14,5 @@ export async function POST(req: Request) {
   await (await broadcastsCol()).updateOne({ _id: body.id }, { $inc: { clicks: 1 } });
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withTransport(handlePOST);

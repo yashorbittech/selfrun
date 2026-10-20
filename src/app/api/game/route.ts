@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
@@ -14,7 +15,7 @@ async function companyOrNull(): Promise<string | null> {
 }
 
 /** The leaderboard of this address (its company, or everyone where no company owns it) and, with `?player=`, that player's best. */
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   const limited = await limitOr429(req, "game-read", 120, 3600);
   if (limited) return limited;
   const player = new URL(req.url).searchParams.get("player");
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 }
 
 /** Saves a finished run: { playerId, name, score, durationMs, page }. */
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const limited = await limitOr429(req, "game-score", 60, 3600);
   if (limited) return limited;
   let body: Record<string, unknown>;
@@ -42,3 +43,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Couldn't save the score." }, { status: 500 });
   }
 }
+
+export const GET = withTransport(handleGET);
+export const POST = withTransport(handlePOST);

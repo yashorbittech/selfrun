@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedLmsRequest } from "@/lib/api-auth";
 import { getLead, isValidCategory, openResumeDownloadStream } from "@/lib/leads";
 
 type Context = { params: Promise<{ category: string; id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "VIEW_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -30,3 +31,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportPortalUsers } from "@/lib/products/commandos/portal-users";
 import { isPortalRole, PORTAL_ROLE_META } from "@/lib/portal-roles";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.portal.users");
   if (!auth.ok) return auth.response;
 
@@ -40,3 +41,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/evaliq/viewer";
 import { EXPORT_KINDS, buildExport } from "@/lib/products/evaliq/exports";
@@ -12,7 +13,7 @@ function csvSafe(v: unknown): unknown {
   return typeof v === "string" && /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
 }
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { kind } = await params;
@@ -38,3 +39,5 @@ export async function GET(req: NextRequest, { params }: Context) {
   const buf = await buildWorkbook(set.title, set.columns, safeRows);
   return new NextResponse(new Uint8Array(buf), { headers: { ...headers, "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Content-Disposition": `attachment; filename="${base}.xlsx"` } });
 }
+
+export const GET = withTransport(handleGET);

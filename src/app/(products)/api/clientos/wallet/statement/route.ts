@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
 import { listWalletTransactions } from "@/lib/wallet/transactions";
@@ -5,7 +6,7 @@ import { txLabel } from "@/lib/wallet/constants";
 import { toCsv, csvResponse } from "@/lib/wallet/csv";
 
 /** A signed-in user's own wallet statement (their rows only, never anyone else's). */
-export async function GET() {
+async function handleGET() {
   const user = await getCurrentPortalUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { items } = await listWalletTransactions({ userId: user.id, pageSize: 100 });
@@ -17,3 +18,5 @@ export async function GET() {
     )
   );
 }
+
+export const GET = withTransport(handleGET);

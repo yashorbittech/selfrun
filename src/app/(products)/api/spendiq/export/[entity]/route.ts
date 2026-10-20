@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
 import { canManageProcurement, canApproveRequisitions, canManageExpenses, canManageFinance } from "@/lib/prms-roles";
@@ -287,7 +288,7 @@ async function buildPaymentExport(): Promise<ExportSpec> {
   };
 }
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentPrmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -334,3 +335,5 @@ export async function GET(req: NextRequest, { params }: Context) {
   const wb = await buildWorkbook([{ name: spec.title, columns: spec.columns, rows: spec.rows }]);
   return fileResponse(wb, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", `${base}.xlsx`);
 }
+
+export const GET = withTransport(handleGET);

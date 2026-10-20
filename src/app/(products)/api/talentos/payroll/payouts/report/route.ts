@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { canRunPayroll } from "@/lib/hrms-roles";
@@ -6,7 +7,7 @@ import { isValidPayoutStatus } from "@/lib/products/talentos/payout-status";
 import { payoutStatusMeta } from "@/lib/products/talentos/payout-status";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const user = await getCurrentHrmsUser();
   if (!user || !canRunPayroll(user)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -62,3 +63,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

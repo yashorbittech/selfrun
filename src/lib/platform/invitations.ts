@@ -1,3 +1,4 @@
+import { passwordPolicyError } from "@/lib/security/password";
 import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 import "server-only";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -156,7 +157,7 @@ export type AcceptResult = { ok: true; adminId: ObjectId } | { ok: false; error:
 export async function acceptInvitation(token: string, input: { name: string; password: string }): Promise<AcceptResult> {
   const name = input.name.trim();
   if (name.length < 2) return { ok: false, error: "Enter your name." };
-  if (input.password.length < 10) return { ok: false, error: "Use at least 10 characters for your password." };
+  { const weak = passwordPolicyError(input.password); if (weak) return { ok: false, error: weak }; }
 
   const c = await col();
   const db = await getDb();

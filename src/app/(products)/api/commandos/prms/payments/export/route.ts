@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportPayments } from "@/lib/products/spendiq/payments";
@@ -5,7 +6,7 @@ import { toCsv } from "@/lib/csv";
 
 const VALID_STATUSES = ["scheduled", "processed", "failed"] as const;
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.prms.payments");
   if (!auth.ok) return auth.response;
 
@@ -40,3 +41,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

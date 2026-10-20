@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import type { PaymentMethod } from "@/lib/products/cashflow-ai/payments/intents";
@@ -7,7 +8,7 @@ import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { simulatedPaymentsAllowed, SIMULATED_PAYMENTS_MESSAGE } from "@/lib/products/cashflow-ai/payments/guard";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const limited = await limitOr429(req, "pay-verify", 40, 600);
   if (limited) return limited;
   try {
@@ -84,3 +85,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

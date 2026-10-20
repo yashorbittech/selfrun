@@ -21,6 +21,7 @@ export default function TermsPage() {
         sections: [
           { heading: "Who we are", body: [`${name} is operated by ${us}. References to “we” and “us” in these terms are to ${us}.`] },
           { heading: "Using the service", body: [`By registering for or using ${name} you agree to these terms. You must provide accurate information, keep your credentials secure and be authorised to bind the company you register on behalf of. You are responsible for activity under your workspace, including that of the people you invite.`] },
+          { heading: "Who may use the service", body: ["The service is for businesses and professionals. You must be at least 18, and able to enter a binding agreement for yourself or the company you register. It is not intended for consumers or for children."] },
           {
             heading: "Your workspace and your people",
             body: ["Each company has its own workspace. The owner and administrators decide which products are switched on, invite people, and set roles and per-action permissions. The number of people depends on your plan. You are responsible for who you give access to and for removing access when someone leaves."],

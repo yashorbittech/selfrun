@@ -1,6 +1,6 @@
 import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
-import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypto";
+import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ObjectId } from "mongodb";
@@ -19,7 +19,6 @@ export const SESSION_COOKIE = "lms_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
-const SCRYPT_KEYLEN = 64;
 
 interface LmsUserDoc {
   _id: ObjectId;
@@ -76,19 +75,8 @@ async function getAdminSessionsCollection() {
   return collection;
 }
 
-export function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, SCRYPT_KEYLEN).toString("hex");
-  return `${salt}:${hash}`;
-}
-
-export function verifyPassword(password: string, stored: string): boolean {
-  const [salt, hash] = stored.split(":");
-  if (!salt || !hash) return false;
-  const hashBuffer = Buffer.from(hash, "hex");
-  const candidate = scryptSync(password, salt, SCRYPT_KEYLEN);
-  return hashBuffer.length === candidate.length && timingSafeEqual(hashBuffer, candidate);
-}
+export { hashPassword, verifyPassword, passwordNeedsRehash } from "@/lib/security/password";
+import { verifyPassword } from "@/lib/security/password";
 
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");

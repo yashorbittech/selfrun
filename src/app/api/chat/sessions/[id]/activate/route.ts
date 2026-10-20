@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import {
   applyChatCookies,
@@ -8,7 +9,7 @@ import {
 type Context = { params: Promise<{ id: string }> };
 
 /** Switch the active-conversation cookie to another of this browser's chats. */
-export async function POST(req: NextRequest, { params }: Context) {
+async function handlePOST(req: NextRequest, { params }: Context) {
   const visitorId = getVisitorIdFromRequest(req);
   if (!visitorId) return NextResponse.json({ error: "No session." }, { status: 401 });
 
@@ -19,3 +20,5 @@ export async function POST(req: NextRequest, { params }: Context) {
   const res = NextResponse.json({ ok: true, sessionId: id });
   return applyChatCookies(res, cookiesToSet);
 }
+
+export const POST = withTransport(handlePOST);

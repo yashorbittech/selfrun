@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
 import { resolvePortalDownload } from "@/lib/products/clientos/documents";
@@ -9,7 +10,7 @@ import { recordPortalAudit } from "@/lib/products/clientos/audit";
  * signed-in external user (own shared doc, own résumé, or a document on one of
  * their own projects) — anything else 404s.
  */
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
+async function handleGET(_req: NextRequest, { params }: { params: Promise<{ type: string; id: string }> }) {
   const user = await getCurrentPortalUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -33,3 +34,5 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ typ
     },
   });
 }
+
+export const GET = withTransport(handleGET);

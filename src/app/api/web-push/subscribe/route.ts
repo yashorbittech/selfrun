@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { describeDevice, isAllowedPushEndpoint } from "@/lib/push/api";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 const B64URL = /^[A-Za-z0-9_-]{16,200}$/;
 
 /** A visitor agrees to notifications (or changes their topics). Anonymous; keyed by the browser's push endpoint. */
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const blocked = await siteGuard(req, "wp-sub", 20);
   if (blocked) return blocked;
   const settings = await getWebPushSettings();
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
 }
 
 /** The visitor turned notifications off. */
-export async function DELETE(req: Request) {
+async function handleDELETE(req: Request) {
   const blocked = await siteGuard(req, "wp-unsub", 30);
   if (blocked) return blocked;
   const body = (await req.json().catch(() => null)) as { endpoint?: unknown } | null;
@@ -49,3 +50,6 @@ export async function DELETE(req: Request) {
   await (await subscribersCol()).deleteOne({ endpoint: body.endpoint });
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withTransport(handlePOST);
+export const DELETE = withTransport(handleDELETE);

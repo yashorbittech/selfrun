@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { searchSubscriptions } from "@/lib/products/spendiq/software-subscriptions";
 import { getResourceStatusMeta, isValidResourceStatus } from "@/lib/products/spendiq/constants";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.prms.subscriptions");
   if (!auth.ok) return auth.response;
 
@@ -41,3 +42,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -62,12 +62,14 @@ export const SAAS_PATHS = {
 } as const;
 
 /** Public contact addresses of the product, from the deployment's environment; derived from the domain when unset. */
-export function saasContact(host: string): { hello: string; support: string; sales: string; security: string } {
+export function saasContact(host: string): { hello: string; support: string; sales: string; security: string; privacy: string } {
   const domain = host.replace(/^www\./, "");
   return {
     hello: process.env.SAAS_HELLO_EMAIL || `hello@${domain}`,
     support: process.env.SAAS_SUPPORT_EMAIL || `support@${domain}`,
     sales: process.env.SAAS_SALES_EMAIL || `sales@${domain}`,
     security: process.env.SAAS_SECURITY_EMAIL || `security@${domain}`,
+    /** Privacy requests (access, correction, deletion …) and the data-protection contact. */
+    privacy: process.env.SAAS_PRIVACY_EMAIL || `privacy@${domain}`,
   };
 }

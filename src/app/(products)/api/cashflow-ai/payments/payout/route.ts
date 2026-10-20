@@ -1,9 +1,10 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canApproveTransactions } from "@/lib/fms-roles";
 
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   try {
     const currUser = await getCurrentFmsUser();
     if (!currUser) {
@@ -93,3 +94,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

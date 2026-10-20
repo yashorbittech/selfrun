@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { exportConversations } from "@/lib/chat-conversations";
@@ -9,7 +10,7 @@ function parseDateParam(value: string | null, endOfDay = false): Date | undefine
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const lmsUser = await requireLms("EXPORT_DATA");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -52,3 +53,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

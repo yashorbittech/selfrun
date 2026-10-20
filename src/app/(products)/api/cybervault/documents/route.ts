@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getViewer, can, DlmsInputError, ForbiddenError } from "@/lib/products/cybervault/viewer";
@@ -10,7 +11,7 @@ import { addDocumentVersion, createDocument } from "@/lib/products/cybervault/re
  * permission and company/client scope are all re-checked here and in the data
  * layer; file type/size/magic-byte validation happens in `saveDlmsFile`.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ ok: false, error: "Your session has expired — please sign in again." }, { status: 401 });
   if (!can(viewer, "MANAGE_DOCUMENTS")) return NextResponse.json({ ok: false, error: "You don't have permission to manage documents." }, { status: 403 });
@@ -37,3 +38,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

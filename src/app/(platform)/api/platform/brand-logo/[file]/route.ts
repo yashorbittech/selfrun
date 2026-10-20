@@ -1,8 +1,9 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { readCompanyLogo } from "@/lib/platform/branding/logo";
 
 /** Serves the current company's uploaded logo (public by nature — it appears on sign-in pages and emails). */
-export async function GET(_req: Request, { params }: { params: Promise<{ file: string }> }) {
+async function handleGET(_req: Request, { params }: { params: Promise<{ file: string }> }) {
   const logo = await readCompanyLogo((await params).file);
   if (!logo) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(new Uint8Array(logo.body), {
@@ -14,3 +15,5 @@ export async function GET(_req: Request, { params }: { params: Promise<{ file: s
     },
   });
 }
+
+export const GET = withTransport(handleGET);

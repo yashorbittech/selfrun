@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { detectLanguage, say } from "@/lib/ai/policy";
 import { limitOr429 } from "@/lib/security/rate-limit";
@@ -36,7 +37,7 @@ function cleanMessages(raw: unknown): ClientMessage[] {
   return out;
 }
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const limited = await limitOr429(req, "ai-agent", 60, 600);
   if (limited) return limited;
 
@@ -97,3 +98,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e instanceof Error && /isn't available|not connected/i.test(e.message) ? e.message : say("failed", lang) }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

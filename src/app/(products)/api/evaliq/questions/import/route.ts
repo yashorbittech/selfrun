@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/evaliq/viewer";
 import { importQuestions, readSheet } from "@/lib/products/evaliq/questions";
@@ -12,7 +13,7 @@ export const maxDuration = 60;
  * preview; `commit=1` inserts the valid rows. A route handler (not a server
  * action) because server actions cap request bodies at 1 MB.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!can(viewer, "IMPORT_QUESTIONS") || !can(viewer, "CREATE_QUESTION")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -36,3 +37,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Could not read that file." }, { status: 400 });
   }
 }
+
+export const POST = withTransport(handlePOST);

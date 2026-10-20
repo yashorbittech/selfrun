@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { pinMessage, unpinMessage } from "@/lib/products/huddle-ai/channels";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/pin  { scopeType, scopeId, messageId, pinned } — channel only. */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as { scopeType?: string; scopeId?: string; messageId?: string; pinned?: boolean };
@@ -28,3 +29,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

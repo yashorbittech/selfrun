@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
 import { hasPrmsStaffRole } from "@/lib/prms-roles";
@@ -8,7 +9,7 @@ import { renderItemInvoicePdf, renderItemReceiptPdf, type PdfItemDetails } from 
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentPrmsUser();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -181,3 +182,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
@@ -12,7 +13,7 @@ import { IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, VIDEO_TYPES } from "@/li
  * size cap. The browser then calls `registerMediaAction`, which re-reads the
  * blob's real type and size before adding it to the library.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Your session has expired — please sign in again." }, { status: 401 });
   if (!can(viewer, "MANAGE_MEDIA")) return NextResponse.json({ error: "You don't have permission to upload media." }, { status: 403 });
@@ -47,3 +48,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: (err as Error).message.slice(0, 200) }, { status: 400 });
   }
 }
+
+export const POST = withTransport(handlePOST);

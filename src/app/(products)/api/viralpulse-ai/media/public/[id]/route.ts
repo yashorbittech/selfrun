@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMediaToken } from "@/lib/products/viralpulse-ai/crypto";
 import { getMedia } from "@/lib/products/viralpulse-ai/media";
@@ -11,7 +12,7 @@ type Context = { params: Promise<{ id: string }> };
  * No session — the HMAC signature over id + expiry is the only credential,
  * minted by `publicMediaUrl` at publish time.
  */
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const { id } = await params;
   const exp = Number(req.nextUrl.searchParams.get("exp"));
   const sig = req.nextUrl.searchParams.get("sig") ?? "";
@@ -30,3 +31,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

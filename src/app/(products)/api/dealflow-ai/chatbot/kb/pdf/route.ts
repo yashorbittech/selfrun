@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
 import { requireLms } from "@/lib/lms-auth";
@@ -7,7 +8,7 @@ import { addPdf, replacePdf, validateKbFile } from "@/lib/kb-pdf";
 // Uploading + indexing a document can take a while.
 export const maxDuration = 300;
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const lmsUser = await requireLms("MANAGE_CHATBOT");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -46,3 +47,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to index the document. Please try again." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

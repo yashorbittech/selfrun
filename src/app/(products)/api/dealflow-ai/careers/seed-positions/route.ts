@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { getRuntimeRecords } from "@/lib/products/sitecraft-ai/collections/store";
@@ -14,7 +15,7 @@ import { getDb } from "@/lib/mongodb";
  * `isOpen: false` so it stops appearing as a selectable open role while
  * remaining resolvable for historical applications.
  */
-export async function POST() {
+async function handlePOST() {
   const lmsUser = await requireLms("MANAGE_CAREERS");
   if (!lmsUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,3 +49,5 @@ export async function POST() {
 
   return NextResponse.json({ upserted, closedOrphans: closedOrphans.modifiedCount });
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helpers";
 import { globalSearch, type SearchType } from "@/lib/products/huddle-ai/search";
@@ -8,7 +9,7 @@ export const runtime = "nodejs";
 const VALID_TYPES: SearchType[] = ["messages", "channels", "users", "files", "projects", "groups"];
 
 /** GET /api/huddle-ai/search?q=&types=messages,channels,users */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const user = await requireSession();
     const sp = request.nextUrl.searchParams;
@@ -23,3 +24,5 @@ export async function GET(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);

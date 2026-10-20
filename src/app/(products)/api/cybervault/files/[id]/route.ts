@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can, canReadScope } from "@/lib/products/cybervault/viewer";
 import { getDocumentDoc } from "@/lib/products/cybervault/records";
@@ -13,7 +14,7 @@ type Context = { params: Promise<{ id: string }> };
  * document's company/client scope. Previews and downloads are both logged.
  * Query: `?v=<version>` (default: current), `&download=1` for a forced download.
  */
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!can(viewer, "DOWNLOAD")) return NextResponse.json({ error: "You don't have permission to open documents." }, { status: 403 });
@@ -60,3 +61,5 @@ export async function GET(req: NextRequest, { params }: Context) {
   };
   return new NextResponse(object.stream, { headers });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportAllTasks } from "@/lib/products/commandos/pms-work-items";
@@ -6,7 +7,7 @@ import { listEmployeeOptions } from "@/lib/products/talentos/employees";
 import { isValidTaskStatus, isValidPriority, getTaskStatusMeta, getPriorityMeta, type TaskStatus, type Priority } from "@/lib/products/sprintos/constants";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.pms.tasks");
   if (!auth.ok) return auth.response;
 
@@ -49,3 +50,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { listLeadMessages } from "@/lib/lead-management/messages";
@@ -12,7 +13,7 @@ export const dynamic = "force-dynamic";
  * Also clears the lead's "new portal reply" flag — opening a conversation here
  * is the same "staff has now seen this" moment as opening the full lead page.
  */
-export async function GET(_req: Request, ctx: RouteContext<"/api/dealflow-ai/leads/[id]/messages">) {
+async function handleGET(_req: Request, ctx: RouteContext<"/api/dealflow-ai/leads/[id]/messages">) {
   const user = await requireLms("VIEW_LEADS");
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -21,3 +22,5 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/dealflow-ai/lea
   await clearLeadPortalUnread(id, user.id);
   return NextResponse.json({ messages });
 }
+
+export const GET = withTransport(handleGET);

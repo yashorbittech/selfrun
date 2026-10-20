@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { toggleStarredMessage } from "@/lib/products/huddle-ai/users";
@@ -6,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/star  { messageId } — toggles a personal star. */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const { messageId } = (await request.json()) as { messageId?: string };
@@ -17,3 +18,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

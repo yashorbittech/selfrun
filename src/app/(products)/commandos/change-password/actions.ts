@@ -1,7 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { ObjectId } from "mongodb";
 import { getCurrentHubUser, changeOwnHubPassword } from "@/lib/hub-auth";
+import { revokeOtherSessions } from "@/lib/security/sessions";
 
 export interface ChangePasswordState {
   error?: string;
@@ -23,6 +25,8 @@ export async function changeHubPasswordAction(
 
   const result = await changeOwnHubPassword(user.id, current, next);
   if (!result.ok) return { error: result.error };
+  // A changed password ends every other sign-in of the account, so a stolen session does not outlive it.
+  await revokeOtherSessions(new ObjectId(user.id)).catch(() => 0);
 
   redirect("/commandos");
 }

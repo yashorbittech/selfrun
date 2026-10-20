@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { hasStaffRole } from "@/lib/hrms-roles";
@@ -8,7 +9,7 @@ import { recordAudit } from "@/lib/products/talentos/audit";
 import { notify } from "@/lib/products/talentos/notifications";
 import { employeeFullName, getEmployee } from "@/lib/products/talentos/employees";
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const user = await getCurrentHrmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -79,3 +80,5 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, id: result.document._id }, { status: 201 });
 }
+
+export const POST = withTransport(handlePOST);

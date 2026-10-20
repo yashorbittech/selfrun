@@ -15,7 +15,7 @@ export const LOGIN_COOKIE = "login_id";
 const EVENT_TTL_SECONDS = 180 * 24 * 60 * 60;
 
 export type LoginVia = "password" | "invite" | "support";
-export type LoginEventType = "login" | "login_failed" | "login_locked" | "logout" | "logout_everywhere" | "session_revoked";
+export type LoginEventType = "login" | "login_failed" | "login_locked" | "logout" | "logout_everywhere" | "session_revoked" | "password_reset";
 
 export interface LoginSessionDoc {
   _id: string;

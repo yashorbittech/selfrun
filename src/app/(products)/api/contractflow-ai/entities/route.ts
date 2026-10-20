@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentLpmsUser } from '@/lib/lpms-auth';
 import { getViewer } from '@/lib/products/contractflow-ai/viewer';
 import { lpmsCan } from '@/lib/lpms-roles';
 import { discoverEntities, fetchEntityRecords } from '@/lib/products/contractflow-ai/entity-discovery';
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const user = await getCurrentLpmsUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -28,3 +29,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Failed' }, { status: 500 });
   }
 }
+
+export const GET = withTransport(handleGET);

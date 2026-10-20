@@ -1,3 +1,4 @@
+import { passwordPolicyError } from "@/lib/security/password";
 import { platformEvents } from "@/lib/notify/triggers/platform";
 import "server-only";
 import { resolveBusiness, type BusinessSelection } from "@/lib/platform/business-taxonomy";
@@ -51,7 +52,7 @@ const HANDOFF_TTL_MS = 2 * 60 * 1000;
 const MAX_PER_IP_PER_HOUR = 5;
 const MAX_PER_EMAIL_PER_HOUR = 3;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-export const MIN_PASSWORD_LENGTH = 10;
+export { MIN_PASSWORD_LENGTH } from "@/lib/security/password";
 
 interface PendingSignup {
   _id: string;
@@ -120,7 +121,7 @@ export function validateSignup(input: SignupInput): SignupFieldErrors {
   if (slugError) errors.slug = slugError;
   if (input.name.trim().length < 2) errors.name = "Enter your name.";
   if (!EMAIL_RE.test(input.email.trim())) errors.email = "Enter a valid email address.";
-  if (input.password.length < MIN_PASSWORD_LENGTH) errors.password = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
+  { const weak = passwordPolicyError(input.password, { email: input.email }); if (weak) errors.password = weak; }
   const business = resolveBusiness(input.businessCategories, input.businessSubCategories);
   if (!business.ok) Object.assign(errors, business.errors);
   if (!input.acceptTerms) errors.acceptTerms = "Accept the terms to continue.";

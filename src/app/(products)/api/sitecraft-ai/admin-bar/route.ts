@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/sitecraft-ai/viewer";
 import { getCurrentCmsUser } from "@/lib/cms-auth";
@@ -19,7 +20,7 @@ export interface AdminBarData {
 }
 
 /** The public site's CMS admin toolbar: who's signed in and what they can edit on the page they're looking at. */
-export async function GET(request: Request) {
+async function handleGET(request: Request) {
   const [viewer, user] = await Promise.all([getViewer(), getCurrentCmsUser()]);
   if (!viewer || !user || !can(viewer, "VIEW")) return new NextResponse(null, { status: 401 });
 
@@ -50,3 +51,5 @@ export async function GET(request: Request) {
   };
   return NextResponse.json(body, { headers: { "Cache-Control": "private, no-store" } });
 }
+
+export const GET = withTransport(handleGET);

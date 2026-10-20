@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { searchDocuments, documentModuleLabel, DOCUMENT_MODULES, type DocumentModule } from "@/lib/products/commandos/documents";
 import { toCsv } from "@/lib/csv";
 import { panelNameMap } from "@/lib/platform/panels/store";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("account.documents");
   if (!auth.ok) return auth.response;
 
@@ -38,3 +39,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

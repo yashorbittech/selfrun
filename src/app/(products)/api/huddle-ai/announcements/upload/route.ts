@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { canPostAnnouncements } from "@/lib/messenger-roles";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/announcements/upload (multipart) — author-only attachment upload. */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     if (!canPostAnnouncements(user)) throw new HttpError(403, "You can't post announcements.");
@@ -20,3 +21,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

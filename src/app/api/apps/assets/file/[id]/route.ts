@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { onAppSurface } from "@/lib/platform/saas/request";
@@ -11,7 +12,7 @@ import { rateLimit } from "@/lib/push/rate-limit";
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function handleGET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const ip = clientIpFrom(req.headers);
   if (!rateLimit(`asset:${ip}`, 120, 60_000)) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
@@ -20,3 +21,5 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!out) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new Response(new Uint8Array(out.png), { headers: { "Content-Type": "image/png", "Cache-Control": "public, max-age=300, s-maxage=300" } });
 }
+
+export const GET = withTransport(handleGET);

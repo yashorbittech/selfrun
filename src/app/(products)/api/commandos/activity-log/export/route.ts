@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportActivityLog, ACTIVITY_LOG_MODULES, type ActivityLogModule } from "@/lib/products/commandos/activity-log";
@@ -9,7 +10,7 @@ function parseDateParam(value: string | null, endOfDay = false): Date | undefine
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("company.audit");
   if (!auth.ok) return auth.response;
 
@@ -45,3 +46,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

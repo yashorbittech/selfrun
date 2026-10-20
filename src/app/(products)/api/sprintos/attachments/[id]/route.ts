@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { checkProjectAccess } from "@/lib/products/sprintos/access";
@@ -6,7 +7,7 @@ import { readAttachmentStream } from "@/lib/products/sprintos/attachment-storage
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentPmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest, { params }: Context) {
   });
 }
 
-export async function DELETE(_req: NextRequest, { params }: Context) {
+async function handleDELETE(_req: NextRequest, { params }: Context) {
   const user = await getCurrentPmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -49,3 +50,6 @@ export async function DELETE(_req: NextRequest, { params }: Context) {
   if (!result.ok) return NextResponse.json({ error: "Could not delete." }, { status: 400 });
   return NextResponse.json({ ok: true });
 }
+
+export const GET = withTransport(handleGET);
+export const DELETE = withTransport(handleDELETE);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentIntelligenceUser } from "@/lib/intelligence-auth";
 import { executeTurn, prepareTurn } from "@/lib/products/databrain-ai/turn";
@@ -16,7 +17,7 @@ function fail(error: string, status: number) {
  * read and whose conversation it is are all resolved from the SESSION; the
  * body only carries the question and (optionally) the conversation id.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const user = await getCurrentIntelligenceUser();
   if (!user) return fail("Your session has expired — please sign in again.", 401);
 
@@ -65,3 +66,5 @@ export async function POST(req: NextRequest) {
   });
   return new NextResponse(readable, { headers: { "Content-Type": "text/event-stream; charset=utf-8", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
 }
+
+export const POST = withTransport(handlePOST);

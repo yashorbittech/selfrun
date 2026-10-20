@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { startCall, getActiveCallForScope, serializeCall, getIceServers } from "@/lib/products/huddle-ai/calls";
@@ -7,7 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/calls?scopeType=&scopeId=  — the active call for a conversation, if any. */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const user = await requireSession();
     const sp = request.nextUrl.searchParams;
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
 }
 
 /** POST /api/huddle-ai/calls  { scopeType, scopeId, mode, meetingId? }  — start (or reuse) a call. */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as { scopeType?: string; scopeId?: string; mode?: CallMode; meetingId?: string | null };
@@ -46,3 +47,6 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);
+export const POST = withTransport(handlePOST);

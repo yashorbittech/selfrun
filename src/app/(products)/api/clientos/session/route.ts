@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
@@ -8,7 +9,7 @@ import { counterpartHost } from "@/lib/platform/tenancy/surfaces";
  * this company's team signs in (the app host that pairs with the website host being visited), so the header can offer
  * "Company login" separately from the visitor's "User login".
  */
-export async function GET() {
+async function handleGET() {
   const user = await getCurrentPortalUser();
   const h = await headers();
   const host = h.get("host");
@@ -19,3 +20,5 @@ export async function GET() {
     { headers: { "Cache-Control": "no-store" } }
   );
 }
+
+export const GET = withTransport(handleGET);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import {
   getVisitorIdFromRequest,
@@ -7,7 +8,7 @@ import {
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function PATCH(req: NextRequest, { params }: Context) {
+async function handlePATCH(req: NextRequest, { params }: Context) {
   const visitorId = getVisitorIdFromRequest(req);
   if (!visitorId) return NextResponse.json({ error: "No session." }, { status: 401 });
 
@@ -27,7 +28,7 @@ export async function PATCH(req: NextRequest, { params }: Context) {
   return NextResponse.json({ session: updated });
 }
 
-export async function DELETE(req: NextRequest, { params }: Context) {
+async function handleDELETE(req: NextRequest, { params }: Context) {
   const visitorId = getVisitorIdFromRequest(req);
   if (!visitorId) return NextResponse.json({ error: "No session." }, { status: 401 });
 
@@ -36,3 +37,6 @@ export async function DELETE(req: NextRequest, { params }: Context) {
   if (!ok) return NextResponse.json({ error: "Conversation not found." }, { status: 404 });
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = withTransport(handlePATCH);
+export const DELETE = withTransport(handleDELETE);

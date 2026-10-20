@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from 'next/server';
 import { getCurrentLpmsUser } from '@/lib/lpms-auth';
 import { getViewer } from '@/lib/products/contractflow-ai/viewer';
 import { lpmsCan } from '@/lib/lpms-roles';
 import { buildVariableRegistry } from '@/lib/products/contractflow-ai/variables';
 
-export async function GET() {
+async function handleGET() {
   const user = await getCurrentLpmsUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -20,3 +21,5 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to build variable registry' }, { status: 500 });
   }
 }
+
+export const GET = withTransport(handleGET);

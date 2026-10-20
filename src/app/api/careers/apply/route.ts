@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { createApplication, getOpenJobPositionBySlug, uploadResume } from "@/lib/career-applications";
@@ -5,7 +6,7 @@ import { validateApplicationInput, validateResumeFile } from "@/lib/career-appli
 import { provisionLeadAndAccount } from "@/lib/lead-management/provision";
 import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const limited = await limitOr429(req, "careers-apply", 6, 3600);
   if (limited) return limited;
   let formData: FormData;
@@ -95,3 +96,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save application. Please try again." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { readSafeJson } from "@/lib/security/safe-json";
@@ -18,7 +19,7 @@ import { externalUsers } from "@/lib/portal-auth";
 import { validateClaimInput, formatClaimMessage } from "@/lib/offers/claim-validation";
 import { isValidAudience, getCampaignEffectiveStatus, DEFAULT_CURRENCY } from "@/lib/offers/constants";
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const limited = await limitOr429(req, "offers-claim", 12, 600);
   if (limited) return limited;
   let body: Record<string, unknown>;
@@ -229,3 +230,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to save your claim. Please try again." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { isAuthorizedLmsRequest } from "@/lib/api-auth";
@@ -35,7 +36,7 @@ async function resolveCategory(slug: string): Promise<{ slug: CategorySlug; cust
   return first ? { slug: first.slug as CategorySlug, custom: { ...first, subServices: [] }, allowed: "" } : null;
 }
 
-export async function POST(req: NextRequest, { params }: Context) {
+async function handlePOST(req: NextRequest, { params }: Context) {
   const limited = await limitOr429(req, "lead-submit", 10, 600);
   if (limited) return limited;
   const { category: categoryParam } = await params;
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest, { params }: Context) {
   }
 }
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "VIEW_LEADS"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -152,3 +153,6 @@ export async function GET(req: NextRequest, { params }: Context) {
     return NextResponse.json({ error: "Failed to fetch submissions." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);
+export const GET = withTransport(handleGET);

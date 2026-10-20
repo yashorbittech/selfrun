@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import { requireCallAccess } from "@/lib/products/huddle-ai/call-guard";
@@ -23,7 +24,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/calls/[id] — full room state (roster, hands, presenter, timer). */
-export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+async function handleGET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
     const { user, call } = await requireCallAccess(id);
@@ -42,7 +43,7 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
  *   join · decline · leave · end · heartbeat
  *   hand { raised } · reaction { emoji } · screen { on, surface } · invite { userIds }
  */
-export async function POST(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
+async function handlePOST(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await ctx.params;
     const { user } = await requireCallAccess(id);
@@ -106,3 +107,6 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ id: st
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);
+export const POST = withTransport(handlePOST);

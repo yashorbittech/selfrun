@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { hasBearer } from "@/lib/security/bearer";
 import { NextRequest, NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
@@ -15,7 +16,7 @@ async function authorize(req: NextRequest): Promise<string | null> {
 }
 
 /** Recent indexing runs (for polling progress). */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   if (!(await authorize(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await reapStaleRuns();
   return NextResponse.json({ runs: await listKbRuns(15) });
@@ -31,7 +32,7 @@ export const maxDuration = 300;
  * either an lmsUser session or the `CHATBOT_ADMIN_API_SECRET` bearer token
  * (mirrors src/app/api/indexing/route.ts) so it can be run from cron / CI.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const triggeredBy = await authorize(req);
   if (!triggeredBy) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -69,3 +70,6 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, runId });
 }
+
+export const GET = withTransport(handleGET);
+export const POST = withTransport(handlePOST);

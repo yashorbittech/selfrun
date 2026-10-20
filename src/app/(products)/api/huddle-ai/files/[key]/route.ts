@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse, type NextRequest } from "next/server";
 import { getCurrentChatUser } from "@/lib/messenger-auth";
 import { getSharedFileByKey, readAttachmentStream } from "@/lib/products/huddle-ai/attachments";
@@ -17,7 +18,7 @@ export const runtime = "nodejs";
  * (`chat_shared_files`) or a published announcement the caller can see. Nothing
  * here is world-readable.
  */
-export async function GET(_req: NextRequest, ctx: RouteContext<"/api/huddle-ai/files/[key]">) {
+async function handleGET(_req: NextRequest, ctx: RouteContext<"/api/huddle-ai/files/[key]">) {
   const user = await getCurrentChatUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -77,3 +78,5 @@ export async function GET(_req: NextRequest, ctx: RouteContext<"/api/huddle-ai/f
     },
   });
 }
+
+export const GET = withTransport(handleGET);

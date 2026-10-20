@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canViewCommercialFinance, canViewPayrollFinance } from "@/lib/fms-roles";
@@ -11,7 +12,7 @@ type Context = { params: Promise<{ key: string }> };
  * file referenced by a transaction — FMS has no employee self-service tier
  * in Phase 1, so every FMS session is staff.
  */
-export async function GET(_req: NextRequest, { params }: Context) {
+async function handleGET(_req: NextRequest, { params }: Context) {
   const user = await getCurrentFmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canViewCommercialFinance(user) && !canViewPayrollFinance(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -37,3 +38,5 @@ export async function GET(_req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

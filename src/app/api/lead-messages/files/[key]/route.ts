@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse, type NextRequest } from "next/server";
 import { getDb } from "@/lib/mongodb";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
@@ -23,7 +24,7 @@ export const runtime = "nodejs";
  * An LMS session may read any lead's attachment (matches the existing
  * no-fine-grained-role convention on the rest of `/dealflow-ai/leads`).
  */
-export async function GET(_req: NextRequest, ctx: RouteContext<"/api/lead-messages/files/[key]">) {
+async function handleGET(_req: NextRequest, ctx: RouteContext<"/api/lead-messages/files/[key]">) {
   const { key } = await ctx.params;
   if (!/^[a-zA-Z0-9._-]+$/.test(key)) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -57,3 +58,5 @@ export async function GET(_req: NextRequest, ctx: RouteContext<"/api/lead-messag
     },
   });
 }
+
+export const GET = withTransport(handleGET);

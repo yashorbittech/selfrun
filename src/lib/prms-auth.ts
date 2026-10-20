@@ -1,3 +1,4 @@
+import { passwordPolicyError } from "@/lib/security/password";
 import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
@@ -225,7 +226,7 @@ export async function changeOwnPrmsPassword(
   current: string,
   next: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (next.length < 10) return { ok: false, error: "New password must be at least 10 characters." };
+  { const weak = passwordPolicyError(next); if (weak) return { ok: false, error: weak }; }
   if (next === current) return { ok: false, error: "New password must be different from the current one." };
   if (!ObjectId.isValid(userId)) return { ok: false, error: "Unknown account." };
 

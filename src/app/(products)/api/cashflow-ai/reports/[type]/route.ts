@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canViewReports } from "@/lib/fms-roles";
@@ -27,7 +28,7 @@ function fileResponse(body: Buffer | string, type: string, filename: string) {
   });
 }
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentFmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canViewReports(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -174,3 +175,5 @@ export async function GET(req: NextRequest, { params }: Context) {
 
   return NextResponse.json({ error: `Unknown report type "${type}".` }, { status: 404 });
 }
+
+export const GET = withTransport(handleGET);

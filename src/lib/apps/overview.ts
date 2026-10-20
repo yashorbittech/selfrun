@@ -13,7 +13,8 @@ export async function getAppsOverview(companyId: string): Promise<AppsOverview> 
     appUrlForCompany(companyId),
   ]);
   const configured = buildsConfigured();
-  const live = (b: BuildDoc) => ["queued", "building"].includes(overallStatus(b)) && Date.now() - b.requestedAt.getTime() < BUILD_TIMEOUT_MS;
+  // A build counts as running only once the build service has accepted it; one that never reached it is not "generating".
+  const live = (b: BuildDoc) => ["queued", "building"].includes(overallStatus(b)) && Boolean(b.dispatchedAt) && Date.now() - b.requestedAt.getTime() < BUILD_TIMEOUT_MS;
   const active = builds.find(live) ?? null;
 
   const downloads = {} as AppsOverview["downloads"];

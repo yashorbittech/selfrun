@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer } from "@/lib/products/viralpulse-ai/viewer";
 import { getMedia } from "@/lib/products/viralpulse-ai/media";
@@ -10,7 +11,7 @@ type Context = { params: Promise<{ id: string }> };
  * (the Blob store is private). Any signed-in SMMS user may view media; the
  * response can never execute script. `?download=1` forces a download.
  */
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
@@ -30,3 +31,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

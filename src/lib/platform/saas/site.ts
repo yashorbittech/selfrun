@@ -31,6 +31,10 @@ export const LEGAL_LINKS: NavLink[] = [
   { href: "/status", label: "System status", hint: "A live check of the website and the database" },
   { href: "/data-policy", label: "Data Policy", hint: "Ownership, isolation, AI and export" },
   { href: "/refund-policy", label: "Refund & Cancellation Policy", hint: "The free plan, cancelling and billing issues" },
+  { href: "/dpa", label: "Data Processing Addendum", hint: "How we process personal data for our customers" },
+  { href: "/subprocessors", label: "Sub-processors and International Transfers", hint: "The providers we use and how data crosses borders" },
+  { href: "/data-requests", label: "Your Data Rights and Requests", hint: "Access, correct, delete or export your information" },
+  { href: "/vulnerability-disclosure", label: "Vulnerability Disclosure Policy", hint: "Report a security issue to us privately" },
 ];
 
 /** The feature groups of the Features page: each lists the module keys (Product Registry keys) it holds. */
@@ -277,6 +281,14 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         ],
       },
       {
+        heading: "When something goes wrong",
+        body: ["We watch the service, and when an incident is confirmed we contain it, fix it and tell affected customers without undue delay, with what happened, what was affected and what we are doing. Open incidents appear on the System status page. If an incident affects personal data, we help the customer meet its own duty to notify regulators and people within the time the law gives it."],
+      },
+      {
+        heading: "Reporting a vulnerability",
+        body: ["If you find a security problem, tell us privately. Our Vulnerability Disclosure Policy explains how, what is in scope, and how we treat good-faith research, and our security.txt file lists the contact."],
+      },
+      {
         heading: "Your data is yours: export, import and leave",
         list: [
           "Ownership: the records, files and content a company puts in its workspace belong to that company.",
@@ -356,7 +368,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
           "Preference storage: your chosen theme and similar interface choices are kept in your browser's local storage.",
         ],
       },
-      { heading: "Analytics", body: ["We use first-party analytics only to understand how the website is used. We do not sell this information."] },
+      { heading: "Analytics and advertising", body: ["This website does not run third-party analytics or advertising trackers, and we do not sell or share personal information for advertising. Companies that build their own website on the platform may add analytics or advertising tools to that website; those websites ask visitors for permission before loading them, and say so in their own cookie notice."] },
       { heading: "Your choices", body: ["You can delete or block cookies in your browser settings. Blocking the sign-in cookies means you will not be able to sign in. Clearing stored preferences resets your interface choices."] },
       { heading: "Questions", body: ["Contact us through the contact page if you want to know more."] },
     ],
@@ -397,6 +409,17 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       { heading: "Cancelling", body: ["You can cancel at any time from your billing page. Your workspace then stays readable for a period so you can export your data."] },
       { heading: "Failed payments", body: ["If a payment fails we give a grace period before restricting your workspace, and your data remains available to export."] },
       { heading: "Refunds and billing mistakes", body: ["If you were charged in error, charged twice or were billed after cancelling, contact us and we will review the case and correct it. Include your workspace address and the invoice number so we can find it quickly."] },
+      {
+        heading: "How long data is kept",
+        list: [
+          "Your workspace data stays for as long as your account is active.",
+          "A Super Admin can schedule the company's deletion. It is then deleted for good after 30 days, and until then it can be restored.",
+          "Before a restore or a wipe, a safety copy is kept for 30 days so the action can itself be undone.",
+          "Backups are rotated automatically: the latest eight scheduled and ten manual backups are kept.",
+          "Sign-in history and security events are kept for 180 days.",
+          "Billing and tax records are kept as long as the law requires.",
+        ],
+      },
       { heading: "Contact", body: ["Write to us through the contact page for any billing or cancellation question."] },
     ],
   },

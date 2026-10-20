@@ -467,6 +467,20 @@ Where each value comes from, in order. You make three secrets once and put them 
 Then press a Generate button on a test company's Settings → Apps page. If it says the build service is not connected, one of the three Vercel keys
 `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN` or `DESKTOP_BUILD_SECRET` is missing or the site was not redeployed after adding them.
 
+**If a Generate button does not start a build.** The page now shows the reason straight away (it no longer waits on "Generating…"):
+
+| Message | What to check |
+| --- | --- |
+| "The platform's build service isn't connected yet…" | `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN` or `DESKTOP_BUILD_SECRET` is missing in Vercel Production, or the site was not redeployed after adding them |
+| "Could not start the build: GitHub answered 404" | `GITHUB_REPOSITORY` is wrong, the token has no access to that repository, or the workflow file is not on the branch in `GITHUB_WORKFLOW_REF` (push it) |
+| "GitHub answered 401 / 403" | The `GITHUB_DISPATCH_TOKEN` is wrong, expired, or lacks **Actions: Read and write** on the code repository |
+| "Could not reach GitHub (…)" | The server could not open api.github.com at all: no internet, DNS, a proxy or a firewall on the machine that runs the site. Not a token problem |
+| "The build runs on GitHub's computers, which cannot reach app.localhost:3000" | You pressed Generate on a local site. The build and its report-back need a public address, so use the deployed site (or set `ALLOW_LOCAL_APP_BUILDS=1` only if your local site is reachable from the internet) |
+| "GitHub answered 422" | The workflow's inputs do not match; push the latest `.github/workflows/desktop.yml` |
+
+A run that starts from the GitHub Actions page by hand always works without these keys because it needs no callback. A run started by a
+Generate button also needs `DESKTOP_BUILD_SECRET` to match in both places, so the finished file is reported back to the Apps page.
+
 ---
 
 ## 14. Keeping this guide current

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer } from "@/lib/products/playbook-ai/viewer";
 import { getReadableSop } from "@/lib/products/playbook-ai/sops";
@@ -11,7 +12,7 @@ import { todayIso } from "@/lib/products/playbook-ai/db";
  * over THAT SOP; the file is validated (type, magic bytes, size) before it is
  * stored in the private blob store.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
 
@@ -45,3 +46,5 @@ export async function POST(req: NextRequest) {
   const { _id, filename, size, kind } = saved.doc;
   return NextResponse.json({ ok: true, file: { id: _id, filename, size, kind } });
 }
+
+export const POST = withTransport(handlePOST);

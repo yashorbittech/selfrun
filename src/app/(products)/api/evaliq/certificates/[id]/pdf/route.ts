@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/evaliq/viewer";
 import { resolveTaker } from "@/lib/products/evaliq/taker";
@@ -9,7 +10,7 @@ import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 type Context = { params: Promise<{ id: string }> };
 
 /** Certificate PDF: staff with report / certificate rights, or the certificate's own holder (OTS or Portal session). */
-export async function GET(_req: Request, { params }: Context) {
+async function handleGET(_req: Request, { params }: Context) {
   const { id } = await params;
   const cert = await getCertificate(id);
   if (!cert) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -43,3 +44,5 @@ export async function GET(_req: Request, { params }: Context) {
     headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${cert.certificateNumber}.pdf"`, "Cache-Control": "private, no-store" },
   });
 }
+
+export const GET = withTransport(handleGET);

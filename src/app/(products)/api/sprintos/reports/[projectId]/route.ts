@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { canViewCosting } from "@/lib/pms-roles";
@@ -20,7 +21,7 @@ function fileResponse(body: Buffer | string, type: string, filename: string) {
   });
 }
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   const user = await getCurrentPmsUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!canViewCosting(user)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -182,3 +183,5 @@ export async function GET(req: NextRequest, { params }: Context) {
   ]);
   return fileResponse(wb, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", `${base}.xlsx`);
 }
+
+export const GET = withTransport(handleGET);

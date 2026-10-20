@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedLmsRequest } from "@/lib/api-auth";
 import { getPdfDocument } from "@/lib/kb-pdf";
@@ -5,7 +6,7 @@ import { readKbFileStream } from "@/lib/kb-storage";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(req: NextRequest, { params }: Context) {
+async function handleGET(req: NextRequest, { params }: Context) {
   if (!(await isAuthorizedLmsRequest(req, "VIEW_CHATBOT"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -27,3 +28,5 @@ export async function GET(req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

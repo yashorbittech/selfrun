@@ -1,10 +1,11 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { getApplication, openResumeDownloadStream } from "@/lib/career-applications";
 
 type Context = { params: Promise<{ id: string }> };
 
-export async function GET(_req: NextRequest, { params }: Context) {
+async function handleGET(_req: NextRequest, { params }: Context) {
   const auth = await authorizeWorkspaceApi("manage.careers.applicants");
   if (!auth.ok) return auth.response;
 
@@ -25,3 +26,5 @@ export async function GET(_req: NextRequest, { params }: Context) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

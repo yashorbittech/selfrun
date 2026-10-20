@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { clientIpFrom } from "@/lib/security/ip";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
@@ -15,7 +16,7 @@ function tooMany(ip: string): boolean {
 }
 
 /** Public "Notify me" / early-access sign-up. Also the lead-capture path for the no-campaign fallback. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   let body: Record<string, unknown>;
   try {
     body = (await readSafeJson(req)) as typeof body;
@@ -39,3 +40,5 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Couldn't save that right now. Please try again." }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

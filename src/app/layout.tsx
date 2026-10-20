@@ -33,6 +33,8 @@ import NavigationProgress from "@/components/pwa/NavigationProgress";
 import { InstallBanner } from "@/components/pwa/InstallApp";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { SAAS_THEME } from "@/lib/platform/saas/theme";
+import TransportBoot from "@/components/security/TransportBoot";
+import { transportPublicKey } from "@/lib/security/transport";
 import { BASE_KEYWORDS } from "@/lib/platform/saas/product-seo";
 
 function verificationMetadata(t: TrackingSettings): Metadata["verification"] {
@@ -167,6 +169,7 @@ export default async function RootLayout({
         {themeCss ? <style id="company-theme-vars" dangerouslySetInnerHTML={{ __html: themeCss }} /> : null}
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <TransportBoot serverKey={transportPublicKey()} />
         {jsonLd.map((schema, i) => (
           <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(schema) }} />
         ))}

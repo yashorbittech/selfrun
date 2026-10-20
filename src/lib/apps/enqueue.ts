@@ -23,7 +23,6 @@ export function buildsConfigured(): boolean {
 
 /** A build handed over longer ago than this without finishing is treated as lost. */
 export const BUILD_TIMEOUT_MS = 90 * 60_000;
-const MAX_ATTEMPTS = 3;
 
 export interface BuildInput {
   origin: string;
@@ -44,10 +43,23 @@ export async function currentBuildInput(companyId: string): Promise<BuildInput> 
   });
 }
 
+/** localhost, *.localhost, loopback and private-network addresses: places only this computer can open. */
+export function isLocalAddress(origin: string): boolean {
+  try {
+    const h = new URL(origin).hostname.toLowerCase();
+    return h === "localhost" || h.endsWith(".localhost") || /^(127\.|10\.|192\.168\.|169\.254\.)/.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h) || h === "::1" || h === "[::1]";
+  } catch {
+    return false;
+  }
+}
+
 export type EnqueueResult = { ok: true; id: string; created: boolean } | { ok: false; reason: "up-to-date" | "in-progress" | "error"; message: string };
 
 export async function enqueueBuild(companyId: string, trigger: BuildTrigger, opts: { force?: boolean; scope?: GenerationScope } = {}): Promise<EnqueueResult> {
   const scope = opts.scope ?? "all";
+  if (!buildsConfigured()) {
+    return { ok: false, reason: "error", message: "The platform's build service isn't connected yet, so nothing can be generated. The platform owner must set GITHUB_REPOSITORY, GITHUB_DISPATCH_TOKEN and DESKTOP_BUILD_SECRET." };
+  }
   try {
     const col = await buildsCol();
     const recent = await recentBuilds(companyId, 20);
@@ -56,11 +68,16 @@ export async function enqueueBuild(companyId: string, trigger: BuildTrigger, opt
     const covering = (b: BuildDoc) => SCOPE_PLATFORMS.all.some((p) => wanted.has(p) && platformsOf(b)[p].status !== "skipped" && !["ready", "failed"].includes(platformsOf(b)[p].status));
     const active = recent.find((b) => ["queued", "building"].includes(overallStatus(b)) && Date.now() - b.requestedAt.getTime() < BUILD_TIMEOUT_MS && covering(b));
     if (active) {
-      // Handed over nothing yet (no build service was connected): try again now.
-      if (!active.dispatchedAt && buildsConfigured()) await dispatchBuild(active);
-      return { ok: false, reason: "in-progress", message: "A build of this app is already in progress." };
+      // A row that was never handed to the build service (an earlier press that could not reach it) must not block a new press:
+      // try once more, and if the build service still refuses, close it as failed and start fresh below.
+      if (!active.dispatchedAt && !(await dispatchBuild(active))) await failStale(active, (await col.findOne({ _id: active._id }))?.error ?? "The build service did not accept the build.");
+      else return { ok: false, reason: "in-progress", message: "A build of this app is already in progress." };
     }
     const input = await currentBuildInput(companyId);
+    // GitHub's build machines build the app from the company's live address and report back to the platform: neither can reach a local one.
+    if (isLocalAddress(input.origin) && process.env.ALLOW_LOCAL_APP_BUILDS !== "1") {
+      return { ok: false, reason: "error", message: `The build runs on GitHub's computers, which cannot reach ${input.origin.replace(/^https?:\/\//, "")} on your computer. Generate the app from your deployed site (such as https://app.yourdomain.com).` };
+    }
     const lastReady = recent.find((b) => overallStatus(b) === "ready" && SCOPE_PLATFORMS[scope].every((p) => platformsOf(b)[p].status === "ready"));
     if (!opts.force && lastReady && lastReady.input.hash === input.hash) return { ok: false, reason: "up-to-date", message: "The apps are up to date." };
 
@@ -80,7 +97,13 @@ export async function enqueueBuild(companyId: string, trigger: BuildTrigger, opt
       attempts: 0,
     };
     await col.insertOne(doc);
-    if (buildsConfigured()) await dispatchBuild(doc);
+    // The build service must accept the build now. If it refuses (wrong token, wrong repository, the workflow missing on that branch),
+    // the app shows the reason at once instead of waiting for a build that will never start.
+    if (!(await dispatchBuild(doc))) {
+      const reason = (await col.findOne({ _id: doc._id }))?.error ?? "The build service did not accept the build.";
+      await failStale(doc, reason);
+      return { ok: false, reason: "error", message: reason };
+    }
     return { ok: true, id: doc._id, created: true };
   } catch (err) {
     console.error("[apps] could not queue a build", err);
@@ -116,7 +139,10 @@ export async function dispatchBuild(build: BuildDoc): Promise<boolean> {
     await col.updateOne({ _id: build._id }, { $set: { dispatchedAt: new Date(), error: null }, $inc: { attempts: 1 } });
     return true;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const cause = err instanceof Error && err.cause instanceof Error ? ` (${(err.cause as NodeJS.ErrnoException).code ?? err.cause.message})` : "";
+    const base = err instanceof Error ? err.message : String(err);
+    // A bare "fetch failed" means GitHub could not be reached at all (no internet, DNS, a proxy or firewall), not that it said no.
+    const message = base === "fetch failed" ? `Could not reach GitHub${cause || ""}. Check the server's internet access, proxy or firewall, and GITHUB_API_URL if you set it.` : `${base}${cause}`;
     console.error("[apps] could not start the build service", message);
     await col.updateOne({ _id: build._id }, { $set: { error: `Could not start the build: ${message}` }, $inc: { attempts: 1 } });
     return false;
@@ -124,10 +150,10 @@ export async function dispatchBuild(build: BuildDoc): Promise<boolean> {
 }
 
 /** Every platform that hasn't finished successfully is marked failed (the build service timed out or vanished). */
-async function failStale(b: BuildDoc): Promise<void> {
-  const set: Record<string, unknown> = { finishedAt: new Date(), error: "The build did not finish in time." };
+export async function failStale(b: BuildDoc, message = "The build did not finish in time."): Promise<void> {
+  const set: Record<string, unknown> = { finishedAt: new Date(), error: message };
   const all = platformsOf(b);
-  for (const p of APP_PLATFORMS) if (!["ready", "skipped"].includes(all[p].status)) Object.assign(set, { [`platforms.${p}.status`]: "failed", [`platforms.${p}.error`]: "The build did not finish in time.", [`platforms.${p}.finishedAt`]: new Date() });
+  for (const p of APP_PLATFORMS) if (!["ready", "skipped"].includes(all[p].status)) Object.assign(set, { [`platforms.${p}.status`]: "failed", [`platforms.${p}.error`]: message.slice(0, 300), [`platforms.${p}.finishedAt`]: new Date() });
   await (await buildsCol()).updateOne({ _id: b._id }, { $set: set });
 }
 

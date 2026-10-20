@@ -1,3 +1,4 @@
+import { passwordPolicyError } from "@/lib/security/password";
 import "server-only";
 import { randomBytes, createHash, randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
@@ -232,7 +233,7 @@ export async function changeOwnPortalPassword(
   current: string,
   next: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (next.length < 8) return { ok: false, error: "New password must be at least 8 characters." };
+  { const weak = passwordPolicyError(next); if (weak) return { ok: false, error: weak }; }
   if (next === current) return { ok: false, error: "New password must be different." };
   const users = await externalUsers();
   const user = await users.findOne({ _id: userId });

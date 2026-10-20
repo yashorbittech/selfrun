@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
 import { exportApplications } from "@/lib/career-applications";
@@ -10,7 +11,7 @@ function parseDateParam(value: string | null, endOfDay = false): Date | undefine
   return Number.isNaN(d.getTime()) ? undefined : d;
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const auth = await authorizeWorkspaceApi("manage.careers.applicants");
   if (!auth.ok) return auth.response;
 
@@ -56,3 +57,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

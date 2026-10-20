@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isAuthorizedHrmsRequest } from "@/lib/products/talentos/api-auth";
 import { exportEmployees, employeeFullName } from "@/lib/products/talentos/employees";
@@ -5,7 +6,7 @@ import { masterLookups } from "@/lib/products/talentos/departments";
 import { isValidEmployeeStatus, isValidEmploymentType, getEmploymentTypeLabel, getGenderLabel, getEmployeeStatusMeta } from "@/lib/products/talentos/employee-status";
 import { toCsv } from "@/lib/csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   if (!(await isAuthorizedHrmsRequest(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -52,3 +53,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

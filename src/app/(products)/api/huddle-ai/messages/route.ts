@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/route-helpers";
 import {
@@ -16,7 +17,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 /** GET  /api/huddle-ai/messages?scopeType=&scopeId=&beforeSeq=&threadRootId= */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const user = await requireSession();
     const sp = request.nextUrl.searchParams;
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
 }
 
 /** POST /api/huddle-ai/messages  { scopeType, scopeId, body, attachments?, mentions?, parentId? } */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 }
 
 /** PATCH /api/huddle-ai/messages  { scopeType, scopeId, messageId, body, attachments? } */
-export async function PATCH(request: NextRequest) {
+async function handlePATCH(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as {
@@ -99,7 +100,7 @@ export async function PATCH(request: NextRequest) {
 }
 
 /** DELETE /api/huddle-ai/messages  { scopeType, scopeId, messageId } */
-export async function DELETE(request: NextRequest) {
+async function handleDELETE(request: NextRequest) {
   try {
     const user = await requireSession();
     const data = (await request.json()) as { scopeType?: string; scopeId?: string; messageId?: string };
@@ -111,3 +112,8 @@ export async function DELETE(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);
+export const POST = withTransport(handlePOST);
+export const PATCH = withTransport(handlePATCH);
+export const DELETE = withTransport(handleDELETE);

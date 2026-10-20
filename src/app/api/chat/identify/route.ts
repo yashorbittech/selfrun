@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
@@ -17,7 +18,7 @@ import { createPortalSession, setPortalSessionCookie } from "@/lib/portal-auth";
  * The visitor is never redirected: they stay in the chat window and the
  * header picks up the new session on its own (see `portal:session-changed`).
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const limited = process.env.NODE_ENV === "production" ? await limitOr429(req, "chat-identify", 30, 3600) : null;
   if (limited) return limited;
   const config = await getChatbotConfig();
@@ -69,3 +70,5 @@ export async function POST(req: NextRequest) {
   const res = NextResponse.json({ ok: true, identified: true, name: validation.data.name, portalSignedIn });
   return applyChatCookies(res, cookiesToSet);
 }
+
+export const POST = withTransport(handlePOST);

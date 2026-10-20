@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { clientIpFrom } from "@/lib/security/ip";
 import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/push/rate-limit";
@@ -14,7 +15,7 @@ export const maxDuration = 60;
 
 const KINDS = new Set(["pwa", "android", "ios", "desktop", "all"]);
 
-export async function GET(req: Request, { params }: { params: Promise<{ kind: string }> }) {
+async function handleGET(req: Request, { params }: { params: Promise<{ kind: string }> }) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const ip = clientIpFrom(req.headers);
   if (!rateLimit(`pack:${ip}`, 10, 60_000)) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
@@ -25,3 +26,5 @@ export async function GET(req: Request, { params }: { params: Promise<{ kind: st
   const zip = await buildAssetPack(kind as AssetGroup | "all");
   return new Response(new Uint8Array(zip), { headers: { "Content-Type": "application/zip", "Content-Disposition": `attachment; filename="${slug}-${kind}-assets.zip"`, "Cache-Control": "public, max-age=60, s-maxage=300" } });
 }
+
+export const GET = withTransport(handleGET);

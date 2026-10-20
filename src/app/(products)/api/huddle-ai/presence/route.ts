@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helpers";
 import { heartbeat, type PresenceStatus } from "@/lib/products/huddle-ai/presence";
@@ -8,7 +9,7 @@ export const runtime = "nodejs";
 const CHOOSABLE: PresenceStatus[] = ["online", "away", "busy", "in_meeting"];
 
 /** POST /api/huddle-ai/presence  { status?, customStatus? } */
-export async function POST(request: NextRequest) {
+async function handlePOST(request: NextRequest) {
   try {
     const user = await requireSession();
     let body: { status?: string; customStatus?: string | null } = {};
@@ -26,3 +27,5 @@ export async function POST(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const POST = withTransport(handlePOST);

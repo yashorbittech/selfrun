@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
 import { NextRequest, NextResponse } from "next/server";
 import { readSafeJson } from "@/lib/security/safe-json";
@@ -24,7 +25,7 @@ export const maxDuration = 60;
 const ASSISTANT_PAUSED = "Our assistant is unavailable right now. Please contact us directly, or try again a little later.";
 const GENERIC_ERROR = "Sorry — something went wrong generating a response. Please try again.";
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   if (!(await isOpenAIConfigured())) {
     return NextResponse.json(
       { error: "The AI assistant is not configured yet. Please try again later." },
@@ -203,3 +204,5 @@ export async function POST(req: NextRequest) {
   });
   return applyChatCookies(res, cookiesToSet);
 }
+
+export const POST = withTransport(handlePOST);

@@ -1,11 +1,15 @@
 import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import type { Metadata } from "next";
+import { saasContact } from "@/lib/platform/saas/brand";
+import { saasCanonicalHost } from "@/lib/platform/saas/hosts";
+import { requestHostOrNull } from "@/lib/platform/saas/request";
 import LegalPage from "@/components/platform/saas/LegalPage";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 
 export const metadata: Metadata = pageMeta({ path: "/privacy", title: "Privacy Policy", description: "How SelfRun AI collects, uses and protects personal information on this website and in the service. Read what we collect, why, and the choices you have.", keywords: ["privacy policy for business software", "SaaS privacy policy", "data privacy SaaS", "how personal data is handled"], tag: "Legal" });
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const c = saasContact(saasCanonicalHost(await requestHostOrNull()));
   const us = SAAS_BRAND.operator || SAAS_BRAND.name;
   const name = SAAS_BRAND.name;
   return (
@@ -47,11 +51,35 @@ export default function PrivacyPage() {
             body: ["When someone uses an AI feature — asking a question of their data, an AI assistant, drafting content, the website chatbot or a voice conversation — the content needed to answer is processed by an AI provider at the customer's request. AI features run only against the requesting customer's own workspace and with the permissions of the person asking. Questions about data are answered with read-only queries, so the AI cannot change records, and answers show how they were calculated. AI usage is metered according to the plan."],
           },
           { heading: "Your clients, students and website visitors", body: ["Customers can give their own clients, students, applicants and website visitors a portal, forms, a chatbot and push notifications under the customer's brand. Information those people provide is stored in the customer's workspace and is the customer's to control; if you are one of them, direct requests about your information to the company you deal with."] },
-          { heading: "Sharing", body: ["We share information only with service providers who help us operate the service (hosting, email delivery, payments and AI processing at the customer's request), with services a customer chooses to connect through integrations and webhooks, when the law requires it, or to protect rights and safety. Providers are bound to protect the information and use it only for the service."] },
-          { heading: "Retention", body: ["We keep information for as long as an account is active and for a reasonable period afterwards to meet legal, accounting and security obligations. Customers can export their data and ask us to delete it."] },
+          { heading: "Sharing", body: ["We share information only with service providers who help us operate the service (hosting, email delivery, payments and AI processing at the customer's request), with services a customer chooses to connect through integrations and webhooks, when the law requires it, or to protect rights and safety. Providers are bound to protect the information and use it only for the service. The Sub-processors page lists them."] },
+          {
+            heading: "How long we keep information",
+            list: [
+              "Your account and workspace data: for as long as the account is active. If a company is deleted, it is scheduled for deletion after a 30-day period in which it can still be restored, then deleted for good. Safety copies made before a restore or wipe are kept for 30 days.",
+              "Backups: the most recent scheduled backups (eight) and manual backups (ten) are kept, and older ones are removed automatically.",
+              "Sign-in history and security events: 180 days. Active sign-ins end when their session expires or you sign out.",
+              "Cookie choices on a company's website: three years, as evidence of the choice.",
+              "Billing and tax records: as long as tax and accounting law requires.",
+              "Enquiries and support messages: as long as needed to answer them and for a reasonable period after.",
+              "Privacy requests and our answers: three years.",
+            ],
+          },
           { heading: "Security", body: ["We use access control, per-action permissions, audit logging, encryption of stored secrets and vault documents, and strict tenant isolation to protect information. No system is perfectly secure, so we also encourage strong passwords and least-privilege access within your workspace."] },
-          { heading: "Your rights", body: ["You can ask to access, correct, export or delete your personal information, or object to certain processing, by contacting us. Customers should direct requests about data in their workspace to their workspace administrator."] },
-          { heading: "Cookies", body: ["We use cookies that are necessary to keep you signed in and secure, and to remember preferences. We use first-party analytics only to understand how the website is used. The Cookie Policy lists them."] },
+          { heading: "Your rights", body: ["Depending on where you live, you can ask to access, correct, delete or export your personal information, object to or restrict how it is used, withdraw consent, and complain to your data protection authority. We do not sell or share personal information for advertising. Customers should direct requests about data in their workspace to their workspace administrator. The Data Rights page explains the rights by country, how to use them, and what to expect, and has the request form."] },
+          { heading: "Controller, contact and grievance officer", body: [`The controller of the information described here is ${us}. Write to us about privacy at ${c.privacy}. That address is also our grievance contact for the purposes of India's Digital Personal Data Protection Act. We reply to every request within 30 days.`] },
+          {
+            heading: "Why we may use your information",
+            list: [
+              "To provide the service you asked for and to take steps before you sign up (contract).",
+              "To keep the service secure, prevent fraud and abuse, and improve the product (our legitimate interests, balanced against your rights).",
+              "To meet legal duties such as tax, accounting and responding to lawful requests (legal obligation).",
+              "To send marketing messages or load non-essential cookies, only where you have agreed (consent), which you can withdraw at any time.",
+            ],
+          },
+          { heading: "International transfers", body: ["We and our providers process information in more than one country. When personal information is transferred across borders we use the safeguard the applicable law requires, such as an adequacy decision, standard contractual clauses or the UK International Data Transfer Agreement or Addendum. The Sub-processors page lists our providers and what each one receives."] },
+          { heading: "Children", body: ["The service is for businesses and is not directed at children. You must be at least 18 to register, and we do not knowingly collect personal information from children under 13 (or under 16 where the law sets that age). If you think a child has given us information, write to us and we will delete it."] },
+          { heading: "Automated decisions and AI", body: ["We do not make decisions about you that have legal or similarly significant effects by solely automated means. AI features in the product produce answers and drafts at a customer's request; a person decides what to do with them, and any change an AI assistant proposes waits for a person's approval."] },
+          { heading: "Cookies", body: ["We use cookies that are necessary to keep you signed in and secure, and to remember preferences. We do not run third-party analytics or advertising trackers on this website. The Cookie Policy lists what is stored."] },
           { heading: "Changes to this policy", body: ["We may update this policy as the service evolves. Material changes will be announced on this page or by email."] },
         ],
       }}

@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { describeDevice, isAllowedPushEndpoint, pushCaller } from "@/lib/push/api";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 const B64URL = /^[A-Za-z0-9_-]{16,200}$/;
 
 /** Registers (or re-assigns to the signed-in person) this browser's push subscription. */
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const who = await pushCaller();
   if (who instanceof NextResponse) return who;
   if (!pushConfigured()) return NextResponse.json({ error: "Push notifications aren't enabled on this server." }, { status: 503 });
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
 }
 
 /** Removes this browser's subscription (the person turned notifications off here, or signed out). */
-export async function DELETE(req: Request) {
+async function handleDELETE(req: Request) {
   const who = await pushCaller();
   if (who instanceof NextResponse) return who;
   const body = (await req.json().catch(() => null)) as { endpoint?: unknown } | null;
@@ -44,3 +45,6 @@ export async function DELETE(req: Request) {
   await (await subscriptionsCol()).deleteOne({ endpoint: body.endpoint, actor: who.actor, userId: who.userId });
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withTransport(handlePOST);
+export const DELETE = withTransport(handleDELETE);

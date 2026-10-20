@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 
-export async function GET(req: Request) {
+async function handleGET(req: Request) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const afterRaw = new URL(req.url).searchParams.get("after");
   const parsed = afterRaw ? Date.parse(afterRaw) : NaN;
@@ -39,3 +40,5 @@ export async function GET(req: Request) {
   }
   return NextResponse.json({ error: "Not signed in" }, { status: 401, headers: noStore });
 }
+
+export const GET = withTransport(handleGET);

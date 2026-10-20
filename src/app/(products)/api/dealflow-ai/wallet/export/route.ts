@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { getDb } from "@/lib/mongodb";
@@ -10,7 +11,7 @@ import { externalUsers } from "@/lib/portal-auth";
 const LIMIT = 50_000;
 
 /** LMS-only CSV exports: `?kind=ledger|referrals|wallets`. Every export is capped and read-only. */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   if (!(await requireLms("MANAGE_WALLET"))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const kind = new URL(req.url).searchParams.get("kind");
   const db = await getDb();
@@ -56,3 +57,5 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ error: "Unknown export kind." }, { status: 400 });
 }
+
+export const GET = withTransport(handleGET);

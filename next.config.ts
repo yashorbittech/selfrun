@@ -84,12 +84,15 @@ const nextConfig: NextConfig = {
       // Uploaded files / API responses are never pages: nothing in them may run script, and only this site may frame them.
       {
         source: "/api/:path*",
-        headers: [{ key: "Content-Security-Policy", value: "script-src 'none'; frame-ancestors 'self'; base-uri 'none'" }],
+        headers: [{ key: "Content-Security-Policy", value: "script-src 'none'; frame-ancestors 'self'; base-uri 'none'; form-action 'none'" }],
       },
       // Pages: no <base> hijack, no plugins, framed only by this site (same intent as X-Frame-Options, which old browsers use).
       {
         source: "/((?!api/).*)",
-        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'self'; base-uri 'self'; form-action 'self' https:" }],
+        // No plugins or embedded objects, no <base> hijack, framed only by this site, forms post only to https, and (in production) any
+        // stray http:// sub-resource is upgraded to https. A script-src is deliberately not set here: companies add their own tracking scripts
+        // and chat widgets in CMS → Settings, which a fixed script policy would break (see docs/compliance/gap-assessment.md).
+        headers: [{ key: "Content-Security-Policy", value: `frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https:${process.env.NODE_ENV === "production" ? "; upgrade-insecure-requests" : ""}` }],
       },
       {
         source: "/:path*",
@@ -98,8 +101,8 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           // Only this site may frame itself (the theme customizer previews the site in a same-origin frame).
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(self), microphone=(self)" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(self), microphone=(self), interest-cohort=(), browsing-topics=()" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           // Other windows (another site that opened this one) get no handle on it; payment / OAuth popups still work.
           { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
           { key: "X-Permitted-Cross-Domain-Policies", value: "none" },

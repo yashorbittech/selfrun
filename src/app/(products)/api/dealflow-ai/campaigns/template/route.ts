@@ -1,9 +1,10 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { requireLms } from "@/lib/lms-auth";
 import { isValidImportKind, isValidPlatform } from "@/lib/campaign-platforms";
 import { templateHeadersFor } from "@/lib/campaign-csv";
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const lmsUser = await requireLms("MANAGE_CAMPAIGNS");
   if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -25,3 +26,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

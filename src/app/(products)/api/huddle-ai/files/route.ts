@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import type { NextRequest } from "next/server";
 import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helpers";
 import { resolveVisibleScopes } from "@/lib/products/huddle-ai/access";
@@ -9,7 +10,7 @@ export const runtime = "nodejs";
 const KINDS: AttachmentKind[] = ["image", "voice", "video", "file"];
 
 /** GET /api/huddle-ai/files?q=&category=&kind=&scopeId=&page= */
-export async function GET(request: NextRequest) {
+async function handleGET(request: NextRequest) {
   try {
     const user = await requireSession();
     const sp = request.nextUrl.searchParams;
@@ -28,3 +29,5 @@ export async function GET(request: NextRequest) {
     return jsonError(err);
   }
 }
+
+export const GET = withTransport(handleGET);

@@ -1,8 +1,9 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 
 /** A person's browser reporting that an error screen was shown: one log line with the reference code. Never stores anything else, never fails. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
     const limited = await limitOr429(req, "client-error", 20, 600);
     if (limited) return limited;
@@ -14,3 +15,5 @@ export async function POST(req: NextRequest) {
   }
   return new NextResponse(null, { status: 204 });
 }
+
+export const POST = withTransport(handlePOST);

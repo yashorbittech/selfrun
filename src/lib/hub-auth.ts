@@ -1,3 +1,4 @@
+import { passwordPolicyError } from "@/lib/security/password";
 import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
 import { randomBytes, createHash } from "node:crypto";
@@ -5,7 +6,7 @@ import { cookies } from "next/headers";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { WORKSPACE_SESSION_COOKIE } from "@/lib/workspace-session";
-import { verifyPassword, hashPassword } from "@/lib/lms-auth";
+import { verifyPassword, hashPassword, passwordNeedsRehash } from "@/lib/lms-auth";
 import { recordLoginEvent } from "@/lib/security/store";
 import { touchLoginSession } from "@/lib/security/touch";
 
@@ -146,7 +147,8 @@ export async function verifyHubCredentials(
   // No role check — Hub accepts any valid admin_users login, mirroring LMS.
   await users.updateOne(
     { _id: user._id },
-    { $set: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date() } }
+    // A password hashed at an older, cheaper cost is hashed again at today's now that we know it is right.
+    { $set: { failedLoginAttempts: 0, lockedUntil: null, lastLoginAt: new Date(), ...(passwordNeedsRehash(user.passwordHash) ? { passwordHash: hashPassword(password) } : {}) } }
   );
   return { ok: true, adminId: user._id };
 }
@@ -224,7 +226,7 @@ export async function changeOwnHubPassword(
   current: string,
   next: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (next.length < 10) return { ok: false, error: "New password must be at least 10 characters." };
+  { const weak = passwordPolicyError(next); if (weak) return { ok: false, error: weak }; }
   if (next === current) return { ok: false, error: "New password must be different from the current one." };
   if (!ObjectId.isValid(userId)) return { ok: false, error: "Unknown account." };
 

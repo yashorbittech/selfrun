@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveCampaign, getCampaign, serializeCampaign } from "@/lib/offers/campaigns";
 import { getPublicOffersWithStats } from "@/lib/offers/offers";
@@ -8,7 +9,7 @@ import { getCampaignEffectiveStatus } from "@/lib/offers/constants";
  * "N claimed", sold-out state) and for claiming from the global strip/popup on
  * any page. Also returns `serverTime` so countdowns use the server clock.
  */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   try {
     const campaignId = req.nextUrl.searchParams.get("campaignId");
     const campaign = campaignId ? await getCampaign(campaignId) : await getActiveCampaign();
@@ -23,3 +24,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "temporarily_unavailable" }, { status: 503 });
   }
 }
+
+export const GET = withTransport(handleGET);

@@ -1,8 +1,9 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest, listSessionMessages } from "@/lib/chatbot-sessions";
 
 /** Returns the current browser session's transcript (lazy-loaded, paginated). */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const session = await getSessionFromRequest(req);
   if (!session) {
     return NextResponse.json({ sessionId: null, messages: [], hasMore: false, nextCursor: null });
@@ -21,3 +22,5 @@ export async function GET(req: NextRequest) {
     startedAt: session.startedAt,
   });
 }
+
+export const GET = withTransport(handleGET);

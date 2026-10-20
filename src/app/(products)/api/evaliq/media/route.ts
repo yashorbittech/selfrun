@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/evaliq/viewer";
@@ -23,7 +24,7 @@ function sniff(b: Buffer): { ext: string; type: string; kind: "image" | "audio" 
 }
 
 /** Uploads question media (image / audio / video) to the shared private Blob store under `ots/`. */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const viewer = await getViewer();
   if (!viewer) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   if (!can(viewer, "CREATE_QUESTION") && !can(viewer, "EDIT_QUESTION")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -38,3 +39,5 @@ export async function POST(req: NextRequest) {
   await putObject("ots", name, buf, kind.type);
   return NextResponse.json({ url: `/api/evaliq/media/${name}`, kind: kind.kind });
 }
+
+export const POST = withTransport(handlePOST);

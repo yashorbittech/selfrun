@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { checkPlatformPermission } from "@/lib/platform/console/access";
 import { attachmentOwnerCompany, getObject, saveAttachment } from "@/lib/support/attachments";
@@ -5,7 +6,7 @@ import { getCompanyCaller } from "@/lib/support/caller";
 
 /** Upload (company users) and download (the company that owns the request, or platform support staff) of request attachments. */
 
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   const caller = await getCompanyCaller();
   if (!caller) return NextResponse.json({ error: "Please sign in again." }, { status: 401 });
   let file: FormDataEntryValue | null = null;
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const key = req.nextUrl.searchParams.get("key") ?? "";
   if (!key.startsWith("support/") || key.includes("..")) return NextResponse.json({ error: "Not found." }, { status: 404 });
   const owner = await attachmentOwnerCompany(key);
@@ -55,3 +56,6 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const POST = withTransport(handlePOST);
+export const GET = withTransport(handleGET);

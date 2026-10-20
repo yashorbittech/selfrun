@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getChatbotConfig } from "@/lib/chatbot-config";
 import { isOpenAIConfigured } from "@/lib/openai";
@@ -6,7 +7,7 @@ import { getVisitorIdFromRequest } from "@/lib/chatbot-sessions";
 import { getVisitorProfile } from "@/lib/chat-visitors";
 
 /** Public subset of the chatbot config, for the welcome screen / composer. */
-export async function GET(req: NextRequest) {
+async function handleGET(req: NextRequest) {
   const config = await getChatbotConfig();
 
   const visitorId = getVisitorIdFromRequest(req);
@@ -37,3 +38,5 @@ export async function GET(req: NextRequest) {
     },
   });
 }
+
+export const GET = withTransport(handleGET);

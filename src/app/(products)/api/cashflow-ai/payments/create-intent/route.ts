@@ -1,3 +1,4 @@
+import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import { createPaymentIntent, CreatePaymentIntentData } from "@/lib/products/cashflow-ai/payments/intents";
@@ -16,7 +17,7 @@ const str = (v: unknown, max = 200) => (typeof v === "string" ? v.trim().slice(0
  *    (amount, currency, invoice, customer) is read from the stored link, never from the request, discounts and wallet
  *    credits are not accepted, and a simulated gateway is refused outside development.
  */
-export async function POST(req: Request) {
+async function handlePOST(req: Request) {
   const limited = await limitOr429(req, "pay-intent", 20, 600);
   if (limited) return limited;
   try {
@@ -112,3 +113,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: message }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);
