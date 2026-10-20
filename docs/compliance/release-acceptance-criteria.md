@@ -2,7 +2,7 @@
 
 A change ships only when every item is true. CI enforces the ones marked (CI).
 
-1. Type-check and lint pass (CI: `security.yml` quality job).
+1. Type-check and lint pass (run `npm run typecheck` and `npm run lint` before merging; not enforced in CI).
 2. No secrets in the diff (CI: `npm run security:scan`).
 3. No high or critical vulnerability in production dependencies (CI: `npm audit`, dependency review).
 4. CodeQL shows no new high-severity finding (CI).

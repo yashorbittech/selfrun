@@ -1,12 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { KeyRound, ShieldCheck } from "lucide-react";
+import { Download, KeyRound, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { confirmTwoFactorAction, disableTwoFactorAction, startTwoFactorAction } from "./actions";
 
 type Status = { enabled: boolean; enabledAt: string | null; recoveryLeft: number; available: boolean };
+
+/** Saves the recovery codes as a plain text file on this device (made in the browser; nothing is sent anywhere). */
+function downloadCodes(codes: string[]) {
+  const text = ["Two-step sign-in recovery codes", `Created: ${new Date().toLocaleString("en-IN")}`, "", "Each code works once if you lose access to your authenticator app.", "Keep this file somewhere safe and private.", "", ...codes, ""].join("\n");
+  const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "recovery-codes.txt";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 /** Turn two-step sign-in on or off: scan the QR code, confirm one code, keep the recovery codes. */
 export default function TwoFactorCard({ status }: { status: Status }) {
@@ -27,6 +40,7 @@ export default function TwoFactorCard({ status }: { status: Status }) {
         <p className="text-sm text-muted-foreground">Save these recovery codes somewhere safe. Each works once if you lose your phone. They are shown only now.</p>
         <ul className="grid grid-cols-2 gap-1 rounded-lg border bg-muted/40 p-3 font-mono text-sm sm:grid-cols-5">{recovery.map((c) => <li key={c}>{c}</li>)}</ul>
         <Button type="button" variant="outline" size="sm" onClick={() => void navigator.clipboard?.writeText(recovery.join("\n"))}>Copy codes</Button>
+        <Button type="button" variant="outline" size="sm" className="ml-2" onClick={() => downloadCodes(recovery)}><Download className="size-4" data-icon="inline-start" />Download codes</Button>
         <Button type="button" size="sm" className="ml-2" onClick={() => setRecovery(null)}>I&apos;ve saved them</Button>
       </div>
     );

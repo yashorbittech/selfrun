@@ -453,11 +453,16 @@ docs/                  Architecture, deployment and app build guides (build-apps
 
 ---
 
+**GitHub token for the Generate buttons.** `GITHUB_DISPATCH_TOKEN` must be able to start workflows: fine-grained token on the code repository with
+**Actions: Read and write**, **Contents: Read-only**, **Metadata: Read-only** (or a classic token with `repo` + `workflow`). A 403
+"Resource not accessible by personal access token" means it lacks that permission; see the troubleshooting table in
+[docs/build-apps.md](docs/build-apps.md#13-how-a-company-gets-its-own-apps-the-generate-buttons).
+
 ## Security and compliance
 
 Security policy and vulnerability reporting: [SECURITY.md](SECURITY.md). The compliance work (country-wise legal register, standards mapping, data
 inventory, policies, gap assessment, release criteria) is in [docs/compliance/](docs/compliance/README.md). Checks: `npm run typecheck`,
-`npm run security:scan`, `npm run security:audit`, `npm run test:password`.
+`npm run security:scan`, `npm run security:audit`, `npm run test:password`, `npm run test:transport`. API requests and responses (and Server Actions) are sealed end to end: [docs/compliance/api-transport-encryption.md](docs/compliance/api-transport-encryption.md).
 
 ## Architecture notes
 

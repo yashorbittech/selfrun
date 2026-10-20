@@ -45,7 +45,7 @@ Certification needs an ISMS with a risk register, internal audit, management rev
 | A03 Injection | Operator-key rejection, no string-built queries, output escaping |
 | A04 Insecure design | Threat-driven controls (session binding, lock-out, upload rules) |
 | A05 Security misconfiguration | Headers, CSP, no powered-by header; platform settings are **Owner** items |
-| A06 Vulnerable components | npm audit, dependency review, Dependabot, Trivy |
+| A06 Vulnerable components | npm audit, dependency review |
 | A07 Authentication failures | Policy, lock-out, MFA, session controls |
 | A08 Integrity failures | Signed webhooks, locked dependencies, CI gates |
 | A09 Logging and monitoring failures | Audit logs, status page; central alerting is an **Owner** item |
@@ -65,7 +65,7 @@ Certification needs an ISMS with a risk register, internal audit, management rev
 ## CIS Critical Security Controls
 
 Inventory of software (lockfiles, dependency tracking) · data protection (encryption, retention) · secure configuration (headers, CSP) · account and access
-management (roles, MFA) · vulnerability management (audit, Dependabot, CodeQL) · audit log management (audit logs, 180-day sign-in records) · email and
+management (roles, MFA) · vulnerability management (audit, CodeQL) · audit log management (audit logs, 180-day sign-in records) · email and
 browser protections (secure cookies, headers) · data recovery (backups) · application software security (the SDLC gates). Network, malware-defence and
 penetration-test controls are infrastructure or **Owner** items.
 
