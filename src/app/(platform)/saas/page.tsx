@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { itemList, planOffers, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { ArrowRight, Check } from "lucide-react";
-import { AI_CAPABILITIES, HOW_IT_WORKS, INDUSTRIES, SECURITY_POINTS } from "@/lib/platform/saas/content";
+import { AI_CAPABILITIES, GLOSSARY, HOW_IT_WORKS, INDUSTRIES, SECURITY_POINTS, SIMPLE_ANSWERS, USE_CASES, USE_CASE_PLAIN_TITLES } from "@/lib/platform/saas/content";
 import { AI_BENEFITS, CAPABILITIES, COMPARISON, DEVICES, FLOWS, REPLACES, RUNS_ITSELF, YOUR_BRAND } from "@/lib/platform/saas/site";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
@@ -31,7 +31,7 @@ import BrandShowcase from "@/components/platform/saas/BrandShowcase";
 import ProductShowcase from "@/components/platform/saas/ProductShowcase";
 import ScreenGallery from "@/components/platform/saas/ScreenGallery";
 import { Journey } from "@/components/platform/saas/Visuals";
-import { ChipMarquee, TimelineSteps } from "@/components/platform/saas/Modern";
+import { ChipMarquee, NumberedRows, TimelineSteps } from "@/components/platform/saas/Modern";
 import CountStats from "@/components/platform/saas/CountStats";
 import CapabilityExplorer from "@/components/platform/saas/CapabilityExplorer";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
@@ -40,7 +40,7 @@ import ProductLogo from "@/components/products/ProductLogo";
 export const dynamic = "force-dynamic";
 
 const HOME_TITLE = "SelfRun AI: Business Automation for CRM, HR & Finance";
-const HOME_DESC = `SelfRun AI is one AI-powered platform with ${SAAS_PRODUCT_COUNT} products for CRM, HR and payroll, accounting, projects, procurement, training and your website. Free to start, every product in every plan.`;
+const HOME_DESC = "SelfRun AI is one software for running your whole business: sales and customers, HR and payroll, accounts and invoices, projects, purchasing, training and your website, with AI built in. Free to start, with every feature in every plan.";
 export const metadata: Metadata = {
   ...pageMeta({
     path: "/",
@@ -70,10 +70,12 @@ export default async function SaasHome() {
   const brandTabs = YOUR_BRAND.flatMap((b, i) => (screenFor(b.shot) ? [{ key: b.key, name: b.title, icon: b.icon, summary: b.text, href: "/products#your-brand", node: <DeviceScene screenKey={b.shot} name={b.title} variant={((i + 2) % 6) as SceneVariant} /> }] : []));
   const starter = plans.find((p) => p.id === "starter");
   const SEC = [
-    { id: "products", label: "What it is", show: true },
+    { id: "simple", label: "Overview", show: true },
+    { id: "products", label: "What is inside", show: true },
     { id: "why", label: "Why choose it", show: true },
     { id: "benefits", label: "Benefits", show: true },
     { id: "who", label: "Who uses it", show: true },
+    { id: "examples", label: "Everyday uses", show: true },
     { id: "connected", label: "An example", show: true },
     { id: "automation", label: "Automation", show: true },
     { id: "included", label: "What you get", show: true },
@@ -89,6 +91,7 @@ export default async function SaasHome() {
     { id: "free", label: "Free to start", show: !!freePlan },
     { id: "trust", label: "Safety", show: true },
     { id: "how", label: "Get started", show: true },
+    { id: "words", label: "Glossary", show: true },
     { id: "faq", label: "FAQs", show: true },
   ].filter((x) => x.show);
   const no = (id: string) => String(SEC.findIndex((x) => x.id === id) + 1).padStart(2, "0");
@@ -103,10 +106,10 @@ export default async function SaasHome() {
       {/* Hero */}
       <PageHero art="home"
         size="home"
-        eyebrow="Business software, made simple"
-        title="All the software"
-        accent="your business needs, in one place."
-        lead={<><span className="font-bold"><span className="text-foreground">SelfRun</span> <span className="text-primary">AI</span></span> is one online system that runs the everyday work of a company: customers and sales, staff and salaries, money and invoices, projects, buying, training and your website. Use it on a phone or a computer, with <b className="text-foreground">your own company name and logo</b> on everything.</>}
+        eyebrow="Business software for your whole business"
+        title="One software to run"
+        accent="your whole business."
+        lead={<><span className="font-bold"><span className="text-foreground">SelfRun</span> <span className="text-primary">AI</span></span> is one online system that runs the everyday work of a business: customers and sales, staff and salaries, money and invoices, projects, buying, training and your website. Use it on a phone or a computer, with <b className="text-foreground">your own business name and logo</b> on everything.</>}
         photo="team-desk"
         shot="workspace"
         chip={{ title: "Sale closed", text: "Customer record created · team told — automatically" }}
@@ -121,7 +124,7 @@ export default async function SaasHome() {
       <section className="relative border-y border-border/50 bg-background/60 backdrop-blur">
         <div className="sr-container">
           <CountStats items={[
-            { v: `${SAAS_PRODUCT_COUNT} → 1`, l: "business tools, one subscription" },
+            { v: "1", l: "software for sales, HR, finance and more" },
             { v: `${totalFeatures}+`, l: "features, all included in every plan" },
             { v: `${platforms}`, l: "devices and systems it works on" },
             { v: "₹0", l: "to start, free forever" },
@@ -130,40 +133,49 @@ export default async function SaasHome() {
         <div className="pb-8"><ModuleMarquee items={modules.map((m) => ({ key: m.key, name: m.name, icon: m.icon }))} /></div>
       </section>
 
+      {/* Overview */}
+      <section id="simple" className="sr-section" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n={no("simple")} center icon="book" eyebrow="Overview" title="What SelfRun AI is" accent="and how it helps you." lead="New here? These six answers cover what SelfRun AI is, what it does for you and what you need to know before you start. No technical knowledge is needed to read them, or to use the product." />
+          <TimelineSteps cols={3} items={SIMPLE_ANSWERS} />
+        </div>
+      </section>
+
       {/* Replace the stack */}
       <section id="products" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("products")} center icon="layers" eyebrow="What is SelfRun AI?" title="One system for" accent="every part of your business." lead={`Most companies juggle many different apps: one for customers, one for salaries, one for invoices, one for projects and so on. SelfRun AI gives you all of these as ready-made tools (${SAAS_PRODUCT_COUNT} of them) in one place, so your team stops jumping between apps and re-typing the same information.`} />
+          <SectionHead n={no("products")} center icon="layers" eyebrow="What is inside" title="One software for" accent="every part of your business." lead="Most businesses use a separate app for every job: one for customers, one for salaries, one for invoices, one for projects and so on. SelfRun AI is a single software with a section for each of these jobs, so your team works in one place and does not type the same information again and again." />
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
               REPLACES.map((r) => ({ label: byKey.get(r.panel)?.name ?? "Included", icon: r.icon, productKey: r.panel })),
             ]} />
           </Reveal>
-          <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See all the tools <ArrowRight className="h-4 w-4" /></Link></div>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">The crossed-out names are the separate apps a business usually pays for. Next to each one is the section of SelfRun AI that does the same job.</p>
+          <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See every section <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
 
       {/* Why SelfRun AI */}
       <section id="why" style={{ scrollMarginTop: 140 }} className="sr-section relative overflow-hidden bg-muted/10">
         <div className="sr-container">
-          <SectionHead n={no("why")} center icon="bolt" eyebrow="Why choose SelfRun AI" title="Why businesses" accent="choose it." lead="Because running a company should not mean buying, learning and connecting a dozen different apps." />
+          <SectionHead n={no("why")} center icon="bolt" eyebrow="Why choose SelfRun AI" title="Why businesses" accent="choose it." lead="Running a business should not mean buying, learning and connecting a dozen different apps. Here is what SelfRun AI gives you instead, and what each of its sections is for." />
           <div className="grid gap-5 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto]">
             <Reveal className="lg:col-span-2 lg:row-span-2">
               <div className="sr-band relative flex h-full min-h-[22rem] flex-col justify-between rounded-[2rem] p-8 shadow-2xl shadow-primary/30 sm:p-10">
                 <div className="relative">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">Many apps, one system</p>
-                  <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">{SAAS_PRODUCT_COUNT}<span className="mx-3 text-white/50">→</span>1</p>
-                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">Pick the tools you need, from customers and staff to money and projects. Each tool works on its own, and together they save you time and double work.</p>
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">One software, every job</p>
+                  <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">1</p>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">One software for every job in your business, from customers and staff to money and projects. Use the sections you need. They work together, so you save time and nobody does the same work twice.</p>
                 </div>
-                <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See all the tools <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every section <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
             {[
               { icon: "brain" as const, t: "AI that helps, safely", b: "Ask questions in plain English and get answers from your own records. The AI only shows what that person is allowed to see." },
-              { icon: "target" as const, t: "Your brand, not ours", b: "Your logo, your web address, your apps and your notifications. Your team and customers see your company, not SelfRun." },
+              { icon: "target" as const, t: "Your brand, not ours", b: "Your logo, your web address, your apps and your notifications. Your team and customers see your business, not SelfRun." },
               { icon: "rocket" as const, t: "Works on every device", b: "Open it in a browser, install it like an app, or get your own apps for Android, iPhone, Windows, Mac and Linux. It is the same data everywhere." },
-              { icon: "wallet" as const, t: "Free to start", b: "Every tool and every feature is free to start. You pay only as your team grows." },
+              { icon: "wallet" as const, t: "Free to start", b: "Every feature is free to start. You pay only as your team grows." },
             ].map((x, i) => (
               <Reveal key={x.t} delay={(i + 1) * 70}>
                 <div className="group relative h-full overflow-hidden rounded-[2rem] border border-border/60 bg-background p-7 shadow-sm">
@@ -177,7 +189,7 @@ export default async function SaasHome() {
             ))}
             <Reveal className="lg:col-span-4">
               <div className="rounded-[2rem] border border-border/60 bg-background p-6 shadow-sm sm:p-8">
-                <h3 className="text-xl font-black">The {SAAS_PRODUCT_COUNT} tools, and what each one does</h3>
+                <h3 className="text-xl font-black">What is inside SelfRun AI, section by section</h3>
                 <ul className="mt-5 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
                   {modules.map((module) => (
                     <li key={module.key} className="flex min-w-0 items-start gap-3 border-t border-border/50 py-4">
@@ -187,6 +199,7 @@ export default async function SaasHome() {
                       <span className="min-w-0">
                         <span className="block font-bold">{module.name}</span>
                         <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{module.summary}</span>
+                        <span className="mt-1.5 block text-sm leading-relaxed"><strong>What you gain:</strong> <span className="text-muted-foreground">{module.outcome}</span></span>
                       </span>
                     </li>
                   ))}
@@ -210,7 +223,7 @@ export default async function SaasHome() {
       {/* Why an AI-powered business */}
       <section id="benefits" style={{ scrollMarginTop: 140 }} className="sr-section">
         <div className="sr-container">
-          <SectionHead n={no("benefits")} center icon="brain" eyebrow="The benefits" title="More time," accent="fewer mistakes." lead="Most of the working day goes into chasing people, copying data between apps and building reports. SelfRun AI takes care of that, so you can focus on your customers and your growth." />
+          <SectionHead n={no("benefits")} center icon="brain" eyebrow="The benefits" title="More time," accent="fewer mistakes." lead="Most of the working day goes into chasing people, copying data from one app to another and building reports by hand. SelfRun AI takes care of that, so you can spend your time on your customers and on growing the business." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <Reveal className="relative">
             <MarketingShot screenKey="fms" name="SelfRun CashFlow AI" />
@@ -237,7 +250,7 @@ export default async function SaasHome() {
       {/* Who it is for */}
       <section id="who" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("who")} center icon="building" eyebrow="Who uses it" title="See how it fits" accent="your business." lead="Different kinds of businesses use SelfRun AI in different ways. Find yours and see what it helps with." />
+          <SectionHead n={no("who")} center icon="building" eyebrow="Who uses it" title="See how it fits" accent="your business." lead="Different kinds of businesses use SelfRun AI in different ways. Find the one closest to yours and see which jobs it takes care of." />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {INDUSTRIES.map((x, i) => (
               <Reveal key={x.slug} delay={(i % 3) * 60}>
@@ -245,12 +258,21 @@ export default async function SaasHome() {
                   <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-brand-accent text-sm font-black text-white shadow-md shadow-primary/25">{String(i + 1).padStart(2, "0")}</span>
                   <h3 className="text-xl font-black leading-snug">{x.name}</h3>
                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
-                  <ul className="mt-4 space-y-2">{x.needs.slice(0, 3).map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
+                  <ul className="mt-4 space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
                 </div>
               </Reveal>
             ))}
           </div>
           <div className="mt-10 flex justify-center"><Link href="/success-stories" className="sr-btn sr-btn-primary">See how it works in practice <ArrowRight className="h-4 w-4" /></Link></div>
+        </div>
+      </section>
+
+      {/* Everyday uses */}
+      <section id="examples" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n={no("examples")} center icon="layers" eyebrow="Everyday uses" title={`${USE_CASES.length} everyday jobs`} accent="it takes off your plate." lead="These are real situations a business runs into. Each one shows the problem people usually have, and what changes when everything works together." />
+          <NumberedRows items={USE_CASES.map((u) => ({ title: USE_CASE_PLAIN_TITLES[u.slug] ?? u.title, text: `${u.problem} The result: ${u.result}` }))} />
+          <div className="mt-10 flex justify-center"><Link href="/success-stories" className="sr-btn sr-btn-primary">See each one step by step <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
 
@@ -273,7 +295,7 @@ export default async function SaasHome() {
       {/* How the whole business runs itself */}
       <section id="automation" className="sr-section relative overflow-hidden" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("automation")} center icon="workflow" eyebrow="Automation" title="Routine work" accent="that does itself." lead="You set the rules once. After that, the system follows up, reminds people, asks for approvals and reports, so nothing waits for someone to remember." />
+          <SectionHead n={no("automation")} center icon="workflow" eyebrow="Automation" title="Routine work" accent="that does itself." lead="You set the rules once, for example “when an invoice is late, send a reminder”. After that the system follows up, reminds people, asks for approvals and reports by itself, so nothing waits for someone to remember. Pick an example below and press run to watch it happen." />
           <TimelineSteps items={RUNS_ITSELF.map((l) => ({ title: l.title, text: l.text, icon: l.icon, points: l.points }))} />
           <div className="mt-20 grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
             <Reveal><AutomationFlow flows={FLOWS} /></Reveal>
@@ -285,7 +307,7 @@ export default async function SaasHome() {
       {/* Everything included */}
       <section id="included" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("included")} center icon="bolt" eyebrow="What you get" title="Everything below" accent="is included." lead="These are not extras. Every plan, even the free one, includes all of it from day one." />
+          <SectionHead n={no("included")} center icon="bolt" eyebrow="What you get" title="Everything below" accent="is included." lead="These are not extras. Every plan, even the free one, includes all of it from day one. Pick a group below to see what is inside it." />
           <Reveal><CapabilityExplorer items={CAPABILITIES.map((c) => ({ title: c.title, icon: c.icon, items: c.items, media: CAP_SHOT[c.title] ? <MarketingShot screenKey={CAP_SHOT[c.title]} name={c.title} /> : undefined }))} /></Reveal>
         </div>
       </section>
@@ -293,7 +315,7 @@ export default async function SaasHome() {
       {/* AI first */}
       <section id="ai" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("ai")} center icon="bot" eyebrow="AI that helps" title="AI that helps" accent="with real work." lead="Not just a chatbot added on the side. The AI reads your own records, writes content, answers your customers and works inside your automations, and it only shows each person what they are allowed to see." />
+          <SectionHead n={no("ai")} center icon="bot" eyebrow="AI that helps" title="AI that helps" accent="with real work." lead="This is not just a chatbot added on the side. The AI reads your own records, helps you write, answers your customers and works inside your automations. It only ever shows a person what they are allowed to see, and it does not change your data without someone approving it." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <div>
             <div className="grid gap-5 sm:grid-cols-2">
@@ -319,7 +341,7 @@ export default async function SaasHome() {
       {/* See the product */}
       <section id="screens" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container relative">
-          <SectionHead n={no("screens")} tone="dark" center icon="chart" eyebrow="See it" title="Real screens from" accent="the live product." lead="These are screenshots of the real product with sample data in it. Pick a tool and look around." />
+          <SectionHead n={no("screens")} tone="dark" center icon="chart" eyebrow="See it" title="Real screens from" accent="the live product." lead="These are screenshots of the real product with sample data in it. Pick a section and look around." />
           <ProductShowcase items={productTabs} />
         </div>
       </section>
@@ -335,7 +357,7 @@ export default async function SaasHome() {
       {/* White label */}
       <section id="your-brand" className="sr-section relative overflow-hidden" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("your-brand")} center icon="target" eyebrow="Your brand" title="Your company's name" accent="everywhere." lead="Your team, your customers and your website visitors see your company: your logo, your web address, your apps and your notifications. SelfRun stays out of sight." />
+          <SectionHead n={no("your-brand")} center icon="target" eyebrow="Your brand" title="Your business name" accent="everywhere." lead="Your team, your customers and your website visitors see your business: your logo, your web address, your emails, your apps and your notifications. SelfRun stays out of sight. Pick an item below to see where it shows up." />
           {brandTabs.length > 0 && <BrandShowcase brand={SAAS_BRAND.name} items={brandTabs.map((t) => ({ key: t.key, title: t.name, text: t.summary, icon: t.icon, node: t.node }))} />}
         </div>
       </section>
@@ -343,7 +365,7 @@ export default async function SaasHome() {
       {/* Every device */}
       <section id="devices" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("devices")} center icon="rocket" eyebrow="Any device" title="Use it anywhere," accent="on any device." lead="In a web browser, on a phone or on a computer. Every app shows your company's name, icon and colours, and can send notifications." />
+          <SectionHead n={no("devices")} center icon="rocket" eyebrow="Any device" title="Use it anywhere," accent="on any device." lead="Open it in a web browser, add it to your phone or computer like an app, or get your own mobile and desktop apps. Every one shows your business name, icon and colours and can send notifications. The browser version and the installable web app are ready from day one. The Android, iPhone, Windows, Mac and Linux apps are made only when you press the Generate button for that app." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <div>
             <div className="space-y-4 border-b border-border/70 pb-4">
@@ -367,7 +389,7 @@ export default async function SaasHome() {
       <section id="nolimits" style={{ scrollMarginTop: 140 }} className="sr-section relative overflow-hidden bg-muted/10">
         <div className="pointer-events-none absolute right-0 top-1/3 h-[700px] w-[700px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <div className="sr-container relative">
-          <SectionHead n={no("nolimits")} center icon="layers" eyebrow="No locked features" title="Every tool. Every feature." accent="In every plan." lead={`${SAAS_PRODUCT_COUNT} tools and ${totalFeatures}+ features: customers, staff, payroll, money, projects, buying, training, documents, website, AI and more. Nothing is hidden behind a higher plan. Plans differ only by team size and usage limits.`} />
+          <SectionHead n={no("nolimits")} center icon="layers" eyebrow="No locked features" title="Every feature." accent="In every plan." lead={`${totalFeatures}+ features across customers, staff, payroll, money, projects, buying, training, documents, website, AI and more. Nothing is hidden behind a higher plan. Plans differ only by team size and usage limits.`} />
           <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -388,7 +410,7 @@ export default async function SaasHome() {
       {/* Comparison */}
       <section id="comparison" style={{ scrollMarginTop: 140 }} className="sr-section">
         <div className="sr-container">
-          <SectionHead n={no("comparison")} center icon="shield" eyebrow="Compare" title="SelfRun AI vs." accent="many separate apps." lead="Most businesses use a different app for every job. Here is what changes when it all lives in one AI-powered system." />
+          <SectionHead n={no("comparison")} center icon="shield" eyebrow="Compare" title="SelfRun AI vs." accent="many separate apps." lead="Most businesses use a different app for every job: one for sales, one for HR, one for invoices, and so on. This table puts the usual way of working next to SelfRun AI, one row at a time." />
           <WhyCompare rows={COMPARISON} brand={SAAS_BRAND.name} />
         </div>
       </section>
@@ -400,7 +422,7 @@ export default async function SaasHome() {
         return st && m > 0 ? (
           <section id="cost" style={{ scrollMarginTop: 140 }} className="sr-section bg-gradient-to-b from-muted/20 to-transparent">
             <div className="sr-container">
-              <SectionHead n={no("cost")} center icon="wallet" eyebrow="What it costs" title="Sixteen tools. Sixteen bills." accent="Or one plan." lead="Add up what a team of ten pays for chat, HR, customer management, projects, accounting, purchasing, training, tests, a website, search ranking, social media, AI, file storage, a policy wiki and a help desk. Then compare it with SelfRun." />
+              <SectionHead n={no("cost")} center icon="wallet" eyebrow="What it costs" title="Many apps. Many bills." accent="Or one plan." lead="Add up what a team of ten pays for chat, HR, customer management, projects, accounting, purchasing, training, tests, a website, search ranking, social media, AI, file storage, a policy wiki and a help desk. Then compare it with SelfRun." />
               <StackCompare plan={{ name: st.name, price: `₹${m.toLocaleString("en-IN")}`, monthly: m }} products={modules} />
             </div>
           </section>
@@ -411,13 +433,13 @@ export default async function SaasHome() {
       {plans.length > 0 && (
         <section id="savings" style={{ scrollMarginTop: 140 }} className="sr-band sr-section">
           <div className="sr-container relative">
-            <SectionHead n={no("savings")} tone="dark" center icon="wallet" eyebrow="Savings" title="What would you save?" accent="Try your own numbers." lead="Fewer subscriptions, fewer logins and less admin work for your people. Move the sliders to match your business." />
+            <SectionHead n={no("savings")} tone="dark" center icon="wallet" eyebrow="Savings" title="What would you save?" accent="Try your own numbers." lead="One bill instead of many, and less admin work for your people. Move the sliders to match your business." />
             <Reveal><SavingsCalculator plans={plans} /></Reveal>
             <div className="mt-12 grid gap-5 md:grid-cols-3">
               {[
-                { t: "Fewer subscriptions", b: "One bill instead of a separate app for every department, and every feature is already included.", icon: "wallet" as const },
+                { t: "One bill instead of many", b: "One plan replaces a separate app for every department, and every feature is already included.", icon: "wallet" as const },
                 { t: "Less admin work", b: "Reminders, follow-ups, approvals and reports run on their own, so your team spends its time on customers instead of chasing.", icon: "users" as const },
-                { t: "Automate the steps you choose", b: "Set up the connections you want between tools and services. Each tool also works fine on its own.", icon: "plug" as const },
+                { t: "Automate the steps you choose", b: "Set up automatic steps between the parts of the software, and connect the services you already use. Each section also works fine on its own.", icon: "plug" as const },
               ].map((x, i) => (
                 <Reveal key={x.t} delay={i * 80}>
                   <div className="sr-glass relative h-full overflow-hidden p-7">
@@ -437,13 +459,13 @@ export default async function SaasHome() {
       {freePlan && (
         <section id="free" style={{ scrollMarginTop: 140 }} className="sr-section">
           <div className="sr-container">
-            <SectionHead n={no("free")} icon="wallet" eyebrow="Free to start" title="Every tool. Every feature." accent="₹0, forever." lead="All the tools and all the features are free. This is not a trial that runs out. Start using it today and pay only when your team grows." />
+            <SectionHead n={no("free")} icon="wallet" eyebrow="Free to start" title="Every feature." accent="₹0, forever." lead="The whole software is free to start, with every feature included. This is not a trial that runs out. Start using it today and pay only when your team grows." />
             <div className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-background p-8 shadow-2xl sm:p-14">
               <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-primary/15 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-accent/15 blur-3xl" />
               <div className="relative space-y-8">
                 <ul className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {[`${SAAS_PRODUCT_COUNT} tools and ${totalFeatures}+ features`, "AI and automation included", "Your own brand, web address and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
+                  {[`${totalFeatures}+ features across the whole software`, "AI and automation included", "Your own brand, web address and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
                     <li key={t} className="flex items-center gap-3 border-b border-border/50 py-3.5 text-[15px] font-semibold"><span className="sr-circle h-6 w-6"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>{t}</li>
                   ))}
                 </ul>
@@ -457,7 +479,7 @@ export default async function SaasHome() {
       {/* Security */}
       <section id="trust" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("trust")} center icon="shield" eyebrow="Safety" title="Safe by design," accent="yours by default." lead="Your data is kept separate from every other company's. People only see what their role allows. The AI only sees what the person asking is allowed to see." />
+          <SectionHead n={no("trust")} center icon="shield" eyebrow="Safety" title="Safe by design," accent="yours by default." lead="Your data is kept separate from every other business's. People only see what their role allows. The AI only sees what the person asking is allowed to see." />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {SECURITY_POINTS.slice(0, 6).map((x, i) => (
               <Reveal key={x.title} delay={(i % 3) * 60}>
@@ -477,13 +499,27 @@ export default async function SaasHome() {
       {/* How it works */}
       <section id="how" style={{ scrollMarginTop: 140 }} className="sr-section">
         <div className="sr-container">
-          <SectionHead n={no("how")} center icon="rocket" eyebrow="Getting started" title="Ready in minutes," accent="not months." lead="Four simple steps from sign-up to running your business on it." />
+          <SectionHead n={no("how")} center icon="rocket" eyebrow="Getting started" title="Ready in minutes," accent="not months." lead="Four steps take you from signing up to running your business on SelfRun AI. You can do the first two in one sitting." />
           <TimelineSteps items={HOW_IT_WORKS.map((x) => ({ title: x.title, text: x.body }))} />
           <div className="mt-16 flex justify-center"><HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "See it with your scenario", href: "/demo" }} /></div>
         </div>
       </section>
 
       <CtaBand />
+
+      {/* Glossary */}
+      <section id="words" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
+        <div className="sr-container">
+          <SectionHead n={no("words")} center icon="book" eyebrow="Glossary" title="Business terms," accent="explained." lead="Some business and software words can be confusing. This is what each one means on this website." />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {GLOSSARY.map((g, i) => (
+              <Reveal key={g.term} delay={(i % 3) * 60}>
+                <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm"><h3 className="font-black leading-snug">{g.term}</h3><p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{g.meaning}</p></div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <FaqSection n={no("faq")} topics={["General", "Plans & pricing", "Setup", "Your brand"]} limit={7} />
     </>

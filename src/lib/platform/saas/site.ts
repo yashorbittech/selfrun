@@ -435,8 +435,8 @@ export interface BrandPoint {
   shot: string;
 }
 export const YOUR_BRAND: BrandPoint[] = [
-  { key: "branding", title: "Your logo, name & colours", text: "Set once — applied across every product, email and PDF your company sends.", icon: "target", shot: "branding" },
-  { key: "apps", title: "Your own apps", text: "Your company's own apps for phones and for Windows, macOS and Linux — generated with one button each, with your name and icon.", icon: "rocket", shot: "apps" },
+  { key: "branding", title: "Your logo, name & colours", text: "Set once — applied across every product, email and PDF your business sends.", icon: "target", shot: "branding" },
+  { key: "apps", title: "Your own apps", text: "Your business's own apps for phones and for Windows, macOS and Linux — generated with one button each, with your name and icon.", icon: "rocket", shot: "apps" },
   { key: "domains", title: "Your own domain", text: "Your website and workspace on your own web address, with a secure (HTTPS) connection set up automatically.", icon: "globe", shot: "domains" },
   { key: "themes", title: "Multiple themes", text: "Pick and customise website themes with live preview — colours, fonts and layouts.", icon: "layers", shot: "cms-theme" },
   { key: "push", title: "Your push notifications", text: "Reach your team and your website visitors on their devices, in your name.", icon: "megaphone", shot: "cms-push" },
@@ -445,19 +445,18 @@ export const YOUR_BRAND: BrandPoint[] = [
 
 /** SelfRun AI against the usual way of running a business: a separate tool for each job. No competitor is named or priced. */
 export const COMPARISON: { row: string; us: string; them: string }[] = [
-  { row: "Software", us: "A set of ready-made tools for every department", them: "A different company for every job" },
-  { row: "Logins", us: "Each tool has its own sign-in", them: "Separate accounts with unrelated companies" },
-  { row: "Your data", us: "Each tool keeps its own records, kept apart from other companies'", them: "Data spread across unrelated companies" },
-  { row: "AI", us: "AI built into each tool, working with that tool's data", them: "AI, if any, added on separately" },
-  { row: "Automation", us: "Set up automatic steps between the tools you choose", them: "Connectors to buy and maintain between apps" },
+  { row: "Software", us: "One software with a section for every department", them: "A different business for every job" },
+  { row: "Your data", us: "Your records stay with your business, kept apart from every other business's", them: "Data spread across unrelated businesses" },
+  { row: "AI", us: "AI built into every section, working with that section's data", them: "AI, if any, added on separately" },
+  { row: "Automation", us: "Set up automatic steps between the sections you choose", them: "Connectors to buy and maintain between apps" },
   { row: "Website", us: "Website builder with themes, AI chatbot, voice AI and search tools", them: "A separate website builder, hosting and plug-ins" },
-  { row: "Mobile apps", us: "Your own Android and iPhone apps, made for you", them: "Each company's app, in their name" },
+  { row: "Mobile apps", us: "Your own Android and iPhone apps, made for you", them: "Each business's app, in their name" },
   { row: "Desktop apps", us: "Your own Windows, macOS and Linux apps", them: "Usually browser only" },
   { row: "Install like an app", us: "Add it to any device in one tap, with your icon", them: "Depends on the tool" },
-  { row: "Notifications", us: "To your team and your website visitors, in your name", them: "Separate in each app, under that company's brand" },
-  { row: "Your brand", us: "Your logo, colours, domain, emails and PDFs", them: "Each company's brand in front of your people" },
-  { row: "Control", us: "Switch tools on or off and choose who can see and do what", them: "Different admin settings in every app" },
-  { row: "Record of actions", us: "A log of who did what, and sign-in history, in each tool", them: "Scattered logs, if available" },
+  { row: "Notifications", us: "To your team and your website visitors, in your name", them: "Separate in each app, under that business's brand" },
+  { row: "Your brand", us: "Your logo, colours, domain, emails and PDFs", them: "Each business's brand in front of your people" },
+  { row: "Control", us: "Switch sections on or off and choose who can see and do what", them: "Different admin settings in every app" },
+  { row: "Record of actions", us: "A log of who did what, and sign-in history, in each section", them: "Scattered logs, if available" },
   { row: "Customer portal", us: "Built in for customers, students and job applicants", them: "Another app to buy" },
   { row: "Features", us: "Every product and every feature on every plan", them: "Features locked behind higher plans in each app" },
   { row: "Pricing", us: "Free forever to start; one plan by team size after", them: "Many subscriptions to track and renew" },
@@ -470,8 +469,8 @@ export const CAPABILITIES: { title: string; icon: IconKey; items: string[] }[] =
   { title: "Automation", icon: "workflow", items: ["Automatic steps: when this happens, do that", "Ready-made templates", "Email and in-app notifications", "Approvals and reminders", "Secure alerts to your other software", "A history of every automatic run"] },
   { title: "Your brand", icon: "target", items: ["Logo, name and colours", "Your own web address, with a secure connection", "Branded emails and PDFs", "Multiple website themes", "Your own push notifications", "Your own app icon and name"] },
   { title: "Every device", icon: "rocket", items: ["Web app on any browser", "Install it like an app from your browser", "Android and iOS apps", "Windows, macOS and Linux apps", "Push notifications", "Works on phone, tablet and desktop"] },
-  { title: "Control", icon: "shield", items: ["Switch tools on or off", "Choose who can see and do what", "A record of who did what", "Sign-in history for each tool", "Your data kept apart from every other company's", "Passwords and keys stored encrypted"] },
-  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every tool", "Insights from your own records", "Saved filters", "Import from spreadsheets (CSV), with checks", "Export to spreadsheets", "Search inside each tool"] },
+  { title: "Control", icon: "shield", items: ["Switch sections on or off", "Choose who can see and do what", "A record of who did what", "Sign-in history", "Your data kept apart from every other business's", "Passwords and keys stored encrypted"] },
+  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every section", "Insights from your own records", "Saved filters", "Import from spreadsheets (CSV), with checks", "Export to spreadsheets", "Search inside each section"] },
   { title: "Website & growth", icon: "globe", items: ["Drag-and-drop page builder", "Blog, careers and products", "Website forms feed straight into your sales list", "Offers, coupons and referrals", "Wallet and reward credits", "SEO audits and rank tracking"] },
   { title: "People & portals", icon: "users", items: ["Employee self-service", "Client & student portal", "Team chat and meetings", "Announcements", "Help center and support desk", "Online tests and certificates"] },
 ];
@@ -481,7 +480,7 @@ export const AI_BENEFITS: { title: string; text: string; icon: IconKey }[] = [
   { title: "Hours back every week", text: "Reminders, follow-ups and approvals happen on their own.", icon: "clock" },
   { title: "Decisions from real numbers", text: "Ask a question and get the answer from your own records, with the working shown.", icon: "brain" },
   { title: "Nothing slips through", text: "Overdue leads, unpaid invoices, pending leave and late tasks are flagged and chased for you.", icon: "check" },
-  { title: "Grow without extra paperwork", text: "Add more people and tools without adding more admin work.", icon: "rocket" },
+  { title: "Grow without extra paperwork", text: "Add more people and more of the software without adding more admin work.", icon: "rocket" },
   { title: "Works around the clock", text: "Automations and AI assistants keep going nights, weekends and holidays.", icon: "bolt" },
   { title: "Safe by design", text: "The AI only sees what the person asking is allowed to see, and every action is recorded.", icon: "shield" },
 ];
@@ -509,20 +508,20 @@ export const REPLACES: { software: string; panel: string; icon: IconKey }[] = [
   { software: "Workflow automation", panel: "workspace", icon: "workflow" },
 ];
 
-/** Every way a company's people can use its workspace — each one carrying the company's own name and icon. */
+/** Every way a business's people can use its workspace — each one carrying the business's own name and icon. */
 export const DEVICES: { title: string; text: string; platforms: string[] }[] = [
   { title: "Web app", text: "Works in any modern browser, on any device — nothing to install.", platforms: ["Chrome", "Safari", "Edge", "Firefox"] },
   { title: "Installable app (PWA)", text: "Add it to your phone or computer from the browser in one tap, with your icon and notifications.", platforms: ["Android", "iOS", "iPadOS", "Windows", "macOS", "Linux", "ChromeOS"] },
-  { title: "Mobile apps", text: "Your company's own Android and iPhone apps, made from your branding, that you can publish on Google Play and the App Store.", platforms: ["Android", "iOS"] },
+  { title: "Mobile apps", text: "Your business's own Android and iPhone apps, made from your branding, that you can publish on Google Play and the App Store.", platforms: ["Android", "iOS"] },
   { title: "Desktop apps", text: "Your own app for Windows, Mac and Linux, with desktop notifications and a tray icon.", platforms: ["Windows", "macOS", "Linux"] },
 ];
 
 /** How the whole business runs itself, in four layers. */
 export const RUNS_ITSELF: { title: string; text: string; icon: IconKey; points: string[] }[] = [
   { title: "Enter it once", text: "Information comes in from wherever your work starts.", icon: "target", points: ["Website forms and campaigns", "Spreadsheet (CSV) imports", "Customer and student portal", "Apps on every device"] },
-  { title: "Connect what you need", text: "Each tool works on its own. Link only the steps you want connected.", icon: "layers", points: ["Create a customer when a deal is won", "Raise an invoice when a milestone is done", "Pass approved payroll on to finance", "Send secure alerts to your other software"] },
-  { title: "Let it follow up", text: "The rules you set take care of the follow-up.", icon: "workflow", points: ["Starts when something happens in a tool you use", "Sends emails and notifications", "Asks for approval and sends reminders", "Alerts your other software automatically"] },
-  { title: "Get answers", text: "AI turns your records into answers.", icon: "brain", points: ["Ask in plain English", "See how each answer was worked out", "AI helps write content and answer customers", "Live dashboards in every tool"] },
+  { title: "Connect what you need", text: "Each section works on its own. Link only the steps you want connected.", icon: "layers", points: ["Create a customer when a deal is won", "Raise an invoice when a milestone is done", "Pass approved payroll on to finance", "Send secure alerts to your other software"] },
+  { title: "Let it follow up", text: "The rules you set take care of the follow-up.", icon: "workflow", points: ["Starts when something happens in any section", "Sends emails and notifications", "Asks for approval and sends reminders", "Alerts your other software automatically"] },
+  { title: "Get answers", text: "AI turns your records into answers.", icon: "brain", points: ["Ask in plain English", "See how each answer was worked out", "AI helps write content and answer customers", "Live dashboards in every section"] },
 ];
 
 /** Extra screens captured per product (desktop, tablet and mobile), shown under the product's feature list. */

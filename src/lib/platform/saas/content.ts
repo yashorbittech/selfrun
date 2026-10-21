@@ -19,7 +19,7 @@ export const CORE_FEATURES: Feature[] = [
   { icon: "workflow", title: "Automations that run on their own", body: "Build Trigger → Condition → Action workflows with no code. When a lead is won, a leave is approved or an invoice goes overdue, the right people are notified and the right records are updated automatically." },
   { icon: "brain", title: "AI that knows your business", body: "Ask questions in plain language and get answers built from your real records — with the calculation shown. AI assistants, drafting and summaries work across every module and respect each person's access." },
   { icon: "globe", title: "A website that manages itself", body: "Every workspace comes with a complete website builder: pages, blog, forms, SEO, themes and your own domain with automatic SSL — edited by your team, published in one click." },
-  { icon: "shield", title: "Built for security and control", body: "Role-based access down to individual actions, a full audit trail, encrypted credentials and strict isolation between companies. You decide who can see and change what." },
+  { icon: "shield", title: "Built for security and control", body: "Role-based access down to individual actions, a full audit trail, encrypted credentials and strict isolation between businesses. You decide who can see and change what." },
   { icon: "chart", title: "Live numbers, not month-end surprises", body: "Product-specific dashboards give teams a current view of their records. Filter by date, department or owner and export what you need." },
 ];
 
@@ -53,7 +53,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   fms: {
     icon: "wallet",
     headline: "Accounting, invoicing and cash flow you can trust",
-    summary: "Invoices, bills, payments, bank accounts and financial reports, connected to your other tools so nobody types the same number twice.",
+    summary: "Invoices, bills, payments, bank accounts and financial reports, connected to the rest of the software so nobody types the same number twice.",
     capabilities: ["Invoices, credit notes, bills and debit notes", "Receipts, payment links and payouts", "Bank and cash accounts with reconciliation", "Chart of accounts, general ledger and trial balance", "Profit & loss, balance sheet, cash flow and tax reports", "Approvals, advances, expenses and numbering rules"],
     automations: ["Send payment reminders on overdue invoices", "Route large expenses for approval", "Post salary and vendor payments from SelfRun TalentOS and SelfRun SpendIQ", "Notify finance when a payment link is paid"],
     outcome: "Books that close faster, fewer payment delays and reports you can hand to your accountant as they are.",
@@ -77,7 +77,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   tms: {
     icon: "graduation",
     headline: "Run training programs from enrolment to certificate",
-    summary: "Run courses and batches: classes, students, assignments, fees and certificates, for institutes and company training teams.",
+    summary: "Run courses and batches: classes, students, assignments, fees and certificates, for institutes and business training teams.",
     capabilities: ["Programs, batches and class schedules", "Applications and student records", "Attendance, assignments and projects", "Fee tracking and payments", "Certificates with verification", "Student portal and mentor tools"],
     automations: ["Notify students about upcoming classes", "Issue a certificate when a program is completed", "Remind students about pending fees"],
     outcome: "Organised batches, engaged students and certificates issued without manual work.",
@@ -86,7 +86,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
     icon: "chat",
     headline: "Team conversations that stay next to the work",
     summary: "Team chat, direct messages, announcements, meetings and calls inside your workspace, so you don't need a separate chat app.",
-    capabilities: ["Channels and direct messages with files", "Company announcements with read tracking", "Meetings and group calls", "Search across messages and files", "Presence and notifications"],
+    capabilities: ["Channels and direct messages with files", "Business announcements with read tracking", "Meetings and group calls", "Search across messages and files", "Presence and notifications"],
     automations: ["Post workflow results into a channel", "Notify a channel when a deal is won or a task is overdue"],
     outcome: "Fewer tools, fewer lost threads and decisions that stay linked to the record they were about.",
   },
@@ -108,9 +108,9 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   },
   dlms: {
     icon: "lock",
-    headline: "A secure vault for company and client documents",
+    headline: "A secure vault for business and client documents",
     summary: "Keep passwords, files, links and notes safe with encryption, access control and expiry reminders.",
-    capabilities: ["Company and client vaults", "Encrypted credentials and documents with version history", "Per-record access control", "Expiry reminders", "Activity log"],
+    capabilities: ["Business and client vaults", "Encrypted credentials and documents with version history", "Per-record access control", "Expiry reminders", "Activity log"],
     automations: ["Alert owners before a document or credential expires", "Notify when a record is shared or changed"],
     outcome: "Important documents always findable, protected and never expired by surprise.",
   },
@@ -180,8 +180,8 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   },
   workspace: {
     icon: "bolt",
-    headline: "The home of your company",
-    summary: "The control center: links to your tools, company settings, plan details and setup, with reports kept inside each tool.",
+    headline: "The home of your business",
+    summary: "The control center: links to every section, business settings, plan details and setup, with reports kept inside each section.",
     capabilities: ["Executive dashboard and per-module analytics", "Users, roles and fine-grained permissions", "Audit log across everything", "Workflow automations", "Data import", "Branding, domains and billing"],
     automations: ["Build your own Trigger → Condition → Action workflows"],
     outcome: "Leadership visibility and administrative control from a single screen.",
@@ -189,7 +189,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   website: {
     icon: "globe",
     headline: "A public website on your own domain",
-    summary: "Publish your company website on your own web address, with a secure (HTTPS) connection set up automatically, edited with the website builder.",
+    summary: "Publish your business website on your own web address, with a secure (HTTPS) connection set up automatically, edited with the website builder.",
     capabilities: ["Your own domain and subdomain", "Automatic SSL", "Maintenance mode", "Built-in forms and lead capture"],
     automations: ["Capture every enquiry straight into SelfRun DealFlow AI"],
     outcome: "A live website without hosting, plug-ins or developers.",
@@ -217,10 +217,10 @@ export interface Step {
 }
 
 export const HOW_IT_WORKS: Step[] = [
-  { title: "Sign up and pick a plan", body: "Create your account with your work email, verify it and start on the free plan. No card is needed. Upgrade only when your team grows." },
-  { title: "Set up your company", body: "A short guided setup asks for your business details, creates your departments, invites your team and lets you switch tools on or off. It takes minutes, not weeks." },
-  { title: "Add your website, AI and automations", body: "Choose a website theme and publish it, connect your email and AI, and switch on the automations you want. You can change any setting later." },
-  { title: "Run your business from one place", body: "Choose the tools your team needs, then set up reminders and automatic steps where they help. Each tool still works on its own." },
+  { title: "Sign up and pick a plan", body: "Go to Sign up, enter your work email and confirm it from the email we send you. You start on the free plan, which has every feature, and no card is needed. You can move to a paid plan later, only when your team grows." },
+  { title: "Set up your business", body: "A short guided setup asks for your business name and details, creates your departments, lets you invite your team by email and lets you switch sections on or off. If you already have lists of customers or staff in a spreadsheet, you can import them here." },
+  { title: "Add your website, AI and automations", body: "Pick a website theme and publish your website, connect the email address you send from and the AI features, and switch on the automatic reminders and approvals you want. Nothing is locked: you can change any setting later." },
+  { title: "Run your business from one place", body: "Your team opens the sections they need every day, such as leads, projects, invoices or leave requests. Reminders and automatic steps take care of follow-ups, and dashboards show how the business is doing. Each section still works on its own." },
 ];
 
 export interface UseCase {
@@ -237,7 +237,7 @@ export interface UseCase {
 
 export const USE_CASES: UseCase[] = [
   { slug: "lead-to-cash", title: "Lead to cash", summary: "From first enquiry to paid invoice without re-entering a single detail.", narrative: "A sales team captures an enquiry from its website or a campaign and follows it in the DealFlow pipeline. When the deal is marked won, the connected workflow creates the client and project records. As project work reaches a billable milestone, the team raises an invoice, shares a payment link and records the payment in finance.", problem: "Sales, delivery and finance live in different tools. Deals are won but the invoice is raised late, and nobody sees the full picture.", solution: ["Capture enquiries from your website and campaigns into the SelfRun DealFlow AI pipeline", "Create the client and project automatically when a deal is won", "Raise the invoice from the milestone and send a payment link", "Remind the client automatically and post the receipt to the ledger"], modules: ["lms", "pms", "fms"], result: "Shorter sales cycles, faster payments and revenue you can trace from campaign to cash." },
-  { slug: "hire-to-retire", title: "Hire to retire", summary: "Every people process, from the job post to the final settlement.", narrative: "A hiring process begins with a job published on the company website. Applicants move through recruitment and assessment; when an offer is accepted, the employee record and assigned onboarding procedures are created. The same people workspace then supports attendance, leave requests, approvals and payroll, with self-service for employees.", problem: "Hiring, onboarding, attendance, leave and payroll are spread across spreadsheets and email, so HR spends its time chasing instead of helping.", solution: ["Publish jobs on your website and track applicants through stages", "Test candidates online and issue offers", "Create the employee record and onboarding SOPs on acceptance", "Run attendance, leave and payroll with employee self-service"], modules: ["hrms", "ots", "sop", "cms"], result: "A smooth employee experience and an HR team that works on people, not paperwork." },
+  { slug: "hire-to-retire", title: "Hire to retire", summary: "Every people process, from the job post to the final settlement.", narrative: "A hiring process begins with a job published on the business website. Applicants move through recruitment and assessment; when an offer is accepted, the employee record and assigned onboarding procedures are created. The same people workspace then supports attendance, leave requests, approvals and payroll, with self-service for employees.", problem: "Hiring, onboarding, attendance, leave and payroll are spread across spreadsheets and email, so HR spends its time chasing instead of helping.", solution: ["Publish jobs on your website and track applicants through stages", "Test candidates online and issue offers", "Create the employee record and onboarding SOPs on acceptance", "Run attendance, leave and payroll with employee self-service"], modules: ["hrms", "ots", "sop", "cms"], result: "A smooth employee experience and an HR team that works on people, not paperwork." },
   { slug: "procure-to-pay", title: "Procure to pay", summary: "Approved, matched and paid — with a full trail.", narrative: "A purchase starts with a request and follows the configured approval chain. The team compares vendor quotes, issues a purchase order and records goods received. Finance can match the vendor invoice to the order and receipt, then carry the payable into CashFlow AI for payment and accounting.", problem: "Purchases happen over chat and email, invoices arrive without a purchase order and approvals are hard to prove.", solution: ["Raise purchase requests with approval chains by amount", "Compare vendor quotes and issue purchase orders", "Match invoice, order and goods receipt before payment", "Post the payable and the payment to SelfRun CashFlow AI"], modules: ["prms", "fms"], result: "Controlled spend, no duplicate payments and a clean audit trail." },
   { slug: "training-operations", title: "Training operations", summary: "Run programs, batches and certificates at scale.", narrative: "An institute receives applications, enrolls learners into programs and batches, then manages class schedules, attendance and assignments in one flow. Fee links and reminders support collections; completion can trigger a verifiable certificate for the learner.", problem: "Institutes juggle enrolments, schedules, fees and certificates across several tools and manual follow-ups.", solution: ["Take applications and enrol students into batches", "Schedule classes and track attendance and assignments", "Collect fees with payment links and reminders", "Issue verifiable certificates automatically"], modules: ["tms", "ots", "portal", "fms"], result: "Organised batches, on-time fees and certificates without manual work." },
   { slug: "always-on-marketing", title: "Always-on marketing", summary: "A website, social presence and SEO that keep working.", narrative: "A marketing team publishes website pages and enquiry forms, plans social content with review steps and tracks search performance. When a visitor submits an enquiry, it enters DealFlow so sales can follow up and connect the opportunity to its source.", problem: "Marketing depends on agencies and tools that do not talk to sales, so nobody knows which effort brings customers.", solution: ["Publish and update your website without a developer", "Plan campaigns and social posts with AI and approvals", "Track rankings and fix SEO issues from audit tasks", "Capture every enquiry into SelfRun DealFlow AI and measure campaign results"], modules: ["cms", "smms", "seo", "lms"], result: "Consistent marketing that is measured against real enquiries and revenue." },
@@ -257,12 +257,12 @@ export interface Industry {
 }
 
 export const INDUSTRIES: Industry[] = [
-  { slug: "it-and-software", name: "IT & software companies", summary: "Run client projects, timesheets, billing and hiring on one platform.", needs: ["Project delivery with timesheets and costing", "Client billing from milestones", "Recruitment and online assessments", "A website and SEO that bring in enquiries"], modules: ["pms", "fms", "hrms", "ots", "cms"] },
-  { slug: "education-and-training", name: "Education & training institutes", summary: "Manage programs, batches, students, fees and certificates.", needs: ["Applications and enrolment", "Batch schedules and attendance", "Fee collection and receipts", "Certificates and a student portal"], modules: ["tms", "ots", "portal", "fms"] },
-  { slug: "agencies-and-consultancies", name: "Agencies & consultancies", summary: "Win clients, deliver projects and keep every engagement profitable.", needs: ["CRM pipeline and proposals", "Projects, tasks and approvals", "Time tracking and profitability", "Marketing and social content"], modules: ["lms", "pms", "fms", "smms"] },
-  { slug: "trading-and-distribution", name: "Trading & distribution", summary: "Control purchasing, inventory, payments and receivables.", needs: ["Purchase requests, orders and goods receipts", "Inventory and stock movements", "Vendor invoices and payments", "Customer invoicing and collections"], modules: ["prms", "fms", "lms"] },
-  { slug: "professional-services", name: "Professional services", summary: "Documents, agreements, clients and compliance in order.", needs: ["Document templates and approvals", "Secure document vault", "Client portal", "Time and billing"], modules: ["lpms", "dlms", "portal", "fms"] },
-  { slug: "growing-smes", name: "Growing small & medium businesses", summary: "Choose independent products and manage your software suite from one place.", needs: ["Separate sign-in and data for each product", "Start with the products you need", "Add products as you grow", "Affordable monthly pricing"], modules: ["workspace", "lms", "hrms", "fms"] },
+  { slug: "it-and-software", name: "IT & software businesses", summary: "Run client projects, track the hours your team works, bill clients and hire people, without moving data between apps.", needs: ["Project delivery with timesheets and costing", "Client billing from milestones", "Recruitment and online assessments", "A website and SEO that bring in enquiries"], modules: ["pms", "fms", "hrms", "ots", "cms"] },
+  { slug: "education-and-training", name: "Education & training institutes", summary: "Run courses and batches, keep student records and attendance, collect fees and give out certificates, with a portal where students see their own progress.", needs: ["Applications and enrolment", "Batch schedules and attendance", "Fee collection and receipts", "Certificates and a student portal"], modules: ["tms", "ots", "portal", "fms"] },
+  { slug: "agencies-and-consultancies", name: "Agencies & consultancies", summary: "Keep track of every possible client, deliver the work on time, record hours and see whether each engagement is making money.", needs: ["CRM pipeline and proposals", "Projects, tasks and approvals", "Time tracking and profitability", "Marketing and social content"], modules: ["lms", "pms", "fms", "smms"] },
+  { slug: "trading-and-distribution", name: "Trading & distribution", summary: "Control what you buy, what is in stock, what you owe suppliers and what customers still owe you.", needs: ["Purchase requests, orders and goods receipts", "Inventory and stock movements", "Vendor invoices and payments", "Customer invoicing and collections"], modules: ["prms", "fms", "lms"] },
+  { slug: "professional-services", name: "Professional services", summary: "Keep agreements, documents, client records and billing in order, with a secure place for sensitive files.", needs: ["Document templates and approvals", "Secure document vault", "Client portal", "Time and billing"], modules: ["lpms", "dlms", "portal", "fms"] },
+  { slug: "growing-smes", name: "Growing small & medium businesses", summary: "Start with the few tools you need today, add more as the business grows, and manage them all from one place.", needs: ["Separate sign-in and data for each product", "Start with the products you need", "Add products as you grow", "Affordable monthly pricing"], modules: ["workspace", "lms", "hrms", "fms"] },
 ];
 
 export interface Faq {
@@ -273,36 +273,36 @@ export interface Faq {
 }
 
 export const FAQS: Faq[] = [
-  { q: "What is SelfRun AI?", a: "SelfRun AI is a cloud platform that brings your sales, HR, finance, projects, procurement, training, documents, website and team communication into one system, with AI and workflow automation running through all of it." },
-  { q: "Do I need to use every module?", a: "No. Each plan includes a set of modules and you switch on only what you need during setup. You can turn modules on or off later from your workspace settings." },
-  { q: "Is there a free plan?", a: "Yes. The Free plan is free forever and includes every product and every feature — no card needed. Paid plans add more people and bigger storage, AI, email and voice allowances." },
-  { q: "How long does setup take?", a: "A guided setup takes a few minutes: company details, departments, team invitations and the modules you want. Importing existing leads, clients or employees from CSV is built in." },
-  { q: "Can I use my own domain for my website?", a: "Yes. Plans that include a custom domain let you connect your own domain with automatic SSL. Every workspace also gets its own address on our domain from the start." },
-  { q: "How does the AI use my data?", a: "AI features run only against your own workspace, with the permissions of the person asking. Answers show how they were calculated, and AI usage is metered per plan so there are no surprises." },
-  { q: "Is my company's data kept separate from other companies?", a: "Yes. Every record belongs to one company and every query is confined to it by the platform itself, not by individual screens. Companies cannot see each other's data." },
-  { q: "Who can see what inside my company?", a: "You control access with roles and fine-grained permissions per module and per action. Everything people do is recorded in an audit log." },
-  { q: "Can I import my existing data?", a: "Yes. Leads, clients and employees can be imported from CSV, and the importer validates each row and tells you exactly what needs fixing." },
-  { q: "What happens if I cancel?", a: "You can cancel from your billing page. Your workspace stays readable for a period after the plan ends so you can export what you need." },
-  { q: "How is pricing calculated?", a: "Pricing is per workspace and depends on the plan: it sets the modules, the number of users, the AI allowance and storage. Prices are shown in your currency and exclude applicable taxes." },
-  { q: "Can I get a demo?", a: "Yes. Request a demo and we will walk you through the platform using your own business scenarios. You can also get started free and explore on your own." },
+  { q: "What is SelfRun AI?", a: "SelfRun AI is one online system for running a business. It brings your customers and sales, staff and payroll, invoices and accounts, projects, purchasing, training, documents, website and team chat into one place. AI and automatic reminders and approvals work across it. You open it in a web browser or in your own apps, and it carries your business name and logo." },
+  { q: "Do I need to use every part?", a: "No. Switch on only the sections you need during setup. For example, you can begin with customers and invoices and add staff records or projects later. You can turn sections on or off at any time from your workspace settings." },
+  { q: "Is there a free plan?", a: "Yes. The free plan is free forever and includes every feature, with no card needed. Paid plans are for bigger teams: they allow more people and give you more storage and more AI, email and voice usage." },
+  { q: "How long does setup take?", a: "A guided setup takes a few minutes. It asks for your business details, creates your departments, invites your team and lets you choose the sections you want. If you already keep lists of leads, clients or employees in a spreadsheet, you can import them from a CSV file." },
+  { q: "Can I use my own domain for my website?", a: "Yes. On plans that include a custom domain you can use your own web address, such as yourbusiness.com, and the secure (HTTPS) certificate is set up for you automatically. Every workspace also gets its own address from the start, so you can begin before you connect a domain." },
+  { q: "How does the AI use my data?", a: "The AI only looks at your own business's records, and only at what the person asking is allowed to see. Its answers show how they were worked out, so you can check them. AI usage is counted per plan, so there are no surprises." },
+  { q: "Is my business's data kept separate from other businesses?", a: "Yes. Every record belongs to one business, and the platform itself limits every request to that business. This is not left to individual screens. One business can never see another business's data." },
+  { q: "Who can see what inside my business?", a: "You decide. Give each person a role, such as Manager or Accountant, and choose what that role may see and do in each tool. Important actions are recorded in a log, so you can see who did what and when." },
+  { q: "Can I import my existing data?", a: "Yes. Leads, clients and employees can be imported from a CSV (spreadsheet) file. The importer checks each row and tells you exactly what needs fixing before anything is saved." },
+  { q: "What happens if I cancel?", a: "You can cancel from your billing page. After the plan ends your workspace stays readable for a period, so you have time to export everything you need." },
+  { q: "How is pricing calculated?", a: "Pricing is per business workspace. The plan you choose sets how many people can use it and how much storage and AI, email and voice usage you get. Prices are shown in your currency and do not include taxes." },
+  { q: "Can I get a demo?", a: "Yes. Ask for a demo and we will walk you through the platform using examples from your own business. Or start free and explore on your own." },
 ];
 
 
 /** More answers, grouped by topic on the FAQ page. */
 export const FAQS_MORE: Faq[] = [
-  { topic: "Data & security", q: "Can one company see another company's data?", a: "No. Every record belongs to one company and the platform adds that company to every database query itself, so a page, report or export cannot ask for another company's rows. See Security & Trust." },
+  { topic: "Data & security", q: "Can one business see another business's data?", a: "No. Every record belongs to one business and the platform adds that business to every database query itself, so a page, report or export cannot ask for another business's rows. See Security & Trust." },
   { topic: "Data & security", q: "Can the AI change my data on its own?", a: "No. Business questions use read-only queries with the asker's permissions. When an assistant proposes to create, edit or delete something, nothing happens until the person approves it, deletes ask for a second confirmation, and every action is logged." },
-  { topic: "Data & security", q: "Can I export my data or leave?", a: "Yes. Tables can be exported to CSV or Excel and documents downloaded as PDF. If you cancel, the workspace stays readable so you can export, and you can ask for permanent deletion of your company's data." },
+  { topic: "Data & security", q: "Can I export my data or leave?", a: "Yes. Tables can be exported to CSV or Excel and documents downloaded as PDF. If you cancel, the workspace stays readable so you can export, and you can ask for permanent deletion of your business's data." },
   { topic: "Data & security", q: "Who can see salaries, payroll and financial statements?", a: "Only people with the specific permission for them. Payroll, salary, bank and statement views are limited by role, even for managers, and every export and change is recorded in the audit log." },
   { topic: "Support", q: "How do I get support?", a: "Inside the product the Help & Support product has a help center, an AI help assistant and support requests you can follow from open to resolved, with attachments and notifications. You can also write to us through the contact page." },
   { topic: "Plans & pricing", q: "What does the Free plan include?", a: "Every product and every feature, free forever. Paid plans add more people and bigger storage, AI, email and voice allowances." },
   { topic: "Plans & pricing", q: "Are any features locked behind a higher plan?", a: "No. Every plan includes every product and every feature. Plans differ only by team size and by allowances." },
   { topic: "Plans & pricing", q: "Can I change plans later?", a: "Yes. You can upgrade as your team grows or move down when you need less. Your data stays in place." },
   { topic: "Plans & pricing", q: "Are prices shown with tax?", a: "No. Prices exclude applicable taxes, and invoices show the tax separately." },
-  { topic: "Your brand", q: "Will my team and clients see SelfRun's brand?", a: "No. Your logo, name, colours, domain, emails and apps carry your company's identity. SelfRun stays in the background." },
+  { topic: "Your brand", q: "Will my team and clients see SelfRun's brand?", a: "No. Your logo, name, colours, domain, emails and apps carry your business's identity. SelfRun stays in the background." },
   { topic: "Your brand", q: "Can I have my own mobile and desktop apps?", a: "Yes. The platform generates your installable app, Android and iOS apps and Windows, macOS and Linux desktop apps from your branding. For the stores you sign the Android and iOS projects with your own developer accounts." },
   { topic: "Your brand", q: "Can I use more than one website theme?", a: "Yes. The theme library lets you preview, activate and customise themes — colours, fonts and components — and switch whenever you like." },
-  { topic: "Your brand", q: "Do push notifications come from my company?", a: "Yes. Push notifications reach your team and your website visitors in your name, on the devices where they have allowed them." },
+  { topic: "Your brand", q: "Do push notifications come from my business?", a: "Yes. Push notifications reach your team and your website visitors in your name, on the devices where they have allowed them." },
   { topic: "AI & automation", q: "What can I ask the AI?", a: "Anything about your business data in plain language — for example overdue invoices, leads by source, who is on leave or which projects are late. It answers with text, a table or a chart and shows how it calculated the answer." },
   { topic: "AI & automation", q: "Can the AI change my data?", a: "No. Questions are answered with read-only queries, and the AI only uses data the person asking is allowed to see." },
   { topic: "AI & automation", q: "Do I need to write code to automate things?", a: "No. Workflows are built from a trigger, optional conditions and actions on a settings screen, starting from ready-made templates." },
@@ -312,7 +312,7 @@ export const FAQS_MORE: Faq[] = [
   { topic: "Apps & devices", q: "Do the apps need updating when you add features?", a: "No. The apps load your workspace, so new features and branding changes appear without reinstalling." },
   { topic: "Data & security", q: "Can I export my data?", a: "Yes. You can export records and reports at any time, and after a plan ends your workspace stays readable for a period so you can take what you need." },
   { topic: "Data & security", q: "How do I see who did what?", a: "Each product keeps its own activity records and sign-in history. Open that product's audit tools to review and export the activity available there." },
-  { topic: "Data & security", q: "How are passwords and credentials protected?", a: "Credentials, API keys and vault documents are encrypted at rest, and company data is isolated from every other company at the data layer." },
+  { topic: "Data & security", q: "How are passwords and credentials protected?", a: "Credentials, API keys and vault documents are encrypted at rest, and business data is isolated from every other business at the data layer." },
   { topic: "Setup", q: "How do I get my existing data in?", a: "Import leads, clients and employees from CSV. Every row is validated and the importer tells you exactly what to fix. Imports never trigger workflows." },
   { topic: "Setup", q: "Can I use my own domain?", a: "Yes. Add your domain, publish the DNS records shown, and the platform verifies it and issues the SSL certificate automatically." },
   { topic: "Setup", q: "Do I have to use every product?", a: "No. Choose the products you need. Each product runs independently with its own sign-in and database; add other products whenever you are ready." },
@@ -337,8 +337,8 @@ export const INTEGRATIONS: Integration[] = [
 ];
 
 export const SECURITY_POINTS: Feature[] = [
-  { icon: "lock", title: "Your data stays yours alone", body: "Every record belongs to one company, and every request to the database is limited to that company. One company can never see another's data." },
-  { icon: "users", title: "The right access for each person", body: "Choose who can see and do what in each tool, so people only get what their job needs." },
+  { icon: "lock", title: "Your data stays yours alone", body: "Every record belongs to one business, and every request to the database is limited to that business. One business can never see another's data." },
+  { icon: "users", title: "The right access for each person", body: "Choose who can see and do what in each section, so people only get what their job needs." },
   { icon: "file", title: "A record of every action", body: "Sign-ins, changes, exports and admin actions are recorded: who did what, and when." },
   { icon: "shield", title: "Secrets stored encrypted", body: "Passwords, API keys and vault documents are encrypted when stored, with the keys kept outside the database." },
   { icon: "clock", title: "Dependable", body: "Your web address gets a secure (HTTPS) certificate automatically, background jobs run on schedule, and billing gives you a grace period before anything is restricted." },
@@ -420,3 +420,47 @@ export const RESOURCES: ResourceArticle[] = [
     ],
   },
 ];
+
+/** Home page overview: the questions a first-time visitor has, answered without jargon. */
+export const SIMPLE_ANSWERS: { title: string; text: string; icon: IconKey; points: string[] }[] = [
+  { title: "What is it?", icon: "layers", text: "SelfRun AI is a website you open in your browser. It handles the daily office work of a business: customer lists, staff records, invoices, projects, purchases, training, documents and your public website. Everything is in one place instead of in many different apps.", points: ["Nothing to install to get started", "Works on a phone and on a computer", "Each person on your team has their own sign-in"] },
+  { title: "What does it do for me?", icon: "bolt", text: "It keeps your information in one place, reminds people when something needs doing, asks the right person for approval and shows you live reports. The AI inside can answer questions about your business and help you write.", points: ["Keeps records of customers, staff, money and projects", "Reminds and follows up for you", "Shows live reports, so you do not build them by hand", "AI answers questions and drafts text"] },
+  { title: "Who is it for?", icon: "users", text: "Any business with a team and paperwork to manage: IT and software businesses, training institutes, agencies and consultancies, traders and distributors, professional firms and growing small and medium businesses.", points: ["You do not need an IT team", "Start with a few sections and add more as you grow", "Each person sees only what their role allows"] },
+  { title: "Do I need technical skills?", icon: "rocket", text: "No. A short guided setup asks for your business details, creates your departments and helps you invite your team. You can bring in your existing lists from a spreadsheet (CSV file), and a help center and an AI help assistant explain each screen.", points: ["Guided setup takes minutes, not weeks", "Import customers, clients and staff from a spreadsheet", "Help center and AI help inside the product"] },
+  { title: "What does it cost?", icon: "wallet", text: "Starting is free, and the free plan includes the whole software with every feature. You pay only when your team grows. Paid plans differ by team size and usage limits, not by features, and no card is needed to start.", points: ["Free to start, no card needed", "No features locked behind a higher plan", "The Pricing page shows every plan"] },
+  { title: "Will it look like my business?", icon: "target", text: "Yes. Your logo, name, colours, web address, emails and apps carry your business's identity, so your team and customers see your business and not SelfRun.", points: ["Your own logo and colours everywhere", "Your own web address for your website", "Your own mobile and desktop apps, made when you press Generate"] },
+];
+
+/** The words used on the home page, in plain language. */
+export const GLOSSARY: { term: string; meaning: string }[] = [
+  { term: "CRM", meaning: "A list of your customers and possible customers, with every conversation, follow-up and deal in one place, so nobody forgets to reply. In SelfRun this is the sales section, SelfRun DealFlow AI." },
+  { term: "Lead", meaning: "A person or business that has shown interest in what you sell but has not bought yet." },
+  { term: "Pipeline", meaning: "The steps a sale goes through, for example enquiry, meeting, quote, won. It shows where every deal stands right now." },
+  { term: "Payroll", meaning: "Working out each person's pay for the month and giving them a payslip." },
+  { term: "Invoice", meaning: "A bill you send to a customer for work or goods, showing what they owe and how to pay it." },
+  { term: "Automation (workflow)", meaning: "A rule that says “when this happens, do that”. For example, when an invoice is overdue, send a reminder. You set it once and it runs by itself." },
+  { term: "Dashboard", meaning: "One screen of live numbers and charts, such as sales this month or unpaid invoices." },
+  { term: "Portal", meaning: "A private page where your customers, students or job applicants can see their own information, such as invoices, tests or certificates." },
+  { term: "Role and permission", meaning: "A role is a type of job, such as Manager or Accountant. Permissions say what each role may see and do, so people only get what they need." },
+  { term: "Audit log", meaning: "A record of who did what and when, so you can check any change later." },
+  { term: "Web address (domain)", meaning: "Your website's name, such as yourbusiness.com. You can use your own instead of ours." },
+  { term: "Push notification", meaning: "A short message that appears on a phone or computer, even when the app is closed, for example “A new lead was assigned to you”." },
+  { term: "CSV file", meaning: "A simple spreadsheet file. You can use one to bring your existing lists into SelfRun, or to take your data out." },
+  { term: "Your brand (white label)", meaning: "Software that carries your business name, logo and colours instead of its maker's. Your customers see your brand, not SelfRun." },
+  { term: "AI assistant", meaning: "A chat helper that answers questions from your own records and documents and helps you write. It only shows what the person asking is allowed to see." },
+  { term: "Installable web app", meaning: "A website you add to the home screen of your phone or computer so it opens like a normal app, without going through an app store." },
+];
+
+/** Everyday-language names for the use cases, for the home page. */
+export const USE_CASE_PLAIN_TITLES: Record<string, string> = {
+  "lead-to-cash": "From first enquiry to payment",
+  "hire-to-retire": "Hiring and looking after your staff",
+  "procure-to-pay": "Buying from suppliers and paying them",
+  "training-operations": "Running training courses",
+  "always-on-marketing": "Marketing that keeps working",
+  "compliance-and-documents": "Policies, procedures and documents",
+  "client-onboarding-and-delivery": "Starting and delivering client work",
+  "customer-support-to-resolution": "Helping customers",
+  "leadership-live-answers": "Answers for managers, from real numbers",
+  "contract-review-and-records": "Agreements and contracts",
+};

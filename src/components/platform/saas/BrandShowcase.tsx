@@ -61,7 +61,7 @@ export default function BrandShowcase({ items, brand }: { items: BrandItem[]; br
         <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[3rem] bg-gradient-to-br from-primary/20 via-transparent to-brand-accent/25 blur-3xl" aria-hidden />
         <div className="sr-stage p-4 sm:p-7">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3.5 py-1.5 text-xs font-bold shadow-sm"><span className="h-2 w-2 rounded-full bg-emerald-500" />Your company&apos;s name · your colours</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-3.5 py-1.5 text-xs font-bold shadow-sm"><span className="h-2 w-2 rounded-full bg-emerald-500" />Your business name · your colours</span>
             <span className="hidden text-xs font-semibold text-muted-foreground sm:block">{brand} stays in the background</span>
           </div>
           <div key={t.key} style={{ animation: "sr-in .5s ease both" }}>{t.node}</div>
