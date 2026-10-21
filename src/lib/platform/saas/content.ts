@@ -37,7 +37,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   lms: {
     icon: "target",
     headline: "Turn enquiries into customers — without anything slipping through",
-    summary: "Capture leads from your website, forms, campaigns and imports, move them through a visual pipeline, and follow up on time every time.",
+    summary: "Collect enquiries from your website, forms and campaigns, move each one through a simple pipeline, and never miss a follow-up.",
     capabilities: ["Lead capture from website forms, ads and CSV import", "Pipeline stages with owners, due dates and notes", "Two-way messages with leads and portal users", "Campaign, offer and coupon tracking with performance reports", "Referral and wallet-credit programs", "Career applications and applicant tracking"],
     automations: ["Assign new leads by rule and notify the owner", "Remind the owner when a follow-up is overdue", "Send a welcome message when a lead is created", "Create a client record when a deal is won"],
     outcome: "Faster response times, a clean pipeline and a clear view of which campaigns actually bring revenue.",
@@ -45,7 +45,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   hrms: {
     icon: "users",
     headline: "Independent people tools for hiring through payroll",
-    summary: "Employee records, attendance, leave, holidays, recruitment and payroll — with self-service for employees and approvals for managers.",
+    summary: "Staff records, attendance, leave, hiring and payroll in one place. Employees can check their own details and managers can approve requests.",
     capabilities: ["Employee directory, documents and organisation tree", "Attendance with monthly calendar and reports", "Leave types, balances, requests and approvals", "Recruitment pipeline from application to offer", "Payroll runs, salary revisions and payslips", "Employee self-service: my attendance, leave, salary and documents"],
     automations: ["Notify the manager when a leave request is filed", "Create the employee record when an offer is accepted", "Alert HR before documents or probation periods expire", "Post payroll results to SelfRun CashFlow AI automatically"],
     outcome: "Hours of HR admin saved every week and employees who always know where they stand.",
@@ -53,7 +53,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   fms: {
     icon: "wallet",
     headline: "Accounting, invoicing and cash flow you can trust",
-    summary: "Invoices, bills, payments, banking, reconciliation and financial reports — connected to every other module so numbers are never re-entered.",
+    summary: "Invoices, bills, payments, bank accounts and financial reports, connected to your other tools so nobody types the same number twice.",
     capabilities: ["Invoices, credit notes, bills and debit notes", "Receipts, payment links and payouts", "Bank and cash accounts with reconciliation", "Chart of accounts, general ledger and trial balance", "Profit & loss, balance sheet, cash flow and tax reports", "Approvals, advances, expenses and numbering rules"],
     automations: ["Send payment reminders on overdue invoices", "Route large expenses for approval", "Post salary and vendor payments from SelfRun TalentOS and SelfRun SpendIQ", "Notify finance when a payment link is paid"],
     outcome: "Books that close faster, fewer payment delays and reports you can hand to your accountant as they are.",
@@ -61,7 +61,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   pms: {
     icon: "layers",
     headline: "Deliver projects on time and on budget",
-    summary: "Clients, projects, tasks, timesheets and costing with boards, timelines and calendars your whole team can follow.",
+    summary: "Manage clients, projects, tasks and hours worked, with boards, timelines and calendars the whole team can follow.",
     capabilities: ["Clients with contacts and project history", "Projects with boards, task lists and timelines", "Timesheets with approvals", "Budget, costing and profitability per project", "My tasks and my projects for every team member", "Project documents and discussion"],
     automations: ["Notify the assignee when a task is assigned or overdue", "Raise an invoice when a milestone is completed", "Warn the manager when a project nears its budget"],
     outcome: "Clear ownership, predictable delivery and profitability you can see before the project ends.",
@@ -69,7 +69,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   prms: {
     icon: "cart",
     headline: "Control spend from request to payment",
-    summary: "Requisitions, RFQs, purchase orders, goods receipts, vendor invoices, inventory and assets — with approvals at every step.",
+    summary: "Everything about buying: purchase requests, quotes, orders, deliveries, supplier invoices, stock and assets, with approvals at each step.",
     capabilities: ["Purchase requests with approval chains", "RFQs and vendor comparison", "Purchase orders, GRN and three-way invoice matching", "Vendor directory and subscription tracking", "Inventory with stock movements", "Asset register, infrastructure and expense claims"],
     automations: ["Route requests to the right approver by amount", "Alert before subscriptions renew", "Create a payable in SelfRun CashFlow AI when an invoice is matched"],
     outcome: "Spend that is approved, tracked and matched — with no surprise invoices.",
@@ -77,7 +77,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   tms: {
     icon: "graduation",
     headline: "Run training programs from enrolment to certificate",
-    summary: "Programs, batches, classes, students, assignments, payments and certificates for institutes and corporate training teams.",
+    summary: "Run courses and batches: classes, students, assignments, fees and certificates, for institutes and company training teams.",
     capabilities: ["Programs, batches and class schedules", "Applications and student records", "Attendance, assignments and projects", "Fee tracking and payments", "Certificates with verification", "Student portal and mentor tools"],
     automations: ["Notify students about upcoming classes", "Issue a certificate when a program is completed", "Remind students about pending fees"],
     outcome: "Organised batches, engaged students and certificates issued without manual work.",
@@ -85,7 +85,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   messenger: {
     icon: "chat",
     headline: "Team conversations that stay next to the work",
-    summary: "Channels, direct messages, announcements, meetings and calls inside your workspace — no separate chat subscription.",
+    summary: "Team chat, direct messages, announcements, meetings and calls inside your workspace, so you don't need a separate chat app.",
     capabilities: ["Channels and direct messages with files", "Company announcements with read tracking", "Meetings and group calls", "Search across messages and files", "Presence and notifications"],
     automations: ["Post workflow results into a channel", "Notify a channel when a deal is won or a task is overdue"],
     outcome: "Fewer tools, fewer lost threads and decisions that stay linked to the record they were about.",
@@ -93,7 +93,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   sop: {
     icon: "book",
     headline: "Document how your business runs — and prove people follow it",
-    summary: "Create, version and publish standard operating procedures, assign them to people and track acknowledgements.",
+    summary: "Write your standard procedures, keep versions, assign them to people and see who has read them.",
     capabilities: ["SOP library with categories, owners and versions", "Block editor with templates", "Assignments to people, teams, departments or roles", "Acknowledgement tracking and compliance reports", "Review and expiry schedule", "Full audit trail"],
     automations: ["Notify assignees of new or updated procedures", "Escalate overdue acknowledgements", "Remind owners before a review is due"],
     outcome: "Consistent execution, faster onboarding and audit-ready compliance records.",
@@ -101,7 +101,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   lpms: {
     icon: "file",
     headline: "Documents and agreements, generated and tracked",
-    summary: "Document templates, approval workflows, signatures and certificates in one place.",
+    summary: "Document templates, approvals, e-signatures and certificates in one place.",
     capabilities: ["Templates with reusable blocks", "Maker types and approval workflows", "Document register with status and history", "Signatures and approvals", "Categories and audit log"],
     automations: ["Generate documents from templates", "Route documents for approval and signature", "Notify when a document is issued or expires"],
     outcome: "Professional documents produced in minutes, with a clear record of who approved what.",
@@ -109,7 +109,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   dlms: {
     icon: "lock",
     headline: "A secure vault for company and client documents",
-    summary: "Store credentials, files, links and notes with encryption, access control and expiry alerts.",
+    summary: "Keep passwords, files, links and notes safe with encryption, access control and expiry reminders.",
     capabilities: ["Company and client vaults", "Encrypted credentials and documents with version history", "Per-record access control", "Expiry reminders", "Activity log"],
     automations: ["Alert owners before a document or credential expires", "Notify when a record is shared or changed"],
     outcome: "Important documents always findable, protected and never expired by surprise.",
@@ -117,7 +117,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   ots: {
     icon: "check",
     headline: "Assess candidates, employees and students at scale",
-    summary: "Question banks, timed online tests, automatic evaluation, certificates and analytics.",
+    summary: "Build question banks, run timed online tests, get automatic marking, and issue certificates with simple reports.",
     capabilities: ["Question bank with categories and bulk import", "Timed tests with sections and randomisation", "Assignments for candidates, employees and students", "Automatic and manual evaluation", "Results, analytics and certificates"],
     automations: ["Assign a test when an application reaches a stage", "Notify evaluators of pending answers", "Issue a certificate on passing"],
     outcome: "Objective hiring and training decisions backed by consistent assessments.",
@@ -125,7 +125,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   aibots: {
     icon: "bot",
     headline: "Build AI assistants trained on your own knowledge",
-    summary: "Create bots with your instructions and files, give your team and customers access, and track usage and cost.",
+    summary: "Create AI assistants with your own instructions and files, give your team and customers access, and track how much they are used.",
     capabilities: ["Bots with custom instructions and knowledge files", "Team and customer chat", "Conversation history and audit", "Usage and cost tracking", "Access modes per bot"],
     automations: ["Answer customer questions around the clock", "Hand over to a person when the bot is unsure"],
     outcome: "Instant, consistent answers for staff and customers, grounded in your own material.",
@@ -133,7 +133,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   intelligence: {
     icon: "brain",
     headline: "Ask your business anything",
-    summary: "Ask questions in plain language and get answers computed from the records available to this product, with tables, charts and a clear explanation of how each number was calculated.",
+    summary: "Ask questions in plain English and get answers from your own records, shown as tables or charts with a clear explanation of how each number was worked out.",
     capabilities: ["Natural-language questions about available records", "Answers built from live data, never guessed", "Tables, charts and KPIs", "“How this was calculated” traceability", "Respects each person's access rights"],
     automations: ["Turn a recurring question into a scheduled summary"],
     outcome: "Leadership decisions in seconds instead of waiting for a report.",
@@ -141,7 +141,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   smms: {
     icon: "megaphone",
     headline: "Plan, create and publish social media with AI",
-    summary: "Campaigns, posts per platform, AI-assisted copy and images, approvals and publishing in one calendar.",
+    summary: "Plan campaigns and posts for each social network, get AI help with text and images, approve them and publish from one calendar.",
     capabilities: ["Campaign briefs and AI strategy", "Posts adapted for each platform", "AI copy and image generation", "Approval workflow before publishing", "Calendar and performance tracking"],
     automations: ["Route posts for approval", "Publish on schedule", "Report on campaign performance"],
     outcome: "A steady, on-brand social presence without a large content team.",
@@ -149,7 +149,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   seo: {
     icon: "search",
     headline: "Be found on search — and know why",
-    summary: "Technical audits, on-page analysis, keyword and ranking tracking, backlinks and a sitemap/robots manager that drives your live website.",
+    summary: "Check your website for problems, track keywords, search rankings and backlinks, and manage your sitemap, all in one place.",
     capabilities: ["Site audits with prioritised issues", "On-page and content analysis", "Keyword groups and rank tracking", "Backlink monitoring", "Schema, sitemap and robots management", "Tasks and reports"],
     automations: ["Create fix tasks from audit issues", "Alert when rankings or indexing change"],
     outcome: "Higher search visibility with a clear list of what to fix next.",
@@ -157,7 +157,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   cms: {
     icon: "globe",
     headline: "Your website, fully in your control",
-    summary: "A complete website builder: pages, sections, blog, forms, media, navigation, themes, SEO and custom domains.",
+    summary: "A complete website builder: pages, blog, forms, images, menus, themes, search tools and your own web address.",
     capabilities: ["Drag-and-drop page builder with draft and publish", "Blog, collections and forms", "Media library", "Themes with live preview", "Navigation and footer management", "Custom domain with automatic SSL"],
     automations: ["Send form submissions to SelfRun DealFlow AI and your inbox", "Notify the team when a page is waiting for approval"],
     outcome: "A professional website your team can change any day — without a developer.",
@@ -165,7 +165,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   portal: {
     icon: "building",
     headline: "A branded portal for clients, students and applicants",
-    summary: "Give external people one place to see their projects, invoices, tests, certificates and messages.",
+    summary: "Give customers, students and other outside people one place to see their projects, invoices, tests, certificates and messages.",
     capabilities: ["Client, student and applicant dashboards", "Invoices, payments and documents", "Tests and certificates", "Messages with your team", "Rewards and referrals"],
     automations: ["Notify portal users about new invoices, messages and tests"],
     outcome: "Fewer status-update emails and a better experience for the people you serve.",
@@ -173,7 +173,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   support: {
     icon: "chat",
     headline: "Get help from AI first, people when you need them",
-    summary: "An AI help assistant that knows the product, a searchable help center and a request desk with attachments and status tracking.",
+    summary: "An AI help assistant that knows the product, a searchable help center and a request desk where you can attach files and track progress.",
     capabilities: ["AI help chat that understands the screen you are on", "Searchable help articles", "Support requests with attachments", "Status tracking and notifications"],
     automations: ["Create a request directly from an AI conversation"],
     outcome: "Answers in seconds and a clear path to a person when it matters.",
@@ -181,7 +181,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   workspace: {
     icon: "bolt",
     headline: "The home of your company",
-    summary: "A suite console for product links, company settings, plan details and setup, with analytics and records kept within each independent product.",
+    summary: "The control center: links to your tools, company settings, plan details and setup, with reports kept inside each tool.",
     capabilities: ["Executive dashboard and per-module analytics", "Users, roles and fine-grained permissions", "Audit log across everything", "Workflow automations", "Data import", "Branding, domains and billing"],
     automations: ["Build your own Trigger → Condition → Action workflows"],
     outcome: "Leadership visibility and administrative control from a single screen.",
@@ -189,7 +189,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   website: {
     icon: "globe",
     headline: "A public website on your own domain",
-    summary: "Publish your company website, served from your domain with automatic SSL, edited through the website builder.",
+    summary: "Publish your company website on your own web address, with a secure (HTTPS) connection set up automatically, edited with the website builder.",
     capabilities: ["Your own domain and subdomain", "Automatic SSL", "Maintenance mode", "Built-in forms and lead capture"],
     automations: ["Capture every enquiry straight into SelfRun DealFlow AI"],
     outcome: "A live website without hosting, plug-ins or developers.",
@@ -203,12 +203,12 @@ export interface AiCapability {
 }
 
 export const AI_CAPABILITIES: AiCapability[] = [
-  { icon: "brain", title: "Ask your business anything", body: "Type a question — “which clients are overdue by more than 30 days?” — and the AI plans a query against your real records, runs it with your permissions and answers with a table or chart plus an explanation of how it got there." },
-  { icon: "bot", title: "AI assistants trained on your knowledge", body: "Create assistants with your own instructions and documents for staff or customers. Every conversation is logged, and usage and cost are tracked per bot." },
-  { icon: "megaphone", title: "AI content for marketing", body: "Turn one idea into platform-specific social posts, generate images and refine the tone with a sentence. Nothing publishes without the approval step you choose." },
-  { icon: "chat", title: "Context-aware help", body: "The in-product help assistant knows which screen you are on, answers how-to questions from the help center and can turn a conversation into a support request." },
-  { icon: "search", title: "AI-assisted SEO and content", body: "Audits explain why an issue matters and what to change, and content analysis scores each page against what searchers expect." },
-  { icon: "workflow", title: "AI in your automations", body: "Use AI steps inside workflows — summarise a conversation, draft a reply, classify an enquiry — and keep a person in the loop wherever you want one." },
+  { icon: "brain", title: "Ask your business anything", body: "Type a question like “Which customers owe us money for more than 30 days?” The AI looks through your own records, using only what you are allowed to see, and answers with a table or chart and an explanation of how it got there." },
+  { icon: "bot", title: "AI assistants that know your business", body: "Create assistants with your own instructions and documents, for your staff or your customers. Every conversation is saved, and you can see how much each assistant is used." },
+  { icon: "megaphone", title: "Marketing content in seconds", body: "Turn one idea into posts for each social network, create images and change the tone with one sentence. Nothing is posted until the approval step you choose." },
+  { icon: "chat", title: "Help that knows where you are", body: "The help assistant knows which screen you are on, answers “how do I…” questions from the help center and can turn a chat into a support request." },
+  { icon: "search", title: "Better search ranking", body: "Website checks explain why a problem matters and what to change, and score each page against what people search for." },
+  { icon: "workflow", title: "AI inside your automations", body: "Add AI steps to automatic workflows: summarise a conversation, draft a reply or sort an enquiry. Keep a person in the loop wherever you want one." },
 ];
 
 export interface Step {
@@ -217,10 +217,10 @@ export interface Step {
 }
 
 export const HOW_IT_WORKS: Step[] = [
-  { title: "Register and choose a plan", body: "Create your account with your work email, verify it and start on the free-forever plan — no card needed. Upgrade only when your team grows." },
-  { title: "Set up your company", body: "A short guided setup collects your business details, creates your departments, invites your team and lets you switch modules on or off. It takes minutes, not weeks." },
-  { title: "Configure your website, AI and automations", body: "Choose a theme and publish your website, connect your AI and email, and switch on the automations that matter. Every setting is yours to change at any time." },
-  { title: "Manage your software suite from one place", body: "Choose independent products for your team, then configure reminders and workflow handoffs where they help. Each product remains usable on its own." },
+  { title: "Sign up and pick a plan", body: "Create your account with your work email, verify it and start on the free plan. No card is needed. Upgrade only when your team grows." },
+  { title: "Set up your company", body: "A short guided setup asks for your business details, creates your departments, invites your team and lets you switch tools on or off. It takes minutes, not weeks." },
+  { title: "Add your website, AI and automations", body: "Choose a website theme and publish it, connect your email and AI, and switch on the automations you want. You can change any setting later." },
+  { title: "Run your business from one place", body: "Choose the tools your team needs, then set up reminders and automatic steps where they help. Each tool still works on its own." },
 ];
 
 export interface UseCase {
@@ -337,11 +337,11 @@ export const INTEGRATIONS: Integration[] = [
 ];
 
 export const SECURITY_POINTS: Feature[] = [
-  { icon: "lock", title: "Strict company isolation", body: "Every record is stamped with its company and every database query is confined to it at the data layer. One company can never read another's data." },
-  { icon: "users", title: "Roles and permissions", body: "Role-based access with fine-grained permissions per module and action, so people see and do only what their job requires." },
-  { icon: "file", title: "Complete audit trail", body: "Sign-ins, changes, exports and administrative actions are recorded with who, what and when." },
-  { icon: "shield", title: "Encrypted secrets", body: "Credentials, API keys and vault documents are encrypted at rest with keys held outside the database." },
-  { icon: "clock", title: "Reliable by design", body: "Automatic SSL on your domain, scheduled background jobs and a billing system that gives you a grace period before anything is restricted." },
+  { icon: "lock", title: "Your data stays yours alone", body: "Every record belongs to one company, and every request to the database is limited to that company. One company can never see another's data." },
+  { icon: "users", title: "The right access for each person", body: "Choose who can see and do what in each tool, so people only get what their job needs." },
+  { icon: "file", title: "A record of every action", body: "Sign-ins, changes, exports and admin actions are recorded: who did what, and when." },
+  { icon: "shield", title: "Secrets stored encrypted", body: "Passwords, API keys and vault documents are encrypted when stored, with the keys kept outside the database." },
+  { icon: "clock", title: "Dependable", body: "Your web address gets a secure (HTTPS) certificate automatically, background jobs run on schedule, and billing gives you a grace period before anything is restricted." },
   { icon: "check", title: "You own your data", body: "Export your records whenever you like. Your data is used to run your workspace and nothing else." },
 ];
 

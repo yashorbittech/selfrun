@@ -53,11 +53,11 @@ export default function AutomationFlow({ flows }: { flows: Flow[] }) {
           ))}
         </div>
         <div className="flex flex-col items-stretch md:flex-row md:items-center">
-          {node(0, "Trigger", Zap, <p className="text-[17px] font-semibold leading-snug">{flow.trigger}</p>)}
+          {node(0, "When", Zap, <p className="text-[17px] font-semibold leading-snug">{flow.trigger}</p>)}
           {wire(1)}
-          {node(1, "Condition", Filter, <p className="text-[17px] font-semibold leading-snug">{flow.condition}</p>)}
+          {node(1, "Rule", Filter, <p className="text-[17px] font-semibold leading-snug">{flow.condition}</p>)}
           {wire(2)}
-          {node(2, "Action", Play,
+          {node(2, "Then", Play,
             <ul className="space-y-2.5">
               {flow.action.map((a, k) => (
                 <li key={a} className="flex items-start gap-2.5 text-[15px] font-medium leading-snug">
