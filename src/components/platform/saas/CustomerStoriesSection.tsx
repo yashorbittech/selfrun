@@ -11,7 +11,7 @@ export default function CustomerStoriesSection({ tone = "light" }: { tone?: "lig
         <div className="max-w-2xl">
           <p className={`sr-eyebrow ${dark ? "text-white/70" : ""}`}>Customer stories</p>
           <h2 id="customer-stories-heading" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">Experiences shared by real customers</h2>
-          <p className={`mt-3 text-sm leading-relaxed ${dark ? "text-white/75" : "text-muted-foreground"}`}>Customer stories are published with the featured business’s approval. Product workflow examples are shown separately below.</p>
+          <p className={`mt-3 text-sm leading-relaxed ${dark ? "text-white/75" : "text-muted-foreground"}`}>Customer stories are published with the featured business’s approval. Worked examples are shown separately below.</p>
         </div>
         <Link href="/contact" className={`inline-flex shrink-0 items-center gap-2 text-sm font-bold ${dark ? "text-white" : "text-primary"}`}>Share your experience <ArrowRight className="h-4 w-4" /></Link>
       </div>
@@ -29,14 +29,14 @@ export default function CustomerStoriesSection({ tone = "light" }: { tone?: "lig
               <p className={`mt-5 text-sm leading-relaxed ${dark ? "text-white/80" : "text-muted-foreground"}`}>{story.summary}</p>
               {story.challenge && <div className="mt-5"><p className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-white/60" : "text-muted-foreground"}`}>Challenge</p><p className="mt-1 text-sm leading-relaxed">{story.challenge}</p></div>}
               {story.approach?.length ? <div className="mt-5"><p className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-white/60" : "text-muted-foreground"}`}>How they use SelfRun</p><ul className="mt-2 space-y-2">{story.approach.map((item) => <li key={item} className="flex gap-2 text-sm"><ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{item}</li>)}</ul></div> : null}
-              {story.results.length > 0 && <div className="mt-5 border-t border-border/50 pt-4"><p className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-white/60" : "text-muted-foreground"}`}>Customer-reported outcomes</p><ul className="mt-2 space-y-2">{story.results.map((result) => <li key={result} className="flex gap-2 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{result}</li>)}</ul></div>}
+              {story.results.length > 0 && <div className="mt-5 border-t border-border/50 pt-4"><p className={`text-xs font-bold uppercase tracking-wider ${dark ? "text-white/60" : "text-muted-foreground"}`}>Results reported by the customer</p><ul className="mt-2 space-y-2">{story.results.map((result) => <li key={result} className="flex gap-2 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />{result}</li>)}</ul></div>}
             </article>
           ))}
         </div>
       ) : (
         <div className={`flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center ${dark ? "border-white/15 bg-white/[0.06]" : "border-border/60 bg-muted/30"}`}>
           <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${dark ? "bg-white/10" : "bg-primary/10 text-primary"}`}><MessageCircle className="h-5 w-5" /></span>
-          <p className={`max-w-3xl text-sm leading-relaxed ${dark ? "text-white/80" : "text-muted-foreground"}`}>We add a customer story when a business has approved the details it wants to share. Until then, explore the product stories below for realistic examples of how connected workflows can run.</p>
+          <p className={`max-w-3xl text-sm leading-relaxed ${dark ? "text-white/80" : "text-muted-foreground"}`}>We add a customer story when a business has approved the details it wants to share. Until then, the worked examples below show how connected work can run.</p>
         </div>
       )}
     </section>

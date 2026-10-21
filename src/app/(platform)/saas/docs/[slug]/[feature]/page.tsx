@@ -90,7 +90,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
     return { key: p.key, name: p.name, icon: p.icon, groups: [...new Set(fs.map((x) => x.group))].map((g) => ({ name: g, items: fs.filter((x) => x.group === g).map((x) => ({ slug: x.slug, name: x.name })) })) };
   }).filter((p) => p.groups.length);
   const toc = [
-    { id: "simple", label: "In simple words", show: true },
+    { id: "simple", label: "What it does", show: true },
     { id: "before", label: "Before you start", show: true },
     { id: "steps", label: guide.auto ? "How it works" : "Step by step", show: true },
     { id: "tips", label: "Tips", show: guide.tips.length > 0 },
@@ -144,7 +144,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
         )}
 
         <section id="simple" className="scroll-mt-32">
-          <GuideHeading icon={BookOpen}>In simple words</GuideHeading>
+          <GuideHeading icon={BookOpen}>What it does</GuideHeading>
           <p className="leading-relaxed text-muted-foreground"><b className="text-foreground">{f.name}</b> is part of {m.name}. {f.text}{/[.!?]$/.test(f.text) ? "" : "."} {guide.auto ? "You do not have to do anything for it to work — this guide shows you where to see it." : `This guide takes you through it in ${guide.steps.length} short steps.`}</p>
           {fit && <p className="mt-3 rounded-2xl border border-primary/25 bg-primary/[0.05] p-4 text-sm leading-relaxed"><b>Where it fits in your work — {fit.title}.</b> <span className="text-muted-foreground">{fit.text}</span></p>}
         </section>
@@ -152,7 +152,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
         <section id="before" className="scroll-mt-32">
           <GuideHeading icon={ListChecks}>Before you start</GuideHeading>
           <ul className="space-y-2 text-muted-foreground">
-            <li className="flex gap-3"><span className="sr-circle mt-1 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span><span>You need to be signed in to your company&apos;s workspace. {m.name} appears in the Workspace dashboard and in the left menu when your role includes it.</span></li>
+            <li className="flex gap-3"><span className="sr-circle mt-1 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span><span>You need to be signed in to your business workspace. {m.name} appears in the Workspace dashboard and in the left menu when your role includes it.</span></li>
             <li className="flex gap-3"><span className="sr-circle mt-1 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span><span>What you can see and change depends on your role. If a menu item or button is missing, ask your workspace owner to give your role access in Workspace → Users.</span></li>
             <li className="flex gap-3"><span className="sr-circle mt-1 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span><span>{f.name} belongs to <b className="text-foreground">{f.group}</b> in {m.name}. {f.text}{/[.!?]$/.test(f.text) ? "" : "."}</span></li>
           </ul>

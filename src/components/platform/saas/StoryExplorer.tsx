@@ -45,7 +45,7 @@ export default function StoryExplorer({ stories }: { stories: ExplorerStory[] })
             <p className="text-[17px] leading-relaxed">{s.narrative}</p>
 
             <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.05] p-5">
-              <p className="text-xs font-black uppercase tracking-widest text-rose-500">The challenge</p>
+              <p className="text-xs font-black uppercase tracking-widest text-rose-500">The problem</p>
               <p className="mt-1.5 leading-relaxed">{s.problem}</p>
             </div>
 
@@ -68,7 +68,7 @@ export default function StoryExplorer({ stories }: { stories: ExplorerStory[] })
             </div>
 
             <div>
-              <p className="mb-3 text-xs font-black uppercase tracking-widest text-muted-foreground">Products in this story</p>
+              <p className="mb-3 text-xs font-black uppercase tracking-widest text-muted-foreground">Products used in this example</p>
               <div className="flex flex-wrap gap-2.5">
                 {s.products.map((p) => (
                   <Link key={p.key} href={p.href} className="group inline-flex items-center gap-2.5 rounded-2xl border border-border/60 bg-background py-1.5 pl-1.5 pr-4 transition-all hover:border-primary/40 hover:shadow-md"><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/60 bg-card"><ProductLogo productKey={p.key} size={26} title={p.name} /></span><span className="text-sm font-black group-hover:text-primary">{p.name}</span></Link>
@@ -77,7 +77,7 @@ export default function StoryExplorer({ stories }: { stories: ExplorerStory[] })
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-5">
-              <p className="text-xs text-muted-foreground">An illustrative workflow built from documented product capabilities, not an account of a named customer.</p>
+              <p className="text-xs text-muted-foreground">A worked example built from what the product really does today. It is not the account of a named customer.</p>
               <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-transform hover:-translate-y-0.5">Try it free <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>

@@ -118,7 +118,7 @@ export default async function SaasHome() {
         <HeroCtas />
       </PageHero>
 
-      <SectionScrollNav label="Home sections" items={SEC} numbered />
+      <SectionScrollNav label="Home products" items={SEC} numbered />
 
       {/* Proof strip */}
       <section className="relative border-y border-border/50 bg-background/60 backdrop-blur">
@@ -144,31 +144,31 @@ export default async function SaasHome() {
       {/* Replace the stack */}
       <section id="products" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("products")} center icon="layers" eyebrow="What is inside" title="One software for" accent="every part of your business." lead="Most businesses use a separate app for every job: one for customers, one for salaries, one for invoices, one for projects and so on. SelfRun AI is a single software with a section for each of these jobs, so your team works in one place and does not type the same information again and again." />
+          <SectionHead n={no("products")} center icon="layers" eyebrow="What is inside" title="One software for" accent="every part of your business." lead="Most businesses use a separate app for every job: one for customers, one for salaries, one for invoices, one for projects and so on. SelfRun AI is a single software with a product for each of these jobs, so your team works in one place and does not type the same information again and again." />
           <Reveal>
             <ChipMarquee rows={[
               REPLACES.map((r) => ({ label: r.software, icon: r.icon, struck: true })),
               REPLACES.map((r) => ({ label: byKey.get(r.panel)?.name ?? "Included", icon: r.icon, productKey: r.panel })),
             ]} />
           </Reveal>
-          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">The crossed-out names are the separate apps a business usually pays for. Next to each one is the section of SelfRun AI that does the same job.</p>
-          <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See every section <ArrowRight className="h-4 w-4" /></Link></div>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">The crossed-out names are the separate apps a business usually pays for. Next to each one is the product of SelfRun AI that does the same job.</p>
+          <div className="mt-10 flex justify-center"><Link href="/products" className="sr-btn sr-btn-primary">See every product <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
 
       {/* Why SelfRun AI */}
       <section id="why" style={{ scrollMarginTop: 140 }} className="sr-section relative overflow-hidden bg-muted/10">
         <div className="sr-container">
-          <SectionHead n={no("why")} center icon="bolt" eyebrow="Why choose SelfRun AI" title="Why businesses" accent="choose it." lead="Running a business should not mean buying, learning and connecting a dozen different apps. Here is what SelfRun AI gives you instead, and what each of its sections is for." />
+          <SectionHead n={no("why")} center icon="bolt" eyebrow="Why choose SelfRun AI" title="Why businesses" accent="choose it." lead="Running a business should not mean buying, learning and connecting a dozen different apps. Here is what SelfRun AI gives you instead, and what each of its products is for." />
           <div className="grid gap-5 lg:grid-cols-4 lg:grid-rows-[auto_auto_auto]">
             <Reveal className="lg:col-span-2 lg:row-span-2">
               <div className="sr-band relative flex h-full min-h-[22rem] flex-col justify-between rounded-[2rem] p-8 shadow-2xl shadow-primary/30 sm:p-10">
                 <div className="relative">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">One software, every job</p>
                   <p className="mt-3 text-7xl font-black leading-none tracking-tighter sm:text-8xl">1</p>
-                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">One software for every job in your business, from customers and staff to money and projects. Use the sections you need. They work together, so you save time and nobody does the same work twice.</p>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">One software for every job in your business, from customers and staff to money and projects. Use the products you need. They work together, so you save time and nobody does the same work twice.</p>
                 </div>
-                <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every section <ArrowRight className="h-4 w-4" /></Link>
+                <Link href="/products" className="relative mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-black shadow-xl transition-transform hover:scale-105">See every product <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
             {[
@@ -189,7 +189,7 @@ export default async function SaasHome() {
             ))}
             <Reveal className="lg:col-span-4">
               <div className="rounded-[2rem] border border-border/60 bg-background p-6 shadow-sm sm:p-8">
-                <h3 className="text-xl font-black">What is inside SelfRun AI, section by section</h3>
+                <h3 className="text-xl font-black">What is inside SelfRun AI, product by product</h3>
                 <ul className="mt-5 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
                   {modules.map((module) => (
                     <li key={module.key} className="flex min-w-0 items-start gap-3 border-t border-border/50 py-4">
@@ -341,7 +341,7 @@ export default async function SaasHome() {
       {/* See the product */}
       <section id="screens" className="sr-band sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container relative">
-          <SectionHead n={no("screens")} tone="dark" center icon="chart" eyebrow="See it" title="Real screens from" accent="the live product." lead="These are screenshots of the real product with sample data in it. Pick a section and look around." />
+          <SectionHead n={no("screens")} tone="dark" center icon="chart" eyebrow="See it" title="Real screens from" accent="the live product." lead="These are screenshots of the real product with sample data in it. Pick a product and look around." />
           <ProductShowcase items={productTabs} />
         </div>
       </section>
@@ -439,7 +439,7 @@ export default async function SaasHome() {
               {[
                 { t: "One bill instead of many", b: "One plan replaces a separate app for every department, and every feature is already included.", icon: "wallet" as const },
                 { t: "Less admin work", b: "Reminders, follow-ups, approvals and reports run on their own, so your team spends its time on customers instead of chasing.", icon: "users" as const },
-                { t: "Automate the steps you choose", b: "Set up automatic steps between the parts of the software, and connect the services you already use. Each section also works fine on its own.", icon: "plug" as const },
+                { t: "Automate the steps you choose", b: "Set up automatic steps between the parts of the software, and connect the services you already use. Each product also works fine on its own.", icon: "plug" as const },
               ].map((x, i) => (
                 <Reveal key={x.t} delay={i * 80}>
                   <div className="sr-glass relative h-full overflow-hidden p-7">

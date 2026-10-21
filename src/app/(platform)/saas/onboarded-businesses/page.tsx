@@ -16,14 +16,14 @@ import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = pageMeta({ path: "/onboarded-businesses", title: "Get Your Business Onboarded in Minutes", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed.", keywords: ["business software onboarding", "set up company workspace", "how to onboard business to software", "free business workspace", "import leads and employees from CSV", "business software setup guide", "start using CRM and HR software"], tag: "Onboarding" });
+export const metadata: Metadata = pageMeta({ path: "/onboarded-businesses", title: "Get Your Business Set Up in Minutes", description: "How a business starts on SelfRun AI: create a workspace, add your brand, invite your team, choose your products and bring your data. Free to start, no card needed.", keywords: ["business software onboarding", "set up company workspace", "how to onboard business to software", "free business workspace", "import leads and employees from CSV", "business software setup guide", "start using CRM and HR software"], tag: "Onboarding" });
 
 const NAV = [
-  { id: "what", label: "What onboarding is" },
+  { id: "what", label: "What getting set up means" },
   { id: "day1", label: "Your first day" },
   { id: "get", label: "What you get" },
-  { id: "path", label: "The path" },
-  { id: "who", label: "Who joins" },
+  { id: "path", label: "Your first year" },
+  { id: "who", label: "Who starts here" },
   { id: "products", label: "Choose products" },
   { id: "data", label: "Bring your data" },
   { id: "help", label: "Help along the way" },
@@ -49,13 +49,13 @@ export default async function OnboardedBusinessesPage() {
 
   return (
     <>
-      <JsonLd data={[webPage({ type: "WebPage", path: "/onboarded-businesses", name: "Onboarded businesses", description: "How a business starts on SelfRun AI: create a workspace, brand it, invite the team, choose products and bring your data. Free to start, no card needed." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Onboarded businesses", path: "/onboarded-businesses" }]), howTo({ path: "/onboarded-businesses", name: "How to get your business onboarded on SelfRun AI", description: first.goal, steps: first.actions.map((a, i) => ({ name: `Step ${i + 1}`, text: a })) })]} />
+      <JsonLd data={[webPage({ type: "WebPage", path: "/onboarded-businesses", name: "Getting started", description: "How a business starts on SelfRun AI: create a workspace, add your brand, invite your team, choose your products and bring your data. Free to start, no card needed." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Getting started", path: "/onboarded-businesses" }]), howTo({ path: "/onboarded-businesses", name: "How to get your business set up on SelfRun AI", description: first.goal, steps: first.actions.map((a, i) => ({ name: `Step ${i + 1}`, text: a })) })]} />
       <PageHero
         art="features"
-        eyebrow="Businesses & clients"
+        eyebrow="Getting started"
         title="A workspace built"
         accent="around your business."
-        lead="Each company sets up its own workspace, team access and brand, and starts free in minutes. Customer names and account details are private, so we publish a directory only when a business has explicitly agreed to be featured."
+        lead="Every business sets up its own workspace, team access and brand, and starts free in minutes. There is nothing to install and no card is needed. Customer names and account details are private, so we publish a list of businesses only when a business has clearly agreed to be featured."
         photo="open-office"
         shot="workspace"
         shotName="SelfRun CommandOS"
@@ -69,10 +69,10 @@ export default async function OnboardedBusinessesPage() {
       {/* 01 what */}
       <section id="what" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="what" title="Onboarding is" accent="your own setup." lead="There is no sales queue and no implementation project. You register, shape the workspace to your company and switch on what you need." />
+          <Head id="what" title="Getting set up is" accent="something you do yourself." lead="There is no sales queue and no long setup project. You register, shape the workspace to your business and switch on what you need, all in one sitting if you like." />
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { icon: "building" as const, t: "Your company's workspace", x: "Register and name your company. The workspace carries your identity from the first screen." },
+              { icon: "building" as const, t: "Your business's workspace", x: "Register and name your business. The workspace carries your name and logo from the first screen." },
               { icon: "users" as const, t: "Your team, with the right access", x: "Invite people and give each a role, so everyone sees only what their job needs." },
               { icon: "layers" as const, t: "Only the products you choose", x: "Switch on the products that fit today and add more whenever you need them." },
             ].map((c, i) => (
@@ -117,7 +117,7 @@ export default async function OnboardedBusinessesPage() {
       {/* 03 what you get */}
       <section id="get" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="get" title="What you get" accent="from the start." lead="Every business gets the same complete platform. There is no smaller version for smaller companies." />
+          <Head id="get" title="What you get" accent="from the start." lead="Every business gets the same complete software. There is no smaller version for smaller businesses." />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {YOUR_BRAND.slice(0, 6).map((b, i) => (
               <Reveal key={b.key} delay={(i % 3) * 60}>
@@ -131,7 +131,7 @@ export default async function OnboardedBusinessesPage() {
       {/* 04 path */}
       <section id="path" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="path" title="From day one to" accent="a company that runs itself." lead="A suggested path, not a rule. Switch on a few products at each stage." />
+          <Head id="path" title="From day one to" accent="a business that runs itself." lead="A suggested path, not a rule. Switch on a few products at each stage and leave the rest until you need them." />
           <ol className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {GROWTH.map((p, i) => (
               <Reveal key={p.id} as="li" delay={(i % 3) * 60}>
@@ -150,14 +150,14 @@ export default async function OnboardedBusinessesPage() {
       {/* 05 who */}
       <section id="who" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="who" title="Businesses that" accent="start here." lead="The kinds of company the platform is built for, and what each gets." />
+          <Head id="who" title="Businesses that" accent="start here." lead="The kinds of business SelfRun AI is built for, and what each one gets." />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {INDUSTRIES.map((x, i) => (
               <Reveal key={x.slug} delay={(i % 3) * 60}>
                 <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
                   <h3 className="text-lg font-black leading-snug">{x.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">{x.summary}</p>
-                  <ul className="mt-4 space-y-2">{x.needs.slice(0, 3).map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
+                  <ul className="mt-4 space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
                 </div>
               </Reveal>
             ))}
@@ -168,7 +168,7 @@ export default async function OnboardedBusinessesPage() {
       {/* 06 products */}
       <section id="products" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="products" title="Choose the products" accent="you need." lead="Every product is in every plan. Start with a few, add the rest when your business is ready." />
+          <Head id="products" title="Choose the products" accent="you need." lead="Every product is included in every plan. Start with a few and add the rest when your business is ready." />
           <div className="grid gap-5 lg:grid-cols-2">
             {groups.map((g, i) => (
               <Reveal key={g.id} delay={(i % 2) * 60}>
@@ -188,8 +188,8 @@ export default async function OnboardedBusinessesPage() {
           <Head id="data" title="Bring your data" accent="with you." lead="You do not start from an empty screen. Import what you already have, and take it back out whenever you choose." />
           <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-3">
             {[
-              { icon: FileSpreadsheet, t: "Import from CSV", x: "Bring leads, clients and employees in from a spreadsheet into the product that uses them." },
-              { icon: LockKeyhole, t: "Kept apart from every other company", x: "Your records are stamped with your company, and one company's data is never visible to another's." },
+              { icon: FileSpreadsheet, t: "Import from a spreadsheet (CSV)", x: "Bring leads, clients and employees in from a spreadsheet, into the product that uses them. Every row is checked first." },
+              { icon: LockKeyhole, t: "Kept apart from every other business", x: "Your records belong to your business, and one business's data is never visible to another's." },
               { icon: BookOpen, t: "Export and leave any time", x: "Your data stays yours. You can export it, or leave, whenever you choose." },
             ].map(({ icon: I, t, x }, i) => (
               <Reveal key={t} delay={i * 70}>
@@ -203,12 +203,12 @@ export default async function OnboardedBusinessesPage() {
       {/* 08 help */}
       <section id="help" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="help" title="Help is" accent="always close." lead="Learn on your own, see it with your scenarios, or ask the team." />
+          <Head id="help" title="Help is" accent="always close." lead="Learn on your own, see it with examples from your business, or ask the team." />
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { icon: "book" as const, t: "Read the setup guide", x: "Step-by-step guidance from registration to a configured workspace.", href: "/docs/getting-started", c: "Open the guide" },
-              { icon: "target" as const, t: "See it with your scenarios", x: "Bring one process you want to improve and we will show how the platform handles it.", href: "/demo", c: "Request a demo" },
-              { icon: "chat" as const, t: "Ask us anything", x: "Questions about onboarding, plans or security? Send a message and we reply within one business day.", href: "/contact", c: "Contact us" },
+              { icon: "book" as const, t: "Read the setup guide", x: "Step-by-step guidance from registering to a fully set-up workspace.", href: "/docs/getting-started", c: "Open the guide" },
+              { icon: "target" as const, t: "See it with your examples", x: "Bring one process you want to improve and we will show how the software handles it.", href: "/demo", c: "Request a demo" },
+              { icon: "chat" as const, t: "Ask us anything", x: "Questions about getting started, plans or safety? Send a message and we reply within one business day.", href: "/contact", c: "Contact us" },
             ].map((c, i) => (
               <Reveal key={c.t} delay={i * 70}>
                 <Link href={c.href} className="group flex h-full flex-col rounded-3xl border border-border/60 bg-card p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
@@ -226,7 +226,7 @@ export default async function OnboardedBusinessesPage() {
       {/* 09 privacy */}
       <section id="privacy" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="privacy" title="No customer directory" accent="without consent." lead="We do not publish private account, workspace or client information as marketing content." />
+          <Head id="privacy" title="No customer list" accent="without permission." lead="We do not publish private account, workspace or client information as marketing." />
           <Reveal>
             <div className="mx-auto max-w-4xl rounded-[2rem] border border-border/60 bg-card p-7 shadow-sm sm:p-10">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -235,9 +235,9 @@ export default async function OnboardedBusinessesPage() {
                   {STORIES.length > 0 ? (
                     <p className="leading-relaxed text-muted-foreground">Customer stories approved for publication are available on our <Link href="/success-stories" className="font-bold text-primary">success stories page</Link>.</p>
                   ) : (
-                    <><h3 className="text-xl font-black">No businesses are listed publicly</h3><p className="mt-2 leading-relaxed text-muted-foreground">There are no onboarded businesses currently approved for public listing. This page will show a business only after it has agreed to be named and featured.</p></>
+                    <><h3 className="text-xl font-black">No businesses are listed publicly</h3><p className="mt-2 leading-relaxed text-muted-foreground">No businesses are listed publicly yet. A business will appear here only after it has agreed to be named and featured.</p></>
                   )}
-                  <ul className="mt-5 grid gap-2 sm:grid-cols-2">{["Names and account details stay private", "A business is listed only if it agrees", "Workspaces are never shown to other companies", "Stories are published with approval"].map((x) => <li key={x} className="flex gap-2.5 text-sm font-semibold"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{x}</li>)}</ul>
+                  <ul className="mt-5 grid gap-2 sm:grid-cols-2">{["Names and account details stay private", "A business is listed only if it agrees", "One business's workspace is never shown to another", "Stories are published only with approval"].map((x) => <li key={x} className="flex gap-2.5 text-sm font-semibold"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{x}</li>)}</ul>
                 </div>
               </div>
             </div>
@@ -253,10 +253,10 @@ export default async function OnboardedBusinessesPage() {
             <div className="relative mx-auto grid max-w-5xl overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-brand-accent text-white shadow-2xl shadow-primary/25 lg:grid-cols-[1.1fr_1fr]">
               <Sparkles className="absolute -right-4 -top-4 h-40 w-40 text-white/10" aria-hidden />
               <div className="relative p-8 sm:p-10">
-                <h3 className="text-2xl font-black leading-snug sm:text-3xl">Ask about onboarding or listing</h3>
-                <p className="mt-3 leading-relaxed text-white/85">Message us to start, or to be named alongside your story. Nothing is shown publicly until you have approved it.</p>
+                <h3 className="text-2xl font-black leading-snug sm:text-3xl">Ask about getting started or being listed</h3>
+                <p className="mt-3 leading-relaxed text-white/85">Message us to get started, or to be named alongside your story. Nothing is shown publicly until you have approved it.</p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-primary shadow-lg transition-transform hover:-translate-y-0.5">Ask about onboarding <MessageCircle className="h-4 w-4" /></Link>
+                  <Link href="/contact" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-primary shadow-lg transition-transform hover:-translate-y-0.5">Ask about getting started <MessageCircle className="h-4 w-4" /></Link>
                   <Link href="/signup" className="inline-flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-white/10">Create a workspace</Link>
                 </div>
               </div>
@@ -269,16 +269,16 @@ export default async function OnboardedBusinessesPage() {
         </div>
       </section>
 
-      <CtaBand title="Create your workspace — free." lead="Every product and every feature is included in every plan, starting free, no card needed." />
+      <CtaBand title="Create your workspace, free." lead="Every feature is included in every plan. Start free, no card needed." />
       <FaqSection
         topics={["Setup", "Data & security"]}
         limit={4}
         title="Questions about"
         accent="getting started."
-        lead="How onboarding works, what it costs and what stays private."
+        lead="How getting set up works, what it costs and what stays private."
         extra={[
-          { q: "How do I onboard my business?", a: "Register your company workspace, set its name and brand, invite your team with roles and switch on the products you need. The setup guide walks through each step." },
-          { q: "Is there an implementation fee or a sales process?", a: "No. You start free on your own, and every product is included in every plan." },
+          { q: "How do I get my business set up?", a: "Register your business workspace, add your name and logo, invite your team with roles and switch on the products you need. The setup guide walks you through each step." },
+          { q: "Is there a setup fee or a sales process?", a: "No. You start free on your own, and every feature is included in every plan." },
           { q: "Will my business be listed publicly?", a: "Only if you agree. We do not publish customer names or account details without explicit permission." },
         ]}
       />

@@ -21,7 +21,7 @@ export type CatalogProduct = {
 export type CatalogGroup = { id: string; title: string; lead: string };
 
 /** The product range as a catalogue of brands: a logo wall, search and category filter, then one card per product. */
-export default function ProductCatalog({ products, groups }: { products: CatalogProduct[]; groups: CatalogGroup[] }) {
+export default function ProductCatalog({ products, groups, afterWall }: { products: CatalogProduct[]; groups: CatalogGroup[]; afterWall?: React.ReactNode }) {
   const [group, setGroup] = useState("all");
   const [q, setQ] = useState("");
 
@@ -34,9 +34,9 @@ export default function ProductCatalog({ products, groups }: { products: Catalog
   return (
     <>
       {/* brand wall */}
-      <section aria-label="The SelfRun product family" className="border-b border-border/50 bg-gradient-to-b from-muted/30 to-background">
+      <section aria-label="Every product of SelfRun AI" className="border-b border-border/50 bg-gradient-to-b from-muted/30 to-background">
         <div className="sr-container py-10 lg:py-14">
-          <p className="mb-6 text-center text-xs font-black uppercase tracking-[0.2em] text-primary">The SelfRun family · {products.length} products, one login</p>
+          <p className="mb-6 text-center text-xs font-black uppercase tracking-[0.2em] text-primary">Every product of SelfRun AI · {products.length} in total</p>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10">
             {products.map((p) => (
               <li key={p.key}>
@@ -50,12 +50,14 @@ export default function ProductCatalog({ products, groups }: { products: Catalog
         </div>
       </section>
 
+      {afterWall}
+
       {/* filter bar */}
       <nav aria-label="Filter products" className="sticky top-[76px] z-40 border-b border-border/50 bg-background/85 backdrop-blur-xl">
         <div className="sr-container flex flex-col gap-3 py-3 lg:flex-row lg:items-center">
           <div className="relative lg:w-72 lg:flex-none">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <input value={q} onChange={(e) => setQ(e.target.value)} type="search" placeholder="Search products" aria-label="Search products" className="h-10 w-full rounded-full border border-border bg-background pl-10 pr-9 text-sm outline-none transition-colors focus:border-primary" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} type="search" placeholder="Search by job, e.g. invoices, leave, leads" aria-label="Search products" className="h-10 w-full rounded-full border border-border bg-background pl-10 pr-9 text-sm outline-none transition-colors focus:border-primary" />
             {q && <button type="button" onClick={() => setQ("")} aria-label="Clear search" className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>}
           </div>
           <div className="sr-scroll-x flex gap-2" role="tablist" aria-label="Categories">
@@ -71,7 +73,7 @@ export default function ProductCatalog({ products, groups }: { products: Catalog
       <div className="sr-container py-12 lg:py-16">
         {shown.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border p-12 text-center">
-            <p className="text-lg font-black">No product matches “{q}”.</p>
+            <p className="text-lg font-black">Nothing matches “{q}”.</p>
             <button type="button" onClick={() => { setQ(""); setGroup("all"); }} className="mt-3 text-sm font-bold text-primary hover:underline">Show all products</button>
           </div>
         )}
@@ -100,7 +102,7 @@ export default function ProductCatalog({ products, groups }: { products: Catalog
                         <li key={b} className="flex items-start gap-2.5 text-sm font-medium leading-snug"><span className="mt-0.5 flex h-5 w-5 flex-none items-center justify-center rounded-full bg-primary/10 text-primary"><Check className="h-3 w-3" strokeWidth={3.5} /></span>{b}</li>
                       ))}
                     </ul>
-                    {p.replaces && <p className="mt-auto rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground"><b className="font-black uppercase tracking-wider text-foreground">Replaces</b> · {p.replaces}</p>}
+                    {p.replaces && <p className="mt-auto rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground"><b className="font-black uppercase tracking-wider text-foreground">Takes the place of</b> · {p.replaces}</p>}
                   </div>
                   <div className="flex items-center justify-between gap-3 border-t border-border/50 bg-muted/20 px-6 py-4">
                     <span className="text-sm font-bold text-muted-foreground"><b className="text-foreground">{p.features}</b> features</span>

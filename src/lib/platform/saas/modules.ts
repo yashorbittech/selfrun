@@ -19,7 +19,7 @@ export async function getFeatureModules(): Promise<FeatureModule[]> {
 
   return [...byKey.values()]
     .filter((panel) => MODULE_COPY[panel.key])
-    .map((panel) => ({ ...MODULE_COPY[panel.key], key: panel.key, name: selfRunProductName(panel.name), description: panel.description }));
+    .map((panel) => ({ ...MODULE_COPY[panel.key], key: panel.key, name: selfRunProductName(panel.name), description: MODULE_COPY[panel.key].short ?? panel.description }));
 }
 
 /** The feature groups with their modules resolved (empty groups dropped). */

@@ -46,13 +46,13 @@ export interface FeatureGroup {
   modules: string[];
 }
 export const FEATURE_GROUPS: FeatureGroup[] = [
-  { id: "sales-marketing", title: "Sales & marketing", lead: "Capture demand, run the pipeline and publish everywhere your customers look.", icon: "target", modules: ["lms", "smms", "seo", "cms", "website"] },
-  { id: "people-training", title: "People & training", lead: "Hire, onboard, pay, assess and train — one record per person.", icon: "users", modules: ["hrms", "tms", "ots"] },
-  { id: "finance-operations", title: "Finance & operations", lead: "Deliver projects, control spend and keep the books closed.", icon: "wallet", modules: ["fms", "pms", "prms"] },
-  { id: "documents-knowledge", title: "Documents & knowledge", lead: "Procedures, agreements and credentials that stay current and protected.", icon: "file", modules: ["sop", "lpms", "dlms"] },
-  { id: "ai-intelligence", title: "AI & intelligence", lead: "Ask your business anything and build assistants on your own knowledge.", icon: "brain", modules: ["intelligence", "aibots"] },
-  { id: "collaboration-portals", title: "Collaboration, portals & support", lead: "Keep teams, clients and students in the loop without another tool.", icon: "chat", modules: ["messenger", "portal", "support"] },
-  { id: "control-center", title: "Control center", lead: "One home for analytics, users, roles, audit and automations.", icon: "bolt", modules: ["workspace"] },
+  { id: "sales-marketing", title: "Sales & marketing", lead: "Find customers, follow up every enquiry and publish where your customers look.", icon: "target", modules: ["lms", "smms", "seo", "cms", "website"] },
+  { id: "people-training", title: "People & training", lead: "Hire, welcome, pay, test and train your people, with one record for each person.", icon: "users", modules: ["hrms", "tms", "ots"] },
+  { id: "finance-operations", title: "Money & operations", lead: "Deliver projects, control what you spend and keep your accounts up to date.", icon: "wallet", modules: ["fms", "pms", "prms"] },
+  { id: "documents-knowledge", title: "Documents & knowledge", lead: "Procedures, agreements and passwords that stay up to date and protected.", icon: "file", modules: ["sop", "lpms", "dlms"] },
+  { id: "ai-intelligence", title: "AI & answers", lead: "Ask questions about your business and build assistants on your own documents.", icon: "brain", modules: ["intelligence", "aibots"] },
+  { id: "collaboration-portals", title: "Teamwork, client pages & support", lead: "Keep your team, customers and students in the loop without another app.", icon: "chat", modules: ["messenger", "portal", "support"] },
+  { id: "control-center", title: "Control center", lead: "One place for reports, users, access, activity records and automations.", icon: "bolt", modules: ["workspace"] },
 ];
 
 /** Example automations, each phrased from the automations the product lists for its modules. */
@@ -445,20 +445,20 @@ export const YOUR_BRAND: BrandPoint[] = [
 
 /** SelfRun AI against the usual way of running a business: a separate tool for each job. No competitor is named or priced. */
 export const COMPARISON: { row: string; us: string; them: string }[] = [
-  { row: "Software", us: "One software with a section for every department", them: "A different business for every job" },
+  { row: "Software", us: "One software with a product for every department", them: "A different business for every job" },
   { row: "Your data", us: "Your records stay with your business, kept apart from every other business's", them: "Data spread across unrelated businesses" },
-  { row: "AI", us: "AI built into every section, working with that section's data", them: "AI, if any, added on separately" },
-  { row: "Automation", us: "Set up automatic steps between the sections you choose", them: "Connectors to buy and maintain between apps" },
+  { row: "AI", us: "AI built into every product, working with that product's data", them: "AI, if any, added on separately" },
+  { row: "Automation", us: "Set up automatic steps between the products you choose", them: "Connectors to buy and maintain between apps" },
   { row: "Website", us: "Website builder with themes, AI chatbot, voice AI and search tools", them: "A separate website builder, hosting and plug-ins" },
   { row: "Mobile apps", us: "Your own Android and iPhone apps, made for you", them: "Each business's app, in their name" },
   { row: "Desktop apps", us: "Your own Windows, macOS and Linux apps", them: "Usually browser only" },
   { row: "Install like an app", us: "Add it to any device in one tap, with your icon", them: "Depends on the tool" },
   { row: "Notifications", us: "To your team and your website visitors, in your name", them: "Separate in each app, under that business's brand" },
   { row: "Your brand", us: "Your logo, colours, domain, emails and PDFs", them: "Each business's brand in front of your people" },
-  { row: "Control", us: "Switch sections on or off and choose who can see and do what", them: "Different admin settings in every app" },
-  { row: "Record of actions", us: "A log of who did what, and sign-in history, in each section", them: "Scattered logs, if available" },
+  { row: "Control", us: "Switch products on or off and choose who can see and do what", them: "Different admin settings in every app" },
+  { row: "Record of actions", us: "A log of who did what, and sign-in history, in each product", them: "Scattered logs, if available" },
   { row: "Customer portal", us: "Built in for customers, students and job applicants", them: "Another app to buy" },
-  { row: "Features", us: "Every product and every feature on every plan", them: "Features locked behind higher plans in each app" },
+  { row: "Features", us: "Every feature on every plan", them: "Features locked behind higher plans in each app" },
   { row: "Pricing", us: "Free forever to start; one plan by team size after", them: "Many subscriptions to track and renew" },
   { row: "Setup", us: "Guided setup in minutes, with spreadsheet (CSV) import built in", them: "Separate setup, training and support for each app" },
 ];
@@ -469,8 +469,8 @@ export const CAPABILITIES: { title: string; icon: IconKey; items: string[] }[] =
   { title: "Automation", icon: "workflow", items: ["Automatic steps: when this happens, do that", "Ready-made templates", "Email and in-app notifications", "Approvals and reminders", "Secure alerts to your other software", "A history of every automatic run"] },
   { title: "Your brand", icon: "target", items: ["Logo, name and colours", "Your own web address, with a secure connection", "Branded emails and PDFs", "Multiple website themes", "Your own push notifications", "Your own app icon and name"] },
   { title: "Every device", icon: "rocket", items: ["Web app on any browser", "Install it like an app from your browser", "Android and iOS apps", "Windows, macOS and Linux apps", "Push notifications", "Works on phone, tablet and desktop"] },
-  { title: "Control", icon: "shield", items: ["Switch sections on or off", "Choose who can see and do what", "A record of who did what", "Sign-in history", "Your data kept apart from every other business's", "Passwords and keys stored encrypted"] },
-  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every section", "Insights from your own records", "Saved filters", "Import from spreadsheets (CSV), with checks", "Export to spreadsheets", "Search inside each section"] },
+  { title: "Control", icon: "shield", items: ["Switch products on or off", "Choose who can see and do what", "A record of who did what", "Sign-in history", "Your data kept apart from every other business's", "Passwords and keys stored encrypted"] },
+  { title: "Data & insight", icon: "chart", items: ["Live dashboards in every product", "Insights from your own records", "Saved filters", "Import from spreadsheets (CSV), with checks", "Export to spreadsheets", "Search inside each product"] },
   { title: "Website & growth", icon: "globe", items: ["Drag-and-drop page builder", "Blog, careers and products", "Website forms feed straight into your sales list", "Offers, coupons and referrals", "Wallet and reward credits", "SEO audits and rank tracking"] },
   { title: "People & portals", icon: "users", items: ["Employee self-service", "Client & student portal", "Team chat and meetings", "Announcements", "Help center and support desk", "Online tests and certificates"] },
 ];
@@ -491,20 +491,20 @@ export const REPLACES: { software: string; panel: string; icon: IconKey }[] = [
   { software: "HR & payroll software", panel: "hrms", icon: "users" },
   { software: "Accounting & invoicing", panel: "fms", icon: "wallet" },
   { software: "Project management", panel: "pms", icon: "layers" },
-  { software: "Procurement & assets", panel: "prms", icon: "cart" },
-  { software: "Training / LMS", panel: "tms", icon: "graduation" },
+  { software: "Purchasing & asset tracking", panel: "prms", icon: "cart" },
+  { software: "Course & training management", panel: "tms", icon: "graduation" },
   { software: "Team chat & meetings", panel: "messenger", icon: "chat" },
-  { software: "SOP & policy manager", panel: "sop", icon: "book" },
-  { software: "Document & e-signature", panel: "lpms", icon: "file" },
-  { software: "Password & document vault", panel: "dlms", icon: "lock" },
-  { software: "Online assessments", panel: "ots", icon: "check" },
+  { software: "Policy & procedure manager", panel: "sop", icon: "book" },
+  { software: "Documents & e-signatures", panel: "lpms", icon: "file" },
+  { software: "Password & file storage", panel: "dlms", icon: "lock" },
+  { software: "Online tests", panel: "ots", icon: "check" },
   { software: "AI chatbot builder", panel: "aibots", icon: "bot" },
-  { software: "Business intelligence", panel: "intelligence", icon: "brain" },
+  { software: "Reports & business analysis", panel: "intelligence", icon: "brain" },
   { software: "Social media scheduler", panel: "smms", icon: "megaphone" },
-  { software: "SEO tools", panel: "seo", icon: "search" },
+  { software: "Website ranking tools", panel: "seo", icon: "search" },
   { software: "Website builder & hosting", panel: "cms", icon: "globe" },
   { software: "Client & student portal", panel: "portal", icon: "building" },
-  { software: "Helpdesk", panel: "support", icon: "chat" },
+  { software: "Help desk", panel: "support", icon: "chat" },
   { software: "Workflow automation", panel: "workspace", icon: "workflow" },
 ];
 
@@ -519,9 +519,9 @@ export const DEVICES: { title: string; text: string; platforms: string[] }[] = [
 /** How the whole business runs itself, in four layers. */
 export const RUNS_ITSELF: { title: string; text: string; icon: IconKey; points: string[] }[] = [
   { title: "Enter it once", text: "Information comes in from wherever your work starts.", icon: "target", points: ["Website forms and campaigns", "Spreadsheet (CSV) imports", "Customer and student portal", "Apps on every device"] },
-  { title: "Connect what you need", text: "Each section works on its own. Link only the steps you want connected.", icon: "layers", points: ["Create a customer when a deal is won", "Raise an invoice when a milestone is done", "Pass approved payroll on to finance", "Send secure alerts to your other software"] },
-  { title: "Let it follow up", text: "The rules you set take care of the follow-up.", icon: "workflow", points: ["Starts when something happens in any section", "Sends emails and notifications", "Asks for approval and sends reminders", "Alerts your other software automatically"] },
-  { title: "Get answers", text: "AI turns your records into answers.", icon: "brain", points: ["Ask in plain English", "See how each answer was worked out", "AI helps write content and answer customers", "Live dashboards in every section"] },
+  { title: "Connect what you need", text: "Each product works on its own. Link only the steps you want connected.", icon: "layers", points: ["Create a customer when a deal is won", "Raise an invoice when a milestone is done", "Pass approved payroll on to finance", "Send secure alerts to your other software"] },
+  { title: "Let it follow up", text: "The rules you set take care of the follow-up.", icon: "workflow", points: ["Starts when something happens in any product", "Sends emails and notifications", "Asks for approval and sends reminders", "Alerts your other software automatically"] },
+  { title: "Get answers", text: "AI turns your records into answers.", icon: "brain", points: ["Ask in plain English", "See how each answer was worked out", "AI helps write content and answer customers", "Live dashboards in every product"] },
 ];
 
 /** Extra screens captured per product (desktop, tablet and mobile), shown under the product's feature list. */
@@ -566,39 +566,39 @@ export interface GrowthPhase {
 }
 export const GROWTH: GrowthPhase[] = [
   {
-    id: "launch", when: "Day 1", title: "Launch your company workspace", goal: "Be live, branded and ready for your team — in minutes, for free.", icon: "rocket", panels: ["workspace"], screen: "workspace",
-    actions: ["Register with your work email and start on the free-forever plan", "Complete the guided setup: profile, departments, the products you want", "Add your logo, name and colours so everything carries your brand", "Invite your team with roles and permissions", "Import your leads, clients and employees from CSV"],
-    outcomes: ["A branded product suite your team can access today", "Separate sign-ins and permissions for each product", "Import existing data into the product that uses it"],
-    before: "Spreadsheets, email threads and software from unrelated vendors.", after: "Independent products under your brand, managed as one suite.",
+    id: "launch", when: "Day 1", title: "Launch your business workspace", goal: "Be live, branded and ready for your team in minutes, for free.", icon: "rocket", panels: ["workspace"], screen: "workspace",
+    actions: ["Register with your work email and start on the free plan", "Complete the guided setup: business profile, departments and the products you want", "Add your logo, name and colours so everything carries your brand", "Invite your team and give each person a role", "Import your leads, clients and employees from a spreadsheet (CSV)"],
+    outcomes: ["A branded workspace your team can use today", "Separate access and permissions in each product", "Your existing records, loaded into the product that uses them"],
+    before: "Spreadsheets, email threads and apps that do not talk to each other.", after: "One branded software for your whole business.",
   },
   {
     id: "organise", when: "Week 1", title: "Capture and organise", goal: "Keep enquiries and people records organised in the products built for them.", icon: "target", panels: ["lms", "hrms", "cms"], screen: "lms",
-    actions: ["Connect your website forms so enquiries become leads with an owner and a due date", "Set up your pipeline and assign leads by rule", "Build the employee directory with departments and documents", "Publish your website on your own domain with SSL"],
-    outcomes: ["No enquiry without an owner", "A people directory HR and managers both trust", "A live website, with an optional configured handoff to your CRM"],
+    actions: ["Connect your website forms so every enquiry becomes a lead with an owner and a due date", "Set up your sales pipeline and assign leads by rule", "Build your staff directory with departments and documents", "Publish your website on your own web address with a secure connection"],
+    outcomes: ["No enquiry without an owner", "A staff directory that HR and managers both trust", "A live website that can send enquiries straight to your sales list"],
     before: "Enquiries in inboxes, staff details in files, a website that needs a developer.", after: "Every lead owned, every person on record, a website your team edits.",
   },
   {
-    id: "automate", when: "Month 1", title: "Automate the busywork", goal: "Let the platform do the follow-ups, approvals and reminders.", icon: "workflow", panels: ["workspace", "fms", "pms", "hrms"], screen: "automations",
-    actions: ["Switch on automations: new-lead alerts, overdue follow-ups, leave routing, payment reminders", "Raise invoices with payment links and let customers pay online", "Run projects with tasks, timesheets and milestone billing", "Move attendance, leave and payroll onto the platform"],
-    outcomes: ["Follow-ups and reminders happen without anyone chasing", "Configured payment workflows can update the relevant finance records", "Automations reduce manual re-entry where you enable them"],
-    before: "Someone remembers to chase, approve and re-type.", after: "Your configured automations notify, request approvals, remind and record each run.",
+    id: "automate", when: "Month 1", title: "Automate the busywork", goal: "Let the software handle follow-ups, approvals and reminders.", icon: "workflow", panels: ["workspace", "fms", "pms", "hrms"], screen: "automations",
+    actions: ["Switch on automations: new-lead alerts, overdue follow-ups, leave approvals and payment reminders", "Send invoices with payment links so customers can pay online", "Run projects with tasks, timesheets and billing by milestone", "Move attendance, leave and payroll onto the software"],
+    outcomes: ["Follow-ups and reminders happen without anyone chasing", "Payments can update your accounts automatically, once you set that up", "Automations cut retyping wherever you switch them on"],
+    before: "Someone has to remember to chase, approve and retype.", after: "Your automations notify people, ask for approval, remind and record every run.",
   },
   {
-    id: "see", when: "Quarter 1", title: "See everything and decide faster", goal: "Use product-specific analytics and connect approved sources when you need a broader view.", icon: "brain", panels: ["intelligence", "prms", "sop", "workspace"], screen: "intelligence",
-    actions: ["Ask AI questions in plain language and read the working it shows", "Put procurement on approvals and track assets and subscriptions", "Publish SOPs and track who has acknowledged them", "Review the audit log, sessions and role permissions"],
-    outcomes: ["Leadership gets answers in seconds, not after a report is built", "Spend is approved and matched before it is paid", "A documented way of working, with proof it is followed"],
-    before: "Decisions wait for someone to build a report.", after: "Ask the business a question and get a verifiable answer.",
+    id: "see", when: "Quarter 1", title: "See everything and decide faster", goal: "Use the reports in each product, and ask questions in plain English when you need a wider view.", icon: "brain", panels: ["intelligence", "prms", "sop", "workspace"], screen: "intelligence",
+    actions: ["Ask AI questions in plain English and read how each answer was worked out", "Put purchases through approvals and track what you own and what you subscribe to", "Publish procedures and see who has read them", "Review the activity record, sign-in sessions and who has access to what"],
+    outcomes: ["Leaders get answers in seconds, not after someone builds a report", "Spending is approved and checked before it is paid", "A written way of working, with proof that people follow it"],
+    before: "Decisions wait for someone to build a report.", after: "Ask your business a question and get an answer you can verify.",
   },
   {
     id: "grow", when: "Months 4–6", title: "Grow your reach", goal: "Bring in customers and keep them engaged.", icon: "megaphone", panels: ["smms", "seo", "cms", "portal", "aibots"], screen: "smms",
-    actions: ["Plan campaigns and let AI draft platform-specific posts, with approval", "Fix SEO issues from a prioritised list and track rankings", "Run offers, coupons, referrals and reward credits from your website", "Give clients, students and applicants their own portal", "Put an AI chatbot on your site, trained on your knowledge"],
-    outcomes: ["A steady, on-brand presence without a large content team", "Visitors answered around the clock and enquiries captured", "Clients who check the portal instead of emailing for updates"],
-    before: "Marketing disconnected from sales; customers waiting on email.", after: "Campaigns measured against real leads; customers served by portal and AI.",
+    actions: ["Plan campaigns and let AI draft posts for each social network, with your approval", "Fix website search problems from a ranked list and track your rankings", "Run offers, coupons, referrals and reward credits from your website", "Give customers, students and applicants a page of their own", "Put an AI chatbot on your website, trained on your own information"],
+    outcomes: ["A steady, on-brand presence without a large content team", "Visitors answered around the clock, and their enquiries captured", "Customers who check their own page instead of emailing for updates"],
+    before: "Marketing disconnected from sales; customers waiting on email.", after: "Campaigns measured against real leads; customers helped by their own page and by AI.",
   },
   {
-    id: "scale", when: "Year 1 and beyond", title: "Scale with your own apps and team", goal: "Grow the team and the company without growing the admin.", icon: "bolt", panels: ["tms", "ots", "lpms", "dlms", "workspace"], screen: "apps",
-    actions: ["Roll out your own Android, iOS, desktop and installable apps in your name", "Hire and train at scale with online tests and training programs", "Generate and sign documents from templates; keep credentials in the vault", "Move up a plan only when your team size or allowances need it"],
-    outcomes: ["Your team and clients use apps that carry your brand", "Hiring, assessment and training run on one record", "More people and more products — without more tools or more admin"],
-    before: "Every new hire or department means another tool to buy and manage.", after: "Choose independent products as you grow and manage the suite from one place.",
+    id: "scale", when: "Year 1 and beyond", title: "Scale with your own apps and team", goal: "Grow your team and your business without growing the admin.", icon: "bolt", panels: ["tms", "ots", "lpms", "dlms", "workspace"], screen: "apps",
+    actions: ["Roll out your own Android, iPhone, desktop and installable apps in your name", "Hire and train at scale with online tests and training courses", "Create and sign documents from templates, and keep passwords and files in the secure vault", "Move to a bigger plan only when your team size or usage needs it"],
+    outcomes: ["Your team and customers use apps that carry your brand", "Hiring, testing and training are kept together", "More people and more products, without more apps or more admin"],
+    before: "Every new hire or department means another app to buy and manage.", after: "Add products as you grow and manage everything from one place.",
   },
 ];

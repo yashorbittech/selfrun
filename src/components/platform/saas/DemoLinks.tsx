@@ -2,22 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRight, ExternalLink, SquareArrowOutUpRight } from "lucide-react";
-import { DEMO_ACCESS } from "@/components/platform/saas/demo-access";
-
-const SLUG = "demo";
-
-function buildDemoUrls(): { workspace: string; website: string } {
-  const { hostname, port, protocol } = window.location;
-  const p = port && port !== "80" && port !== "443" ? `:${port}` : "";
-  const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
-  const root = isLocal
-    ? "localhost"
-    : hostname.replace(/^www\./, "").replace(/^app\./, "").replace(/^[^.]+\./, "") || hostname;
-  return {
-    website: `${protocol}//${SLUG}.${root}${p}/`,
-    workspace: `${protocol}//${SLUG}-app.${root}${p}/commandos/login?demo=1`,
-  };
-}
+import { DEMO_ACCESS, buildDemoUrls } from "@/components/platform/saas/demo-access";
 
 /** Primary CTA: "Open live demo workspace" + "Or preview the public website first" */
 export function DemoWorkspaceCta() {

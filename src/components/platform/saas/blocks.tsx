@@ -197,7 +197,7 @@ export function EmptyState({ title, body, children }: { title: string; body: str
 }
 
 /** Closing call to action over a faded photo, in the style of the default theme's final CTA section. */
-export function CtaBand({ title = "Your business, running itself — starting today.", lead = "Every product, every feature, your own brand. Start free in minutes, or let us show you the platform with your own business scenarios.", photo = "success" }: { title?: string; lead?: string; photo?: string }) {
+export function CtaBand({ title = "Your business, running itself — starting today.", lead = "Every feature, your own brand. Start free in minutes, or let us show you the platform with your own business scenarios.", photo = "success" }: { title?: string; lead?: string; photo?: string }) {
   return (
     <section className="relative overflow-hidden border-t border-border/50 py-24 sm:py-32">
       {/* eslint-disable-next-line @next/next/no-img-element */}

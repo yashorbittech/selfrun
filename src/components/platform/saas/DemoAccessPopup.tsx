@@ -4,34 +4,17 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, ExternalLink, KeyRound, Sparkles, X } from "lucide-react";
 import CopyDemoValue from "@/components/platform/saas/CopyDemoValue";
-import { DEMO_ACCESS } from "@/components/platform/saas/demo-access";
+import { DEMO_ACCESS, buildDemoUrls } from "@/components/platform/saas/demo-access";
 
 const KEY = "sr-demo-access-closed";
 const QUIET = ["/signup", "/login", "/register"];
-const SLUG = "demo";
-
-/** Build website + workspace URLs for the demo slug from the current browser hostname. */
-function demourls(): { website: string; workspace: string } {
-  if (typeof window === "undefined") return { website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace };
-  const { hostname, port, protocol } = window.location;
-  const p = port ? `:${port}` : "";
-  const isLocal = hostname === "localhost" || hostname.endsWith(".localhost");
-  // Strip www. / app. / existing slug prefix to get the bare root domain
-  const root = hostname.replace(/^www\./, "").replace(/^app\./, "").replace(/^[^.]+\./, "") || hostname;
-  const bare = isLocal ? "localhost" : root;
-  return {
-    website: `${protocol}//${SLUG}.${bare}${p}/`,
-    workspace: `${protocol}//${SLUG}-app.${bare}${p}/commandos/login?demo=1`,
-  };
-}
-
 export default function DemoAccessPopup() {
   const path = usePathname() || "/";
   const [visible, setVisible] = useState(false);
   const [urls, setUrls] = useState<{ website: string; workspace: string }>({ website: DEMO_ACCESS.website, workspace: DEMO_ACCESS.workspace });
 
   useEffect(() => {
-    setUrls(demourls());
+    setUrls(buildDemoUrls());
     try {
       if (sessionStorage.getItem(KEY) === "1") return;
     } catch {}

@@ -19,50 +19,50 @@ import { PANEL_DETAIL } from "@/lib/platform/saas/panel-detail";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = pageMeta({ path: "/vision", title: "Product Vision: A Business That Runs Itself", description: "Where SelfRun AI is heading and why: independent products, automation you can trust, AI inside your permissions and your own brand on everything.", keywords: ["SelfRun AI vision", "future of business automation", "AI-first business platform", "autonomous business software", "business operating system vision", "automation with human approval"], tag: "Vision" });
+export const metadata: Metadata = pageMeta({ path: "/vision", title: "Our Vision: A Business That Runs Itself", description: "Where SelfRun AI is heading and why: one software for your whole business, automation you can trust, AI that stays within each person's access, and your own brand on everything.", keywords: ["SelfRun AI vision", "future of business automation", "AI-first business platform", "autonomous business software", "business operating system vision", "automation with human approval"], tag: "Vision" });
 
 const NAV = [
-  { id: "vision", label: "The vision" },
-  { id: "problem", label: "The problem" },
+  { id: "vision", label: "Our vision" },
+  { id: "problem", label: "Why it exists" },
   { id: "beliefs", label: "What we believe" },
-  { id: "today", label: "Built today" },
-  { id: "flow", label: "Work that flows" },
+  { id: "today", label: "What exists today" },
+  { id: "flow", label: "Work that moves" },
   { id: "ai", label: "AI you can trust" },
   { id: "control", label: "Safe and yours" },
-  { id: "journey", label: "The journey" },
+  { id: "journey", label: "Your journey" },
   { id: "promises", label: "Our promises" },
-  { id: "next", label: "What's next" },
+  { id: "next", label: "What next" },
 ];
 
 const PILLARS: { icon: IconKey; title: string; text: string }[] = [
-  { icon: "workflow", title: "It runs the routine", text: "Copying data between tools, chasing approvals and compiling reports become the platform's job, not a person's." },
-  { icon: "shield", title: "You stay in control", text: "Every automated action is logged and explained, workflows can be paused, and people approve anything that moves money." },
-  { icon: "target", title: "It is your company's", text: "Your logo, colours, domain and apps on everything, with your data kept apart from every other company's." },
+  { icon: "workflow", title: "It runs the routine", text: "Copying details between apps, chasing approvals and building reports become the software's job, not a person's." },
+  { icon: "shield", title: "You stay in control", text: "Every automatic action is recorded and explained, automations can be paused, and people approve anything that moves money." },
+  { icon: "target", title: "It is your business's", text: "Your logo, colours, web address and apps on everything, with your data kept apart from every other business's." },
 ];
 
 const PROBLEMS = [
-  { title: "The same data typed again and again", text: "A lead becomes a client, a hire becomes an employee, an order becomes an invoice, and each time someone copies it into the next tool." },
-  { title: "Approvals that live in inboxes", text: "Requests wait for a reply in somebody's mail. Nobody can say who is holding things up, and nothing is on record." },
-  { title: "Reports built by hand", text: "Answers to simple questions mean exporting from three places and stitching them together in a spreadsheet." },
-  { title: "A different login and rulebook for every tool", text: "Each tool has its own users, its own permissions and its own settings, so access is hard to see and harder to keep tidy." },
+  { title: "The same details typed again and again", text: "A lead becomes a client, a new hire becomes an employee, an order becomes an invoice. Each time, someone copies the details into the next app." },
+  { title: "Approvals buried in inboxes", text: "A request waits for a reply in someone's email. Nobody can say who is holding it up, and there is no record of who approved what." },
+  { title: "Reports made by hand", text: "A simple question such as “how much are customers overdue?” means exporting data from three places and joining it together in a spreadsheet." },
+  { title: "Different rules in every app", text: "Each app has its own users, its own permissions and its own settings, so it is hard to see who can do what, and harder still to keep it tidy." },
 ];
 
 const BELIEFS = [
-  { icon: "bolt" as IconKey, title: "A business should run itself", text: "People are at their best with customers, craft and growth. The repetitive parts of running a company belong to software.", means: "Automations and workflows that run on their own, with every run recorded." },
-  { icon: "layers" as IconKey, title: "Products should stand on their own", text: "Each product keeps its own sign-in and its own data, so you pick what fits your business and add more only when you need it.", means: "Independent products you can use alone, or manage together from one place." },
-  { icon: "brain" as IconKey, title: "Intelligence should ask permission", text: "AI is useful when it answers from your real records, shows how it got there and only sees what the person asking may see.", means: "AI that works inside each person's permissions; changes it proposes wait for approval." },
-  { icon: "lock" as IconKey, title: "Your data is yours", text: "Companies are kept strictly apart, secrets are encrypted and you can export your data, or leave, at any time.", means: "Isolation per company, roles and per-action permissions, and an audit log." },
-  { icon: "building" as IconKey, title: "The brand on it is yours", text: "Your team, clients and visitors should meet your company, not ours. SelfRun stays in the background.", means: "White-label logo, colours, domain, emails and apps." },
-  { icon: "check" as IconKey, title: "Say what is true", text: "We describe the product as it is today. Where there is nothing to show yet, we say so instead of inventing it.", means: "No made-up stories, discounts or promised dates." },
+  { icon: "bolt" as IconKey, title: "A business should run itself", text: "People do their best work with customers, creativity and growth. The repetitive jobs of running a business belong to software.", means: "Automatic reminders, approvals and follow-ups that run by themselves, with every run recorded." },
+  { icon: "layers" as IconKey, title: "Start small, add what you need", text: "Each product works on its own, so you choose what fits your business today and add more only when you need it.", means: "Products you can use alone or together, managed from one place." },
+  { icon: "brain" as IconKey, title: "AI should ask permission", text: "AI is useful when it answers from your real records, shows how it got there, and only sees what the person asking is allowed to see.", means: "AI that works within each person's access. Any change it suggests waits for approval." },
+  { icon: "lock" as IconKey, title: "Your data is yours", text: "Every business's data is kept strictly apart, secrets are stored encrypted, and you can export your data or leave at any time.", means: "Data kept separate for each business, roles and per-action permissions, and a record of every action." },
+  { icon: "building" as IconKey, title: "The brand on it is yours", text: "Your team, customers and visitors should meet your business, not ours. SelfRun stays out of sight.", means: "Your logo, colours, web address, emails and apps." },
+  { icon: "check" as IconKey, title: "Say only what is true", text: "We describe the product as it is today. Where there is nothing to show yet, we say so instead of inventing it.", means: "No made-up stories, discounts or promised dates." },
 ];
 
 const PROMISES = [
-  "Every plan includes every product and every feature, starting free.",
-  "No speculative release dates, and no idea presented as a commitment.",
+  "Every plan includes every feature, and you can start free.",
+  "We do not publish guessed release dates, and we never present an idea as a promise.",
   "AI never changes anything until a person approves it.",
-  "One company's data is never visible to another's.",
+  "One business's data is never visible to another.",
   "You can export your data and leave whenever you choose.",
-  "What this site describes is what the product does today.",
+  "What this website describes is what the product does today.",
 ];
 
 function Head({ id, title, lead }: { id: string; title: string; lead?: string }) {
@@ -88,13 +88,13 @@ export default async function VisionPage() {
   const features = products.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   return (
     <>
-      <JsonLd data={[webPage({ type: "AboutPage", path: "/vision", name: "Product vision", description: "Where SelfRun AI is heading and why: independent products, automation you can trust, AI inside your permissions and your own brand on everything." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Product vision", path: "/vision" }])]} />
+      <JsonLd data={[webPage({ type: "AboutPage", path: "/vision", name: "Product vision", description: "Where SelfRun AI is heading and why: one software for your whole business, automation you can trust, AI that stays within each person's access, and your own brand on everything." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Product vision", path: "/vision" }])]} />
       <PageHero
         art="features"
-        eyebrow="Product vision"
+        eyebrow="Our vision"
         title="A business that"
         accent="runs itself."
-        lead="Our vision is simple: every company, whatever its size, gets one intelligent platform that runs the routine, so people spend their time on customers, craft and growth. This page explains what that means, why we build this way and where it stands today."
+        lead="Our vision is simple: every business, whatever its size, gets one intelligent software that handles the routine work, so people can spend their time on customers, creativity and growth. This page explains what that means, why we build it this way and where it stands today."
         photo="team-desk"
         shot="workspace"
         shotName="SelfRun CommandOS"
@@ -103,17 +103,17 @@ export default async function VisionPage() {
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Explore the products", href: "/products" }} />
       </PageHero>
 
-      <SectionScrollNav items={NAV} label="Vision sections" numbered />
+      <SectionScrollNav items={NAV} label="Vision products" numbered />
 
       {/* 01 the vision */}
       <section id="vision" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="vision" title="One sentence, three promises." />
+          <Head id="vision" title="One sentence, three promises." lead="This is what we are building, in one line, and the three ideas that hold it together." />
           <Reveal>
             <figure className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-brand-accent p-8 text-white shadow-2xl shadow-primary/25 sm:p-12">
               <Quote className="absolute -right-4 -top-4 h-40 w-40 text-white/10" aria-hidden />
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/75">Our vision</p>
-              <blockquote className="relative mt-3 max-w-4xl text-2xl font-black leading-snug sm:text-4xl">Every business, from a ten-person firm to a growing enterprise, should run on one intelligent platform that handles the routine, so its people can focus on what only people can do.</blockquote>
+              <blockquote className="relative mt-3 max-w-4xl text-2xl font-black leading-snug sm:text-4xl">Every business, from a ten-person team to a large organisation, should be able to run on one intelligent software that handles the routine work, so its people can focus on what only people can do.</blockquote>
             </figure>
           </Reveal>
           <div className="mt-6 grid gap-5 md:grid-cols-3">
@@ -133,7 +133,7 @@ export default async function VisionPage() {
       {/* 02 the problem */}
       <section id="problem" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="problem" title="Why this needs to exist." lead="Most companies do not struggle to find software. They struggle with what happens between the tools they already have." />
+          <Head id="problem" title="Why this needs to exist." lead="Finding software is rarely the problem. The trouble starts in the gaps between the apps a business already uses." />
           <div className="grid gap-5 md:grid-cols-2">
             {PROBLEMS.map((p, i) => (
               <Reveal key={p.title} delay={i * 70}>
@@ -144,14 +144,14 @@ export default async function VisionPage() {
               </Reveal>
             ))}
           </div>
-          <Reveal className="mt-8"><p className="rounded-3xl border border-primary/20 bg-primary/[0.06] p-6 text-lg font-bold leading-snug sm:p-8 sm:text-xl">That in-between work is exactly what we want software to take over, so that nobody on your team has to be the glue.</p></Reveal>
+          <Reveal className="mt-8"><p className="rounded-3xl border border-primary/20 bg-primary/[0.06] p-6 text-lg font-bold leading-snug sm:p-8 sm:text-xl">That in-between work is exactly what we want software to take over, so nobody on your team has to be the glue holding things together.</p></Reveal>
         </div>
       </section>
 
       {/* 03 beliefs */}
       <section id="beliefs" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="beliefs" title="Six beliefs that shape every product." lead="Each belief on the left becomes something concrete in the product, shown on the right." />
+          <Head id="beliefs" title="Six beliefs behind everything we build." lead="Each belief on the left becomes something real in the product, shown on the right." />
           <div className="space-y-4">
             {BELIEFS.map((b, i) => (
               <Reveal key={b.title} delay={(i % 2) * 60}>
@@ -174,8 +174,8 @@ export default async function VisionPage() {
       {/* 04 built today */}
       <section id="today" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="today" title="The vision, as it exists today." lead="Not a plan on a slide: these products are live, each with its own sign-in and its own data, and all of them are in every plan." />
-          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: String(products.length), l: "independent products" }, { v: `${features}+`, l: "features across them" }, { v: String(groups.length), l: "areas of your business" }, { v: "Own", l: "sign-in and data per product" }]} /></div></Reveal>
+          <Head id="today" title="What exists today." lead="This is not a slide deck. These products are live now, and every one of them is included in every plan." />
+          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: String(products.length), l: "ready-made products" }, { v: `${features}+`, l: "features across them" }, { v: String(groups.length), l: "areas of your business" }, { v: "Free", l: "to start, every feature included" }]} /></div></Reveal>
           <div className="grid gap-5 lg:grid-cols-2">
             {groups.map((g, i) => (
               <Reveal key={g.id} delay={(i % 2) * 70}>
@@ -206,7 +206,7 @@ export default async function VisionPage() {
       {/* flow between products */}
       <section id="flow" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="flow" title="Work that moves on its own." lead="Each product works alone. When you choose to connect them, the next step starts without anyone copying anything. These are real hand-offs the products support." />
+          <Head id="flow" title="Work that moves on its own." lead="Each product works on its own. When you choose to connect them, the next step starts without anyone copying anything. These are real hand-offs the software supports." />
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {handoffs.map((h, i) => (
               <Reveal key={`${h.from.key}-${h.to.key}`} delay={(i % 3) * 60}>
@@ -227,7 +227,7 @@ export default async function VisionPage() {
       {/* AI */}
       <section id="ai" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="ai" title="Intelligence that asks permission." lead="AI is built into the platform, but it only sees what the person asking may see, shows how it reached an answer, and never changes anything until a person approves." />
+          <Head id="ai" title="AI that asks permission." lead="AI is part of the software, but it only sees what the person asking is allowed to see, shows how it reached its answer, and never changes anything until a person approves." />
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {AI_CAPABILITIES.map((a, i) => (
               <Reveal key={a.title} delay={(i % 3) * 60}>
@@ -245,7 +245,7 @@ export default async function VisionPage() {
       {/* control: security and brand */}
       <section id="control" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="control" title="Safe by design. Yours by default." lead="Two things matter as much as features: that your data is protected, and that everything your people and clients see carries your name." />
+          <Head id="control" title="Safe by design. Yours by default." lead="Two things matter as much as features: your data is protected, and everything your people and customers see carries your name." />
           <div className="grid gap-6 lg:grid-cols-2">
             <Reveal>
               <div className="h-full rounded-[2rem] border border-border/60 bg-card p-6 shadow-sm sm:p-8">
@@ -275,7 +275,7 @@ export default async function VisionPage() {
       {/* 05 the journey */}
       <section id="journey" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="journey" title="From day one to a company that runs itself." lead="A suggested path, not a rule. Switch on a few products at each stage and leave the rest until you need them." />
+          <Head id="journey" title="From day one to a business that runs itself." lead="A suggested path, not a rule. Switch on a few products at each stage and leave the rest until you need them." />
           <ol className="space-y-5">
             {GROWTH.map((ph, i) => (
               <Reveal key={ph.id} as="li" delay={(i % 2) * 60}>
@@ -316,12 +316,12 @@ export default async function VisionPage() {
       {/* 07 what's next */}
       <section id="next" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="next" title="Where it goes from here." lead="We keep improving the products people use every day. We only announce something when it is ready to describe clearly." />
+          <Head id="next" title="Where it goes from here." lead="We keep improving what people use every day. We announce something only when it is ready to be described clearly." />
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { t: "See what is available now", x: "The roadmap page lists what the product offers today, drawn from the live product registry.", href: "/roadmap", c: "Open the roadmap" },
-              { t: "Tell us what to build next", x: "Name the workflow you want to improve. Real customer needs decide what we work on.", href: "/contact", c: "Share feedback" },
-              { t: "Try it with your own business", x: "Start free, switch on the products you need and see the vision work on your own data.", href: "/signup", c: "Get started free" },
+              { t: "See what is available now", x: "The roadmap page lists everything the software offers today, taken from the live product.", href: "/roadmap", c: "Open the roadmap" },
+              { t: "Tell us what to build next", x: "Tell us which job you want made easier. Real customer needs decide what we work on.", href: "/contact", c: "Share feedback" },
+              { t: "Try it with your own business", x: "Start free, switch on the products you need and see it work on your own data.", href: "/signup", c: "Get started free" },
             ].map((c, i) => (
               <Reveal key={c.t} delay={i * 70}>
                 <Link href={c.href} className="group flex h-full flex-col rounded-3xl border border-border/60 bg-card p-7 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
@@ -335,7 +335,7 @@ export default async function VisionPage() {
         </div>
       </section>
 
-      <CtaBand title="Build the business that runs itself." lead="Every product and every feature is included in every plan, starting free, no card needed." />
+      <CtaBand title="Build a business that runs itself." lead="Every feature is included in every plan. Start free, no card needed." />
       <FaqSection
         topics={["General", "Data & security", "Your brand"]}
         limit={5}
@@ -343,9 +343,9 @@ export default async function VisionPage() {
         accent="the vision."
         lead="What we are building, how far it has come and how we decide what comes next."
         extra={[
-          { q: "What is the SelfRun vision?", a: "Every business should run on one intelligent platform that handles the routine, so its people can focus on customers, craft and growth. In practice that means independent products, automation you can trust, AI that stays inside your permissions, and your own brand on everything." },
-          { q: "Is the vision already built, or is it a plan?", a: `The ${products.length} products on this page are live today, each with its own sign-in and its own data, and all of them are in every plan. We describe the product as it is now and do not present ideas as commitments.` },
-          { q: "Will you publish release dates?", a: "No. We only announce something when it is ready to describe clearly. The roadmap page lists what the product offers today." },
+          { q: "What is the SelfRun vision?", a: "Every business should be able to run on one intelligent software that handles the routine work, so its people can focus on customers, creativity and growth. In practice that means one software with a product for every job, automation you can trust, AI that stays within each person's access, and your own brand on everything." },
+          { q: "Is the vision already built, or is it a plan?", a: `The ${products.length} products on this page are live today and all of them are included in every plan. We describe the product as it is now and do not present ideas as commitments.` },
+          { q: "Will you publish release dates?", a: "No. We announce something only when it is ready to be described clearly. The roadmap page lists what the software offers today." },
         ]}
       />
     </>

@@ -21,19 +21,19 @@ export interface Tutorial {
 
 export const TUTORIALS: Tutorial[] = [
   {
-    slug: "launch-your-workspace", title: "Launch your company workspace", summary: "From registration to a branded workspace your team can sign in to.", minutes: 10, level: "Beginner", shot: "workspace", panel: "workspace",
+    slug: "launch-your-workspace", title: "Launch your business workspace", summary: "From registration to a branded workspace your team can sign in to.", minutes: 10, level: "Beginner", shot: "workspace", panel: "workspace",
     youWillHave: "A branded workspace with your team invited and your data inside.",
     steps: [
       { title: "Register", text: "Create your account with your work email and start on the free-forever plan. Verify your email from the message we send.", shot: "workspace" },
-      { title: "Complete the guided setup", text: "Enter your company details, create departments and choose the products your team will use. You can skip and return — a Finish setup strip stays visible until it is done.", shot: "branding" },
+      { title: "Complete the guided setup", text: "Enter your business details, create departments and choose the products your team will use. You can skip and return — a Finish setup strip stays visible until it is done.", shot: "branding" },
       { title: "Add your brand", text: "Open Workspace → Branding, upload your logo, set your name and pick a theme. Save.", shot: "branding" },
       { title: "Invite your team", text: "Open Users, roles & seats, invite people by email and give each a role.", shot: "workspace-users" },
-      { title: "Import your data", text: "Bring leads, clients and employees in from CSV under Import data; fix any rows the importer flags.", tip: "Imports never trigger workflows, so nobody is flooded with notifications.", shot: "workspace-users" },
+      { title: "Import your data", text: "Bring leads, clients and employees in from a spreadsheet (CSV) under Import data; fix any rows the importer flags.", tip: "Imports never trigger workflows, so nobody is flooded with notifications.", shot: "workspace-users" },
     ],
     next: ["brand-your-workspace", "invite-your-team", "import-your-data"],
   },
   {
-    slug: "capture-your-first-leads", title: "Capture your first leads and run the pipeline", summary: "Connect your website form and work every enquiry with an owner and a due date.", minutes: 8, level: "Beginner", shot: "lms", panel: "lms",
+    slug: "capture-your-first-leads", title: "Capture your first leads and follow each one to a result", summary: "Connect your website form and work every enquiry with an owner and a due date.", minutes: 8, level: "Beginner", shot: "lms", panel: "lms",
     youWillHave: "Enquiries arriving as leads, each with an owner and a follow-up date.",
     steps: [
       { title: "Open SelfRun DealFlow AI", text: "The dashboard shows your pipeline: New, In progress, Completed and Rejected.", shot: "lms" },
@@ -57,19 +57,19 @@ export const TUTORIALS: Tutorial[] = [
     next: ["first-automations", "automation-basics"],
   },
   {
-    slug: "publish-your-website-on-your-domain", title: "Publish your website on your own domain", summary: "Edit your pages, then connect your domain with automatic SSL.", minutes: 12, level: "Intermediate", shot: "cms-pages", panel: "cms",
+    slug: "publish-your-website-on-your-domain", title: "Publish your website on your own domain", summary: "Edit your pages, then connect your domain with a secure connection.", minutes: 12, level: "Intermediate", shot: "cms-pages", panel: "cms",
     youWillHave: "Your website live on your domain, secured with SSL.",
     steps: [
       { title: "Review your starter site", text: "Website → Pages lists the pages that are already live. Open one in the builder.", shot: "cms-pages" },
       { title: "Choose and customise a theme", text: "Website → Themes: preview a theme live, activate it and customise colours and fonts.", shot: "cms-theme" },
-      { title: "Set up menus, footer and identity", text: "Add your navigation, footer links and your company's contact and social details.", shot: "cms" },
+      { title: "Set up menus, footer and identity", text: "Add your navigation, footer links and your business's contact and social details.", shot: "cms" },
       { title: "Connect your domain", text: "Workspace → Custom domains: add your domain, then add the DNS records shown at your domain provider.", shot: "domains" },
-      { title: "Verify and publish", text: "Verify the domain; the SSL certificate is issued automatically. Review any pages waiting and publish.", shot: "cms-pages" },
+      { title: "Verify and publish", text: "Verify the domain; the secure (HTTPS) certificate is issued automatically. Review any pages waiting and publish.", shot: "cms-pages" },
     ],
     next: ["custom-domain", "publish-website"],
   },
   {
-    slug: "get-paid-with-payment-links", title: "Send an invoice and get paid online", summary: "Create an invoice with a payment link and watch the ledger update itself.", minutes: 8, level: "Intermediate", shot: "fms", panel: "fms",
+    slug: "get-paid-with-payment-links", title: "Send an invoice and get paid online", summary: "Create an invoice with a payment link and watch your accounts update themselves.", minutes: 8, level: "Intermediate", shot: "fms", panel: "fms",
     youWillHave: "An invoice sent, paid online and posted — without re-entering anything.",
     steps: [
       { title: "Connect your payment account", text: "Workspace → Payment account connects your own gateway so payments come to you.", shot: "fms" },

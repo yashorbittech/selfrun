@@ -17,6 +17,7 @@ import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import { PRODUCT_AUDIENCE, PRODUCT_CATEGORY, PRODUCT_SEO } from "@/lib/platform/saas/product-seo";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { breadcrumbList, faqPage, howTo, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
+import { PRODUCT_START } from "@/lib/platform/saas/product-start";
 import { productFaqs } from "@/lib/platform/saas/product-faq";
 import { DOCS } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
@@ -64,7 +65,7 @@ const SECTIONS = [
   { id: "features", label: "Features" },
   { id: "how", label: "How it works" },
   { id: "who", label: "Who uses it" },
-  { id: "extras", label: "Smart extras" },
+  { id: "extras", label: "Automations & AI" },
   { id: "screens", label: "Screens" },
   { id: "walkthroughs", label: "Walkthroughs" },
   { id: "docs", label: "Docs" },
@@ -162,7 +163,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
     <>
       <span className="block">{endDot(m.summary)}</span>
       <span className="mt-3 block text-[0.95em]">
-        {endDot(m.description)}{detail?.intro ? ` ${endDot(detail.intro)}` : ""}{value ? ` It stands in for ${soft(value.replaces)}.` : ""}
+        {detail?.intro ? endDot(detail.intro) : ""}{value ? ` It takes the place of ${soft(value.replaces)}.` : ""}
       </span>
     </>
   );
@@ -170,7 +171,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
   const glance = [
     { icon: <Layers className="h-5 w-5" />, q: "What it does", a: m.headline },
     detail && { icon: <Users className="h-5 w-5" />, q: "Who uses it", a: detail.audience.map((a) => a.who).join(", ") },
-    value && { icon: <Wallet className="h-5 w-5" />, q: "What it replaces", a: value.replaces },
+    value && { icon: <Wallet className="h-5 w-5" />, q: "What it takes the place of", a: value.replaces },
     { icon: <ShieldCheck className="h-5 w-5" />, q: "What it costs", a: "Included in every plan. Free to start, no card needed." },
   ].filter(Boolean) as { icon: React.ReactNode; q: string; a: string }[];
 
@@ -233,7 +234,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                   <div className="space-y-5">
                     <div className="rounded-2xl border border-border/60 bg-background p-5 shadow-sm">
                       <p className="mb-1.5 text-[11px] font-black uppercase tracking-wider text-muted-foreground">In short</p>
-                      <p className="text-[17px] leading-relaxed"><b>{m.name}</b>: {m.description}{/[.!?]$/.test(m.description) ? "" : "."} {m.summary}</p>
+                      <p className="text-[17px] leading-relaxed"><b>{m.name}</b>: {endDot(m.description)}</p>
                     </div>
                     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-brand-accent p-6 text-white shadow-xl shadow-primary/25">
                       <Sparkles className="absolute -right-3 -top-3 h-24 w-24 text-white/10" aria-hidden />
@@ -263,13 +264,13 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
               <span className="absolute bottom-8 left-[22px] top-12 hidden w-px bg-gradient-to-b from-primary/60 via-border to-transparent lg:block" aria-hidden />
             {/* why: a bento of reasons */}
             {value && (
-              <Chapter {...chapterProps("why")} title={`Why teams choose ${m.name}`} lead={`${m.name} stands in for ${soft(value.replaces)}, and works with the same login and the same people as everything else you use.`}>
+              <Chapter {...chapterProps("why")} title={`Why teams choose ${m.name}`} lead={`${m.name} takes the place of ${soft(value.replaces)}, and it works together with the other SelfRun AI products you switch on.`}>
                 <div className="grid gap-4 md:grid-cols-6">
                   <Reveal className="md:col-span-3">
                     <div className="relative h-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-brand-accent p-8 text-white shadow-xl shadow-primary/25">
                       <span className="pointer-events-none absolute -bottom-10 -right-6 h-48 w-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
                       <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl"><CountUp to={total} /></p>
-                      <p className="mt-3 text-xl font-bold">features in one product</p>
+                      <p className="mt-3 text-xl font-bold">features in this product</p>
                       <p className="mt-1 text-white/80">{groups.slice(0, 3).map((g) => g.title).join(" · ")}{groups.length > 3 ? " · and more" : ""}</p>
                     </div>
                   </Reveal>
@@ -277,7 +278,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                     <div className="relative h-full overflow-hidden rounded-[2rem] bg-foreground p-8 text-background shadow-xl">
                       <span className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-primary/40 blur-3xl" aria-hidden />
                       <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl"><CountUp to={m.automations.length} /></p>
-                      <p className="mt-3 text-xl font-bold">automations built in</p>
+                      <p className="mt-3 text-xl font-bold">automatic steps built in</p>
                       <p className="mt-1 text-background/70">{m.automations[0]}</p>
                     </div>
                   </Reveal>
@@ -305,7 +306,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
             )}
 
             {/* features: explorer */}
-            <Chapter {...chapterProps("features")} title="Everything you can do" lead="Search, or pick a group. Open any feature for its full guide. All of it is in every plan.">
+            <Chapter {...chapterProps("features")} title="Everything you can do" lead="Search, or pick a group. Open any feature to read its full guide. Every feature is included in every plan.">
               <FeatureExplorer productName={m.name} items={explorerItems} groups={groups.map((g) => ({ title: g.title, count: g.items.length }))} />
             </Chapter>
 
@@ -325,7 +326,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
 
             {/* smart extras */}
             {hasExtras && (
-              <Chapter {...chapterProps("extras")} title="It works while you don't" lead="Pick a tab: questions you can ask in plain words, things that happen on their own, and the products it can hand work to.">
+              <Chapter {...chapterProps("extras")} title="It works while you don't" lead="Pick a tab: questions you can ask in plain English, things that happen on their own, and the products it can pass work to.">
                   <ExtrasTabs
                     tabs={[
                       detail?.ask?.length ? { id: "ask", label: "Ask AI", count: detail.ask.length, icon: <Bot className="h-4 w-4" />, node: <AskAiDemo productName={m.name} questions={detail.ask} /> } : null,
@@ -346,7 +347,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                         id: "with", label: "Works with", count: connects.length, icon: <Plug className="h-4 w-4" />,
                         node: (
                           <div>
-                            <p className="mb-4 text-sm text-muted-foreground">{m.name} also works fully on its own. These are the hand-offs it supports.</p>
+                            <p className="mb-4 text-sm text-muted-foreground">{m.name} works fully on its own. These are the other products it can pass work to, if you want it to.</p>
                             <div className="grid gap-3 sm:grid-cols-2">
                               {connects.map(({ o, text }) => (
                                 <Link key={o.key} href={productPath(o.key)} className="group flex items-start gap-4 rounded-2xl border border-border/60 bg-background p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
@@ -375,13 +376,14 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
 
             {/* walkthroughs */}
             <Chapter {...chapterProps("walkthroughs")} title={`Learn ${m.name} step by step`} lead="Learn by doing: start with the three steps, then follow a walkthrough for one job at a time, or take the quick tour of how a job moves through the product.">
-              <h3 className="mb-4 text-lg font-black">Start in three steps</h3>
+              <h3 className="mb-1 text-lg font-black">Your first three steps</h3>
+              <p className="mb-4 text-sm text-muted-foreground">First register free and switch on {m.name} in your business setup. Then:</p>
               <ol className="mb-10 grid gap-4 sm:grid-cols-3">
-                {[
+                {(PRODUCT_START[m.key] ?? [
                   { t: "Register free", x: "Create your workspace with your work email. No card needed." },
-                  { t: `Switch on ${m.name}`, x: "Pick it in Company setup, then invite your team and give each person a role." },
+                  { t: `Switch on ${m.name}`, x: "Switch it on in your business setup, then invite your team and give each person a role." },
                   { t: "Follow a walkthrough", x: tutorials[0] ? `Start with “${tutorials[0].title}” below.` : "Then open its guides in the Docs section." },
-                ].map((st, i) => (
+                ]).map((st, i) => (
                   <Reveal key={st.t} as="li" delay={i * 70} className={`${tile}`}>
                     <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-accent text-sm font-black text-white shadow-lg shadow-primary/25">{i + 1}</span>
                     <p className="font-black leading-snug">{st.t}</p><p className="mt-1 text-[15px] text-muted-foreground">{st.x}</p>
@@ -466,7 +468,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
         </div>
       </div>
 
-      <CtaBand title={`Run ${m.name} — and every other product — free.`} lead="Every product and every feature is included in every plan, starting free, no card needed." />
+      <CtaBand title={`Run ${m.name}, and every other product, free.`} lead="Every feature is included in every plan. Start free, no card needed." />
 
       {/* questions: the last thing on the page, just above the footer */}
       <section id="faq" className="scroll-mt-36 border-t border-border/50 bg-muted/30 py-14 lg:py-20">
@@ -474,7 +476,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
           <div className="mb-8 text-center">
             <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">Questions</p>
             <h2 className="text-3xl font-black leading-tight tracking-tight sm:text-4xl">Questions about {m.name}</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">What people ask before they start, answered from what the product really does.</p>
+            <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">What people ask before they start, answered from what the product really does today.</p>
           </div>
           <ProductFaqList items={faqs} />
         </div>
