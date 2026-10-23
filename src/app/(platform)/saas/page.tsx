@@ -128,7 +128,14 @@ export default async function SaasHome() {
             { v: "₹0", l: "to start, free forever" },
           ]} />
         </div>
-        <div className="pb-8"><ModuleMarquee items={modules.map((m) => ({ key: m.key, name: m.name, icon: m.icon }))} /></div>
+        <div className="pb-8">
+          <Reveal className="mx-auto mb-4 max-w-2xl px-4 pt-8 text-center">
+            <p className="sr-eyebrow mb-2">SelfRun family products</p>
+            <h2 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">Meet the <span className="bg-gradient-to-r from-primary to-brand-accent bg-clip-text text-transparent">SelfRun family.</span></h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">One product for every job in your business. Click any card to see what it does.</p>
+          </Reveal>
+          <ModuleMarquee items={modules.map((m) => ({ key: m.key, name: m.name, icon: m.icon }))} />
+        </div>
       </section>
 
       {/* Overview */}
@@ -187,18 +194,25 @@ export default async function SaasHome() {
             ))}
             <Reveal className="lg:col-span-4">
               <div className="rounded-[2rem] border border-border/60 bg-background p-6 shadow-sm sm:p-8">
-                <h3 className="text-xl font-black">What is inside SelfRun AI, product by product</h3>
-                <ul className="mt-5 grid gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h3 className="text-xl font-black">What is inside SelfRun AI, product by product</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Each product does one job well. Open any card to see exactly what it does.</p>
+                  </div>
+                  <Link href="/products" className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">Browse all products <ArrowRight className="h-4 w-4" /></Link>
+                </div>
+                <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {modules.map((module) => (
-                    <li key={module.key} className="flex min-w-0 items-start gap-3 border-t border-border/50 py-4">
-                      <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center">
-                        <ProductLogo productKey={module.key} size={32} className="h-8 w-8 flex-none" title={module.name} />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block font-bold">{module.name}</span>
-                        <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{module.summary}</span>
-                        <span className="mt-1.5 block text-sm leading-relaxed"><strong>What you gain:</strong> <span className="text-muted-foreground">{module.outcome}</span></span>
-                      </span>
+                    <li key={module.key}>
+                      <Link href={productPath(module.key)} className="group flex h-full flex-col gap-3 rounded-2xl border border-border/60 bg-background p-5 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                        <span className="flex items-center gap-3">
+                          <span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-border/60 bg-card shadow-sm transition-transform group-hover:scale-105"><ProductLogo productKey={module.key} size={34} title={module.name} /></span>
+                          <span className="min-w-0 font-black leading-tight transition-colors group-hover:text-primary">{module.name}</span>
+                        </span>
+                        <span className="text-sm leading-relaxed text-muted-foreground">{module.description}</span>
+                        <span className="mt-auto flex gap-2.5 rounded-xl bg-primary/[0.06] p-3 text-[13px] leading-snug"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} /><span><b>What you gain:</b> <span className="text-muted-foreground">{module.outcome}</span></span></span>
+                        <span className="inline-flex items-center gap-1.5 text-sm font-bold text-primary">See what it does <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                      </Link>
                     </li>
                   ))}
                 </ul>

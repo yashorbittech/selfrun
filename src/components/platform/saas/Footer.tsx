@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUp, Lock, MessageCircle, Scale, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUp, Lock, MessageCircle, PlayCircle, Scale, ShieldCheck } from "lucide-react";
 import Logo from "@/components/platform/saas/Logo";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { LEGAL_LINKS } from "@/lib/platform/saas/site";
@@ -73,8 +73,9 @@ export default async function Footer({}: { host?: string }) {
               <h2 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl">Put your business on <span className="text-white/70">autopilot.</span></h2>
               <p className="mt-1.5 max-w-xl text-[15px] text-white/80">Free forever, with every feature — or talk to the team first.</p>
             </div>
-            <div className="flex w-full flex-none flex-row gap-3 lg:w-auto">
+            <div className="flex w-full flex-none flex-row flex-wrap gap-3 lg:w-auto lg:flex-nowrap">
               <Link href="/signup" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-black shadow-xl transition-transform hover:scale-105">Get started free <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" /></Link>
+              <Link href="/demo" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-white/40 bg-white/10 px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-white backdrop-blur transition-all hover:bg-white/20"><PlayCircle className="h-5 w-5" />Live demo</Link>
               <Link href="/contact" className="group inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-white/40 bg-white/10 px-3 py-3 text-sm lg:flex-none lg:gap-2 lg:px-7 lg:text-[15px] font-bold text-white backdrop-blur transition-all hover:bg-white/20"><MessageCircle className="h-5 w-5" />Contact us</Link>
             </div>
           </div>

@@ -11,7 +11,6 @@ import { jsonForScript } from "@/lib/security/json-script";
 import FreeForeverToast from "@/components/platform/saas/FreeForeverToast";
 import SrRoot from "@/components/platform/saas/SrRoot";
 import SaasFloatingContact from "@/components/platform/saas/SaasFloatingContact";
-import DemoAccessPopup from "@/components/platform/saas/DemoAccessPopup";
 
 
 /** The product website exists only on the product's own host; on a customer's domain this path is not a page. */
@@ -52,7 +51,6 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
       <Header />
       <main>{children}</main>
       <Footer host={host} />
-      <DemoAccessPopup />
       <FreeForeverToast />
       <SaasFloatingContact />
     </SrRoot>

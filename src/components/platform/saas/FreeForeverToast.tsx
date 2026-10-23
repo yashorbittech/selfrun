@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, GripHorizontal, Sparkles, X } from "lucide-react";
+import { ArrowRight, GripHorizontal, PlayCircle, Sparkles, X } from "lucide-react";
 
 /** Closed for this page load only: a reload (or a new visit) shows it again; moving between pages does not. */
 let closedThisLoad = false;
@@ -86,6 +86,7 @@ export default function FreeForeverToast() {
           <p className="relative mt-1 flex items-baseline gap-1.5"><span className="text-4xl font-black leading-none tracking-tighter">₹0</span><span className="text-sm font-black">forever</span></p>
           <p className="relative mt-1.5 text-[12px] font-semibold leading-snug">{line.body}</p>
           <Link href="/signup" onClick={close} className="group relative mt-3 flex items-center justify-center gap-1.5 rounded-full bg-emerald-950 px-4 py-2 text-xs font-black text-white transition-transform hover:scale-[1.04]">Start free <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" /></Link>
+          <Link href="/demo" onClick={close} className="relative mt-2 flex items-center justify-center gap-1.5 rounded-full border border-emerald-950/30 bg-white/45 px-4 py-2 text-xs font-black text-emerald-950 transition-colors hover:bg-white/70"><PlayCircle className="h-3.5 w-3.5" />See live demo</Link>
           <GripHorizontal className="relative mx-auto mt-2 h-3.5 w-3.5 opacity-50" aria-label="Drag to move" />
         </div>
       </div>
