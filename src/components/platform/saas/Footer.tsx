@@ -1,15 +1,15 @@
 import Link from "next/link";
-import { ArrowRight, MessageCircle } from "lucide-react";
+import { ArrowRight, ArrowUp, Lock, MessageCircle, Scale, ShieldCheck } from "lucide-react";
 import Logo from "@/components/platform/saas/Logo";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { LEGAL_LINKS } from "@/lib/platform/saas/site";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
 /** The legal and trust links, grouped by what a reader is looking for. */
-const LEGAL_GROUPS: { title: string; hrefs: string[] }[] = [
-  { title: "Legal", hrefs: ["/terms", "/privacy", "/cookies", "/refund-policy"] },
-  { title: "Your data", hrefs: ["/data-policy", "/data-requests", "/dpa", "/subprocessors"] },
-  { title: "Trust and security", hrefs: ["/security", "/sla", "/status", "/vulnerability-disclosure"] },
+const LEGAL_GROUPS: { title: string; note: string; icon: typeof Scale; hrefs: string[] }[] = [
+  { title: "Legal", note: "The agreements and policies for using the service.", icon: Scale, hrefs: ["/terms", "/privacy", "/cookies", "/refund-policy"] },
+  { title: "Your data", note: "How your information is handled, and your rights over it.", icon: Lock, hrefs: ["/data-policy", "/data-requests", "/dpa", "/subprocessors"] },
+  { title: "Trust and security", note: "How the service is protected and kept running.", icon: ShieldCheck, hrefs: ["/security", "/sla", "/status", "/vulnerability-disclosure"] },
 ];
 
 /** The footer: what the platform is, every product, the way in, the docs — and the legal pages beside the copyright line. */
@@ -54,13 +54,13 @@ export default async function Footer({}: { host?: string }) {
     { href: "/docs", label: "Documentation" },
   ];
   const productLinks = [
-    { label: "Product Gallery", href: "/gallery" },
-    { label: "Our Products", href: "/products" },
-    { label: "Product Live Demo", href: "/demo" },
-    { label: "Product Vision", href: "/vision" },
-    { label: "Product Roadmap", href: "/roadmap" },
-    { label: "Success Stories", href: "/success-stories" },
-    { label: "Getting Started", href: "/onboarded-businesses" },
+    { label: "Screen gallery", href: "/gallery" },
+    { label: "All products", href: "/products" },
+    { label: "Live demo", href: "/demo" },
+    { label: "Our vision", href: "/vision" },
+    { label: "Roadmap", href: "/roadmap" },
+    { label: "Success stories", href: "/success-stories" },
+    { label: "Getting started", href: "/onboarded-businesses" },
   ];
   return (
     <footer className="relative overflow-hidden border-t border-border/50 bg-muted/20">
@@ -101,37 +101,42 @@ export default async function Footer({}: { host?: string }) {
             </div>
           ))}
           <div>
-            <p className="mb-3 text-sm font-bold">Products</p>
+            <p className="mb-3 text-sm font-bold">Discover</p>
             <ul className="space-y-2">
               {productLinks.map((product) => <li key={product.href}><Link href={product.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">{product.label}</Link></li>)}
             </ul>
           </div>
         </div>
 
-        <div className="mt-8 border-t border-border/50 pt-7">
-          <nav aria-label="Legal and trust" className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
+        <div className="mt-9 overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-sm backdrop-blur">
+          <div className="border-b border-border/50 bg-gradient-to-r from-primary/[0.07] to-brand-accent/[0.07] px-6 py-4 sm:px-8">
+            <p className="text-sm font-black">Trust center</p>
+            <p className="text-sm text-muted-foreground">How we handle your data and keep the service running, in one place.</p>
+          </div>
+          <nav aria-label="Legal and trust" className="grid grid-cols-1 divide-y divide-border/50 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
             {LEGAL_GROUPS.map((g) => (
-              <div key={g.title}>
-                <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-foreground">{g.title}</p>
-                <ul className="space-y-2">
-                  {g.hrefs.flatMap((href) => { const l = LEGAL_LINKS.find((x) => x.href === href); return l ? [<li key={l.href}><Link href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">{l.label}</Link></li>] : []; })}
+              <div key={g.title} className="px-6 py-6 sm:px-8">
+                <p className="flex items-center gap-2.5 text-sm font-black"><span className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary"><g.icon className="h-4 w-4" /></span>{g.title}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{g.note}</p>
+                <ul className="mt-3 space-y-1.5">
+                  {g.hrefs.flatMap((href) => { const l = LEGAL_LINKS.find((x) => x.href === href); return l ? [<li key={l.href}><Link href={l.href} className="group inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"><ArrowRight className="h-3 w-3 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" aria-hidden />{l.label}</Link></li>] : []; })}
                 </ul>
               </div>
             ))}
           </nav>
-          <div className="mt-7 flex flex-col gap-2 border-t border-border/40 pt-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <p>
-              © {new Date().getFullYear()} {SAAS_BRAND.name}. All rights reserved.
-              {SAAS_BRAND.operator ? <span> · Operated by {SAAS_BRAND.operator}</span> : null}
-            </p>
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <Link href="/status" className="inline-flex items-center gap-1.5 font-semibold transition-colors hover:text-primary"><span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />System status</Link>
-              <span aria-hidden>·</span>
-              <Link href="/data-requests" className="font-semibold transition-colors hover:text-primary">Privacy requests</Link>
-              <span aria-hidden>·</span>
-              <Link href="/vulnerability-disclosure" className="font-semibold transition-colors hover:text-primary">Report a security issue</Link>
-            </p>
-          </div>
+        </div>
+
+        <div className="mt-6 flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            © {new Date().getFullYear()} {SAAS_BRAND.name}. All rights reserved.
+            {SAAS_BRAND.operator ? <span> · Operated by {SAAS_BRAND.operator}</span> : null}
+          </p>
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+            <Link href="/status" className="inline-flex items-center gap-1.5 font-semibold transition-colors hover:text-primary"><span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />System status</Link>
+            <Link href="/data-requests" className="font-semibold transition-colors hover:text-primary">Privacy requests</Link>
+            <Link href="/vulnerability-disclosure" className="font-semibold transition-colors hover:text-primary">Report a security issue</Link>
+            <a href="#top" className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-3 py-1 font-bold text-foreground transition-colors hover:border-primary/40 hover:text-primary">Back to top <ArrowUp className="h-3 w-3" /></a>
+          </p>
         </div>
       </div>
     </footer>
