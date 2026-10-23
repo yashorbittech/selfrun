@@ -14,7 +14,6 @@ import ProductLogo from "@/components/products/ProductLogo";
 import { AI_CAPABILITIES, INDUSTRIES, SECURITY_POINTS, type IconKey } from "@/lib/platform/saas/content";
 import { GROWTH, YOUR_BRAND } from "@/lib/platform/saas/site";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
-import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { PANEL_DETAIL } from "@/lib/platform/saas/panel-detail";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
@@ -85,7 +84,6 @@ export default async function VisionPage() {
     const to = c ? byKey.get(c.panel) : undefined;
     return c && to ? [{ from: m, to, text: c.text }] : [];
   }).slice(0, 9);
-  const features = products.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   return (
     <>
       <JsonLd data={[webPage({ type: "AboutPage", path: "/vision", name: "Product vision", description: "Where SelfRun AI is heading and why: one software for your whole business, automation you can trust, AI that stays within each person's access, and your own brand on everything." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Product vision", path: "/vision" }])]} />
@@ -98,7 +96,7 @@ export default async function VisionPage() {
         photo="team-desk"
         shot="workspace"
         shotName="SelfRun CommandOS"
-        chip={{ title: `${products.length} products live today`, text: `${features}+ features, all in every plan` }}
+        chip={{ title: "Products live today", text: "Every feature, all in every plan" }}
       >
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Explore the products", href: "/products" }} />
       </PageHero>
@@ -175,7 +173,7 @@ export default async function VisionPage() {
       <section id="today" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <Head id="today" title="What exists today." lead="This is not a slide deck. These products are live now, and every one of them is included in every plan." />
-          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: String(products.length), l: "ready-made products" }, { v: `${features}+`, l: "features across them" }, { v: String(groups.length), l: "areas of your business" }, { v: "Free", l: "to start, every feature included" }]} /></div></Reveal>
+          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: "All", l: "ready-made products" }, { v: "AI", l: "built into the software" }, { v: "Every", l: "area of your business" }, { v: "Free", l: "to start, every feature included" }]} /></div></Reveal>
           <div className="grid gap-5 lg:grid-cols-2">
             {groups.map((g, i) => (
               <Reveal key={g.id} delay={(i % 2) * 70}>
@@ -344,7 +342,7 @@ export default async function VisionPage() {
         lead="What we are building, how far it has come and how we decide what comes next."
         extra={[
           { q: "What is the SelfRun vision?", a: "Every business should be able to run on one intelligent software that handles the routine work, so its people can focus on customers, creativity and growth. In practice that means one software with a product for every job, automation you can trust, AI that stays within each person's access, and your own brand on everything." },
-          { q: "Is the vision already built, or is it a plan?", a: `The ${products.length} products on this page are live today and all of them are included in every plan. We describe the product as it is now and do not present ideas as commitments.` },
+          { q: "Is the vision already built, or is it a plan?", a: `The products on this page are live today and all of them are included in every plan. We describe the product as it is now and do not present ideas as commitments.` },
           { q: "Will you publish release dates?", a: "No. We announce something only when it is ready to be described clearly. The roadmap page lists what the software offers today." },
         ]}
       />

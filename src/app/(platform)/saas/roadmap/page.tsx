@@ -12,7 +12,7 @@ import CountStats from "@/components/platform/saas/CountStats";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import ProductLogo from "@/components/products/ProductLogo";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
-import { FEATURE_LISTS, featureCount } from "@/lib/platform/saas/feature-lists";
+import { FEATURE_LISTS } from "@/lib/platform/saas/feature-lists";
 import { productPath } from "@/lib/platform/saas/product-routes";
 import { productShort } from "@/lib/platform/saas/product-short";
 
@@ -113,8 +113,6 @@ function Head({ id, title, lead }: { id: string; title: string; lead?: string })
 
 export default async function RoadmapPage() {
   const groups = await getFeatureGroups();
-  const products = groups.flatMap((g) => g.items);
-  const features = products.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
 
   return (
     <>
@@ -128,7 +126,7 @@ export default async function RoadmapPage() {
         photo="team-desk"
         shot="workspace"
         shotName="SelfRun CommandOS"
-        chip={{ title: `${products.length} products available now`, text: `${features}+ features, taken from the live product` }}
+        chip={{ title: "Products available now", text: "Taken from the live product" }}
       >
         <HeroCtas primary={{ label: "Explore the products", href: "/products" }} secondary={{ label: "Share feedback", href: "/contact" }} />
       </PageHero>
@@ -179,7 +177,7 @@ export default async function RoadmapPage() {
       <section id="now" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <Head id="now" title="Everything available today." lead="These products are live now, and every one of them is included in every plan." />
-          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: String(products.length), l: "products available" }, { v: `${features}+`, l: "features across them" }, { v: String(groups.length), l: "areas of your business" }, { v: "Free", l: "to start, every feature included" }]} /></div></Reveal>
+          <Reveal><div className="mb-10 rounded-3xl border border-border/60 bg-card px-4 shadow-sm"><CountStats items={[{ v: "All", l: "products available" }, { v: "AI", l: "built into the software" }, { v: "Every", l: "area of your business" }, { v: "Free", l: "to start, every feature included" }]} /></div></Reveal>
           <div className="space-y-8">
             {groups.map((g, gi) => (
               <Reveal key={g.id} delay={(gi % 2) * 50}>
@@ -187,7 +185,7 @@ export default async function RoadmapPage() {
                   <div className="flex flex-wrap items-center gap-4 border-b border-border/50 bg-gradient-to-br from-primary/[0.08] via-card to-brand-accent/[0.08] px-6 py-5 sm:px-8">
                     <span className="sr-icon h-12 w-12 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span>
                     <div className="min-w-0 flex-1"><h3 className="text-xl font-black">{g.title}</h3><p className="text-sm leading-snug text-muted-foreground">{g.lead}</p></div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-600"><Check className="h-3.5 w-3.5" strokeWidth={3} />{g.items.length} {g.items.length === 1 ? "product" : "products"} available</span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1 text-xs font-black text-emerald-600"><Check className="h-3.5 w-3.5" strokeWidth={3} />Available now</span>
                   </div>
                   <ul className="grid gap-4 p-5 sm:p-6 md:grid-cols-2 xl:grid-cols-3">
                     {g.items.map((m) => {
@@ -197,7 +195,7 @@ export default async function RoadmapPage() {
                           <Link href={productPath(m.key)} className="group flex h-full flex-col gap-3 rounded-2xl border border-border/60 bg-background p-4 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
                             <span className="flex items-center gap-3"><span className="flex h-12 w-12 flex-none items-center justify-center rounded-xl border border-border/60 bg-card shadow-sm"><ProductLogo productKey={m.key} size={34} title={m.name} /></span><span className="min-w-0"><span className="block font-black leading-tight group-hover:text-primary">{m.name}</span><span className="block text-xs leading-snug text-muted-foreground">{productShort(m.key, m.summary)}</span></span></span>
                             {areas.length > 0 && <span className="flex flex-wrap gap-1.5">{areas.slice(0, 4).map((a) => <span key={a} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-bold text-muted-foreground">{a}</span>)}{areas.length > 4 && <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-bold text-muted-foreground">+{areas.length - 4} more</span>}</span>}
-                            <span className="mt-auto flex items-center justify-between pt-1 text-sm"><span className="font-bold text-muted-foreground"><b className="text-foreground">{featureCount(m.key) || m.capabilities.length}</b> features</span><span className="inline-flex items-center gap-1 font-bold text-primary">Open<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span></span>
+                            <span className="mt-auto flex items-center justify-between pt-1 text-sm"><span className="font-bold text-muted-foreground">Every feature included</span><span className="inline-flex items-center gap-1 font-bold text-primary">Open<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span></span>
                           </Link>
                         </li>
                       );

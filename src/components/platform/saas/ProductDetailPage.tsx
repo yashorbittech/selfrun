@@ -24,7 +24,6 @@ import { TUTORIALS } from "@/lib/platform/saas/tutorials";
 import ProductSidebar from "@/components/platform/saas/ProductSidebar";
 import ProductFaqList from "@/components/platform/saas/ProductFaq";
 import ProductScrollNav from "@/components/platform/saas/product/ProductScrollNav";
-import CountUp from "@/components/platform/saas/product/CountUp";
 import FeatureExplorer from "@/components/platform/saas/product/FeatureExplorer";
 import StepperHowItWorks from "@/components/platform/saas/product/StepperHowItWorks";
 import RoleExplorer from "@/components/platform/saas/product/RoleExplorer";
@@ -167,7 +166,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
       </span>
     </>
   );
-  const heroNotes = [`${total} features`, ...(groups.length ? [`${groups.length} feature groups`] : []), ...(detail?.workflow.length ? [`${detail.workflow.length}-step workflow`] : []), "Included in every plan"];
+  const heroNotes = ["Every feature included", ...(detail?.workflow.length ? [`${detail.workflow.length}-step workflow`] : []), "Included in every plan"];
   const glance = [
     { icon: <Layers className="h-5 w-5" />, q: "What it does", a: m.headline },
     detail && { icon: <Users className="h-5 w-5" />, q: "Who uses it", a: detail.audience.map((a) => a.who).join(", ") },
@@ -178,7 +177,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
   return (
     <>
       <JsonLd data={ld} />
-      <PageHero art={`product-${m.key}`} eyebrow={`${tagline ? `${tagline} · ` : ""}${total} features`} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
+      <PageHero art={`product-${m.key}`} eyebrow={tagline || "Part of SelfRun AI"} title={m.name} lead={heroLead} notes={heroNotes} photo="analytics" shot={m.key} shotName={m.name}>
         <HeroCtas />
       </PageHero>
 
@@ -246,7 +245,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                 </div>
 
                 <div className="border-t border-border/50 bg-muted/20 px-6 py-8 sm:px-10 sm:py-10">
-                  <h3 className="mb-5 flex items-center gap-2 text-lg font-black"><Check className="h-5 w-5 text-primary" />What you can do with it <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-black text-primary">{m.capabilities.length}</span></h3>
+                  <h3 className="mb-5 flex items-center gap-2 text-lg font-black"><Check className="h-5 w-5 text-primary" />What you can do with it </h3>
                   <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                     {m.capabilities.map((c, i) => (
                       <Reveal key={c} as="li" delay={i * 40} className="group flex items-start gap-3.5 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
@@ -269,16 +268,16 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                   <Reveal className="md:col-span-3">
                     <div className="relative h-full overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary to-brand-accent p-8 text-white shadow-xl shadow-primary/25">
                       <span className="pointer-events-none absolute -bottom-10 -right-6 h-48 w-48 rounded-full bg-white/10 blur-2xl" aria-hidden />
-                      <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl"><CountUp to={total} /></p>
-                      <p className="mt-3 text-xl font-bold">features in this product</p>
+                      <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl">All</p>
+                      <p className="mt-3 text-xl font-bold">the features of this product, in every plan</p>
                       <p className="mt-1 text-white/80">{groups.slice(0, 3).map((g) => g.title).join(" · ")}{groups.length > 3 ? " · and more" : ""}</p>
                     </div>
                   </Reveal>
                   <Reveal className="md:col-span-3" delay={80}>
                     <div className="relative h-full overflow-hidden rounded-[2rem] bg-foreground p-8 text-background shadow-xl">
                       <span className="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-primary/40 blur-3xl" aria-hidden />
-                      <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl"><CountUp to={m.automations.length} /></p>
-                      <p className="mt-3 text-xl font-bold">automatic steps built in</p>
+                      <p className="text-7xl font-black leading-none tracking-tighter sm:text-8xl">Auto</p>
+                      <p className="mt-3 text-xl font-bold">steps that run by themselves</p>
                       <p className="mt-1 text-background/70">{m.automations[0]}</p>
                     </div>
                   </Reveal>
@@ -390,7 +389,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                   </Reveal>
                 ))}
               </ol>
-              <h3 className="mb-4 flex items-center gap-2 text-lg font-black"><GraduationCap className="h-5 w-5 text-primary" />{tutorials.length > 0 ? `${tutorials.length === 1 ? "The walkthrough" : `${tutorials.length} walkthroughs`} for ${m.name}` : `Walkthroughs for ${m.name}`}</h3>
+              <h3 className="mb-4 flex items-center gap-2 text-lg font-black"><GraduationCap className="h-5 w-5 text-primary" />{tutorials.length === 1 ? `The walkthrough for ${m.name}` : `Walkthroughs for ${m.name}`}</h3>
               {tutorials.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   {tutorials.map((t) => (
@@ -437,7 +436,7 @@ export default async function ProductDetailPage({ productSlug }: { productSlug: 
                 {total > 0 && (
                   <a href="#features" className={`${tile} flex flex-col`}>
                     <span className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-black uppercase tracking-wider text-foreground"><Layers className="h-3.5 w-3.5" />Feature guides</span>
-                    <span className="text-xl font-black leading-snug">{total} feature guides</span>
+                    <span className="text-xl font-black leading-snug">A guide for every feature</span>
                     <span className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">Every feature of {m.name} has its own guide. Search the features above and open the one you need.</span>
                     <span className="mt-4 text-sm font-bold text-primary">See the features <ArrowRight className="ml-1 inline h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
                   </a>

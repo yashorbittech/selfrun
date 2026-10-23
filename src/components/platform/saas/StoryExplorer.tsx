@@ -37,7 +37,7 @@ export default function StoryExplorer({ stories }: { stories: ExplorerStory[] })
       <AnimatePresence mode="wait">
         <motion.article key={s.slug} role="tabpanel" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="min-w-0 overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-sm">
           <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-6 sm:p-8">
-            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">Product story · {String(i + 1).padStart(2, "0")} of {stories.length}</span>
+            <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">Worked example · {String(i + 1).padStart(2, "0")}</span>
             <h3 className="mt-3 text-2xl font-black leading-tight tracking-tight sm:text-3xl">{s.title}</h3>
             <p className="mt-2 text-lg leading-relaxed text-muted-foreground">{s.summary}</p>
           </div>

@@ -24,18 +24,17 @@ export default function DocsNav({ panels, currentPanel, currentSlug }: { panels:
   useEffect(() => { activeRef.current?.scrollIntoView({ block: "center" }); }, [currentSlug]);
 
   const toggle = (k: string) => setOpen((s) => { const n = new Set(s); if (n.has(k)) n.delete(k); else n.add(k); return n; });
-  const total = panels.reduce((a, p) => a + p.groups.reduce((b, g) => b + g.items.length, 0), 0);
 
   return (
     <nav aria-label="All documentation" className="flex max-h-[inherit] flex-col">
       <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-background to-brand-accent/[0.10] p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All documentation<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{total}</span></p>
+          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All documentation</p>
           <Link href="/docs" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"><ArrowLeft className="h-3 w-3" />Docs home</Link>
         </div>
         <label className="relative block">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} type="search" placeholder={`Search ${total} guides`} aria-label="Search guides" className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-8 text-sm outline-none focus:border-primary" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} type="search" placeholder="Search the guides" aria-label="Search guides" className="h-10 w-full rounded-xl border border-border bg-background pl-9 pr-8 text-sm outline-none focus:border-primary" />
           {q && <button type="button" onClick={() => setQ("")} aria-label="Clear" className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:text-foreground"><X className="h-3.5 w-3.5" /></button>}
         </label>
       </div>
@@ -45,12 +44,11 @@ export default function DocsNav({ panels, currentPanel, currentSlug }: { panels:
           if (query && !groups.length) return null;
           const isOpen = query ? true : open.has(p.key);
           const current = p.key === currentPanel;
-          const count = p.groups.reduce((a, g) => a + g.items.length, 0);
           return (
             <div key={p.key} className={`rounded-2xl border transition-colors ${current ? "border-primary/30 bg-primary/[0.04]" : "border-transparent"}`}>
               <button type="button" onClick={() => toggle(p.key)} aria-expanded={isOpen} className="flex w-full items-center gap-3 rounded-2xl px-2.5 py-2 text-left transition-colors hover:bg-muted/50">
                 <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-border/60 bg-background shadow-sm"><ProductLogo productKey={p.key} size={32} title={p.name} /></span>
-                <span className="min-w-0 flex-1"><span className="block truncate text-[15px] font-black leading-tight">{p.name}</span><span className="text-[11px] font-semibold text-muted-foreground">{count} guides</span></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-[15px] font-black leading-tight">{p.name}</span><span className="text-[11px] font-semibold text-muted-foreground">Guides</span></span>
                 <ChevronDown className={`h-4 w-4 flex-none text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
               </button>
               {isOpen && (

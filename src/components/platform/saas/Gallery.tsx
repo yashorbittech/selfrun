@@ -55,7 +55,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
       <aside className="xl:sticky xl:top-28 xl:self-start" aria-label="Filter screens">
         <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
           <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
-            <p className="mb-3 flex items-center gap-2 text-sm font-black"><Grid3X3 className="h-4 w-4 text-primary" />All screens<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{pool.length}</span></p>
+            <p className="mb-3 flex items-center gap-2 text-sm font-black"><Grid3X3 className="h-4 w-4 text-primary" />All screens</p>
             <label className="relative block">
               <span className="sr-only">Search the screens</span>
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -69,7 +69,6 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
                 <button key={p.key} role="tab" aria-selected={on} onClick={() => pick(p.key)} className={`group relative flex shrink-0 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-bold transition-all xl:w-full xl:border-transparent ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/60 hover:border-primary/40 hover:bg-muted/60 xl:border-transparent"}`}>
                   <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl border ${on ? "border-white/30 bg-white/20" : "border-border/60 bg-background"}`}>{p.key === "all" ? <Grid3X3 className="h-4 w-4" /> : <ProductLogo productKey={p.key} size={26} title={p.name} />}</span>
                   <span className="min-w-0 flex-1"><span className="block whitespace-nowrap leading-tight xl:whitespace-normal">{p.name}</span>{p.key !== "all" && <span className={`mt-1.5 hidden h-1 overflow-hidden rounded-full xl:block ${on ? "bg-white/25" : "bg-border"}`}><span className={`block h-full rounded-full ${on ? "bg-white" : "bg-gradient-to-r from-primary to-brand-accent"}`} style={{ width: `${(p.count / max) * 100}%` }} /></span>}</span>
-                  <span className={`text-xs font-black tabular-nums ${on ? "opacity-90" : "text-muted-foreground"}`}>{p.count}</span>
                 </button>
               );
             })}
@@ -79,7 +78,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
 
       <div className="min-w-0">
         <div className="sticky top-[88px] z-20 mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/50 bg-background/80 px-4 py-3 shadow-sm backdrop-blur-xl sm:px-5">
-          <p className="text-sm text-muted-foreground">Showing <b className="text-foreground">{visible.length}</b> of {list.length} real screens{panel !== "all" && <> in <b className="text-foreground">{panels.find((p) => p.key === panel)?.name}</b></>}</p>
+          <p className="text-sm text-muted-foreground">Real screens{panel !== "all" && <> in <b className="text-foreground">{panels.find((p) => p.key === panel)?.name}</b></>}</p>
           <div className="inline-flex rounded-full border border-border/60 bg-muted/30 p-1" role="group" aria-label="Layout">
             <button type="button" onClick={() => setMosaic(true)} aria-pressed={mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${mosaic ? "bg-foreground text-background shadow" : "text-muted-foreground hover:text-foreground"}`}><LayoutDashboard className="h-3.5 w-3.5" />Mosaic</button>
             <button type="button" onClick={() => setMosaic(false)} aria-pressed={!mosaic} className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors ${!mosaic ? "bg-foreground text-background shadow" : "text-muted-foreground hover:text-foreground"}`}><Grid3X3 className="h-3.5 w-3.5" />Grid</button>
@@ -126,7 +125,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
 
         {shown < list.length && (
           <div className="mt-10 flex justify-center">
-            <button type="button" onClick={() => setShown((s) => s + PAGE)} className="group inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-105 active:scale-95">Show {Math.min(PAGE, list.length - shown)} more screens <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></button>
+            <button type="button" onClick={() => setShown((s) => s + PAGE)} className="group inline-flex items-center gap-2 rounded-full bg-foreground px-8 py-4 text-sm font-bold text-background shadow-xl shadow-foreground/20 transition-all hover:scale-105 active:scale-95">Show more screens <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></button>
           </div>
         )}
       </div>
@@ -137,7 +136,7 @@ export default function Gallery({ items, panels, initialPanel }: { items: Galler
           <img key={`bg-${cur.id}`} src={cur.src} alt="" aria-hidden className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-20 blur-3xl" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/10 via-background/70 to-background/90" aria-hidden />
           <div className="relative flex items-center justify-between gap-4 border-b border-border/60 bg-background/70 px-4 py-4 backdrop-blur-xl sm:px-8">
-            <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-muted-foreground">{cur.panel} · {(open ?? 0) + 1} of {list.length}</p></div>
+            <div className="min-w-0"><p className="truncate text-xl font-black tracking-tight">{cur.title}</p><p className="text-sm text-muted-foreground">{cur.panel}</p></div>
             <div className="flex items-center gap-2">
               <Link href={productPath(cur.panelKey)} className="hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/50 px-4 py-2.5 text-sm font-semibold transition-colors hover:border-primary/50 hover:text-primary sm:inline-flex">About {cur.panel} <ArrowUpRight className="h-4 w-4" /></Link>
               <button type="button" onClick={() => setOpen(null)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted/50 transition-colors hover:border-primary/50 hover:text-primary"><X className="h-5 w-5" /></button>

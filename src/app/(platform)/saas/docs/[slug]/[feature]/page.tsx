@@ -236,7 +236,7 @@ export default async function FeatureGuidePage({ params }: { params: Promise<{ s
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 bg-gradient-to-br from-primary/[0.08] via-card to-brand-accent/[0.08] px-5 py-4 sm:px-6">
             <p className="text-sm font-black">Keep going with {m.name}</p>
             <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground">
-              <span>Guide {i + 1} of {list.length}</span>
+              <span>Your progress</span>
               <span className="h-1.5 w-28 overflow-hidden rounded-full bg-border" aria-hidden><span className="block h-full rounded-full bg-gradient-to-r from-primary to-brand-accent" style={{ width: `${((i + 1) / list.length) * 100}%` }} /></span>
             </div>
           </div>

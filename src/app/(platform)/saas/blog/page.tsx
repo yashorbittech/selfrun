@@ -79,7 +79,7 @@ export default function BlogIndexPage() {
         shot="cms"
         shotName="SelfRun SiteCraft AI"
         chip={{
-          title: `${POSTS.length} In-Depth Guides`,
+          title: "In-Depth Guides",
           text: "Actionable playbooks for every department",
         }}
         notes={[

@@ -8,7 +8,6 @@ import { getOffers } from "@/lib/platform/saas/offers";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
-import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import PricingPlans from "@/components/platform/saas/PricingPlans";
 import FaqSection from "@/components/platform/saas/FaqSection";
@@ -17,7 +16,7 @@ import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
-import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
+import { productPath } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +25,6 @@ export const metadata: Metadata = pageMeta({ path: "/pricing", title: "Pricing: 
 export default async function PricingPage() {
   const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules()]);
   const endsAt = (await getOffers().catch(() => null))?.endsAt ?? null;
-  const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   const has = plans.length > 0;
   const SEC = [
     { id: "plans", label: "Plans", show: true },
@@ -43,7 +41,7 @@ export default async function PricingPage() {
   return (
     <>
       <JsonLd data={[webPage({ type: "CollectionPage", path: "/pricing", name: "Pricing", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }]), planOffers(plans.map((p) => ({ id: p.id, name: p.name, description: p.description, currency: p.currency, kind: p.kind, monthly: p.offer.monthly, validUntil: endsAt ? new Date(endsAt).toISOString() : null })))]} />
-      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
+      <PageHero art="pricing" eyebrow="Pricing" title="Free forever." accent="Pay only as your team grows." lead={`Every plan includes every product, with every feature. A plan sets your team size and your storage, AI, email and voice allowance — nothing else. Prices exclude applicable taxes.`} photo="analytics" shot="fms" shotName="SelfRun CashFlow AI" chip={{ title: "Every feature, every plan", text: "Nothing locked behind a higher tier" }}>
         <HeroCtas primary={{ label: "Start free forever", href: "/signup" }} secondary={{ label: "Talk to us", href: "/contact" }} />
       </PageHero>
 
@@ -61,7 +59,7 @@ export default async function PricingPage() {
           <SectionHead n={no("how")} icon="check" eyebrow="How pricing works" title="Simple, with" accent="no hidden tiers." lead="Three rules explain the whole page." />
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { icon: "layers" as const, t: "Everything is included", x: `All ${SAAS_PRODUCT_COUNT} products and ${total}+ features are in every plan, including the free one. Nothing is locked behind a higher tier.` },
+              { icon: "layers" as const, t: "Everything is included", x: `Every product, with every feature, is in every plan, including the free one. Nothing is locked behind a higher tier.` },
               { icon: "users" as const, t: "Plans differ by team size", x: "A plan sets how many people can use the workspace. Start small and move up when your team grows." },
               { icon: "chart" as const, t: "And by allowances", x: "Storage, AI, email and voice usage are set per plan, so you only pay for the capacity you use." },
             ].map((c, i) => (
@@ -86,7 +84,7 @@ export default async function PricingPage() {
                   </thead>
                   <tbody>
                     <tr className="border-b border-border/40"><td className="p-4 font-semibold">People</td>{plans.map((p) => <td key={p.id} className="p-4">{p.seats ? `Up to ${p.seats.toLocaleString("en-IN")}` : "Unlimited"}</td>)}</tr>
-                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />All {SAAS_PRODUCT_COUNT} products</span></td>)}</tr>
+                    <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />Every product</span></td>)}</tr>
                     {rows.map((k, i) => (
                       <tr key={k} className={`border-b border-border/40 ${i % 2 ? "" : "bg-muted/20"}`}>
                         <td className="p-4 font-semibold">{plans[0].limits.find((l) => l.key === k)?.label}</td>
@@ -125,13 +123,13 @@ export default async function PricingPage() {
 
       <section id="products" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("products")} center icon="layers" eyebrow="Included in every plan" title={`All ${SAAS_PRODUCT_COUNT} products,`} accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
+          <SectionHead n={no("products")} center icon="layers" eyebrow="Included in every plan" title="Every product," accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
                 <Link href={productPath(m.key)} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
                   <span className="sr-icon h-10 w-10 flex-none"><ProductLogo productKey={m.key} size={30} title={m.name} /></span>
-                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">{featureCount(m.key) || m.capabilities.length} features</span></span>
+                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">Every feature included</span></span>
                   <Check className="h-4 w-4 flex-none text-primary" />
                 </Link>
               </Reveal>

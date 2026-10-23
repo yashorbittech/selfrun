@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, ChevronDown, Layers, Search, Sparkles, X } from "lucide-react";
 import ProductLogo from "@/components/products/ProductLogo";
 import type { FaqHubGroup } from "@/lib/platform/saas/faqs";
-import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 function Logo({ id, title, size }: { id: string; title: string; size: number }) {
   return id === "general" ? <Layers className="text-primary" style={{ width: size * 0.6, height: size * 0.6 }} aria-hidden /> : <ProductLogo productKey={id} size={size} title={title} />;
@@ -55,12 +54,12 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
           <p className="mt-4 text-lg leading-relaxed text-muted-foreground">Search every answer at once, or pick a product to see only its questions. Answers describe what the product does today.</p>
           <div className="relative mt-8">
             <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" aria-hidden />
-            <input value={query} onChange={(e) => { setQuery(e.target.value); setOpen(new Set()); }} type="search" aria-label="Search questions and answers" placeholder={`Search ${total} answers, for example “invoice” or “leave”`} className="h-14 w-full rounded-full border border-border bg-background pl-14 pr-12 text-base shadow-lg shadow-primary/5 outline-none transition-shadow focus:border-primary focus:shadow-xl focus:shadow-primary/10" />
+            <input value={query} onChange={(e) => { setQuery(e.target.value); setOpen(new Set()); }} type="search" aria-label="Search questions and answers" placeholder="Search the answers, for example “invoice” or “leave”" className="h-14 w-full rounded-full border border-border bg-background pl-14 pr-12 text-base shadow-lg shadow-primary/5 outline-none transition-shadow focus:border-primary focus:shadow-xl focus:shadow-primary/10" />
             {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="absolute right-4 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"><X className="h-4 w-4" /></button>}
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm font-bold text-muted-foreground">
-            <span><b className="text-2xl font-black text-foreground">{total}</b> answers</span>
-            <span><b className="text-2xl font-black text-foreground">{SAAS_PRODUCT_COUNT}</b> products</span>
+            <span><b className="text-2xl font-black text-foreground">Clear</b> answers</span>
+            <span><b className="text-2xl font-black text-foreground">Every</b> product</span>
             <span className="inline-flex items-center gap-1.5"><Sparkles className="h-4 w-4 text-primary" />Written from how the product works</span>
           </div>
         </div>
@@ -70,7 +69,7 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
           <aside aria-label="FAQ topics" className="lg:sticky lg:top-28 lg:self-start">
             <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
               <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
-                <p className="flex items-center gap-2 text-sm font-black"><Layers className="h-4 w-4 text-primary" />Topics<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{groups.length}</span></p>
+                <p className="flex items-center gap-2 text-sm font-black"><Layers className="h-4 w-4 text-primary" />Topics</p>
               </div>
               <nav className="sr-scroll-x flex gap-2 p-2.5 lg:block lg:max-h-[calc(100vh-14rem)] lg:space-y-1 lg:overflow-y-auto lg:[scrollbar-width:thin]">
                 {[{ id: "all", title: "All FAQs", n: total }, ...groups.map((g) => ({ id: g.id, title: g.title, n: g.items.length }))].map((t) => {
@@ -79,7 +78,6 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
                     <button key={t.id} type="button" onClick={() => pick(t.id)} aria-pressed={on} className={`flex flex-none items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-bold transition-all lg:w-full ${on ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/60 hover:border-primary/40 hover:bg-muted/60 lg:border-transparent"}`}>
                       <span className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl border ${on ? "border-white/30 bg-white/20" : "border-border/60 bg-background"}`}>{t.id === "all" ? <Layers className="h-4 w-4" /> : <Logo id={t.id} title={t.title} size={26} />}</span>
                       <span className="min-w-0 flex-1 whitespace-nowrap leading-tight lg:whitespace-normal">{t.title}</span>
-                      <span className={`text-xs font-black tabular-nums ${on ? "opacity-90" : "text-muted-foreground"}`}>{t.n}</span>
                     </button>
                   );
                 })}
@@ -94,7 +92,7 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
                 {selected && <span className="flex h-10 w-10 flex-none items-center justify-center rounded-xl border border-border/60 bg-background"><Logo id={selected.id} title={selected.title} size={28} /></span>}
                 <div className="min-w-0">
                   <h3 className="truncate text-lg font-black leading-tight">{selected ? selected.title : terms.length ? "Search results" : "All FAQs"}</h3>
-                  <p className="text-xs font-semibold text-muted-foreground" aria-live="polite">{directory ? `${total} answers across ${SAAS_PRODUCT_COUNT} products` : `${results} ${results === 1 ? "answer" : "answers"}${terms.length ? ` for “${query.trim()}”` : ""}`}</p>
+                  <p className="text-xs font-semibold text-muted-foreground" aria-live="polite">{directory ? "Answers for every product" : `Answers${terms.length ? ` matching “${query.trim()}”` : ""}`}</p>
                 </div>
                 {selected?.href && <Link href={selected.href} className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-black text-primary hover:bg-primary hover:text-primary-foreground">Product details <ArrowUpRight className="h-3.5 w-3.5" /></Link>}
               </div>
@@ -110,7 +108,7 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
                     <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
                     <span className="flex items-center gap-3">
                       <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl border border-border/60 bg-background shadow-sm transition-transform group-hover:scale-105"><Logo id={g.id} title={g.title} size={40} /></span>
-                      <span className="min-w-0"><span className="block font-black leading-tight">{g.title}</span><span className="mt-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-black text-primary">{g.items.length} answers</span></span>
+                      <span className="min-w-0"><span className="block font-black leading-tight">{g.title}</span><span className="mt-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-black text-primary">Answers</span></span>
                     </span>
                     <span className="mt-4 line-clamp-2 flex-1 text-sm leading-snug text-muted-foreground">“{g.items[0]?.q}”</span>
                     <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">Browse answers<ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
@@ -136,7 +134,6 @@ export default function FaqHub({ groups }: { groups: FaqHubGroup[] }) {
                       <div className="mb-3 flex items-center gap-3 px-1">
                         <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-background"><Logo id={g.id} title={g.title} size={22} /></span>
                         <h4 className="font-black">{g.title}</h4>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-bold text-muted-foreground">{g.items.length}</span>
                         {g.href && <Link href={g.href} className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">Product details <ArrowUpRight className="h-3.5 w-3.5" /></Link>}
                       </div>
                     )}

@@ -15,7 +15,7 @@ import Reveal from "@/components/platform/saas/Reveal";
 import type { IconKey } from "@/lib/platform/saas/content";
 import ProductCatalog from "@/components/platform/saas/catalog/ProductCatalog";
 import { productShort } from "@/lib/platform/saas/product-short";
-import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
+import { productPath } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/products", title: "SelfRun AI Features: CRM, HR, Accounting, Projects & More", description: "See everything SelfRun AI does, product by section: customers and sales, HR and payroll, accounting, projects, purchasing, training, documents, AI, SEO and a website builder. Free to start.", keywords: ["business software products", "CRM software", "HR and payroll software", "accounting software", "project management software", "procurement software", "helpdesk software", "website builder", "AI chatbot for business", "SEO software", "contract management software", "online test software"], tag: "Products" });
@@ -70,17 +70,13 @@ const WANTS: { key: string; text: string }[] = [
 export default async function ProductsPage() {
   const groups = await getFeatureGroups();
   const all = groups.flatMap((g) => g.items);
-  const total = all.reduce(
-    (n, m) => n + (featureCount(m.key) || m.capabilities.length),
-    0
-  );
 
   return (
     <>
       <JsonLd data={[webPage({ type: "CollectionPage", path: "/products", name: "Products", description: "See everything SelfRun AI does, product by section: customers and sales, HR and payroll, accounting, projects, purchasing, training, documents, AI, SEO and a website builder. Free to start." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }]), itemList({ name: "SelfRun AI products", items: all.map((m) => ({ name: m.name, path: productPath(m.key) })) })]} />
       <PageHero
         art="features"
-        eyebrow={`${SAAS_PRODUCT_COUNT} products · ${total}+ features`}
+        eyebrow="Every product · every feature included"
         title="Everything SelfRun AI does,"
         accent="product by product."
         lead="SelfRun AI is one software for your whole business. It is made of products, one for each job: customers and sales, staff and payroll, invoices and accounts, projects, buying, training, documents, your website and more. Browse them below and open any product to see exactly what it does. Use only the ones you need. Every product and every feature is included in every plan."

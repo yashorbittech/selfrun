@@ -86,7 +86,7 @@ export default async function BlogPostPage({
           className="group inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-5 py-3 text-xs font-bold text-foreground shadow-sm backdrop-blur transition-all hover:bg-muted"
         >
           <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-1" />
-          All Guides ({POSTS.length})
+          All Guides
         </Link>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-2.5 text-xs font-bold text-primary">
           <Tag className="h-3.5 w-3.5" />
@@ -104,7 +104,7 @@ export default async function BlogPostPage({
           {/* Left Sidebar: sticky */}
           <aside className="md:col-span-5 lg:col-span-4 md:sticky md:top-28 md:self-start" aria-label="All guides">
             <details className="group rounded-2xl border border-border/60 bg-card shadow-sm md:hidden">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black">All {POSTS.length} guides<span className="text-xs font-bold text-primary group-open:hidden">Tap to browse</span></summary>
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black">All guides<span className="text-xs font-bold text-primary group-open:hidden">Tap to browse</span></summary>
               <div className="border-t border-border/60 p-2"><BlogSidebar posts={sidebarPosts} activeSlug={post.slug} /></div>
             </details>
             <div className="hidden md:block"><BlogSidebar posts={sidebarPosts} activeSlug={post.slug} /></div>
@@ -183,7 +183,7 @@ export default async function BlogPostPage({
                   href="/blog"
                   className="text-xs font-semibold text-primary transition-colors hover:underline"
                 >
-                  View all {POSTS.length} articles
+                  View all articles
                 </Link>
               </div>
 
@@ -250,7 +250,7 @@ export default async function BlogPostPage({
                 Start automating your business with SelfRun AI
               </h3>
               <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-                All 20+ modules included on our free plan. Launch your website, manage your sales pipeline, and run payroll with zero complexity.
+                Every product included on our free plan. Launch your website, manage your sales pipeline, and run payroll with zero complexity.
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <Link

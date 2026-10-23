@@ -13,7 +13,6 @@ import { panelColor } from "@/lib/platform/saas/palette";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { screenFor } from "@/lib/platform/saas/screens";
 import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
-import { FEATURE_LISTS, featureCount } from "@/lib/platform/saas/feature-lists";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Reveal from "@/components/platform/saas/Reveal";
@@ -62,7 +61,6 @@ export default async function SaasHome() {
   const freePlan = plans.find((p) => p.kind === "free");
   const platforms = new Set(DEVICES.flatMap((d) => d.platforms).filter((x) => !["Chrome", "Safari", "Edge", "Firefox"].includes(x))).size;
   const byKey = new Map(modules.map((m) => [m.key, m]));
-  const totalFeatures = Object.keys(FEATURE_LISTS).filter((k) => byKey.has(k)).reduce((n, k) => n + featureCount(k), 0);
   const productTabs = SHOWCASE.flatMap((k, i) => {
     const m = byKey.get(k);
     return m && screenFor(k) ? [{ key: k, name: m.name, icon: m.icon, summary: m.summary, points: m.capabilities, node: <DeviceScene screenKey={k} name={m.name} variant={(i % 6) as SceneVariant} /> }] : [];
@@ -125,7 +123,7 @@ export default async function SaasHome() {
         <div className="sr-container">
           <CountStats items={[
             { v: "1", l: "software for sales, HR, finance and more" },
-            { v: `${totalFeatures}+`, l: "features, all included in every plan" },
+            { v: "AI", l: "built in, to answer questions and write drafts" },
             { v: `${platforms}`, l: "devices and systems it works on" },
             { v: "₹0", l: "to start, free forever" },
           ]} />
@@ -270,7 +268,7 @@ export default async function SaasHome() {
       {/* Everyday uses */}
       <section id="examples" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("examples")} center icon="layers" eyebrow="Everyday uses" title={`${USE_CASES.length} everyday jobs`} accent="it takes off your plate." lead="These are real situations a business runs into. Each one shows the problem people usually have, and what changes when everything works together." />
+          <SectionHead n={no("examples")} center icon="layers" eyebrow="Everyday uses" title="Everyday jobs" accent="it takes off your plate." lead="These are real situations a business runs into. Each one shows the problem people usually have, and what changes when everything works together." />
           <NumberedRows items={USE_CASES.map((u) => ({ title: USE_CASE_PLAIN_TITLES[u.slug] ?? u.title, text: `${u.problem} The result: ${u.result}` }))} />
           <div className="mt-10 flex justify-center"><Link href="/success-stories" className="sr-btn sr-btn-primary">See each one step by step <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
@@ -389,7 +387,7 @@ export default async function SaasHome() {
       <section id="nolimits" style={{ scrollMarginTop: 140 }} className="sr-section relative overflow-hidden bg-muted/10">
         <div className="pointer-events-none absolute right-0 top-1/3 h-[700px] w-[700px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <div className="sr-container relative">
-          <SectionHead n={no("nolimits")} center icon="layers" eyebrow="No locked features" title="Every feature." accent="In every plan." lead={`${totalFeatures}+ features across customers, staff, payroll, money, projects, buying, training, documents, website, AI and more. Nothing is hidden behind a higher plan. Plans differ only by team size and usage limits.`} />
+          <SectionHead n={no("nolimits")} center icon="layers" eyebrow="No locked features" title="Every feature." accent="In every plan." lead="Customers, staff, payroll, money, projects, buying, training, documents, your website, AI and more. Nothing is hidden behind a higher plan. Plans differ only by team size and usage limits." />
           <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
           <div>
             <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-1">
@@ -465,7 +463,7 @@ export default async function SaasHome() {
               <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-brand-accent/15 blur-3xl" />
               <div className="relative space-y-8">
                 <ul className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {[`${totalFeatures}+ features across the whole software`, "AI and automation included", "Your own brand, web address and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
+                  {["Every feature of the whole software", "AI and automation included", "Your own brand, web address and apps", ...freePlan.limits.filter((l) => l.included).slice(0, 3).map((l) => `${l.label}: ${l.value}`), "No card needed"].map((t) => (
                     <li key={t} className="flex items-center gap-3 border-b border-border/50 py-3.5 text-[15px] font-semibold"><span className="sr-circle h-6 w-6"><Check className="h-3.5 w-3.5" strokeWidth={3} /></span>{t}</li>
                   ))}
                 </ul>

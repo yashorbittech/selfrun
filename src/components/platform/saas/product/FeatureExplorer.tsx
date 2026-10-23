@@ -28,7 +28,7 @@ export default function FeatureExplorer({ productName, items, groups }: { produc
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={`Search ${items.length} ${productName} features…`}
+          placeholder={`Search ${productName} features…`}
           aria-label={`Search ${productName} features`}
           className="h-14 w-full rounded-2xl border border-border/70 bg-background pl-12 pr-12 text-base shadow-sm outline-none transition-shadow placeholder:text-muted-foreground focus:border-primary focus:shadow-[0_0_0_4px] focus:shadow-primary/15"
         />
@@ -38,12 +38,12 @@ export default function FeatureExplorer({ productName, items, groups }: { produc
       <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Feature groups">
         {[{ title: "all", label: "All", count: items.length }, ...groups.map((g) => ({ title: g.title, label: g.title, count: g.count }))].map((g) => (
           <button key={g.title} type="button" role="tab" aria-selected={group === g.title} onClick={() => { setGroup(g.title); setAll(false); }} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition-all ${group === g.title ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/70 bg-background text-foreground hover:border-primary/50 hover:text-primary"}`}>
-            {g.label}<span className={`rounded-full px-2 py-0.5 text-[11px] ${group === g.title ? "bg-white/20" : "bg-primary/10 text-primary"}`}>{g.count}</span>
+            {g.label}
           </button>
         ))}
       </div>
 
-      <p className="mt-5 text-sm text-muted-foreground" aria-live="polite">Showing <b className="text-foreground">{shown.length}</b> of {items.length} features{query ? <> matching “{q}”</> : null}</p>
+      <p className="mt-5 text-sm text-muted-foreground" aria-live="polite">{query ? <>Features matching “{q}”</> : <>All {productName} features</>}</p>
 
       <motion.div layout className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <AnimatePresence mode="popLayout">
@@ -77,7 +77,7 @@ export default function FeatureExplorer({ productName, items, groups }: { produc
 
       {limited && (
         <div className="mt-8 flex justify-center">
-          <button type="button" onClick={() => setAll(true)} className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-bold text-background shadow-lg transition-transform hover:scale-105">Show all {filtered.length} features <ArrowRight className="h-4 w-4" /></button>
+          <button type="button" onClick={() => setAll(true)} className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-bold text-background shadow-lg transition-transform hover:scale-105">Show all features <ArrowRight className="h-4 w-4" /></button>
         </div>
       )}
     </div>

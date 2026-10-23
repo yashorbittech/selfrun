@@ -11,7 +11,7 @@ import { ArrowRight } from "lucide-react";
 import FaqHub from "@/components/platform/saas/FaqHub";
 import { FAQ_GROUPS } from "@/lib/platform/saas/faqs";
 
-export const metadata: Metadata = pageMeta({ path: "/faqs", title: "FAQs: Answers for Every Product", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers.", keywords: ["SelfRun AI FAQ", "business software FAQs", "CRM software questions", "HR software questions", "payroll software FAQ", "accounting software FAQ", "how does business automation software work", "SaaS security questions", "white label software FAQ"], tag: "FAQs" });
+export const metadata: Metadata = pageMeta({ path: "/faqs", title: "FAQs: Answers for Every Product", description: "Answers about SelfRun AI and every one of its products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers.", keywords: ["SelfRun AI FAQ", "business software FAQs", "CRM software questions", "HR software questions", "payroll software FAQ", "accounting software FAQ", "how does business automation software work", "SaaS security questions", "white label software FAQ"], tag: "FAQs" });
 
 const NAV = [
   { id: "browse", label: "Browse answers" },
@@ -23,7 +23,7 @@ const NAV = [
 export default function FaqsPage() {
   return (
     <>
-      <JsonLd data={[webPage({ type: "CollectionPage", path: "/faqs", name: "FAQs", description: "Answers about SelfRun AI and every one of its 20 products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }]), faqPage(FAQ_GROUPS.find((g) => g.id === "general")?.items.slice(0, 20).map(({ q, a }) => ({ q, a })) ?? [])]} />
+      <JsonLd data={[webPage({ type: "CollectionPage", path: "/faqs", name: "FAQs", description: "Answers about SelfRun AI and every one of its products: CRM, HR, finance, projects, AI, security, pricing, setup and your own brand. Search over a thousand answers." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "FAQs", path: "/faqs" }]), faqPage(FAQ_GROUPS.find((g) => g.id === "general")?.items.slice(0, 20).map(({ q, a }) => ({ q, a })) ?? [])]} />
       <PageHero
         art="features"
         eyebrow="SelfRun answers"

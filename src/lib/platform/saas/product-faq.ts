@@ -18,7 +18,7 @@ export function productFaqs(m: FeatureModule, d: { groups: FeatureGroupList[]; t
   if (detail) out.push({ q: `Who is ${m.name} for?`, a: detail.audience.map((a) => `${a.who}: ${a.does}`).join(" ") });
   if (value) out.push({ q: `What does ${m.name} take the place of?`, a: `${m.name} takes the place of ${value.replaces.toLowerCase()}. ${value.benefits.join(". ")}.` });
   if (detail) out.push({ q: `How does ${m.name} work?`, a: detail.workflow.map((w, i) => `${i + 1}. ${w.title}: ${w.text}`).join(" ") });
-  if (total > 0) out.push({ q: `How many features does ${m.name} have?`, a: `${total} features in ${groups.length} groups: ${list(groups.map((g) => g.title))}. Every one of them is included in every plan.` });
+  if (total > 0) out.push({ q: `What features does ${m.name} have?`, a: `They are grouped like this: ${list(groups.map((g) => g.title))}. Every one of them is included in every plan.` });
   if (m.automations.length) out.push({ q: `What does ${m.name} do automatically?`, a: `${m.automations.join(". ")}.` });
   if (connected.length) out.push({ q: `Does ${m.name} work with other products?`, a: `It works fully on its own, and it can pass work to ${list(connected)} when you want it to.` });
   if (detail?.ask?.length) out.push({ q: `Can I ask AI questions about my ${m.name} data?`, a: `Yes. Ask in plain English, for example ${detail.ask.slice(0, 3).map((q) => `“${q}”`).join(", ")}. Answers are worked out from the records the person asking is allowed to see, and show how they were calculated.` });

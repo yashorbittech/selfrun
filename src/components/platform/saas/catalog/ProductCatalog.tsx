@@ -36,7 +36,7 @@ export default function ProductCatalog({ products, groups, afterWall }: { produc
       {/* brand wall */}
       <section aria-label="Every product of SelfRun AI" className="border-b border-border/50 bg-gradient-to-b from-muted/30 to-background">
         <div className="sr-container py-10 lg:py-14">
-          <p className="mb-6 text-center text-xs font-black uppercase tracking-[0.2em] text-primary">Every product of SelfRun AI · {products.length} in total</p>
+          <p className="mb-6 text-center text-xs font-black uppercase tracking-[0.2em] text-primary">Every product of SelfRun AI</p>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10">
             {products.map((p) => (
               <li key={p.key}>
@@ -63,7 +63,7 @@ export default function ProductCatalog({ products, groups, afterWall }: { produc
           <div className="sr-scroll-x flex gap-2" role="tablist" aria-label="Categories">
             {[{ id: "all", title: "All products", n: products.length }, ...groups.map((g) => ({ id: g.id, title: g.title, n: products.filter((p) => p.group === g.id).length }))].map((g) => (
               <button key={g.id} type="button" role="tab" aria-selected={group === g.id} onClick={() => setGroup(g.id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-bold transition-all ${group === g.id ? "border-primary bg-primary text-primary-foreground shadow-md shadow-primary/25" : "border-border/60 bg-muted/40 text-foreground hover:border-primary/40 hover:text-primary"}`}>
-                {g.title}<span className={`rounded-full px-1.5 text-xs ${group === g.id ? "bg-white/20" : "bg-background"}`}>{g.n}</span>
+                {g.title}
               </button>
             ))}
           </div>
@@ -81,7 +81,7 @@ export default function ProductCatalog({ products, groups, afterWall }: { produc
           <section key={g.id} id={g.id} className="mb-16 last:mb-0" style={{ scrollMarginTop: 150 }}>
             <header className="mb-7 flex flex-wrap items-end justify-between gap-3">
               <div className="max-w-2xl"><h2 className="text-2xl font-black tracking-tight sm:text-3xl">{g.title}</h2><p className="mt-1.5 text-muted-foreground">{g.lead}</p></div>
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">{shown.filter((p) => p.group === g.id).length} {shown.filter((p) => p.group === g.id).length === 1 ? "product" : "products"}</span>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-primary">Included in every plan</span>
             </header>
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {shown.filter((p) => p.group === g.id).map((p) => (
@@ -105,7 +105,7 @@ export default function ProductCatalog({ products, groups, afterWall }: { produc
                     {p.replaces && <p className="mt-auto rounded-xl bg-muted/50 px-3 py-2 text-xs text-muted-foreground"><b className="font-black uppercase tracking-wider text-foreground">Takes the place of</b> · {p.replaces}</p>}
                   </div>
                   <div className="flex items-center justify-between gap-3 border-t border-border/50 bg-muted/20 px-6 py-4">
-                    <span className="text-sm font-bold text-muted-foreground"><b className="text-foreground">{p.features}</b> features</span>
+                    <span className="text-sm font-bold text-muted-foreground">Every feature included</span>
                     <span className="flex items-center gap-2">
                       <Link href={p.docsHref} aria-label={`${p.name} documentation`} className="relative z-20 flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:text-primary"><BookOpen className="h-4 w-4" /></Link>
                       <Link href={p.href} className="relative z-20 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-all hover:gap-2.5">Explore <ArrowRight className="h-4 w-4" /></Link>

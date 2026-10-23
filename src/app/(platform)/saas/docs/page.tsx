@@ -16,7 +16,6 @@ import ProductDocsExplorer from "@/components/platform/saas/ProductDocsExplorer"
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
-import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/docs", title: "Documentation: Guides and Walkthroughs", description: "Step-by-step guides and walkthroughs for every feature of SelfRun AI, with the real screen beside each step. Set up your business workspace and learn each product.", keywords: ["business software documentation", "CRM user guide", "HR software setup guide", "payroll software how to", "project management software tutorial", "accounting software guide", "SaaS help center", "how to set up business software", "step by step software guides"], tag: "Docs" });
@@ -44,7 +43,6 @@ const PATH: { slug: string; title: string; text: string }[] = [
 export default async function DocsPage() {
   const groups = await getFeatureGroups();
   const panels = groups.flatMap((g) => g.items);
-  const total = panels.reduce((n, m) => n + featuresOf(m.key).length, 0);
   const entries: DocEntry[] = panels.flatMap((m) => featuresOf(m.key).map((f) => ({ panelKey: m.key, panel: m.name, slug: f.slug, name: f.name, text: f.text })));
   const explorer = panels.flatMap((m) => {
     const fs = featuresOf(m.key);
@@ -56,7 +54,7 @@ export default async function DocsPage() {
   return (
     <>
       <JsonLd data={[webPage({ type: "CollectionPage", path: "/docs", name: "Documentation", description: "Step-by-step guides and walkthroughs for every feature of SelfRun AI, with the real screen beside each step. Set up your business workspace and learn each product." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Documentation", path: "/docs" }]), itemList({ name: "SelfRun AI guides by product", items: panels.map((m) => ({ name: `${m.name} guides`, path: `/docs#${m.key}` })) }), itemList({ name: "SelfRun AI walkthroughs", items: TUTORIALS.map((t) => ({ name: t.title, path: `/docs/walkthroughs/${t.slug}` })) })]} />
-      <PageHero art="docs" eyebrow={`${total} feature guides · ${DOCS.length} general guides · ${TUTORIALS.length} walkthroughs`} title="Learn SelfRun AI" accent="one step at a time." lead="Everything you need to set up SelfRun AI and use it every day, from creating your account to running payroll or publishing your website. Every guide shows the real screen and the exact steps to follow. New here? Follow the learning path below, or search for the job you want to do." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ">
+      <PageHero art="docs" eyebrow="A guide for every feature · general guides · walkthroughs" title="Learn SelfRun AI" accent="one step at a time." lead="Everything you need to set up SelfRun AI and use it every day, from creating your account to running payroll or publishing your website. Every guide shows the real screen and the exact steps to follow. New here? Follow the learning path below, or search for the job you want to do." photo="laptop-talk" shot="support" shotName="SelfRun ResolveIQ">
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Browse walkthroughs", href: "#walkthroughs" }} />
       </PageHero>
 
@@ -65,7 +63,7 @@ export default async function DocsPage() {
       {/* 01 start */}
       <section id="start" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n="01" icon="search" eyebrow="Start here" title="What do you want" accent="to do?" lead={`Search all ${total} feature guides by what you want to do, or choose the way you prefer to learn.`} />
+          <SectionHead n="01" icon="search" eyebrow="Start here" title="What do you want" accent="to do?" lead="Search the guides by what you want to do, or choose the way you prefer to learn." />
           <Reveal className="mb-12"><DocsSearch entries={entries} large /></Reveal>
           <div className="grid gap-5 md:grid-cols-3">
             {[
@@ -131,7 +129,7 @@ export default async function DocsPage() {
       {/* 05 guides by section */}
       <section id="products" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n="05" icon="layers" eyebrow="Guides by product" title="Every feature of" accent="every product." lead={`${SAAS_PRODUCT_COUNT} products, ${total} step-by-step guides. Each guide tells you what the feature does, what to check before you start, the steps in order, and a quick recap.`} />
+          <SectionHead n="05" icon="layers" eyebrow="Guides by product" title="Every feature of" accent="every product." lead="Every product has step-by-step guides. Each guide tells you what the feature does, what to check before you start, the steps in order, and a quick recap." />
           <ProductDocsExplorer panels={explorer} />
         </div>
       </section>

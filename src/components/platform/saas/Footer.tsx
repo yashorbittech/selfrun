@@ -5,6 +5,13 @@ import { SAAS_BRAND } from "@/lib/platform/saas/brand";
 import { LEGAL_LINKS } from "@/lib/platform/saas/site";
 import { productPath } from "@/lib/platform/saas/product-routes";
 
+/** The legal and trust links, grouped by what a reader is looking for. */
+const LEGAL_GROUPS: { title: string; hrefs: string[] }[] = [
+  { title: "Legal", hrefs: ["/terms", "/privacy", "/cookies", "/refund-policy"] },
+  { title: "Your data", hrefs: ["/data-policy", "/data-requests", "/dpa", "/subprocessors"] },
+  { title: "Trust and security", hrefs: ["/security", "/sla", "/status", "/vulnerability-disclosure"] },
+];
+
 /** The footer: what the platform is, every product, the way in, the docs — and the legal pages beside the copyright line. */
 export default async function Footer({}: { host?: string }) {
   const CATEGORIES: { title: string; products: { label: string; href: string }[] }[] = [
@@ -101,14 +108,30 @@ export default async function Footer({}: { host?: string }) {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 border-t border-border/50 pt-5 text-sm text-muted-foreground lg:flex-row lg:items-center lg:justify-between">
-          <p>
-            © {new Date().getFullYear()} {SAAS_BRAND.name}. All rights reserved.
-            {SAAS_BRAND.operator ? <span> · Operated by {SAAS_BRAND.operator}</span> : null}
-          </p>
-          <ul className="flex flex-wrap gap-x-5 gap-y-2" aria-label="Legal">
-            {LEGAL_LINKS.map((l) => <li key={l.href}><Link href={l.href} className="transition-colors hover:text-primary">{l.label}</Link></li>)}
-          </ul>
+        <div className="mt-8 border-t border-border/50 pt-7">
+          <nav aria-label="Legal and trust" className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-3">
+            {LEGAL_GROUPS.map((g) => (
+              <div key={g.title}>
+                <p className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-foreground">{g.title}</p>
+                <ul className="space-y-2">
+                  {g.hrefs.flatMap((href) => { const l = LEGAL_LINKS.find((x) => x.href === href); return l ? [<li key={l.href}><Link href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-primary">{l.label}</Link></li>] : []; })}
+                </ul>
+              </div>
+            ))}
+          </nav>
+          <div className="mt-7 flex flex-col gap-2 border-t border-border/40 pt-5 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              © {new Date().getFullYear()} {SAAS_BRAND.name}. All rights reserved.
+              {SAAS_BRAND.operator ? <span> · Operated by {SAAS_BRAND.operator}</span> : null}
+            </p>
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              <Link href="/status" className="inline-flex items-center gap-1.5 font-semibold transition-colors hover:text-primary"><span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />System status</Link>
+              <span aria-hidden>·</span>
+              <Link href="/data-requests" className="font-semibold transition-colors hover:text-primary">Privacy requests</Link>
+              <span aria-hidden>·</span>
+              <Link href="/vulnerability-disclosure" className="font-semibold transition-colors hover:text-primary">Report a security issue</Link>
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -32,7 +32,7 @@ export default function StackCompare({ plan, products }: {
                 </li>
               ))}
             </ul>
-            <p className="mt-auto flex items-baseline justify-between border-t border-border pt-4 text-lg font-black"><span>Only these {c.rows.length} jobs</span><span className="tabular-nums">{inr(c.totalInr)}<span className="text-sm font-semibold text-muted-foreground"> /mo</span></span></p>
+            <p className="mt-auto flex items-baseline justify-between border-t border-border pt-4 text-lg font-black"><span>Only these jobs</span><span className="tabular-nums">{inr(c.totalInr)}<span className="text-sm font-semibold text-muted-foreground"> /mo</span></span></p>
           </div>
           <div className="sr-band relative flex flex-col gap-5 overflow-hidden p-6 sm:p-8">
             <span className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden />
@@ -63,7 +63,7 @@ export default function StackCompare({ plan, products }: {
                   <p className="text-2xl font-black tabular-nums text-emerald-300">{inr(c.totalInr - plan.monthly)}</p>
                 </div>
                 <div className="mt-3 space-y-2" aria-hidden>
-                  <div className="flex items-center gap-2"><span className="w-20 flex-none text-[10px] font-bold uppercase text-white/70">{c.rows.length} tools</span><span className="h-2.5 flex-1 rounded-full bg-rose-400/80" /><span className="w-16 flex-none text-right text-[11px] font-bold tabular-nums">{inr(c.totalInr)}</span></div>
+                  <div className="flex items-center gap-2"><span className="w-20 flex-none text-[10px] font-bold uppercase text-white/70">Separate tools</span><span className="h-2.5 flex-1 rounded-full bg-rose-400/80" /><span className="w-16 flex-none text-right text-[11px] font-bold tabular-nums">{inr(c.totalInr)}</span></div>
                   <div className="flex items-center gap-2"><span className="w-20 flex-none text-[10px] font-bold uppercase text-white/70">SelfRun</span><span className="flex-1"><span className="block h-2.5 rounded-full bg-emerald-300" style={{ width: `${Math.max(1.5, (plan.monthly / c.totalInr) * 100)}%` }} /></span><span className="w-16 flex-none text-right text-[11px] font-bold tabular-nums">{inr(plan.monthly)}</span></div>
                 </div>
                 <p className="mt-3 text-xs font-semibold text-white/85">About {Math.round(c.totalInr / plan.monthly)}× less — and {inr((c.totalInr - plan.monthly) * 12)} a year.</p>
@@ -71,7 +71,7 @@ export default function StackCompare({ plan, products }: {
             )}
 
             <div className="relative">
-              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>Independent products, together in one suite</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">{SAAS_PRODUCT_COUNT} products</span></p>
+              <p className="mb-2.5 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-white/75"><span>Independent products, together in one suite</span><span className="rounded-full bg-white/15 px-2 py-0.5 text-[10px] normal-case tracking-normal">All products</span></p>
               <div className="grid grid-cols-2 gap-2">
                 {products.slice(0, SAAS_PRODUCT_COUNT).map((product) => {
                   return (

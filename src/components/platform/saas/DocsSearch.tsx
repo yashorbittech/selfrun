@@ -26,7 +26,7 @@ export default function DocsSearch({ entries, large = false }: { entries: DocEnt
       <label className="relative block">
         <span className="sr-only">Search the guides</span>
         <Search className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted-foreground ${large ? "left-5 h-5 w-5" : "left-4 h-4 w-4"}`} aria-hidden />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={`Search ${entries.length} guides…`} className="sr-input" style={{ height: large ? 58 : 46, paddingLeft: large ? 52 : 42, borderRadius: 999, boxShadow: large ? "0 10px 30px -12px rgba(67,56,202,.25)" : undefined }} />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search the guides…" className="sr-input" style={{ height: large ? 58 : 46, paddingLeft: large ? 52 : 42, borderRadius: 999, boxShadow: large ? "0 10px 30px -12px rgba(67,56,202,.25)" : undefined }} />
       </label>
       {focus && q.trim() !== "" && (
         <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-2xl border border-border/70 bg-background p-2 shadow-2xl shadow-primary/15" style={{ animation: "sr-in .2s ease both" }}>

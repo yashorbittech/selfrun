@@ -9,7 +9,6 @@ import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { formatMoney } from "@/lib/platform/billing/types";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
-import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
@@ -34,7 +33,6 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
   if (!d) notFound();
   const { plan, plans, prev, next } = d;
   const modules = await getFeatureModules();
-  const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   const monthly = plan.kind === "paid" ? plan.offer.monthly : null;
   const yearly = plan.kind === "paid" ? plan.offer.yearly : null;
   return (
@@ -42,7 +40,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
       <JsonLd data={[
         webPage({ path: `/pricing/${plan.id}`, name: `${plan.name} plan`, description: plan.description }),
         breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }, { name: `${plan.name} plan`, path: `/pricing/${plan.id}` }]),, planOffers([{ id: plan.id, name: plan.name, description: plan.description, currency: plan.currency, kind: plan.kind, monthly: plan.offer.monthly, validUntil: null }])]} />
-      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${SAAS_PRODUCT_COUNT} products`, text: `${total}+ features included` }}>
+      <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${SAAS_PRODUCT_COUNT} products`, text: "Every feature included" }}>
         <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started", href: plan.kind === "contact" ? "/contact" : "/signup" }} secondary={{ label: "All plans", href: "/pricing" }} />
       </PageHero>
 
@@ -88,13 +86,13 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
 
       <section className="sr-section bg-muted/10">
         <div className="sr-container">
-          <SectionHead center icon="layers" eyebrow="Included" title={`Every product, in ${plan.name}.`} accent={`${total}+ features.`} lead="Nothing is held back in any plan. Open a product to see every feature." />
+          <SectionHead center icon="layers" eyebrow="Included" title={`Every product, in ${plan.name}.`} accent="Every feature." lead="Nothing is held back in any plan. Open a product to see every feature." />
           <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
                 <Link href={productPath(m.key)} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
                   <span className="sr-icon h-10 w-10 flex-none"><ProductLogo productKey={m.key} size={30} title={m.name} /></span>
-                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">{featureCount(m.key) || m.capabilities.length} features</span></span>
+                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">Every feature included</span></span>
                   <Check className="h-4 w-4 flex-none text-primary" />
                 </Link>
               </Reveal>
@@ -110,7 +108,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
               <Link key={dir} href={`/pricing/${p.id}`} className="group rounded-2xl border border-border/60 p-5 transition-all hover:-translate-y-0.5 hover:border-primary/40"><span className="block text-xs font-bold uppercase tracking-widest text-muted-foreground">{dir}</span><span className="mt-1 block text-xl font-black">{p.name}</span></Link>
             ) : null)}
           </div>
-          <p className="mt-6 text-center text-xs text-muted-foreground">{plans.length} plans in total · <Link href="/pricing" className="font-bold text-primary">Compare all</Link></p>
+          <p className="mt-6 text-center text-xs text-muted-foreground">See every plan · <Link href="/pricing" className="font-bold text-primary">Compare all</Link></p>
         </div>
       </section>
       <CtaBand />

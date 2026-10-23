@@ -44,7 +44,6 @@ function Head({ id, title, accent, lead }: { id: string; title: string; accent?:
 
 export default async function OnboardedBusinessesPage() {
   const groups = await getFeatureGroups();
-  const products = groups.flatMap((g) => g.items);
   const first = GROWTH[0];
 
   return (
@@ -59,7 +58,7 @@ export default async function OnboardedBusinessesPage() {
         photo="open-office"
         shot="workspace"
         shotName="SelfRun CommandOS"
-        chip={{ title: "Start free, no card needed", text: `${products.length} products in every plan` }}
+        chip={{ title: "Start free, no card needed", text: "Every product in every plan" }}
       >
         <HeroCtas primary={{ label: "Create a workspace", href: "/signup" }} secondary={{ label: "Read the setup guide", href: "/docs/getting-started" }} />
       </PageHero>

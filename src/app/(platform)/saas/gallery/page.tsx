@@ -13,7 +13,6 @@ import Reveal from "@/components/platform/saas/Reveal";
 import Icon from "@/components/platform/saas/Icon";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/gallery", title: "Product Gallery: Real Screens of Every Product", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size.", keywords: ["business software screenshots", "CRM software screenshots", "HR software demo screens", "accounting software interface", "project management software screenshots", "business dashboard examples", "SaaS product gallery", "software UI screens"], tag: "Gallery" });
@@ -31,11 +30,11 @@ export default async function GalleryPage({ searchParams }: { searchParams: Prom
   return (
     <>
       <JsonLd data={[webPage({ type: "CollectionPage", path: "/gallery", name: "Product gallery", description: "See every real screen of SelfRun AI in one place: CRM, HR, finance, projects, website builder and more. Filter by product, search and open any screen full size." }), breadcrumbList([{ name: "Home", path: "/" }, { name: "Gallery", path: "/gallery" }]), imageGallery({ path: "/gallery", name: "SelfRun AI product gallery", description: "Real screens of every SelfRun AI product, captured in a demo workspace.", images: items.slice(0, 40).map((i) => ({ url: i.src, name: `${i.panel}: ${i.title}` })) })]} />
-      <PageHero art="gallery" eyebrow={`${items.length} real screens · ${SAAS_PRODUCT_COUNT} products`} title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `${items.length} screens`, text: "Captured from the real product" }}>
+      <PageHero art="gallery" eyebrow="Real screens from every product" title="The product," accent="every screen." lead="Not mock-ups: captures of the live product, taken in a demo workspace with sample data. Filter by product, search, and open any screen full size." photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: "Real screens", text: "Captured from the real product" }}>
         <HeroCtas />
       </PageHero>
       <section className="border-b border-border/50 bg-background/60">
-        <div className="sr-container"><CountStats items={[{ v: `${items.length}`, l: "real screens" }, { v: `${SAAS_PRODUCT_COUNT}`, l: "products in suite" }, { v: `${items.filter((i) => i.featured).length}`, l: "featured captures" }, { v: "0", l: "mock-ups — every one is the live product" }]} /></div>
+        <div className="sr-container"><CountStats items={[{ v: "Real", l: "screens of the live product" }, { v: "Every", l: "product, with its own screens" }, { v: "Sample", l: "data, so nothing private is shown" }, { v: "0", l: "mock-ups — every one is the live product" }]} /></div>
       </section>
       <SectionScrollNav items={NAV} label="Gallery sections" numbered />
       <section id="browse" className="sr-section relative" style={{ scrollMarginTop: 140 }}>

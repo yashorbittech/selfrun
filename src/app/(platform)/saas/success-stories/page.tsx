@@ -69,7 +69,7 @@ export default async function SuccessStoriesPage() {
         photo="colleagues"
         shot="workspace"
         shotName="SelfRun CommandOS"
-        chip={{ title: `${USE_CASES.length} worked examples`, text: "Based on what the product does today" }}
+        chip={{ title: "Worked examples", text: "Based on what the product does today" }}
       >
         <HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "Talk with our team", href: "/contact" }} />
       </PageHero>
@@ -110,7 +110,7 @@ export default async function SuccessStoriesPage() {
       {/* 03 library */}
       <section id="library" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="library" title="See how the work" accent="connects." lead={`${USE_CASES.length} worked examples. Pick one to read the problem, the steps and the products involved.`} />
+          <Head id="library" title="See how the work" accent="connects." lead="Pick an example to read the problem, the steps and the products involved." />
           <StoryExplorer stories={stories} />
         </div>
       </section>
@@ -123,7 +123,7 @@ export default async function SuccessStoriesPage() {
             {byArea.map(({ g, list }, i) => (
               <Reveal key={g.id} delay={(i % 3) * 60}>
                 <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-3"><span className="sr-icon h-11 w-11 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span><div><h3 className="font-black leading-tight">{g.title}</h3><p className="text-xs font-bold text-muted-foreground">{list.length} {list.length === 1 ? "example" : "examples"}</p></div></div>
+                  <div className="mb-4 flex items-center gap-3"><span className="sr-icon h-11 w-11 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span><div><h3 className="font-black leading-tight">{g.title}</h3><p className="text-xs font-bold text-muted-foreground">Worked examples</p></div></div>
                   <ul className="space-y-2">{list.map((u) => <li key={u.slug}><a href="#library" className="group flex items-start gap-2 text-[15px] font-semibold leading-snug hover:text-primary"><ArrowRight className="mt-1 h-3.5 w-3.5 flex-none text-primary" />{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</a></li>)}</ul>
                 </div>
               </Reveal>
@@ -159,7 +159,7 @@ export default async function SuccessStoriesPage() {
               <Reveal key={m.key} as="li" delay={(i % 3) * 50}>
                 <Link href={productPath(m.key)} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
                   <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl border border-border/60 bg-background shadow-sm"><ProductLogo productKey={m.key} size={40} title={m.name} /></span>
-                  <span className="min-w-0 flex-1"><span className="block font-black leading-tight group-hover:text-primary">{m.name}</span><span className="text-sm text-muted-foreground">in {n} {n === 1 ? "example" : "examples"}</span></span>
+                  <span className="min-w-0 flex-1"><span className="block font-black leading-tight group-hover:text-primary">{m.name}</span><span className="text-sm text-muted-foreground">Used in the worked examples</span></span>
                   <ArrowRight className="h-4 w-4 flex-none text-primary opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
               </Reveal>

@@ -15,7 +15,6 @@ export type SidebarGroup = { id: string; title: string; items: { key: string; na
 export default function ProductSidebar({ groups, activeKey }: { groups: SidebarGroup[]; activeKey: string }) {
   const [q, setQ] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
-  const total = groups.reduce((n, g) => n + g.items.length, 0);
 
   const shown = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -33,7 +32,7 @@ export default function ProductSidebar({ groups, activeKey }: { groups: SidebarG
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm lg:sticky lg:top-28">
         <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
           <div className="mb-3 flex items-center justify-between gap-2">
-            <p className="flex items-center gap-2 text-sm font-black"><LayoutGrid className="h-4 w-4 text-primary" />All products<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{total}</span></p>
+            <p className="flex items-center gap-2 text-sm font-black"><LayoutGrid className="h-4 w-4 text-primary" />All products</p>
             <Link href="/products" className="text-xs font-bold text-primary hover:underline">Listing</Link>
           </div>
           <div className="relative">
@@ -65,7 +64,7 @@ export default function ProductSidebar({ groups, activeKey }: { groups: SidebarG
                         <span className="min-w-0 flex-1">
                           <span className="block text-[15px] font-black leading-snug">{p.name}</span>
                           <span className={`mt-0.5 block text-xs leading-snug ${active ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{p.short}</span>
-                          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${active ? "bg-white/20" : "bg-muted text-muted-foreground"}`}>{p.features} features</span>
+                          <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${active ? "bg-white/20" : "bg-muted text-muted-foreground"}`}>All included</span>
                         </span>
                         {!active && <ArrowRight className="h-4 w-4 flex-none -translate-x-1 text-primary opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />}
                       </Link>
@@ -85,7 +84,7 @@ export default function ProductSidebar({ groups, activeKey }: { groups: SidebarG
   return (
     <>
       <details className="group rounded-2xl border border-border/60 bg-card shadow-sm lg:hidden">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black"><span className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-primary" />Browse all {total} products</span><ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-sm font-black"><span className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-primary" />Browse all products</span><ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
         <div className="border-t border-border/60 p-2">{card}</div>
       </details>
       <aside className="hidden lg:block" aria-label="All products">{card}</aside>

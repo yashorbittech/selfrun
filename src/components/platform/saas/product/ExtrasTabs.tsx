@@ -12,7 +12,7 @@ export default function ExtrasTabs({ tabs }: { tabs: { id: string; label: string
       <div role="tablist" aria-label="Smart extras" className="mb-6 inline-flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-muted/60 p-1.5">
         {tabs.map((t) => (
           <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={active === t.id} aria-controls={`panel-${t.id}`} onClick={() => setActive(t.id)} className={`flex shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-all ${active === t.id ? "bg-background text-primary shadow-md" : "text-muted-foreground hover:text-foreground"}`}>
-            {t.icon}{t.label}{t.count !== undefined && <span className={`rounded-full px-2 py-0.5 text-[11px] ${active === t.id ? "bg-primary/10 text-primary" : "bg-background/70"}`}>{t.count}</span>}
+            {t.icon}{t.label}
           </button>
         ))}
       </div>

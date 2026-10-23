@@ -7,9 +7,6 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { INDUSTRIES, SECURITY_POINTS, USE_CASES, USE_CASE_PLAIN_TITLES } from "@/lib/platform/saas/content";
 import { GROWTH } from "@/lib/platform/saas/site";
-import { DOCS } from "@/lib/platform/saas/docs";
-import { TUTORIALS } from "@/lib/platform/saas/tutorials";
-import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import { panelColor } from "@/lib/platform/saas/palette";
@@ -22,7 +19,6 @@ import MarketingShot from "@/components/platform/saas/MarketingShot";
 import AboutHeroArtwork from "@/components/platform/saas/AboutHeroArtwork";
 import CustomerStoriesSection from "@/components/platform/saas/CustomerStoriesSection";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
-import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/about", title: "About SelfRun AI: What We Build and Why", description: "SelfRun AI is one software for running your whole business. Learn what we build, who it is for, how a business grows on it and the values behind it.", keywords: ["about SelfRun AI", "business automation company", "AI software company India", "who makes SelfRun AI", "business software mission", "SaaS company values", "all-in-one business platform company"], tag: "About" });
@@ -96,7 +92,7 @@ export default async function AboutPage() {
               <p>Use the products you need, one at a time or all together. The AI works with the records in each product, and whenever you choose to connect products you can set up automatic steps between them, such as creating a client record when a deal is won.</p>
               <p>SelfRun AI is built for many businesses at once. Every business gets the same features, the same guided setup and the same safeguards, and there is no special version for anyone. Each business uses it under its own name: in a web browser, as an installable app, on Android and iPhone, and on a computer.</p>
             </div>
-            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: String(SAAS_PRODUCT_COUNT), l: "ready-made products" }, { v: "Free", l: "to start, every feature included" }, { v: "Yours", l: "your own name, logo and web address" }]} /></div>
+            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: "All", l: "ready-made products" }, { v: "Free", l: "to start, every feature included" }, { v: "Yours", l: "your own name, logo and web address" }]} /></div>
           </div>
           <Reveal><MarketingShot screenKey="workspace" name="SelfRun CommandOS" /></Reveal>
         </div>
@@ -114,7 +110,7 @@ export default async function AboutPage() {
       {/* What we do */}
       <section id="what-we-do" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <Head id="what-we-do" title={`${groups.length} areas of your business,`} accent="one software." lead="We build and run the software your business works in. Each area below is a group of products, and all of them are included in every plan." />
+          <Head id="what-we-do" title="Every area of your business," accent="one software." lead="We build and run the software your business works in. Each area below is a group of products, and all of them are included in every plan." />
           <div className="mb-20">
             <ul className="grid gap-x-10 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((g, i) => (
@@ -140,10 +136,10 @@ export default async function AboutPage() {
           <Head id="numbers" title="What we have built," accent="at a glance." lead="Counted from the live product, not rounded up for effect." />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { v: String(modules.length), l: "ready-made products", x: "Each one covers a job in your business, from sales to payroll." },
-              { v: `${modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0)}+`, l: "features", x: "All included in every plan, starting free." },
-              { v: String(groups.length), l: "areas of your business", x: "From sales and people to finance and your website." },
-              { v: String(DOCS.length + TUTORIALS.length), l: "guides and walkthroughs", x: "Step by step, with the real screen." },
+              { v: "All", l: "ready-made products", x: "Each one covers a job in your business, from sales to payroll." },
+              { v: "AI", l: "built into the software", x: "Ask questions and get drafts and answers from your own records." },
+              { v: "Every", l: "area of your business", x: "From sales and people to finance and your website." },
+              { v: "Step by step", l: "guides and walkthroughs", x: "Each one uses the real screen." },
             ].map((n, i) => (
               <Reveal key={n.l} delay={i * 60}>
                 <div className="h-full rounded-3xl border border-border/60 bg-gradient-to-br from-primary/[0.07] via-card to-brand-accent/[0.07] p-7 text-center shadow-sm">

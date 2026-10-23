@@ -12,7 +12,6 @@ export default function DocsGuideSidebar({ groups, activeSlug, activeCategory }:
   const [open, setOpen] = useState<Set<string>>(() => new Set([activeCategory]));
   const boxRef = useRef<HTMLDivElement>(null);
   const query = q.trim().toLowerCase();
-  const total = groups.reduce((n, g) => n + g.items.length, 0);
 
   const shown = useMemo(() => (query ? groups.map((g) => ({ ...g, items: g.items.filter((x) => x.title.toLowerCase().includes(query)) })).filter((g) => g.items.length) : groups), [groups, query]);
 
@@ -28,7 +27,7 @@ export default function DocsGuideSidebar({ groups, activeSlug, activeCategory }:
     <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
       <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All guides<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{total}</span></p>
+          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All guides</p>
           <Link href="/docs" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"><ArrowLeft className="h-3 w-3" />Docs home</Link>
         </div>
         <div className="relative">
@@ -46,7 +45,6 @@ export default function DocsGuideSidebar({ groups, activeSlug, activeCategory }:
             <div key={g.name} className={`rounded-2xl border ${current ? "border-primary/30 bg-primary/[0.04]" : "border-transparent"}`}>
               <button type="button" onClick={() => toggle(g.name)} aria-expanded={isOpen} className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left hover:bg-muted/50">
                 <span className="min-w-0 flex-1 truncate text-sm font-black">{g.name}</span>
-                <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold text-muted-foreground">{g.items.length}</span>
                 <ChevronDown className={`h-4 w-4 flex-none text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`} />
               </button>
               {isOpen && (

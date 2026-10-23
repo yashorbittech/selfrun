@@ -28,7 +28,7 @@ export default function BlogSidebar({ posts, activeSlug }: { posts: SidebarPost[
     <div className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
       <div className="border-b border-border/50 bg-gradient-to-br from-primary/[0.10] via-card to-brand-accent/[0.10] p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All guides<span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-black text-primary">{posts.length}</span></p>
+          <p className="flex items-center gap-2 text-sm font-black"><BookOpen className="h-4 w-4 text-primary" />All guides</p>
           <Link href="/blog" className="text-xs font-bold text-primary hover:underline">Listing</Link>
         </div>
         <div className="relative">

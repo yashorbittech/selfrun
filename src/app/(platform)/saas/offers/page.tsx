@@ -7,21 +7,18 @@ import Link from "next/link";
 import { ArrowRight, BadgePercent, Check, Gift, Infinity as InfinityIcon, Layers, PiggyBank, Sparkles, Star } from "lucide-react";
 import { getOffers } from "@/lib/platform/saas/offers";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
-import { featureCount } from "@/lib/platform/saas/feature-lists";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import { TimelineSteps } from "@/components/platform/saas/Modern";
 import Countdown from "@/components/platform/saas/Countdown";
 import SavingsCalculator from "@/components/platform/saas/SavingsCalculator";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
-import { SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/offers", title: "Launch Offer on Every Paid Plan", description: "The current SelfRun AI launch offer on paid plans, with its real end date. Every plan includes every product and every feature, starting free.", keywords: ["business software offer", "SaaS launch offer", "discount on business software", "CRM software deal", "SaaS pricing offer", "limited time software offer"], tag: "Offer" });
 
 export default async function OffersPage() {
   const [o, modules] = await Promise.all([getOffers(), getFeatureModules()]);
-  const total = modules.reduce((n, m) => n + (featureCount(m.key) || m.capabilities.length), 0);
   const yearly = o.yearly;
   const topYearly = yearly.reduce<(typeof yearly)[number] | null>((a, b) => (!a || (b.yearly?.pct ?? 0) > (a.yearly?.pct ?? 0) ? b : a), null);
   return (
@@ -32,7 +29,7 @@ export default async function OffersPage() {
         eyebrow={o.topPct > 0 ? o.label : "Offers"}
         title={o.topPct > 0 ? `Save up to ${o.topPct}%` : "Free forever."}
         accent={o.topPct > 0 ? "on every paid plan." : "Pay only as your team grows."}
-        lead={`Every plan includes every one of the ${SAAS_PRODUCT_COUNT} products and ${total}+ features. The prices below are the prices you pay — plus a free plan that is free forever.`}
+        lead={`Every plan includes every product, with every feature. The prices below are the prices you pay — plus a free plan that is free forever.`}
         photo="success" shot="fms" shotName="Finance"
       >
         {o.endsAt && (
@@ -101,7 +98,7 @@ export default async function OffersPage() {
               <div className="relative h-full overflow-hidden rounded-[2.25rem] border border-border/60 bg-background p-8 shadow-sm">
                 <Layers className="pointer-events-none absolute -bottom-8 -right-6 h-44 w-44 text-primary/[0.07]" />
                 <span className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-black uppercase tracking-wider"><Sparkles className="h-4 w-4 text-primary" />Nothing locked</span>
-                <p className="mt-5 text-5xl font-black tracking-tight">{SAAS_PRODUCT_COUNT} products · {total}+ features</p>
+                <p className="mt-5 text-5xl font-black tracking-tight">Every product · every feature</p>
                 <p className="mt-2 text-muted-foreground">In every plan, including the free one. Plans differ only by team size and by storage, AI, email and voice allowances.</p>
                 <Link href="/products" className="group relative mt-6 inline-flex items-center gap-2 text-sm font-black text-primary">See every feature <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
               </div>
