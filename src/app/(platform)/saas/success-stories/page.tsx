@@ -12,6 +12,7 @@ import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import StoryExplorer from "@/components/platform/saas/StoryExplorer";
 import CustomerStoriesSection from "@/components/platform/saas/CustomerStoriesSection";
 import ProductLogo from "@/components/products/ProductLogo";
+import type { IconKey } from "@/lib/platform/saas/content";
 import { INDUSTRIES, USE_CASES, USE_CASE_PLAIN_TITLES } from "@/lib/platform/saas/content";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
@@ -45,6 +46,9 @@ function Head({ id, title, accent, lead }: { id: string; title: string; accent?:
   );
 }
 
+/** An icon for each kind of business. */
+const INDUSTRY_ICON: Record<string, IconKey> = { "it-and-software": "bolt", "education-and-training": "graduation", "agencies-and-consultancies": "megaphone", "trading-and-distribution": "cart", "professional-services": "file", "growing-smes": "rocket" };
+
 export default async function SuccessStoriesPage() {
   const modules = await getFeatureModules();
   const byKey = new Map(modules.map((m) => [m.key, m]));
@@ -55,7 +59,7 @@ export default async function SuccessStoriesPage() {
   const groups = await getFeatureGroups();
   const byArea = groups.map((g) => ({ g, list: USE_CASES.filter((u) => u.modules.some((k) => g.items.some((m) => m.key === k))) })).filter((x) => x.list.length);
   const byIndustry = INDUSTRIES.map((x) => ({ x, list: USE_CASES.filter((u) => u.modules.some((k) => x.modules.includes(k))) })).filter((y) => y.list.length);
-  const usage = modules.map((m) => ({ m, n: USE_CASES.filter((u) => u.modules.includes(m.key)).length })).filter((x) => x.n > 0).sort((a, b) => b.n - a.n);
+  const usage = modules.map((m) => ({ m, list: USE_CASES.filter((u) => u.modules.includes(m.key)) })).filter((x) => x.list.length > 0).sort((a, b) => b.list.length - a.list.length);
 
   return (
     <>
@@ -124,7 +128,7 @@ export default async function SuccessStoriesPage() {
               <Reveal key={g.id} delay={(i % 3) * 60}>
                 <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm">
                   <div className="mb-4 flex items-center gap-3"><span className="sr-icon h-11 w-11 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span><div><h3 className="font-black leading-tight">{g.title}</h3><p className="text-xs font-bold text-muted-foreground">Worked examples</p></div></div>
-                  <ul className="space-y-2">{list.map((u) => <li key={u.slug}><a href="#library" className="group flex items-start gap-2 text-[15px] font-semibold leading-snug hover:text-primary"><ArrowRight className="mt-1 h-3.5 w-3.5 flex-none text-primary" />{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</a></li>)}</ul>
+                  <ul className="space-y-2">{list.map((u) => <li key={u.slug}><a href="#library" data-story={u.slug} className="group flex items-start gap-2 text-[15px] font-semibold leading-snug hover:text-primary"><ArrowRight className="mt-1 h-3.5 w-3.5 flex-none text-primary" />{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</a></li>)}</ul>
                 </div>
               </Reveal>
             ))}
@@ -139,10 +143,19 @@ export default async function SuccessStoriesPage() {
           <div className="grid gap-5 md:grid-cols-2">
             {byIndustry.map(({ x, list }, i) => (
               <Reveal key={x.slug} delay={(i % 2) * 60}>
-                <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:border-primary/40 hover:shadow-lg">
-                  <h3 className="text-xl font-black leading-snug">{x.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{x.summary}</p>
-                  <div className="mt-4 flex flex-wrap gap-2">{list.slice(0, 5).map((u) => <a key={u.slug} href="#library" className="rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:border-primary/40 hover:text-primary">{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</a>)}</div>
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <div className="mb-3 flex items-center gap-4">
+                    <span className="sr-icon h-14 w-14 flex-none rounded-2xl transition-transform group-hover:scale-110"><Icon name={INDUSTRY_ICON[x.slug] ?? "building"} className="h-6 w-6" /></span>
+                    <h3 className="text-xl font-black leading-snug">{x.name}</h3>
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
+                  <p className="mb-2.5 mt-5 text-[11px] font-black uppercase tracking-[0.16em] text-primary">Examples that fit</p>
+                  <div className="flex flex-wrap gap-2">
+                    {list.slice(0, 5).map((u) => (
+                      <a key={u.slug} href="#library" data-story={u.slug} className="group/chip inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-3 py-1.5 text-xs font-bold transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:text-primary hover:shadow-sm">{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}<ArrowRight className="h-3 w-3 opacity-0 transition-opacity group-hover/chip:opacity-100" /></a>
+                    ))}
+                  </div>
                 </div>
               </Reveal>
             ))}
@@ -154,14 +167,25 @@ export default async function SuccessStoriesPage() {
       <section id="products" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <Head id="products" title="The products" accent="behind the examples." lead="Which products appear in the most examples, so you can see where connected work usually starts." />
-          <ul className="mx-auto grid max-w-5xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {usage.map(({ m, n }, i) => (
+          <ul className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {usage.map(({ m, list }, i) => (
               <Reveal key={m.key} as="li" delay={(i % 3) * 50}>
-                <Link href={productPath(m.key)} className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg">
-                  <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl border border-border/60 bg-background shadow-sm"><ProductLogo productKey={m.key} size={40} title={m.name} /></span>
-                  <span className="min-w-0 flex-1"><span className="block font-black leading-tight group-hover:text-primary">{m.name}</span><span className="text-sm text-muted-foreground">Used in the worked examples</span></span>
-                  <ArrowRight className="h-4 w-4 flex-none text-primary opacity-0 transition-opacity group-hover:opacity-100" />
-                </Link>
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <Link href={productPath(m.key)} className="flex items-center gap-3.5">
+                    <span className="flex h-14 w-14 flex-none items-center justify-center rounded-2xl border border-border/60 bg-background shadow-sm transition-transform group-hover:scale-105"><ProductLogo productKey={m.key} size={40} title={m.name} /></span>
+                    <span className="min-w-0 font-black leading-tight transition-colors hover:text-primary">{m.name}</span>
+                  </Link>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{m.description}</p>
+                  <p className="mb-2 mt-4 text-[11px] font-black uppercase tracking-[0.16em] text-primary">Used in</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {list.slice(0, 3).map((u) => <a key={u.slug} href="#library" data-story={u.slug} className="rounded-full border border-border/60 bg-background px-2.5 py-1 text-[11px] font-bold transition-colors hover:border-primary/40 hover:text-primary">{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</a>)}
+                    {list.length > 3 && <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold text-muted-foreground">and more</span>}
+                  </div>
+                  <div className="mt-auto pt-4">
+                    <Link href={productPath(m.key)} className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">See the product <ArrowRight className="h-4 w-4" /></Link>
+                  </div>
+                </div>
               </Reveal>
             ))}
           </ul>

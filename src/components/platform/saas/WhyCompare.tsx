@@ -17,7 +17,7 @@ export default function WhyCompare({ rows, brand }: { rows: { row: string; us: s
 
         <div className="relative z-10 flex items-center justify-center gap-3 px-8 py-8 text-2xl font-black tracking-tight text-muted-foreground" style={{ gridColumn: 1, gridRow: 1 }}>A stack of separate tools</div>
         <div className="relative z-10 flex items-center justify-center" style={{ gridColumn: 2, gridRow: 1 }}><span className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-sm font-black tracking-widest text-background shadow-xl ring-8 ring-background">VS</span></div>
-        <div className="relative z-10 flex items-center justify-center gap-3 px-8 py-8 text-2xl font-black tracking-tight text-white" style={{ gridColumn: 3, gridRow: 1 }}><Sparkles className="h-6 w-6" />{brand}</div>
+        <div className="sr-compare-us relative z-10 flex items-center justify-center gap-3 px-8 py-8 text-2xl font-black tracking-tight text-white" style={{ gridColumn: 3, gridRow: 1 }}><Sparkles className="h-6 w-6" />{brand}</div>
 
         {rows.map((r, i) => (
           <RowCells key={r.row} r={r} row={i + 2} />
@@ -48,7 +48,7 @@ function RowCells({ r, row }: { r: { row: string; us: string; them: string }; ro
       <div className="relative z-10 flex items-center justify-center px-2" style={{ gridColumn: 2, gridRow: row }}>
         <span className="rounded-full border border-border/70 bg-background px-3 py-1.5 text-center text-[11px] font-bold uppercase tracking-[0.12em] text-foreground shadow-sm">{r.row}</span>
       </div>
-      <div className="relative z-10 flex items-center gap-4 border-t border-white/15 px-8 py-5 text-white" style={{ gridColumn: 3, gridRow: row }}>
+      <div className="sr-compare-us relative z-10 flex items-center gap-4 border-t border-white/15 px-8 py-5 text-white" style={{ gridColumn: 3, gridRow: row }}>
         <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-emerald-400 text-emerald-950"><Check className="h-4 w-4" strokeWidth={3} /></span>
         <span className="font-semibold leading-snug">{r.us}</span>
       </div>

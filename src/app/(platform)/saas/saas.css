@@ -387,6 +387,13 @@ html:has(.sr[data-theme="dark"]) { background: #0b1020; color-scheme: dark; }
 .sr[data-theme="dark"] .sr-band .sr-glass :is([class*="text-white"]) { color: #14183a; }
 .sr[data-theme="dark"] .sr-band [class*="text-white/"] .sr-numeral { opacity: .5; }
 /* the solid white buttons become dark buttons */
+/* the comparison's right-hand panel is drawn behind its cells, so the cells are not inside `.sr-band`: they get the same dark-on-light colours */
+.sr[data-theme="dark"] .sr-compare-us { color: #14183a; border-color: rgb(67 56 202 / .18); }
+/* mint accents and the dark call-to-action inside a band are light-on-dark by default: on the dark theme's light band they flip to dark-on-light */
+.sr[data-theme="dark"] .sr-band :is(.text-emerald-300, .text-emerald-200\/90, [class*="text-emerald-200"]) { color: #047857; }
+.sr[data-theme="dark"] .sr-band .bg-emerald-300 { background-color: #059669; }
+.sr[data-theme="dark"] .sr-band .bg-emerald-950 { background-color: #0b1020; color: #fff !important; }
+.sr[data-theme="dark"] .sr-band .bg-emerald-950 :is(span, svg) { color: inherit; }
 .sr[data-theme="dark"] .sr-band .bg-white { background-color: #0b1020 !important; color: #fff !important; box-shadow: 0 10px 24px -10px rgb(11 16 32 / .7); }
 .sr[data-theme="dark"] .sr-band .bg-white :is(span, svg) { color: inherit; }
 .sr[data-theme="dark"] .sr-band .rounded-full.bg-white.text-\[var\(--primary\)\] { color: #fff !important; }

@@ -245,25 +245,36 @@ export default async function VisionPage() {
         <div className="sr-container">
           <Head id="control" title="Safe by design. Yours by default." lead="Two things matter as much as features: your data is protected, and everything your people and customers see carries your name." />
           <div className="grid gap-6 lg:grid-cols-2">
-            <Reveal>
-              <div className="h-full rounded-[2rem] border border-border/60 bg-card p-6 shadow-sm sm:p-8">
-                <p className="mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary"><Icon name="shield" className="h-5 w-5" />Safe by design</p>
-                <ul className="space-y-5">
+            <Reveal >
+              <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card shadow-sm">
+                <div className="flex items-center gap-4 border-b border-border/50 px-6 py-5 sm:px-8">
+                  <span className="sr-icon h-14 w-14 flex-none rounded-2xl"><Icon name="shield" className="h-6 w-6" /></span>
+                  <div><p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">Safe by design</p><h3 className="text-xl font-black leading-snug">Your data is protected</h3><p className="text-sm text-muted-foreground">Isolation, access, records and encryption.</p></div>
+                </div>
+                <ul className="flex-1 divide-y divide-border/50 px-3 py-2 sm:px-4">
                   {SECURITY_POINTS.slice(0, 5).map((x) => (
-                    <li key={x.title} className="flex gap-4"><span className="sr-icon h-11 w-11 flex-none"><Icon name={x.icon} className="h-5 w-5" /></span><span><span className="block font-black">{x.title}</span><span className="block text-[15px] leading-relaxed text-muted-foreground">{x.body}</span></span></li>
+                    <li key={x.title} className="group flex gap-4 rounded-2xl px-3 py-4 transition-colors hover:bg-primary/[0.05]"><span className="sr-icon h-11 w-11 flex-none rounded-xl transition-transform group-hover:scale-110"><Icon name={x.icon} className="h-5 w-5" /></span><span className="min-w-0"><span className="block font-black">{x.title}</span><span className="block text-[15px] leading-relaxed text-muted-foreground">{x.body}</span></span></li>
                   ))}
                 </ul>
-                <Link href="/security" className="mt-6 inline-flex items-center gap-2 font-bold text-primary hover:underline">Read how security and trust work <ArrowRight className="h-4 w-4" /></Link>
+                <div className="border-t border-border/50 bg-muted/30 px-6 py-4 sm:px-8">
+                  <Link href="/security" className="inline-flex items-center gap-2 font-bold text-primary hover:underline">Read how security and trust work <ArrowRight className="h-4 w-4" /></Link>
+                </div>
               </div>
             </Reveal>
             <Reveal delay={80}>
-              <div className="h-full rounded-[2rem] border border-border/60 bg-gradient-to-br from-primary/[0.07] via-card to-brand-accent/[0.07] p-6 shadow-sm sm:p-8">
-                <p className="mb-5 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-primary"><Icon name="target" className="h-5 w-5" />Yours by default</p>
-                <ul className="space-y-5">
+              <div className="flex h-full flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-gradient-to-br from-primary/[0.07] via-card to-brand-accent/[0.07] shadow-sm">
+                <div className="flex items-center gap-4 border-b border-border/50 px-6 py-5 sm:px-8">
+                  <span className="sr-icon h-14 w-14 flex-none rounded-2xl"><Icon name="target" className="h-6 w-6" /></span>
+                  <div><p className="text-[11px] font-black uppercase tracking-[0.18em] text-primary">Yours by default</p><h3 className="text-xl font-black leading-snug">It carries your name</h3><p className="text-sm text-muted-foreground">Your logo, apps, web address and notifications.</p></div>
+                </div>
+                <ul className="flex-1 divide-y divide-border/50 px-3 py-2 sm:px-4">
                   {YOUR_BRAND.slice(0, 5).map((x) => (
-                    <li key={x.key} className="flex gap-4"><span className="sr-icon h-11 w-11 flex-none"><Icon name={x.icon} className="h-5 w-5" /></span><span><span className="block font-black">{x.title}</span><span className="block text-[15px] leading-relaxed text-muted-foreground">{x.text}</span></span></li>
+                    <li key={x.key} className="group flex gap-4 rounded-2xl px-3 py-4 transition-colors hover:bg-primary/[0.05]"><span className="sr-icon h-11 w-11 flex-none rounded-xl transition-transform group-hover:scale-110"><Icon name={x.icon} className="h-5 w-5" /></span><span className="min-w-0"><span className="block font-black">{x.title}</span><span className="block text-[15px] leading-relaxed text-muted-foreground">{x.text}</span></span></li>
                   ))}
                 </ul>
+                <div className="border-t border-border/50 bg-muted/30 px-6 py-4 sm:px-8">
+                  <Link href="/docs/brand-your-workspace" className="inline-flex items-center gap-2 font-bold text-primary hover:underline">See how branding works <ArrowRight className="h-4 w-4" /></Link>
+                </div>
               </div>
             </Reveal>
           </div>

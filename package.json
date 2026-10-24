@@ -21,7 +21,8 @@
     "security:scan": "node scripts/scan-secrets.mjs",
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "test:password": "npx --yes tsx scripts/test-password.ts",
-    "test:transport": "npx --yes tsx scripts/test-transport.ts"
+    "test:transport": "npx --yes tsx scripts/test-transport.ts",
+    "test:device-limit": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env.local scripts/test-device-limit.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

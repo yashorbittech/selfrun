@@ -526,7 +526,7 @@ export default async function SaasHome() {
             </ul>
             <Link href="/products" className="sr-btn sr-btn-primary mt-8">See every feature <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          <Reveal className="lg:sticky lg:top-28"><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
+          <Reveal className="lg:sticky lg:top-28 lg:self-center"><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
         </div>
         </div>
       </section>

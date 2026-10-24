@@ -7,12 +7,13 @@ import type { ObjectId } from "mongodb";
 import SessionsList from "./SessionsList";
 import TwoFactorCard from "./TwoFactorCard";
 import { twoFactorStatus } from "@/lib/security/two-factor";
+import { oneDeviceLimitApplies } from "@/lib/security/device-limit";
 
 const ICONS = { desktop: Laptop, mobile: Smartphone, tablet: Tablet, app: AppWindow } as const;
 
 /** "Where you're signed in" and "Sign-in history" for one account: the same two cards on the company Security page and on the personal one. */
 export default async function SecuritySections({ adminId, email }: { adminId: ObjectId; email: string }) {
-  const [sessions, history, tf] = await Promise.all([listActiveSessions(adminId), listLoginHistory(adminId, email), twoFactorStatus(adminId)]);
+  const [sessions, history, tf, oneDevice] = await Promise.all([listActiveSessions(adminId), listLoginHistory(adminId, email), twoFactorStatus(adminId), oneDeviceLimitApplies().catch(() => false)]);
   return (
     <>
       <GlassCard interactive={false} containerClassName="h-auto">
@@ -31,6 +32,7 @@ export default async function SecuritySections({ adminId, email }: { adminId: Ob
           <CardDescription>
             Every device that is signed in to your account right now, with where it signed in from. Log out any you don&apos;t recognise; if something looks wrong, log out everywhere and change your password.
           </CardDescription>
+          {oneDevice && <p className="mt-3 rounded-lg bg-primary/[0.07] px-3 py-2 text-sm text-muted-foreground">Your plan (Free) lets you stay signed in on <b className="text-foreground">one device at a time</b>. When you sign in on a new device, you are asked first, and the other device is signed out. Paid plans allow unlimited devices.</p>}
         </CardHeader>
         <CardContent>
           <SessionsList sessions={sessions} />

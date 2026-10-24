@@ -51,7 +51,7 @@ async function currentLoginId(): Promise<string | null> {
 }
 
 /** Ends one sign-in (device): its sessions in every product. */
-async function endLogin(adminId: ObjectId, loginId: string, reason: string, event: "logout" | "session_revoked", email: string): Promise<void> {
+async function endLogin(adminId: ObjectId, loginId: string, reason: string, event: "logout" | "session_revoked" | "session_replaced", email: string): Promise<void> {
   const db = await getDb();
   await Promise.all(sessionCollectionNames().map((n) => db.collection(n).deleteMany({ adminId, loginId })));
   const res = await (await loginSessions()).findOneAndUpdate({ _id: loginId, adminId: adminId.toString(), revokedAt: null }, { $set: { revokedAt: new Date(), revokedReason: reason } });
@@ -185,6 +185,30 @@ export async function revokeOtherSessions(adminId: ObjectId): Promise<number> {
   return n;
 }
 
+/** The devices signed in to this account other than this browser's own sign-in. */
+export async function otherDevices(adminId: ObjectId): Promise<SessionView[]> {
+  return (await listActiveSessions(adminId)).filter((s) => !s.current);
+}
+
+/**
+ * Ends every sign-in of the account except `keepLoginId`: used when a plan allows one device at a time and a new device has signed in.
+ * Each ended device is signed out in every product and the event says why.
+ */
+export async function endOtherDevices(adminId: ObjectId, keepLoginId: string): Promise<number> {
+  const email = await emailOf(adminId);
+  let n = 0;
+  for (const s of await listActiveSessions(adminId)) {
+    if (s.id === keepLoginId) continue;
+    if (s.legacy) {
+      if ((await revokeSession(adminId, s.id)).ok) n++;
+    } else {
+      await endLogin(adminId, s.id, "replaced_by_new_sign_in", "session_replaced", email);
+      n++;
+    }
+  }
+  return n;
+}
+
 // ── History ────────────────────────────────────────────────────────────────────
 
 export interface HistoryView {
@@ -210,6 +234,7 @@ const TITLES: Record<LoginEventDoc["type"], { title: string; tone: HistoryView["
   logout: { title: "Signed out", tone: "neutral" },
   logout_everywhere: { title: "Signed out of every device", tone: "warn" },
   session_revoked: { title: "A device was signed out", tone: "warn" },
+  session_replaced: { title: "Signed out: the account signed in on another device (free plan: one device at a time)", tone: "warn" },
   password_reset: { title: "Password was reset", tone: "warn" },
 };
 

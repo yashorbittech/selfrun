@@ -85,6 +85,7 @@ export default async function PricingPage() {
                   <tbody>
                     <tr className="border-b border-border/40"><td className="p-4 font-semibold">People</td>{plans.map((p) => <td key={p.id} className="p-4">{p.seats ? `Up to ${p.seats.toLocaleString("en-IN")}` : "Unlimited"}</td>)}</tr>
                     <tr className="border-b border-border/40 bg-muted/20"><td className="p-4 font-semibold">Products and features</td>{plans.map((p) => <td key={p.id} className="p-4"><span className="inline-flex items-center gap-1.5 font-semibold text-primary"><Check className="h-4 w-4" />Every product</span></td>)}</tr>
+                    <tr className="border-b border-border/40"><td className="p-4 font-semibold">Devices signed in at once</td>{plans.map((p) => <td key={p.id} className="p-4 font-medium">{p.kind === "free" ? "1 device" : "Unlimited"}</td>)}</tr>
                     {rows.map((k, i) => (
                       <tr key={k} className={`border-b border-border/40 ${i % 2 ? "" : "bg-muted/20"}`}>
                         <td className="p-4 font-semibold">{plans[0].limits.find((l) => l.key === k)?.label}</td>
@@ -124,13 +125,18 @@ export default async function PricingPage() {
       <section id="products" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("products")} center icon="layers" eyebrow="Included in every plan" title="Every product," accent="from the free plan up." lead="You never pay extra to unlock a product. Open any to see what it does." />
-          <div className="grid gap-x-10 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {modules.map((m, i) => (
               <Reveal key={m.key} delay={(i % 4) * 50}>
-                <Link href={productPath(m.key)} className="group flex items-center gap-3.5 border-b border-border/60 py-4 transition-all hover:bg-gradient-to-r hover:from-primary/[0.06] hover:to-transparent hover:pl-2">
-                  <span className="sr-icon h-10 w-10 flex-none"><ProductLogo productKey={m.key} size={30} title={m.name} /></span>
-                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-bold">{m.name}</span><span className="block text-xs text-muted-foreground">Every feature included</span></span>
-                  <Check className="h-4 w-4 flex-none text-primary" />
+                <Link href={productPath(m.key)} className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <span className="flex items-center justify-between">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-border/60 bg-background shadow-sm transition-transform group-hover:scale-110"><ProductLogo productKey={m.key} size={34} title={m.name} /></span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-600"><Check className="h-3 w-3" strokeWidth={3.5} />Included</span>
+                  </span>
+                  <span className="font-black leading-tight transition-colors group-hover:text-primary">{m.name.replace(/^SelfRun\s+/i, "")}</span>
+                  <span className="text-xs leading-relaxed text-muted-foreground">{m.description}</span>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-1 text-xs font-bold text-primary">See what it does <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></span>
                 </Link>
               </Reveal>
             ))}

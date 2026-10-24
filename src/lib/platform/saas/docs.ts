@@ -215,6 +215,7 @@ const added: Doc[] = [
     slug: "security-sessions-audit", title: "Sessions, devices and the audit log", summary: "See where you are signed in and who did what across every product.", category: "Security & admin", readMinutes: 4, shot: "workspace-audit", panel: "workspace",
     sections: [
       { heading: "Your sessions and devices", body: ["Open Profile & Settings from the user block at the bottom of the sidebar and choose Sessions & Devices. Every signed-in device is listed with where it signed in from; log out one, all others, or everywhere."] },
+      { heading: "Free plan: one device at a time", body: ["On the Free plan you can stay signed in on one device at a time. If you sign in somewhere new while another device is signed in, you are asked first. The screen shows which device would be signed out, and nothing changes until you confirm. Paid plans have no limit on devices."] },
       { heading: "Sign-in history", body: ["Sign-ins, failed attempts and sign-outs are kept for 180 days, with an alert flag when a sign-in comes from a country the account has not used before."] },
       { heading: "The audit log", body: ["Workspace → Audit log is the one place for who did what, and when — across every product. Filter by product, action and date, and export to CSV."], shot: "workspace-audit" },
     ],
@@ -222,7 +223,7 @@ const added: Doc[] = [
   d({
     slug: "plans-and-billing", title: "Plans, usage and billing", summary: "How plans work, what is included and how to change.", category: "Security & admin", readMinutes: 4, shot: "workspace", panel: "workspace",
     sections: [
-      { heading: "What a plan sets", body: ["Every plan includes every product and every feature. A plan sets the number of people and the allowances for storage, AI, email and voice. The Free plan is free forever."] },
+      { heading: "What a plan sets", body: ["Every plan includes every product and every feature. A plan sets the number of people and the allowances for storage, AI, email and voice. The Free plan is free forever. The Free plan lets each person stay signed in on one device at a time; paid plans have no limit."] },
       { heading: "See what you use", body: ["Workspace → Usage shows seats, AI, email, voice and storage against your plan."] },
       { heading: "Change plan or cancel", body: ["Upgrade or move down at any time from Plan & billing. Invoices, credit notes and payments for your subscription are under Invoices & payments."] },
     ],

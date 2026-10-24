@@ -10,9 +10,10 @@ import { GROWTH } from "@/lib/platform/saas/site";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { CtaBand, HeroCtas, PageHero } from "@/components/platform/saas/blocks";
 import { panelColor } from "@/lib/platform/saas/palette";
+import ProductLogo from "@/components/products/ProductLogo";
+import { productPath } from "@/lib/platform/saas/product-routes";
 import Icon from "@/components/platform/saas/Icon";
 import { NumberedRows } from "@/components/platform/saas/Modern";
-import CountStats from "@/components/platform/saas/CountStats";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Reveal from "@/components/platform/saas/Reveal";
 import MarketingShot from "@/components/platform/saas/MarketingShot";
@@ -87,12 +88,26 @@ export default async function AboutPage() {
           <Head id="about" title="One software for" accent="the whole business." lead="Here is who we are and what we build, in plain terms." />
           <div className="grid items-center gap-14 lg:grid-cols-2">
           <div>
-            <div className="sr-prose">
-              <p>{SAAS_BRAND.name} brings the everyday work of a business into one software: customers and sales, staff and payroll, accounts and invoices, projects, purchasing, training, documents, a website builder, team chat and more. Each job has its own product, and each product can work on its own.</p>
+            <div className="space-y-4 leading-relaxed text-muted-foreground">
+              <p className="text-lg font-medium leading-relaxed text-foreground">{SAAS_BRAND.name} brings the everyday work of a business into one software: customers and sales, staff and payroll, accounts and invoices, projects, purchasing, training, documents, a website builder, team chat and more. Each job has its own product, and each product can work on its own.</p>
               <p>Use the products you need, one at a time or all together. The AI works with the records in each product, and whenever you choose to connect products you can set up automatic steps between them, such as creating a client record when a deal is won.</p>
               <p>SelfRun AI is built for many businesses at once. Every business gets the same features, the same guided setup and the same safeguards, and there is no special version for anyone. Each business uses it under its own name: in a web browser, as an installable app, on Android and iPhone, and on a computer.</p>
             </div>
-            <div className="mt-8 border-t border-border/60"><CountStats items={[{ v: "All", l: "ready-made products" }, { v: "Free", l: "to start, every feature included" }, { v: "Yours", l: "your own name, logo and web address" }]} /></div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {([
+                { icon: "layers" as const, v: "All", l: "ready-made products" },
+                { icon: "wallet" as const, v: "Free", l: "to start, every feature included" },
+                { icon: "target" as const, v: "Yours", l: "your own name, logo and web address" },
+              ]).map((x, i) => (
+                <Reveal key={x.v} delay={i * 70}>
+                  <div className="group h-full rounded-2xl border border-border/60 bg-card p-4 text-center shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+                    <span className="sr-icon mx-auto mb-2 h-10 w-10 rounded-xl"><Icon name={x.icon} className="h-4 w-4" /></span>
+                    <p className="bg-gradient-to-br from-primary to-brand-accent bg-clip-text text-3xl font-black leading-none tracking-tight text-transparent">{x.v}</p>
+                    <p className="mt-1.5 text-xs font-medium leading-snug text-muted-foreground">{x.l}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
           <Reveal><MarketingShot screenKey="workspace" name="SelfRun CommandOS" /></Reveal>
         </div>
@@ -112,17 +127,31 @@ export default async function AboutPage() {
         <div className="sr-container">
           <Head id="what-we-do" title="Every area of your business," accent="one software." lead="We build and run the software your business works in. Each area below is a group of products, and all of them are included in every plan." />
           <div className="mb-20">
-            <ul className="grid gap-x-10 gap-y-6 md:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
               {groups.map((g, i) => (
-                <Reveal key={g.id} as="li" delay={i * 50}>
-                  <Link href={`/products#${g.id}`} className="group flex gap-4">
-                    <span className="sr-icon h-12 w-12 flex-none"><Icon name={g.icon} className="h-5 w-5" /></span>
-                    <span>
-                      <span className="block font-black">{g.title}</span>
-                      <span className="block text-sm leading-snug text-muted-foreground">{g.lead}</span>
-                      <span className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs font-semibold text-primary">{g.items.map((m) => <span key={m.key}>{m.name}</span>)}</span>
-                    </span>
-                  </Link>
+                <Reveal key={g.id} as="li" delay={(i % 3) * 60}>
+                  <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                    <div className="mb-4 flex items-center gap-4">
+                      <span className="sr-icon h-14 w-14 flex-none rounded-2xl transition-transform group-hover:scale-110"><Icon name={g.icon} className="h-6 w-6" /></span>
+                      <h3 className="text-lg font-black leading-snug">{g.title}</h3>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{g.lead}</p>
+                    <ul className="mt-5 space-y-2">
+                      {g.items.map((m) => (
+                        <li key={m.key}>
+                          <Link href={productPath(m.key)} className="flex items-center gap-3 rounded-xl border border-border/50 bg-background px-3 py-2 text-sm font-bold transition-all hover:border-primary/40 hover:text-primary hover:shadow-sm">
+                            <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg border border-border/60 bg-card"><ProductLogo productKey={m.key} size={22} title={m.name} /></span>
+                            <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                            <ArrowRight className="h-3.5 w-3.5 flex-none opacity-0 transition-opacity group-hover:opacity-60" />
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-auto pt-5">
+                      <Link href={`/products#${g.id}`} className="inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline">See this area <ArrowRight className="h-4 w-4" /></Link>
+                    </div>
+                  </div>
                 </Reveal>
               ))}
             </ul>
