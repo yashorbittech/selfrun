@@ -146,7 +146,7 @@ export function howTo(o: { path: string; name: string; description: string; step
 }
 
 export function itemList(o: { name: string; items: { name: string; path: string }[] }) {
-  return { "@context": ctx, "@type": "ItemList", name: o.name, numberOfItems: o.items.length, itemListElement: o.items.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.name, url: x.path })) };
+  return { "@context": ctx, "@type": "ItemList", name: o.name, itemListElement: o.items.map((x, i) => ({ "@type": "ListItem", position: i + 1, name: x.name, url: x.path })) };
 }
 
 export function faqPage(items: { q: string; a: string }[]) {

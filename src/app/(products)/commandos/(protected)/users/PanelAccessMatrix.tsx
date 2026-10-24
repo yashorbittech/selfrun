@@ -76,7 +76,7 @@ export default function PanelAccessMatrix({
         <div>
           <h3 className="text-sm font-semibold text-foreground">Product Access Overview</h3>
           <p className="text-xs text-muted-foreground">
-            Access is automatically determined by assigned roles across the {panels.length} Platform Consoles.
+            Access is automatically determined by assigned roles across every product.
           </p>
         </div>
         {onEditRoles && (

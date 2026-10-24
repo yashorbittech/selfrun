@@ -162,7 +162,7 @@ export interface PanelValue {
   benefits: string[];
 }
 export const PANEL_VALUE: Record<string, PanelValue> = {
-  workspace: { replaces: "Separate dashboards, user admin and automation apps", benefits: ["See your whole business on one screen instead of opening ten apps", "Control who can see and do what, down to a single action", "Automate follow-ups across every product without developers", "One activity record and one place for billing, brand and security"] },
+  workspace: { replaces: "Separate dashboards, user admin and automation apps", benefits: ["See your whole business on one screen instead of opening many apps", "Control who can see and do what, down to a single action", "Automate follow-ups across every product without developers", "One activity record and one place for billing, brand and security"] },
   lms: { replaces: "CRM & lead management software", benefits: ["No enquiry slips through — every lead has an owner and a due date", "Stale leads are flagged before they go cold", "See which campaigns actually bring revenue", "Won deals turn into client records and projects"] },
   hrms: { replaces: "HR & payroll software", benefits: ["Hire, onboard, track attendance and pay from one record", "Employees self-serve leave, salary and documents — HR stops chasing", "Payroll is passed to accounts automatically", "Managers approve leave and timesheets where they already work"] },
   fms: { replaces: "Accounting & invoicing software", benefits: ["Accounts that are ready sooner, built from live transactions", "Customers pay online straight from the invoice", "Salaries, supplier payments and project money are recorded for you, with no retyping", "Reports your accountant can use as they are"] },

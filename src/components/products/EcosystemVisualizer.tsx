@@ -159,7 +159,6 @@ export default function EcosystemVisualizer() {
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">{s.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{s.products.length}{tx("catalog.ecosystemVisualizer.products")}</div>
                   </div>
                 </div>
                 <span className={`text-xs font-semibold ${isSelected ? s.textColor : "text-muted-foreground"}`}>

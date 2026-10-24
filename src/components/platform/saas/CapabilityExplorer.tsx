@@ -18,7 +18,6 @@ export default function CapabilityExplorer({ items }: { items: { title: string; 
           <button key={x.title} role="tab" aria-selected={n === i} onClick={() => setI(n)} className={`group relative flex shrink-0 items-center gap-3.5 rounded-2xl px-4 py-3.5 text-left transition-all lg:rounded-none lg:border-l-2 lg:py-4 ${n === i ? "bg-primary/10 text-primary lg:border-primary lg:bg-gradient-to-r lg:from-primary/10 lg:to-transparent" : "text-muted-foreground hover:text-foreground lg:border-border/60"}`}>
             <span className={`flex h-10 w-10 flex-none items-center justify-center rounded-xl transition-colors ${n === i ? "bg-primary text-white shadow-lg shadow-primary/30" : "bg-muted text-muted-foreground group-hover:text-primary"}`}><Icon name={x.icon} className="h-5 w-5" /></span>
             <span className="flex-1 text-base font-bold lg:text-lg">{x.title}</span>
-            <span className={`hidden rounded-full px-2 py-0.5 text-[11px] font-bold lg:inline ${n === i ? "bg-primary text-white" : "bg-muted text-muted-foreground"}`}>{x.items.length}</span>
           </button>
         ))}
       </div>

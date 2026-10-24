@@ -13,7 +13,7 @@ export async function renderProductOgImage(slug?: string) {
   const { brand } = await getSiteInfo();
   const dark = (await getActiveThemeState()).tokens.colorsDark;
   const title = product ? product.name : "AI-powered business software";
-  const sub = product ? valueLine(product) : `${products.length} products. One connected platform.`;
+  const sub = product ? valueLine(product) : "Every product, one connected platform.";
   const kicker = product ? product.category : "Products";
   return new ImageResponse(
     (

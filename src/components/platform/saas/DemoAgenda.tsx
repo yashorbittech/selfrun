@@ -113,7 +113,7 @@ export default function DemoAgenda() {
           <div className="flex items-start gap-4">
             <span className="sr-icon h-12 w-12 shrink-0"><ActiveIcon className="h-5 w-5" /></span>
             <div>
-              <p className="sr-eyebrow">Step 0{activeIndex + 1} of {AGENDA.length}</p>
+              <p className="sr-eyebrow">Step 0{activeIndex + 1}</p>
               <h4 className="mt-1 text-xl font-black">{active.title}</h4>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{active.copy}</p>
             </div>
@@ -135,7 +135,6 @@ export default function DemoAgenda() {
             >
               <ArrowLeft className="h-4 w-4" /> Back
             </button>
-            <span className="text-xs text-muted-foreground">{activeIndex + 1} / {AGENDA.length}</span>
             <button
               type="button"
               onClick={() => goTo(activeIndex + 1)}

@@ -38,7 +38,6 @@ export default function ScreenGallery({ shots, name }: { shots: Shot[]; name: st
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-black">{cur.title}</p>
-        <p className="flex-none text-sm font-bold text-muted-foreground">{i + 1} / {shots.length}</p>
       </div>
 
       {shots.length > 1 && (

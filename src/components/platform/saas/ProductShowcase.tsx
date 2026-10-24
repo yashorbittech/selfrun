@@ -61,7 +61,7 @@ export default function ProductShowcase({ items }: { items: ShowcaseItem[] }) {
             <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/20">
               <div key={`${t.key}-bar`} className="h-full origin-left rounded-full bg-white" style={{ animation: "sr-fill 8s linear forwards", animationPlayState: hover ? "paused" : "running" }} onAnimationEnd={next} />
             </div>
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-white/60">{hover ? <><Pause className="h-3 w-3" />Paused</> : `${i + 1} / ${items.length}`}</span>
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-white/60">{hover ? <><Pause className="h-3 w-3" />Paused</> : "Playing"}</span>
           </div>
         </div>
       </div>

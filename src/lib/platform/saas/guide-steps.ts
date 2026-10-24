@@ -16,7 +16,7 @@ export function guideFor(panel: string, featureName: string, panelName: string, 
   const facts: ScreenFacts | undefined = routeKey ? GUIDE_FACTS[panel]?.[routeKey] : undefined;
   const steps: GuideStep[] = [];
   const clean = (a: string[]) => a.filter((x) => !/[▼▲]|__|^\W*$/.test(x));
-  steps.push({ title: `Open ${panelName}`, text: panel === "workspace" ? "Sign in to your company's Workspace. You see only what your role allows." : `Sign in and open the ${panelName} product from your Workspace dashboard (or sign in to it directly). You see only what your role allows.` });
+  steps.push({ title: `Open ${panelName}`, text: panel === "workspace" ? "Sign in to your business's Workspace. You see only what your role allows." : `Sign in and open the ${panelName} product from your Workspace dashboard (or sign in to it directly). You see only what your role allows.` });
   if (!facts) {
     const route = routeKey ? r?.routes[routeKey] : undefined;
     const routeText = route

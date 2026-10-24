@@ -42,7 +42,6 @@ export default function ProductLauncher({ currentPanel, products: panelList }: {
               <SheetTitle className="text-base font-semibold">All products</SheetTitle>
               <SheetDescription className="mt-1 text-xs">Switch to another product in your workspace.</SheetDescription>
             </div>
-            <span className="rounded-full bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">{products.length}</span>
           </div>
         </SheetHeader>
 

@@ -5,7 +5,6 @@ import { Check, ShieldCheck } from "lucide-react";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { getSignupMode } from "@/lib/platform/settings";
 import { platformRootDomain } from "@/lib/platform/tenancy/provisioning";
-import { getFeatureModules } from "@/lib/platform/saas/modules";
 import SrRoot from "@/components/platform/saas/SrRoot";
 import Header from "@/components/platform/saas/Header";
 import Footer from "@/components/platform/saas/Footer";
@@ -32,7 +31,7 @@ const POINTS = [
 export default async function SignupPage() {
   // Sign-up belongs to the platform's own site, not to a company's workspace.
   if (!(await isPlatformOwnerContext())) notFound();
-  const [mode, modules] = await Promise.all([getSignupMode(), getFeatureModules()]);
+  const mode = await getSignupMode();
 
   return (
     <SrRoot>
@@ -64,7 +63,7 @@ export default async function SignupPage() {
               </ul>
 
               <div className="mt-9 grid max-w-md grid-cols-3 border-y border-border/60">
-                {[{ v: String(modules.length), l: "panels" }, { v: "1", l: "login" }, { v: "₹0", l: "to start" }].map((s, i) => (
+                {[{ v: "All", l: "products" }, { v: "AI", l: "built in" }, { v: "₹0", l: "to start" }].map((s, i) => (
                   <div key={s.l} className={`py-5 text-center ${i ? "border-l border-border/60" : ""}`}>
                     <p className="bg-gradient-to-br from-primary to-brand-accent bg-clip-text text-3xl font-black tracking-tight text-transparent">{s.v}</p>
                     <p className="mt-0.5 text-xs font-semibold text-muted-foreground">{s.l}</p>

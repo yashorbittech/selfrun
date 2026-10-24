@@ -661,7 +661,7 @@ export default function SaasProductCatalog({ categories }: { categories: string[
               <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-muted/40 border border-border/50 text-xs font-semibold text-foreground mb-3 shadow-sm">
                 <Layers className="w-3.5 h-3.5 text-primary" />{tx("catalog.saasProductCatalog.browse-all-applications")}</span>
               <h2 className="text-3xl font-black tracking-tight text-foreground mt-1">
-                {tx("catalog.saasProductCatalog.product-ecosystem-directory")}{filteredProducts.length})
+                {tx("catalog.saasProductCatalog.product-ecosystem-directory").replace(/\s*\($/, "")}
               </h2>
             </div>
 

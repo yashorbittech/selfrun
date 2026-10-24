@@ -80,7 +80,7 @@ export default async function DocsPage() {
       {/* 02 learning path */}
       <section id="path" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n="02" icon="rocket" eyebrow="Learning path" title="Where to begin," accent="in order." lead="If you are new, follow these six guides in order. By the end your business workspace is set up, your team is in, your records are loaded and the routine work runs by itself." />
+          <SectionHead n="02" icon="rocket" eyebrow="Learning path" title="Where to begin," accent="in order." lead="If you are new, follow these guides in order. By the end your business workspace is set up, your team is in, your records are loaded and the routine work runs by itself." />
           <NumberedRows items={PATH.flatMap((x) => { const d = DOCS.find((y) => y.slug === x.slug); return d ? [{ title: x.title, text: x.text, tag: `${d.readMinutes} min`, href: `/docs/${d.slug}` }] : []; })} />
         </div>
       </section>

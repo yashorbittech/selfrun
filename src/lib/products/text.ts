@@ -26,7 +26,7 @@ export const PRODUCTS_TEXT_DEFAULTS: Record<string, string> = {
   "products.listing.filterLabel": "Filter products by category",
   "products.listing.gridHeading": "Explore the product suite",
   "products.listing.gridDescription": "Pick a product to see what it does, how it automates the work, and how it connects to the rest of the platform.",
-  "products.listing.count": "{n} products",
+  "products.listing.count": "Product list updated.",
   "products.listing.connected.badge": "One connected platform",
   "products.listing.connected.title": "Products that share one company record",
   "products.listing.connected.description": "A client created in Projects is the same client in Finance and in the Client Portal. A lead won in CRM becomes a client. One sign-in and one role model cover every product, and every company's data is kept separate from every other's.",
