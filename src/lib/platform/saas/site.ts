@@ -511,7 +511,7 @@ export const REPLACES: { software: string; panel: string; icon: IconKey }[] = [
 /** Every way a business's people can use its workspace — each one carrying the business's own name and icon. */
 export const DEVICES: { title: string; text: string; platforms: string[] }[] = [
   { title: "Web app", text: "Works in any modern browser, on any device — nothing to install.", platforms: ["Chrome", "Safari", "Edge", "Firefox"] },
-  { title: "Installable app (PWA)", text: "Add it to your phone or computer from the browser in one tap, with your icon and notifications.", platforms: ["Android", "iOS", "iPadOS", "Windows", "macOS", "Linux", "ChromeOS"] },
+  { title: "Installable web app", text: "Add it to your phone or computer from the browser in one tap, with your icon and notifications.", platforms: ["Android", "iOS", "iPadOS", "Windows", "macOS", "Linux", "ChromeOS"] },
   { title: "Mobile apps", text: "Your business's own Android and iPhone apps, made from your branding, that you can publish on Google Play and the App Store.", platforms: ["Android", "iOS"] },
   { title: "Desktop apps", text: "Your own app for Windows, Mac and Linux, with desktop notifications and a tray icon.", platforms: ["Windows", "macOS", "Linux"] },
 ];

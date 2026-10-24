@@ -4,6 +4,7 @@ import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import JsonLd from "@/components/platform/saas/JsonLd";
 import { itemList, planOffers, softwareApplication, webPage } from "@/lib/platform/saas/jsonld";
 import { ArrowRight, Check } from "lucide-react";
+import type { IconKey } from "@/lib/platform/saas/content";
 import { AI_CAPABILITIES, GLOSSARY, HOW_IT_WORKS, INDUSTRIES, SECURITY_POINTS, SIMPLE_ANSWERS, USE_CASES, USE_CASE_PLAIN_TITLES } from "@/lib/platform/saas/content";
 import { AI_BENEFITS, CAPABILITIES, COMPARISON, DEVICES, FLOWS, REPLACES, RUNS_ITSELF, YOUR_BRAND } from "@/lib/platform/saas/site";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
@@ -14,6 +15,7 @@ import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { screenFor } from "@/lib/platform/saas/screens";
 import DeviceScene, { type SceneVariant } from "@/components/platform/saas/DeviceScene";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
+import GlossaryGrid from "@/components/platform/saas/GlossaryGrid";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Reveal from "@/components/platform/saas/Reveal";
 import Icon from "@/components/platform/saas/Icon";
@@ -30,7 +32,7 @@ import BrandShowcase from "@/components/platform/saas/BrandShowcase";
 import ProductShowcase from "@/components/platform/saas/ProductShowcase";
 import ScreenGallery from "@/components/platform/saas/ScreenGallery";
 import { Journey } from "@/components/platform/saas/Visuals";
-import { ChipMarquee, NumberedRows, TimelineSteps } from "@/components/platform/saas/Modern";
+import { ChipMarquee } from "@/components/platform/saas/Modern";
 import CountStats from "@/components/platform/saas/CountStats";
 import CapabilityExplorer from "@/components/platform/saas/CapabilityExplorer";
 import { SAAS_BRAND } from "@/lib/platform/saas/brand";
@@ -53,6 +55,18 @@ export const metadata: Metadata = {
 
 /** The real marketing image that goes with each capability area. */
 const CAP_SHOT: Record<string, string> = { AI: "intelligence", Automation: "automations", "Your brand": "branding", "Every device": "apps", Control: "workspace-users", "Data & insight": "workspace", "Website & growth": "cms-pages", "People & portals": "hrms" };
+
+/** An icon for each kind of business on the home page. */
+const INDUSTRY_ICON: Record<string, IconKey> = { "it-and-software": "bolt", "education-and-training": "graduation", "agencies-and-consultancies": "megaphone", "trading-and-distribution": "cart", "professional-services": "file", "growing-smes": "rocket" };
+
+/** An icon for each everyday job on the home page. */
+const USE_CASE_ICON: Record<string, IconKey> = { "lead-to-cash": "wallet", "hire-to-retire": "users", "procure-to-pay": "cart", "training-operations": "graduation", "always-on-marketing": "megaphone", "compliance-and-documents": "book", "client-onboarding-and-delivery": "layers", "customer-support-to-resolution": "chat", "leadership-live-answers": "brain", "contract-review-and-records": "file" };
+
+/** An icon for each way of using the software, in the order of DEVICES. */
+const DEVICE_ICON: IconKey[] = ["globe", "bolt", "rocket", "layers"];
+
+/** An icon for each getting-started step. */
+const HOW_ICON: IconKey[] = ["rocket", "building", "globe", "layers"];
 
 const SHOWCASE = ["workspace", "lms", "hrms", "fms", "pms", "prms", "tms", "messenger", "sop", "cms", "smms", "seo", "aibots", "ots"];
 
@@ -142,7 +156,22 @@ export default async function SaasHome() {
       <section id="simple" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("simple")} center icon="book" eyebrow="Overview" title="What SelfRun AI is" accent="and how it helps you." lead="New here? These six answers cover what SelfRun AI is, what it does for you and what you need to know before you start. No technical knowledge is needed to read them, or to use the product." />
-          <TimelineSteps cols={3} items={SIMPLE_ANSWERS} />
+          <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {SIMPLE_ANSWERS.map((a, i) => (
+              <Reveal key={a.title} as="li" delay={(i % 3) * 70}>
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-7 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <span className="pointer-events-none absolute -right-2 -top-6 select-none bg-gradient-to-b from-primary/20 to-transparent bg-clip-text text-8xl font-black leading-none text-transparent" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
+                  <span className="sr-icon relative mb-5 h-14 w-14 rounded-2xl transition-transform group-hover:scale-110"><Icon name={a.icon} className="h-6 w-6" /></span>
+                  <h3 className="text-xl font-black leading-snug tracking-tight">{a.title}</h3>
+                  <p className="mt-3 leading-relaxed text-muted-foreground">{a.text}</p>
+                  <div className="mt-auto pt-6"><ul className="space-y-2.5 rounded-2xl bg-muted/40 p-4 text-sm font-medium">
+                    {a.points.map((pt) => <li key={pt} className="flex gap-2.5 leading-snug"><span className="sr-circle mt-0.5 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span>{pt}</li>)}
+                  </ul></div>
+                </div>
+              </Reveal>
+            ))}
+          </ol>
         </div>
       </section>
 
@@ -246,11 +275,16 @@ export default async function SaasHome() {
             </div>
           </Reveal>
           <div>
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {AI_BENEFITS.map((b, i) => (
-                <Reveal key={b.title} delay={(i % 2) * 80} className="flex gap-4">
-                  <span className="sr-icon h-11 w-11 flex-none"><Icon name={b.icon} className="h-5 w-5" /></span>
-                  <span><span className="block font-bold">{b.title}</span><span className="block text-sm leading-relaxed text-muted-foreground">{b.text}</span></span>
+                <Reveal key={b.title} delay={(i % 2) * 80}>
+                  <div className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                    <Icon name={b.icon} className="pointer-events-none absolute -bottom-5 -right-5 h-24 w-24 text-primary/[0.07] transition-transform duration-500 group-hover:scale-110" />
+                    <span className="sr-icon relative mb-4 h-12 w-12 rounded-2xl transition-transform group-hover:scale-110"><Icon name={b.icon} className="h-5 w-5" /></span>
+                    <h3 className="relative text-base font-black leading-snug">{b.title}</h3>
+                    <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.text}</p>
+                  </div>
                 </Reveal>
               ))}
             </div>
@@ -266,11 +300,22 @@ export default async function SaasHome() {
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {INDUSTRIES.map((x, i) => (
               <Reveal key={x.slug} delay={(i % 3) * 60}>
-                <div className="group h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
-                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-brand-accent text-sm font-black text-white shadow-md shadow-primary/25">{String(i + 1).padStart(2, "0")}</span>
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="sr-icon h-14 w-14 rounded-2xl transition-transform group-hover:scale-110"><Icon name={INDUSTRY_ICON[x.slug] ?? "building"} className="h-6 w-6" /></span>
+                    <span className="bg-gradient-to-b from-primary/30 to-transparent bg-clip-text text-4xl font-black leading-none text-transparent" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
+                  </div>
                   <h3 className="text-xl font-black leading-snug">{x.name}</h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
-                  <ul className="mt-4 space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm"><Check className="mt-0.5 h-4 w-4 flex-none text-primary" strokeWidth={3} />{n}</li>)}</ul>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{x.summary}</p>
+                  <p className="mb-2.5 mt-5 text-[11px] font-black uppercase tracking-[0.16em] text-primary">What it helps with</p>
+                  <ul className="space-y-2">{x.needs.map((n) => <li key={n} className="flex gap-2.5 text-sm leading-snug"><span className="sr-circle mt-0.5 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span>{n}</li>)}</ul>
+                  <div className="mt-auto pt-6"><div className="border-t border-border/50 pt-4">
+                    <p className="mb-2.5 text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">Products it uses</p>
+                    <ul className="flex flex-wrap gap-2">
+                      {x.modules.flatMap((k) => { const m = byKey.get(k); return m ? [<li key={k}><Link href={productPath(k)} title={m.name} aria-label={m.name} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/60 bg-background shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"><ProductLogo productKey={k} size={30} title={m.name} /></Link></li>] : []; })}
+                    </ul>
+                  </div></div>
                 </div>
               </Reveal>
             ))}
@@ -283,7 +328,30 @@ export default async function SaasHome() {
       <section id="examples" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("examples")} center icon="layers" eyebrow="Everyday uses" title="Everyday jobs" accent="it takes off your plate." lead="These are real situations a business runs into. Each one shows the problem people usually have, and what changes when everything works together." />
-          <NumberedRows items={USE_CASES.map((u) => ({ title: USE_CASE_PLAIN_TITLES[u.slug] ?? u.title, text: `${u.problem} The result: ${u.result}` }))} />
+          <ol className="grid gap-5 md:grid-cols-2">
+            {USE_CASES.map((u, i) => (
+              <Reveal key={u.slug} as="li" delay={(i % 2) * 70}>
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10 sm:p-7">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <div className="mb-4 flex items-center gap-4">
+                    <span className="sr-icon h-12 w-12 flex-none rounded-2xl transition-transform group-hover:scale-110"><Icon name={USE_CASE_ICON[u.slug] ?? "workflow"} className="h-5 w-5" /></span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.16em] text-primary">Everyday job {String(i + 1).padStart(2, "0")}</p>
+                      <h3 className="text-lg font-black leading-snug">{USE_CASE_PLAIN_TITLES[u.slug] ?? u.title}</h3>
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl bg-rose-500/[0.07] p-4"><p className="text-[11px] font-black uppercase tracking-widest text-rose-500">The problem</p><p className="mt-1.5 text-sm leading-relaxed">{u.problem}</p></div>
+                    <div className="rounded-2xl bg-emerald-500/[0.09] p-4"><p className="text-[11px] font-black uppercase tracking-widest text-emerald-600">With SelfRun AI</p><p className="mt-1.5 text-sm leading-relaxed">{u.result}</p></div>
+                  </div>
+                  <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+                    <span className="mr-1 text-[11px] font-black uppercase tracking-widest text-muted-foreground">Products used</span>
+                    {u.modules.flatMap((k) => { const m = byKey.get(k); return m ? [<Link key={k} href={productPath(k)} title={m.name} aria-label={m.name} className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/60 bg-background shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40"><ProductLogo productKey={k} size={24} title={m.name} /></Link>] : []; })}
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </ol>
           <div className="mt-10 flex justify-center"><Link href="/success-stories" className="sr-btn sr-btn-primary">See each one step by step <ArrowRight className="h-4 w-4" /></Link></div>
         </div>
       </section>
@@ -308,7 +376,29 @@ export default async function SaasHome() {
       <section id="automation" className="sr-section relative overflow-hidden" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("automation")} center icon="workflow" eyebrow="Automation" title="Routine work" accent="that does itself." lead="You set the rules once, for example “when an invoice is late, send a reminder”. After that the system follows up, reminds people, asks for approvals and reports by itself, so nothing waits for someone to remember. Pick an example below and press run to watch it happen." />
-          <TimelineSteps items={RUNS_ITSELF.map((l) => ({ title: l.title, text: l.text, icon: l.icon, points: l.points }))} />
+          <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            {RUNS_ITSELF.map((l, i) => (
+              <Reveal key={l.title} as="li" delay={i * 90} className="relative lg:px-2.5">
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <div className="mb-5 flex items-center justify-between">
+                    <span className="sr-icon h-14 w-14 rounded-2xl transition-transform group-hover:scale-110"><Icon name={l.icon} className="h-6 w-6" /></span>
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-primary">Step {i + 1}</span>
+                  </div>
+                  <h3 className="text-xl font-black leading-snug tracking-tight">{l.title}</h3>
+                  <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{l.text}</p>
+                  <div className="mt-auto pt-5">
+                    <ul className="space-y-2.5 rounded-2xl bg-muted/40 p-4 text-sm font-medium">
+                      {l.points.map((pt) => <li key={pt} className="flex gap-2.5 leading-snug"><span className="sr-circle mt-0.5 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span>{pt}</li>)}
+                    </ul>
+                  </div>
+                </div>
+                {i < RUNS_ITSELF.length - 1 && (
+                  <span className="pointer-events-none absolute -right-3.5 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border/60 bg-background text-primary shadow-md lg:flex" aria-hidden><ArrowRight className="h-4 w-4" /></span>
+                )}
+              </Reveal>
+            ))}
+          </ol>
           <div className="mt-20 grid grid-cols-[minmax(0,1fr)] items-center gap-10 lg:grid-cols-[1.5fr_1fr] lg:gap-14">
             <Reveal><AutomationFlow flows={FLOWS} /></Reveal>
             <Reveal delay={120}><MarketingShot screenKey="automations" name="Automations" /></Reveal>
@@ -328,18 +418,23 @@ export default async function SaasHome() {
       <section id="ai" className="sr-section" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("ai")} center icon="bot" eyebrow="AI that helps" title="AI that helps" accent="with real work." lead="This is not just a chatbot added on the side. The AI reads your own records, helps you write, answers your customers and works inside your automations. It only ever shows a person what they are allowed to see, and it does not change your data without someone approving it." />
-          <div className="grid items-center gap-14 lg:grid-cols-2">
+          <div className="grid items-start gap-10 lg:grid-cols-[1.15fr_1fr] xl:gap-12">
           <div>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2">
               {AI_CAPABILITIES.map((c, i) => (
-                <Reveal key={c.title} delay={(i % 2) * 80} className="flex gap-4">
-                  <span className="sr-icon h-11 w-11 flex-none"><Icon name={c.icon} className="h-5 w-5" /></span>
-                  <span><span className="block font-bold">{c.title}</span><span className="block text-sm leading-relaxed text-muted-foreground line-clamp-3">{c.body}</span></span>
+                <Reveal key={c.title} delay={(i % 2) * 80}>
+                  <div className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                    <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                    <Icon name={c.icon} className="pointer-events-none absolute -bottom-5 -right-5 h-24 w-24 text-primary/[0.07] transition-transform duration-500 group-hover:scale-110" />
+                    <span className="sr-icon relative mb-4 h-12 w-12 rounded-2xl transition-transform group-hover:scale-110"><Icon name={c.icon} className="h-5 w-5" /></span>
+                    <h3 className="relative text-base font-black leading-snug">{c.title}</h3>
+                    <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+                  </div>
                 </Reveal>
               ))}
             </div>
           </div>
-          <Reveal className="space-y-6">
+          <Reveal className="space-y-5 lg:sticky lg:top-28">
             <MarketingShot screenKey="intelligence" name="SelfRun DataBrain AI" />
             <div className="grid grid-cols-2 gap-4">
               <PanelShot moduleKey="aibots" name="SelfRun AgentOS" glow={false} />
@@ -377,22 +472,30 @@ export default async function SaasHome() {
       {/* Every device */}
       <section id="devices" className="sr-section relative overflow-hidden bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n={no("devices")} center icon="rocket" eyebrow="Any device" title="Use it anywhere," accent="on any device." lead="Open it in a web browser, add it to your phone or computer like an app, or get your own mobile and desktop apps. Every one shows your business name, icon and colours and can send notifications. The browser version and the installable web app are ready from day one. The Android, iPhone, Windows, Mac and Linux apps are made only when you press the Generate button for that app." />
-          <div className="grid items-center gap-14 lg:grid-cols-2">
+          <SectionHead n={no("devices")} center icon="rocket" eyebrow="Any device" title="Use it anywhere," accent="on any device." lead="Open it in a web browser, add it to your phone or computer like an app, or get your own mobile and desktop apps. Every one shows your business name, icon and colours, and can send notifications." />
+          <div className="grid items-start gap-10 lg:grid-cols-[1.1fr_1fr] xl:gap-12">
           <div>
-            <div className="space-y-4 border-b border-border/70 pb-4">
-              {DEVICES.map((d, i) => (
-                <Reveal key={d.title} delay={i * 70} className="border-t border-border/70 pb-2 pt-6">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="font-bold">{d.title}</h3>
-                    <div className="flex flex-wrap gap-1.5">{d.platforms.map((p) => <span key={p} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">{p}</span>)}</div>
-                  </div>
-                  <p className="mt-1.5 text-sm text-muted-foreground">{d.text}</p>
-                </Reveal>
-              ))}
+            <div className="grid gap-4 sm:grid-cols-2">
+              {DEVICES.map((d, i) => {
+                const ready = i < 2;
+                return (
+                  <Reveal key={d.title} delay={(i % 2) * 70}>
+                    <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                      <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                      <div className="mb-4 flex items-center justify-between gap-2">
+                        <span className="sr-icon h-12 w-12 rounded-2xl transition-transform group-hover:scale-110"><Icon name={DEVICE_ICON[i] ?? "rocket"} className="h-5 w-5" /></span>
+                        <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${ready ? "bg-emerald-500/10 text-emerald-600" : "bg-amber-500/10 text-amber-600"}`}>{ready ? "Ready from day one" : "Made when you press Generate"}</span>
+                      </div>
+                      <h3 className="text-base font-black leading-snug">{d.title}</h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{d.text}</p>
+                      <div className="mt-auto flex flex-wrap gap-1.5 pt-4">{d.platforms.map((pl) => <span key={pl} className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">{pl}</span>)}</div>
+                    </div>
+                  </Reveal>
+                );
+              })}
             </div>
           </div>
-          <Reveal><MarketingShot screenKey="apps" name="Apps & downloads" /></Reveal>
+          <Reveal className="lg:sticky lg:top-28"><MarketingShot screenKey="apps" name="Apps & downloads" /></Reveal>
         </div>
         </div>
       </section>
@@ -402,19 +505,28 @@ export default async function SaasHome() {
         <div className="pointer-events-none absolute right-0 top-1/3 h-[700px] w-[700px] translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
         <div className="sr-container relative">
           <SectionHead n={no("nolimits")} center icon="layers" eyebrow="No locked features" title="Every feature." accent="In every plan." lead="Customers, staff, payroll, money, projects, buying, training, documents, your website, AI and more. Nothing is hidden behind a higher plan. Plans differ only by team size and usage limits." />
-          <div className="grid items-center gap-14 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid items-start gap-10 lg:grid-cols-[1.2fr_1fr] xl:gap-12">
           <div>
-            <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-600">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1"><Check className="h-3.5 w-3.5" strokeWidth={3} />Included in every plan</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1"><Check className="h-3.5 w-3.5" strokeWidth={3} />Free to start</span>
+            </div>
+            <ul className="grid gap-3 sm:grid-cols-2">
               {modules.slice(0, SAAS_PRODUCT_COUNT).map((module) => (
-                <li key={module.key} className="flex gap-3 text-sm leading-relaxed">
-                  <span className="sr-circle mt-0.5 h-5 w-5 flex-none"><Check className="h-3 w-3" strokeWidth={3} /></span>
-                  <span><strong>{module.name}:</strong> {module.capabilities[0] ?? module.summary}</span>
+                <li key={module.key}>
+                  <Link href={productPath(module.key)} className="group flex h-full items-start gap-3 rounded-2xl border border-border/60 bg-card p-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10">
+                    <span className="flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-border/60 bg-background shadow-sm transition-transform group-hover:scale-105"><ProductLogo productKey={module.key} size={30} title={module.name} /></span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-black leading-tight transition-colors group-hover:text-primary">{module.name.replace(/^SelfRun\s+/i, "")}</span>
+                      <span className="mt-1 block text-xs leading-snug text-muted-foreground">{module.capabilities[0] ?? module.summary}</span>
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
             <Link href="/products" className="sr-btn sr-btn-primary mt-8">See every feature <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          <Reveal><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
+          <Reveal className="lg:sticky lg:top-28"><PanelOrbit panels={orbit} brand={SAAS_BRAND.name} /></Reveal>
         </div>
         </div>
       </section>
@@ -512,8 +624,26 @@ export default async function SaasHome() {
       <section id="how" style={{ scrollMarginTop: 140 }} className="sr-section">
         <div className="sr-container">
           <SectionHead n={no("how")} center icon="rocket" eyebrow="Getting started" title="Ready in minutes," accent="not months." lead="Four steps take you from signing up to running your business on SelfRun AI. You can do the first two in one sitting." />
-          <TimelineSteps items={HOW_IT_WORKS.map((x) => ({ title: x.title, text: x.body }))} />
-          <div className="mt-16 flex justify-center"><HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "See it with your scenario", href: "/demo" }} /></div>
+          <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-0">
+            {HOW_IT_WORKS.map((x, i) => (
+              <Reveal key={x.title} as="li" delay={i * 90} className="relative lg:px-2.5">
+                <div className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+                  <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-60 transition-opacity group-hover:opacity-100" aria-hidden />
+                  <span className="pointer-events-none absolute -right-2 -top-5 select-none bg-gradient-to-b from-primary/20 to-transparent bg-clip-text text-8xl font-black leading-none text-transparent" aria-hidden>{i + 1}</span>
+                  <div className="relative mb-5 flex items-center gap-3">
+                    <span className="sr-icon h-14 w-14 rounded-2xl transition-transform group-hover:scale-110"><Icon name={HOW_ICON[i] ?? "rocket"} className="h-6 w-6" /></span>
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-black uppercase tracking-widest text-primary">Step {i + 1}</span>
+                  </div>
+                  <h3 className="relative text-xl font-black leading-snug tracking-tight">{x.title}</h3>
+                  <p className="relative mt-2 text-[15px] leading-relaxed text-muted-foreground">{x.body}</p>
+                </div>
+                {i < HOW_IT_WORKS.length - 1 && (
+                  <span className="pointer-events-none absolute -right-3.5 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-border/60 bg-background text-primary shadow-md lg:flex" aria-hidden><ArrowRight className="h-4 w-4" /></span>
+                )}
+              </Reveal>
+            ))}
+          </ol>
+          <div className="mt-16 flex justify-center"><HeroCtas primary={{ label: "Get started free", href: "/signup" }} secondary={{ label: "See it with your own example", href: "/demo" }} /></div>
         </div>
       </section>
 
@@ -523,13 +653,7 @@ export default async function SaasHome() {
       <section id="words" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
           <SectionHead n={no("words")} center icon="book" eyebrow="Glossary" title="Business terms," accent="explained." lead="Some business and software words can be confusing. This is what each one means on this website." />
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {GLOSSARY.map((g, i) => (
-              <Reveal key={g.term} delay={(i % 3) * 60}>
-                <div className="h-full rounded-3xl border border-border/60 bg-card p-6 shadow-sm"><h3 className="font-black leading-snug">{g.term}</h3><p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground">{g.meaning}</p></div>
-              </Reveal>
-            ))}
-          </div>
+          <GlossaryGrid items={GLOSSARY} />
         </div>
       </section>
 

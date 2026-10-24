@@ -26,18 +26,18 @@ function IconList({
   items: { title: string; body: string; icon: IconKey }[];
 }) {
   return (
-    <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((x, i) => (
-        <Reveal key={x.title} delay={(i % 3) * 70} className="flex gap-4">
-          <span className="sr-icon h-12 w-12 flex-none">
-            <Icon name={x.icon} className="h-5 w-5" />
-          </span>
-          <span>
-            <span className="block font-black">{x.title}</span>
-            <span className="block text-sm leading-relaxed text-muted-foreground">
-              {x.body}
+        <Reveal key={x.title} delay={(i % 3) * 70}>
+          <div className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/10">
+            <span className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary to-brand-accent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+            <Icon name={x.icon} className="pointer-events-none absolute -bottom-5 -right-5 h-24 w-24 text-primary/[0.07] transition-transform duration-500 group-hover:scale-110" />
+            <span className="sr-icon relative mb-4 h-12 w-12 rounded-2xl transition-transform group-hover:scale-110">
+              <Icon name={x.icon} className="h-5 w-5" />
             </span>
-          </span>
+            <h3 className="relative text-base font-black leading-snug">{x.title}</h3>
+            <p className="relative mt-1.5 text-sm leading-relaxed text-muted-foreground">{x.body}</p>
+          </div>
         </Reveal>
       ))}
     </div>
