@@ -4,7 +4,7 @@ import { pageMeta } from "@/lib/platform/saas/seo-meta";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Clock } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, Clock } from "lucide-react";
 import { NumberedRows } from "@/components/platform/saas/Modern";
 import { getFeatureGroups } from "@/lib/platform/saas/modules";
 import { featuresOf } from "@/lib/platform/saas/feature-lists";
@@ -12,7 +12,8 @@ import { DOCS, DOC_CATEGORIES } from "@/lib/platform/saas/docs";
 import { TUTORIALS } from "@/lib/platform/saas/tutorials";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import DocsSearch, { type DocEntry } from "@/components/platform/saas/DocsSearch";
-import ProductDocsExplorer from "@/components/platform/saas/ProductDocsExplorer";
+import ProductLogo from "@/components/products/ProductLogo";
+import { productDocsPath, productPath } from "@/lib/platform/saas/product-routes";
 import SectionScrollNav from "@/components/platform/saas/SectionScrollNav";
 import Icon from "@/components/platform/saas/Icon";
 import Reveal from "@/components/platform/saas/Reveal";
@@ -129,8 +130,41 @@ export default async function DocsPage() {
       {/* 05 guides by section */}
       <section id="products" className="sr-section bg-muted/10" style={{ scrollMarginTop: 140 }}>
         <div className="sr-container">
-          <SectionHead n="05" icon="layers" eyebrow="Guides by product" title="Every feature of" accent="every product." lead="Every product has step-by-step guides. Each guide tells you what the feature does, what to check before you start, the steps in order, and a quick recap." />
-          <ProductDocsExplorer panels={explorer} />
+          <SectionHead n="05" icon="layers" eyebrow="Guides by product" title="Every feature of" accent="every product." lead="Product by product, here is every feature with its own guide. Click a feature to read what it does, what to check before you start, the steps in order, and a quick recap." />
+          <div className="space-y-20">
+            {explorer.map((p) => (
+              <div key={p.key} id={p.key} className="scroll-mt-32">
+                <SectionHead
+                  icon={<ProductLogo productKey={p.key} size={34} title={p.name} />}
+                  eyebrow="Product"
+                  title="SelfRun"
+                  accent={p.name.replace(/^SelfRun\s+/i, "")}
+                  lead={p.summary}
+                />
+                <div className="-mt-6 mb-10 flex justify-center">
+                  <Link href={productPath(p.key)} className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-background px-5 py-2.5 text-sm font-bold shadow-sm transition-colors hover:border-primary/40 hover:text-primary">See the product page <ArrowUpRight className="h-4 w-4" /></Link>
+                </div>
+                <div className="space-y-7">
+                  {p.groups.map((g) => (
+                    <section key={g.name} aria-label={`${p.name}: ${g.name}`}>
+                      <h4 className="mb-3 flex items-center gap-3 px-1 text-xs font-black uppercase tracking-widest text-primary">{g.name}</h4>
+                      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                        {g.items.map((f, i) => (
+                          <li key={f.slug}>
+                            <Link href={productDocsPath(p.key, f.slug)} className="group flex h-full gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5">
+                              <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-primary/10 text-xs font-black text-primary">{String(i + 1).padStart(2, "0")}</span>
+                              <span className="min-w-0 flex-1"><span className="block font-black leading-snug group-hover:text-primary">{f.name}</span><span className="mt-1 line-clamp-2 block text-sm leading-snug text-muted-foreground">{f.text}</span></span>
+                              <ArrowUpRight className="mt-0.5 h-4 w-4 flex-none text-primary opacity-0 transition-opacity group-hover:opacity-100" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
