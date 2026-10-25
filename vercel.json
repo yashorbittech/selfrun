@@ -47,10 +47,6 @@
     {
       "path": "/api/apps/builds/cron",
       "schedule": "0 7 * * *"
-    },
-    {
-      "path": "/api/notify/announcements/cron",
-      "schedule": "0 8 * * *"
     }
   ]
 }
