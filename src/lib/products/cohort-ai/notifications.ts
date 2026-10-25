@@ -1,4 +1,5 @@
 import "server-only";
+import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
@@ -135,7 +136,7 @@ export async function notifyStaff(n: Omit<NotifyInput, "recipientUserId" | "audi
     const db = await getDb();
     const staff = await db
       .collection<{ _id: unknown }>("admin_users")
-      .find({ roles: { $in: ["super_admin", "tms_admin", "tms_manager"] } })
+      .find({ roles: { $in: ["super_admin", "tms_admin", "tms_manager"] }, status: { $nin: BLOCKED_STATUSES } })
       .toArray();
     await Promise.all(
       staff.map((s) =>

@@ -2,6 +2,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, createStamp, escapeRx, newId, notDeleted, parseDateTime, updateStamp, type AuditFields } from "@/lib/products/evaliq/db";
 import { OtsInputError, NotFoundError } from "@/lib/products/evaliq/viewer";
+import { notifyCandidates } from "@/lib/products/evaliq/notifications";
 import {
   ACTIVE_ASSIGNMENT_STATUSES,
   PRIORITIES,
@@ -349,6 +350,27 @@ export async function updateAssignment(
   // (Extra attempts on a finished assignment make it attemptable again — `startAttempt` checks the limit.)
   const after = { ...before, ...patch };
   await (await col()).updateOne({ _id: id }, { $set: { ...patch, ...updateStamp(actorId) } });
+  // The candidate hears when their test window moves or they are given another attempt (from any screen that edits an assignment).
+  try {
+    const t = (n: Date | null | undefined) => (n ? new Date(n).getTime() : 0);
+    const moved = t(before.startAt) !== t(patch.startAt) || t(before.dueAt) !== t(patch.dueAt);
+    const extraGiven = (patch.extraAttempts ?? 0) > (before.extraAttempts ?? 0);
+    if (moved || extraGiven) {
+      const test = await requireTest(before.testId).catch(() => null);
+      const when = (d: Date | null | undefined) => (d ? new Date(d).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "no limit");
+      await notifyCandidates([
+        {
+          ref: before.candidate,
+          assignmentId: id,
+          type: extraGiven ? "ots_extra_attempt" : "ots_updated",
+          title: extraGiven ? `You have another attempt: ${test?.name ?? "your test"}` : `Your test schedule changed: ${test?.name ?? "your test"}`,
+          body: extraGiven ? "An extra attempt was added to your assignment." : `Opens ${when(patch.startAt)} · due ${when(patch.dueAt)}.`,
+        },
+      ]);
+    }
+  } catch {
+    /* a notification never fails the edit */
+  }
   return { before, after };
 }
 
@@ -363,6 +385,12 @@ export async function cancelAssignment(id: string, reason: string, actorId: stri
     { $set: { status: "cancelled", cancelledAt: now, cancelReason: reason.trim().slice(0, 300) || null, ...updateStamp(actorId) } }
   );
   if (res.modifiedCount === 0) throw new OtsInputError("The assignment changed in the meantime — reload and try again.");
+  try {
+    const test = await requireTest(a.testId).catch(() => null);
+    await notifyCandidates([{ ref: a.candidate, assignmentId: id, type: "ots_cancelled_alert", title: `Test cancelled: ${test?.name ?? "your test"}`, body: reason.trim().slice(0, 200) || "You no longer need to take it." }]);
+  } catch {
+    /* never fails the cancel */
+  }
   return { ...a, status: "cancelled", cancelledAt: now };
 }
 

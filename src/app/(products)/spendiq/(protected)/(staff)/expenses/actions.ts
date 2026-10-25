@@ -168,16 +168,7 @@ export async function decideExpenseAction(id: string, approve: boolean, note: st
   const res = await decideExpense(id, approve, note || null, user.id);
   if (!res.ok) return { ok: false, error: res.reason };
   await recordAudit({ actorId: user.id, actorEmail: user.email, action: approve ? "approve" : "reject", entity: "expense", entityId: id, entityLabel: res.expense?.expenseCode });
-  if (res.expense) {
-    await notify({
-      recipientUserId: res.expense.raisedByUserId,
-      audience: "employee",
-      type: approve ? "expense_approved" : "expense_rejected",
-      title: `Expense ${res.expense.expenseCode} ${approve ? "approved" : "rejected"}`,
-      body: note || null,
-      link: `/spendiq/me/expenses/${id}`,
-    });
-  }
+  // The submitter is notified by `decideExpense` itself (so the Workspace and bulk paths notify too).
   revalidate(id);
   return { ok: true, id };
 }

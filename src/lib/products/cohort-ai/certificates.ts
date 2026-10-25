@@ -1,5 +1,6 @@
 import { tmsEvents } from "@/lib/notify/triggers/tms";
 import "server-only";
+import { notifyStudent } from "@/lib/products/cohort-ai/notifications";
 import { randomBytes } from "node:crypto";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, nextSequence, type AuditFields } from "@/lib/products/cohort-ai/db";
@@ -256,11 +257,22 @@ export async function setCertificateRevoked(
   actorId: string
 ): Promise<Certificate | null> {
   const collection = await getCollection();
-  return collection.findOneAndUpdate(
+  const before = await collection.findOne({ _id: id, ...notDeleted }, { projection: { revoked: 1 } });
+  const cert = await collection.findOneAndUpdate(
     { _id: id, ...notDeleted },
     { $set: { revoked, revokedReason: revoked ? reason : null, ...updateStamp(actorId) } },
     { returnDocument: "after" }
   );
+  // The student is told their certificate was withdrawn (with the reason) or given back.
+  if (cert && before && !!before.revoked !== revoked) {
+    await notifyStudent(cert.studentId, {
+      type: revoked ? "certificate_revoked_alert" : "certificate_reinstated",
+      title: revoked ? `Your certificate ${cert.certificateNumber} was revoked` : `Your certificate ${cert.certificateNumber} is valid again`,
+      body: revoked ? reason : null,
+      link: "/cohort-ai/notifications",
+    });
+  }
+  return cert;
 }
 
 /** Reissue: revokes the original and mints a fresh certificate number + code. */
@@ -281,6 +293,7 @@ export async function reissueCertificate(id: string, actorId: string): Promise<C
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  await notifyStudent(doc.studentId, { type: "certificate_reissued", title: `Your certificate was reissued as ${doc.certificateNumber}`, body: "Use the new number; the old one no longer verifies.", link: "/cohort-ai/notifications" });
   return doc;
 }
 

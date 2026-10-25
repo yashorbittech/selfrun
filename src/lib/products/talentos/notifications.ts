@@ -1,4 +1,5 @@
 import "server-only";
+import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/products/talentos/db";
 import type { CurrentHrmsUser } from "@/lib/hrms-auth";
@@ -118,7 +119,9 @@ export async function notifyEmployee(
 ): Promise<void> {
   try {
     const db = await getDb();
-    const user = await db.collection("admin_users").findOne({ employeeId, roles: "employee" }, { projection: { _id: 1 } });
+    // Whoever the HR file is linked to, whatever their role: a Director or an HR manager has their own HR file too (leave decided, payslip
+    // published …), so the lookup must not require the plain "employee" role. Deactivated / left accounts are skipped.
+    const user = await db.collection("admin_users").findOne({ employeeId, status: { $nin: BLOCKED_STATUSES } }, { projection: { _id: 1 } });
     if (!user) return;
     await notify({ ...input, audience: "employee", recipientUserId: String(user._id) });
   } catch {

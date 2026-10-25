@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { mustSetUpTwoFactor } from "@/lib/security/two-factor";
 import { emailLapseGate } from "@/lib/platform/email-lapse";
+import { trialLockGate } from "@/lib/platform/billing/trial-lock";
 
 /**
  * Every product's signed-in area starts with this. A company on hold for an unverified email is sent to the page that explains it;
@@ -13,5 +14,6 @@ export const twoStepGate = cache(async (): Promise<void> => {
   const user = await getCurrentHubUser();
   if (!user) return; // not signed in with the company sign-in: the product's own checks decide
   await emailLapseGate(); // the 30 days for verifying the company email ran out: the workspace is on hold
+  await trialLockGate(); // the free trial ended and no plan was bought: the workspace is locked until one is
   if (await mustSetUpTwoFactor(user)) redirect("/commandos/two-factor-setup");
 });

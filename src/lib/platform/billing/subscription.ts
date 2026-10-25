@@ -1,4 +1,5 @@
 import "server-only";
+import { forgetTrialLock } from "@/lib/platform/billing/trial-lock";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { COMPANIES_COLLECTION, type Company } from "@/lib/platform/tenancy/companies";
 import { getDefaultPlan, getPlan } from "@/lib/platform/billing/plans";
@@ -91,4 +92,5 @@ export async function updateCompanySubscription(companyId: string, patch: Partia
   const current = await getCompanySubscription(companyId);
   if (!current) return;
   await (await companies()).updateOne({ _id: companyId, isPlatformOwner: { $ne: true } }, { $set: { subscription: { ...current, ...patch, updatedAt: new Date() } } });
+  forgetTrialLock(); // buying a plan lifts a trial lock at once
 }

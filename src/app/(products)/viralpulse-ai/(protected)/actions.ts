@@ -7,7 +7,7 @@ import { signOutThisDevice } from "@/lib/security/sessions";
 import { run } from "@/lib/products/viralpulse-ai/run";
 import { requireViewer, can, ForbiddenError, SmmsInputError } from "@/lib/products/viralpulse-ai/viewer";
 import { recordAudit, diffSummary } from "@/lib/products/viralpulse-ai/audit";
-import { markSmmsNotificationsRead } from "@/lib/products/viralpulse-ai/notifications";
+import { markSmmsNotificationsRead, notifySmmsUsers } from "@/lib/products/viralpulse-ai/notifications";
 import { recordVersion, getVersion, listWorkspaceRuns, type TargetType } from "@/lib/products/viralpulse-ai/generations";
 import { createCampaign, duplicateCampaign, parseBrief, requireCampaign, saveCampaignAi, setCampaignStatus, setLmsLinks, softDeleteCampaign, statusAfterEdit, updateBrief } from "@/lib/products/viralpulse-ai/campaigns";
 import { contentFromConcept, createAd, duplicateAd, parseAdHeader, parseSchedule, requireAd, softDeleteAd, updateAd } from "@/lib/products/viralpulse-ai/ads";
@@ -402,6 +402,9 @@ export async function approvePostAction(id: string, approve: boolean) {
     if (p.status !== "scheduled") throw new SmmsInputError("Only scheduled posts can be approved.");
     await updatePost(id, { approvedBy: approve ? v.userId : null, approvedAt: approve ? new Date() : null }, v.userId);
     await recordAudit({ ...who(v), action: "approve", entity: "post", entityId: id, entityLabel: p.title, recordId: id, summary: approve ? "Approved to auto-publish" : "Approval withdrawn" });
+    if (p.createdBy && p.createdBy !== v.userId) {
+      await notifySmmsUsers([p.createdBy], { type: approve ? "smms_post_approved" : "smms_approval_withdrawn", title: approve ? `Approved to publish: ${p.title}` : `Approval withdrawn: ${p.title}`, body: approve ? "Your scheduled post will publish automatically." : "This post will not auto-publish until it is approved again.", link: `/viralpulse-ai/posts/${id}` });
+    }
     return {};
   });
 }

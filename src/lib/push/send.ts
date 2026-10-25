@@ -21,6 +21,8 @@ export interface PushMessage {
   url?: string | null;
   /** Notifications with the same tag replace each other instead of stacking. */
   tag?: string | null;
+  /** false = push only, no email (the default is to email whoever's own settings allow it). */
+  email?: boolean;
 }
 
 const MAX_FAILURES = 5;
@@ -90,18 +92,23 @@ export async function pushToUsers(actor: PushActor, userIds: string[], message: 
 }
 
 /**
- * For the notification writers: schedules the push after the response (a serverless function may stop right after it),
- * inside the current company's scope. Outside a request (a cron, a script) it just runs it.
+ * For the notification writers: schedules the out-of-app channels, push AND email, after the response (a serverless function may stop
+ * right after it), inside the current company's scope. Outside a request (a cron, a script) it just runs them. Each is best-effort and
+ * follows the person's own settings; one failing never stops the other. (The name is from when push was the only channel.)
  */
 export async function queuePush(actor: PushActor, userIds: string[], message: PushMessage): Promise<void> {
   try {
-    if (!pushConfigured() || userIds.length === 0) return;
+    if (userIds.length === 0) return;
     const companyId = await currentCompanyIdOrNull();
     if (!companyId) return;
+    const deliver = async () => {
+      const { emailToUsers } = await import("@/lib/notify/email-channel");
+      await Promise.all([pushToUsers(actor, userIds, message), message.email === false ? 0 : emailToUsers(actor, userIds, message)]);
+    };
     try {
-      await afterForCompany(() => pushToUsers(actor, userIds, message));
+      await afterForCompany(deliver);
     } catch {
-      void runAsCompany(companyId, () => pushToUsers(actor, userIds, message));
+      void runAsCompany(companyId, deliver);
     }
   } catch (err) {
     console.error("[push] could not queue", err);

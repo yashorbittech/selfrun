@@ -23,7 +23,12 @@ export type OtsNotificationType =
   | "ots_completed"
   | "ots_result"
   | "ots_certificate"
-  | "ots_evaluation_needed";
+  | "ots_evaluation_needed"
+  | "ots_updated"
+  | "ots_extra_attempt"
+  | "ots_cancelled_alert"
+  | "ots_certificate_revoked_alert"
+  | "ots_certificate_restored";
 
 export interface CandidateNotice {
   ref: CandidateRef;

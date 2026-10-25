@@ -3,6 +3,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/products/cohort-ai/db";
 import { DEFAULT_STUDENT_STATUS, type StudentStatus } from "@/lib/products/cohort-ai/constants";
+import { notifyStudent } from "@/lib/products/cohort-ai/notifications";
 
 /**
  * A student's enrolment in one batch of one program. Created by the application
@@ -164,5 +165,11 @@ export async function updateEnrollment(
   if (data.progressPercent !== undefined) {
     patch.progressPercent = Math.min(100, Math.max(0, Math.round(data.progressPercent)));
   }
-  return collection.findOneAndUpdate({ _id: id, ...notDeleted }, { $set: patch }, { returnDocument: "after" });
+  const before = data.status !== undefined ? await collection.findOne({ _id: id, ...notDeleted }, { projection: { status: 1 } }) : null;
+  const after = await collection.findOneAndUpdate({ _id: id, ...notDeleted }, { $set: patch }, { returnDocument: "after" });
+  // The student hears when staff change the state of their enrolment (completed, dropped, on hold …), from whichever screen it was changed.
+  if (after && before && data.status !== undefined && before.status !== data.status) {
+    await notifyStudent(after.studentId, { type: `enrollment_${data.status}`, title: `Your enrolment is now ${String(data.status).replace(/_/g, " ")}`, link: "/cohort-ai/notifications" });
+  }
+  return after;
 }

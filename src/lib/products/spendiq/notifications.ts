@@ -1,4 +1,5 @@
 import "server-only";
+import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
@@ -80,6 +81,18 @@ export async function notify(input: NotifyInput): Promise<void> {
   }
 }
 
+/** Tell the person whose HR file is `employeeId` (whatever their role), if they have a login. `exceptUserId` is skipped. */
+export async function notifyEmployeeLogin(employeeId: string, n: Omit<NotifyInput, "recipientUserId" | "audience">, exceptUserId?: string | null): Promise<void> {
+  try {
+    if (!employeeId) return;
+    const user = await (await getDb()).collection<{ _id: unknown }>("admin_users").findOne({ employeeId, status: { $nin: BLOCKED_STATUSES } }, { projection: { _id: 1 } });
+    if (!user || String(user._id) === exceptUserId) return;
+    await notify({ ...n, recipientUserId: String(user._id), audience: "employee" });
+  } catch {
+    /* never breaks the action */
+  }
+}
+
 /** Notify all PRMS staff, optionally narrowed to specific roles. */
 export async function notifyStaff(
   n: Omit<NotifyInput, "recipientUserId" | "audience">,
@@ -89,7 +102,7 @@ export async function notifyStaff(
     const db = await getDb();
     const staff = await db
       .collection<{ _id: unknown }>("admin_users")
-      .find({ roles: { $in: roles } })
+      .find({ roles: { $in: roles }, status: { $nin: BLOCKED_STATUSES } })
       .toArray();
     await Promise.all(
       staff.map((s) =>

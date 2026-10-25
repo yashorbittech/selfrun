@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bell, BellOff, BellRing, Check, Loader2, Moon, Send, Smartphone, Trash2 } from "lucide-react";
+import { Bell, BellOff, BellRing, Check, Loader2, Mail, Moon, Send, Smartphone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InstallCard } from "@/components/pwa/InstallApp";
@@ -217,7 +217,7 @@ export default function NotificationSettings({ initialPreferences, initialDevice
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-foreground">What to notify me about</h2>
-            <p className="text-sm text-muted-foreground">Applies to push notifications on all your devices. The in-app bell always shows everything.</p>
+            <p className="text-sm text-muted-foreground">Applies to push notifications on all your devices. The in-app bell always shows everything; email has its own choices below.</p>
           </div>
           <span className="shrink-0 text-xs text-muted-foreground" aria-live="polite">{saving === "saving" ? "Saving…" : saving === "saved" ? <span className="inline-flex items-center gap-1"><Check className="size-3.5" /> Saved</span> : ""}</span>
         </div>
@@ -238,6 +238,35 @@ export default function NotificationSettings({ initialPreferences, initialDevice
                 <p className="text-xs text-muted-foreground">{PUSH_CATEGORY_META[key].description}</p>
               </div>
               <Toggle checked={prefs.categories[key]} disabled={!prefs.enabled} onChange={(v) => update({ ...prefs, categories: { ...prefs.categories, [key]: v } })} label={PUSH_CATEGORY_META[key].label} />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* ---- email */}
+      <section className="rounded-2xl border border-border bg-card p-5">
+        <div className="flex items-start gap-3">
+          <Mail className="mt-0.5 size-5 text-primary" />
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-foreground">Email notifications</h2>
+            <p className="text-sm text-muted-foreground">The same events can also reach your inbox. Pick which. Sign-in codes, invoices and invitations are not notifications and always arrive.</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-4 rounded-xl bg-muted/50 px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">All notification emails</p>
+            <p className="text-xs text-muted-foreground">Master switch. To keep your inbox calm, at most a few emails an hour are sent, and a repeated reminder is sent once.</p>
+          </div>
+          <Toggle checked={prefs.email.enabled} onChange={(v) => update({ ...prefs, email: { ...prefs.email, enabled: v } })} label="All notification emails" />
+        </div>
+        <ul className="mt-2 divide-y divide-border">
+          {PUSH_CATEGORIES.map((key: PushCategory) => (
+            <li key={key} className="flex items-center justify-between gap-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-foreground">{PUSH_CATEGORY_META[key].label}</p>
+                <p className="text-xs text-muted-foreground">{PUSH_CATEGORY_META[key].description}</p>
+              </div>
+              <Toggle checked={prefs.email.categories[key]} disabled={!prefs.email.enabled} onChange={(v) => update({ ...prefs, email: { ...prefs.email, categories: { ...prefs.email.categories, [key]: v } } })} label={`Email: ${PUSH_CATEGORY_META[key].label}`} />
             </li>
           ))}
         </ul>

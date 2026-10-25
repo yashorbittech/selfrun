@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { emailLapseFor } from "@/lib/platform/email-lapse";
+import { trialLockedFor } from "@/lib/platform/billing/trial-lock";
+import { TRIAL_LOCK_OPEN_PATH } from "@/lib/platform/billing/trial-lock-rule";
 import { LAPSE_OPEN_PATH } from "@/lib/platform/email-lapse-rule";
 import type { NextRequest } from "next/server";
 import { isMaintenanceOn, isPublicSitePath } from "@/lib/products/sitecraft-ai/maintenance-gate";
@@ -52,6 +54,20 @@ async function panelGate(request: NextRequest, companyId: string | null | undefi
       }
     } catch (err) {
       console.error("[email-lapse] gate lookup failed in proxy", err);
+    }
+  }
+  // A free trial that ended without a subscription locks the workspace: pages lead to the subscribe page, APIs and actions refuse.
+  // Settings → Billing, sign-in and the subscribe page itself stay open so a plan can be bought.
+  if (segment && (segment === "commandos" || productKeyFromSlug(segment)) && !TRIAL_LOCK_OPEN_PATH.test(pathname)) {
+    try {
+      if (await trialLockedFor(companyId)) {
+        const error = "Your free trial has ended. Subscribe to a plan in Settings → Billing to continue.";
+        if (isApi) return NextResponse.json({ error }, { status: 402, headers: { "Cache-Control": "no-store" } });
+        if (mutatingNow) return new NextResponse(error, { status: 402, headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" } });
+        return NextResponse.redirect(new URL("/commandos/subscribe-required", request.url));
+      }
+    } catch (err) {
+      console.error("[trial-lock] gate lookup failed in proxy", err);
     }
   }
   try {

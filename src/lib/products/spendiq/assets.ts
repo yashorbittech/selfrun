@@ -1,6 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
+import { notifyEmployeeLogin } from "@/lib/products/spendiq/notifications";
 import {
   newId,
   createStamp,
@@ -303,6 +304,7 @@ export async function assignAsset(
     { $set: { status: "assigned", assignedEmployeeId: employee.id, assignedEmployeeName: employee.name, assignedAt: new Date(), ...updateStamp(actorId) } }
   );
   await logAssignment({ assetId: id, action: "assigned", employeeId: employee.id, employeeName: employee.name, note, actorId });
+  await notifyEmployeeLogin(employee.id, { type: "asset_assigned", title: `${asset.name} (${asset.assetCode}) is assigned to you`, body: note, link: "/spendiq/notifications" }, actorId);
   return { ok: true };
 }
 

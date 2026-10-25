@@ -1,4 +1,5 @@
 import "server-only";
+import { notify } from "@/lib/products/spendiq/notifications";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
 import {
@@ -312,10 +313,21 @@ export async function setPurchaseOrderStatus(
   actorId: string
 ): Promise<{ ok: boolean }> {
   const collection = await getCollection();
+  const before = await collection.findOne({ _id: id, ...notDeleted }, { projection: { status: 1, poNumber: 1, vendorName: 1, createdBy: 1 } });
   const res = await collection.updateOne(
     { _id: id, ...notDeleted },
     { $set: { status, ...updateStamp(actorId) } }
   );
+  // The person who raised the PO is told when it is cancelled, closed or moves on, whether the change was made in SpendIQ or in the Workspace.
+  if (res.modifiedCount === 1 && before && before.status !== status && before.createdBy && before.createdBy !== actorId) {
+    await notify({
+      recipientUserId: before.createdBy,
+      audience: "staff",
+      type: status === "cancelled" ? "po_cancelled_alert" : `po_${status}`,
+      title: `Purchase order ${before.poNumber} (${before.vendorName}) is now ${status.replace(/_/g, " ")}`,
+      link: `/spendiq/purchase-orders/${id}`,
+    });
+  }
   return { ok: res.modifiedCount === 1 };
 }
 

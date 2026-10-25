@@ -1,6 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
+import { notify } from "@/lib/products/spendiq/notifications";
 import {
   newId,
   createStamp,
@@ -339,6 +340,18 @@ export async function decideExpense(
     },
     { returnDocument: "after" }
   );
+  // The person who raised it is told here, in the one place every route to a decision goes through (the product, the Workspace manage page,
+  // its bulk action, the AI agent): a decision made anywhere reaches them.
+  if (expense) {
+    await notify({
+      recipientUserId: expense.raisedByUserId,
+      audience: "employee",
+      type: approve ? "expense_approved" : "expense_rejected",
+      title: `Expense ${expense.expenseCode} ${approve ? "approved" : "rejected"}`,
+      body: approve ? null : note?.trim() || null,
+      link: `/spendiq/me/expenses/${id}`,
+    });
+  }
   return { ok: true, expense };
 }
 
@@ -348,6 +361,14 @@ export async function markExpenseReimbursed(id: string, actorId: string): Promis
   if (!existing) return { ok: false, reason: "Expense not found." };
   if (existing.approvalStatus !== "approved") return { ok: false, reason: "Only approved expenses can be reimbursed." };
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { approvalStatus: "reimbursed", ...updateStamp(actorId) } });
+  await notify({
+    recipientUserId: existing.raisedByUserId,
+    audience: "employee",
+    type: "expense_reimbursed",
+    title: `Expense ${existing.expenseCode} reimbursed`,
+    body: "The amount has been paid out to you.",
+    link: `/spendiq/me/expenses/${id}`,
+  });
   return { ok: true };
 }
 

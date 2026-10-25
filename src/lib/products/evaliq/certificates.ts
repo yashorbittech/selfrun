@@ -138,6 +138,15 @@ export async function setRevoked(id: string, revoked: boolean, reason: string, a
   const patch = revoked ? { revoked: true, revokedAt: new Date(), revokedReason: reason.trim().slice(0, 300) } : { revoked: false, revokedAt: null, revokedReason: null };
   await (await col()).updateOne({ _id: id }, { $set: { ...patch, ...updateStamp(actor.id) } });
   await recordAudit({ actorId: actor.id, actorEmail: actor.email, action: revoked ? "certificate_revoked" : "certificate_restored", entity: "certificate", entityId: id, entityLabel: `${c.certificateNumber} · ${c.candidateName}`, testId: c.testId, summary: revoked ? reason.trim().slice(0, 200) : null });
+  // The holder is told when it is withdrawn (with the reason) or given back.
+  if (!!c.revoked !== revoked && c.assignmentId) {
+    try {
+      const asg = await (await getDb()).collection<Assignment>(COLLECTIONS.assignments).findOne({ _id: c.assignmentId });
+      if (asg) await notifyCandidates([{ ref: asg.candidate, assignmentId: asg._id, type: revoked ? "ots_certificate_revoked_alert" : "ots_certificate_restored", title: revoked ? `Certificate ${c.certificateNumber} was revoked` : `Certificate ${c.certificateNumber} is valid again`, body: revoked ? reason.trim().slice(0, 200) : undefined }]);
+    } catch {
+      /* never fails the change */
+    }
+  }
   return { ...c, ...patch };
 }
 

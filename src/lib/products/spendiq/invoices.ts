@@ -1,4 +1,5 @@
 import "server-only";
+import { notify } from "@/lib/products/spendiq/notifications";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
 import {
@@ -241,7 +242,18 @@ export async function updateInvoice(id: string, data: InvoiceWriteData, actorId:
 
 export async function setInvoiceStatus(id: string, status: InvoiceStatus, actorId: string): Promise<{ ok: boolean }> {
   const collection = await getCollection();
+  const before = await collection.findOne({ _id: id, ...notDeleted }, { projection: { status: 1, invoiceNumber: 1, vendorName: 1, createdBy: 1 } });
   const res = await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status, ...updateStamp(actorId) } });
+  // Whoever recorded the invoice hears when its status is decided (approved, rejected, disputed …), from whichever screen it was decided.
+  if (res.modifiedCount === 1 && before && before.status !== status && before.createdBy && before.createdBy !== actorId) {
+    await notify({
+      recipientUserId: before.createdBy,
+      audience: "staff",
+      type: /reject|dispute|cancel|void/i.test(status) ? `invoice_${status}_alert` : `invoice_${status}`,
+      title: `Invoice ${before.invoiceNumber} from ${before.vendorName}: ${status.replace(/_/g, " ")}`,
+      link: `/spendiq/invoices/${id}`,
+    });
+  }
   return { ok: res.modifiedCount === 1 };
 }
 
