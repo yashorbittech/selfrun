@@ -50,7 +50,7 @@
     },
     {
       "path": "/api/notify/announcements/cron",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
