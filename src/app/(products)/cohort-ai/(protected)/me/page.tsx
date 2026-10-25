@@ -26,7 +26,7 @@ export default async function StudentHomePage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "My Dashboard" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "My Dashboard" }]}
         title={<>Welcome, {s.fullName.split(" ")[0]}</>}
         description={<><span className="font-mono">{s.studentCode}</span> · <StudentStatusBadge status={s.status} /></>}
       />

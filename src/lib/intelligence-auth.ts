@@ -18,7 +18,7 @@ export interface CurrentIntelligenceUser {
   email: string;
   /** Raw `admin_users.roles` — every data-access check in the catalog runs over this. */
   roles: string[];
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

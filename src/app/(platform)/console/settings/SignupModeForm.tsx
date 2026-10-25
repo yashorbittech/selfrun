@@ -9,7 +9,7 @@ import { setSignupModeAction } from "./actions";
 
 const MODES: { value: SignupMode; label: string; description: string }[] = [
   { value: "open", label: "Open", description: "Anyone can sign up. A workspace is created as soon as they confirm their email." },
-  { value: "approval", label: "Approval required", description: "Anyone can sign up, but after confirming their email the request waits here until a Super Admin approves it." },
+  { value: "approval", label: "Approval required", description: "Anyone can sign up, but after confirming their email the request waits here until a Director approves it." },
   { value: "closed", label: "Closed", description: "The sign-up page stops accepting new companies. Existing workspaces are unaffected." },
 ];
 

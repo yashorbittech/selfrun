@@ -26,7 +26,7 @@ export default async function EditProjectPage({ params }: { params: Promise<{ id
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "PMS", href: "/sprintos" },
+          { label: "SprintOS", href: "/sprintos" },
           { label: "Projects", href: "/sprintos/projects" },
           { label: project.name, href: `/sprintos/projects/${id}` },
           { label: "Edit" },

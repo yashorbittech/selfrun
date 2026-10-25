@@ -26,7 +26,7 @@ export default async function SmmsNotificationsPage() {
       panel="smms"
       live
       panelName="Social Media Marketing"
-      shortCode="SMMS"
+      shortCode="ViralPulse"
       description="Track scheduled social post broadcasts, channel performance alerts & campaign updates."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

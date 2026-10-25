@@ -47,7 +47,7 @@ export default async function AdminMilestonesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "PMS", panel: "pms" }, { label: "Milestones" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "SprintOS", panel: "pms" }, { label: "Milestones" }]}
         title={<>Milestones</>}
         description={<>{total} milestone{total === 1 ? "" : "s"} across every project.</>}
       />

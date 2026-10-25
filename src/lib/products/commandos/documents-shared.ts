@@ -11,9 +11,9 @@ export const DOCUMENT_MODULES = ["pms", "hrms", "portal"] as const;
 export type DocumentModule = (typeof DOCUMENT_MODULES)[number];
 
 const MODULE_LABELS: Record<DocumentModule, string> = {
-  pms: "Project Management",
-  hrms: "HRMS",
-  portal: "External Portal",
+  pms: "SprintOS",
+  hrms: "TalentOS",
+  portal: "ClientOS",
 };
 
 export function documentModuleLabel(module: string): string {

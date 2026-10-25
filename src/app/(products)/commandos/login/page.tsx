@@ -9,7 +9,7 @@ import { loginLanding } from "@/lib/platform/onboarding/state";
 import { BrandName } from "@/components/platform/BrandProvider";
 import { whiteLabelProductName } from "@/lib/platform/panels/types";
 
-export default async function HubLoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[]; demo?: string; reset?: string }> }) {
+export default async function HubLoginPage({ searchParams }: { searchParams: Promise<{ next?: string | string[]; demo?: string; reset?: string; ended?: string }> }) {
   // The headline products come from the Product Registry (the first few active, non-core business products).
   const panelList = (await listPanels().catch(() => [])).filter((p) => p.active && !p.core && !(["website", "support", "portal"] as string[]).includes(p.key)).slice(0, 5).map((p) => whiteLabelProductName(p.name)).join(", ");
   // Where to go after sign-in: only a same-origin path survives `safeNextPath` (no open redirect).
@@ -49,6 +49,7 @@ export default async function HubLoginPage({ searchParams }: { searchParams: Pro
       </div>
 
       <div className="flex w-full flex-col items-center justify-center px-4 py-12 lg:w-1/2">
+        {sp.ended === "1" ? <p role="status" className="mb-4 w-full max-w-sm rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">You were signed out here. This happens when your account signs in on another device (the Free plan allows one device at a time) or the session expires.</p> : null}
         {sp.reset === "1" ? <p role="status" className="mb-4 w-full max-w-sm rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">Your password was changed. Sign in with the new one.</p> : null}
         <LoginForm next={next} demo={isDemo} />
       </div>

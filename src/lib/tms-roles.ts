@@ -24,11 +24,11 @@ export const TMS_STAFF_ROLES: TmsRole[] = ["super_admin", "tms_admin", "tms_mana
 
 export const TMS_ROLE_META: Record<TmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: programs, batches, students, finance, certificates, settings and the audit log.",
   },
   tms_admin: {
-    label: "TMS Admin",
+    label: "Cohort AI Admin",
     description: "Run every program and batch, manage students, issue certificates, configure settings and payments.",
   },
   tms_manager: {

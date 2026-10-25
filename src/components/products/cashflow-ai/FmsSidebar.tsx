@@ -130,10 +130,10 @@ export default function FmsSidebar({
 
       {/* ── PRODUCTS ── */}
       <SectionLabel collapsed={collapsed}>Products</SectionLabel>
-      {panels.prms?.available !== false && nav({ href: "/cashflow-ai/products/prms", label: panelLabel("prms", "PRMS Product"), icon: ShoppingCart })}
-      {panels.pms?.available !== false && nav({ href: "/cashflow-ai/products/pms", label: panelLabel("pms", "PMS Product"), icon: FolderKanban })}
-      {canViewPayrollFinance(roleCtx) && panels.hrms?.available !== false && nav({ href: "/cashflow-ai/products/hrms", label: panelLabel("hrms", "HRMS Product"), icon: Users })}
-      {panels.tms?.available !== false && nav({ href: "/cashflow-ai/products/tms", label: panelLabel("tms", "TMS Product"), icon: GraduationCap })}
+      {panels.prms?.available !== false && nav({ href: "/cashflow-ai/products/prms", label: panelLabel("prms", "SpendIQ Product"), icon: ShoppingCart })}
+      {panels.pms?.available !== false && nav({ href: "/cashflow-ai/products/pms", label: panelLabel("pms", "SprintOS Product"), icon: FolderKanban })}
+      {canViewPayrollFinance(roleCtx) && panels.hrms?.available !== false && nav({ href: "/cashflow-ai/products/hrms", label: panelLabel("hrms", "TalentOS Product"), icon: Users })}
+      {panels.tms?.available !== false && nav({ href: "/cashflow-ai/products/tms", label: panelLabel("tms", "Cohort AI Product"), icon: GraduationCap })}
 
       {/* ── FINANCE DESK ── */}
       <SectionLabel collapsed={collapsed}>Finance Desk</SectionLabel>

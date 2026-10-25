@@ -57,7 +57,7 @@ export default async function EmployeesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Employees" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Employees" }]}
         title={<>Employees</>}
         description={<>{total} employee{total === 1 ? "" : "s"}
             {restrictToManagerId ? " in your reporting line" : ""}</>}

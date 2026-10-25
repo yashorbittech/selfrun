@@ -2,7 +2,7 @@
  * Company setup (onboarding) and where it shows up. Pure (no server imports),
  * so every sign-in path and the tests use the same rules.
  *
- *  - LOGIN LANDING (`postLoginTarget`): when the company's owner (a Super Admin of
+ *  - LOGIN LANDING (`postLoginTarget`): when the company's owner (a Director of
  *    a customer company) signs in and setup is neither completed nor skipped, they
  *    land on `/commandos/onboarding` — unless a valid `next` was explicitly asked
  *    for (a deep link, a product's `/login?next=/talentos`), which always wins. Invited
@@ -26,7 +26,7 @@ export interface SetupFacts {
   state: { completedAt: Date | null; dismissedAt: Date | null };
 }
 
-/** Who counts as the company's owner for setup purposes: a Super Admin (invited teammates with other roles never do). */
+/** Who counts as the company's owner for setup purposes: a Director (invited teammates with other roles never do). */
 export function isOnboardingOwner(roles: readonly string[]): boolean {
   return roles.includes("super_admin");
 }

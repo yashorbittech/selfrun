@@ -36,7 +36,7 @@ export default async function AssetsPage({ searchParams }: { searchParams: Promi
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Asset Management" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Asset Management" }]}
         title={<>Asset Management</>}
         description={<>{total} asset{total === 1 ? "" : "s"} tracked.</>}
         actions={<>{canManage && (

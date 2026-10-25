@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { CheckCircle2, LogOut, Monitor, MonitorSmartphone, Moon, ShieldAlert, ShieldCheck, Sun, UserCog, X, XCircle } from "lucide-react";
 import NotificationSettings from "@/components/pwa/NotificationSettings";
+import TwoStepSettings, { TWO_STEP_DESCRIPTION } from "@/components/security/TwoStepSettings";
 import SessionsList from "@/app/(products)/commandos/(protected)/settings/security/SessionsList";
 import type { HistoryView, SessionView } from "@/lib/security/sessions";
 import type { PushPreferences } from "@/lib/push/categories";
@@ -141,6 +142,10 @@ function ProfileView(p: AccountDrawerProps) {
             </div>
           )}
         </dl>
+      </Section>
+
+      <Section title="Two-step sign-in" description={TWO_STEP_DESCRIPTION}>
+        <TwoStepSettings />
       </Section>
 
       <Section title="Appearance" description="Light or dark theme for this device.">

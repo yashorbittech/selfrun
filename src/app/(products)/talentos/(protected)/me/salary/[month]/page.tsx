@@ -22,7 +22,7 @@ export default async function MyPayslipPage({ params }: { params: Promise<{ mont
     <div className="space-y-4">
       <div className="print:hidden">
         <PanelPageHeader
-          breadcrumbs={[{ label: "HRMS", href: "/talentos/me" }, { label: "Salary", href: "/talentos/me/salary" }, { label: month }]}
+          breadcrumbs={[{ label: "TalentOS", href: "/talentos/me" }, { label: "Salary", href: "/talentos/me/salary" }, { label: month }]}
           title={<>Payslip · {month}</>}
           description={<>Your earnings and deductions for this month. Print or download it from below.</>}
           actions={

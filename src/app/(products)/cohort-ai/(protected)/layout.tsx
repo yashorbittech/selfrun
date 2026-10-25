@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentTmsUser } from "@/lib/tms-auth";
 import { hasTmsAccess } from "@/lib/tms-roles";
@@ -11,6 +12,7 @@ import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
 
 export default async function ProtectedTmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("tms");
   const user = await getCurrentTmsUser();
   if (!user) redirect("/cohort-ai/login");

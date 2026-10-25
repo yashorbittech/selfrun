@@ -124,7 +124,7 @@ const txnCurrent = (t: Json): Json => ({ ...t, transactionDate: t.transactionDat
 
 export const FMS_ENTITIES: EntityDef[] = [
   {
-    key: "fms.invoice", panel: "fms", label: "Invoice", description: "Customer invoices (draft → sent → partially_paid → paid / overdue / cancelled / void). Customers are PMS clients.", collection: "fms_invoices", idType: "string", baseFilter: soft,
+    key: "fms.invoice", panel: "fms", label: "Invoice", description: "Customer invoices (draft → sent → partially_paid → paid / overdue / cancelled / void). Customers are SprintOS clients.", collection: "fms_invoices", idType: "string", baseFilter: soft,
     titleField: "invoiceNumber", search: ["invoiceNumber", "customerName", "poNumber"], read: "staff", write: "staff", allow: canManageTransactions, canDelete: true,
     fields: [
       { key: "customerId", label: "Customer (pms.client id)", type: "ref", ref: "pms.client", required: true, createOnly: true },
@@ -314,7 +314,7 @@ export const FMS_ENTITIES: EntityDef[] = [
   { key: "fms.payment_link", panel: "fms", label: "Payment link", description: "Online payment links sent to customers.", collection: "fms_payment_links", idType: "string", read: "staff" },
   { key: "fms.asset_expense", panel: "fms", label: "Asset expense", description: "Maintenance, insurance and AMC costs of assets.", collection: "fms_asset_expenses", idType: "string", baseFilter: soft, read: "staff" },
   { key: "fms.asset_disposal", panel: "fms", label: "Asset disposal", description: "Assets sold or written off, with gain/loss.", collection: "fms_asset_disposals", idType: "string", baseFilter: soft, read: "staff" },
-  { key: "fms.activity", panel: "fms", label: "Audit log", description: "Who changed what in FMS.", collection: "fms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
+  { key: "fms.activity", panel: "fms", label: "Audit log", description: "Who changed what in CashFlow.", collection: "fms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
 ];
 
 const ref = (key: string, label: string, entity: string, required = true): FieldDef => ({ key, label, type: "ref", ref: entity, required });

@@ -35,8 +35,8 @@ export default async function AibotsDashboardPage({ searchParams }: { searchPara
             { key: "to", label: "To", type: "date" },
           ]}
         />}
-        title="AI Bots Overview"
-        breadcrumbs={[{ label: "AI Bots", href: "/agentos" }, { label: "Dashboard" }]}
+        title="AgentOS Overview"
+        breadcrumbs={[{ label: "AgentOS", href: "/agentos" }, { label: "Dashboard" }]}
         description={mine ? "Track your bots, conversations and AI usage, with cost and reliability for the selected period." : "Monitor every bot, conversation and OpenAI execution across the company, with usage, cost and failure insights for the selected period."}
         actions={
           <Button nativeButton={false} render={<Link href={`/agentos/b/${GENERAL_BOT_ID}`} />}>
@@ -126,7 +126,7 @@ export default async function AibotsDashboardPage({ searchParams }: { searchPara
           )}
         </SectionCard>
       </div>
-      <p className="text-[11px] text-muted-foreground">Cost is an estimate from the per-model prices in AI Bots settings, not an OpenAI invoice.</p>
+      <p className="text-[11px] text-muted-foreground">Cost is an estimate from the per-model prices in AgentOS settings, not an OpenAI invoice.</p>
     </div>
   );
 }

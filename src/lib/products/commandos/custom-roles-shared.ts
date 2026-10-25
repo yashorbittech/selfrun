@@ -1,6 +1,6 @@
 /** Types and validation shared by the custom-role builder (server and client). */
 
-export const MAX_CUSTOM_ROLES = 50;
+export const MAX_CUSTOM_ROLES = 2000;
 export const MAX_ROLES_PER_USER = 10;
 
 export interface CustomRoleInput {
@@ -20,6 +20,10 @@ export interface CustomRoleView {
   permissions: Record<string, boolean>;
   userCount: number;
   updatedAt: string;
+  /** Set on the designations the platform created for every company (they can be edited but not deleted). */
+  builtinKey: string | null;
+  /** Which part of the business the designation belongs to. */
+  department: string;
 }
 
 export function validateCustomRoleInput(
@@ -34,7 +38,7 @@ export function validateCustomRoleInput(
   if (baseRoles.length === 0) return { ok: false, error: "Pick at least one product role — it decides which products this role can open." };
   if (baseRoles.length > 40) return { ok: false, error: "Too many roles selected." };
   const unknown = baseRoles.find((r) => r === "super_admin" || !known.knownRoles.includes(r));
-  if (unknown) return { ok: false, error: unknown === "super_admin" ? "A custom role can never include Super Admin." : `Unknown role: ${unknown}.` };
+  if (unknown) return { ok: false, error: unknown === "super_admin" ? "A custom role can never include Director." : `Unknown role: ${unknown}.` };
   const permissions: Record<string, boolean> = {};
   const raw = input.permissions && typeof input.permissions === "object" ? input.permissions : {};
   for (const [k, v] of Object.entries(raw)) {
@@ -47,8 +51,8 @@ export function validateCustomRoleInput(
 
 /** Which product (Product Registry key) each permission-catalog group belongs to — the builder uses it to mark permissions that matter for the products a role opens. */
 export const PERMISSION_MODULE_PANEL: Record<string, string> = {
-  "Team Chat": "messenger", "Training (TMS)": "tms", HRMS: "hrms", "Projects (PMS)": "pms", "Procurement (PRMS)": "prms", "Finance (FMS)": "fms",
-  "LMS (CRM & Learning)": "lms", "External Portal": "portal", "SOP Product": "sop", "SEO Product": "seo", "Digi Locker (DLMS)": "dlms", "AI Bots": "aibots",
-  "AI Intelligence": "intelligence", "Social Media (SMMS)": "smms", "Online Tests (OTS)": "ots", "Website CMS": "cms", "Workspace Product": "workspace",
-  "Workspace management": "workspace", "LPMS (Legal & Documents)": "lpms",
+  "Huddle": "messenger", "Cohort AI": "tms", TalentOS: "hrms", "SprintOS": "pms", "SpendIQ": "prms", "CashFlow": "fms",
+  "DealFlow": "lms", "ClientOS": "portal", "Playbook": "sop", "RankMax": "seo", "CyberVault": "dlms", "AgentOS": "aibots",
+  "DataBrain": "intelligence", "ViralPulse": "smms", "EvalIQ": "ots", "SiteCraft": "cms", "CommandOS": "workspace",
+  "CommandOS management": "workspace", "ContractFlow": "lpms",
 };

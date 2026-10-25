@@ -24,11 +24,11 @@ export const PMS_STAFF_ROLES: PmsRole[] = ["super_admin", "pms_admin", "pms_mana
 
 export const PMS_ROLE_META: Record<PmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: clients, projects, teams, costing, settings and the activity log.",
   },
   pms_admin: {
-    label: "PMS Admin",
+    label: "SprintOS Admin",
     description: "Manage every client and project, costing, configure settings, read the activity log.",
   },
   pms_manager: {

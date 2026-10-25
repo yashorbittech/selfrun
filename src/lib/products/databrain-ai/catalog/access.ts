@@ -14,13 +14,13 @@ import type { AccessGrant, EntityDef, IntelArea } from "@/lib/products/databrain
  *    Staff Hub KPIs, global search and the "Ask about your business" box. People whose
  *    product role is the self-service tier (employee portals) get nothing company-wide.
  *  - PMS is tighter than the Ask box: the PMS product scopes its project list to the projects a person manages or is a
- *    member of unless they hold `canViewAllProjects` (pms_admin, Super Admin, or an override), so projects, project
+ *    member of unless they hold `canViewAllProjects` (pms_admin, Director, or an override), so projects, project
  *    members and tasks need that same tier. Timesheets need `canReviewTimesheets` (the product's review page shows all).
  *    Clients stay at the staff tier: the PMS client list shows every client to every staff role.
  *  - procurement (vendors, purchase orders): PRMS `canManageProcurement` or `canManageFinance`.
  *  - expenses: PRMS `canManageExpenses` (admin, procurement manager, finance). Department
  *    managers only see their own department's expenses in PRMS, so they get none here.
- * Both PRMS rules honour the Super Admin's permission overrides, and the PRMS product must be in the plan and enabled.
+ * Both PRMS rules honour the Director's permission overrides, and the PRMS product must be in the plan and enabled.
  */
 
 export interface IntelAccessUser {

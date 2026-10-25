@@ -51,7 +51,7 @@ export interface CurrentSeoUser {
   roles: string[];
   /** Explicit SEO roles, for display only. */
   seoRoles: ReturnType<typeof normalizeSeoRoles>;
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

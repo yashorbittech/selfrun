@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentAibotsUser } from "@/lib/aibots-auth";
 import { hasAibotsAccess } from "@/lib/aibots-roles";
@@ -17,6 +18,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:aibots}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedAibotsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("aibots");
   const user = await getCurrentAibotsUser();
   if (!user) redirect("/agentos/login");

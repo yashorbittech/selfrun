@@ -45,7 +45,7 @@ export default async function ApplicationDetailPage({ params }: { params: Promis
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Applications", href: "/cohort-ai/applications" }, { label: a.fullName }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Applications", href: "/cohort-ai/applications" }, { label: a.fullName }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{a.fullName}<ApplicationStatusBadge status={a.status} /></span></>}
         description={<><span className="font-mono">{a.applicationCode}</span>
             {program ? (

@@ -34,7 +34,7 @@ export default function NumberingPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Numbering" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Numbering" }]}
         title={<>Numbering</>}
         description={<>Every document type&apos;s real, in-use numbering format — reference only, not an editable config.</>}
       />

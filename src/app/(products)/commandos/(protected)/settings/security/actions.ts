@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { ObjectId } from "mongodb";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { clearAllSessionCookies } from "@/lib/cross-module-sso";
-import { confirmTwoFactorSetup, disableTwoFactor, startTwoFactorSetup } from "@/lib/security/two-factor";
+import { confirmTwoFactorSetup, disableEmailTwoFactor, disableTwoFactor, enableEmailTwoFactor, startTwoFactorSetup } from "@/lib/security/two-factor";
+import { sendEmailCode } from "@/lib/security/email-otp";
 import { revokeOtherSessions, revokeSession, signOutEverywhere } from "@/lib/security/sessions";
 
 async function me(): Promise<ObjectId> {
@@ -63,6 +64,35 @@ export async function confirmTwoFactorAction(code: string): Promise<{ ok: true; 
 /** Turns two-step off for the signed-in person (needs a valid code or recovery code). */
 export async function disableTwoFactorAction(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
   const res = await disableTwoFactor(await me(), String(code ?? ""));
+  if (res.ok) {
+    revalidatePath("/commandos/settings/security");
+    revalidatePath("/commandos/account/sessions");
+  }
+  return res;
+}
+
+/** Two-step sign-in by email: sends a code to the signed-in person's own address, to confirm turning the method on or off. */
+export async function sendTwoStepEmailCodeAction(purpose: "enable" | "disable"): Promise<{ ok: true; hint: string } | { ok: false; error: string }> {
+  const user = await getCurrentHubUser();
+  if (!user || !ObjectId.isValid(user.id)) redirect("/commandos/login");
+  if (purpose !== "enable" && purpose !== "disable") return { ok: false, error: "Unknown request." };
+  const r = await sendEmailCode(new ObjectId(user.id), user.email, purpose);
+  return r.ok ? r : { ok: false, error: r.error };
+}
+
+/** Turns email codes on, after the code that was sent to the person's address. */
+export async function enableEmailTwoFactorAction(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await enableEmailTwoFactor(await me(), String(code ?? ""));
+  if (res.ok) {
+    revalidatePath("/commandos/settings/security");
+    revalidatePath("/commandos/account/sessions");
+  }
+  return res;
+}
+
+/** Turns email codes off, after the code that was sent to the person's address. */
+export async function disableEmailTwoFactorAction(code: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const res = await disableEmailTwoFactor(await me(), String(code ?? ""));
   if (res.ok) {
     revalidatePath("/commandos/settings/security");
     revalidatePath("/commandos/account/sessions");

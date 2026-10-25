@@ -45,7 +45,7 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Batches", href: "/cohort-ai/batches" }, { label: b.name }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Batches", href: "/cohort-ai/batches" }, { label: b.name }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{b.name}<BatchStatusBadge status={b.status} /></span></>}
         description={<><span className="font-mono">{b.batchCode}</span>
             {program ? (

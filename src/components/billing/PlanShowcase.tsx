@@ -6,6 +6,7 @@ import { Bot, Building2, Check, Crown, Gift, Globe, HardDrive, Mail, MessageSqua
 import { cn } from "@/lib/utils";
 import { formatMoney, type BillingInterval } from "@/lib/platform/billing/types";
 import type { ShowcasePlan } from "@/lib/platform/billing/showcase";
+import { DOWNGRADE_MESSAGE, isPlanDowngrade } from "@/lib/platform/billing/plan-order-rule";
 
 /**
  * The pricing screens: a sliding Monthly / Yearly switch, a "how many people?" slider that points at the plan that fits, and a card per plan
@@ -18,6 +19,10 @@ export interface PlanShowcaseProps {
   /** The plan in use (in-app): its button reads "Current plan". */
   currentPlanId?: string | null;
   defaultInterval?: BillingInterval;
+  /** In-app, during a free trial: the plan being tried can be bought as it is ("Subscribe"), not only a higher one. */
+  allowCurrent?: boolean;
+  /** In-app: plans below the current one are shown as not available (a company can only move up). */
+  blockDowngrade?: boolean;
   /** In-app: choosing a plan calls this (the checkout lives elsewhere). */
   onSelect?: (planId: string, interval: BillingInterval) => void;
   /** Marketing: where the buttons go. */
@@ -29,6 +34,8 @@ const PLAN_ICON: Record<string, LucideIcon> = { free: Gift, starter: Sparkles, g
 const SERVICE_ICON: Record<string, LucideIcon> = { storageMb: HardDrive, aiTokensPerMonth: Bot, emailsPerMonth: Mail, voiceMinutesPerMonth: Mic, customDomains: Globe };
 
 const money = (paise: number, currency: string) => formatMoney(paise, currency);
+/** The plan's monthly price for ordering plans (a "contact us" plan has none and counts as the highest). */
+const monthlyOf = (p: ShowcasePlan | undefined): number | null => (!p ? 0 : p.kind === "contact" ? null : (p.offer.monthly ?? 0));
 
 /** A number that counts from where it was to its new value (instantly under reduced motion). */
 function useCountTo(target: number): number {
@@ -90,7 +97,7 @@ function PriceBlock({ p, interval }: { p: ShowcasePlan; interval: BillingInterva
   );
 }
 
-export default function PlanShowcase({ plans, currentPlanId, defaultInterval = "monthly", onSelect, signupHref = "/signup", contactHref = "/contact" }: PlanShowcaseProps) {
+export default function PlanShowcase({ plans, currentPlanId, defaultInterval = "monthly", onSelect, blockDowngrade = false, allowCurrent = false, signupHref = "/signup", contactHref = "/contact" }: PlanShowcaseProps) {
   const [interval, setInterval] = useState<BillingInterval>(defaultInterval);
   const [team, setTeam] = useState(5);
   const hasYearly = plans.some((p) => p.kind === "paid" && p.offer.yearly !== null);
@@ -130,6 +137,7 @@ export default function PlanShowcase({ plans, currentPlanId, defaultInterval = "
       <div className="pc-grid">
         {plans.map((p) => {
           const current = currentPlanId === p.id;
+          const lower = !!blockDowngrade && !current && isPlanDowngrade(monthlyOf(plans.find((x) => x.id === currentPlanId)), monthlyOf(p));
           const isFit = fit?.id === p.id;
           const Icon = PLAN_ICON[p.id] ?? Zap;
           return (
@@ -158,8 +166,8 @@ export default function PlanShowcase({ plans, currentPlanId, defaultInterval = "
                 p.kind === "contact" ? (
                   <Link href={contactHref} className="pc-btn pc-btn-ghost">Contact support</Link>
                 ) : (
-                  <button type="button" disabled={current || p.kind === "free"} onClick={() => onSelect(p.id, interval)} className={cn("pc-btn", current ? "pc-btn-current" : p.kind === "free" ? "pc-btn-ghost" : "pc-btn-primary")}>
-                    {current ? "Current plan" : p.kind === "free" ? "Free plan" : "Choose plan"}
+                  <button type="button" disabled={(current && !allowCurrent) || lower || p.kind === "free"} title={lower ? DOWNGRADE_MESSAGE : undefined} onClick={() => onSelect(p.id, interval)} className={cn("pc-btn", current && !allowCurrent ? "pc-btn-current" : lower || p.kind === "free" ? "pc-btn-ghost" : "pc-btn-primary")}>
+                    {current && allowCurrent ? `Subscribe to ${p.name}` : current ? "Current plan" : lower ? "Not available" : p.kind === "free" ? "Free plan" : "Choose plan"}
                   </button>
                 )
               ) : (

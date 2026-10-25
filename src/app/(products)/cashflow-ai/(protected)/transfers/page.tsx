@@ -41,7 +41,7 @@ export default async function TransfersPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Transfers" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Transfers" }]}
         title={<>Transfers</>}
         description={<>{result.total} transfer{result.total === 1 ? "" : "s"} between accounts.</>}
         actions={<>{canManage && accountOptions.length >= 2 && (

@@ -44,7 +44,7 @@ export default async function ClientsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Clients" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Clients" }]}
         title={<>Clients</>}
         description={<>{totalClients} client{totalClients === 1 ? "" : "s"} in the directory.</>}
         actions={<><div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default async function ClientsPage({
       {result.total === 0 && !sp.search && !sp.status && !sp.industry && (
         <p className="text-center text-sm text-muted-foreground">
           No clients yet.{" "}
-          {canManage ? "Use “New Client” to add the first one." : "Ask a PMS admin to add one."}
+          {canManage ? "Use “New Client” to add the first one." : "Ask a SprintOS admin to add one."}
         </p>
       )}
 

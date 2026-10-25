@@ -38,7 +38,7 @@ export default async function AssignmentDetailPage({ params }: { params: Promise
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Assignments", href: "/cohort-ai/assignments" }, { label: a.title }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Assignments", href: "/cohort-ai/assignments" }, { label: a.title }]}
         title={<>{a.title}</>}
         description={<>{batch ? (
               <Link href={`/cohort-ai/batches/${batch._id}`} className="text-primary hover:underline">{batch.name}</Link>

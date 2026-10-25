@@ -48,7 +48,7 @@ export default async function ProgramsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Programs" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Programs" }]}
         title={<>Programs</>}
         description={<>{totalPrograms} program{totalPrograms === 1 ? "" : "s"} in the catalogue.</>}
         actions={<>{canManage && (
@@ -89,7 +89,7 @@ export default async function ProgramsPage({
       {result.total === 0 && !sp.search && !sp.category && !sp.status && !sp.mode && (
         <p className="text-center text-sm text-muted-foreground">
           No programs yet.{" "}
-          {canManage ? "Use “New Program” to add the first one." : "Ask a TMS admin to add one."}
+          {canManage ? "Use “New Program” to add the first one." : "Ask a Cohort AI admin to add one."}
         </p>
       )}
 

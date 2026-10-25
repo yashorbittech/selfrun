@@ -45,7 +45,7 @@ export default async function InvoicesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Invoices" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Invoices" }]}
         title={<>Invoices</>}
         description={<>{total} invoice{total === 1 ? "" : "s"} raised.</>}
         actions={<>{canManage && (

@@ -8,7 +8,7 @@ import { IMPORT_MAX_BYTES } from "@/lib/platform/import/shared";
 /**
  * POST /commandos/settings/import/run — { type, csv, mapping, dryRun, leadType?, sendInvites? }.
  * A route handler rather than a server action so a 2 MB file fits (server
- * actions cap the request body at 1 MB). Company Super Admins only.
+ * actions cap the request body at 1 MB). Company Directors only.
  */
 export const maxDuration = 300;
 
@@ -17,7 +17,7 @@ const REVALIDATE: Record<string, string[]> = { leads: ["/dealflow-ai/leads", "/d
 export async function POST(req: Request) {
   const user = await getCurrentHubUser();
   if (!user) return NextResponse.json({ ok: false, error: "Sign in again to continue." }, { status: 401 });
-  if (!user.roles.includes("super_admin")) return NextResponse.json({ ok: false, error: "Only a Super Admin can import data." }, { status: 403 });
+  if (!user.roles.includes("super_admin")) return NextResponse.json({ ok: false, error: "Only a Director can import data." }, { status: 403 });
   // Same-origin only: a cross-site page can't post a JSON body with this header check passing.
   if (!(req.headers.get("content-type") ?? "").includes("application/json")) return NextResponse.json({ ok: false, error: "Unsupported request." }, { status: 415 });
   const declared = Number(req.headers.get("content-length") ?? 0);

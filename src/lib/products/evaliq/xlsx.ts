@@ -5,7 +5,7 @@ import { getCompanyBrand } from "@/lib/platform/branding";
 /** Minimal formatted-workbook builder (each module keeps its own copy — see `sop/xlsx.ts`). */
 export async function buildWorkbook(name: string, columns: { header: string; key: string; width?: number }[], rows: Record<string, unknown>[]): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = `${(await getCompanyBrand()).name} OTS`;
+  wb.creator = `${(await getCompanyBrand()).name} EvalIQ`;
   wb.created = new Date();
   const ws = wb.addWorksheet(name.slice(0, 31));
   const header = ws.getRow(1);

@@ -1,3 +1,4 @@
+import { canSignIn, type AccountStatus } from "@/lib/security/account-status";
 import { normalizeAdminRoles } from "@/lib/admin-roles";
 import { normalizeRoles } from "@/lib/hrms-roles";
 import { normalizePmsRoles } from "@/lib/pms-roles";
@@ -21,7 +22,7 @@ export interface AdminUserRow {
   email: string;
   roles: string[];
   permissionOverrides: Record<string, boolean>;
-  /** What the Super Admin set by hand; `roles` / `permissionOverrides` also include everything custom roles add. */
+  /** What the Director set by hand; `roles` / `permissionOverrides` also include everything custom roles add. */
   manualRoles: string[];
   manualOverrides: Record<string, boolean>;
   customRoleIds: string[];
@@ -30,7 +31,15 @@ export interface AdminUserRow {
   locked: boolean;
   createdAt: string;
   lastLoginAt: string | null;
-  status: "active" | "deactivated";
+  status: AccountStatus;
+  /** Why the status is what it is (suspension / termination reasons) and the last working day, when set. */
+  statusReason: string;
+  statusChangedAt: string | null;
+  lastWorkingDay: string | null;
+  name: string;
+  /** The designation the person holds ("Director", "HR Manager" …). */
+  designation: string;
+  designationId: string | null;
   savedRoles: string[];
   userType: "employee" | "contractor" | "partner" | "system";
   notes: string;
@@ -51,49 +60,49 @@ export function getPanelAccessSummary(user: AdminUserRow): PanelAccessSummaryIte
   return [
     {
       key: "admin",
-      name: "Super Admin Product",
+      name: "Director Product",
       hasAccess: isSuperAdmin || normalizeAdminRoles(roles).length > 0,
       roles: normalizeAdminRoles(roles),
       isSuperAdmin,
     },
     {
       key: "hrms",
-      name: "HRMS Product",
+      name: "TalentOS",
       hasAccess: isSuperAdmin || normalizeRoles(roles).length > 0,
       roles: normalizeRoles(roles),
       isSuperAdmin,
     },
     {
       key: "pms",
-      name: "PMS Product",
+      name: "SprintOS",
       hasAccess: isSuperAdmin || normalizePmsRoles(roles).length > 0,
       roles: normalizePmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "prms",
-      name: "PRMS Product",
+      name: "SpendIQ",
       hasAccess: isSuperAdmin || normalizePrmsRoles(roles).length > 0,
       roles: normalizePrmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "tms",
-      name: "TMS Product",
+      name: "Cohort AI",
       hasAccess: isSuperAdmin || normalizeTmsRoles(roles).length > 0,
       roles: normalizeTmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "fms",
-      name: "FMS Product",
+      name: "CashFlow",
       hasAccess: isSuperAdmin || normalizeFmsRoles(roles).length > 0,
       roles: normalizeFmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "sop",
-      name: "SOP Product",
+      name: "Playbook",
       hasAccess: isSuperAdmin || hasSopAccess(roles),
       // Explicit sop_* roles plus what the account's HRMS role implies (employee → reader, manager/hr → manager).
       roles: effectiveSopRoles(roles),
@@ -101,42 +110,42 @@ export function getPanelAccessSummary(user: AdminUserRow): PanelAccessSummaryIte
     },
     {
       key: "seo",
-      name: "SEO Product",
+      name: "RankMax",
       hasAccess: isSuperAdmin || normalizeSeoRoles(roles).length > 0,
       roles: normalizeSeoRoles(roles),
       isSuperAdmin,
     },
     {
       key: "dlms",
-      name: "Digi Locker (DLMS)",
+      name: "CyberVault",
       hasAccess: isSuperAdmin || normalizeDlmsRoles(roles).length > 0,
       roles: normalizeDlmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "aibots",
-      name: "AI Bots",
+      name: "AgentOS",
       hasAccess: isSuperAdmin || normalizeAibotsRoles(roles).length > 0,
       roles: normalizeAibotsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "intelligence",
-      name: "AI Intelligence",
+      name: "DataBrain",
       hasAccess: isSuperAdmin || normalizeIntelligenceRoles(roles).length > 0,
       roles: normalizeIntelligenceRoles(roles),
       isSuperAdmin,
     },
     {
       key: "smms",
-      name: "Social Media (SMMS)",
+      name: "ViralPulse",
       hasAccess: isSuperAdmin || normalizeSmmsRoles(roles).length > 0,
       roles: normalizeSmmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "ots",
-      name: "Online Tests (OTS)",
+      name: "EvalIQ",
       hasAccess: isSuperAdmin || hasOtsAccess(roles),
       // Explicit ots_* roles plus what HRMS / TMS roles imply (employee → test taker, hr / TMS admin → manager, mentor → evaluator).
       roles: effectiveOtsRoles(roles),
@@ -144,41 +153,41 @@ export function getPanelAccessSummary(user: AdminUserRow): PanelAccessSummaryIte
     },
     {
       key: "messenger",
-      name: "Messenger Product",
+      name: "Huddle",
       hasAccess: isSuperAdmin || normalizeChatRoles(roles).length > 0,
       roles: normalizeChatRoles(roles),
       isSuperAdmin,
     },
     {
       key: "lms",
-      name: "LMS Product",
-      hasAccess: isSuperAdmin || normalizeLmsRoles(roles).length > 0 || user.status === "active",
+      name: "DealFlow",
+      hasAccess: isSuperAdmin || normalizeLmsRoles(roles).length > 0 || canSignIn({ status: user.status, roles: user.roles }),
       roles: normalizeLmsRoles(roles).length > 0
         ? normalizeLmsRoles(roles)
-        : (user.status === "active" ? ["lms_user"] : []),
+        : (canSignIn({ status: user.status, roles: user.roles }) ? ["lms_user"] : []),
       isSuperAdmin,
     },
     {
       key: "lpms",
-      name: "Legal & Documents",
+      name: "ContractFlow",
       hasAccess: isSuperAdmin || normalizeLpmsRoles(roles).length > 0,
       roles: normalizeLpmsRoles(roles),
       isSuperAdmin,
     },
     {
       key: "portal",
-      name: "External Portal",
+      name: "ClientOS",
       hasAccess: isSuperAdmin || roles.some((r) => r.startsWith("portal_")),
       roles: roles.filter((r) => r.startsWith("portal_")),
       isSuperAdmin,
     },
     {
       key: "workspace",
-      name: "Workspace Product",
-      hasAccess: isSuperAdmin || normalizeWorkspaceRoles(roles).length > 0 || user.status === "active",
+      name: "CommandOS",
+      hasAccess: isSuperAdmin || normalizeWorkspaceRoles(roles).length > 0 || canSignIn({ status: user.status, roles: user.roles }),
       roles: normalizeWorkspaceRoles(roles).length > 0
         ? normalizeWorkspaceRoles(roles)
-        : (user.status === "active" ? ["workspace_member"] : []),
+        : (canSignIn({ status: user.status, roles: user.roles }) ? ["workspace_member"] : []),
       isSuperAdmin,
     },
   ];

@@ -29,9 +29,9 @@ export default async function CustomersPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Customers" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Customers" }]}
         title={<>Customers</>}
-        description={<>Financial view over PMS&apos;s client records — {result.total} customer{result.total === 1 ? "" : "s"}.</>}
+        description={<>Financial view over SprintOS&apos;s client records — {result.total} customer{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -72,12 +72,12 @@ export default async function CustomersPage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No customers found — client records are created in PMS."
+        emptyLabel="No customers found — client records are created in SprintOS."
       />
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Receipt className="size-3.5" />
-        Customer records are owned by PMS. Create or edit a client at{" "}
+        Customer records are owned by SprintOS. Create or edit a client at{" "}
         <Link href="/sprintos/clients" className="text-primary hover:underline">/sprintos/clients</Link>.
       </p>
     </div>

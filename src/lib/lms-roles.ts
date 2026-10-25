@@ -11,19 +11,19 @@ export type LmsRole = (typeof LMS_ROLES)[number];
 
 export const LMS_ROLE_META: Record<LmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access to leads, campaigns, courses, and CRM analytics.",
   },
   lms_admin: {
-    label: "LMS Admin",
+    label: "DealFlow Admin",
     description: "Full control over leads, marketing campaigns, courses, and sales analytics.",
   },
   lms_manager: {
-    label: "LMS Manager",
+    label: "DealFlow Manager",
     description: "Manage lead assignments, sales stages, student enrollments, and reports.",
   },
   lms_agent: {
-    label: "LMS Executive / Counselor",
+    label: "DealFlow Executive / Counselor",
     description: "Manage assigned leads, track call activities, and update status.",
   },
 };
@@ -60,7 +60,7 @@ export const LMS_PERMISSIONS = [
 ] as const;
 export type LmsPermission = (typeof LMS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const LMS_PERMISSION_KEY: Record<LmsPermission, string> = {
   VIEW_LEADS: "lms.canViewLeads",
   CREATE_LEADS: "lms.canCreateLeads",

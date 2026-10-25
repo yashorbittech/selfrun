@@ -37,7 +37,7 @@ export function DlmsSettingsForm({ warnDays, alertsEnabled }: { warnDays: number
       </div>
       <label className="flex items-center gap-2 pb-2 text-sm">
         <input type="checkbox" className="size-4 accent-[var(--primary)]" checked={alerts} onChange={(e) => setAlerts(e.target.checked)} />
-        Send daily expiry alerts to DLMS managers &amp; admins
+        Send daily expiry alerts to CyberVault managers &amp; admins
       </label>
       <Button type="submit" disabled={pending}>
         {pending ? <Loader2 className="size-4 animate-spin" /> : "Save"}
@@ -109,7 +109,7 @@ function AccessRow({ user, clients }: { user: AccessUser; clients: { id: string;
 }
 
 export function AccessManager({ users, clients }: { users: AccessUser[]; clients: { id: string; label: string }[] }) {
-  if (users.length === 0) return <p className="py-6 text-center text-sm text-muted-foreground">No accounts have a DLMS role yet. Grant one under Admin → Users.</p>;
+  if (users.length === 0) return <p className="py-6 text-center text-sm text-muted-foreground">No accounts have a CyberVault role yet. Grant one under Admin → Users.</p>;
   return (
     <ul className="grid gap-3 lg:grid-cols-2">
       {users.map((u) => (

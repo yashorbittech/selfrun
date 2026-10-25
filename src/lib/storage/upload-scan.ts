@@ -137,7 +137,7 @@ export async function scanUpload(input: { filename: string; contentType?: string
 export const BLOCKED_UPLOADS = "upload_blocks";
 export interface BlockedUpload { at: Date; filename: string; reason: string; size: number; folder: string }
 
-/** Keeps a short record of what was refused so a Super Admin can see it (kept 180 days). Never throws. */
+/** Keeps a short record of what was refused so a Director can see it (kept 180 days). Never throws. */
 export async function recordBlockedUpload(row: Omit<BlockedUpload, "at">): Promise<void> {
   try {
     const col = (await getDb()).collection<BlockedUpload>(BLOCKED_UPLOADS);

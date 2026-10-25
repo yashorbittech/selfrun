@@ -26,7 +26,7 @@ export default async function MyRequisitionDetailPage({ params }: { params: Prom
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "PRMS", href: "/spendiq/me" },
+          { label: "SpendIQ", href: "/spendiq/me" },
           { label: "My Requisitions", href: "/spendiq/me/requisitions" },
           { label: r.prCode },
         ]}

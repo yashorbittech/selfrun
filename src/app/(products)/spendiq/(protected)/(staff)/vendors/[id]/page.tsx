@@ -37,7 +37,7 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Vendors", href: "/spendiq/vendors" }, { label: v.companyName }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Vendors", href: "/spendiq/vendors" }, { label: v.companyName }]}
         title={<>{v.companyName}</>}
         description={<><span className="font-mono">{v.vendorCode}</span> · <VendorCategoryBadge category={v.category} /> · <VendorStatusBadge status={v.status} /></>}
         actions={<>{canManage && (

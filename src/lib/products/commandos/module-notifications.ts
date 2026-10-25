@@ -37,7 +37,7 @@ import {
 } from "@/lib/products/huddle-ai/notifications";
 
 /**
- * Super Admin Command Center — Executive Notifications (Phase 2). Every
+ * Director Command Center — Executive Notifications (Phase 2). Every
  * module already writes real notifications addressed to `admin_users` ids,
  * several already broadcasting to every `super_admin` account (PRMS invoice/
  * budget/stock/renewal alerts, TMS stale-application/fee alerts). This layer
@@ -58,11 +58,11 @@ export const NOTIFICATION_MODULES = ["hrms", "pms", "prms", "tms", "messenger"] 
 export type NotificationModule = (typeof NOTIFICATION_MODULES)[number];
 
 export const MODULE_LABELS: Record<NotificationModule, string> = {
-  hrms: "HRMS",
-  pms: "PMS",
-  prms: "Procurement",
-  tms: "Training",
-  messenger: "Team Chat",
+  hrms: "TalentOS",
+  pms: "SprintOS",
+  prms: "SpendIQ",
+  tms: "Cohort AI",
+  messenger: "Huddle",
 };
 
 export type NotificationPriority = "high" | "medium" | "low";

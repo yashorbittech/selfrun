@@ -49,7 +49,12 @@ const columns: AdminDataGridColumn<CompanyRow>[] = [
       ),
   },
   { key: "createdAt", label: "Created", render: (row) => formatDate(row.createdAt) },
-  { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} isPlatformOwner={row.isPlatformOwner} /> },
+  { key: "status", label: "Status", render: (row) => (
+    <span className="flex flex-wrap items-center gap-1.5">
+      <StatusBadge status={row.status} isPlatformOwner={row.isPlatformOwner} />
+      {row.reactivationPending && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">Reactivation requested</span>}
+    </span>
+  ) },
   { key: "access", label: "", render: (row) => (row.isPlatformOwner || row.status !== "active" ? null : <LoginAsCompanyButton companyId={row.id} companyName={row.name} label="Login" />) },
 ];
 

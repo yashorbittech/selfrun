@@ -35,7 +35,7 @@ export default async function AssignmentsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Assignments" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Assignments" }]}
         title={<>Assignments</>}
         description={<>{total} assignment{total === 1 ? "" : "s"} across all batches.</>}
         actions={<>{canManage && (

@@ -42,7 +42,7 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Payments", href: "/cohort-ai/payments" }, { label: plan.studentName }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Payments", href: "/cohort-ai/payments" }, { label: plan.studentName }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{plan.studentName}<PaymentStatusBadge status={plan.status} /></span></>}
         description={<><Link href={`/cohort-ai/students/${plan.studentId}`} className="text-primary hover:underline">Student profile</Link>
             {" · "}{plan.programName}{plan.batchName ? ` · ${plan.batchName}` : ""}</>}

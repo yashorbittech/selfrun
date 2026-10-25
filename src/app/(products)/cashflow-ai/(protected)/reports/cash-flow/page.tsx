@@ -32,7 +32,7 @@ export default async function CashFlowPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Cash Flow" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Cash Flow" }]}
         title={<>Cash Flow</>}
         description={<>Direct method — cash in and out of real bank/cash accounts for the selected range. No operating/investing/financing
           categorization yet.</>}

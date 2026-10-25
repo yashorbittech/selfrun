@@ -106,10 +106,10 @@ export const ATTEMPT_SCORING = [
 export type AttemptScoring = (typeof ATTEMPT_SCORING)[number]["value"];
 
 export const CANDIDATE_KINDS = [
-  { value: "employee", label: "Employee", source: "HRMS" },
+  { value: "employee", label: "Employee", source: "TalentOS" },
   { value: "user", label: "Staff User", source: "Admin Users" },
   { value: "applicant", label: "Applicant", source: "Careers" },
-  { value: "student", label: "Student", source: "TMS" },
+  { value: "student", label: "Student", source: "Cohort AI" },
 ] as const;
 export type CandidateKind = (typeof CANDIDATE_KINDS)[number]["value"];
 
@@ -133,18 +133,18 @@ export function parseCandidateKey(key: string): CandidateRef | null {
 
 /** Everything a test can be assigned to. Each resolves to people LIVE from the owning module. */
 export const TARGET_TYPES = [
-  { value: "department", label: "Department", group: "Employees", source: "HRMS departments" },
-  { value: "designation", label: "Role / Designation", group: "Employees", source: "HRMS designations" },
-  { value: "team", label: "Team / User Group", group: "Employees", source: "HRMS teams" },
-  { value: "employment_type", label: "Employee Type", group: "Employees", source: "HRMS employment types" },
-  { value: "employee", label: "Individual Employee", group: "Employees", source: "HRMS employees" },
+  { value: "department", label: "Department", group: "Employees", source: "TalentOS departments" },
+  { value: "designation", label: "Role / Designation", group: "Employees", source: "TalentOS designations" },
+  { value: "team", label: "Team / User Group", group: "Employees", source: "TalentOS teams" },
+  { value: "employment_type", label: "Employee Type", group: "Employees", source: "TalentOS employment types" },
+  { value: "employee", label: "Individual Employee", group: "Employees", source: "TalentOS employees" },
   { value: "platform_role", label: "Platform Role", group: "Staff Users", source: "Admin user roles" },
   { value: "user", label: "Individual Staff User", group: "Staff Users", source: "Admin users" },
   { value: "applicant", label: "Individual Applicant", group: "Applicants", source: "Careers applications" },
   { value: "applicant_position", label: "Applicants by Position", group: "Applicants", source: "Careers job positions" },
-  { value: "student", label: "Individual Student", group: "Students", source: "TMS students" },
-  { value: "batch", label: "Batch", group: "Students", source: "TMS batches" },
-  { value: "program", label: "Course / Program", group: "Students", source: "TMS programs" },
+  { value: "student", label: "Individual Student", group: "Students", source: "Cohort AI students" },
+  { value: "batch", label: "Batch", group: "Students", source: "Cohort AI batches" },
+  { value: "program", label: "Course / Program", group: "Students", source: "Cohort AI programs" },
 ] as const;
 export type TargetType = (typeof TARGET_TYPES)[number]["value"];
 

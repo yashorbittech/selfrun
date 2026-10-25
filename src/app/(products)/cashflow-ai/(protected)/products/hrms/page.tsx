@@ -47,8 +47,8 @@ export default async function HrmsFinancePage({
     <div className="relative space-y-6">
 
       <PanelPageHeader
-        title={<>{panelName("hrms", "HRMS Payroll")} &amp; Employee Finance</>}
-        description={<>Payroll and employee expenses flow from HRMS → FMS for salary payouts and reimbursements.</>}
+        title={<>{panelName("hrms", "TalentOS Payroll")} &amp; Employee Finance</>}
+        description={<>Payroll and employee expenses flow from TalentOS → CashFlow for salary payouts and reimbursements.</>}
       />
 
 
@@ -71,9 +71,9 @@ export default async function HrmsFinancePage({
       <GlassCard className="p-4 bg-card/60 border-border/40 backdrop-blur-md">
         <div className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Workflow</div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground sm:gap-4">
-          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">{panelName("hrms", "HRMS Payroll")}</span>
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">{panelName("hrms", "TalentOS Payroll")}</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
-          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">FMS Request</span>
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">CashFlow Request</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
           <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold">Approval</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
@@ -140,7 +140,7 @@ export default async function HrmsFinancePage({
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{t.payee || t.customerName || "Employee"}</td>
                       <td className="px-4 py-3 font-mono text-muted-foreground">
-                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">HRMS</span>{" "}
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">TalentOS</span>{" "}
                         {t.sourceRecordId || "PAY-2026"}
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">

@@ -3,6 +3,9 @@ import { currentNotifyViewer } from "@/lib/notify/viewer";
 import { pullSignals } from "@/lib/notify/signals";
 import { hasLevel } from "@/lib/ai/agent/access";
 import type { NotifyPanel } from "@/lib/notify/panels";
+import { ObjectId } from "mongodb";
+import { getDb } from "@/lib/mongodb";
+import { canSignIn } from "@/lib/security/account-status";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -13,6 +16,8 @@ const PING_MS = 25_000;
 /** Ends a stream a little before the host would, so the browser reconnects cleanly (EventSource retries by itself). */
 const MAX_LIFETIME_MS = 270_000;
 const OVERLAP_MS = 4000;
+/** How often a stream checks that the person may still sign in: a suspended or departed person's stream ends within this time. */
+const RECHECK_MS = 10_000;
 
 /**
  * Realtime notifications: Server-Sent Events carrying "a notification arrived" / "recount" signals for the signed-in person only.
@@ -37,10 +42,16 @@ export async function GET(req: NextRequest) {
       const seen = new Set<string>();
       const started = Date.now();
       let lastPing = Date.now();
+      let lastCheck = Date.now();
       send({ type: "ready" });
 
       while (!closed && Date.now() - started < MAX_LIFETIME_MS) {
         try {
+          if (viewer.actor !== "portal" && Date.now() - lastCheck > RECHECK_MS) {
+            lastCheck = Date.now();
+            const u = ObjectId.isValid(viewer.user.id) ? await (await getDb()).collection("admin_users").findOne({ _id: new ObjectId(viewer.user.id) } as never, { projection: { status: 1, roles: 1, platformRoleId: 1 } }) : null;
+            if (!u || !canSignIn(u as { status?: string; roles?: string[]; platformRoleId?: string })) { finish(); break; }
+          }
           const rows = await pullSignals(viewer.user.id, viewer.actor, new Date(since.getTime() - OVERLAP_MS));
           for (const s of rows) {
             if (seen.has(s._id)) continue;

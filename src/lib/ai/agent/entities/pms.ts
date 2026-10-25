@@ -405,8 +405,8 @@ export const PMS_ENTITIES: EntityDef[] = [
     },
   },
   { key: "pms.costing", panel: "pms", label: "Project costing inputs", description: "Per-project contract value, other costs and default rates (the figures themselves come from the project_financials report).", collection: "pms_project_costing", idType: "string", read: "staff" },
-  { key: "pms.activity", panel: "pms", label: "Activity log", description: "Who changed what in PMS, and when.", collection: "pms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin" },
-  { key: "pms.notification", panel: "pms", label: "Notification", description: "PMS notifications.", collection: "pms_notifications", idType: "string", read: "admin" },
+  { key: "pms.activity", panel: "pms", label: "Activity log", description: "Who changed what in SprintOS, and when.", collection: "pms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin" },
+  { key: "pms.notification", panel: "pms", label: "Notification", description: "SprintOS notifications.", collection: "pms_notifications", idType: "string", read: "admin" },
 ];
 
 const taskAccess = async (u: AgentUser, projectId: string) => (await checkProjectAccess({ id: u.id, roles: u.roles as never, employeeId: u.employeeId ?? null }, projectId)).allowed;
@@ -519,7 +519,7 @@ export const PMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "pms.update_settings", panel: "pms", label: "Change PMS settings", description: "Project categories, technology suggestions and the default currency.", level: "admin", allow: canManageSettings,
+    key: "pms.update_settings", panel: "pms", label: "Change SprintOS settings", description: "Project categories, technology suggestions and the default currency.", level: "admin", allow: canManageSettings,
     params: [
       { key: "categories", label: "Project categories", type: "stringList" },
       { key: "technologySuggestions", label: "Technology suggestions", type: "stringList" },

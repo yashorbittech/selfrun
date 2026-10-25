@@ -26,7 +26,7 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Clients", href: "/sprintos/clients" }, { label: client.companyName }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Clients", href: "/sprintos/clients" }, { label: client.companyName }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{client.companyName}<ClientStatusBadge status={client.status} /></span></>}
         description={<><span className="font-mono">{client.clientCode}</span>
             {client.industry ? ` · ${client.industry}` : ""}</>}

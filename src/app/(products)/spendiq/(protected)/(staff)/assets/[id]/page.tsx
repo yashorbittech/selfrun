@@ -46,7 +46,7 @@ export default async function AssetDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Asset Management", href: "/spendiq/assets" }, { label: a.assetCode }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Asset Management", href: "/spendiq/assets" }, { label: a.assetCode }]}
         title={<>{a.name}</>}
         description={<><span className="font-mono">{a.assetCode}</span> · {a.category} · <AssetStatusBadge status={a.status} /></>}
         actions={<>{canManage && (

@@ -24,7 +24,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Analytics" crumbs={[{ label: "Analytics" }]} description="Organic post performance recorded per platform, and paid campaign results from the LMS ad imports." />
+      <PageHeader title="Analytics" crumbs={[{ label: "Analytics" }]} description="Organic post performance recorded per platform, and paid campaign results from the DealFlow ad imports." />
       <SmmsFilterBar values={{ from: sp.from ?? "", to: sp.to ?? "" }} fields={[{ key: "from", label: "Published from", type: "date" }, { key: "to", label: "to", type: "date" }]} />
       {totalPublished === 0 && <Notice tone="info">No published posts in this range yet. Performance appears once posts are published and their numbers recorded (Publishing → Record performance).</Notice>}
 
@@ -96,7 +96,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
         )}
       </SectionCard>
 
-      <SectionCard title="Paid campaign performance" description={a.paid.totals.linkedCampaigns ? `${a.paid.totals.linkedCampaigns} SMMS campaign(s) linked to LMS ad imports · ${formatCurrency(a.paid.totals.spend, a.paid.totals.currency)} spend · CTR ${a.paid.totals.ctr ?? "—"}% · ROAS ${a.paid.totals.roas ?? "—"}×` : "No campaign is linked to LMS ad-platform data yet (Campaign → Performance)."}>
+      <SectionCard title="Paid campaign performance" description={a.paid.totals.linkedCampaigns ? `${a.paid.totals.linkedCampaigns} ViralPulse campaign(s) linked to DealFlow ad imports · ${formatCurrency(a.paid.totals.spend, a.paid.totals.currency)} spend · CTR ${a.paid.totals.ctr ?? "—"}% · ROAS ${a.paid.totals.roas ?? "—"}×` : "No campaign is linked to DealFlow ad-platform data yet (Campaign → Performance)."}>
         {a.paid.rows.length > 0 && (
           <div className="overflow-x-auto">
             <Table>

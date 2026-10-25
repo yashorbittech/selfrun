@@ -61,7 +61,7 @@ export default async function CollectMoneyPage({
     const name = formData.get("payerName") as string;
     const amount = Number(formData.get("amount") || 0);
     const purpose = formData.get("purpose") as string;
-    const portal = formData.get("portal") as string; // TMS, PMS, DIRECT
+    const portal = formData.get("portal") as string; // Cohort AI, SprintOS, DIRECT
 
     if (!name || amount <= 0) return;
 
@@ -93,7 +93,7 @@ export default async function CollectMoneyPage({
 
       <PanelPageHeader
         title={<>Collect Money</>}
-        description={<>Generate 1-click payment links &amp; send instant payment requests to Students (TMS) or Clients (PMS).</>}
+        description={<>Generate 1-click payment links &amp; send instant payment requests to Students (Cohort AI) or Clients (SprintOS).</>}
         actions={
             <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary border-primary/20">
           <Sparkles className="size-3.5 mr-1" />
@@ -301,7 +301,7 @@ export default async function CollectMoneyPage({
                       <td className="px-4 py-3 font-medium text-foreground">{inv.customerName || "Customer"}</td>
                       <td className="px-4 py-3">
                         <Badge variant="outline" className="uppercase text-[10px] font-semibold bg-primary/10 text-primary border-primary/20">
-                          {inv.sourceModule || "PMS"}
+                          {inv.sourceModule || "SprintOS"}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">₹{(inv.amount || inv.totalAmount || 0).toLocaleString("en-IN")}</td>

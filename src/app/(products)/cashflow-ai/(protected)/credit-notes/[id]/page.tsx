@@ -24,7 +24,7 @@ export default async function CreditNoteDetailPage({ params }: { params: Promise
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Credit Notes", href: "/cashflow-ai/credit-notes" }, { label: note.creditNoteNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Credit Notes", href: "/cashflow-ai/credit-notes" }, { label: note.creditNoteNumber }]}
         title={<>{note.creditNoteNumber}</>}
         description={<>{note.customerName}</>}
         actions={<><div className="flex items-center gap-2">

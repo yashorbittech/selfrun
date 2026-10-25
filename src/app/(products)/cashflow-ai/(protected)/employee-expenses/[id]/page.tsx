@@ -30,7 +30,7 @@ export default async function EmployeeExpenseDetailPage({ params }: { params: Pr
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Employee Expenses", href: "/cashflow-ai/employee-expenses" }, { label: expense.expenseCode }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Employee Expenses", href: "/cashflow-ai/employee-expenses" }, { label: expense.expenseCode }]}
         title={<>{expense.expenseCode}</>}
         description={<>{expense.raisedByName} · {formatMoney(expense.totalAmount, expense.currency)}</>}
         actions={<><div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ export default async function EmployeeExpenseDetailPage({ params }: { params: Pr
       </GlassCard>
 
       <p className="text-xs text-muted-foreground">
-        Created {formatDateTime(expense.createdAt)}. Claim data is owned by PRMS — approve/reject at{" "}
+        Created {formatDateTime(expense.createdAt)}. Claim data is owned by SpendIQ — approve/reject at{" "}
         <Link href={`/spendiq/expenses/${expense._id}`} className="text-primary hover:underline">/spendiq/expenses/{expense._id}</Link>.
       </p>
     </div>

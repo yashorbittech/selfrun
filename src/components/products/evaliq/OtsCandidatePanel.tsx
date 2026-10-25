@@ -26,7 +26,7 @@ export default async function OtsCandidatePanel({ kind, id, title = "Online Test
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base"><FileCheck2 className="size-4" /> {title}</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">Test assignments and results live in the Online Test System and are visible to OTS managers and evaluators.</CardContent>
+        <CardContent className="text-sm text-muted-foreground">Test assignments and results live in the Online Test System and are visible to EvalIQ managers and evaluators.</CardContent>
       </GlassCard>
     );
   const list = await assignmentsForCandidates([{ kind, id }]);

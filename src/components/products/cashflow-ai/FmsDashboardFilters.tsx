@@ -192,10 +192,10 @@ export default function FmsDashboardFilters({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all" className="text-xs">All Products</SelectItem>
-              <SelectItem value="prms" className="text-xs">{panelLabel("prms", "PRMS Procurement")}</SelectItem>
-              <SelectItem value="pms" className="text-xs">{panelLabel("pms", "PMS Projects")}</SelectItem>
-              <SelectItem value="hrms" className="text-xs">{panelLabel("hrms", "HRMS Payroll")}</SelectItem>
-              <SelectItem value="tms" className="text-xs">{panelLabel("tms", "TMS Training")}</SelectItem>
+              <SelectItem value="prms" className="text-xs">{panelLabel("prms", "SpendIQ Procurement")}</SelectItem>
+              <SelectItem value="pms" className="text-xs">{panelLabel("pms", "SprintOS Projects")}</SelectItem>
+              <SelectItem value="hrms" className="text-xs">{panelLabel("hrms", "TalentOS Payroll")}</SelectItem>
+              <SelectItem value="tms" className="text-xs">{panelLabel("tms", "Cohort AI Training")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

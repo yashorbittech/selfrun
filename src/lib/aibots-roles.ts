@@ -9,7 +9,7 @@
  *      `lib/agentos/bots.ts`. Anyone who can edit bots can use every bot.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -24,19 +24,19 @@ export type AibotsRole = (typeof AIBOTS_ROLES)[number];
 
 export const AIBOTS_ROLE_META: Record<AibotsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
-    description: "Every AI Bots operation: create, edit and delete bots, manage knowledge bases, review all chats, settings and the activity log.",
+    label: "Director",
+    description: "Every AgentOS operation: create, edit and delete bots, manage knowledge bases, review all chats, settings and the activity log.",
   },
   aibots_admin: {
-    label: "AI Bots Admin",
-    description: "Everything a manager can do, plus deleting bots and changing AI Bots settings (models, pricing, limits).",
+    label: "AgentOS Admin",
+    description: "Everything a manager can do, plus deleting bots and changing AgentOS settings (models, pricing, limits).",
   },
   aibots_manager: {
-    label: "AI Bots Manager",
+    label: "AgentOS Manager",
     description: "Create and edit bots, manage their knowledge bases and access lists, review everyone's chats and read the activity log.",
   },
   aibots_user: {
-    label: "AI Bots User",
+    label: "AgentOS User",
     description: "Chat with the bots assigned to them (or their role): start, continue, rename and delete their own chats.",
   },
 };
@@ -56,7 +56,7 @@ export const AIBOTS_PERMISSIONS = [
 ] as const;
 export type AibotsPermission = (typeof AIBOTS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const AIBOTS_PERMISSION_KEY: Record<AibotsPermission, string> = {
   USE_BOT: "aibots.canUseBots",
   CREATE_BOT: "aibots.canCreateBots",
@@ -81,7 +81,7 @@ export const AIBOTS_PERMISSION_META: Record<AibotsPermission, { label: string; d
   DELETE_FILES: { label: "Delete knowledge files", description: "Remove files from a bot's knowledge base (deleted from OpenAI too)." },
   VIEW_CHATS: { label: "View all chats", description: "Read every user's chats with every bot (read-only oversight)." },
   DELETE_CHATS: { label: "Delete any chat", description: "Delete other users' chats. Everyone can always delete their own." },
-  VIEW_AUDIT: { label: "View activity log", description: "Read the AI Bots activity log." },
+  VIEW_AUDIT: { label: "View activity log", description: "Read the AgentOS activity log." },
   MANAGE_SETTINGS: { label: "Manage settings", description: "Change allowed OpenAI models, token pricing and limits." },
 };
 

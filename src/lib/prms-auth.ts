@@ -51,7 +51,7 @@ export interface CurrentPrmsUser {
    * account also has access to OTHER products (cross-product nav links), never
    * as PRMS's own gate (use `roles` above for that). */
   allRoles: string[];
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   /** Linked `hrms_employees` id — set for accounts that are also HRMS employees. */
   employeeId: string | null;

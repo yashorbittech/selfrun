@@ -7,7 +7,7 @@ import { plural, short } from "@/lib/notify/triggers/format";
 
 /**
  * Workspace (company control centre) notifications — they land in the Workspace bell. People-management, domain, billing and
- * automation events go to the company's admins (Super Admins and Workspace Admins); anything about one person's own access also
+ * automation events go to the company's admins (Directors and Workspace Admins); anything about one person's own access also
  * goes to that person. Never throws.
  */
 const ADMINS = ["workspace_admin"];

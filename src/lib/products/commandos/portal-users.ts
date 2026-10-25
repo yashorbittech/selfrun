@@ -6,7 +6,7 @@ import { NOTIFICATIONS_COLLECTION as PORTAL_NOTIFICATIONS_COLLECTION } from "@/l
 import type { PortalRole } from "@/lib/portal-roles";
 
 /**
- * Super Admin management layer for the External User Portal. Nothing here
+ * Director management layer for the External User Portal. Nothing here
  * existed before — the Portal only ever had auth/session code
  * (`src/lib/portal-auth.ts`) and registration flows, no admin-facing
  * search/suspend/force-logout anywhere (there's no "portal staff product" to

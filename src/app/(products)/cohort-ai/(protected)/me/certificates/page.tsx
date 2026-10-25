@@ -19,7 +19,7 @@ export default async function MyCertificatesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "Certificates" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "Certificates" }]}
         title={<>My Certificates</>}
       />
 

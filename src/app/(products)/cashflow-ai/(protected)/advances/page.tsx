@@ -35,7 +35,7 @@ export default async function AdvancesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Advances" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Advances" }]}
         title={<>Employee Advances</>}
         description={<>{result.total} advance{result.total === 1 ? "" : "s"} requested.</>}
         actions={<>{canManage && (

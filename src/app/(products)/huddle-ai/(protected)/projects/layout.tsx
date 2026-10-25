@@ -32,7 +32,7 @@ export default async function ProjectChannelsLayout({ children }: { children: Re
         <ConversationList
           rows={rows}
           header="Project Channels"
-          emptyLabel="No project channels yet. They appear automatically once you're on a PMS project team."
+          emptyLabel="No project channels yet. They appear automatically once you're on a SprintOS project team."
         />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">{children}</div>

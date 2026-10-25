@@ -23,7 +23,7 @@ export default async function NewDocumentPage() {
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "LPMS", href: "/contractflow-ai" },
+          { label: "ContractFlow", href: "/contractflow-ai" },
           { label: "Documents", href: "/contractflow-ai/documents" },
           { label: "New Document" },
         ]}

@@ -14,7 +14,7 @@ export default async function BankReconciliationIndexPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Bank Reconciliation" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Bank Reconciliation" }]}
         title={<>Bank Reconciliation</>}
         description={<>Pick a bank account to reconcile.</>}
       />

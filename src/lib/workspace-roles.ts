@@ -10,15 +10,15 @@ export type WorkspaceRole = (typeof WORKSPACE_ROLES)[number];
 
 export const WORKSPACE_ROLE_META: Record<WorkspaceRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full workspace configuration and executive dashboard access.",
   },
   workspace_admin: {
-    label: "Workspace Admin",
+    label: "CommandOS Admin",
     description: "Manage workspace settings, department analytics, and employee product access.",
   },
   workspace_member: {
-    label: "Workspace Member",
+    label: "CommandOS Member",
     description: "Access to workspace dashboard, employee self-service, and department KPIs.",
   },
 };

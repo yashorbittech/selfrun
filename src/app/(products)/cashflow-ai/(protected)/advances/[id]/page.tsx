@@ -27,7 +27,7 @@ export default async function AdvanceDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Advances", href: "/cashflow-ai/advances" }, { label: advance.advanceNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Advances", href: "/cashflow-ai/advances" }, { label: advance.advanceNumber }]}
         title={<>{advance.advanceNumber}</>}
         description={<>{advance.employeeName} · {formatMoney(advance.amount)}</>}
         actions={<><AdvanceStatusBadge status={advance.status} /></>}

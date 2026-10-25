@@ -46,7 +46,7 @@ function Editor({ initial, mode, onClose }: { initial: PanelRecord; mode: "creat
         <div><L>Header title (optional — blank uses the name)</L><input value={p.headerTitle} onChange={(e) => set("headerTitle", e.target.value)} className={INPUT} maxLength={60} /></div>
         <div><L>Header description (optional — blank uses the description)</L><input value={p.headerDescription} onChange={(e) => set("headerDescription", e.target.value)} className={INPUT} maxLength={200} /></div>
       </div>
-      <div><L>Other names to replace (comma separated — old wording such as “HRMS” is shown as this product's current name wherever it still appears in product screens)</L><input value={p.aliases.join(", ")} onChange={(e) => set("aliases", e.target.value.split(",").map((a) => a.trim()).filter(Boolean))} className={INPUT} placeholder="e.g. HRMS, Human Resource Management System" /></div>
+      <div><L>Other names to replace (comma separated — old wording such as “TalentOS” is shown as this product's current name wherever it still appears in product screens)</L><input value={p.aliases.join(", ")} onChange={(e) => set("aliases", e.target.value.split(",").map((a) => a.trim()).filter(Boolean))} className={INPUT} placeholder="e.g. TalentOS, Human Resource Management System" /></div>
       <div className="grid gap-3 sm:grid-cols-3">
         <div><L>Route</L><input value={p.route} onChange={(e) => set("route", e.target.value)} placeholder={`/${p.key || "key"}`} className={INPUT} /></div>
         <div><L>Icon</L><select value={p.icon} onChange={(e) => set("icon", e.target.value as PanelRecord["icon"])} className={INPUT}>{ICONS.map((i) => <option key={i} value={i}>{i}</option>)}</select></div>

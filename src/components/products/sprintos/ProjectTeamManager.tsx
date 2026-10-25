@@ -211,7 +211,7 @@ export default function ProjectTeamManager({
         <SheetContent>
           <SheetHeader className="border-b border-border/60">
             <SheetTitle>{editing ? "Edit Team Member" : "Add Team Member"}</SheetTitle>
-            <SheetDescription>Assign an HRMS employee to this project.</SheetDescription>
+            <SheetDescription>Assign an TalentOS employee to this project.</SheetDescription>
           </SheetHeader>
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
             <div className="space-y-1.5">

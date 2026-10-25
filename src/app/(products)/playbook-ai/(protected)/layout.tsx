@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentSopUser } from "@/lib/sop-auth";
 import { hasSopAccess, sopCan } from "@/lib/sop-roles";
@@ -18,6 +19,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:sop}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedSopLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("sop");
   const user = await getCurrentSopUser();
   if (!user) redirect("/playbook-ai/login");

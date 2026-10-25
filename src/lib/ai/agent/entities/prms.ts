@@ -437,7 +437,7 @@ export const PRMS_ENTITIES: EntityDef[] = [
   }),
   { key: "prms.asset_assignment", panel: "prms", label: "Asset assignment", description: "Who holds which asset and since when.", collection: "prms_asset_assignments", idType: "string", read: "staff" },
   { key: "prms.inventory_transaction", panel: "prms", label: "Inventory movement", description: "Stock in / out / adjustments per item.", collection: "prms_inventory_transactions", idType: "string", read: "staff" },
-  { key: "prms.activity", panel: "prms", label: "Audit log", description: "Who changed what in PRMS.", collection: "prms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
+  { key: "prms.activity", panel: "prms", label: "Audit log", description: "Who changed what in SpendIQ.", collection: "prms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
 ];
 
 async function billData(v: Json): Promise<{ data: InvoiceWriteData } | { error: Json }> {

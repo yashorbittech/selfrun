@@ -19,9 +19,9 @@ export default async function ProjectProfitabilityPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Project Profitability" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Project Profitability" }]}
         title={<>Project Profitability</>}
-        description={<>Real revenue and expenses per project from booked Finance transactions — distinct from PMS&apos;s own
+        description={<>Real revenue and expenses per project from booked Finance transactions — distinct from SprintOS&apos;s own
           simulated costing (timesheets × rates), shown on each project&apos;s costing page.</>}
       />
 

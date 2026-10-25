@@ -129,7 +129,7 @@ const WIPE_KEEP = /^(custom_roles|access_audit.*)$/;
 
 /**
  * Deletes everything the company has stored — records, settings and uploaded files — and keeps the company itself, its accounts and its
- * subscription, so the Super Admin can sign in and start again. A safety copy of the records is made first and kept for 30 days (uploaded
+ * subscription, so the Director can sign in and start again. A safety copy of the records is made first and kept for 30 days (uploaded
  * files are deleted for good and are not in it).
  */
 export async function wipeCompanyData(actor: Actor): Promise<{ ok: true; rows: number; files: number } | { ok: false; error: string }> {

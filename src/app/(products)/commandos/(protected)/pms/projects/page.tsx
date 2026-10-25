@@ -58,7 +58,7 @@ export default async function AdminProjectsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "PMS", panel: "pms" }, { label: "Projects" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "SprintOS", panel: "pms" }, { label: "Projects" }]}
         title={<>Projects</>}
         description={<>{total} project{total === 1 ? "" : "s"}. Status changes are guarded — illegal transitions (e.g. planning
           → completed) are refused with the real reason.</>}

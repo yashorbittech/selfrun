@@ -15,7 +15,7 @@ export default async function BatchCalendarPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Batches", href: "/cohort-ai/batches" }, { label: "Calendar" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Batches", href: "/cohort-ai/batches" }, { label: "Calendar" }]}
         title={<>Batch Calendar</>}
         description={<>Every batch by start date.</>}
         actions={<><Link href="/cohort-ai/batches" className={buttonVariants({ variant: "outline", size: "sm" })}>

@@ -167,7 +167,7 @@ export default async function FmsDashboardPage({
     {
       href: "/cashflow-ai/products/prms",
       icon: <ShoppingBag className="size-3.5" />,
-      label: panelName("prms", "PRMS Procurement"),
+      label: panelName("prms", "SpendIQ Procurement"),
       badge: "Payables",
       primaryLabel: "Vendor Payables",
       primaryValue: panel.prms.payables,
@@ -178,7 +178,7 @@ export default async function FmsDashboardPage({
     {
       href: "/cashflow-ai/products/pms",
       icon: <Briefcase className="size-3.5" />,
-      label: panelName("pms", "PMS Projects"),
+      label: panelName("pms", "SprintOS Projects"),
       badge: "Receivables",
       primaryLabel: "Client Invoices",
       primaryValue: panel.pms.receivables,
@@ -189,7 +189,7 @@ export default async function FmsDashboardPage({
     {
       href: "/cashflow-ai/products/hrms",
       icon: <Users className="size-3.5" />,
-      label: panelName("hrms", "HRMS Payroll"),
+      label: panelName("hrms", "TalentOS Payroll"),
       badge: "Payroll",
       primaryLabel: "Salary Payable",
       primaryValue: panel.hrms.salaryPayable,
@@ -200,7 +200,7 @@ export default async function FmsDashboardPage({
     {
       href: "/cashflow-ai/products/tms",
       icon: <BookOpen className="size-3.5" />,
-      label: panelName("tms", "TMS Training"),
+      label: panelName("tms", "Cohort AI Training"),
       badge: "Student Fees",
       primaryLabel: "Fee Receivables",
       primaryValue: panel.tms.receivables,
@@ -213,7 +213,7 @@ export default async function FmsDashboardPage({
   return (
     <div className="relative space-y-4">
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Dashboard" }]}
         title="Financial Overview"
         description={<>Welcome back{user?.email ? `, ${user.email.split("@")[0]}` : ""}. Track treasury, cash flow, receivables and payables across every product in real time.</>}
         actions={
@@ -276,8 +276,8 @@ export default async function FmsDashboardPage({
           </div>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             {[
-              { href: "/cashflow-ai/products/tms", icon: <GraduationCap className="size-3.5 text-primary" />, label: `${panelName("tms", "TMS")} Fee Link`, sub: "Student Portal" },
-              { href: "/cashflow-ai/products/pms", icon: <Briefcase className="size-3.5 text-primary" />, label: `${panelName("pms", "PMS")} Client Link`, sub: "Client Portal" },
+              { href: "/cashflow-ai/products/tms", icon: <GraduationCap className="size-3.5 text-primary" />, label: `${panelName("tms", "Cohort AI")} Fee Link`, sub: "Student Portal" },
+              { href: "/cashflow-ai/products/pms", icon: <Briefcase className="size-3.5 text-primary" />, label: `${panelName("pms", "SprintOS")} Client Link`, sub: "Client Portal" },
               { href: "/cashflow-ai/beneficiaries", icon: <Building2 className="size-3.5 text-primary" />, label: "Beneficiaries", sub: "Bank Directory" },
               { href: "/cashflow-ai/payouts", icon: <ArrowUpRight className="size-3.5 text-rose-500" />, label: "Direct Payout", sub: "Pay Vendors / Staff" },
               { href: "/cashflow-ai/receivables", icon: <Receipt className="size-3.5 text-emerald-600 dark:text-emerald-400" />, label: "Collect Money", sub: "Central Invoicing" },
@@ -432,7 +432,7 @@ export default async function FmsDashboardPage({
             <CardHeader className="flex-row items-center justify-between pb-1 pt-3 px-4">
               <div>
                 <CardTitle className="text-xs font-bold">Revenue by Source Product</CardTitle>
-                <p className="text-[11px] text-muted-foreground">Distribution across PRMS, PMS, HRMS & TMS</p>
+                <p className="text-[11px] text-muted-foreground">Distribution across SpendIQ, SprintOS, TalentOS & Cohort AI</p>
               </div>
               <Badge variant="outline" className="text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 py-0 px-1.5">
                 Income

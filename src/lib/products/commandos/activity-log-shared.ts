@@ -10,21 +10,21 @@ export const ACTIVITY_LOG_MODULES = ["prms", "pms", "teamchat", "tms", "hrms", "
 export type ActivityLogModule = (typeof ACTIVITY_LOG_MODULES)[number];
 
 const MODULE_LABELS: Record<ActivityLogModule, string> = {
-  prms: "Procurement",
-  pms: "Project Management",
+  prms: "SpendIQ",
+  pms: "SprintOS",
   teamchat: "Team Chat",
-  tms: "Training",
-  hrms: "HRMS",
-  portal: "External Portal",
-  ots: "Online Tests",
-  lpms: "Legal Documents",
-  sop: "SOPs",
-  fms: "Finance",
-  smms: "Social Media",
-  aibots: "AI Bots",
-  cms: "Website",
-  dlms: "Digital Vault",
-  seo: "SEO",
+  tms: "Cohort AI",
+  hrms: "TalentOS",
+  portal: "ClientOS",
+  ots: "EvalIQ",
+  lpms: "ContractFlow",
+  sop: "Playbook",
+  fms: "CashFlow",
+  smms: "ViralPulse",
+  aibots: "AgentOS",
+  cms: "SiteCraft",
+  dlms: "CyberVault",
+  seo: "RankMax",
 };
 
 export function activityModuleLabel(module: string): string {
@@ -38,7 +38,7 @@ export type AuditSource = "all" | "workspace" | "products";
 export const AUDIT_SOURCES: readonly AuditSource[] = ["all", "workspace", "products"];
 export const AUDIT_SOURCE_LABELS: Record<AuditSource, string> = { all: "All", workspace: "Workspace events", products: "Product activity" };
 
-/** What a reader may see: product activity needs the Audit log permission, workspace events the company Super Admin. */
+/** What a reader may see: product activity needs the Audit log permission, workspace events the company Director. */
 export interface AuditSourceAccess {
   panels: boolean;
   workspace: boolean;

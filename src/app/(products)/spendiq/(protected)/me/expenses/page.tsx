@@ -30,7 +30,7 @@ export default async function MyExpensesPage({ searchParams }: { searchParams: P
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq/me" }, { label: "My Expenses" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq/me" }, { label: "My Expenses" }]}
         title={<>My Expenses</>}
         description={<>{result.total} expense claims raised by you.</>}
         actions={<><ExpenseForm

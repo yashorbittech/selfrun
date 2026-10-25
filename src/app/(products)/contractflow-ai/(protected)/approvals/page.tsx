@@ -39,7 +39,7 @@ export default async function ApprovalsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Approvals" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Approvals" }]}
         title={<>Approval Queue</>}
         description={<>{approvals.length} pending approval{approvals.length !== 1 ? "s" : ""}</>}
       />

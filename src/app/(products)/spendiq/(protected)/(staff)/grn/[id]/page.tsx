@@ -27,7 +27,7 @@ export default async function GrnDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Goods Receipt", href: "/spendiq/grn" }, { label: g.grnNumber }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Goods Receipt", href: "/spendiq/grn" }, { label: g.grnNumber }]}
         title={<>{g.grnNumber}</>}
         description={<><Link className="text-primary hover:underline" href={`/spendiq/purchase-orders/${g.poId}`}>{g.poNumber}</Link> · {g.vendorName} · <GrnStatusBadge status={g.status} /></>}
       />

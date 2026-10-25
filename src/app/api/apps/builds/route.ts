@@ -5,7 +5,7 @@ import { onAppSurface } from "@/lib/platform/saas/request";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { getAppsOverview } from "@/lib/apps/overview";
 
-/** The Apps page polls this while a build is running. Super Admins of the company only. */
+/** The Apps page polls this while a build is running. Directors of the company only. */
 export const dynamic = "force-dynamic";
 
 async function handleGET() {

@@ -94,6 +94,8 @@ export interface NewCompany {
   business?: BusinessSelection;
   /** Self-serve sign-up waits for the AI-written website (its progress screen has a step for it); every other path writes it in the background. */
   aiWebsite?: "wait" | "background";
+  /** The plan chosen on the pricing page: the company starts a free trial of it (default plan when absent). */
+  plan?: { id: string; interval: "monthly" | "yearly" };
   /** Where the owner is, from the sign-up request. */
   hints?: { country?: string; languages?: string; timezone?: string };
 }
@@ -143,9 +145,14 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
       name: input.owner.name.trim(),
       passwordHash: input.owner.passwordHash,
       roles: ["super_admin"],
+      manualRoles: ["super_admin"],
+      customRoleIds: [],
+      // Whoever registers a company is its Director.
+      designationId: "director",
+      status: "active",
       permissionOverrides: {},
-      userType: "system",
-      notes: `Founding Super Admin of ${company.name}`,
+      userType: "employee",
+      notes: `Founding Director of ${company.name}`,
       employeeId: null,
       mustChangePassword: input.owner.mustChangePassword,
       ...(input.owner.emailVerified === undefined ? {} : { emailVerified: input.owner.emailVerified, ...(input.owner.emailVerified ? { emailVerifiedAt: now } : {}) }),
@@ -154,6 +161,13 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
       createdAt: now,
       updatedAt: now,
     });
+    // The Director's HR file in TalentOS (the rest of the profile is theirs to complete there). Never fails the sign-up.
+    try {
+      const { ensureHrFile } = await import("@/lib/products/commandos/employee-link");
+      await ensureHrFile({ userId: res.insertedId, email: input.owner.email, name: input.owner.name, designationTitle: "Director", departmentName: "Management", actorId: String(res.insertedId) });
+    } catch (err) {
+      console.error(`[provisioning] HR file for the Director of ${company.slug} failed`, err);
+    }
     return String(res.insertedId);
   });
 
@@ -169,7 +183,7 @@ export async function createCompanyWithOwner(input: NewCompany): Promise<Provisi
   forgetCompanyRouting();
 
   // Every new company starts on a free trial of the default plan. Non-fatal.
-  await startTrial(company._id).catch((err) => console.error(`[provisioning] trial for ${company.slug} failed`, err));
+  await startTrial(company._id, input.plan?.id, input.plan?.interval).catch((err) => console.error(`[provisioning] trial for ${company.slug} failed`, err));
 
   // A working public site from minute one (neutral starter pages, editable in the CMS). Non-fatal.
   await runAsCompany(company._id, () => publishStarterWebsite()).catch((err) => console.error(`[provisioning] starter website for ${company.slug} failed`, err));

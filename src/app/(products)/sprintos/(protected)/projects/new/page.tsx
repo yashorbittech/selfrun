@@ -19,14 +19,14 @@ export default async function NewProjectPage({
   const sp = await searchParams;
   const [clients, employees, settings] = await Promise.all([
     listClientOptions(),
-    listEmployeeOptions(),
+    listEmployeeOptions({ activeOnly: true }),
     getPmsSettings(),
   ]);
 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Projects", href: "/sprintos/projects" }, { label: "New" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Projects", href: "/sprintos/projects" }, { label: "New" }]}
         title={<>New Project</>}
         description={<>The project ID is generated automatically on save.</>}
       />

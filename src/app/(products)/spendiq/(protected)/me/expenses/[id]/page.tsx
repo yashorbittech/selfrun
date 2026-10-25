@@ -22,7 +22,7 @@ export default async function MyExpenseDetailPage({ params }: { params: Promise<
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq/me" }, { label: "My Expenses", href: "/spendiq/me/expenses" }, { label: e.expenseCode }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq/me" }, { label: "My Expenses", href: "/spendiq/me/expenses" }, { label: e.expenseCode }]}
         title={<>{e.expenseCode}</>}
       />
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">

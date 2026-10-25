@@ -85,7 +85,7 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
   const [profile, viewer] = await Promise.all([getApplicantProfile(id), getCurrentLmsUser()]);
   if (!profile) notFound();
   const { application, account, leads, interviews, files, offer, employee, wallet, activity, otherApplications } = profile;
-  // Compensation is HR data: only HR and the Super Admin see the offered CTC.
+  // Compensation is HR data: only HR and the Director see the offered CTC.
   const seesCompensation = !!viewer && (viewer.roles.includes("super_admin") || viewer.roles.includes("hr"));
   const lead = leads[0] ?? null;
   const messages = leads.flatMap((l) => [...l.portalMessages, ...l.internalMessages]).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -286,7 +286,7 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
 
   const offerTab = (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Section title="Offer" icon={<Handshake className="size-4" />} action={offer ? <Link href="/talentos/recruitment" className={buttonVariants({ variant: "outline", size: "sm" })}>Open in HRMS <ExternalLink className="size-3.5" /></Link> : undefined}>
+      <Section title="Offer" icon={<Handshake className="size-4" />} action={offer ? <Link href="/talentos/recruitment" className={buttonVariants({ variant: "outline", size: "sm" })}>Open in TalentOS <ExternalLink className="size-3.5" /></Link> : undefined}>
         {!offer ? (
           <Empty>No offer has been made.</Empty>
         ) : (

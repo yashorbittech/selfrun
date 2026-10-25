@@ -42,7 +42,7 @@ export default async function PlacementsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Placements" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Placements" }]}
         title={<>Placements</>}
         description={<>{rows.length} placement{rows.length === 1 ? "" : "s"} recorded.</>}
         actions={<><PlacementForm

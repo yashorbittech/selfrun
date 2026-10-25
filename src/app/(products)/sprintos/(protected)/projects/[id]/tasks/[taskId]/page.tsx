@@ -57,7 +57,7 @@ export default async function TaskDetailPage({
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "PMS", href: "/sprintos" },
+          { label: "SprintOS", href: "/sprintos" },
           { label: "Projects", href: "/sprintos/projects" },
           { label: project.name, href: `/sprintos/projects/${id}` },
           { label: "Tasks", href: `/sprintos/projects/${id}/tasks` },

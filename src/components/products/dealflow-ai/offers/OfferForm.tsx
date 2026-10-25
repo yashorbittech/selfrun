@@ -182,7 +182,7 @@ export default function OfferForm({ campaignId, offer }: { campaignId: string; o
             <Select value={form.linkedKind} onValueChange={(v) => v && setForm({ ...form, linkedKind: v as typeof form.linkedKind })}>
               <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="course">LMS course</SelectItem>
+                <SelectItem value="course">DealFlow course</SelectItem>
                 <SelectItem value="program">Program</SelectItem>
                 <SelectItem value="service">Service</SelectItem>
                 <SelectItem value="product">Product</SelectItem>

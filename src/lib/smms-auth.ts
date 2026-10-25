@@ -51,7 +51,7 @@ export interface CurrentSmmsUser {
   roles: string[];
   /** Explicit SMMS roles, for display only. */
   smmsRoles: ReturnType<typeof normalizeSmmsRoles>;
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

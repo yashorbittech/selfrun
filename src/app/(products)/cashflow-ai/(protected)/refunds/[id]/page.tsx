@@ -23,7 +23,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Refunds", href: "/cashflow-ai/refunds" }, { label: refund.refundNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Refunds", href: "/cashflow-ai/refunds" }, { label: refund.refundNumber }]}
         title={<>{refund.refundNumber}</>}
         description={<>{refund.customerName}</>}
         actions={<><RefundStatusBadge status={refund.status} /></>}

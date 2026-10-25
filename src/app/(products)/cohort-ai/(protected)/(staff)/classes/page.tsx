@@ -35,7 +35,7 @@ export default async function ClassesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Classes" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Classes" }]}
         title={<>Classes &amp; Schedule</>}
         description={<>{total} class{total === 1 ? "" : "es"} scheduled across all batches.</>}
         actions={<>{canManage && (

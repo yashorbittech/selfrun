@@ -26,9 +26,9 @@ export default async function PayablesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payables" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payables" }]}
         title={<>Accounts Payable</>}
-        description={<>Real aging computed from PRMS&apos;s open vendor bills plus FMS debit notes.</>}
+        description={<>Real aging computed from SpendIQ&apos;s open vendor bills plus CashFlow debit notes.</>}
       />
 
       <PanelListFilters>

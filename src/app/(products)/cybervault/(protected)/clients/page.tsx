@@ -59,13 +59,13 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Clients" crumbs={[{ label: "Clients" }]} description="Each client has one vault profile: credentials, URLs, documents, notes and expiry. Clients themselves are managed in the client master (PMS)." />
+      <PageHeader title="Clients" crumbs={[{ label: "Clients" }]} description="Each client has one vault profile: credentials, URLs, documents, notes and expiry. Clients themselves are managed in the client master (SprintOS)." />
       <DlmsFilterBar fields={[{ key: "q", label: "Search", type: "search", placeholder: "Client name or code…" }]} values={{ q: sp.q ?? "" }} />
       {!viewer.seesAll && <Notice tone="info">Showing the clients you have been assigned to.</Notice>}
       <SectionCard title={`${visible.length} client${visible.length === 1 ? "" : "s"}`}>
         {visible.length === 0 ? (
           <EmptyState icon={<Users className="size-5" />} title="No clients to show">
-            {viewer.seesAll ? "Add clients in the PMS client master and they appear here." : "A DLMS manager can assign clients to you under Settings."}
+            {viewer.seesAll ? "Add clients in the SprintOS client master and they appear here." : "A CyberVault manager can assign clients to you under Settings."}
           </EmptyState>
         ) : (
           <div className="overflow-x-auto">

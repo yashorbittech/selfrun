@@ -36,7 +36,7 @@ export default async function DirectoryPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-5">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos/me" }, { label: "Directory" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos/me" }, { label: "Directory" }]}
         title={<>Company Directory</>}
         description={<>Everyone at {brand.name} and how the team is organised.</>}
       />

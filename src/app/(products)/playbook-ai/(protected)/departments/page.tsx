@@ -52,7 +52,7 @@ export default async function DepartmentsPage() {
       <PanelPageHeader
         breadcrumbs={[{ label: "SOP", href: "/playbook-ai" }, { label: "Departments" }]}
         title={<>Departments</>}
-        description={<>{nodes.length} departments, each with its functions, processes and sub-processes. Departments come from HRMS and can be extended here — any future department is supported.</>}
+        description={<>{nodes.length} departments, each with its functions, processes and sub-processes. Departments come from TalentOS and can be extended here — any future department is supported.</>}
       />
       <PanelListFilters>
 <DepartmentsManager nodes={nodes} canManage={canManage} hrmsOptions={hrms.map((h) => ({ value: h._id, label: h.name }))} />

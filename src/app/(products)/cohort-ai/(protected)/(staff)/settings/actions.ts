@@ -24,7 +24,7 @@ export async function saveTmsSettingsAction(input: Record<string, unknown>): Pro
     action: "update",
     entity: "settings",
     entityId: "config",
-    entityLabel: "TMS settings",
+    entityLabel: "Cohort AI settings",
     summary: `${data.technologySuggestions.length} track suggestions · default ${data.defaultCurrency}`,
   });
   revalidatePath("/cohort-ai/settings");

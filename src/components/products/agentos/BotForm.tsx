@@ -251,7 +251,7 @@ export default function BotForm({
         </div>
       </SectionCard>
 
-      <SectionCard title="Access" description="Who sees this bot in their sidebar and can chat with it. AI Bots managers can always open every bot.">
+      <SectionCard title="Access" description="Who sees this bot in their sidebar and can chat with it. AgentOS managers can always open every bot.">
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Access mode">
           {(
             [
@@ -273,10 +273,10 @@ export default function BotForm({
         </div>
         {v.accessMode === "restricted" && (
           <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <Field label="Roles" hint="Anyone holding one of these roles (and an AI Bots role to sign in).">
+            <Field label="Roles" hint="Anyone holding one of these roles (and an AgentOS role to sign in).">
               <MultiPicker options={roleOptions} value={v.accessRoles} onChange={(x) => set("accessRoles", x)} placeholder="Search roles" />
             </Field>
-            <Field label="People" hint="Specific AI Bots users. They get a notification when added.">
+            <Field label="People" hint="Specific AgentOS users. They get a notification when added.">
               <MultiPicker options={userOptions} value={v.accessUserIds} onChange={(x) => set("accessUserIds", x)} placeholder="Search people" emptyLabel="No AI Bots users yet." />
             </Field>
           </div>

@@ -47,8 +47,8 @@ async function handlePOST(req: NextRequest) {
   const ip = signedClientIp(clientIpFrom(req.headers));
   if (ip) headers.set("x-internal-ip", ip);
 
-  const local = process.env.NODE_ENV !== "production";
-  const origin = local ? `http://127.0.0.1:${process.env.PORT || 3000}` : `https://${host}`;
+  // fetch ignores a Host override, so the call goes to the host the person is on (locally that is a *.localhost name, which resolves to this machine).
+  const origin = `${process.env.NODE_ENV !== "production" ? "http" : "https"}://${host}`;
   let upstream: Response;
   try {
     upstream = await fetch(origin + path, { method: "POST", headers, body: Buffer.from(b64uDecode(m.b ?? "")), redirect: "manual", cache: "no-store" });

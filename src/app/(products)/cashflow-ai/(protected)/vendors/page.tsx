@@ -31,9 +31,9 @@ export default async function VendorsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Vendors" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Vendors" }]}
         title={<>Vendors</>}
-        description={<>Financial view over PRMS&apos;s vendor records — {result.total} vendor{result.total === 1 ? "" : "s"}.</>}
+        description={<>Financial view over SpendIQ&apos;s vendor records — {result.total} vendor{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -73,12 +73,12 @@ export default async function VendorsPage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No vendors found — vendor records are created in PRMS."
+        emptyLabel="No vendors found — vendor records are created in SpendIQ."
       />
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Building2 className="size-3.5" />
-        Vendor records are owned by PRMS. Create or edit a vendor at{" "}
+        Vendor records are owned by SpendIQ. Create or edit a vendor at{" "}
         <Link href="/spendiq/vendors" className="text-primary hover:underline">/spendiq/vendors</Link>.
       </p>
     </div>

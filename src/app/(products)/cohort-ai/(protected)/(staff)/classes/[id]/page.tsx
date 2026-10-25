@@ -43,7 +43,7 @@ export default async function ClassDetailPage({ params }: { params: Promise<{ id
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Classes", href: "/cohort-ai/classes" }, { label: c.topic }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Classes", href: "/cohort-ai/classes" }, { label: c.topic }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{c.topic}<ClassStatusBadge status={c.status} /></span></>}
         description={<>{batch ? (
               <Link href={`/cohort-ai/batches/${batch._id}`} className="text-primary hover:underline">{batch.name}</Link>

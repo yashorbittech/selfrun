@@ -61,8 +61,8 @@ export default async function LpmsSettingsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Settings" }]}
-        title={<>LPMS Settings</>}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Settings" }]}
+        title={<>ContractFlow Settings</>}
         description={<>Configure your Legal &amp; Document Automation system.</>}
       />
 

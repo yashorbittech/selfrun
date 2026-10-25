@@ -167,7 +167,7 @@ export default async function LmsDashboardPage({
     <div className="relative space-y-6">
       <DashboardAutoRefresh />
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "LMS", href: "/dealflow-ai" }, { label: "Dashboard & Analytics" }]}
+        breadcrumbs={[{ label: "DealFlow", href: "/dealflow-ai" }, { label: "Dashboard & Analytics" }]}
         title="Lead & Campaign Analytics"
         description="Measure lead pipeline health, campaign spend, ROI and conversion performance from one unified view."
         actions={

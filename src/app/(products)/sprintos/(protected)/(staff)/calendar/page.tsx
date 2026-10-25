@@ -24,7 +24,7 @@ export default async function PmsCalendarPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Calendar" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Calendar" }]}
         title={<>Calendar</>}
         description={<>Task due dates, milestones and project deadlines across the portfolio.</>}
       />

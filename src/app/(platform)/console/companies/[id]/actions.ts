@@ -5,6 +5,7 @@ import { checkPlatformPermission } from "@/lib/platform/console/access";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 import { getCompany } from "@/lib/platform/tenancy/companies";
 import { setCompanyStatus, type SetStatusResult } from "@/lib/platform/console/companies";
+import { closePendingOnReactivate } from "@/lib/platform/reactivation";
 import { extendTrial } from "@/lib/platform/billing/trials";
 
 export async function setCompanyStatusAction(companyId: string, status: string): Promise<SetStatusResult> {
@@ -15,6 +16,7 @@ export async function setCompanyStatusAction(companyId: string, status: string):
   const before = await getCompany(id);
   const res = await setCompanyStatus(id, status, auth.user.id);
   if (res.ok) {
+    if (status === "active") await closePendingOnReactivate(id, auth.user.id);
     await recordPlatformAudit({
       actorId: auth.user.id,
       action: status === "suspended" ? "company.suspend" : "company.activate",

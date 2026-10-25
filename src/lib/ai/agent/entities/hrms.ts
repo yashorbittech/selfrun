@@ -380,7 +380,7 @@ export const HRMS_ENTITIES: EntityDef[] = [
   { key: "hrms.salary_payout", panel: "hrms", label: "Salary payout", description: "Salary transfers per payslip: pending, initiated, paid, failed.", collection: "hrms_salary_payouts", idType: "string", read: "staff", allowRead: canRunPayroll },
   { key: "hrms.salary_revision", panel: "hrms", label: "Salary revision", description: "History of salary structure changes.", collection: "hrms_salary_revisions", idType: "string", read: "staff", allowRead: canManagePayroll },
   { key: "hrms.payroll_profile", panel: "hrms", label: "Payroll profile", description: "An employee's salary structure (basic, HRA, allowances, deductions).", collection: "hrms_payroll_profiles", read: "staff", allowRead: canManagePayroll },
-  { key: "hrms.audit", panel: "hrms", label: "Audit log", description: "Who changed what in HRMS.", collection: "hrms_audit_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
+  { key: "hrms.audit", panel: "hrms", label: "Audit log", description: "Who changed what in TalentOS.", collection: "hrms_audit_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
 ];
 
 // ── Actions ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────

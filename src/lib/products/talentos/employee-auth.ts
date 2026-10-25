@@ -26,6 +26,8 @@ interface LmsUserDoc {
   roles?: string[];
   employeeId?: string | null;
   mustChangePassword?: boolean;
+  name?: string;
+  status?: string;
 }
 
 export function generateTempPassword(): string {
@@ -98,18 +100,30 @@ export async function createEmployeeLogin(
   if (seatBlock) return { ok: false, error: seatBlock };
 
   const newId = new ObjectId();
+  // HR gives the login the standard "Team Member" designation (their access follows it); the Director can change it on the People page.
+  const { ensureDesignations, listCustomRoles, computeEffective, getCustomRoles } = await import("@/lib/products/commandos/custom-roles");
+  await ensureDesignations();
+  const teamMember = (await listCustomRoles()).find((r) => r.builtinKey === "team-member");
+  const eff = teamMember ? computeEffective([], {}, await getCustomRoles([teamMember.id])) : { roles: ["employee"], overrides: {} };
   await col.insertOne({
     _id: newId,
     email,
+    name: `${employee.firstName} ${employee.lastName}`.trim(),
     passwordHash: hashPassword(tempPassword),
     failedLoginAttempts: 0,
     lockedUntil: null,
     createdAt: new Date(),
     lastLoginAt: null,
-    roles: ["employee"],
+    roles: eff.roles.includes("employee") ? eff.roles : [...eff.roles, "employee"],
+    permissionOverrides: eff.overrides,
+    manualRoles: [],
+    manualOverrides: {},
+    customRoleIds: teamMember ? [teamMember.id] : [],
+    designationId: teamMember?.id ?? null,
+    status: "active",
     employeeId,
     mustChangePassword: true,
-  });
+  } as never);
   {
     const overSeats = await rollbackIfOverSeats(newId);
     if (overSeats) return { ok: false, error: overSeats };
@@ -141,7 +155,8 @@ export async function revokeEmployeeLogin(employeeId: string): Promise<{ ok: boo
   const col = await users();
   const doc = await col.findOne({ employeeId, roles: "employee" });
   if (!doc) return { ok: false, error: "No login for this employee." };
-  // Delete outright — the account exists only for portal access.
+  // Delete outright — the account exists only for portal access. Every sign-in it had ends first.
+  await (await import("@/lib/cross-module-sso")).revokeSessionsOf(doc._id, "login_removed");
   await col.deleteOne({ _id: doc._id });
   const db = await getDb();
   await db.collection("hrms_sessions").deleteMany({ adminId: doc._id });

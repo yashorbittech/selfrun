@@ -15,7 +15,7 @@
  * itself (job_applicant / intern / trainee) is what lets them take tests.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -30,23 +30,23 @@ export type OtsRole = (typeof OTS_ROLES)[number];
 
 export const OTS_ROLE_META: Record<OtsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Every Online Test System operation, including settings, certificate revocation and the activity log.",
   },
   ots_admin: {
-    label: "OTS Admin",
-    description: "Everything a manager can do, plus deleting tests, revoking certificates and editing OTS settings.",
+    label: "EvalIQ Admin",
+    description: "Everything a manager can do, plus deleting tests, revoking certificates and editing EvalIQ settings.",
   },
   ots_manager: {
-    label: "OTS Manager",
+    label: "EvalIQ Manager",
     description: "Publishes and archives tests, assigns them to departments, roles, applicants and batches, overrides marks, publishes results and exports reports.",
   },
   ots_author: {
-    label: "OTS Author",
+    label: "EvalIQ Author",
     description: "Builds tests and the question bank (create, edit, import, export). Cannot publish, assign or delete.",
   },
   ots_evaluator: {
-    label: "OTS Evaluator",
+    label: "EvalIQ Evaluator",
     description: "Reads tests and questions, marks subjective answers and reads reports.",
   },
   ots_candidate: {
@@ -88,7 +88,7 @@ export const OTS_PERMISSIONS = [
 ] as const;
 export type OtsPermission = (typeof OTS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const OTS_PERMISSION_KEY: Record<OtsPermission, string> = {
   VIEW_TESTS: "ots.canViewTests",
   CREATE_TEST: "ots.canCreateTest",
@@ -149,8 +149,8 @@ export const OTS_PERMISSION_META: Record<OtsPermission, { label: string; descrip
   TAKE_TEST: { label: "Take tests", description: "Start and submit tests assigned to them." },
   VIEW_RESULTS: { label: "View own results", description: "See their own results, as far as each test's result visibility allows." },
   VIEW_CERTIFICATES: { label: "View own certificates", description: "View and download their own certificates." },
-  VIEW_AUDIT_LOG: { label: "View activity log", description: "Read the OTS activity log, including exam security events." },
-  MANAGE_SETTINGS: { label: "Manage settings & categories", description: "Edit OTS settings and the test / question categories." },
+  VIEW_AUDIT_LOG: { label: "View activity log", description: "Read the EvalIQ activity log, including exam security events." },
+  MANAGE_SETTINGS: { label: "Manage settings & categories", description: "Edit EvalIQ settings and the test / question categories." },
 };
 
 const CANDIDATE: OtsPermission[] = ["TAKE_TEST", "VIEW_RESULTS", "VIEW_CERTIFICATES", "VERIFY_CERTIFICATE"];

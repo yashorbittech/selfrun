@@ -52,7 +52,7 @@ function day(value: string | undefined, endOfDay: boolean): Date | undefined {
  * Company → Audit log: the one place for "who did what, and when".
  *
  *  - Workspace events: what the event bus recorded (leads, projects, invoices,
- *    imports …, kept 180 days). Company Super Admin only, as before.
+ *    imports …, kept 180 days). Company Director only, as before.
  *  - Product activity: the products' own audit trails (Procurement, Projects, Team
  *    Chat, Training, HR, External Portal, Online Tests) with their filters and
  *    CSV export. Needs the Audit log permission, as before.

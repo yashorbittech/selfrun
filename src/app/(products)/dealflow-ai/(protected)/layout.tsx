@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { panelUnread } from "@/lib/notify";
 import { runLmsSweep } from "@/lib/notify/sweeps";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
 
 export default async function ProtectedLmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("lms");
   const lmsUser = await getCurrentLmsUser();
   if (!lmsUser) redirect("/dealflow-ai/login");

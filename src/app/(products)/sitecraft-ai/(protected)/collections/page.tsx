@@ -13,7 +13,7 @@ import CmsPageHeader from "@/components/products/sitecraft-ai/ui/CmsPageHeader";
 const ICONS: Record<CollectionKey, typeof Newspaper> = { blog: Newspaper, jobs: Briefcase, engagement: UserPlus, products: Boxes };
 const USED_BY: Record<CollectionKey, string> = {
   blog: "Blog index, article pages, related/next links, sitemap and article SEO.",
-  jobs: "Careers job board, job pages, the apply form's role list, LMS applicant filters, sitemap and job-posting SEO.",
+  jobs: "Careers job board, job pages, the apply form's role list, DealFlow applicant filters, sitemap and job-posting SEO.",
   engagement: "Resource Augmentation cards and pages, and the homepage hiring section.",
   products: "The Our SaaS Product catalogue, product modals and flagship showcases.",
 };

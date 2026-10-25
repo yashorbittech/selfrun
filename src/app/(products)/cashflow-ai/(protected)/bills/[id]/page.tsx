@@ -29,7 +29,7 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Bills", href: "/cashflow-ai/bills" }, { label: bill.invoiceNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Bills", href: "/cashflow-ai/bills" }, { label: bill.invoiceNumber }]}
         title={<>{bill.invoiceNumber}</>}
         description={<>{bill.vendorName} · {formatMoney(bill.totalAmount, bill.currency)}</>}
         actions={<><div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default async function BillDetailPage({ params }: { params: Promise<{ id:
         </GlassCard>
       )}
 
-      <p className="text-xs text-muted-foreground">Created {formatDateTime(bill.createdAt)}. Bill data is owned by PRMS.</p>
+      <p className="text-xs text-muted-foreground">Created {formatDateTime(bill.createdAt)}. Bill data is owned by SpendIQ.</p>
     </div>
   );
 }

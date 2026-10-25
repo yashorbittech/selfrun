@@ -37,7 +37,7 @@ export default async function ReceiptsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payment Receipts" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payment Receipts" }]}
         title={<>Payment Receipts</>}
         description={<>{result.total} receipt{result.total === 1 ? "" : "s"} recorded.</>}
         actions={<>{canManage && (

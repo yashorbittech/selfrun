@@ -21,10 +21,10 @@ export default async function TaxConfigPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Tax Configuration" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Tax Configuration" }]}
         title={<>Tax Configuration</>}
         description={<>A named list of tax rates for entering taxable transactions and invoices — not a GST/TDS compliance
-          engine; that stays PRMS&apos;s own procurement-specific territory.</>}
+          engine; that stays SpendIQ&apos;s own procurement-specific territory.</>}
       />
 
       {canManage && (

@@ -19,7 +19,7 @@ export interface SheetSpec {
 /** Builds a formatted .xlsx workbook as a Node Buffer. Mirrors `src/lib/sprintos/xlsx.ts`. */
 export async function buildWorkbook(sheets: SheetSpec[]): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = `${(await getCompanyBrand()).name} TMS`;
+  wb.creator = `${(await getCompanyBrand()).name} Cohort AI`;
   wb.created = new Date();
 
   for (const spec of sheets) {

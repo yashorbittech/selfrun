@@ -178,7 +178,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.link_student", panel: "lms", label: "Link a managed lead to a TMS student", description: "So batch, attendance and assignments show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
+    key: "lms.link_student", panel: "lms", label: "Link a managed lead to a Cohort AI student", description: "So batch, attendance and assignments show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "studentId", label: "Student id (tms.student)", type: "ref", ref: "tms.student", required: true }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));
@@ -192,7 +192,7 @@ export const LMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "lms.link_client", panel: "lms", label: "Link a managed lead to a PMS client (and project)", description: "So milestones, meetings and invoices show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
+    key: "lms.link_client", panel: "lms", label: "Link a managed lead to a SprintOS client (and project)", description: "So milestones, meetings and invoices show in the lead's portal.", level: "staff", allow: L("EDIT_LEADS"),
     params: [{ key: "leadId", label: "Managed lead id", type: "ref", ref: "lms.managed_lead", required: true }, { key: "clientId", label: "Client id (pms.client)", type: "ref", ref: "pms.client", required: true }, { key: "projectId", label: "Project id (pms.project, optional)", type: "ref", ref: "pms.project" }],
     run: async (v, u) => {
       const lead = await getLeadRecord(String(v.leadId));

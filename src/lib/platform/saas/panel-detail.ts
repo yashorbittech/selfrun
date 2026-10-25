@@ -61,7 +61,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { who: "HR team", does: "Run recruitment, employee records, leave rules and payroll." },
       { who: "Managers", does: "Approve leave and see their team's attendance." },
       { who: "Employees", does: "Check in, request leave, view payslips and documents themselves." },
-      { who: "Super Admin", does: "Set permissions and see HR analytics for the whole business." },
+      { who: "Director", does: "Set permissions and see HR analytics for the whole business." },
     ],
     workflow: [
       { title: "Hire", text: "Applications move through the hiring steps; an accepted offer creates the employee record." },

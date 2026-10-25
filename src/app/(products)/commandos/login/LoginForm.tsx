@@ -28,18 +28,25 @@ export default function LoginForm({ next = null, demo = false }: { next?: string
   const [dismissed, setDismissed] = useState<string | null>(null);
   const [takeoverError, setTakeoverError] = useState<string | null>(null);
   const [taking, startTaking] = useTransition();
+  const [goingTo, setGoingTo] = useState<string | null>(null);
   const conflict = state?.conflict && state.conflict.ticket !== dismissed ? state.conflict : null;
   const confirmTakeover = () => {
     if (!conflict) return;
     setTakeoverError(null);
     startTaking(async () => {
       const r = await hubTakeoverAction(conflict.ticket, next);
-      if (r?.error) { setTakeoverError(r.error); }
+      if (r?.error) setTakeoverError(r.error);
+      else if (r?.redirectTo) setGoingTo(r.redirectTo);
     });
   };
   const codeId = useId();
   const emailId = useId();
   const passwordId = useId();
+
+  const target = goingTo ?? state?.redirectTo ?? null;
+  useEffect(() => {
+    if (target) window.location.assign(target);
+  }, [target]);
 
   // Auto-submit once fields are filled for demo mode
   useEffect(() => {
@@ -98,10 +105,22 @@ export default function LoginForm({ next = null, demo = false }: { next?: string
             </div>
             {state?.needsCode && (
               <div className="space-y-1.5">
-                <Label htmlFor={codeId}>Authentication code</Label>
-                <Input id={codeId} name="code" inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="6-digit code or recovery code" maxLength={20} required />
-                <p className="text-xs text-muted-foreground">Open your authenticator app and enter the current code. Lost your phone? Use one of your recovery codes.</p>
+                <Label htmlFor={codeId}>{state.method === "email" ? "Code from your email" : "Authentication code"}</Label>
+                <Input id={codeId} name="code" inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder={state.method === "email" ? "6-digit code" : "6-digit code or recovery code"} maxLength={20} required />
+                {state.method === "email" ? (
+                  <p className="text-xs text-muted-foreground">
+                    Enter the code we emailed{state.hint ? ` to ${state.hint}` : ""}. Nothing there?{" "}
+                    <button type="submit" name="resend" value="1" formNoValidate className="font-medium text-primary hover:underline">Send a new code</button>
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Open your authenticator app and enter the current code. Lost your phone? Use one of your recovery codes.</p>
+                )}
               </div>
+            )}
+            {state?.info && (
+              <p role="status" className="rounded-lg bg-primary/[0.07] px-3 py-2 text-sm text-foreground">
+                {state.info}
+              </p>
             )}
             {state?.error && (
               <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -109,8 +128,8 @@ export default function LoginForm({ next = null, demo = false }: { next?: string
               </p>
             )}
             <p className="text-right text-sm"><Link href="/commandos/forgot-password" className="text-muted-foreground hover:text-primary hover:underline">Forgot your password?</Link></p>
-            <Button type="submit" className="w-full" disabled={pending}>
-              {pending ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
+            <Button type="submit" className="w-full" disabled={pending || !!target}>
+              {pending || target ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
             </Button>
           </form>
         </CardContent>

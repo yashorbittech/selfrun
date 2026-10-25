@@ -51,7 +51,7 @@ export interface CurrentAibotsUser {
   roles: string[];
   /** Explicit AIBOTS roles, for display only. */
   aibotsRoles: ReturnType<typeof normalizeAibotsRoles>;
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

@@ -77,7 +77,7 @@ export default async function StaffResultPage({ params }: { params: Promise<{ at
                 ["Submitted", att.submittedAt ? formatDateTime(att.submittedAt) : "—"],
                 ["Submission", att.submitReason ?? "—"],
                 ["Deadline", att.deadlineAt ? formatDateTime(att.deadlineAt) : "None"],
-                ["Channel", att.client.channel === "portal" ? "External Portal" : "OTS product"],
+                ["Channel", att.client.channel === "portal" ? "External Portal" : "EvalIQ product"],
                 ["Start IP", att.client.startIp ?? "—"],
                 ["Last IP", att.client.lastIp ?? "—"],
                 ["Violations", String(att.violations)],

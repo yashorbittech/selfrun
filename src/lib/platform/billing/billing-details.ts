@@ -138,4 +138,6 @@ export interface PlanOption {
   /** Null when the plan doesn't offer that billing cycle. */
   priceMonthly: number | null;
   priceYearly: number | null;
+  /** What the plan includes, for the order summary (users, storage, AI …). */
+  perks?: { label: string; value: string }[];
 }

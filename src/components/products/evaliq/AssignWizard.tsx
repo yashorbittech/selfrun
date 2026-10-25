@@ -125,7 +125,7 @@ export default function AssignWizard({ tests, directory, initialTestId, initialT
             <CardTitle className="text-sm font-bold">2 · Who</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-[11px] text-muted-foreground">People are read live from HRMS (employees, departments, roles, teams), Careers (applicants) and TMS (students, batches, courses). Combine as many targets as you like — each person is assigned once.</p>
+            <p className="text-[11px] text-muted-foreground">People are read live from TalentOS (employees, departments, roles, teams), Careers (applicants) and Cohort AI (students, batches, courses). Combine as many targets as you like — each person is assigned once.</p>
             {targets.map((t, i) => (
               <div key={i} className="space-y-2 rounded-xl border border-border/50 p-3">
                 <div className="flex items-center gap-2">
@@ -272,7 +272,7 @@ export default function AssignWizard({ tests, directory, initialTestId, initialT
                 <Button type="button" className="w-full" onClick={assign} disabled={assigning || toAssign === 0}>
                   {assigning ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />} {`Assign to ${toAssign} ${toAssign === 1 ? "person" : "people"}`}
                 </Button>
-                <p className="text-[11px] text-muted-foreground">Applicants and students see the test in their Portal (once they have a portal account); employees and staff in OTS → My Tests.</p>
+                <p className="text-[11px] text-muted-foreground">Applicants and students see the test in their Portal (once they have a portal account); employees and staff in EvalIQ → My Tests.</p>
               </>
             )}
           </CardContent>

@@ -22,7 +22,7 @@ function downloadCodes(codes: string[]) {
 }
 
 /** Turn two-step sign-in on or off: scan the QR code, confirm one code, keep the recovery codes. */
-export default function TwoFactorCard({ status }: { status: Status }) {
+export default function TwoFactorCard({ status, onChange }: { status: Status; onChange?: (enabled: boolean) => void }) {
   const [enabled, setEnabled] = useState(status.enabled);
   const [setup, setSetup] = useState<{ secret: string; qr: string } | null>(null);
   const [recovery, setRecovery] = useState<string[] | null>(null);
@@ -53,7 +53,7 @@ export default function TwoFactorCard({ status }: { status: Status }) {
         {!asking ? (
           <Button type="button" variant="outline" size="sm" onClick={() => setAsking(true)}>Turn off</Button>
         ) : (
-          <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); setError(null); start(async () => { const r = await disableTwoFactorAction(code); if (r.ok) { setEnabled(false); setAsking(false); setCode(""); } else setError(r.error); }); }}>
+          <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); setError(null); start(async () => { const r = await disableTwoFactorAction(code); if (r.ok) { setEnabled(false); setAsking(false); setCode(""); onChange?.(false); } else setError(r.error); }); }}>
             <Input value={code} onChange={(e) => setCode(e.target.value)} inputMode="numeric" autoComplete="one-time-code" placeholder="Code or recovery code" className="w-56" aria-label="Authentication code" />
             <Button type="submit" size="sm" disabled={pending || !code.trim()}>Confirm turn off</Button>
           </form>
@@ -65,7 +65,7 @@ export default function TwoFactorCard({ status }: { status: Status }) {
 
   if (setup) {
     return (
-      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); setError(null); start(async () => { const r = await confirmTwoFactorAction(code); if (r.ok) { setRecovery(r.recovery); setEnabled(true); setSetup(null); setCode(""); } else setError(r.error); }); }}>
+      <form className="space-y-3" onSubmit={(e) => { e.preventDefault(); setError(null); start(async () => { const r = await confirmTwoFactorAction(code); if (r.ok) { setRecovery(r.recovery); setEnabled(true); setSetup(null); setCode(""); onChange?.(true); } else setError(r.error); }); }}>
         <p className="text-sm text-muted-foreground">1. Scan this code with an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password…). 2. Enter the 6-digit code it shows.</p>
         <div className="flex flex-wrap items-start gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}

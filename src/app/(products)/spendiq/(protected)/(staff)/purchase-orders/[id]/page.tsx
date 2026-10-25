@@ -47,7 +47,7 @@ export default async function PurchaseOrderDetailPage({ params }: { params: Prom
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Purchase Orders", href: "/spendiq/purchase-orders" }, { label: p.poNumber }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Purchase Orders", href: "/spendiq/purchase-orders" }, { label: p.poNumber }]}
         title={<>{p.poNumber}</>}
         description={<>{p.vendorName} · <PoStatusBadge status={p.status} /> · {formatMoney(p.totalAmount, p.currency)}</>}
         actions={<>{canManage && p.status === "draft" && (

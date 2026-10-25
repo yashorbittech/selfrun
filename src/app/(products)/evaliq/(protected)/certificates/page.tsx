@@ -39,7 +39,7 @@ export default async function CertificatesPage({ searchParams }: { searchParams:
       {verifier && (
         <SectionCard title="Verify a certificate" description="Look up by certificate ID or verification code.">
           <form className="flex flex-wrap gap-2" action="/evaliq/certificates">
-            <input name="verify" defaultValue={sp.verify ?? ""} placeholder="OTS-2026-0001 or verification code" className="h-9 min-w-64 flex-1 rounded-xl border border-border/60 bg-background px-3 text-sm" aria-label="Certificate ID or code" />
+            <input name="verify" defaultValue={sp.verify ?? ""} placeholder="EvalIQ-2026-0001 or verification code" className="h-9 min-w-64 flex-1 rounded-xl border border-border/60 bg-background px-3 text-sm" aria-label="Certificate ID or code" />
             <Button type="submit" size="sm">
               <SearchCheck className="size-3.5" /> Verify
             </Button>

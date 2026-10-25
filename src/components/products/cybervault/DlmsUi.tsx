@@ -12,7 +12,7 @@ import type { ExpiryState, RecordStatus, Scope } from "@/lib/products/cybervault
 /** Shared, server-renderable pieces of the DLMS UI — the same visual language as SOP/SEO/FMS. */
 
 export function PageHeader({ title, description, crumbs, actions }: { title: ReactNode; description?: ReactNode; crumbs: { label: string; href?: string }[]; actions?: ReactNode }) {
-  return <PanelPageHeader breadcrumbs={[{ label: "Digi Locker", href: "/cybervault" }, ...crumbs]} title={title} description={description} actions={actions} />;
+  return <PanelPageHeader breadcrumbs={[{ label: "CyberVault", href: "/cybervault" }, ...crumbs]} title={title} description={description} actions={actions} />;
 }
 
 export function SectionCard({ title, description, children, className, action }: { title: ReactNode; description?: ReactNode; children: ReactNode; className?: string; action?: ReactNode }) {

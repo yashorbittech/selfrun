@@ -100,7 +100,7 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
   // ── AI & Voice ───────────────────────────────────────────────────────
   {
     key: "openai", name: "OpenAI", group: "ai", testable: true, docsUrl: "https://platform.openai.com/api-keys",
-    description: "Your OpenAI key powers every AI feature in the workspace: the website chatbot, AI Bots, Intelligence, social-content generation and the business assistant. AI usage is billed to your OpenAI account.",
+    description: "Your OpenAI key powers every AI feature in the workspace: the website chatbot, AgentOS, Intelligence, social-content generation and the business assistant. AI usage is billed to your OpenAI account.",
     usedBy: ["AI Bots", "Website chatbot (LMS)", "Intelligence", "SMMS content generator", "Workspace assistant", "Knowledge bases"],
     fields: [secret("apiKey", "API key", "Starts with sk-"), text("organization", "Organization ID", "org_…", "Optional.", false), text("project", "Project ID", "proj_…", "Optional.", false)],
   },

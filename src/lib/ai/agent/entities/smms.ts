@@ -33,7 +33,7 @@ export const SMMS_ENTITIES: EntityDef[] = [
   { key: "smms.post", panel: "smms", label: "Social post", description: "Organic posts with a version per platform: topic, copy, schedule, approval and publish state.", collection: "smms_posts", idType: "string", baseFilter: soft, titleField: "title", search: ["title", "topic", "idea"], read: "staff", allowRead: can("VIEW_CAMPAIGNS") },
   { key: "smms.media", panel: "smms", label: "Media", description: "Images and videos in the media library.", collection: "smms_media", idType: "string", baseFilter: soft, titleField: "name", search: ["name"], read: "staff", allowRead: can("MANAGE_MEDIA") },
   { key: "smms.generation", panel: "smms", label: "AI generation", description: "History of AI generations and saved versions.", collection: "smms_generations", idType: "string", read: "staff", allowRead: can("VIEW_CAMPAIGNS") },
-  { key: "smms.activity", panel: "smms", label: "Audit log", description: "Who changed what in SMMS.", collection: "smms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: can("VIEW_AUDIT_LOG") },
+  { key: "smms.activity", panel: "smms", label: "Audit log", description: "Who changed what in ViralPulse.", collection: "smms_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: can("VIEW_AUDIT_LOG") },
 ];
 
 export const SMMS_ACTIONS: ActionDef[] = [

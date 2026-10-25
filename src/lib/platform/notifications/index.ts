@@ -1,3 +1,4 @@
+import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -59,13 +60,13 @@ async function resolveRecipients(target: NotifyTarget): Promise<string[]> {
   const users = (await getDb()).collection<{ _id: ObjectId; roles?: string[] }>("admin_users");
   if ("role" in target) {
     if (!target.role) return [];
-    const rows = await users.find({ roles: target.role }, { projection: { _id: 1 } }).limit(MAX_RECIPIENTS).toArray();
+    const rows = await users.find({ roles: target.role, status: { $nin: BLOCKED_STATUSES } }, { projection: { _id: 1 } }).limit(MAX_RECIPIENTS).toArray();
     return rows.map((r) => String(r._id));
   }
   const ids = [...new Set(("userIds" in target ? target.userIds : [target.userId]).filter((id) => ObjectId.isValid(id)))].slice(0, MAX_RECIPIENTS);
   if (ids.length === 0) return [];
   // Only real accounts of this company (the scoped collection can't see anyone else's).
-  const rows = await users.find({ _id: { $in: ids.map((id) => new ObjectId(id)) } }, { projection: { _id: 1 } }).toArray();
+  const rows = await users.find({ _id: { $in: ids.map((id) => new ObjectId(id)) }, status: { $nin: BLOCKED_STATUSES } }, { projection: { _id: 1 } }).toArray();
   return rows.map((r) => String(r._id));
 }
 

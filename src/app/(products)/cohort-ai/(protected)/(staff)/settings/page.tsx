@@ -15,7 +15,7 @@ export default async function TmsSettingsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Settings" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Settings" }]}
         title={<>Settings</>}
         description={<>Track suggestions, currency, certificate numbering and institute identity.</>}
       />

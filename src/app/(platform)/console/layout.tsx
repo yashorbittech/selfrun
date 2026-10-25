@@ -17,13 +17,15 @@ export const metadata: Metadata = { title: { default: "Platform Console", templa
 /**
  * The Platform Console — the single control centre for the SaaS platform
  * (tenants, plans, billing, tax, analytics, platform administration). Same
- * shell as every other product. Platform owner company accounts with a platform role (or legacy Super Admins) only; on any other
+ * shell as every other product. Platform owner company accounts with a platform role (or legacy Directors) only; on any other
  * company's host it doesn't exist (404). Pages and actions re-check access.
  */
 export default async function PlatformPanelLayout({ children }: { children: React.ReactNode }) {
   const user = await requirePlatformAccess();
-  // Everyone who can use the Platform Console must use two-step sign-in.
-  if (await mustSetUpTwoFactor({ id: user.id }, { alwaysPrivileged: true })) redirect("/commandos/two-factor-setup");
+  // Two-step sign-in is asked of Platform Console people like everyone else (they can skip for 72 hours); mandatory only when the operator sets REQUIRE_PRIVILEGED_MFA=1.
+  const tfDue = await mustSetUpTwoFactor({ id: user.id, roles: user.roles }, { alwaysPrivileged: true });
+  console.error("[console-dbg] layout twoFactorDue=", tfDue);
+  if (tfDue) redirect("/commandos/two-factor-setup");
   const flags: PlatformNavFlags = {
     pendingApprovals: can(user, "signups.read") ? await countAwaitingApproval() : 0,
     unreadNotifications: await unreadCount(user.id).catch(() => 0),

@@ -48,9 +48,15 @@ export async function recordUsage(metric: UsageMetric, amount: number, date = ne
   if (!Number.isFinite(amount) || amount <= 0) return;
   if (ctx) await recordUsageEvent(metric, amount, ctx, date);
   const db = await getDb();
-  await db
+  const add = Math.round(amount);
+  const row = await db
     .collection<{ _id: string; metric: UsageMetric; period: string; total: number; updatedAt: Date }>(COLLECTION)
-    .updateOne({ _id: `${metric}:${usagePeriod(date)}` }, { $inc: { total: Math.round(amount) }, $set: { metric, period: usagePeriod(date), updatedAt: new Date() } }, { upsert: true });
+    .findOneAndUpdate({ _id: `${metric}:${usagePeriod(date)}` }, { $inc: { total: add }, $set: { metric, period: usagePeriod(date), updatedAt: new Date() } }, { upsert: true, returnDocument: "after" });
+  // Whatever went beyond the plan's own monthly allowance is paid from top-up credits (see credits-burn.ts). Only for the current month.
+  if (row && usagePeriod(date) === usagePeriod()) {
+    const { burnAfterUsage } = await import("@/lib/platform/billing/credits-burn");
+    await burnAfterUsage(metric, row.total - add, row.total);
+  }
 }
 
 export async function getUsage(metric: UsageMetric, period = usagePeriod()): Promise<number> {

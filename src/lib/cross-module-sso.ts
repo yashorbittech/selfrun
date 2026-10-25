@@ -45,7 +45,7 @@ import { loginSessions, LOGIN_COOKIE } from "@/lib/security/store";
  * enough — no second login anywhere else. This grants nothing new: it only
  * saves a second login for access the account already has. Which roles an
  * account holds — and therefore which products get provisioned — is entirely
- * controlled by the Super Admin at `/commandos/users`.
+ * controlled by the Director at `/commandos/users`.
  *
  * `destroySessionsEverywhere` is the single-logout counterpart: logging out
  * of ANY one product destroys every session for that account, in every product,
@@ -228,6 +228,17 @@ export async function destroySessionsEverywhere(adminId: ObjectId): Promise<void
   // The Security page's list: every sign-in of this account is over.
   await (await loginSessions()).updateMany({ adminId: adminId.toString(), revokedAt: null }, { $set: { revokedAt: new Date(), revokedReason: "signed_out_everywhere" } }).catch(() => {});
   await clearAllSessionCookies();
+}
+
+/**
+ * Ends every sign-in of ANOTHER person (their status changed, their access was removed): every product session is deleted and the
+ * Security page's list shows them as ended. Unlike `destroySessionsEverywhere` it never touches the cookies of the browser making the
+ * request, which belong to whoever is making the change.
+ */
+export async function revokeSessionsOf(adminId: ObjectId, reason: string): Promise<void> {
+  const db = await getDb();
+  await Promise.all(sessionCollectionNames().map((name) => db.collection(name).deleteMany({ adminId })));
+  await (await loginSessions()).updateMany({ adminId: adminId.toString(), revokedAt: null }, { $set: { revokedAt: new Date(), revokedReason: reason } }).catch(() => {});
 }
 
 /** Every Mongo collection that holds product sessions (the LMS and admin ones share one). */

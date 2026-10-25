@@ -17,7 +17,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Reports" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Reports" }]}
         title={<>Reports</>}
         description={<>Export training data to CSV, Excel or PDF.</>}
       />

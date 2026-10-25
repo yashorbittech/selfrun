@@ -38,7 +38,7 @@ export default async function AssetFinanceDetailPage({ params }: { params: Promi
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Asset Register", href: "/cashflow-ai/assets" }, { label: asset.assetCode }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Asset Register", href: "/cashflow-ai/assets" }, { label: asset.assetCode }]}
         title={<>{asset.name}</>}
         description={<>{asset.assetCode} · {asset.category}</>}
         actions={<><AssetStatusBadge status={asset.status} /></>}
@@ -162,7 +162,7 @@ export default async function AssetFinanceDetailPage({ params }: { params: Promi
         </GlassCard>
       )}
 
-      <p className="text-xs text-muted-foreground">Created {formatDateTime(asset.createdAt)}. Asset data is owned by PRMS.</p>
+      <p className="text-xs text-muted-foreground">Created {formatDateTime(asset.createdAt)}. Asset data is owned by SpendIQ.</p>
     </div>
   );
 }

@@ -75,7 +75,7 @@ export default async function LeavePage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Leave" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Leave" }]}
         title={<>Leave</>}
         description={<>Requests, balances and the leave calendar.</>}
         actions={<>{canDecide && <FileLeaveSheet employees={scopedEmployees} leaveTypes={typeOpts} />}</>}

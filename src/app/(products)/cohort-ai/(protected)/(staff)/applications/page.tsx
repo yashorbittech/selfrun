@@ -40,7 +40,7 @@ export default async function ApplicationsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Applications" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Applications" }]}
         title={<>Applications</>}
         description={<>{total} application{total === 1 ? "" : "s"} in the pipeline.</>}
         actions={<><div className="flex items-center gap-2">

@@ -30,7 +30,7 @@ export default async function TaxReportPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Tax" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Tax" }]}
         title={<>Tax Report</>}
         description={<>Tax collected on income vs. tax paid on expenses, from settled transactions&apos; <code>taxAmount</code>.
           A single flat figure per transaction, not a CGST/SGST/IGST breakdown.</>}

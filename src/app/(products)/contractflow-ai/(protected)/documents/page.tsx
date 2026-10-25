@@ -49,7 +49,7 @@ export default async function LpmsDocumentsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Document Library" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Document Library" }]}
         title={<>Document Library</>}
         description={<>{total} document{total !== 1 ? "s" : ""} in your workspace</>}
         actions={<>{canCreate && (

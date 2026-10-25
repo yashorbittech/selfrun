@@ -28,7 +28,7 @@ export default async function GeneralLedgerPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "General Ledger" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "General Ledger" }]}
         title={<>General Ledger</>}
         description={<>Per-account journal-line detail with a running balance, computed live from posted entries.</>}
       />

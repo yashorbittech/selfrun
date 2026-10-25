@@ -78,7 +78,7 @@ export default async function PmsAnalyticsPage() {
 
   return (
     <div className="space-y-4">
-      <PanelPageHeader breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Project & Client Analytics" }]} title={<>Project &amp; Client Analytics</>} description={<>Hours, budget, milestones and team size across your projects and clients.</>} />
+      <PanelPageHeader breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Project & Client Analytics" }]} title={<>Project &amp; Client Analytics</>} description={<>Hours, budget, milestones and team size across your projects and clients.</>} />
       <ProjectClientAnalytics
         projects={projects}
         clients={clients.map((c: { _id: string; companyName: string }) => ({ _id: c._id, companyName: c.companyName }))}

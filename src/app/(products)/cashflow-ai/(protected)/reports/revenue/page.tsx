@@ -45,7 +45,7 @@ export default async function RevenueReportPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Revenue" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Revenue" }]}
         title={<>Revenue Report</>}
         description={<>Income by account and by customer for the selected range, from posted journal entries and settled transactions.</>}
       />

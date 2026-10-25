@@ -31,7 +31,7 @@ export default async function RfqDetailPage({ params }: { params: Promise<{ id: 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "RFQ & Quotations", href: "/spendiq/rfq" }, { label: r.rfqCode }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "RFQ & Quotations", href: "/spendiq/rfq" }, { label: r.rfqCode }]}
         title={<>{r.title}</>}
         description={<><span className="font-mono">{r.rfqCode}</span> · <RfqStatusBadge status={r.status} />
             {r.awardedPoId && (

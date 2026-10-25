@@ -105,10 +105,10 @@ export default async function BeneficiariesPage({
 
       {/* KPIs */}
       <KpiGrid>
-        <KpiCard label="Vendor Bank Accounts (PRMS)" value={vendorCount} icon={<ShoppingBag className="size-4" />} />
-        <KpiCard label="Employee Salary Accounts (HRMS)" value={employeeCount} icon={<Users className="size-4" />} />
-        <KpiCard label="Client Billing Accounts (PMS)" value={clientCount} icon={<Briefcase className="size-4" />} />
-        <KpiCard label="Student Refund Accounts (TMS)" value={studentCount} icon={<GraduationCap className="size-4" />} />
+        <KpiCard label="Vendor Bank Accounts (SpendIQ)" value={vendorCount} icon={<ShoppingBag className="size-4" />} />
+        <KpiCard label="Employee Salary Accounts (TalentOS)" value={employeeCount} icon={<Users className="size-4" />} />
+        <KpiCard label="Client Billing Accounts (SprintOS)" value={clientCount} icon={<Briefcase className="size-4" />} />
+        <KpiCard label="Student Refund Accounts (Cohort AI)" value={studentCount} icon={<GraduationCap className="size-4" />} />
       </KpiGrid>
 
       {/* Add New Beneficiary Form Surface */}
@@ -207,10 +207,10 @@ export default async function BeneficiariesPage({
           active={entityType || ""}
           tabs={[
             { key: "", label: "All Accounts", href: "/cashflow-ai/beneficiaries?type=" },
-            { key: "vendor", label: `Vendors (${panelName("prms", "PRMS")})`, href: "/cashflow-ai/beneficiaries?type=vendor" },
-            { key: "employee", label: `Employees (${panelName("hrms", "HRMS")})`, href: "/cashflow-ai/beneficiaries?type=employee" },
-            { key: "client", label: `Clients (${panelName("pms", "PMS")})`, href: "/cashflow-ai/beneficiaries?type=client" },
-            { key: "student", label: `Students (${panelName("tms", "TMS")})`, href: "/cashflow-ai/beneficiaries?type=student" },
+            { key: "vendor", label: `Vendors (${panelName("prms", "SpendIQ")})`, href: "/cashflow-ai/beneficiaries?type=vendor" },
+            { key: "employee", label: `Employees (${panelName("hrms", "TalentOS")})`, href: "/cashflow-ai/beneficiaries?type=employee" },
+            { key: "client", label: `Clients (${panelName("pms", "SprintOS")})`, href: "/cashflow-ai/beneficiaries?type=client" },
+            { key: "student", label: `Students (${panelName("tms", "Cohort AI")})`, href: "/cashflow-ai/beneficiaries?type=student" },
           ]}
         />
 

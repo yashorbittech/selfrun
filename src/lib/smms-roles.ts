@@ -5,7 +5,7 @@
  * super_admin); it is never implied by another product's role.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -20,23 +20,23 @@ export type SmmsRole = (typeof SMMS_ROLES)[number];
 
 export const SMMS_ROLE_META: Record<SmmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Every Social Media operation, including platform integrations, brand context and the activity log.",
   },
   smms_admin: {
-    label: "Social Media Admin",
+    label: "ViralPulse Admin",
     description: "Everything a manager can do, plus connecting platform accounts and editing the brand context and AI settings.",
   },
   smms_manager: {
-    label: "Social Media Manager",
+    label: "ViralPulse Manager",
     description: "Runs the team: deletes campaigns, publishes and approves scheduled content, reads analytics and the activity log.",
   },
   smms_specialist: {
-    label: "Social Media Specialist",
+    label: "ViralPulse Specialist",
     description: "Creates and edits campaigns and ads, schedules posts and reads analytics. Cannot publish.",
   },
   smms_employee: {
-    label: "Social Media Employee",
+    label: "ViralPulse Employee",
     description: "Drafts social posts with AI, manages the media library and views campaigns.",
   },
 };
@@ -58,7 +58,7 @@ export const SMMS_PERMISSIONS = [
 ] as const;
 export type SmmsPermission = (typeof SMMS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const SMMS_PERMISSION_KEY: Record<SmmsPermission, string> = {
   VIEW_CAMPAIGNS: "smms.canViewCampaigns",
   CREATE_CAMPAIGNS: "smms.canCreateCampaigns",

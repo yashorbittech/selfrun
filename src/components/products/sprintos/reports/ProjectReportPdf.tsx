@@ -138,7 +138,7 @@ function ReportDocument({ report, brandName }: { report: ProjectReport; brandNam
           ))
         )}
 
-        <PdfFooter note={`${sm.name} · ${sm.projectCode} — ${brandName} PMS`} />
+        <PdfFooter note={`${sm.name} · ${sm.projectCode} — ${brandName} SprintOS`} />
       </Page>
     </Document>
   );

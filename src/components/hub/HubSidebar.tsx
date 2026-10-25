@@ -40,6 +40,7 @@ import {
   FileText,
   LifeBuoy,
   Smartphone,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -58,6 +59,7 @@ const ICONS: Record<NavIcon, React.ComponentType<{ className?: string }>> = {
   vault: Vault,
   bot: Bot,
   megaphone: Megaphone,
+  mail: Mail,
   test: FileCheck2,
   chat: MessagesSquare,
   grid: LayoutGrid,

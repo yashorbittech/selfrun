@@ -138,11 +138,14 @@ export async function getEmployeeByCode(code: string): Promise<Employee | null> 
   return collection.findOne({ employeeCode: code, ...notDeleted });
 }
 
-/** All non-deleted employees, lightweight — for pickers (manager, team lead…). */
-export async function listEmployeeOptions(): Promise<{ _id: string; employeeCode: string; name: string }[]> {
+/**
+ * All non-deleted employees, lightweight — for pickers (manager, team lead…) and for turning stored ids back into names.
+ * `activeOnly` is for pickers that ASSIGN someone to something new: people who have left, or are suspended or deactivated, are left out.
+ */
+export async function listEmployeeOptions(opts: { activeOnly?: boolean } = {}): Promise<{ _id: string; employeeCode: string; name: string }[]> {
   const collection = await getCollection();
   const docs = await collection
-    .find(notDeleted, { projection: { firstName: 1, lastName: 1, employeeCode: 1 } })
+    .find(opts.activeOnly ? { ...notDeleted, status: { $in: ACTIVE_EMPLOYEE_STATUSES } } : notDeleted, { projection: { firstName: 1, lastName: 1, employeeCode: 1 } })
     .sort({ firstName: 1 })
     .toArray();
   return docs.map((d) => ({ _id: d._id, employeeCode: d.employeeCode, name: employeeFullName(d) }));
@@ -297,11 +300,16 @@ export async function updateEmployee(
   actorId: string
 ): Promise<Employee | null> {
   const collection = await getCollection();
-  return collection.findOneAndUpdate(
+  const before = data.status ? await collection.findOne({ _id: id, ...notDeleted }, { projection: { status: 1 } }) : null;
+  const updated = await collection.findOneAndUpdate(
     { _id: id, ...notDeleted },
     { $set: { ...data, ...updateStamp(actorId) } },
     { returnDocument: "after" }
   );
+  if (updated && data.status && before && before.status !== data.status) {
+    await (await import("@/lib/products/commandos/account-status")).syncAccountFromEmployee(id, data.status, actorId, updated.professional.relievingDate ?? null);
+  }
+  return updated;
 }
 
 export async function changeEmployeeStatus(
@@ -313,7 +321,10 @@ export async function changeEmployeeStatus(
   const collection = await getCollection();
   const set: Record<string, unknown> = { status, ...updateStamp(actorId) };
   if (relievingDate !== undefined) set["professional.relievingDate"] = relievingDate;
-  return collection.findOneAndUpdate({ _id: id, ...notDeleted }, { $set: set }, { returnDocument: "after" });
+  const updated = await collection.findOneAndUpdate({ _id: id, ...notDeleted }, { $set: set }, { returnDocument: "after" });
+  // The person's account follows the HR file: someone relieved or terminated here can no longer sign in.
+  if (updated) await (await import("@/lib/products/commandos/account-status")).syncAccountFromEmployee(id, status, actorId, relievingDate ?? updated.professional.relievingDate ?? null);
+  return updated;
 }
 
 /** Soft-delete. Employees are never hard-removed so audit history stays intact. */

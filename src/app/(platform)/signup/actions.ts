@@ -40,6 +40,8 @@ function signupInput(formData: FormData) {
     businessCategories: formData.getAll("businessCategory").map(String),
     businessSubCategories: formData.getAll("businessSubCategory").map(String),
     acceptTerms: formData.get("acceptTerms") === "on",
+    planId: field("plan") || undefined,
+    interval: field("interval") || undefined,
   };
 }
 

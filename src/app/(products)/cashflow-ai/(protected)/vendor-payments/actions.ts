@@ -71,7 +71,7 @@ export async function recordVendorPaymentAction(input: Record<string, unknown>):
     entity: "transaction",
     entityId: res.paymentId!,
     entityLabel: null,
-    summary: `Vendor payment of ${amount} recorded via FMS (PRMS payment ${res.paymentId})`,
+    summary: `Vendor payment of ${amount} recorded via CashFlow (SpendIQ payment ${res.paymentId})`,
   });
   revalidate(billId);
   return { ok: true, paymentId: res.paymentId };

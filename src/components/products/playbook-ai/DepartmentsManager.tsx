@@ -57,7 +57,7 @@ export default function DepartmentsManager({ nodes, hrmsOptions, canManage }: { 
   const deptFields = [
     { key: "name", label: "Name", type: "text" as const, maxLength: 80 },
     { key: "description", label: "Description", type: "textarea" as const },
-    { key: "hrmsDepartmentId", label: "Linked HRMS department", type: "select" as const, options: hrmsOptions, noneLabel: "Not linked", hint: "The link is how HRMS membership drives who can read department-only SOPs and who mandatory SOPs are assigned to." },
+    { key: "hrmsDepartmentId", label: "Linked TalentOS department", type: "select" as const, options: hrmsOptions, noneLabel: "Not linked", hint: "The link is how TalentOS membership drives who can read department-only SOPs and who mandatory SOPs are assigned to." },
     { key: "active", label: "Active (available for new SOPs)", type: "checkbox" as const },
   ];
 
@@ -72,8 +72,8 @@ export default function DepartmentsManager({ nodes, hrmsOptions, canManage }: { 
           <EditDialog
             trigger={<Button type="button" size="sm"><Plus className="size-3.5" data-icon="inline-start" />Add department</Button>}
             title="Add a department"
-            description="Departments added in HRMS appear here automatically. Use this for departments that don't exist in HRMS."
-            fields={[{ key: "name", label: "Name", type: "text", maxLength: 80 }, { key: "code", label: "Code (used in SOP IDs)", type: "text", maxLength: 8, hint: "Optional — generated from the name if blank." }, { key: "description", label: "Description", type: "textarea" }, { key: "hrmsDepartmentId", label: "Linked HRMS department", type: "select", options: hrmsOptions, noneLabel: "Not linked" }]}
+            description="Departments added in TalentOS appear here automatically. Use this for departments that don't exist in TalentOS."
+            fields={[{ key: "name", label: "Name", type: "text", maxLength: 80 }, { key: "code", label: "Code (used in SOP IDs)", type: "text", maxLength: 8, hint: "Optional — generated from the name if blank." }, { key: "description", label: "Description", type: "textarea" }, { key: "hrmsDepartmentId", label: "Linked TalentOS department", type: "select", options: hrmsOptions, noneLabel: "Not linked" }]}
             initial={{ name: "", code: "", description: "", hrmsDepartmentId: "" }}
             onSubmit={(v) => saveDepartmentAction({ name: String(v.name), code: String(v.code), description: String(v.description), hrmsDepartmentId: String(v.hrmsDepartmentId) || null })}
           />
@@ -99,7 +99,7 @@ export default function DepartmentsManager({ nodes, hrmsOptions, canManage }: { 
                     <ActiveBadge active={d.active} />
                   </p>
                   <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {d.hrmsDepartmentId ? <><Link2 className="size-3" />HRMS: {d.hrmsName ?? "linked"}</> : <><Link2Off className="size-3" />Not linked to an HRMS department</>}
+                    {d.hrmsDepartmentId ? <><Link2 className="size-3" />TalentOS: {d.hrmsName ?? "linked"}</> : <><Link2Off className="size-3" />Not linked to an TalentOS department</>}
                     <span>· {d.functions.length} function{d.functions.length === 1 ? "" : "s"}</span>
                   </p>
                 </div>

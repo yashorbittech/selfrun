@@ -36,12 +36,12 @@ export type FmsRole = (typeof FMS_ROLES)[number];
 
 export const FMS_ROLE_META: Record<FmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: transactions, receivables, payables, accounts, approvals and the audit log.",
   },
   fms_admin: {
     label: "Finance Admin",
-    description: "Run all of FMS — transactions, customers, vendors, chart of accounts, settings and reports.",
+    description: "Run all of CashFlow — transactions, customers, vendors, chart of accounts, settings and reports.",
   },
   finance_manager: {
     label: "Finance Manager",

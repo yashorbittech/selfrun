@@ -1,6 +1,9 @@
 import BillingNotice from "@/components/platform/BillingNotice";
 import PanelBackLink from "@/components/hub/PanelBackLink";
 import SetupBanner from "@/components/products/commandos/SetupBanner";
+import { getEmailLapse } from "@/lib/platform/email-lapse";
+import { getUpgradeOffer } from "@/lib/platform/billing/upgrade-offer";
+import UpgradeBanner from "@/components/products/commandos/UpgradeBanner";
 import VerifyEmailBanner from "@/components/products/commandos/VerifyEmailBanner";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { showVerifyStrip } from "@/lib/platform/email-verification-rule";
@@ -15,6 +18,8 @@ import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 export default async function PanelBackBar() {
   let user = null;
   let verify = false;
+  let daysLeft: number | undefined;
+  let upgrade: Awaited<ReturnType<typeof getUpgradeOffer>> = null;
   let setup = { show: false, done: 0, total: 0 };
   try {
     user = await getCurrentHubUser();
@@ -25,6 +30,8 @@ export default async function PanelBackBar() {
       ]);
       verify = showVerifyStrip({ emailVerified: user.emailVerified !== false, isPlatformOwnerCompany: own });
       setup = s;
+      if (user.roles.includes("super_admin")) upgrade = await getUpgradeOffer();
+      if (verify) daysLeft = (await getEmailLapse().catch(() => null))?.daysLeft;
     }
   } catch {
     user = null;
@@ -34,9 +41,10 @@ export default async function PanelBackBar() {
     <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
       <div className="min-w-0">{user && <PanelBackLink />}</div>
       <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 empty:hidden">
-        {user && verify && <VerifyEmailBanner email={user.email} />}
+        {user && verify && <VerifyEmailBanner email={user.email} daysLeft={daysLeft} />}
         <BillingNotice />
         {user && setup.show && <SetupBanner done={setup.done} total={setup.total} />}
+        {user && upgrade && <UpgradeBanner offer={upgrade} />}
       </div>
     </div>
   );

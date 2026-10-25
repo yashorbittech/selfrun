@@ -19,6 +19,7 @@ export default function RolesManager({ roles, audit }: { roles: CustomRoleView[]
   const [toDelete, setToDelete] = useState<CustomRoleView | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const departments = [...new Set(roles.map((r) => r.department))].sort((a, b) => (a === "Custom" ? -1 : b === "Custom" ? 1 : a.localeCompare(b)));
   const panelsOf = (r: CustomRoleView) =>
     ROLE_GROUPS.filter((g) => g.roles.some((x) => r.baseRoles.includes(x.value))).map((g) => panels[g.panel]?.name ?? g.module);
 
@@ -26,7 +27,7 @@ export default function RolesManager({ roles, audit }: { roles: CustomRoleView[]
     if (!toDelete) return;
     startTransition(async () => {
       const res = await deleteCustomRoleAction(toDelete.id);
-      if (res.ok) toast.success(res.affected > 0 ? `Role deleted — ${res.affected} ${res.affected === 1 ? "person" : "people"} lost the access it gave.` : "Role deleted.");
+      if (res.ok) toast.success(res.affected > 0 ? `Designation deleted — ${res.affected} ${res.affected === 1 ? "person" : "people"} lost the access it gave.` : "Designation deleted.");
       else toast.error(res.error);
       setToDelete(null);
     });
@@ -35,45 +36,51 @@ export default function RolesManager({ roles, audit }: { roles: CustomRoleView[]
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground">{roles.length === 0 ? "No custom roles yet." : `${roles.length} custom role${roles.length === 1 ? "" : "s"}`}</p>
+        <p className="text-sm text-muted-foreground">{`${roles.length} designation${roles.length === 1 ? "" : "s"} besides the Director`}</p>
         <Button size="sm" onClick={() => setBuilder({ role: null, duplicate: false })}>
-          <Plus className="mr-1 size-3.5" /> New role
+          <Plus className="mr-1 size-3.5" /> New designation
         </Button>
       </div>
 
-      {roles.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/70 bg-card p-10 text-center">
-          <ShieldCheck className="mx-auto mb-3 size-8 text-primary" />
-          <p className="text-sm font-medium">Create your first role</p>
-          <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">For example “Sales lead”: the CRM product, with exports on and wallet adjustments off. Anyone you give it to gets exactly that — nothing more.</p>
+      <div className="rounded-2xl border border-primary/30 bg-primary/[0.05] p-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="size-4 text-primary" />
+          <p className="text-sm font-semibold">Director</p>
+          <Badge variant="outline" className="text-[10px]">Fixed</Badge>
         </div>
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {roles.map((r) => {
-            const rules = Object.keys(r.permissions).length;
-            return (
-              <div key={r.id} className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{r.name}</p>
-                    {r.description && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.description}</p>}
+        <p className="mt-1 text-xs text-muted-foreground">The company&apos;s top role: full access to every product and setting, and the only one who can change anyone&apos;s status or make another Director. Whoever registers a company is its Director. Give it to someone on the People page.</p>
+      </div>
+
+      {departments.map((dep) => (
+        <section key={dep} className="space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{dep === "Custom" ? "Your own designations" : dep}</h3>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {roles.filter((r) => r.department === dep).map((r) => {
+              const rules = Object.keys(r.permissions).length;
+              return (
+                <div key={r.id} className="flex flex-col gap-3 rounded-2xl border border-border/70 bg-card p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold">{r.name}</p>
+                      {r.description && <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{r.description}</p>}
+                    </div>
+                    <Badge variant="outline" className="shrink-0 gap-1 text-[10px]"><Users className="size-3" />{r.userCount}</Badge>
                   </div>
-                  <Badge variant="outline" className="shrink-0 gap-1 text-[10px]"><Users className="size-3" />{r.userCount}</Badge>
+                  <div className="flex flex-wrap gap-1">
+                    {panelsOf(r).map((n) => <Badge key={n} variant="secondary" className="text-[10px]">{n}</Badge>)}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">{r.baseRoles.length} product role{r.baseRoles.length === 1 ? "" : "s"} · {rules} permission rule{rules === 1 ? "" : "s"}</p>
+                  <div className="mt-auto flex gap-1.5">
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setBuilder({ role: r, duplicate: false })}><Pencil className="mr-1 size-3" />Edit</Button>
+                    <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setBuilder({ role: r, duplicate: true })}><Copy className="mr-1 size-3" />Duplicate</Button>
+                    {!r.builtinKey && <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => setToDelete(r)}><Trash2 className="mr-1 size-3" />Delete</Button>}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1">
-                  {panelsOf(r).map((n) => <Badge key={n} variant="secondary" className="text-[10px]">{n}</Badge>)}
-                </div>
-                <p className="text-[11px] text-muted-foreground">{r.baseRoles.length} product role{r.baseRoles.length === 1 ? "" : "s"} · {rules} permission rule{rules === 1 ? "" : "s"}</p>
-                <div className="mt-auto flex gap-1.5">
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setBuilder({ role: r, duplicate: false })}><Pencil className="mr-1 size-3" />Edit</Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setBuilder({ role: r, duplicate: true })}><Copy className="mr-1 size-3" />Duplicate</Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => setToDelete(r)}><Trash2 className="mr-1 size-3" />Delete</Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        </section>
+      ))}
 
       <div className="rounded-2xl border border-border/70 bg-card">
         <div className="flex items-center gap-2 border-b border-border/60 px-4 py-3">
@@ -109,7 +116,7 @@ export default function RolesManager({ roles, audit }: { roles: CustomRoleView[]
       <AlertDialog open={toDelete !== null} onOpenChange={(o) => !o && setToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete “{toDelete?.name}”?</AlertDialogTitle>
+            <AlertDialogTitle>Delete the “{toDelete?.name}” designation?</AlertDialogTitle>
             <AlertDialogDescription>
               {toDelete && toDelete.userCount > 0 ? `${toDelete.userCount} ${toDelete.userCount === 1 ? "person has" : "people have"} this role. They keep any other roles they hold but lose everything this role gave them, immediately.` : "No one holds this role."}
             </AlertDialogDescription>

@@ -162,7 +162,7 @@ export const TMS_ENTITIES: EntityDef[] = [
   { key: "tms.certificate", panel: "tms", label: "Certificate", description: "Certificates issued to students (number, type, program, revoked or not).", collection: "certificates", idType: "string", baseFilter: soft, titleField: "certificateNumber", search: ["certificateNumber", "title"], read: "staff", self: mine },
   { key: "tms.class_attendance", panel: "tms", label: "Class attendance", description: "Attendance of students per class.", collection: "class_attendance", read: "staff", self: mine },
   { key: "tms.submission", panel: "tms", label: "Assignment submission", description: "Student submissions with marks and feedback.", collection: "assignment_submissions", read: "staff", self: mine },
-  { key: "tms.activity", panel: "tms", label: "Audit log", description: "Who changed what in TMS.", collection: "training_audit_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
+  { key: "tms.activity", panel: "tms", label: "Audit log", description: "Who changed what in Cohort AI.", collection: "training_audit_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: canViewAuditLog },
 ];
 
 export const TMS_ACTIONS: ActionDef[] = [
@@ -344,7 +344,7 @@ export const TMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "tms.save_settings", panel: "tms", label: "Change TMS settings", description: "Track/technology suggestions and the default currency.", level: "admin", allow: canManageSettings,
+    key: "tms.save_settings", panel: "tms", label: "Change Cohort AI settings", description: "Track/technology suggestions and the default currency.", level: "admin", allow: canManageSettings,
     params: [f.list("technologySuggestions", "Track suggestions"), f.enum("defaultCurrency", "Default currency", CURRENCIES)],
     run: async (v, u) => {
       const cur = await getTmsSettings();

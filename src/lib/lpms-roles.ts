@@ -21,23 +21,23 @@ export type LpmsRole = (typeof LPMS_ROLES)[number];
 
 export const LPMS_ROLE_META: Record<LpmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: 'Super Admin',
-    description: 'Every LPMS operation across all document types, templates, workflows, signatures, and audit.',
+    label: 'Director',
+    description: 'Every ContractFlow operation across all document types, templates, workflows, signatures, and audit.',
   },
   lpms_admin: {
-    label: 'LPMS Admin',
+    label: 'ContractFlow Admin',
     description: 'Manage every document, maker type, template, workflow, approval, signature and audit log.',
   },
   lpms_manager: {
-    label: 'LPMS Manager',
+    label: 'ContractFlow Manager',
     description: 'Create, edit, approve, publish and archive documents; manage templates, policies, workflows.',
   },
   lpms_author: {
-    label: 'LPMS Author',
+    label: 'ContractFlow Author',
     description: 'Create and edit documents using available templates and maker types. Cannot approve or publish.',
   },
   lpms_viewer: {
-    label: 'LPMS Viewer',
+    label: 'ContractFlow Viewer',
     description: 'Read and download permitted documents.',
   },
 };
@@ -100,7 +100,7 @@ export const LPMS_PERMISSION_META: Record<LpmsPermission, { label: string; descr
   MANAGE_MAKERS: { label: 'Manage maker types', description: 'Create, configure and delete document maker types.' },
   MANAGE_POLICIES: { label: 'Manage policies', description: 'Configure company-wide document policies and numbering.' },
   MANAGE_DOCUMENTS: { label: 'Manage all documents', description: 'Full CRUD over every document regardless of department.' },
-  VIEW_AUDIT: { label: 'View audit log', description: 'Read the LPMS audit trail.' },
+  VIEW_AUDIT: { label: 'View audit log', description: 'Read the ContractFlow audit trail.' },
 };
 
 const VIEWER_PERMS: LpmsPermission[] = ['VIEW', 'DOWNLOAD'];

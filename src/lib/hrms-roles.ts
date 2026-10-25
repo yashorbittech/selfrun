@@ -22,7 +22,7 @@ export const STAFF_ROLES: HrmsRole[] = ["super_admin", "hr", "manager"];
 
 export const HRMS_ROLE_META: Record<HrmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: employees, masters, payroll, audit logs, and settings.",
   },
   hr: {

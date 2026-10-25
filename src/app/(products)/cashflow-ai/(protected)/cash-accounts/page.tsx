@@ -25,7 +25,7 @@ export default async function CashAccountsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Cash Accounts" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Cash Accounts" }]}
         title={<>Cash Accounts</>}
         description={<>{accounts.length} account{accounts.length === 1 ? "" : "s"}.</>}
         actions={<>{canManage && (

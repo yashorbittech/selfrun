@@ -5,7 +5,7 @@ export interface WorkflowTemplate {
   key: string;
   title: string;
   description: string;
-  /** `adminEmail` is the Super Admin adding it — the starting recipient for email templates (editable afterwards). */
+  /** `adminEmail` is the Director adding it — the starting recipient for email templates (editable afterwards). */
   build(adminEmail: string): WorkflowInput;
 }
 

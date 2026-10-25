@@ -29,11 +29,11 @@ export const CHAT_STAFF_ROLES: ChatRole[] = ["super_admin", "chat_admin", "chat_
 
 export const CHAT_ROLE_META: Record<ChatRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: every channel, workspace analytics, member management, announcements and the audit log.",
   },
   chat_admin: {
-    label: "Workspace Admin",
+    label: "Huddle Admin",
     description: "Manage channels and members, post announcements, moderate messages, view workspace analytics.",
   },
   chat_pm: {

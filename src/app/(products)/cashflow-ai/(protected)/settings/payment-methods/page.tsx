@@ -9,9 +9,9 @@ export default function PaymentMethodsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Payment Methods" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Payment Methods" }]}
         title={<>Payment Methods</>}
-        description={<>A fixed set matching the payment rails FMS already supports across transactions, receipts and payments —
+        description={<>A fixed set matching the payment rails CashFlow already supports across transactions, receipts and payments —
           not an editable per-org list.</>}
       />
 
@@ -38,7 +38,7 @@ export default function PaymentMethodsPage() {
       </GlassCard>
 
       <p className="text-xs text-muted-foreground">
-        Every transaction, receipt, payment and reimbursement across FMS picks from this same list
+        Every transaction, receipt, payment and reimbursement across CashFlow picks from this same list
         (<code>fms/constants.ts</code>). Adding a new payment rail is a code change, not a per-org setting — the
         available rails are the same for every organization using this platform.
       </p>

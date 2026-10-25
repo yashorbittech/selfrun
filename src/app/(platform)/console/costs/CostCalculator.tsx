@@ -357,7 +357,7 @@ export default function CostCalculator({ initial, plans, actual, priceList, asOf
             <p className="mb-2 text-xs font-semibold">Files, voice and the sign-up website</p>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <Num label="Files downloaded per month" value={s.egressFactor} step={0.05} suffix="× their size" onChange={(n) => set({ egressFactor: n })} hint="Your assumption — Vercel Blob Insights shows the real figure." />
-              <Num label="AI tokens that use file search" value={s.fileSearchSharePct} max={100} suffix="%" onChange={(n) => set({ fileSearchSharePct: n })} hint="Chatbot and AI Bots answers; $2.50 per 1,000 searches." />
+              <Num label="AI tokens that use file search" value={s.fileSearchSharePct} max={100} suffix="%" onChange={(n) => set({ fileSearchSharePct: n })} hint="Chatbot and AgentOS answers; $2.50 per 1,000 searches." />
               <Num label="Vector stores, all companies" value={s.vectorStoreGb} step={0.1} suffix="GB" onChange={(n) => set({ vectorStoreGb: n })} hint="First 1 GB is free; $0.10 per GB per day after." />
               <Num label="App build: minutes per job" value={s.buildMinutesPerJob} max={75} onChange={(n) => set({ buildMinutesPerJob: n })} hint="The workflow caps a job at 75 minutes; use your real build time." />
               <Num label="Voice: characters spoken per minute" value={s.speechCharsPerMinute} step={50} min={100} onChange={(n) => set({ speechCharsPerMinute: n })} hint="About 150 words a minute ≈ 900." />

@@ -107,7 +107,7 @@ export default function PanelAccessMatrix({
                   <div>
                     <h4 className="text-sm font-medium text-foreground">{p.name}</h4>
                     {p.isSuperAdmin ? (
-                      <span className="text-[11px] text-amber-500 font-medium">Bypassed by Super Admin</span>
+                      <span className="text-[11px] text-amber-500 font-medium">Bypassed by Director</span>
                     ) : p.roles.length > 0 ? (
                       <span className="text-[11px] text-muted-foreground">
                         {p.roles.length} role{p.roles.length > 1 ? "s" : ""} assigned

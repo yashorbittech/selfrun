@@ -96,7 +96,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
               <ActionButton action={setCampaignLifecycleAction.bind(null, id, "scheduled")} success="Launch scheduled for the start date"><CalendarClock className="size-3.5" /> Schedule launch</ActionButton>
             ))}
             {c.status !== "archived" && c.status !== "published" && can(viewer, "PUBLISH_CONTENT") && (
-              <ActionButton variant="default" action={setCampaignLifecycleAction.bind(null, id, "published")} success="Marked as launched" confirm={{ title: "Mark this campaign as launched?", description: "SMMS never launches or spends on paid ads itself. Confirm you've set the campaign live in each ad platform's ads manager.", confirmLabel: "Mark launched" }}>
+              <ActionButton variant="default" action={setCampaignLifecycleAction.bind(null, id, "published")} success="Marked as launched" confirm={{ title: "Mark this campaign as launched?", description: "ViralPulse never launches or spends on paid ads itself. Confirm you've set the campaign live in each ad platform's ads manager.", confirmLabel: "Mark launched" }}>
                 <Rocket className="size-3.5" /> Mark launched
               </ActionButton>
             )}
@@ -209,18 +209,18 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
         </TabsContent>
 
         <TabsContent value="performance" className="mt-4 space-y-4">
-          <SectionCard title="Linked ad-platform data" description="Spend and results live in LMS → Campaigns (CSV imports from Meta, Google and LinkedIn). Link the imported campaigns that belong to this one.">
+          <SectionCard title="Linked ad-platform data" description="Spend and results live in DealFlow → Campaigns (CSV imports from Meta, Google and LinkedIn). Link the imported campaigns that belong to this one.">
             {can(viewer, "EDIT_CAMPAIGNS") ? (
               <LmsLinker options={lmsOptions.map((o) => ({ key: o.key, name: o.name, platform: o.platform }))} selected={c.lmsCampaignKeys} save={linkLmsCampaignsAction.bind(null, id)} />
             ) : (
-              <p className="text-sm text-muted-foreground">{`${c.lmsCampaignKeys.length} linked LMS campaign(s).`}</p>
+              <p className="text-sm text-muted-foreground">{`${c.lmsCampaignKeys.length} linked DealFlow campaign(s).`}</p>
             )}
           </SectionCard>
           <SectionCard title="Performance" description={perf.rows.length ? `${formatCurrency(perf.totals.spend, perf.totals.currency)} spent · ${perf.totals.impressions.toLocaleString("en-IN")} impressions · ${perf.totals.clicks.toLocaleString("en-IN")} clicks · ${perf.totals.leads} leads` : "No imported results for the linked campaigns yet."}>
             {perf.rows.length > 0 && (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader><TableRow><TableHead>LMS campaign</TableHead><TableHead className="text-right">Spend</TableHead><TableHead className="text-right">Impr.</TableHead><TableHead className="text-right">Clicks</TableHead><TableHead className="text-right">CTR</TableHead><TableHead className="text-right">Leads</TableHead><TableHead className="text-right">Conv.</TableHead><TableHead className="text-right">CPL</TableHead><TableHead className="text-right">ROAS</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>DealFlow campaign</TableHead><TableHead className="text-right">Spend</TableHead><TableHead className="text-right">Impr.</TableHead><TableHead className="text-right">Clicks</TableHead><TableHead className="text-right">CTR</TableHead><TableHead className="text-right">Leads</TableHead><TableHead className="text-right">Conv.</TableHead><TableHead className="text-right">CPL</TableHead><TableHead className="text-right">ROAS</TableHead></TableRow></TableHeader>
                   <TableBody>
                     {perf.rows.map((r) => (
                       <TableRow key={r.key}>
@@ -248,7 +248,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
           </SectionCard>
         </TabsContent>
       </Tabs>
-      <p className="text-[11px] text-muted-foreground">{`Ads are written here and launched by a person in each platform's ads manager (${c.platforms.map((p) => PLATFORM_META[p].label).join(", ")}) — SMMS never spends on ads by itself.`}</p>
+      <p className="text-[11px] text-muted-foreground">{`Ads are written here and launched by a person in each platform's ads manager (${c.platforms.map((p) => PLATFORM_META[p].label).join(", ")}) — ViralPulse never spends on ads by itself.`}</p>
     </div>
   );
 }

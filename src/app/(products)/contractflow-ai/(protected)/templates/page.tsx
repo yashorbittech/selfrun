@@ -37,7 +37,7 @@ export default async function TemplatesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Templates" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Templates" }]}
         title={<>Templates</>}
         description={<>{templates.length} template{templates.length !== 1 ? "s" : ""} across{" "}
             {Object.keys(grouped).length} maker type{Object.keys(grouped).length !== 1 ? "s" : ""}</>}

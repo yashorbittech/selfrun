@@ -62,7 +62,7 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Recruitment" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Recruitment" }]}
         title={<>Recruitment</>}
         description={<>Track offers for shortlisted candidates and onboard them.</>}
         actions={<><a href="/dealflow-ai/careers/applicants" target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>

@@ -14,7 +14,7 @@ import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/
 const can = (u: AgentUser) => intelligenceCan({ roles: u.roles, permissionOverrides: u.permissionOverrides }, "USE");
 
 export const INTELLIGENCE_ENTITIES: EntityDef[] = [
-  { key: "intelligence.conversation", panel: "intelligence", label: "Intelligence conversation", description: "Your past questions to AI Intelligence.", collection: "intel_conversations", idType: "string", titleField: "title", search: ["title"], read: "any", allowRead: can, self: (u) => ({ userId: u.id }), scope: (u) => ({ userId: u.id }) },
+  { key: "intelligence.conversation", panel: "intelligence", label: "Intelligence conversation", description: "Your past questions to DataBrain.", collection: "intel_conversations", idType: "string", titleField: "title", search: ["title"], read: "any", allowRead: can, self: (u) => ({ userId: u.id }), scope: (u) => ({ userId: u.id }) },
 ];
 
 export const INTELLIGENCE_ACTIONS: ActionDef[] = [

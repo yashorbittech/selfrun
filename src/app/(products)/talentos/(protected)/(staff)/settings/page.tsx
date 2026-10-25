@@ -30,7 +30,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Settings" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Settings" }]}
         title={<>Settings</>}
         description={<>Company identity, work schedule, leave configuration and statutory payroll rates.</>}
       />

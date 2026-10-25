@@ -48,8 +48,8 @@ export default async function PmsFinancePage({
     <div className="relative space-y-6">
 
       <PanelPageHeader
-        title={<>{panelName("pms", "PMS")} Project Finance</>}
-        description={<>Project billing flows from PMS → FMS to raise client invoices and track collections.</>}
+        title={<>{panelName("pms", "SprintOS")} Project Finance</>}
+        description={<>Project billing flows from SprintOS → CashFlow to raise client invoices and track collections.</>}
       />
 
 
@@ -61,7 +61,7 @@ export default async function PmsFinancePage({
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground sm:gap-4">
           <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">Milestone</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
-          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">FMS Invoice</span>
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">CashFlow Invoice</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
           <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold">Link Sent</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
@@ -130,7 +130,7 @@ export default async function PmsFinancePage({
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{t.customerName || t.payee || "Client"}</td>
                       <td className="px-4 py-3 font-mono text-muted-foreground">
-                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">PMS</span>{" "}
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">SprintOS</span>{" "}
                         {t.sourceRecordId || "PRJ-00125"}
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">
@@ -185,7 +185,7 @@ export default async function PmsFinancePage({
                             defaultTitle={`Project Billing: ${t.customerName || "Client"}`}
                             defaultCustomerName={t.customerName || t.payee || "Client"}
                             defaultAmount={t.amount || 0}
-                            defaultSourceModule="PMS"
+                            defaultSourceModule="SprintOS"
                             sourceTransactionId={txnId}
                             triggerLabel={isLinkSent ? "Resend Link" : "Send Link"}
                           />

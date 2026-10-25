@@ -47,7 +47,7 @@ export default function LeadLinksPanel({
         {isLearner && (
           <div>
             <p className="mb-1.5 flex items-center gap-1.5 font-medium text-foreground">
-              <GraduationCap className="size-4" /> TMS student
+              <GraduationCap className="size-4" /> Cohort AI student
             </p>
             {studentId ? (
               <p className="flex items-center gap-1.5 text-muted-foreground">
@@ -74,7 +74,7 @@ export default function LeadLinksPanel({
             <p className="mt-1 text-[11px] text-muted-foreground">
               Create the student first from{" "}
               <a href="/cohort-ai/students" className="text-primary hover:underline">
-                TMS → Students
+                Cohort AI → Students
               </a>
               , then paste its id.
             </p>
@@ -84,7 +84,7 @@ export default function LeadLinksPanel({
         {isClient && (
           <div>
             <p className="mb-1.5 flex items-center gap-1.5 font-medium text-foreground">
-              <FolderKanban className="size-4" /> PMS client &amp; project
+              <FolderKanban className="size-4" /> SprintOS client &amp; project
             </p>
             {clientId ? (
               <p className="flex items-center gap-1.5 text-muted-foreground">
@@ -118,7 +118,7 @@ export default function LeadLinksPanel({
             <p className="mt-1 text-[11px] text-muted-foreground">
               Create the client / project in{" "}
               <a href="/sprintos/clients" className="text-primary hover:underline">
-                PMS
+                SprintOS
               </a>
               , then paste the ids.
             </p>

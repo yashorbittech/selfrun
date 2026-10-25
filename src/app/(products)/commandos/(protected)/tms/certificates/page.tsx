@@ -40,7 +40,7 @@ export default async function AdminCertificatesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "TMS", panel: "tms" }, { label: "Certificates" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Cohort AI", panel: "tms" }, { label: "Certificates" }]}
         title={<>Certificates</>}
         description={<>{total} certificate{total === 1 ? "" : "s"} issued.</>}
       />

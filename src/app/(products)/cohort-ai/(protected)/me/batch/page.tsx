@@ -21,7 +21,7 @@ export default async function MyBatchPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "My Batch" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "My Batch" }]}
         title={<>My Batch</>}
       />
 

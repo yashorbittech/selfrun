@@ -1,3 +1,4 @@
+import { canSignIn } from "@/lib/security/account-status";
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
 import { getDb } from "@/lib/mongodb";
@@ -37,8 +38,9 @@ export async function requestPasswordReset(emailInput: string): Promise<void> {
   const email = emailInput.trim().toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) || email.length > 200) return;
   const db = await getDb();
-  const user = await db.collection("admin_users").findOne({ email }, { projection: { _id: 1, email: 1, name: 1, active: 1, status: 1, disabled: 1 } });
-  if (!user || user.active === false || user.disabled === true || user.status === "disabled" || user.status === "inactive") return;
+  const user = await db.collection("admin_users").findOne({ email }, { projection: { _id: 1, email: 1, name: 1, active: 1, status: 1, disabled: 1, roles: 1, platformRoleId: 1 } });
+  // Someone who is suspended, deactivated or has left the company gets no reset link (they could not sign in with it anyway).
+  if (!user || user.active === false || user.disabled === true || !canSignIn(user as { status?: string; roles?: string[]; platformRoleId?: string })) return;
   const col = await resets();
   const now = new Date();
   if ((await col.countDocuments({ adminId: user._id, usedAt: null, expiresAt: { $gt: now } })) >= MAX_PENDING) return;

@@ -54,7 +54,7 @@ export default async function MyRequisitionsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq/me" }, { label: "My Requisitions" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq/me" }, { label: "My Requisitions" }]}
         title={<>My Requisitions</>}
         description={<>{result.total} raised by you.</>}
         actions={<><RequisitionForm

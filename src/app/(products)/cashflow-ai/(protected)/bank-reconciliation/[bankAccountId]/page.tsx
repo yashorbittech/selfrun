@@ -50,7 +50,7 @@ export default async function BankReconciliationPage({ params }: { params: Promi
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Bank Reconciliation", href: "/cashflow-ai/bank-reconciliation" }, { label: account.accountName }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Bank Reconciliation", href: "/cashflow-ai/bank-reconciliation" }, { label: account.accountName }]}
         title={<>{account.accountName}</>}
         description={<>{formatMoney(account.currentBalance, account.currency)} system balance.</>}
         actions={<>{canManage && (

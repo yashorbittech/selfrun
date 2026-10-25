@@ -10,7 +10,7 @@ import { resolveAssignableIds } from "@/lib/products/commandos/custom-roles";
 import { requestOrigin } from "@/lib/platform/request";
 import type { DepartmentTemplate } from "@/lib/platform/onboarding/catalog";
 
-/** Every step is the company owner's (Super Admin's) call — checked on each action, not just the page. */
+/** Every step is the company owner's (Director's) call — checked on each action, not just the page. */
 async function requireOwner() {
   const user = await getCurrentHubUser();
   if (!user) redirect("/commandos/login");
@@ -83,11 +83,11 @@ export async function saveModulesAction(keys: string[]): Promise<void> {
   revalidatePath("/commandos", "layout"); // the last step completes setup: the strip goes away
 }
 
-export async function skipOnboardingAction(): Promise<void> {
+/** Returns where to go (the wizard then does a full page load): a soft redirect straight after revalidating this very page can re-fetch it in a loop. */
+export async function skipOnboardingAction(): Promise<{ redirectTo: string }> {
   await requireOwner();
   await skipOnboarding();
-  revalidatePath("/commandos", "layout");
-  redirect("/commandos");
+  return { redirectTo: "/commandos" };
 }
 
 /** "Skip this step": the step counts as done (it can be revisited any time from Company setup), so setup can still complete. */

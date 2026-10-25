@@ -14,7 +14,7 @@ const PATH = "/commandos/settings/backups";
 
 async function superAdmin() {
   const user = await requireWorkspaceAction(KEY);
-  if (!user.roles.includes("super_admin")) throw new Error("Only a Super Admin can do this.");
+  if (!user.roles.includes("super_admin")) throw new Error("Only a Director can do this.");
   return user;
 }
 const msg = (err: unknown) => (isBillingLimitError(err) || err instanceof Error ? (err as Error).message : "Something went wrong.");

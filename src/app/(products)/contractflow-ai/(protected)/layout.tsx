@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { runLpmsSweep } from "@/lib/notify/sweeps";
 import { panelUnread } from "@/lib/notify";
 import { redirect } from 'next/navigation';
@@ -18,6 +19,7 @@ import { getLpmsDashboard } from '@/lib/products/contractflow-ai/analytics';
 export const generateMetadata = () => brandedMetadata('{brand} {product:lpms}', { robots: { index: false, follow: false } });
 
 export default async function ProtectedLpmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule('lpms');
   const user = await getCurrentLpmsUser();
   if (!user) redirect('/contractflow-ai/login');

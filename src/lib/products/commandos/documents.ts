@@ -13,7 +13,7 @@ export { DOCUMENT_MODULES, documentModuleLabel };
 export type { DocumentModule };
 
 /**
- * Cross-module document listing for the Super Admin. Three real, separate
+ * Cross-module document listing for the Director. Three real, separate
  * per-owner document stores exist — `pms_documents` (per-project),
  * `hrms_employee_documents` (per-employee), `portal_documents` (staff files
  * explicitly shared with a portal login) — none has a cross-owner admin

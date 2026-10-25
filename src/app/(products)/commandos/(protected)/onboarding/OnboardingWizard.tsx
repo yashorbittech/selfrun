@@ -81,11 +81,20 @@ export default function OnboardingWizard(props: Props) {
             <p className="mt-1 text-sm text-muted-foreground">A few quick steps to make it yours — everything can be changed later.</p>
           </div>
           {!done && (
-            <form action={skipOnboardingAction}>
-              <Button type="submit" variant="ghost" size="sm">
-                Skip for now
-              </Button>
-            </form>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={skipping}
+              onClick={() =>
+                startSkip(async () => {
+                  const res = await skipOnboardingAction().catch(() => null);
+                  window.location.assign(res?.redirectTo ?? "/commandos");
+                })
+              }
+            >
+              Skip for now
+            </Button>
           )}
         </div>
 

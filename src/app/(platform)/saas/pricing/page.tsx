@@ -7,6 +7,7 @@ import { ArrowRight, Check, Minus } from "lucide-react";
 import { getOffers } from "@/lib/platform/saas/offers";
 import { getStandardPlans } from "@/lib/platform/billing/plans";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
+import { getBillingSettings } from "@/lib/platform/billing/settings";
 import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { EmptyState, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import PricingPlans from "@/components/platform/saas/PricingPlans";
@@ -23,7 +24,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = pageMeta({ path: "/pricing", title: "Pricing: Free Forever, Pay as Your Team Grows", description: "Start free, no card needed. Every plan includes every product and every feature; plans differ only by team size and by storage, AI, email and voice allowances.", keywords: ["business software pricing", "free CRM and HR software", "free business software forever", "SaaS pricing plans", "affordable business software for small business", "free ERP alternative", "business software free plan", "pricing for all-in-one business platform", "pay as your team grows software"], tag: "Pricing" });
 
 export default async function PricingPage() {
-  const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules()]);
+  const [plans, modules] = await Promise.all([Promise.all([getStandardPlans(), getBillingSettings().then((s) => s.billing.defaultTrialDays).catch(() => 30)]).then(([p, days]) => buildShowcase(p, days)).catch(() => []), getFeatureModules()]);
   const endsAt = (await getOffers().catch(() => null))?.endsAt ?? null;
   const has = plans.length > 0;
   const SEC = [

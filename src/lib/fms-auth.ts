@@ -52,7 +52,7 @@ export interface CurrentFmsUser {
    * account also has access to OTHER products (cross-product nav links), never
    * as FMS's own gate (use `roles` above for that). */
   allRoles: string[];
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
 import { hasPrmsAccess } from "@/lib/prms-roles";
@@ -14,6 +15,7 @@ import { brandedMetadata } from "@/lib/platform/branding/metadata";
 export const generateMetadata = () => brandedMetadata("{brand} {product:prms}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedPrmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("prms");
   const user = await getCurrentPrmsUser();
   if (!user) redirect("/spendiq/login");

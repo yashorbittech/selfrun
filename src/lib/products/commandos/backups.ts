@@ -10,7 +10,7 @@ import { buildArchive } from "@/lib/products/commandos/data-archive";
 
 /**
  * Backups of a company's workspace: the archive from `data-archive.ts`, saved in private storage with a history row for each. Scheduled ones
- * are made by the daily job (one per company a week), manual ones by the Super Admin, and the system takes one automatically before every
+ * are made by the daily job (one per company a week), manual ones by the Director, and the system takes one automatically before every
  * restore and before data is deleted. Every backup stays downloadable: what you download is the very file that is stored, and the very file a
  * restore reads. These files are the platform's own safety copies: they don't count against the company's storage allowance.
  */

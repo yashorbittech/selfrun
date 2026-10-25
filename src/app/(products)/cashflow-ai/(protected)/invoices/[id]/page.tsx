@@ -38,7 +38,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Invoices", href: "/cashflow-ai/invoices" }, { label: invoice.invoiceNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Invoices", href: "/cashflow-ai/invoices" }, { label: invoice.invoiceNumber }]}
         title={<>{invoice.invoiceNumber}</>}
         description={<>{invoice.customerName} · {formatMoney(invoice.totalAmount, invoice.currency)} · Due {formatDate(invoice.dueDate)}</>}
         actions={<><div className="flex items-center gap-2">

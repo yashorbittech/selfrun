@@ -160,7 +160,7 @@ const general: FaqHubGroup = {
     },
     {
       q: "Can CommandOS administrators create custom roles?",
-      a: "Yes. A Super Admin can define custom roles that combine product access with specific permissions.",
+      a: "Yes. A Director can define custom roles that combine product access with specific permissions.",
       evidence: ["src/app/(products)/commandos/(protected)/roles/page.tsx:11-21"],
     },
     {

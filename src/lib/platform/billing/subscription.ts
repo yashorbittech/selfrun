@@ -5,6 +5,8 @@ import { getDefaultPlan, getPlan } from "@/lib/platform/billing/plans";
 import { type CompanySubscription } from "@/lib/platform/billing/types";
 import { getBillingSettings } from "@/lib/platform/billing/settings";
 import { resolveTrialDays } from "@/lib/platform/billing/pricing";
+import { signupTrialDays } from "@/lib/platform/billing/signup-plan-rule";
+import type { BillingInterval } from "@/lib/platform/billing/types";
 import { recordSubscriptionEvent } from "@/lib/platform/billing/events";
 
 /**
@@ -56,15 +58,21 @@ export async function getCompanySubscription(companyId: string): Promise<Company
   };
 }
 
-/** Starts a trial of the default (or given) plan — called when a company is created. */
-export async function startTrial(companyId: string, planId?: string): Promise<CompanySubscription> {
-  const plan = planId ? await getPlan(planId) : await getDefaultPlan();
-  const trialDays = resolveTrialDays(plan, (await getBillingSettings()).billing.defaultTrialDays);
+/**
+ * Starts a trial of the default (or given) plan — called when a company is created. A plan chosen on the pricing page (`planId`) always gets
+ * a real trial of that plan (one month unless the plan or the platform settings say otherwise), on the cycle the visitor chose.
+ */
+export async function startTrial(companyId: string, planId?: string, interval?: BillingInterval): Promise<CompanySubscription> {
+  const chosen = planId ? await getPlan(planId) : null;
+  const plan = chosen ?? (await getDefaultPlan());
+  const platformDays = (await getBillingSettings()).billing.defaultTrialDays;
+  const trialDays = chosen && !chosen.lifetimeFree ? signupTrialDays(chosen.trialDays, platformDays) : resolveTrialDays(plan, platformDays);
   const now = new Date();
   const free = plan?.lifetimeFree === true;
   const sub: CompanySubscription = {
     ...INTERNAL,
     planId: plan?._id ?? "trial",
+    ...(interval && chosen && !chosen.lifetimeFree ? { interval } : {}),
     status: free ? "active" : "trialing",
     trialEndsAt: free ? null : new Date(now.getTime() + trialDays * 86_400_000),
     updatedAt: now,

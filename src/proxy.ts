@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { emailLapseFor } from "@/lib/platform/email-lapse";
+import { LAPSE_OPEN_PATH } from "@/lib/platform/email-lapse-rule";
 import type { NextRequest } from "next/server";
 import { isMaintenanceOn, isPublicSitePath } from "@/lib/products/sitecraft-ai/maintenance-gate";
-import { resolveCompanyIdByHost, resolveHostInfo, normalizeHost, type HostInfo } from "@/lib/platform/tenancy/companies";
+import { resolveCompanyIdByHost, resolveHostInfo, resolveSuspendedHost, normalizeHost, type HostInfo } from "@/lib/platform/tenancy/companies";
 import { gateApi, gatePage, hardenApiResponse, isAssetPath } from "@/lib/security/gate";
 import { gateSessionBinding } from "@/lib/security/session-bind";
 import { counterpartHost, surfaceRedirect } from "@/lib/platform/tenancy/surfaces";
@@ -39,6 +41,19 @@ async function panelGate(request: NextRequest, companyId: string | null | undefi
   const isApi = parts[0] === "api";
   const segment = isApi ? parts[1] : parts[0];
   const panelKey = segment ? productKeyFromSlug(segment) ?? segment : "";
+  // A company whose 30 days to verify its email ran out is on hold: its products' APIs and actions refuse, except what lifts the hold.
+  // (Public endpoints — careers, leads, consent… — are not product areas and stay up.)
+  const mutatingNow = !["GET", "HEAD"].includes(request.method.toUpperCase());
+  if ((isApi || mutatingNow) && segment && (segment === "commandos" || productKeyFromSlug(segment)) && !LAPSE_OPEN_PATH.test(pathname)) {
+    try {
+      if ((await emailLapseFor(companyId)).lapsed) {
+        const error = "Your workspace is on hold until its email is verified. Open /commandos/verify-required to verify it.";
+        return isApi ? NextResponse.json({ error }, { status: 402, headers: { "Cache-Control": "no-store" } }) : new NextResponse(error, { status: 402, headers: { "Cache-Control": "no-store", "Content-Type": "text/plain; charset=utf-8" } });
+      }
+    } catch (err) {
+      console.error("[email-lapse] gate lookup failed in proxy", err);
+    }
+  }
   try {
     const off = await unavailablePanelKeys(companyId);
     if (off.size === 0) return null;
@@ -130,6 +145,8 @@ export async function proxy(request: NextRequest) {
     } catch {
       apiCompany = undefined;
     }
+    // A suspended company's address answers exactly one thing: the reactivation request form (the route does its own origin and rate checks).
+    if (apiCompany === null && request.method === "POST" && request.nextUrl.pathname === "/api/reactivation" && (await resolveSuspendedHost(hostHeader0).catch(() => null))) return NextResponse.next();
     const blocked = await gateApi(request, hostHeader0, apiCompany ?? null, onSaasHost0);
     if (blocked) return blocked;
     const planBlocked = await planGate(request, apiCompany);
@@ -167,6 +184,11 @@ export async function proxy(request: NextRequest) {
     console.error("[tenancy] company lookup failed in proxy", err);
   }
   if (info === null) {
+    // A suspended company's address explains that, and lets its people ask for reactivation (not the generic "no workspace" page).
+    if (request.method === "GET" || request.method === "HEAD") {
+      const suspended = await resolveSuspendedHost(request.headers.get("host")).catch(() => null);
+      if (suspended) return NextResponse.rewrite(new URL("/company-suspended", request.url), { status: 403, headers: { "Cache-Control": "no-store" } });
+    }
     return NextResponse.rewrite(new URL("/workspace-not-found", request.url), { status: 404 });
   }
   const companyId = info?.companyId;

@@ -36,12 +36,12 @@ export default async function SmmsSettingsPage({ searchParams }: { searchParams:
           <TabsTrigger value="roles">Roles</TabsTrigger>
         </TabsList>
         <TabsContent value="brand" className="mt-4 space-y-4">
-          <SectionCard title="Read live from other products" description="Not copied into SMMS — edit them where they live.">
+          <SectionCard title="Read live from other products" description="Not copied into ViralPulse — edit them where they live.">
             <ul className="space-y-1 text-sm">
-              <li>{`Company: ${snap.companyName} · ${snap.website}`} <span className="text-xs text-muted-foreground">(HRMS → Settings → Company)</span></li>
+              <li>{`Company: ${snap.companyName} · ${snap.website}`} <span className="text-xs text-muted-foreground">(TalentOS → Settings → Company)</span></li>
               <li>{`Service catalogue: ${serviceCatalogue().filter((s) => s.value === s.group).map((s) => s.label).join(", ")}`} <span className="text-xs text-muted-foreground">(public site)</span></li>
-              <li>{`Active offers: ${offers.length ? offers.map((o) => `${o.title} (${o.badge}, until ${formatDate(o.validUntil)})`).join("; ") : "none right now"}`} <span className="text-xs text-muted-foreground">(LMS → Offers)</span></li>
-              <li>Clients: picked per campaign/post from PMS clients</li>
+              <li>{`Active offers: ${offers.length ? offers.map((o) => `${o.title} (${o.badge}, until ${formatDate(o.validUntil)})`).join("; ") : "none right now"}`} <span className="text-xs text-muted-foreground">(DealFlow → Offers)</span></li>
+              <li>Clients: picked per campaign/post from SprintOS clients</li>
             </ul>
           </SectionCard>
           <SectionCard title="Marketing voice" description="Used in every AI prompt (campaigns, ads, posts, generator).">
@@ -59,7 +59,7 @@ export default async function SmmsSettingsPage({ searchParams }: { searchParams:
           </SectionCard>
         </TabsContent>
         <TabsContent value="integrations" className="mt-4 space-y-4">
-          <Notice tone="info">Connections are used only when someone presses Publish or approves a schedule. Paid ads (incl. Google Ads) are never created from here — they&apos;re launched in each ads manager; their results come in through LMS → Campaigns imports.</Notice>
+          <Notice tone="info">Connections are used only when someone presses Publish or approves a schedule. Paid ads (incl. Google Ads) are never created from here — they&apos;re launched in each ads manager; their results come in through DealFlow → Campaigns imports.</Notice>
           <IntegrationsPanel items={integrations} encryptionReady={isEncryptionConfigured()} />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">

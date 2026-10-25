@@ -1,5 +1,6 @@
 import HubSidebarShell from "@/components/hub/HubSidebarShell";
 import HubTopbar from "@/components/hub/HubTopbar";
+import SessionWatch from "@/components/hub/SessionWatch";
 import { SidebarCollapseProvider } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,9 @@ import type { CurrentHubUser } from "@/lib/hub-auth";
 import type { ResolvedNav } from "@/lib/products/commandos/nav";
 import SetupBanner from "@/components/products/commandos/SetupBanner";
 import { setupStripNeeded } from "@/lib/platform/onboarding/state";
+import { getEmailLapse } from "@/lib/platform/email-lapse";
+import { getUpgradeOffer } from "@/lib/platform/billing/upgrade-offer";
+import UpgradeBanner from "@/components/products/commandos/UpgradeBanner";
 import VerifyEmailBanner, { VerifiedNotice } from "@/components/products/commandos/VerifyEmailBanner";
 import { showVerifyStrip } from "@/lib/platform/email-verification-rule";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
@@ -31,9 +35,13 @@ export default async function WorkspaceShell({ user, nav, children }: { user: Cu
     isPlatformOwnerContext().catch(() => false),
   ]);
   const verifyStrip = showVerifyStrip({ emailVerified: user.emailVerified !== false, isPlatformOwnerCompany: ownCompany });
+  // Directors are offered the next plan up; nobody else can buy one.
+  const upgrade = user.roles.includes("super_admin") ? await getUpgradeOffer() : null;
+  const verifyDaysLeft = verifyStrip ? (await getEmailLapse().catch(() => null))?.daysLeft : undefined;
 
   return (
     <TooltipProvider delay={200}>
+      <SessionWatch />
       <SidebarCollapseProvider>
         <div className="relative flex h-screen gap-3 overflow-hidden bg-canvas p-3">
           <div className="lms-ambient pointer-events-none absolute inset-0 overflow-hidden">
@@ -49,8 +57,9 @@ export default async function WorkspaceShell({ user, nav, children }: { user: Cu
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2 empty:hidden">
               <BillingNotice />
-              {verifyStrip && <VerifyEmailBanner email={user.email} />}
+              {verifyStrip && <VerifyEmailBanner email={user.email} daysLeft={verifyDaysLeft} />}
               {setup.show && <SetupBanner done={setup.done} total={setup.total} />}
+              {upgrade && <UpgradeBanner offer={upgrade} />}
             </div>
             <main id="workspace-content" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">
               {children}

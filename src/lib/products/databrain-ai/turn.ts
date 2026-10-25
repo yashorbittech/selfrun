@@ -22,7 +22,7 @@ export type PreparedTurn =
   | { ok: true; conversation: ConversationDoc; isNew: boolean; question: string; history: { role: "user" | "assistant"; text: string }[] };
 
 export async function prepareTurn(user: CurrentIntelligenceUser, body: { message?: unknown; conversationId?: unknown }): Promise<PreparedTurn> {
-  if (!intelligenceCan(user, "USE")) return { ok: false, status: 403, error: "You don't have permission to use AI Intelligence." };
+  if (!intelligenceCan(user, "USE")) return { ok: false, status: 403, error: "You don't have permission to use DataBrain." };
   if (!(await isOpenAIConfigured())) return { ok: false, status: 503, error: "The AI assistant isn't set up for this workspace yet. Ask your platform administrator to add an OpenAI key." };
 
   const q = sanitizeUserMessage(body.message, MAX_QUESTION_CHARS);

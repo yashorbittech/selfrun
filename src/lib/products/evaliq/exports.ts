@@ -92,7 +92,7 @@ export async function buildExport(kind: string, sp: Record<string, string | unde
   if (kind === "audit") {
     const rows = await exportAudit({ action: sp.action, entity: sp.entity, from: sp.from, to: sp.to, q: sp.search });
     return {
-      title: "OTS Activity Log",
+      title: "EvalIQ Activity Log",
       columns: [
         { header: "When", key: "when", width: 18 },
         { header: "Actor", key: "actor", width: 26 },

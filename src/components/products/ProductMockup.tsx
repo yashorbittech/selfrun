@@ -239,8 +239,8 @@ function MockupContent({ type }: { type: string }) {
           </div>
           <div className="grid grid-cols-3 gap-2 text-xs">
             <KanbanCol title={tx("catalog.productMockup.in-progress")} count={4} items={["Enterprise Portal v2.0", "AI Search Engine Optimization"]} />
-            <KanbanCol title={tx("catalog.productMockup.quality-testing")} count={2} items={["DLMS Vault Encryption Audit"]} />
-            <KanbanCol title={tx("catalog.productMockup.completed-billed")} count={8} items={["OTS Assessment Engine"]} />
+            <KanbanCol title={tx("catalog.productMockup.quality-testing")} count={2} items={["CyberVault Vault Encryption Audit"]} />
+            <KanbanCol title={tx("catalog.productMockup.completed-billed")} count={8} items={["EvalIQ Assessment Engine"]} />
           </div>
         </div>
       );

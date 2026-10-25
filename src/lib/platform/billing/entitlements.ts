@@ -9,6 +9,8 @@ import { getBillingSettings } from "@/lib/platform/billing/settings";
 import { effectiveSubscriptionStatus, trialDaysLeft } from "@/lib/platform/billing/lifecycle";
 import { getModuleUnlocks } from "@/lib/platform/billing/addons";
 import { UNLIMITED_LIMITS, effectiveLimitsFor } from "@/lib/platform/billing/limits";
+import { withCreditLimits } from "@/lib/platform/billing/credits-store";
+import { applyFlagOverrides, applyModuleOverrides } from "@/lib/platform/billing/overrides";
 import type { Entitlements } from "@/lib/platform/billing/types";
 
 const UNLIMITED = UNLIMITED_LIMITS;
@@ -38,18 +40,23 @@ export async function entitlementsFor(companyId: string): Promise<Entitlements> 
 
   const plan = await getPlan(sub.planId);
   // Products in the plan, plus any unlocked by module add-ons the company holds.
-  const modules = !plan || plan.modules === "all" ? null : new Set<string>([...CORE, ...plan.modules, ...(await getModuleUnlocks(companyId))]);
+  const planModules = !plan || plan.modules === "all" ? null : new Set<string>([...CORE, ...plan.modules, ...(await getModuleUnlocks(companyId))]);
+  // Then what the platform admin unlocked or locked for this company alone.
+  const modules = applyModuleOverrides(planModules, sub.overrides, now, MODULES.map((m) => m.key), CORE);
   // A company scheduled for deletion is read-only until the day it is deleted, or until the request is cancelled.
   const pendingDeletionAt = (await getCompany(companyId).catch(() => null))?.deletion?.purgeAt ?? null;
+  const baseLimits = await effectiveLimitsFor(sub, plan);
   return {
     planId: sub.planId,
     planName: plan?.name ?? null,
     pendingDeletionAt,
     status,
     modules,
-    limits: await effectiveLimitsFor(sub, plan),
+    // Top-ups bought on top of the plan count here, so every limit check in the product sees them.
+    limits: await withCreditLimits(companyId, baseLimits),
+    baseLimits,
     // A plan that was deleted keeps its company running (no product locked, no limits): flags follow the same rule.
-    flags: plan ? plan.flags ?? [] : null,
+    flags: applyFlagOverrides(plan ? plan.flags ?? [] : null, sub.overrides, now),
     readOnly: status === "suspended" || status === "canceled" || pendingDeletionAt !== null,
     trialDaysLeft: status === "trialing" && sub.trialEndsAt ? trialDaysLeft(sub.trialEndsAt, now) : null,
   };

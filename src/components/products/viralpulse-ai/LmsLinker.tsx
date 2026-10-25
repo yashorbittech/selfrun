@@ -11,7 +11,7 @@ export default function LmsLinker({ options, selected, save }: { options: { key:
   const router = useRouter();
   const [keys, setKeys] = useState(selected);
   const [pending, start] = useTransition();
-  if (options.length === 0) return <p className="text-xs text-muted-foreground">No ad-platform data has been imported into LMS → Campaigns yet. Import a Meta / Google / LinkedIn performance CSV there, then link it here.</p>;
+  if (options.length === 0) return <p className="text-xs text-muted-foreground">No ad-platform data has been imported into DealFlow → Campaigns yet. Import a Meta / Google / LinkedIn performance CSV there, then link it here.</p>;
   return (
     <div className="space-y-2">
       <div className="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-border/50 p-2">

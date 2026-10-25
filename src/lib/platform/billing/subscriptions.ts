@@ -9,10 +9,12 @@ import { getPlan } from "@/lib/platform/billing/plans";
 import { randomUUID } from "node:crypto";
 import { quoteCheckout, type QuoteLine } from "@/lib/platform/billing/quote";
 import { COUPON_REDEMPTIONS_COLLECTION, computeCouponDiscount, getCoupon, getRenewalRedemption, markRedemptionCycleBilled, redeemCoupon, releaseRedemption } from "@/lib/platform/billing/coupons";
-import { currentPriceVersion, planPriceAtVersion } from "@/lib/platform/billing/pricing";
+import { currentPriceVersion, planPrice, planPriceAtVersion } from "@/lib/platform/billing/pricing";
+import { DOWNGRADE_MESSAGE, downgradeGuarded, isPlanDowngrade } from "@/lib/platform/billing/plan-order-rule";
 import { getBillingSettings } from "@/lib/platform/billing/settings";
 import { recordSubscriptionEvent, type SubscriptionEventType } from "@/lib/platform/billing/events";
 import { getCompanySubscription, updateCompanySubscription } from "@/lib/platform/billing/subscription";
+import { recordTransaction } from "@/lib/platform/billing/transactions";
 import { issueSaasInvoice, type IssueSaasInvoiceInput, type SaasInvoiceRef } from "@/lib/platform/billing/invoices";
 import { taxTotals, validateBillingDetails, type BillingDetails, type BillingDetailsErrors, type PriceSummary } from "@/lib/platform/billing/billing-details";
 import {
@@ -29,12 +31,14 @@ import {
   razorpayKeyId,
   razorpayPlanAmount,
   refundPayment,
+  fetchPayment,
+  listSubscriptionInvoices,
   updateSubscriptionPlan,
   verifyCheckoutSignature,
   type RazorpayPayment,
   type RazorpaySubscription,
 } from "@/lib/platform/billing/razorpay";
-import { formatMoney, type BillingInterval, type CompanySubscription, type SubscriptionPricing, type SubscriptionStatus } from "@/lib/platform/billing/types";
+import { formatMoney, type BillingInterval, type CompanySubscription, type Plan, type SubscriptionPricing, type SubscriptionStatus } from "@/lib/platform/billing/types";
 
 /**
  * Paid subscriptions through Razorpay (the platform owner's own account,
@@ -87,7 +91,17 @@ const DAY_MS = 86_400_000;
 /** Smallest pro-rata refund worth issuing (smallest currency unit). */
 const MIN_REFUND = 100;
 
-export type BillingActionResult = { ok: true; message?: string } | { ok: false; error: string };
+/** `checkout` is set when the change needs the customer to approve a payment again (a UPI subscription can't be edited, so the new plan is a new subscription). */
+/** Whether moving to `targetPlanId` would be a step DOWN from the plan the company is on (not allowed for the company itself; the Platform Console can still do it). */
+async function downgradeBlock(sub: CompanySubscription, targetPlanId: string): Promise<string | null> {
+  if (!downgradeGuarded(sub.status) || sub.planId === targetPlanId) return null;
+  const [current, target] = await Promise.all([getPlan(sub.planId), getPlan(targetPlanId)]);
+  if (!current || !target) return null;
+  const monthly = (p: Plan) => (p.contactSales ? null : p.lifetimeFree ? 0 : planPrice(p, "monthly"));
+  return isPlanDowngrade(monthly(current), monthly(target)) ? DOWNGRADE_MESSAGE : null;
+}
+
+export type BillingActionResult = { ok: true; message?: string; checkout?: CheckoutPayload } | { ok: false; error: string };
 
 export interface CheckoutPayload {
   key: string;
@@ -355,7 +369,7 @@ async function billingRecipient(companyId: string, sub: CompanySubscription | nu
 
 type NoticeKind = "payment_failed" | "grace" | "suspended" | "trial_ended" | "canceled";
 
-/** Billing emails to the company's billing contact (or first Super Admin). Never throws. */
+/** Billing emails to the company's billing contact (or first Director). Never throws. */
 async function notify(companyId: string, kind: NoticeKind): Promise<void> {
   try {
     const company = await (await companies()).findOne({ _id: companyId }, { projection: { name: 1, slug: 1, subscription: 1 } });
@@ -419,7 +433,7 @@ async function notify(companyId: string, kind: NoticeKind): Promise<void> {
  * forever. The failure is audited ("invoice.issue_failed") for the owner to
  * issue it by hand; a total that differs from the payment is audited too.
  */
-async function issueInvoice(companyId: string, entity: RazorpaySubscription, payment: { id: string; amount: number; currency: string }, sub: CompanySubscription): Promise<void> {
+async function issueInvoice(companyId: string, entity: RazorpaySubscription, payment: { id: string; amount: number; currency: string }, sub: CompanySubscription): Promise<SaasInvoiceRef | null> {
   try {
     const resolved = await resolvePlan(entity);
     const planId = resolved?.planId ?? sub.planId;
@@ -439,10 +453,40 @@ async function issueInvoice(companyId: string, entity: RazorpaySubscription, pay
     if (invoice && invoice.total !== payment.amount) {
       await recordPlatformAudit({ actorId: "system", action: "invoice.total_mismatch", target: { type: "saas_invoice", id: invoice.id }, companyId, details: { paymentId: payment.id, charged: payment.amount, invoiceTotal: invoice.total, number: invoice.number } });
     }
+    return invoice;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[billing] invoice for ${payment.id} failed`, err);
     await recordPlatformAudit({ actorId: "system", action: "invoice.issue_failed", target: { type: "subscription", id: companyId }, companyId, details: { paymentId: payment.id, amount: payment.amount, message: message.slice(0, 500) } });
+    return null;
+  }
+}
+
+/** One successful charge, written to the payments ledger (with its invoice, once there is one). Never throws. */
+async function ledgerPayment(companyId: string, entity: RazorpaySubscription, payment: { id: string; amount: number; currency: string; method?: string | null }, sub: CompanySubscription, invoice: SaasInvoiceRef | null): Promise<void> {
+  try {
+    const resolved = await resolvePlan(entity);
+    const planId = resolved?.planId ?? sub.planId;
+    const interval = resolved?.interval ?? sub.interval;
+    const plan = await getPlan(planId);
+    await recordTransaction({
+      companyId,
+      type: "payment",
+      amount: payment.amount,
+      currency: payment.currency,
+      paymentId: payment.id,
+      description: `${plan?.name ?? planId} plan · ${interval === "yearly" ? "yearly" : "monthly"} subscription`,
+      method: payment.method ?? null,
+      planId,
+      planName: plan?.name ?? null,
+      interval,
+      subscriptionId: entity.id,
+      invoiceId: invoice?.id ?? null,
+      invoiceNumber: invoice?.number ?? null,
+      payer: sub.billingDetails ? { name: sub.billingDetails.legalName, email: sub.billingDetails.email, gstin: sub.billingDetails.gstin } : null,
+    });
+  } catch (err) {
+    console.error("[billing] ledger entry failed", payment.id, err);
   }
 }
 
@@ -486,11 +530,15 @@ async function adoptSubscription(companyId: string, entity: RazorpaySubscription
     pendingChange: null,
     pricing: pricing ?? null,
     ...(pricing?.priceVersion ? { priceVersion: pricing.priceVersion } : {}),
+    // Paying for the plan ends the free trial.
+    ...(entity.status === "active" ? { trialEndsAt: null } : {}),
     ...(resolved ?? {}),
     ...(await patchFromEntity(current, entity)),
   };
   if (checkoutPricing?.subscriptionId === entity.id) patch.checkout = null;
-  const after = await applyChange(companyId, current, patch, { ...opts, details: { ...opts.details, subscriptionId: entity.id } });
+  // A UPI plan switch: the unused part of the last payment on the old plan is refunded (best effort, audited) once the new one is active.
+  const refund = checkoutPricing?.subscriptionId === entity.id && checkoutPricing.replaces && entity.status === "active" && previous && previous !== entity.id ? await refundUnused(companyId, current, opts.actorId ?? "system") : null;
+  const after = await applyChange(companyId, current, patch, { ...opts, details: { ...opts.details, subscriptionId: entity.id, ...(refund ? { refund } : {}) } });
   if (previous && previous !== entity.id && !current.cancelAtPeriodEnd) {
     await cancelRazorpaySubscription(previous, false).catch((err) => console.warn(`[billing] couldn't cancel replaced subscription ${previous}`, err instanceof Error ? err.message : err));
   }
@@ -566,14 +614,17 @@ export async function saveBillingDetails(companyId: string, input: Partial<Recor
 
 // ── Checkout ─────────────────────────────────────────────────────────────────
 
-export async function startCheckout(companyId: string, input: { planId: string; interval: BillingInterval; couponCode?: string | null }, actorId = "system"): Promise<StartCheckoutResult> {
+export async function startCheckout(companyId: string, input: { planId: string; interval: BillingInterval; couponCode?: string | null; replaceLive?: boolean; /** During a free trial: pay and start the paid plan today instead of when the trial ends. */ startNow?: boolean }, actorId = "system"): Promise<StartCheckoutResult> {
   if (!(await razorpayConfigured())) return { ok: false, error: "Online billing isn't configured yet. Please contact support." };
   const company = await (await companies()).findOne({ _id: companyId }, { projection: { name: 1, slug: 1, isPlatformOwner: 1 } });
   if (!company) return { ok: false, error: "Unknown workspace." };
   const sub = await getCompanySubscription(companyId);
   const blocked = company.isPlatformOwner ? "The platform owner's workspace isn't billed." : notBilled(sub);
   if (blocked || !sub) return { ok: false, error: blocked ?? "Unknown workspace." };
-  if (hasLiveSubscription(sub)) return { ok: false, error: "You already have a subscription — change your plan instead." };
+  const lower = await downgradeBlock(sub, input.planId);
+  if (lower) return { ok: false, error: lower };
+  const replacing = input.replaceLive === true && hasLiveSubscription(sub);
+  if (hasLiveSubscription(sub) && !replacing) return { ok: false, error: "You already have a subscription — change your plan instead." };
   const priced = await priceSubscription({ companyId, planId: input.planId, interval: input.interval, couponCode: input.couponCode });
   if (!priced.ok) return priced;
   if (input.couponCode?.trim() && priced.summary.couponError) return { ok: false, error: priced.summary.couponError };
@@ -595,7 +646,8 @@ export async function startCheckout(companyId: string, input: { planId: string; 
       await updateCompanySubscription(companyId, { provider: { id: "razorpay", subscriptionId: sub.provider?.subscriptionId ?? null, customerId } });
     }
     const razorpayPlanId = await ensureRazorpayPlan(plan, pricing.interval, pricing.total, pricing.currency);
-    const startsAt = checkoutStartAt(sub, Date.now());
+    // A trial normally rolls into the paid plan when it ends; "start now" charges today (the trial ends with the payment).
+    const startsAt = input.startNow ? null : checkoutStartAt(sub, Date.now());
     const created = await createSubscription({
       planId: razorpayPlanId,
       customerId,
@@ -605,7 +657,7 @@ export async function startCheckout(companyId: string, input: { planId: string; 
       notes: { companyId, planId: plan._id, interval: pricing.interval, purpose: "platform_subscription", ...(pricing.couponId ? { couponId: pricing.couponId } : {}), ...(pricing.redemptionId ? { redemptionId: pricing.redemptionId } : {}) },
     });
     // Remembered until Razorpay confirms this subscription, so the confirmed one carries its quote.
-    await updateCompanySubscription(companyId, { checkout: { subscriptionId: created.id, pricing } });
+    await updateCompanySubscription(companyId, { checkout: { subscriptionId: created.id, pricing, ...(replacing ? { replaces: true } : {}) } });
     await recordPlatformAudit({
       actorId,
       action: "subscription.checkout.start",
@@ -651,11 +703,71 @@ export async function confirmCheckout(companyId: string, response: CheckoutRespo
   if (noteOf(entity, "companyId") !== companyId) return { ok: false, error: "This payment belongs to a different workspace." };
   if (!["active", "authenticated"].includes(entity.status)) return { ok: false, error: "Razorpay hasn't confirmed the payment yet. This page will update automatically once it does." };
 
+  // What this checkout was quoted at, read before adopting clears it: the amount when Razorpay can't be asked.
+  const quotedTotal = sub?.checkout?.subscriptionId === entity.id ? sub.checkout.pricing.total : null;
   // The webhook does the same (whichever arrives first wins; the other is a no-op), and issues the invoice.
   const updated = await adoptSubscription(companyId, entity, { actorId, action: "subscription.checkout.confirm" });
+  // A first charge that has happened is recorded NOW (ledger + tax invoice), not only when the webhook arrives: on a server Razorpay can't reach
+  // (local development) or when the webhook is late, the history would otherwise stay empty. Both are idempotent on the payment id.
+  if (entity.status === "active" && updated && paymentId) await settleConfirmedPayment(companyId, entity, paymentId, quotedTotal, updated);
+  // Autopay approved, first charge later (a plan taken during the free trial): the history says so, so "I paid" never looks like "nothing happened".
+  else if (entity.status === "authenticated" && updated) {
+    const plan = await getPlan(updated.planId);
+    const first = fromUnix(entity.start_at ?? entity.charge_at) ?? updated.trialEndsAt;
+    await recordTransaction({
+      companyId,
+      type: "setup",
+      amount: 0,
+      currency: (updated.pricing?.currency ?? "INR").toUpperCase(),
+      paymentId: entity.id,
+      description: `${plan?.name ?? updated.planId} plan · autopay set up${first ? `, first charge ${fmtDate(first)}${updated.pricing ? ` of ${formatMoney(updated.pricing.total, updated.pricing.currency)}` : ""}` : ""}`,
+      planId: updated.planId,
+      planName: plan?.name ?? null,
+      interval: updated.interval,
+      subscriptionId: entity.id,
+      payer: updated.billingDetails ? { name: updated.billingDetails.legalName, email: updated.billingDetails.email, gstin: updated.billingDetails.gstin } : null,
+    });
+  }
   if (entity.status === "active" && updated) return { ok: true, message: "Payment received — your subscription is active." };
   const startsAt = fromUnix(entity.start_at ?? entity.charge_at);
   return { ok: true, message: startsAt ? `You're all set. Your first charge is on ${fmtDate(startsAt)}.` : "You're all set." };
+}
+
+async function settleConfirmedPayment(companyId: string, entity: RazorpaySubscription, paymentId: string, quotedTotal: number | null, sub: CompanySubscription): Promise<void> {
+  try {
+    const paid = await fetchPayment(paymentId).catch(() => null);
+    const amount = paid?.amount ?? quotedTotal;
+    if (!amount) return;
+    const currency = (paid?.currency ?? sub.pricing?.currency ?? "INR").toUpperCase();
+    const payment = { id: paymentId, amount, currency, method: paid?.method ?? null };
+    if (!sub.lastPayment || sub.lastPayment.id !== paymentId) {
+      await updateCompanySubscription(companyId, { lastPayment: { id: paymentId, amount, currency, at: new Date(), periodStart: fromUnix(entity.current_start), periodEnd: fromUnix(entity.current_end) } });
+    }
+    const invoice = await issueInvoice(companyId, entity, payment, sub);
+    await ledgerPayment(companyId, entity, payment, sub, invoice);
+  } catch (err) {
+    console.error(`[billing] recording confirmed payment ${paymentId} failed`, err);
+  }
+}
+
+/**
+ * "Missing a payment?": reads the subscription's paid charges from Razorpay and records any the ledger and the invoices don't have yet (a
+ * checkout confirmed before the ledger existed, or a webhook that never arrived). Safe to run any number of times.
+ */
+export async function syncPaymentsFromRazorpay(companyId: string): Promise<{ ok: true; found: number } | { ok: false; error: string }> {
+  const sub = await getCompanySubscription(companyId);
+  const blocked = notBilled(sub);
+  if (blocked || !sub) return { ok: false, error: blocked ?? "Unknown workspace." };
+  const subscriptionId = sub.provider?.subscriptionId;
+  if (!subscriptionId) return { ok: true, found: 0 };
+  try {
+    const [entity, invoices] = await Promise.all([fetchSubscription(subscriptionId), listSubscriptionInvoices(subscriptionId)]);
+    const paid = invoices.filter((i) => i.status === "paid" && i.payment_id);
+    for (const i of paid) await settleConfirmedPayment(companyId, entity, i.payment_id!, null, sub);
+    return { ok: true, found: paid.length };
+  } catch (err) {
+    return { ok: false, error: friendly(err, "We couldn't reach Razorpay just now. Please try again in a moment.") };
+  }
 }
 
 /** Re-subscribes after a scheduled cancellation: a new subscription whose first charge is when the current period (or trial) ends. */
@@ -677,14 +789,20 @@ export async function resumeSubscription(companyId: string, actorId = "system"):
  */
 export async function changePlan(
   companyId: string,
-  input: { planId: string; interval: BillingInterval; couponCode?: string | null; when?: "auto" | "now" | "cycle_end" },
+  input: { planId: string; interval: BillingInterval; couponCode?: string | null; when?: "auto" | "now" | "cycle_end"; startNow?: boolean },
   actorId = "system",
   action = "subscription.change_plan",
+  /** The customer is at the screen and can authorise a payment (not the Platform Console). */
+  customerPresent = false,
 ): Promise<BillingActionResult> {
   const sub = await getCompanySubscription(companyId);
   const blocked = notBilled(sub);
   if (blocked || !sub) return { ok: false, error: blocked ?? "Unknown workspace." };
   if (!hasLiveSubscription(sub)) return { ok: false, error: "You don't have an active subscription to change — choose a plan to subscribe." };
+  if (customerPresent) {
+    const lower = await downgradeBlock(sub, input.planId);
+    if (lower) return { ok: false, error: lower };
+  }
   if (!(await razorpayConfigured())) return { ok: false, error: "Online billing isn't configured yet." };
   // Unless a code is given, a discount that is still running carries over to the new plan.
   const running = await getRenewalRedemption(companyId);
@@ -713,7 +831,19 @@ export async function changePlan(
 
     if (remote.status === "authenticated" || remote.status === "created") {
       // Nothing charged yet (still in the trial): switch outright.
-      await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "now", pricing.interval);
+      try {
+        await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "now", pricing.interval);
+      } catch (err) {
+        if (!isUpiNoEdit(err)) throw err;
+        // A UPI mandate can't be edited either: nothing was charged, so the waiting subscription is dropped and the new plan is set up afresh
+        // (starting when the trial ends, as before), with the customer approving the new mandate.
+        if (!customerPresent) return { ok: false, error: "This company pays by UPI, which can't be changed from here. Ask them to change the plan in Settings → Billing, where they can approve the new payment." };
+        await cancelRazorpaySubscription(subscriptionId, false);
+        await applyChange(companyId, sub, { provider: { ...sub.provider!, subscriptionId: null }, pendingChange: null }, { actorId, action: `${action}.upi_replace`, details: { reason: "not charged yet" } });
+        const started = await startCheckout(companyId, { planId: input.planId, interval: input.interval, couponCode, startNow: input.startNow }, actorId);
+        if (!started.ok) return started;
+        return { ok: true, checkout: started.checkout, message: "Approve the new plan's payment to finish." };
+      }
       await applyChange(companyId, sub, { planId: plan._id, interval: pricing.interval, pricing, pendingChange: null, ...versionPatch }, { actorId, action, details: { when: "now", reason: "not charged yet" } });
       if (sub.pricing?.couponId !== pricing.couponId) await releaseUnused(companyId, sub.pricing?.redemptionId, "plan_changed_before_first_charge");
       return { ok: true, message: `You're now on ${plan.name}. Your first charge of ${formatMoney(pricing.total, pricing.currency)} is when your trial ends.` };
@@ -724,7 +854,12 @@ export async function changePlan(
     const when = input.when === "now" || input.when === "cycle_end" ? input.when : isUpgrade ? "now" : "cycle_end";
 
     if (when === "now") {
-      await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "now", pricing.interval);
+      try {
+        await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "now", pricing.interval);
+      } catch (err) {
+        if (!isUpiNoEdit(err)) throw err;
+        return await switchViaNewSubscription(companyId, sub, { planId: input.planId, interval: input.interval, couponCode }, "now", actorId, customerPresent);
+      }
       const refund = await refundUnused(companyId, sub, actorId);
       await applyChange(companyId, sub, { planId: plan._id, interval: pricing.interval, pricing, pendingChange: null, ...versionPatch }, { actorId, action, details: { when: "now", upgrade: isUpgrade, refund: refund ?? null } });
       return {
@@ -732,7 +867,12 @@ export async function changePlan(
         message: `You're now on ${plan.name} (${pricing.interval}). A new billing period starts today at ${formatMoney(pricing.total, pricing.currency)}${refund?.amount ? `; ${formatMoney(refund.amount, pricing.currency)} for the unused part of your last period is being refunded` : ""}.`,
       };
     }
-    await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "cycle_end", pricing.interval);
+    try {
+      await updateSubscriptionPlan(subscriptionId, razorpayPlanId, "cycle_end", pricing.interval);
+    } catch (err) {
+      if (!isUpiNoEdit(err)) throw err;
+      return await switchViaNewSubscription(companyId, sub, { planId: input.planId, interval: input.interval, couponCode }, "cycle_end", actorId, customerPresent);
+    }
     const effectiveAt = fromUnix(remote.current_end) ?? sub.currentPeriodEnd;
     await applyChange(companyId, sub, { pendingChange: { planId: plan._id, interval: pricing.interval, effectiveAt, pricing } }, { actorId, action: `${action}.scheduled`, details: { to: `${plan._id}/${pricing.interval}`, effectiveAt } });
     return { ok: true, message: `You'll move to ${plan.name} (${pricing.interval}) on ${fmtDate(effectiveAt)}, when your current period ends.` };
@@ -740,6 +880,40 @@ export async function changePlan(
     if (coupon.fresh && pricing.redemptionId) await releaseRedemption({ redemptionId: pricing.redemptionId, reason: "plan_change_failed", actorId }).catch(() => {});
     return { ok: false, error: friendly(err, "We couldn't change your plan. Please try again.") };
   }
+}
+
+/** Razorpay can't edit a subscription whose payment mode is UPI (an autopay mandate is fixed to one amount). */
+function isUpiNoEdit(err: unknown): boolean {
+  return /cannot be updated|payment mode is upi/i.test(err instanceof Error ? err.message : String(err ?? ""));
+}
+
+/**
+ * The plan change for a UPI subscription: the new plan is a NEW subscription the customer authorises again.
+ *  - upgrade ("now"): starts at once; when it is confirmed the old one is canceled and its unused part refunded (see `adoptSubscription`).
+ *  - downgrade ("cycle_end"): the old one is set to end with the period they paid for, and the new one starts when it ends.
+ * Needs the customer at the screen (a Platform Console change can't authorise a payment for them).
+ */
+async function switchViaNewSubscription(
+  companyId: string,
+  sub: CompanySubscription,
+  input: { planId: string; interval: BillingInterval; couponCode: string | null },
+  when: "now" | "cycle_end",
+  actorId: string,
+  customerPresent: boolean,
+): Promise<BillingActionResult> {
+  if (!customerPresent) return { ok: false, error: "This company pays by UPI, which can't be changed from here. Ask them to change the plan in Settings → Billing, where they can approve the new payment." };
+  if (when === "cycle_end") {
+    const ended = await cancelSubscription(companyId, { when: "period_end" }, actorId, "subscription.change_plan.upi_switch");
+    if (!ended.ok) return ended;
+  }
+  const started = await startCheckout(companyId, { ...input, replaceLive: when === "now" }, actorId);
+  if (!started.ok) return started;
+  await recordPlatformAudit({ actorId, action: "subscription.change_plan.upi_switch", target: { type: "subscription", id: companyId }, companyId, details: { from: `${sub.planId}/${sub.interval}`, to: `${input.planId}/${input.interval}`, when } });
+  return {
+    ok: true,
+    checkout: started.checkout,
+    message: when === "now" ? "Approve the new plan's payment to finish the upgrade." : "Approve the new plan's payment: it starts when your current period ends.",
+  };
 }
 
 /** Pro-rata refund of the unused part of the last payment (immediate upgrade). Best effort; audited either way. */
@@ -756,6 +930,7 @@ async function refundUnused(companyId: string, sub: CompanySubscription, actorId
   try {
     const refund = await refundPayment(last.id, amount, { companyId, reason: "prorated_upgrade" });
     await recordPlatformAudit({ actorId, action: "subscription.refund.prorated", target: { type: "subscription", id: companyId }, companyId, details: { paymentId: last.id, amount, refundId: refund.id } });
+    await recordTransaction({ companyId, type: "refund", amount, currency: last.currency, paymentId: last.id, refundId: refund.id, description: "Refund for the unused part of your previous plan", subscriptionId: sub.provider?.subscriptionId ?? null, planId: sub.planId, interval: sub.interval });
     return { amount, refundId: refund.id };
   } catch (err) {
     const error = err instanceof Error ? err.message : String(err);
@@ -961,6 +1136,13 @@ async function processEvent(eventId: string, payload: RazorpayWebhookPayload): P
   const entity = payload.payload?.subscription?.entity ?? null;
   const payment = payload.payload?.payment?.entity ?? null;
 
+  // A one-time top-up bought through an order: handled apart from the subscription (it has no subscription id).
+  if ((event === "payment.captured" || event === "order.paid") && payment?.order_id) {
+    const { topupFromWebhook } = await import("@/lib/platform/billing/credits");
+    const top = await topupFromWebhook(payment);
+    if (top.handled) return { outcome: { status: "processed" as const, detail: `top-up: ${top.detail ?? "ok"}` }, companyId: null, subscriptionId: null };
+  }
+
   let subscriptionId = entity?.id ?? payment?.subscription_id ?? null;
   if (!subscriptionId && event === "payment.failed" && payment?.invoice_id) {
     subscriptionId = await fetchInvoiceSubscriptionId(payment.invoice_id).catch(() => null);
@@ -1027,7 +1209,8 @@ async function processEvent(eventId: string, payload: RazorpayWebhookPayload): P
       if (charged) {
         // This charge carried the coupon discount → one more discounted cycle billed.
         if (after.pricing?.redemptionId && after.pricing.discount > 0) await markRedemptionCycleBilled(after.pricing.redemptionId);
-        await issueInvoice(companyId, entity, { id: payment.id, amount: payment.amount, currency: payment.currency }, after);
+        const invoice = await issueInvoice(companyId, entity, { id: payment.id, amount: payment.amount, currency: payment.currency }, after);
+        await ledgerPayment(companyId, entity, { id: payment.id, amount: payment.amount, currency: payment.currency.toUpperCase(), method: payment.method ?? null }, after, invoice);
         // A limited coupon that has now run out (or an add-on change) → next cycle at the new price. The daily cron retries a failure.
         await repriceSubscription(companyId, "system").catch((err) => console.error(`[billing] reprice after charge failed for ${companyId}`, err));
       }
@@ -1036,6 +1219,9 @@ async function processEvent(eventId: string, payload: RazorpayWebhookPayload): P
 
     case "subscription.pending":
     case "payment.failed": {
+      if (event === "payment.failed" && payment?.id) {
+        await recordTransaction({ companyId, type: "failed", amount: payment.amount, currency: payment.currency, paymentId: payment.id, description: "Subscription payment failed", method: payment.method ?? null, subscriptionId, reason: payment.error_description ?? null });
+      }
       if (!["active", "trialing", "past_due"].includes(current.status)) return done(`no change from ${current.status}`);
       const failedPayments = (current.dunning?.failedPayments ?? 0) + (event === "payment.failed" ? 1 : 0);
       const wasPastDue = current.status === "past_due";

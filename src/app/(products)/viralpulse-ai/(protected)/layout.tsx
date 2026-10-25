@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentSmmsUser } from "@/lib/smms-auth";
 import { hasSmmsAccess } from "@/lib/smms-roles";
@@ -18,6 +19,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:smms}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedSmmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("smms");
   const user = await getCurrentSmmsUser();
   if (!user) redirect("/viralpulse-ai/login");

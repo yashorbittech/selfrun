@@ -133,7 +133,7 @@ const PANEL_GRID = [
   },
   {
     key: "aibots",
-    label: "AI Bots",
+    label: "AgentOS",
     icon: <Bot className="size-5" />,
     analyticsHref: productAnalyticsPath("aibots"),
     panelHref: "/agentos",
@@ -149,7 +149,7 @@ const PANEL_GRID = [
   },
   {
     key: "dlms",
-    label: "Digi Locker",
+    label: "CyberVault",
     icon: <Boxes className="size-5" />,
     analyticsHref: productAnalyticsPath("dlms"),
     panelHref: "/cybervault",
@@ -275,7 +275,7 @@ export default function CommandCenterSections({ stats, companyName }: { stats: C
       <AnalyticsFilterBar title="Company overview filters" />
 
       {/* ── FMS Top-Line Financial KPIs ── */}
-      <ExecutiveSection title="Financial Position (FMS Ledger)" description="Real ledger-backed figures from the Finance Management System.">
+      <ExecutiveSection title="Financial Position (CashFlow Ledger)" description="Real ledger-backed figures from the Finance Management System.">
         <KpiGrid>
           <KpiCard label="Ledger Revenue" value={stats.finance.totalRevenue} format="currency" accent icon={<IndianRupee className="size-4" />} />
           <KpiCard label="Ledger Expenses" value={stats.finance.totalExpenses} format="currency" icon={<ReceiptText className="size-4" />} />
@@ -289,7 +289,7 @@ export default function CommandCenterSections({ stats, companyName }: { stats: C
       </ExecutiveSection>
 
       {/* ── Business Overview (derived) ── */}
-      <ExecutiveSection title="Business Overview" description="Composite figures derived from PMS, TMS, and CRM activity.">
+      <ExecutiveSection title="Business Overview" description="Composite figures derived from SprintOS, Cohort AI, and CRM activity.">
         <KpiGrid>
           <KpiCard label="Total Revenue" value={stats.business.totalRevenue} format="currency" accent icon={<IndianRupee className="size-4" />} />
           <KpiCard label="Monthly Revenue" value={stats.business.monthlyRevenue} format="currency" icon={<Wallet className="size-4" />} />

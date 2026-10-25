@@ -30,7 +30,7 @@ export default async function BankAccountDetailPage({ params }: { params: Promis
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Bank Accounts", href: "/cashflow-ai/bank-accounts" }, { label: account.accountName }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Bank Accounts", href: "/cashflow-ai/bank-accounts" }, { label: account.accountName }]}
         title={<>{account.accountName}</>}
         description={<>{account.bankName} · {formatMoney(account.currentBalance, account.currency)}</>}
         actions={<><div className="flex items-center gap-2">

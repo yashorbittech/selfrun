@@ -47,8 +47,8 @@ export default async function PrmsFinancePage({
     <div className="relative space-y-6">
 
       <PanelPageHeader
-        title={<>{panelName("prms", "PRMS Procurement")} Finance</>}
-        description={<>Purchase orders and vendor bills flow from PRMS → FMS for approval, payment and reconciliation.</>}
+        title={<>{panelName("prms", "SpendIQ Procurement")} Finance</>}
+        description={<>Purchase orders and vendor bills flow from SpendIQ → CashFlow for approval, payment and reconciliation.</>}
       />
 
 
@@ -60,7 +60,7 @@ export default async function PrmsFinancePage({
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground sm:gap-4">
           <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">Purchase Order</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
-          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">FMS Payable</span>
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">CashFlow Payable</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
           <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold">Approval</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
@@ -127,8 +127,8 @@ export default async function PrmsFinancePage({
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{t.payee || t.customerName || "Vendor"}</td>
                       <td className="px-4 py-3 font-mono text-muted-foreground">
-                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">PRMS</span>{" "}
-                        {t.sourceRecordId || "PO-PRMS"}
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">SpendIQ</span>{" "}
+                        {t.sourceRecordId || "PO-SpendIQ"}
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">
                         ₹{(t.amount || 0).toLocaleString("en-IN")}

@@ -17,9 +17,9 @@ export default async function PayrollRunsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payroll Runs" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payroll Runs" }]}
         title={<>Payroll Runs</>}
-        description={<>Read-only financial view over HRMS&apos;s real payroll runs — {runs.length} run{runs.length === 1 ? "" : "s"}.</>}
+        description={<>Read-only financial view over TalentOS&apos;s real payroll runs — {runs.length} run{runs.length === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -52,7 +52,7 @@ export default async function PayrollRunsPage() {
         page={1}
         totalPages={1}
         total={runs.length}
-        emptyLabel="No payroll runs found — runs are created in HRMS."
+        emptyLabel="No payroll runs found — runs are created in TalentOS."
       />
 
       <p className="text-xs text-muted-foreground">Manage payroll runs at /talentos/payroll.</p>

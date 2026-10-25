@@ -41,7 +41,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Programs", href: "/cohort-ai/programs" }, { label: p.name }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Programs", href: "/cohort-ai/programs" }, { label: p.name }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{p.name}<ProgramStatusBadge status={p.status} /></span></>}
         description={<><span className="font-mono">{p.programCode}</span>
             {p.technology ? ` · ${p.technology}` : ""}</>}
@@ -157,7 +157,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
       </GlassCard>
 
       <p className="text-xs text-muted-foreground">
-        Enrolments and revenue for this program appear here as later TMS phases land.
+        Enrolments and revenue for this program appear here as later Cohort AI phases land.
       </p>
     </div>
   );

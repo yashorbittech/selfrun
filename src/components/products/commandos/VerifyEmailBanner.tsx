@@ -13,10 +13,10 @@ const RESEND_COOLDOWN_S = 30;
 /**
  * The "Verify your email" strip: shown to a signed-in user whose address isn't
  * verified yet, on every Workspace page (the dashboard included). Nothing is
- * blocked while it shows. "Verify email" sends the link and the strip changes
+ * blocked while it shows (until the 30 days run out: `daysLeft` counts them down). "Verify email" sends the link and the strip changes
  * in place; Resend appears after a short cooldown.
  */
-export default function VerifyEmailBanner({ email }: { email: string }) {
+export default function VerifyEmailBanner({ email, daysLeft }: { email: string; daysLeft?: number }) {
   const path = usePathname();
   const [state, setState] = useState<VerifyEmailSendState>({ status: "idle" });
   const [pending, start] = useTransition();
@@ -59,6 +59,7 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
           <>
             <span className="font-semibold text-foreground">Verify email</span>
             <span className="max-w-[180px] truncate text-muted-foreground">{email}</span>
+            {daysLeft !== undefined && <span className={daysLeft <= 7 ? "font-semibold text-destructive" : "text-muted-foreground"}>· {daysLeft} {daysLeft === 1 ? "day" : "days"} left</span>}
           </>
         )}
         {state.status === "error" && (

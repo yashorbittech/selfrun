@@ -17,6 +17,7 @@ function copy(n: BillingNoticeInfo): { title: string; body: string; cta: string;
   const plan = n.planName ? `${n.planName} plan` : "plan";
   switch (n.status) {
     case "trialing":
+      if (n.firstChargeAt) return { title: `${n.planName ?? "Plan"} subscribed · first charge ${n.firstChargeAt.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`, body: `Autopay is set up for the ${plan}. Your first payment is when the free trial ends; nothing is charged before then.`, cta: "View billing", tone: "info" };
       return { title: `Free trial${n.daysLeft !== null ? ` · ${days(n.daysLeft)}` : ""}`, body: `You're trying the ${plan}. Choose a plan to keep your workspace running after the trial.`, cta: "Choose a plan", tone: n.daysLeft !== null && n.daysLeft <= 3 ? "warn" : "info" };
     case "past_due":
       return { title: "Payment overdue", body: "Your last payment didn't go through. We'll retry automatically — update your payment method to avoid interruption.", cta: "Update payment", tone: "warn" };

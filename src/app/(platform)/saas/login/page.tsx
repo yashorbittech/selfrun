@@ -101,7 +101,7 @@ export default async function LoginPage() {
 
               <div className="rounded-2xl border border-primary/15 bg-primary/[0.04] p-5">
                 <p className="text-sm font-bold">Don't know your workspace address?</p>
-                <p className="mt-1 text-sm text-muted-foreground">Check your invitation email — it contains your workspace URL. Or ask your company's Super Admin.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Check your invitation email — it contains your workspace URL. Or ask your company's Director.</p>
                 <Link href="/contact" className="sr-link mt-3 inline-flex">
                   Contact support <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -229,7 +229,7 @@ export default async function LoginPage() {
           <SectionHead n="04" icon="chat" eyebrow="Need help" title="Can't sign in?" accent="Start here." lead="Most sign-in problems are one of these. If none fits, our team will help." />
           <div className="grid gap-5 md:grid-cols-3">
             {[
-              { t: "Find your workspace address", x: "It is in your invitation email, in the link you use every day, or ask your company's Super Admin.", href: "/docs/getting-started", c: "Read the setup guide" },
+              { t: "Find your workspace address", x: "It is in your invitation email, in the link you use every day, or ask your company's Director.", href: "/docs/getting-started", c: "Read the setup guide" },
               { t: "Check the platform is up", x: "If sign-in is failing for everyone, an open incident notice will be shown on the status page.", href: "/status", c: "Open the status page" },
               { t: "Ask our team", x: "Tell us your company name and what you see. We reply within one business day.", href: "/contact", c: "Contact support" },
             ].map((c, i) => (

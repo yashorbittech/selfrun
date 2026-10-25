@@ -22,7 +22,7 @@ export default async function Page() {
       panel="hrms"
       live
       panelName="Human Resource Management System"
-      shortCode="HRMS"
+      shortCode="TalentOS"
       description="Leave requests, new joiners, document expiry, birthdays and probation reminders."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body ?? "", createdAt: new Date(n.createdAt).toISOString(), read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

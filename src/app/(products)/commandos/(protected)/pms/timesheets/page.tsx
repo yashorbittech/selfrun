@@ -60,10 +60,10 @@ export default async function AdminTimesheetsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "PMS", panel: "pms" }, { label: "Timesheets" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "SprintOS", panel: "pms" }, { label: "Timesheets" }]}
         title={<>Timesheets</>}
         description={<>{total} entr{total === 1 ? "y" : "ies"}. Only entries awaiting review (&quot;Submitted&quot;) can be
-          approved or rejected — the same guard the PMS review page uses.</>}
+          approved or rejected — the same guard the SprintOS review page uses.</>}
       />
 
       <TimesheetsGrid

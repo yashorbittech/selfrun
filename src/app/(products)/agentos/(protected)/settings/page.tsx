@@ -34,7 +34,7 @@ export default async function AibotsSettingsPage() {
         <SettingsForm models={settings.models} defaultModel={settings.defaultModel} maxOutputTokens={settings.maxOutputTokens} dailyMessageLimit={settings.dailyMessageLimit} generalInstructions={settings.generalInstructions} />
       </SectionCard>
 
-      <SectionCard title="Role permissions" description="Defaults per role. The Super Admin can override individual capabilities per person under Admin → Users.">
+      <SectionCard title="Role permissions" description="Defaults per role. The Director can override individual capabilities per person under Admin → Users.">
         <Notice tone="info">Roles are assigned in Admin → Users. Which bots a person sees is set per bot under “Access”.</Notice>
         <div className="mt-3 overflow-x-auto">
           <Table>

@@ -10,7 +10,7 @@ import BackupsManager from "./BackupsManager";
 export const metadata: Metadata = { title: "Backups & data", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-/** Backups (history, download, restore), the restore history, and the two ways to delete data. Super Admin only. */
+/** Backups (history, download, restore), the restore history, and the two ways to delete data. Director only. */
 export default async function BackupsPage() {
   const user = await requireWorkspaceAccess("company.backups");
   const [backups, restores, events, company] = await Promise.all([listBackups(50), listRestores(30), listDataEvents(30), getCompany(await currentCompanyId())]);

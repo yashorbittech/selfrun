@@ -22,7 +22,7 @@ export default async function Page() {
       panel="prms"
       live
       panelName="Procurement Management System"
-      shortCode="PRMS"
+      shortCode="SpendIQ"
       description="Requisitions, approvals, purchase orders and vendor updates."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body ?? "", createdAt: new Date(n.createdAt).toISOString(), read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

@@ -23,7 +23,7 @@ export default async function AutomationsSettingsPage() {
     listWorkflows(),
     (await getDb()).collection<{ email: string }>("admin_users").find({}, { projection: { email: 1 } }).sort({ email: 1 }).limit(500).toArray(),
   ]);
-  const roles = [{ value: "super_admin", label: "Super Admin" }, ...ROLE_GROUPS.flatMap((g) => g.roles.map((r) => ({ value: r.value, label: `${r.label} · ${g.module}` })))];
+  const roles = [{ value: "super_admin", label: "Director" }, ...ROLE_GROUPS.flatMap((g) => g.roles.map((r) => ({ value: r.value, label: `${r.label} · ${g.module}` })))];
 
   return (
     <div className="min-h-screen bg-muted/70 px-4 py-10 dark:bg-background">

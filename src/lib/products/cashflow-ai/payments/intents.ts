@@ -30,13 +30,13 @@ export const PAYMENT_INTENTS_COLLECTION = "fms_payment_intents";
 const INTENT_NUMBER_PREFIX = "PAY";
 
 export type PaymentSourceModule =
-  | "TMS"
-  | "PMS"
-  | "PRMS"
+  | "Cohort AI"
+  | "SprintOS"
+  | "SpendIQ"
   | "LMS"
   | "PORTAL"
-  | "FMS"
-  | "HRMS"
+  | "CashFlow"
+  | "TalentOS"
   | "WEBSITE"
   | "DIRECT"
   | "OFFERS";

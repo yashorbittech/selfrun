@@ -9,7 +9,7 @@ import { renderSaasInvoicePdf } from "@/components/platform/billing/SaasInvoiceP
 type Context = { params: Promise<{ id: string }> };
 
 /**
- * Downloads a SaaS tax invoice or credit note. A company's Super Admins get
+ * Downloads a SaaS tax invoice or credit note. A company's Directors get
  * only their own company's documents (anything else is a 404, never a 403, so
  * ids can't be probed); Platform Console users who may read invoices get any.
  */

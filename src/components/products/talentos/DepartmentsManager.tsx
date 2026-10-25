@@ -256,7 +256,7 @@ export default function DepartmentsManager({
               {editing?.id ? "Edit" : "New"}{" "}
               {editing?.kind === "departments" ? "Department" : editing?.kind === "designations" ? "Designation" : "Team"}
             </SheetTitle>
-            <SheetDescription>Master data used across the HRMS.</SheetDescription>
+            <SheetDescription>Master data used across the TalentOS.</SheetDescription>
           </SheetHeader>
           <div className="flex-1 space-y-4 overflow-y-auto p-4">
             {editing?.kind === "departments" && (

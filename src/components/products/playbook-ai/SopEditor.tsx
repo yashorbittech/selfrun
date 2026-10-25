@@ -438,7 +438,7 @@ export default function SopEditor(props: SopEditorProps) {
 
               <div className="space-y-2">
                 <Label>Linked products</Label>
-                <p className="text-[11px] text-muted-foreground">Tag the product(s) this SOP serves (e.g. a procurement SOP → PRMS) with a deep link, so it can be filtered by product and found from there.</p>
+                <p className="text-[11px] text-muted-foreground">Tag the product(s) this SOP serves (e.g. a procurement SOP → SpendIQ) with a deep link, so it can be filtered by product and found from there.</p>
                 {content.moduleLinks.map((m, i) => (
                   <div key={i} className="grid gap-2 sm:grid-cols-[11rem_1fr_1fr_auto]">
                     <OptionSelect value={m.module} onChange={(v) => editContent((c) => ({ ...c, moduleLinks: c.moduleLinks.map((x, j) => (j === i ? { ...x, module: v as typeof m.module } : x)) }))} options={SOP_MODULES.map((x) => ({ value: x.value, label: panelLabel(x.value, x.label) }))} aria-label="Product" />
@@ -461,14 +461,14 @@ export default function SopEditor(props: SopEditorProps) {
             <CardContent className="space-y-3 p-5">
               <div>
                 <h2 className="text-sm font-bold">Applicable roles</h2>
-                <p className="text-xs text-muted-foreground">Job roles (from HRMS designations) this SOP applies to. Leave empty for everyone in scope. Used to target mandatory assignment.</p>
+                <p className="text-xs text-muted-foreground">Job roles (from TalentOS designations) this SOP applies to. Leave empty for everyone in scope. Used to target mandatory assignment.</p>
               </div>
               <MultiPicker
                 options={props.designations.map((d) => ({ id: d.id, label: d.title, sub: d.department }))}
                 value={meta.applicableRoleIds}
                 onChange={(ids) => editMeta({ applicableRoleIds: ids })}
                 placeholder="Search roles…"
-                emptyLabel="No designations found in HRMS."
+                emptyLabel="No designations found in TalentOS."
                 maxHeight="max-h-72"
               />
             </CardContent>

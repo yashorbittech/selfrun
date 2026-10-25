@@ -50,7 +50,7 @@ export default async function PurchaseOrdersPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Purchase Orders" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Purchase Orders" }]}
         title={<>Purchase Orders</>}
         description={<>{total} PO{total === 1 ? "" : "s"} raised.</>}
         actions={<>{canManage && (

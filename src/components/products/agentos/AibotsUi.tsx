@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /** Shared, server-renderable pieces of the AI Bots UI — the same visual language as SOP/SEO/DLMS. */
 
 export function PageHeader({ title, description, crumbs, actions }: { title: ReactNode; description?: ReactNode; crumbs: { label: string; href?: string }[]; actions?: ReactNode }) {
-  return <PanelPageHeader breadcrumbs={[{ label: "AI Bots", href: "/agentos" }, ...crumbs]} title={title} description={description} actions={actions} />;
+  return <PanelPageHeader breadcrumbs={[{ label: "AgentOS", href: "/agentos" }, ...crumbs]} title={title} description={description} actions={actions} />;
 }
 
 export function SectionCard({ title, description, children, className, action }: { title: ReactNode; description?: ReactNode; children: ReactNode; className?: string; action?: ReactNode }) {

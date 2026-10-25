@@ -29,7 +29,11 @@ import { disabledPanelKeys, listPanels } from "@/lib/platform/panels/store";
 import { getTrialOverview } from "@/lib/platform/billing/trials";
 import { getCompanyMaintenance } from "@/lib/platform/maintenance-state";
 import MaintenanceForm from "../../maintenance/MaintenanceForm";
+import ReactivationCard from "./ReactivationCard";
+import { listRequests } from "@/lib/platform/reactivation";
 import FreeAccessCard from "./FreeAccessCard";
+import CompanyOverridesCard from "./CompanyOverridesCard";
+import { getOverridesDetail } from "@/lib/platform/billing/overrides-admin";
 import LoginAsCompanyButton from "../LoginAsCompanyButton";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
 
@@ -55,9 +59,11 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
   const { onboarding: ob } = company;
   const [allAddons, heldAddons] = company.isPlatformOwner ? [[], []] : await Promise.all([listAddons(), getCompanyAddons(company.id)]);
   const trial = company.isPlatformOwner ? null : await getTrialOverview(company.id);
+  const reactivations = company.isPlatformOwner ? [] : await listRequests(company.id).catch(() => []);
   const [registry, disabledHere] = await Promise.all([listPanels(), disabledPanelKeys(company.id)]);
   const maintenance = company.isPlatformOwner ? null : await getCompanyMaintenance(company.id);
   const subscription = company.isPlatformOwner ? null : await getCompanySubscription(company.id);
+  const overrides = company.isPlatformOwner ? null : await getOverridesDetail(company.id);
 
   return (
     <div className="space-y-4 p-1">
@@ -87,6 +93,8 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
             )
           }
         />
+
+        <ReactivationCard companyId={company.id} companyName={company.name} requests={reactivations} canDecide={can(user, "companies.status")} />
 
         <GlassCard interactive={false}>
           <CardContent>
@@ -239,6 +247,8 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
             />
           </CardContent>
         </GlassCard>
+
+        {overrides && <CompanyOverridesCard companyId={company.id} companyName={company.name} detail={overrides} canManage={can(user, "subscriptions.manage")} />}
 
         {subscription && <FreeAccessCard companyId={company.id} companyName={company.name} free={subscription.status === "internal"} canManage={can(user, "subscriptions.manage")} />}
 

@@ -1,5 +1,5 @@
 /**
- * Shared resolver for the Super Admin's per-user permission overrides. Every
+ * Shared resolver for the Director's per-user permission overrides. Every
  * module's capability predicates (e.g. `canManageProjects` in `pms-roles.ts`)
  * are built on this: `super_admin` always bypasses overrides entirely (so a
  * bad override can never lock out a super_admin, including on another

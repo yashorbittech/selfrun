@@ -20,7 +20,7 @@ export const AIBOTS_ENTITIES: EntityDef[] = [
   { key: "aibots.file", panel: "aibots", label: "Knowledge file", description: "Files that teach a bot (title, category, enabled, processing status).", collection: "aibots_files", idType: "string", baseFilter: soft, titleField: "title", search: ["title", "category"], read: "staff", allowRead: can("MANAGE_KB") },
   { key: "aibots.chat", panel: "aibots", label: "Chat", description: "Conversations with bots. People see their own; auditors with permission see everyone's.", collection: "aibots_chats", idType: "string", baseFilter: soft, titleField: "title", search: ["title", "userEmail"], read: "staff", allowRead: can("VIEW_CHATS"), self: (u) => ({ userId: u.id }), hide: ["messages"] },
   { key: "aibots.run", panel: "aibots", label: "Usage run", description: "Each bot reply with model, tokens and estimated cost.", collection: "aibots_runs", idType: "string", read: "staff", allowRead: can("VIEW_CHATS") },
-  { key: "aibots.activity", panel: "aibots", label: "Audit log", description: "Who changed what in AI Bots.", collection: "aibots_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: can("VIEW_AUDIT") },
+  { key: "aibots.activity", panel: "aibots", label: "Audit log", description: "Who changed what in AgentOS.", collection: "aibots_activity_logs", idType: "string", search: ["entityLabel", "summary", "actorEmail"], read: "admin", allowRead: can("VIEW_AUDIT") },
 ];
 
 const act = (key: string, label: string, description: string, params: FieldDef[], perm: AibotsPermission, run: (v: Json) => Promise<unknown>, success: string, destructive = false): ActionDef => ({

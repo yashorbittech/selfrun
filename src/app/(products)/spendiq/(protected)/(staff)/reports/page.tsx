@@ -30,7 +30,7 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Reports & Analytics" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Reports & Analytics" }]}
         title={<>Reports &amp; Analytics</>}
         description={<>Download enterprise reports as CSV, Excel or PDF.</>}
       />

@@ -35,7 +35,7 @@ export default async function AdminDocumentsPage({
       <PanelPageHeader
         breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Account" }, { label: "Documents" }]}
         title={<>Documents</>}
-        description={<>{total} document{total === 1 ? "" : "s"} across Project Management, HRMS, and the External Portal.</>}
+        description={<>{total} document{total === 1 ? "" : "s"} across Project Management, TalentOS, and the External Portal.</>}
       />
 
       <DocumentsGrid

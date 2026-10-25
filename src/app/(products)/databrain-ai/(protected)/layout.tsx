@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { panelUnread } from "@/lib/notify";
 import { redirect } from "next/navigation";
 import { getCurrentIntelligenceUser } from "@/lib/intelligence-auth";
@@ -18,6 +19,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:intelligence}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedIntelligenceLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("intelligence");
   const user = await getCurrentIntelligenceUser();
   if (!user) redirect("/databrain-ai/login");

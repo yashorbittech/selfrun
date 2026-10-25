@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentSeoUser } from "@/lib/seo-auth";
 import { hasSeoAccess } from "@/lib/seo-roles";
@@ -18,6 +19,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:seo}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedSeoLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("seo");
   const user = await getCurrentSeoUser();
   if (!user) redirect("/rankmax-ai/login");

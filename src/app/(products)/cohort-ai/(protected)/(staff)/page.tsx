@@ -81,7 +81,7 @@ export default async function TmsDashboardPage({
   return (
     <div className="relative space-y-4">
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Dashboard" }]}
         title="Training Operations Overview"
         description={<>Welcome back{user ? `, ${user.email.split("@")[0]}` : ""}. Monitor enrolments, batches, attendance and fee collection across your programs.</>}
         filters={<TmsDashboardFilters

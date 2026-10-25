@@ -123,11 +123,11 @@ export default function RoleEditorSheet({
             <div>
               <p className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                 <ShieldAlert className="size-3.5 text-amber-500" />
-                Super Admin
+                Director
               </p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
-                Full access to every module and Super Admin Command Center.
-                {isSelf && " (You cannot remove your own Super Admin role)." }
+                Full access to every module and Director Command Center.
+                {isSelf && " (You cannot remove your own Director role)." }
               </p>
             </div>
           </label>

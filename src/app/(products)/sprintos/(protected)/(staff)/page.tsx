@@ -112,7 +112,7 @@ export default async function PmsDashboardPage({
     <div className="relative space-y-5">
 
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Dashboard" }]}
         title="Project Portfolio Overview"
         description={<>{displayName ? `Welcome back, ${displayName}. ` : ""}Track delivery progress, team capacity and billing health across your projects.</>}
         actions={

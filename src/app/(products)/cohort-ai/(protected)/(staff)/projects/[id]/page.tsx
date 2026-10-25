@@ -51,7 +51,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Projects", href: "/cohort-ai/projects" }, { label: p.title }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Projects", href: "/cohort-ai/projects" }, { label: p.title }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{p.title}<LiveProjectStatusBadge status={p.status} /></span></>}
         description={<><span className="font-mono">{p.projectCode}</span>
             {program ? ` · ${program.name}` : ""}</>}

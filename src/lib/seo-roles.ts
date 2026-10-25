@@ -21,23 +21,23 @@ export type SeoRole = (typeof SEO_ROLES)[number];
 
 export const SEO_ROLE_META: Record<SeoRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Every SEO operation, plus integrations, permissions and the audit log.",
   },
   seo_admin: {
-    label: "SEO Admin",
+    label: "RankMax Admin",
     description: "Global SEO configuration, integrations, reports and the audit log, plus everything a manager can do.",
   },
   seo_manager: {
-    label: "SEO Manager",
+    label: "RankMax Manager",
     description: "Run SEO operations: website SEO, robots.txt, competitors, reports, deletions and the whole team's tasks.",
   },
   seo_specialist: {
-    label: "SEO Specialist",
+    label: "RankMax Specialist",
     description: "Technical SEO, on-page SEO, rankings, backlinks, sitemap and schema, plus audits and keywords.",
   },
   seo_employee: {
-    label: "SEO Executive",
+    label: "RankMax Executive",
     description: "View SEO data, run audits, manage keywords, update issues and work on their assigned tasks.",
   },
 };
@@ -64,7 +64,7 @@ export const SEO_PERMISSIONS = [
 ] as const;
 export type SeoPermission = (typeof SEO_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const SEO_PERMISSION_KEY: Record<SeoPermission, string> = {
   VIEW: "seo.canView",
   CREATE: "seo.canCreate",

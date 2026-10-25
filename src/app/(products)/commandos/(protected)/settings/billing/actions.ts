@@ -12,6 +12,7 @@ import {
   saveBillingDetails,
   priceSubscription,
   startCheckout,
+  syncPaymentsFromRazorpay,
   type BillingActionResult,
   type CheckoutResponse,
   type StartCheckoutResult,
@@ -19,7 +20,7 @@ import {
 import type { BillingDetails, BillingDetailsErrors, PriceSummary } from "@/lib/platform/billing/billing-details";
 import type { BillingInterval } from "@/lib/platform/billing/types";
 
-/** Super Admins of this company only — re-checked in every action. */
+/** Directors of this company only — re-checked in every action. */
 async function requireOwner(): Promise<{ companyId: string; userId: string }> {
   const user = await getCurrentHubUser();
   if (!user) redirect("/commandos/login");
@@ -56,9 +57,9 @@ export async function saveBillingDetailsAction(input: Partial<BillingDetails>): 
   );
 }
 
-export async function startCheckoutAction(planId: string, interval: BillingInterval, couponCode: string | null): Promise<StartCheckoutResult> {
+export async function startCheckoutAction(planId: string, interval: BillingInterval, couponCode: string | null, startNow = false): Promise<StartCheckoutResult> {
   const { companyId, userId } = await requireOwner();
-  return startCheckout(companyId, { planId: String(planId ?? ""), interval, couponCode: couponCode ? String(couponCode).slice(0, 64) : null }, userId);
+  return startCheckout(companyId, { planId: String(planId ?? ""), interval, couponCode: couponCode ? String(couponCode).slice(0, 64) : null, startNow: startNow === true }, userId);
 }
 
 export async function confirmCheckoutAction(response: CheckoutResponse): Promise<BillingActionResult> {
@@ -68,7 +69,16 @@ export async function confirmCheckoutAction(response: CheckoutResponse): Promise
 
 export async function changePlanAction(planId: string, interval: BillingInterval, couponCode: string | null): Promise<BillingActionResult> {
   const { companyId, userId } = await requireOwner();
-  return done(await changePlan(companyId, { planId: String(planId ?? ""), interval, couponCode: couponCode ? String(couponCode).slice(0, 64) : null }, userId));
+  return done(await changePlan(companyId, { planId: String(planId ?? ""), interval, couponCode: couponCode ? String(couponCode).slice(0, 64) : null }, userId, "subscription.change_plan", true));
+}
+
+/** "Missing a payment?": pulls the subscription's paid charges from Razorpay into the history. */
+export async function syncTransactionsAction(): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
+  const { companyId } = await requireOwner();
+  const res = await syncPaymentsFromRazorpay(companyId);
+  if (!res.ok) return res;
+  revalidatePath("/commandos/settings/billing/invoices");
+  return { ok: true, message: res.found ? `Checked ${res.found} payment${res.found === 1 ? "" : "s"} with Razorpay. Your history is up to date.` : "No payments found for this subscription yet." };
 }
 
 export async function cancelSubscriptionAction(): Promise<BillingActionResult> {

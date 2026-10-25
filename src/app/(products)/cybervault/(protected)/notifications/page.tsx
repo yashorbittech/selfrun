@@ -26,7 +26,7 @@ export default async function DlmsNotificationsPage() {
       panel="dlms"
       live
       panelName="Document Lifecycle Management"
-      shortCode="DLMS"
+      shortCode="CyberVault"
       description="Track secure document vault uploads, file expiration warnings & access permission alerts."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

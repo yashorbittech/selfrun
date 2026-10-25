@@ -26,7 +26,7 @@ export default async function EditEmployeePage({ params }: { params: Promise<{ i
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "HRMS", href: "/talentos" },
+          { label: "TalentOS", href: "/talentos" },
           { label: "Employees", href: "/talentos/employees" },
           { label: employeeFullName(employee), href: `/talentos/employees/${id}` },
           { label: "Edit" },

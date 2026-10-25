@@ -27,7 +27,7 @@ export default async function MyAssignmentsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "Assignments" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "Assignments" }]}
         title={<>Assignments</>}
       />
 

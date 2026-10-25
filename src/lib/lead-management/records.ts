@@ -243,7 +243,7 @@ export async function advanceLeadStage(
   if (toStage === "batch_assigned" && !lead.studentId) {
     await recordLeadEvent(leadId, {
       kind: "linked_student",
-      title: "Link a TMS student",
+      title: "Link a Cohort AI student",
       detail: "This lead has no linked student yet — link one so batch, attendance and assignments show in the portal.",
       actor: "system",
       visibleToLead: false,
@@ -252,7 +252,7 @@ export async function advanceLeadStage(
   if (toStage === "project_started" && !lead.projectId) {
     await recordLeadEvent(leadId, {
       kind: "linked_project",
-      title: "Link a PMS project",
+      title: "Link a SprintOS project",
       detail: "This lead has no linked project yet — link one so milestones, meetings and invoices show in the portal.",
       actor: "system",
       visibleToLead: false,

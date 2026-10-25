@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import HrmsSidebarShell from "@/components/products/talentos/HrmsSidebarShell";
@@ -10,6 +11,7 @@ import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
 
 export default async function ProtectedHrmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("hrms");
   const user = await getCurrentHrmsUser();
   if (!user) redirect("/talentos/login");

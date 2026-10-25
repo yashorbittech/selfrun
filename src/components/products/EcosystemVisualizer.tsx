@@ -38,8 +38,8 @@ interface SphereData {
 }
 
 const PRODUCT_KEY_BY_TAG: Record<string, string> = {
-  LMS: "lms", SEO: "seo", SMMS: "smms", Web: "website", HRMS: "hrms", OTS: "ots", TMS: "tms",
-  PMS: "pms", PRMS: "prms", Chat: "messenger", Admin: "workspace", "AI Bots": "aibots", DLMS: "dlms", Portal: "portal",
+  DealFlow: "lms", RankMax: "seo", ViralPulse: "smms", Web: "website", TalentOS: "hrms", EvalIQ: "ots", "Cohort AI": "tms",
+  SprintOS: "pms", SpendIQ: "prms", Huddle: "messenger", CommandOS: "workspace", AgentOS: "aibots", CyberVault: "dlms", ClientOS: "portal",
 };
 
 export default function EcosystemVisualizer() {
@@ -58,9 +58,9 @@ export default function EcosystemVisualizer() {
       description: tx("catalog.ecosystemVisualizer.inbound-site-inquiries-and-ai-chatbot-in"),
       dataFlowTrigger: "Web Lead Intake → 24/7 AI Qualification → CRM Kanban → Campaign Brief",
       products: [
-        { name: tx("catalog.ecosystemVisualizer.ai-growth-sales-pipeline-crm"), tag: "LMS", icon: Filter },
-        { name: tx("catalog.ecosystemVisualizer.seo-growth-engine"), tag: "SEO", icon: Search },
-        { name: tx("catalog.ecosystemVisualizer.autonomous-ai-marketing-studio"), tag: "SMMS", icon: Megaphone },
+        { name: tx("catalog.ecosystemVisualizer.ai-growth-sales-pipeline-crm"), tag: "DealFlow", icon: Filter },
+        { name: tx("catalog.ecosystemVisualizer.seo-growth-engine"), tag: "RankMax", icon: Search },
+        { name: tx("catalog.ecosystemVisualizer.autonomous-ai-marketing-studio"), tag: "ViralPulse", icon: Megaphone },
         { name: tx("catalog.ecosystemVisualizer.digital-marketing-front-door"), tag: "Web", icon: Globe },
       ],
     },
@@ -75,9 +75,9 @@ export default function EcosystemVisualizer() {
       description: tx("catalog.ecosystemVisualizer.hired-job-applicants-convert-instantly-i"),
       dataFlowTrigger: "Career Applicant → AI Resume Match → Employee Profile → Biometric Payroll",
       products: [
-        { name: tx("catalog.ecosystemVisualizer.workforce-intelligence-suite"), tag: "HRMS", icon: Users },
-        { name: tx("catalog.ecosystemVisualizer.ots-assessment-engine"), tag: "OTS", icon: FileQuestion },
-        { name: tx("catalog.ecosystemVisualizer.academy-talent-platform"), tag: "TMS", icon: GraduationCap },
+        { name: tx("catalog.ecosystemVisualizer.workforce-intelligence-suite"), tag: "TalentOS", icon: Users },
+        { name: tx("catalog.ecosystemVisualizer.ots-assessment-engine"), tag: "EvalIQ", icon: FileQuestion },
+        { name: tx("catalog.ecosystemVisualizer.academy-talent-platform"), tag: "Cohort AI", icon: GraduationCap },
       ],
     },
     {
@@ -89,11 +89,11 @@ export default function EcosystemVisualizer() {
       textColor: "text-secondary-foreground",
       icon: Kanban,
       description: tx("catalog.ecosystemVisualizer.project-hours-logged-in-timesheets-drive"),
-      dataFlowTrigger: "PMS Timesheet → Profit Margin Calc → PRMS PO Approval → Client Billing",
+      dataFlowTrigger: "SprintOS Timesheet → Profit Margin Calc → SpendIQ PO Approval → Client Billing",
       products: [
-        { name: tx("catalog.ecosystemVisualizer.smart-project-operations"), tag: "PMS", icon: Kanban },
-        { name: tx("catalog.ecosystemVisualizer.enterprise-spend-vault"), tag: "PRMS", icon: ShoppingCart },
-        { name: tx("catalog.ecosystemVisualizer.teamchat-enterprise-comms"), tag: "Chat", icon: MessageSquare },
+        { name: tx("catalog.ecosystemVisualizer.smart-project-operations"), tag: "SprintOS", icon: Kanban },
+        { name: tx("catalog.ecosystemVisualizer.enterprise-spend-vault"), tag: "SpendIQ", icon: ShoppingCart },
+        { name: tx("catalog.ecosystemVisualizer.teamchat-enterprise-comms"), tag: "Huddle", icon: MessageSquare },
       ],
     },
     {
@@ -107,10 +107,10 @@ export default function EcosystemVisualizer() {
       description: tx("catalog.ecosystemVisualizer.super-admin-rbac-governance-encrypted-cr"),
       dataFlowTrigger: "Single Sign-On → Central RBAC Audit → Encrypted Vault → Vector RAG Bot",
       products: [
-        { name: tx("catalog.ecosystemVisualizer.executive-command-center"), tag: "Admin", icon: ShieldCheck },
-        { name: tx("catalog.ecosystemVisualizer.ai-assistant-studio"), tag: "AI Bots", icon: Bot },
-        { name: tx("catalog.ecosystemVisualizer.digilocker-secret-vault"), tag: "DLMS", icon: KeyRound },
-        { name: tx("catalog.ecosystemVisualizer.stakeholder-portal"), tag: "Portal", icon: Lock },
+        { name: tx("catalog.ecosystemVisualizer.executive-command-center"), tag: "CommandOS", icon: ShieldCheck },
+        { name: tx("catalog.ecosystemVisualizer.ai-assistant-studio"), tag: "AgentOS", icon: Bot },
+        { name: tx("catalog.ecosystemVisualizer.digilocker-secret-vault"), tag: "CyberVault", icon: KeyRound },
+        { name: tx("catalog.ecosystemVisualizer.stakeholder-portal"), tag: "ClientOS", icon: Lock },
       ],
     },
   ];

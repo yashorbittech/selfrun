@@ -14,7 +14,7 @@ import { notifyEmployees } from "@/lib/products/sprintos/notifications";
  * notifications) but gated on the admin session, not a PMS one. Full project
  * editing (dates, budget, technologies, …) stays on the existing, much richer
  * `/sprintos/projects/[id]` page rather than being rebuilt here — this listing
- * covers the quick actions a Super Admin actually needs from an overview.
+ * covers the quick actions a Director actually needs from an overview.
  */
 
 async function notifyStatusChange(projectId: string, projectName: string, status: string, projectManagerId: string | null, actorId: string, actorEmail: string) {

@@ -9,6 +9,7 @@
 export const GLOBAL_COLLECTIONS = new Set<string>([
   "companies",
   "company_domains",
+  "email_sender_domains", // which company owns which sending domain (the email provider account is shared)
   "platform_settings",
   "pending_signups",
   "signup_attempts",
@@ -66,6 +67,7 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "aibots_settings",
   "cms_settings",
   "web_push_settings",
+  "email_sender", // the company's own sending address (`_id: "main"`)
   "pwa_settings",
   "dlms_settings",
   "hrms_settings",

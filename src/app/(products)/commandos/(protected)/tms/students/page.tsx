@@ -49,7 +49,7 @@ export default async function AdminStudentsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "TMS", panel: "tms" }, { label: "Students" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Cohort AI", panel: "tms" }, { label: "Students" }]}
         title={<>Students</>}
         description={<>{total} student{total === 1 ? "" : "s"}. There is no delete for students anywhere in the app — only
           status changes — so this listing doesn&apos;t add one either.</>}

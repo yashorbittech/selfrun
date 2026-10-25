@@ -35,7 +35,7 @@ export default async function PaymentLinksPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payment Links" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payment Links" }]}
         title={<>Payment Links</>}
         description={<>Generate secure public payment links (`/pay/[token]`) for direct payment collection.</>}
         actions={<><PaymentLinkCreateDialog /></>}

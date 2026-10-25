@@ -22,7 +22,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ i
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Vendors", href: "/cashflow-ai/vendors" }, { label: vendor.companyName }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Vendors", href: "/cashflow-ai/vendors" }, { label: vendor.companyName }]}
         title={<>{vendor.companyName}</>}
         description={<>{vendor.vendorCode}</>}
         actions={<><div className="flex items-center gap-2">

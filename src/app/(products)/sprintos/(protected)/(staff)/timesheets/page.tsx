@@ -76,7 +76,7 @@ export default async function TimesheetReviewPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Timesheet Review" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Timesheet Review" }]}
         title={<>Timesheet Review</>}
         description={<>Review and approve submitted hours for project delivery and billable tracking.</>}
         actions={<><div className="flex items-center gap-2">

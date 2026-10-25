@@ -15,7 +15,7 @@ export default async function PmsSettingsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Settings" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Settings" }]}
         title={<>Settings</>}
         description={<>Configure project categories, technology suggestions and defaults.</>}
       />

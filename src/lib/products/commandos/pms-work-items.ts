@@ -7,7 +7,7 @@ import { MILESTONES_COLLECTION, type Milestone } from "@/lib/products/sprintos/m
 import type { TaskStatus, MilestoneStatus, Priority } from "@/lib/products/sprintos/constants";
 
 /**
- * Cross-project Tasks and Milestones search for the Super Admin. Both
+ * Cross-project Tasks and Milestones search for the Director. Both
  * `src/lib/sprintos/tasks.ts`'s and `src/lib/sprintos/milestones.ts`'s own filter
  * builders are project-scoped (a task/milestone is always managed from its
  * one project's page in the native PMS product — there's no "all tasks across

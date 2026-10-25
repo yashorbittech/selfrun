@@ -7,7 +7,7 @@
  * An item is available when ALL of these hold:
  *   1. `allow(user)` — a rule built from the existing role files
  *      (`*-roles.ts`) and the permission catalog (`permissionOverrides`,
- *      resolved by `resolvePermission`). Super Admin has access across all products.
+ *      resolved by `resolvePermission`). Director has access across all products.
  *   2. The product is switched on for this company and in the product registry.
  *   3. `platform` items: the Platform Console's own access check passed.
  */
@@ -54,6 +54,7 @@ export type NavIcon =
   | "shield"
   | "chart"
   | "globe"
+  | "mail"
   | "building"
   | "card"
   | "receipt"
@@ -110,12 +111,12 @@ const PANELS: NavItemDef[] = (
     ["prms", "Procurement & Expenses", "cart", has(normalizePrmsRoles)],
     ["tms", "Training", "training", has(normalizeTmsRoles)],
     ["messenger", "Team Chat", "chat", has(normalizeChatRoles)],
-    ["sop", "SOP Library", "book", (u) => hasSopAccess(u.roles)],
+    ["sop", "Playbook Library", "book", (u) => hasSopAccess(u.roles)],
     ["lpms", "Legal & Documents", "file", (u) => hasLpmsAccess(u.roles)],
-    ["dlms", "Digi Locker", "vault", (u) => hasDlmsAccess(u.roles)],
+    ["dlms", "CyberVault", "vault", (u) => hasDlmsAccess(u.roles)],
     ["ots", "Online Tests", "test", (u) => hasOtsAccess(u.roles)],
-    ["aibots", "AI Bots", "bot", (u) => hasAibotsAccess(u.roles)],
-    ["intelligence", "AI Intelligence", "chart", (u) => hasIntelligenceAccess(u.roles)],
+    ["aibots", "AgentOS", "bot", (u) => hasAibotsAccess(u.roles)],
+    ["intelligence", "DataBrain", "chart", (u) => hasIntelligenceAccess(u.roles)],
     ["smms", "Social Media", "megaphone", (u) => hasSmmsAccess(u.roles)],
     ["seo", "SEO", "search", (u) => hasSeoAccess(u.roles)],
     ["cms", "Website", "website", (u) => hasCmsAccess(u.roles)],
@@ -129,21 +130,21 @@ const PANELS: NavItemDef[] = (
 // analytics permission where it has one, otherwise its see-everything tier.
 const ANALYTICS: NavItemDef[] = (
   [
-    ["aibots", "AI Bots Analytics", "bot", (u) => hasAibotsAccess(u.roles) && isAibotsManagerTier(u)],
+    ["aibots", "AgentOS Analytics", "bot", (u) => hasAibotsAccess(u.roles) && isAibotsManagerTier(u)],
     ["cms", "Website Analytics", "website", (u) => hasCmsAccess(u.roles) && cmsCan(u, "VIEW")],
-    ["dlms", "Digi Locker Analytics", "vault", (u) => hasDlmsAccess(u.roles) && isDlmsManagerTier(u)],
+    ["dlms", "CyberVault Analytics", "vault", (u) => hasDlmsAccess(u.roles) && isDlmsManagerTier(u)],
     ["fms", "Finance Analytics", "finance", orAdmin(has(normalizeFmsRoles))],
     ["hrms", "HR Analytics", "users", orAdmin(has(normalizeRoles))],
     ["lms", "Lead Analytics", "grid", canViewLmsAnalytics],
-    ["lpms", "LPMS Analytics", "file", (u) => hasLpmsAccess(u.roles) && isLpmsManagerTier(u)],
+    ["lpms", "ContractFlow Analytics", "file", (u) => hasLpmsAccess(u.roles) && isLpmsManagerTier(u)],
     ["messenger", "Messenger Analytics", "chat", orAdmin(has(normalizeChatRoles))],
     ["ots", "Online Tests Analytics", "test", (u) => hasOtsAccess(u.roles) && otsCan(u, "VIEW_REPORTS")],
     ["pms", "Project Analytics", "projects", orAdmin(has(normalizePmsRoles))],
     ["portal", "Portal Analytics", "globe", (u) => resolvePermission(u, "portal.isPortalAdmin", () => u.roles.includes("portal_admin"))],
     ["prms", "Procurement Analytics", "cart", orAdmin(has(normalizePrmsRoles))],
-    ["seo", "SEO Analytics", "search", (u) => hasSeoAccess(u.roles) && seoCan(u, "VIEW")],
+    ["seo", "RankMax Analytics", "search", (u) => hasSeoAccess(u.roles) && seoCan(u, "VIEW")],
     ["smms", "Social Media Analytics", "megaphone", (u) => hasSmmsAccess(u.roles) && smmsCan(u, "VIEW_ANALYTICS")],
-    ["sop", "SOP Analytics", "book", (u) => hasSopAccess(u.roles) && sopCan(u, "EXPORT")],
+    ["sop", "Playbook Analytics", "book", (u) => hasSopAccess(u.roles) && sopCan(u, "EXPORT")],
     ["tms", "Training Analytics", "training", orAdmin(has(normalizeTmsRoles))],
     ["workspace", "Workspace Analytics", "chart", canViewWorkspaceAnalytics],
   ] as [string, string, NavIcon, NavItemDef["allow"]][]
@@ -162,7 +163,7 @@ const ANALYTICS: NavItemDef[] = (
 /**
  * Company-management capabilities, in the permission catalog
  * (`permission-catalog.ts`, group "Workspace management"). `super_admin`
- * holds all of them; nobody else does by default, and a Super Admin can grant
+ * holds all of them; nobody else does by default, and a Director can grant
  * any single one to a person through permission overrides in Users & roles.
  */
 export const MANAGE_PERMISSIONS = {
@@ -191,7 +192,7 @@ export const canViewCommandCenter = (u: RoleContext): boolean => may(MANAGE_PERM
 
 /** Who may open the Audit log page, and which of its two sources each reader gets. */
 export const canViewAuditLog = (u: RoleContext): boolean => may(MANAGE_PERMISSIONS.auditLog)(u);
-/** Workspace events (`platform_events`, the event bus) — company Super Admin only, as `/settings/activity` always was. */
+/** Workspace events (`platform_events`, the event bus) — company Director only, as `/settings/activity` always was. */
 export const canViewWorkspaceEvents = (u: RoleContext): boolean => superAdmin(u);
 
 const P = MANAGE_PERMISSIONS;
@@ -244,7 +245,7 @@ const MANAGE: NavItemDef[] = MANAGE_PAGES.map(([group, path, label, icon, permis
 const COMPANY_GROUPS: Record<string, string> = {
   setup: "Organization", profile: "Organization", users: "Organization", roles: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
-  branding: "Branding & domains", "website-domain": "Branding & domains", "app-domain": "Branding & domains", domains: "Branding & domains", app: "Branding & domains",
+  branding: "Branding & domains", addresses: "Branding & domains", domains: "Branding & domains", email: "Branding & domains", app: "Branding & domains",
   payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Security & logs",
   audit: "Security & logs", security: "Security & logs",
 };
@@ -252,16 +253,16 @@ const company = (key: string, href: string, icon: NavIcon, label: string, descri
 const COMPANY: NavItemDef[] = [
   company("setup", "/commandos/onboarding", "building", "Company setup", "Profile, departments, invitations and which products your team uses."),
   company("profile", "/commandos/settings/profile", "building", "Organization profile", "Company name, legal name, industry, country, currency, time zone and contact details."),
-  { ...company("users", "/commandos/users", "users", "Users, roles & seats", "Who can sign in, which products and permissions each person has, and seats used.", "Users & roles"), allow: may(P.users) },
-  company("roles", "/commandos/roles", "users", "Custom roles", "Build roles of your own: choose the products and the exact permissions, then give them to people.", "Custom roles"),
+  { ...company("users", "/commandos/users", "users", "People & access", "Everyone who can sign in: their designation, status (active, on leave, left the company …), access in every product, and seats used.", "People & access"), allow: may(P.users) },
+  company("roles", "/commandos/roles", "users", "Designations & permissions", "The jobs in your company (HR Manager, Accountant …) and what each may do in every product. Start from the standard ones or add your own.", "Designations"),
   company("billing", "/commandos/settings/billing", "card", "Plan & billing", "Your plan, payments, coupon codes and GST billing details."),
   company("invoices", "/commandos/settings/billing/invoices", "receipt", "Invoices & payments", "Tax invoices, credit notes and every payment made for your subscription."),
-  company("usage", "/commandos/settings/usage", "gauge", "Usage", "Seats, AI tokens and file storage used against your plan's limits."),
+  company("usage", "/commandos/settings/usage", "gauge", "Usage & limits", "What your workspace uses against its plan (seats, AI tokens, storage, emails, voice, domains), and where to add more capacity.", "Usage & limits"),
   company("branding", "/commandos/settings/branding", "palette", "Branding", "Logo, name and colour across products, emails and PDFs."),
   company("app", "/commandos/settings/apps", "smartphone", "Apps & downloads", "Your company's own apps for phones and Windows, macOS and Linux computers: settings, and a Generate button and download link for each app.", "Apps"),
-  company("website-domain", "/commandos/addresses/website", "website", "Website domain", "The address of your public website, ready to copy and share.", "Website domain"),
-  company("app-domain", "/commandos/addresses/app", "smartphone", "App domain", "The address where you and your team sign in to the Workspace and every product.", "App domain"),
+  company("addresses", "/commandos/addresses", "website", "Default domain", "The default addresses we give your company: your public website and the app where your team signs in to the Workspace and every product, ready to copy and share.", "Default domain"),
   company("domains", "/commandos/settings/domains", "globe", "Custom domains", "Your workspace address and your own custom domains, with automatic SSL.", "Domains"),
+  company("email", "/commandos/settings/email", "mail", "Sender email", "Send your emails from your own address, like hello@yourbusiness.com, by connecting your domain.", "Sender email"),
   company("payments", "/commandos/settings/payments", "bank", "Payment account", "Connect your own Razorpay account to collect invoice payments and pay salaries.", "Payments & payouts"),
   company("integrations", "/commandos/settings/integrations", "plug", "Integrations", "What your workspace is connected to: payment gateway, webhooks and your own domain."),
   company("automations", "/commandos/settings/automations", "zap", "Automations", "When something happens, notify people, send an email or call a webhook."),
@@ -269,7 +270,7 @@ const COMPANY: NavItemDef[] = [
   company("import", "/commandos/settings/import", "upload", "Import data", "Bring leads, clients and employees in from CSV files, or download a copy of everything your workspace holds."),
   {
     ...company("audit", "/commandos/settings/audit-log", "history", "Audit log", "Who did what across your workspace and its products, and when: workspace events and product activity in one place."),
-    // Same rule as the old Management → Activity log; the Super Admin's workspace events source is checked on the page itself.
+    // Same rule as the old Management → Activity log; the Director's workspace events source is checked on the page itself.
     allow: canViewAuditLog,
   },
   company("security", "/commandos/settings/security", "lock", "Security", "Your sign-in, password, active sessions and accounts that need attention."),

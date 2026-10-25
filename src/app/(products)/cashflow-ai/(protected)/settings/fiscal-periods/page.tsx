@@ -22,7 +22,7 @@ export default async function FiscalPeriodsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Fiscal Periods" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Fiscal Periods" }]}
         title={<>Fiscal Periods</>}
         description={<>Closing a period posts a real journal entry that zeroes its income/expense activity into Retained Earnings
           and locks it against further postings. Reopening reverses that entry.</>}

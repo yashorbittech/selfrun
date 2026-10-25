@@ -1,3 +1,7 @@
+import { DESIGNATION_TEMPLATES, DIRECTOR_ROLE, DIRECTOR_TITLE, presetToDesignationKey } from "@/lib/platform/designations";
+
+const DIRECTOR_KEY = "director";
+
 /**
  * Starting points offered by the onboarding wizard — client-safe, no data
  * access. Everything here is a DEFAULT the owner can edit before it's applied.
@@ -46,67 +50,44 @@ export const DEPARTMENT_TEMPLATES: Record<Industry, DepartmentTemplate[]> = {
 };
 
 /**
- * Invitation role presets → the REAL role literals each product checks (see
- * each module's `*-roles.ts` / `admin/role-catalog.ts`). A preset is only a
- * convenient bundle; roles stay editable per person in Users & Roles.
+ * What a person can be invited as: a designation (Director, HR Manager, Accountant …). Each one is a bundle of the REAL role literals every
+ * product checks (see `platform/designations.ts`), so the invitee gets the right access in every product at once. Roles stay editable per
+ * person in People & access.
  */
-export const ROLE_PRESETS = [
-  { value: "admin", label: "Company Admin", description: "Full access to every product and company settings.", roles: ["super_admin"] },
-  {
-    value: "hr",
-    label: "HR Manager",
-    description: "People, attendance, leave, payroll, recruitment tests and policies.",
-    roles: ["hr", "employee", "chat_hr", "sop_manager", "ots_manager", "workspace_member"],
-  },
-  {
-    value: "project_manager",
-    label: "Project Manager",
-    description: "Projects, tasks, timesheets and the delivery team.",
-    roles: ["pms_manager", "manager", "employee", "chat_pm", "sop_employee", "dlms_manager", "workspace_member"],
-  },
-  {
-    value: "developer",
-    label: "Developer / Team member",
-    description: "Their tasks, timesheets, leave, chat and company documents.",
-    roles: ["pms_employee", "employee", "chat_employee", "sop_employee", "prms_employee", "dlms_employee", "workspace_member"],
-  },
-  { value: "sales", label: "Sales / Business Development", description: "Leads, clients and the CRM pipeline.", roles: ["lms_manager", "employee", "chat_employee", "sop_employee", "workspace_member"] },
-  { value: "finance", label: "Accounts / Finance", description: "Invoices, payments, expenses and procurement approvals.", roles: ["finance_manager", "finance", "employee", "chat_employee", "sop_employee", "workspace_member"] },
-  {
-    value: "marketing",
-    label: "Marketing",
-    description: "Social media, SEO and the website.",
-    roles: ["smms_manager", "seo_manager", "cms_editor", "employee", "chat_employee", "sop_employee", "workspace_member"],
-  },
-] as const;
-export type RolePreset = (typeof ROLE_PRESETS)[number]["value"];
+export const ROLE_PRESETS: { value: string; label: string; description: string; roles: string[] }[] = [
+  { value: DIRECTOR_KEY, label: DIRECTOR_TITLE, description: "Full access to every product and company settings. Can change anyone's status.", roles: [DIRECTOR_ROLE] },
+  ...DESIGNATION_TEMPLATES.map((d) => ({ value: d.key, label: d.title, description: d.description, roles: d.roles })),
+];
+export type RolePreset = string;
 
 export function rolesForPreset(preset: string): string[] | null {
-  const p = ROLE_PRESETS.find((r) => r.value === preset);
+  const key = presetToDesignationKey(preset);
+  if (!key) return null;
+  const p = ROLE_PRESETS.find((r) => r.value === key);
   return p ? [...p.roles] : null;
 }
 
 /** The products a company can switch on or off. `core` products are always on. */
 export const MODULES = [
-  { key: "workspace", label: "Staff Hub", description: "Everyone's home screen", core: true },
-  { key: "admin", label: "Command Center", description: "Company dashboard, users & roles", core: true },
-  { key: "messenger", label: "Team Chat", description: "Channels, DMs, meetings, calls", core: true },
-  { key: "hrms", label: "HR & Payroll", description: "Employees, attendance, leave, payroll, recruitment", core: false },
-  { key: "pms", label: "Projects", description: "Clients, projects, tasks, timesheets, costing", core: false },
-  { key: "lms", label: "CRM & Sales", description: "Leads, pipeline, campaigns, offers", core: false },
-  { key: "fms", label: "Finance", description: "Invoices, payments, accounting, reports", core: false },
-  { key: "prms", label: "Procurement & Assets", description: "Vendors, purchase orders, assets, expenses", core: false },
-  { key: "tms", label: "Training", description: "Programs, batches, students, certificates", core: false },
-  { key: "ots", label: "Online Tests", description: "Assessments for hiring and training", core: false },
-  { key: "sop", label: "SOPs & Policies", description: "Processes and acknowledgements", core: false },
-  { key: 'lpms', label: 'Legal & Documents', description: 'Policies, agreements, certificates and document automation', core: false },
-  { key: "dlms", label: "Digi Locker", description: "Company & client documents and credentials", core: false },
-  { key: "cms", label: "Website", description: "Your public website and pages", core: false },
-  { key: "seo", label: "SEO", description: "Search visibility and audits", core: false },
-  { key: "smms", label: "Social Media", description: "Posts, campaigns and approvals", core: false },
-  { key: "aibots", label: "AI Assistants", description: "AI bots for your team", core: false },
-  { key: "intelligence", label: "AI Intelligence", description: "Ask questions about your business data", core: false },
-  { key: "portal", label: "Client & Student Portal", description: "External portal for clients, students, applicants", core: false },
+  { key: "workspace", label: "CommandOS", description: "Everyone's home screen", core: true },
+  { key: "admin", label: "CommandOS Command Center", description: "Company dashboard, users & roles", core: true },
+  { key: "messenger", label: "Huddle", description: "Channels, DMs, meetings, calls", core: true },
+  { key: "hrms", label: "TalentOS", description: "Employees, attendance, leave, payroll, recruitment", core: false },
+  { key: "pms", label: "SprintOS", description: "Clients, projects, tasks, timesheets, costing", core: false },
+  { key: "lms", label: "DealFlow", description: "Leads, pipeline, campaigns, offers", core: false },
+  { key: "fms", label: "CashFlow", description: "Invoices, payments, accounting, reports", core: false },
+  { key: "prms", label: "SpendIQ", description: "Vendors, purchase orders, assets, expenses", core: false },
+  { key: "tms", label: "Cohort AI", description: "Programs, batches, students, certificates", core: false },
+  { key: "ots", label: "EvalIQ", description: "Assessments for hiring and training", core: false },
+  { key: "sop", label: "Playbook", description: "Processes and acknowledgements", core: false },
+  { key: 'lpms', label: "ContractFlow", description: 'Policies, agreements, certificates and document automation', core: false },
+  { key: "dlms", label: "CyberVault", description: "Company & client documents and credentials", core: false },
+  { key: "cms", label: "SiteCraft", description: "Your public website and pages", core: false },
+  { key: "seo", label: "RankMax", description: "Search visibility and audits", core: false },
+  { key: "smms", label: "ViralPulse", description: "Posts, campaigns and approvals", core: false },
+  { key: "aibots", label: "AgentOS", description: "AI bots for your team", core: false },
+  { key: "intelligence", label: "DataBrain", description: "Ask questions about your business data", core: false },
+  { key: "portal", label: "ClientOS", description: "External portal for clients, students, applicants", core: false },
 ] as const;
 export type ModuleKey = (typeof MODULES)[number]["key"];
 

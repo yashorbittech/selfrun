@@ -50,7 +50,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Contracts & AMC" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Contracts & AMC" }]}
         title={<>Contracts &amp; AMC</>}
         description={<>{total} contract{total === 1 ? "" : "s"}, {active} active.</>}
         actions={<>{canManage && (

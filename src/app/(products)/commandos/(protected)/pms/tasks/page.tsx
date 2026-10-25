@@ -56,7 +56,7 @@ export default async function AdminTasksPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "PMS", panel: "pms" }, { label: "Tasks" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "SprintOS", panel: "pms" }, { label: "Tasks" }]}
         title={<>Tasks</>}
         description={<>{total} task{total === 1 ? "" : "s"} across every project.</>}
       />

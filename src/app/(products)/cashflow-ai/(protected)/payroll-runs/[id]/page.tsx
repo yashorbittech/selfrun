@@ -20,7 +20,7 @@ export default async function PayrollRunDetailPage({ params }: { params: Promise
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payroll Runs", href: "/cashflow-ai/payroll-runs" }, { label: monthLabelLong(run.month) }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payroll Runs", href: "/cashflow-ai/payroll-runs" }, { label: monthLabelLong(run.month) }]}
         title={<>{monthLabelLong(run.month)}</>}
         description={<>{run.payslipCount} payslip{run.payslipCount === 1 ? "" : "s"}</>}
         actions={<><Badge className={meta.badgeClass}>{meta.label}</Badge></>}

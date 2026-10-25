@@ -23,7 +23,7 @@ export default async function MakersPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Maker Types" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Maker Types" }]}
         title={<>Maker Types</>}
         description={<>Configure the types of documents your team can create.</>}
         actions={<><Link href="/contractflow-ai/makers/new" className={buttonVariants({ size: "sm" })}>

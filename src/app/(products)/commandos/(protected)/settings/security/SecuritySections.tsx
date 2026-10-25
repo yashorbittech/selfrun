@@ -5,7 +5,8 @@ import { cn, formatDateTime } from "@/lib/utils";
 import { listActiveSessions, listLoginHistory } from "@/lib/security/sessions";
 import type { ObjectId } from "mongodb";
 import SessionsList from "./SessionsList";
-import TwoFactorCard from "./TwoFactorCard";
+import TwoStepSettings, { TWO_STEP_DESCRIPTION } from "@/components/security/TwoStepSettings";
+import { maskEmail } from "@/lib/security/email-otp";
 import { twoFactorStatus } from "@/lib/security/two-factor";
 import { oneDeviceLimitApplies } from "@/lib/security/device-limit";
 
@@ -19,10 +20,10 @@ export default async function SecuritySections({ adminId, email }: { adminId: Ob
       <GlassCard interactive={false} containerClassName="h-auto">
         <CardHeader>
           <CardTitle className="text-base">Two-step sign-in</CardTitle>
-          <CardDescription>A second check with an authenticator app when you sign in with your password.</CardDescription>
+          <CardDescription>{TWO_STEP_DESCRIPTION}</CardDescription>
         </CardHeader>
         <CardContent>
-          <TwoFactorCard status={{ enabled: tf.enabled, enabledAt: tf.enabledAt ? tf.enabledAt.toISOString() : null, recoveryLeft: tf.recoveryLeft, available: tf.available }} />
+          <TwoStepSettings initial={{ method: tf.method, enabledAt: tf.enabledAt ? tf.enabledAt.toISOString() : null, recoveryLeft: tf.recoveryLeft, available: tf.available, email: maskEmail(email) }} />
         </CardContent>
       </GlassCard>
 

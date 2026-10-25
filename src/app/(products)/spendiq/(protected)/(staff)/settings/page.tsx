@@ -15,7 +15,7 @@ export default async function PrmsSettingsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Settings" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Settings" }]}
         title={<>Settings</>}
         description={<>Company identity for purchase orders and invoices, requisition approval thresholds and default currency.</>}
       />

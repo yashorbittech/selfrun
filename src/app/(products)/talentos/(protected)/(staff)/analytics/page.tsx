@@ -119,7 +119,7 @@ export default async function HrmsAdvanceAnalyticsPage({
 
       {/* Breadcrumbs */}
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Advance Analytics" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Advance Analytics" }]}
         title={<>
             Advance Analytics & Workforce Intelligence</>}
         description={<>In-depth analytics for headcount trends, hiring velocity, attrition metrics, department distribution, and diversity.</>}

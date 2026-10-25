@@ -43,7 +43,7 @@ export default async function VendorsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Vendors" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Vendors" }]}
         title={<>Vendors</>}
         description={<>{totalVendors} supplier{totalVendors === 1 ? "" : "s"} in the CRM.</>}
         actions={<>{canManage && (

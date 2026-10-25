@@ -62,7 +62,7 @@ export default async function BatchesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Batches" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Batches" }]}
         title={<>Batches</>}
         description={<>{totalBatches} batch{totalBatches === 1 ? "" : "es"} across all programs.</>}
         actions={<><div className="flex items-center gap-2">

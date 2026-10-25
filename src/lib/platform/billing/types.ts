@@ -191,10 +191,39 @@ export interface CompanySubscription {
   /** The last successful charge (for invoices and pro-rata refunds on an immediate upgrade). */
   lastPayment?: { id: string; amount: number; currency: string; at: Date; periodStart: Date | null; periodEnd: Date | null } | null;
   /** A checkout started but not yet confirmed by Razorpay: the quote it was created with. */
-  checkout?: { subscriptionId: string; pricing: SubscriptionPricing } | null;
+  checkout?: { subscriptionId: string; pricing: SubscriptionPricing; /** Replaces the live subscription (UPI plan switch): the old one is canceled, and the unused part refunded, once this one is confirmed. */ replaces?: boolean } | null;
   /** Set by the Platform Console: never billed (status "internal") although not the platform owner. */
   complimentary?: boolean;
+  /** What the platform admin has changed for THIS company only, on top of its plan (limits, capabilities, products). See `billing/overrides.ts`. */
+  overrides?: CompanyOverrides | null;
   updatedAt: Date;
+}
+
+/**
+ * One limit changed for one company. `set` replaces the plan's limit with `value`; `add` gives `value` more than the plan (and any add-ons)
+ * does; `unlimited` removes the limit. With `until` it ends on its own and the plan's limit applies again.
+ */
+export interface LimitOverride {
+  mode: "set" | "add" | "unlimited";
+  value?: number;
+  until?: Date | null;
+}
+
+/** A capability or product switched on or off for one company, whatever its plan says; optionally for a while only. */
+export interface SwitchOverride {
+  on: boolean;
+  until?: Date | null;
+}
+
+/** The Platform Console's per-company adjustments to a plan: every limit, every capability, every product. */
+export interface CompanyOverrides {
+  limits?: Record<string, LimitOverride>;
+  flags?: Record<string, SwitchOverride>;
+  modules?: Record<string, SwitchOverride>;
+  /** Why (shown to platform staff only). */
+  note?: string;
+  updatedAt?: Date;
+  updatedBy?: string;
 }
 
 /** One add-on held by a company (`companies.subscription.addons[]`). */
@@ -240,14 +269,17 @@ export interface Entitlements {
   status: SubscriptionStatus;
   /** null = all products. */
   modules: Set<string> | null;
+  /** What the company can use now: the plan's limits, add-ons, Console overrides AND purchased top-up credits. */
   limits: PlanLimits;
+  /** The same WITHOUT top-up credits: what the plan itself allows each month (credits are used only beyond this). */
+  baseLimits?: PlanLimits;
   /** Capability flags the plan includes (`PLAN_FLAGS`); null = every flag (platform owner, demo). */
   flags: string[] | null;
   /** Suspended/canceled: data stays visible but nothing new can be created. */
   readOnly: boolean;
   /** Days left in the trial (trialing only). */
   trialDaysLeft: number | null;
-  /** When the company will be deleted for good (the Super Admin asked for it; until then it is read-only and the request can be cancelled). */
+  /** When the company will be deleted for good (the Director asked for it; until then it is read-only and the request can be cancelled). */
   pendingDeletionAt?: Date | null;
 }
 

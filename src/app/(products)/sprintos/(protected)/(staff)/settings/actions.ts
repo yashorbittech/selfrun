@@ -24,7 +24,7 @@ export async function savePmsSettingsAction(input: Record<string, unknown>): Pro
     action: "update",
     entity: "settings",
     entityId: "config",
-    entityLabel: "PMS settings",
+    entityLabel: "SprintOS settings",
     summary: `${data.categories.length} categories · default ${data.defaultCurrency}`,
   });
   revalidatePath("/sprintos/settings");

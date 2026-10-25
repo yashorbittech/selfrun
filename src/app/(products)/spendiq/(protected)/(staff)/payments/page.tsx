@@ -40,7 +40,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Payments" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Payments" }]}
         title={<>Payments</>}
         description={<>{result.total} payment{result.total === 1 ? "" : "s"} recorded against invoices.</>}
       />

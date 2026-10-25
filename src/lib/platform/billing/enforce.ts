@@ -1,3 +1,4 @@
+import { BLOCKED_STATUSES, canSignIn } from "@/lib/security/account-status";
 import { checkAiTokenUsage, checkStorageUsage } from "@/lib/notify/triggers/usage";
 import "server-only";
 import { notFound, unstable_rethrow } from "next/navigation";
@@ -100,7 +101,7 @@ export function rolesUseSeat(roles: readonly string[] | null | undefined): boole
 }
 
 /** Mongo filter for `admin_users` that take a seat (mirrors `rolesUseSeat`). */
-export const SEAT_FILTER = { roles: { $elemMatch: { $nin: SEATLESS_ROLES } } };
+export const SEAT_FILTER = { roles: { $elemMatch: { $nin: SEATLESS_ROLES } }, status: { $nin: BLOCKED_STATUSES } };
 
 export async function countSeatsUsed(): Promise<number> {
   return (await getDb()).collection("admin_users").countDocuments(SEAT_FILTER);
@@ -195,10 +196,12 @@ const allowedCache = new Map<string, { ids: Set<string>; limit: number | null; a
 
 /**
  * Whether this account may be used under the plan's seat limit right now. A company that moved to a smaller plan (or
- * had accounts created before the limit existed) keeps its Super Admin and the oldest accounts up to the limit; the
+ * had accounts created before the limit existed) keeps its Director and the oldest accounts up to the limit; the
  * rest are locked out until they upgrade or free a seat. Seatless roles and unlimited plans are never affected.
  */
-export async function accountWithinSeats(user: { _id: unknown; roles?: string[] | null }): Promise<boolean> {
+export async function accountWithinSeats(user: { _id: unknown; roles?: string[] | null; status?: string | null; platformRoleId?: string | null }): Promise<boolean> {
+  // The one check every product's per-request sign-in passes through: an account that is suspended, deactivated or belongs to someone who left never gets in.
+  if (!canSignIn(user)) return false;
   try {
     if (!rolesUseSeat(user.roles)) return true;
     const companyId = await currentCompanyIdOrNull();
@@ -361,6 +364,8 @@ export interface BillingNoticeInfo {
   planName: string | null;
   /** Trial or grace days left; null for the other states. */
   daysLeft: number | null;
+  /** Trial only: autopay is already set up, so the trial rolls into the paid plan by itself (the date of the first charge). */
+  firstChargeAt?: Date | null;
 }
 
 /** What the product banner should say for the current company, or null (active / internal). */
@@ -368,8 +373,10 @@ export async function getBillingNotice(): Promise<BillingNoticeInfo | null> {
   const e = await getEntitlements();
   if (e.pendingDeletionAt) return { status: "deleting", planName: e.planName, daysLeft: Math.max(0, Math.ceil((e.pendingDeletionAt.getTime() - Date.now()) / 86_400_000)) };
   switch (e.status) {
-    case "trialing":
-      return { status: "trialing", planName: e.planName, daysLeft: e.trialDaysLeft };
+    case "trialing": {
+      const sub = await getCompanySubscription(await currentCompanyId());
+      return { status: "trialing", planName: e.planName, daysLeft: e.trialDaysLeft, firstChargeAt: sub?.provider?.subscriptionId ? sub.trialEndsAt : null };
+    }
     case "past_due":
     case "suspended":
     case "canceled":

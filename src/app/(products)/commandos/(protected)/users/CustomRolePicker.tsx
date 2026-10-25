@@ -5,19 +5,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import type { CustomRoleView } from "@/lib/products/commandos/custom-roles-shared";
 
-/** The company's custom roles as a checklist (hidden when there are none). Server actions re-check what the actor may hand out. */
+/** The company's designations as a checklist of extras (hidden when there are none). Server actions re-check what the actor may hand out. */
 export default function CustomRolePicker({ roles, selected, onToggle, canManage }: { roles: CustomRoleView[]; selected: string[]; onToggle: (id: string) => void; canManage?: boolean }) {
   if (roles.length === 0) {
     return canManage ? (
       <p className="text-[11px] text-muted-foreground">
-        No custom roles yet. <Link href="/commandos/roles" className="font-medium text-primary underline">Build one</Link> to hand out a ready-made bundle of products and permissions.
+        No other designations yet. <Link href="/commandos/roles" className="font-medium text-primary underline">Add one</Link> to hand out a ready-made bundle of products and permissions.
       </p>
     ) : null;
   }
   return (
     <div className="space-y-2 rounded-xl border border-border/70 bg-card p-3">
       <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Custom roles</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Additional designations</span>
         {selected.length > 0 && <Badge variant="outline" className="px-1.5 py-0 text-[10px] text-primary">{selected.length} assigned</Badge>}
       </div>
       {roles.map((r) => (

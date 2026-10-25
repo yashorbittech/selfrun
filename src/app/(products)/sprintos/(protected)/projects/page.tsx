@@ -69,7 +69,7 @@ export default async function ProjectsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Projects" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Projects" }]}
         title={<>Projects</>}
         description={<>{restrictToEmployeeId ? "Projects you manage or contribute to." : `${totalProjects} project${totalProjects === 1 ? "" : "s"} across the portfolio.`}</>}
         actions={<><div className="flex items-center gap-2">

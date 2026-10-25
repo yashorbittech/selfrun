@@ -22,7 +22,7 @@ function revalidate() {
 export async function updateRfqStatusAction(id: string, status: string): Promise<{ ok: boolean; error?: string }> {
   const admin = await requireWorkspaceAction("manage.prms.rfqs");
   if (!isValidRfqStatus(status) || !(ADMIN_SETTABLE_STATUSES as readonly string[]).includes(status)) {
-    return { ok: false, error: "That status can only be set by awarding the RFQ in PRMS." };
+    return { ok: false, error: "That status can only be set by awarding the RFQ in SpendIQ." };
   }
   const before = await getRfq(id);
   if (!before) return { ok: false, error: "RFQ not found." };

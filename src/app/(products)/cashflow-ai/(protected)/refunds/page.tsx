@@ -23,7 +23,7 @@ export default async function RefundsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Refunds" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Refunds" }]}
         title={<>Refunds</>}
         description={<>{result.total} refund{result.total === 1 ? "" : "s"}. Request one from a receipt&apos;s detail page.</>}
       />

@@ -38,7 +38,7 @@ export default async function InventoryItemDetailPage({ params }: { params: Prom
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Inventory & Stationery", href: "/spendiq/inventory" }, { label: i.itemCode }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Inventory & Stationery", href: "/spendiq/inventory" }, { label: i.itemCode }]}
         title={<>{i.name}</>}
         description={<><span className="font-mono">{i.itemCode}</span> · {i.currentStock} {i.uom} on hand
             {i.currentStock <= i.minStock && <span className="ml-1 text-destructive">(below minimum)</span>}</>}

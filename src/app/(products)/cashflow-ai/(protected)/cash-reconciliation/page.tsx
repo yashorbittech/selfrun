@@ -36,7 +36,7 @@ export default async function CashReconciliationPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Cash Reconciliation" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Cash Reconciliation" }]}
         title={<>Cash Reconciliation</>}
         description={<>{selectedAccount ? selectedAccount.accountName : "No cash accounts yet."}</>}
         actions={<>{canManage && accountOpts.length > 0 && (

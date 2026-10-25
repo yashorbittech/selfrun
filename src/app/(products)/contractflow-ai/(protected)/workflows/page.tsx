@@ -23,7 +23,7 @@ export default async function WorkflowsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Workflows" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Workflows" }]}
         title={<>Approval Workflows</>}
         description={<>Configure multi-step approval workflows for document types.</>}
         actions={<><Link href="/contractflow-ai/workflows/new" className={buttonVariants({ size: "sm" })}>

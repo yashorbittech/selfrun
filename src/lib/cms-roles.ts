@@ -5,7 +5,7 @@
  * an explicit `cms_*` role (or super_admin).
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in
  * `src/lib/commandos/permission-catalog.ts`).
  *
@@ -21,20 +21,20 @@ export type CmsRole = (typeof CMS_ROLES)[number];
 
 export const CMS_ROLE_META: Record<CmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
-    description: "Every CMS operation, including publish, theme, navigation, media and the audit log.",
+    label: "Director",
+    description: "Every SiteCraft operation, including publish, theme, navigation, media and the audit log.",
   },
   cms_admin: {
-    label: "CMS Admin",
+    label: "SiteCraft Admin",
     description: "Full control: publish pages, manage navigation/footer, delete media, publish the theme, manage settings and the audit log.",
   },
   cms_editor: {
-    label: "CMS Editor",
+    label: "SiteCraft Editor",
     description: "Create and edit page content, sections, media uploads, form fields and draft theme tokens — cannot publish.",
   },
   cms_viewer: {
-    label: "CMS Viewer",
-    description: "Read-only access to every CMS dataset.",
+    label: "SiteCraft Viewer",
+    description: "Read-only access to every SiteCraft dataset.",
   },
 };
 
@@ -60,7 +60,7 @@ export const CMS_PERMISSIONS = [
 ] as const;
 export type CmsPermission = (typeof CMS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const CMS_PERMISSION_KEY: Record<CmsPermission, string> = {
   VIEW: "cms.canView",
   PAGES_CREATE: "cms.canCreatePages",
@@ -83,10 +83,10 @@ export const CMS_PERMISSION_KEY: Record<CmsPermission, string> = {
 };
 
 export const CMS_PERMISSION_META: Record<CmsPermission, { label: string; description: string }> = {
-  VIEW: { label: "View", description: "Open the CMS product and read every CMS dataset." },
-  PAGES_CREATE: { label: "Create pages", description: "Add new CMS-managed pages." },
+  VIEW: { label: "View", description: "Open the SiteCraft product and read every SiteCraft dataset." },
+  PAGES_CREATE: { label: "Create pages", description: "Add new SiteCraft-managed pages." },
   PAGES_EDIT: { label: "Edit pages", description: "Edit a page's draft sections in the builder." },
-  PAGES_DELETE: { label: "Delete pages", description: "Remove a CMS-managed page." },
+  PAGES_DELETE: { label: "Delete pages", description: "Remove a SiteCraft-managed page." },
   PAGES_PUBLISH: { label: "Publish pages", description: "Publish a page's draft to the live site, and restore/re-publish a prior version." },
   PAGES_RESTORE: { label: "Restore versions", description: "Load a prior published version back into draft." },
   SECTIONS_EDIT: { label: "Edit sections", description: "Add, remove, reorder and configure individual page sections." },
@@ -97,8 +97,8 @@ export const CMS_PERMISSION_META: Record<CmsPermission, { label: string; descrip
   FORMS_MANAGE: { label: "Manage forms", description: "Edit form field labels, order and visibility." },
   THEME_UPDATE: { label: "Edit theme", description: "Edit draft theme tokens and preview them." },
   THEME_PUBLISH: { label: "Publish theme", description: "Publish draft theme tokens to the live site." },
-  SETTINGS_MANAGE: { label: "Manage settings", description: "Edit global CMS settings (maintenance mode, defaults)." },
-  VIEW_AUDIT: { label: "View audit", description: "Read the CMS audit trail." },
+  SETTINGS_MANAGE: { label: "Manage settings", description: "Edit global SiteCraft settings (maintenance mode, defaults)." },
+  VIEW_AUDIT: { label: "View audit", description: "Read the SiteCraft audit trail." },
   COLLECTIONS_EDIT: { label: "Edit collections", description: "Create and edit draft blog posts, jobs, engagement models and products." },
   COLLECTIONS_PUBLISH: { label: "Publish collections", description: "Publish, archive or revert collection records on the live site." },
 };

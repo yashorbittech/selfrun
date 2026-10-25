@@ -26,7 +26,7 @@ export default async function OtsNotificationsPage() {
       panel="ots"
       live
       panelName="Online Test System"
-      shortCode="OTS"
+      shortCode="EvalIQ"
       description="Track candidate exam submissions, test result evaluation alerts & question bank updates."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

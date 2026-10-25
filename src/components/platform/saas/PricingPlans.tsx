@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, BadgePercent, Building2, Check, Crown, Rocket, Sparkles, Sprout, Zap, type LucideIcon } from "lucide-react";
 import { formatMoney, type BillingInterval } from "@/lib/platform/billing/types";
+import { signupPlanHref, trialLabel } from "@/lib/platform/billing/signup-plan-rule";
 import Countdown from "@/components/platform/saas/Countdown";
 import type { ShowcasePlan } from "@/lib/platform/billing/showcase";
 
@@ -54,7 +55,9 @@ export default function PricingPlans({ plans, compact = false, endsAt = null }: 
           const pop = !!p.popular;
           const offer = pr.pct > 0;
           const tick = pop ? "bg-white text-[var(--primary)]" : "bg-primary/10 text-primary";
-          const cta = p.kind === "contact" ? "Contact us" : p.kind === "free" ? "Start free forever" : `Get ${p.name}`;
+          const trial = p.kind === "paid" && p.trialDays > 0 ? trialLabel(p.trialDays) : null;
+          const cta = p.kind === "contact" ? "Contact us" : p.kind === "free" ? "Start free forever" : trial ? `Try ${p.name} free for ${trial}` : `Get ${p.name}`;
+          const href = p.kind === "contact" ? "/contact" : p.kind === "free" ? "/signup" : signupPlanHref(p.id, interval);
           return (
             <div key={p.id} className={`group relative flex flex-col overflow-hidden rounded-[2rem] transition-all duration-500 ${pop ? "sr-band text-white shadow-[0_40px_90px_-30px] shadow-primary/70 xl:-my-5" : "border border-border/60 bg-background shadow-sm hover:-translate-y-2 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/15"}`}>
               {/* the offer, stated first and plainly */}
@@ -108,9 +111,10 @@ export default function PricingPlans({ plans, compact = false, endsAt = null }: 
                 </div>
 
                 <div className="grid gap-2">
-                  <Link href={p.kind === "contact" ? "/contact" : "/signup"} className={`group/b inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-4 text-sm font-black transition-all hover:scale-[1.03] ${pop ? "bg-white text-black shadow-xl" : "bg-foreground text-background shadow-lg hover:shadow-xl"}`}>
+                  <Link href={href} className={`group/b inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-4 py-4 text-sm font-black transition-all hover:scale-[1.03] ${pop ? "bg-white text-black shadow-xl" : "bg-foreground text-background shadow-lg hover:shadow-xl"}`}>
                     {cta}<ArrowRight className="h-4 w-4 transition-transform group-hover/b:translate-x-1" />
                   </Link>
+                  {trial && <p className={`text-center text-xs font-medium ${pop ? "text-white/75" : "text-muted-foreground"}`}>No card needed · then {pr.main}{pr.unit ? ` ${pr.unit}` : ""} · cancel any time</p>}
                   <Link href={`/pricing/${p.id}`} className={`group/l inline-flex items-center justify-center gap-1.5 py-1.5 text-sm font-bold ${pop ? "text-white" : "text-primary"}`}>View details <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/l:translate-x-1" /></Link>
                 </div>
 

@@ -24,7 +24,7 @@ export async function savePrmsSettingsAction(input: Record<string, unknown>): Pr
     action: "update",
     entity: "settings",
     entityId: "config",
-    entityLabel: "PRMS settings",
+    entityLabel: "SpendIQ settings",
     summary: `default ${data.defaultCurrency} · review threshold ${data.procurementReviewThreshold}`,
   });
   revalidatePath("/spendiq/settings");

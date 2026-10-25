@@ -16,6 +16,7 @@ import {
   SelectSeparator,
 } from "@/components/ui/select";
 import { ROLE_GROUPS } from "@/lib/products/commandos/role-catalog";
+import { ACCOUNT_STATUSES } from "@/lib/security/account-status";
 
 export default function UsersFilterBar({
   initialSearch,
@@ -23,7 +24,11 @@ export default function UsersFilterBar({
   initialPanel,
   initialStatus,
   initialUserType,
+  initialDesignation,
+  designations,
 }: {
+  initialDesignation: string;
+  designations: { id: string; name: string; department: string }[];
   initialSearch: string;
   initialRole: string;
   initialPanel: string;
@@ -67,7 +72,7 @@ export default function UsersFilterBar({
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search email, notes, ID..."
+            placeholder="Search name, email, notes, ID..."
             className="h-9 w-56 pl-8 text-xs rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40"
           />
         </div>
@@ -86,7 +91,7 @@ export default function UsersFilterBar({
           </SelectTrigger>
           <SelectContent align="start">
             <SelectItem value="all">All Products</SelectItem>
-            <SelectItem value="admin">Super Admin Product</SelectItem>
+            <SelectItem value="admin">Director (full access)</SelectItem>
             {panelOptions.map((p) => (
               <SelectItem key={p.key} value={p.key}>
                 {p.name}
@@ -103,21 +108,48 @@ export default function UsersFilterBar({
           value={initialStatus || "all"}
           onValueChange={(val: string | null) => updateParams({ status: !val || val === "all" ? undefined : val })}
         >
-          <SelectTrigger className="w-36 h-9 text-xs rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40">
+          <SelectTrigger className="w-44 h-9 text-xs rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40">
             <SelectValue placeholder="All Statuses" />
           </SelectTrigger>
           <SelectContent align="start">
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="active">
-              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="size-3" /> Active Users
-              </span>
+            <SelectItem value="all">All statuses</SelectItem>
+            <SelectItem value="working">
+              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400"><CheckCircle2 className="size-3" /> Can sign in</span>
             </SelectItem>
-            <SelectItem value="deactivated">
-              <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400">
-                <XCircle className="size-3" /> Deactivated
-              </span>
+            <SelectItem value="blocked">
+              <span className="flex items-center gap-1.5 text-rose-600 dark:text-rose-400"><XCircle className="size-3" /> Cannot sign in</span>
             </SelectItem>
+            <SelectItem value="left">Left the company</SelectItem>
+            <SelectSeparator />
+            {ACCOUNT_STATUSES.map((st) => (
+              <SelectItem key={st.value} value={st.value}>{st.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Designation Filter */}
+      <div className="flex flex-col gap-1.5">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">Designation</label>
+        <Select
+          value={initialDesignation || "all"}
+          onValueChange={(val: string | null) => updateParams({ designation: !val || val === "all" ? undefined : val })}
+        >
+          <SelectTrigger className="w-48 h-9 text-xs rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40">
+            <SelectValue placeholder="All designations" />
+          </SelectTrigger>
+          <SelectContent align="start">
+            <SelectItem value="all">All designations</SelectItem>
+            <SelectItem value="director">Director</SelectItem>
+            {[...new Set(designations.map((d) => d.department))].sort().map((dep) => (
+              <SelectGroup key={dep}>
+                <SelectSeparator />
+                <SelectLabel>{dep}</SelectLabel>
+                {designations.filter((d) => d.department === dep).sort((a, b) => a.name.localeCompare(b.name)).map((d) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                ))}
+              </SelectGroup>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -155,7 +187,7 @@ export default function UsersFilterBar({
           </SelectTrigger>
           <SelectContent align="end">
             <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="super_admin">Super Admin</SelectItem>
+            <SelectItem value="super_admin">Director</SelectItem>
             {ROLE_GROUPS.map((g) => (
               <SelectGroup key={g.module}>
                 <SelectSeparator />

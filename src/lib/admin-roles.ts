@@ -28,7 +28,7 @@ export function hasAdminAccess(roles: readonly string[] | undefined | null): boo
 
 export const ADMIN_ROLE_META: Record<AdminRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full cross-module executive visibility: financials, operations, and every module's live KPIs.",
   },
 };

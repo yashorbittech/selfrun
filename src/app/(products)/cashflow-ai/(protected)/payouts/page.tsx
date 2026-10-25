@@ -105,7 +105,7 @@ export default async function LivePayoutsPage({
 
       <PanelPageHeader
         title={<>Live Bank Payout Desk</>}
-        description={<>Pay Vendors (PRMS), Employee Salaries (HRMS), or Student Refunds (TMS) directly from your Company Current Bank Account.</>}
+        description={<>Pay Vendors (SpendIQ), Employee Salaries (TalentOS), or Student Refunds (Cohort AI) directly from your Company Current Bank Account.</>}
         actions={
             <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
             <ShieldCheck className="size-3.5 mr-1" />
@@ -236,11 +236,11 @@ export default async function LivePayoutsPage({
               name="sourceModule"
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="prms">PRMS — Vendor Procurement Payout</option>
-              <option value="hrms">HRMS — Employee Salary / Reimbursement</option>
-              <option value="pms">PMS — Subcontractor / Client Refund</option>
-              <option value="tms">TMS — Student Fee Refund</option>
-              <option value="fms">FMS — Office Expense / Operational</option>
+              <option value="prms">SpendIQ — Vendor Procurement Payout</option>
+              <option value="hrms">TalentOS — Employee Salary / Reimbursement</option>
+              <option value="pms">SprintOS — Subcontractor / Client Refund</option>
+              <option value="tms">Cohort AI — Student Fee Refund</option>
+              <option value="fms">CashFlow — Office Expense / Operational</option>
             </select>
           </div>
 
@@ -249,7 +249,7 @@ export default async function LivePayoutsPage({
             <input
               type="text"
               name="refNotes"
-              placeholder="e.g. INV-2026-088 / PO-PRMS-99"
+              placeholder="e.g. INV-2026-088 / PO-SpendIQ-99"
               className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
@@ -308,7 +308,7 @@ export default async function LivePayoutsPage({
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant="outline" className="uppercase text-[10px] font-semibold bg-primary/10 text-primary border-primary/20">
-                        {t.sourceModule || "FMS"}
+                        {t.sourceModule || "CashFlow"}
                       </Badge>
                     </td>
                     <td className="px-4 py-3 font-bold text-foreground">₹{(t.amount || 0).toLocaleString("en-IN")}</td>

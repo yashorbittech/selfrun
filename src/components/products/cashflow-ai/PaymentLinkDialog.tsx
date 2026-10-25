@@ -259,8 +259,8 @@ export default function PaymentLinkDialog({
                   onChange={(e) => set("sourceModule", e.target.value)}
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="TMS">TMS — Student Portal</option>
-                  <option value="PMS">PMS — Client Portal</option>
+                  <option value="TMS">Cohort AI — Student Portal</option>
+                  <option value="PMS">SprintOS — Client Portal</option>
                   <option value="DIRECT">Direct Link (Public)</option>
                 </select>
               </div>

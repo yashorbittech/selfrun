@@ -37,7 +37,7 @@ export default async function StudentsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Students" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Students" }]}
         title={<>Students</>}
         description={<>{total} student{total === 1 ? "" : "s"} in the CRM.</>}
         actions={<>{canManage && (

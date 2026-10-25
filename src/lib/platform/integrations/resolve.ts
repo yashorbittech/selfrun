@@ -1,7 +1,7 @@
 import "server-only";
 import { siteUrl } from "@/lib/seo";
 import { decryptPlatformSecret } from "@/lib/platform/crypto";
-import { loadIntegrationsDoc, type IntegrationsDoc, type StoredSecret } from "@/lib/platform/integrations/store";
+import { loadIntegrationsDoc, resolvedRootDomain, type IntegrationsDoc, type StoredSecret } from "@/lib/platform/integrations/store";
 import type { VercelConfig } from "@/lib/platform/domains/vercel";
 
 /**
@@ -29,7 +29,11 @@ export const DOMAIN_PROVIDERS = ["vercel", "manual"] as const;
 export type EmailProviderId = (typeof EMAIL_PROVIDERS)[number];
 export type DomainProviderId = (typeof DOMAIN_PROVIDERS)[number];
 
-export const DEFAULT_EMAIL_FROM = `SelfRun AI <no-reply@${new URL(siteUrl).hostname}>`;
+/** The sender when none is set: `no-reply@` on the platform's own root domain (Console → Integrations, `PLATFORM_ROOT_DOMAIN`, or the production domain). */
+export function defaultEmailFrom(): string {
+  const root = resolvedRootDomain().replace(/:\d+$/, "");
+  return `SelfRun AI <no-reply@${root === "localhost" ? new URL(siteUrl).hostname : root}>`;
+}
 
 function env(name: string): string | null {
   return process.env[name]?.trim() || null;
@@ -69,7 +73,7 @@ export interface ResolvedEmailConfig {
 
 export function emailConfigFrom(doc: IntegrationsDoc | null): ResolvedEmailConfig {
   const apiKey = pickSecret(doc?.email?.resendApiKey, SECRET_CONTEXT.resendApiKey, "RESEND_API_KEY");
-  const from = pick(doc?.email?.from, "EMAIL_FROM", DEFAULT_EMAIL_FROM);
+  const from = pick(doc?.email?.from, "EMAIL_FROM", defaultEmailFrom());
 
   let provider: EmailProviderId;
   let providerSource: ConfigSource;

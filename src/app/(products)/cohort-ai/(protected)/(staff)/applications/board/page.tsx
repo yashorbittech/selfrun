@@ -21,7 +21,7 @@ export default async function ApplicationsBoardPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Applications", href: "/cohort-ai/applications" }, { label: "Board" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Applications", href: "/cohort-ai/applications" }, { label: "Board" }]}
         title={<>Application Pipeline</>}
         description={<>Drag cards to move applicants through the pipeline.</>}
         actions={<><Link href="/cohort-ai/applications" className={buttonVariants({ variant: "outline", size: "sm" })}>

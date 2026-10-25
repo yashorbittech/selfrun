@@ -12,6 +12,7 @@ import { hashPassword } from "@/lib/lms-auth";
 import { runAsCompany } from "@/lib/platform/tenancy/context";
 import { sendVerificationEmail } from "@/lib/platform/email-verification";
 import { headers } from "next/headers";
+import { resolveSignupPlan } from "@/lib/platform/billing/signup-plan";
 
 /** Country, browser languages and time zone the sign-up request carries (when the host or CDN provides them). Used only to tailor the website. */
 async function requestHints(): Promise<{ country?: string; languages?: string; timezone?: string }> {
@@ -63,6 +64,8 @@ interface PendingSignup {
   slug: string;
   passwordHash: string;
   business?: BusinessSelection;
+  /** The plan picked on the pricing page, started as a free trial once the company exists. */
+  plan?: { id: string; interval: "monthly" | "yearly" };
   status: "pending" | "awaiting_approval";
   createdAt: Date;
   expiresAt: Date;
@@ -109,6 +112,9 @@ export interface SignupInput {
   businessCategories: string[];
   businessSubCategories: string[];
   acceptTerms: boolean;
+  /** From the pricing page (`/signup?plan=…&interval=…`); checked on the server, ignored when it is not a plan that can be started. */
+  planId?: string;
+  interval?: string;
 }
 
 export type SignupFieldErrors = Partial<Record<keyof SignupInput | "form", string>>;
@@ -169,7 +175,7 @@ export type StartSignupResult =
   | { ok: false; errors: SignupFieldErrors };
 
 /** One-time sign-in token for the new owner, redeemed on the company's own host. */
-/** A one-time sign-in link for a Platform Console user to enter a company's products as that company's Super Admin (`next` is where it lands). */
+/** A one-time sign-in link for a Platform Console user to enter a company's products as that company's Director (`next` is where it lands). */
 export async function issueSupportHandoff(created: { companyId: string; adminId: string }, appBase: string, next = "/commandos?via=platform"): Promise<string> {
   const { handoffs } = await collections();
   const handoff = randomBytes(32).toString("hex");
@@ -214,6 +220,8 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
   if (!(await isSlugAvailable(input.slug, email))) return { ok: false, errors: { slug: "That workspace address is taken." } };
 
   const business = (resolveBusiness(input.businessCategories, input.businessSubCategories) as { ok: true; value: BusinessSelection }).value;
+  const picked = await resolveSignupPlan(input.planId, input.interval);
+  const plan = picked ? { id: picked.planId, interval: picked.interval } : undefined;
   const passwordHash = hashPassword(input.password);
   const companyName = input.companyName.trim();
   const name = input.name.trim();
@@ -232,6 +240,7 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
       slug: input.slug,
       passwordHash,
       business,
+      ...(plan ? { plan } : {}),
       status: "awaiting_approval",
       createdAt: now,
       expiresAt: new Date(now.getTime() + 30 * PENDING_TTL_MS),
@@ -239,7 +248,7 @@ export async function startSignup(input: SignupInput, ctx: { hostHint: string | 
     return { ok: true, kind: "awaiting_approval", email };
   }
 
-  const created = await createCompanyWithOwner({ name: companyName, slug: input.slug, owner: { email, name, passwordHash, mustChangePassword: false, emailVerified: false }, business, aiWebsite: "wait", hints: await requestHints() });
+  const created = await createCompanyWithOwner({ name: companyName, slug: input.slug, owner: { email, name, passwordHash, mustChangePassword: false, emailVerified: false }, business, ...(plan ? { plan } : {}), aiWebsite: "wait", hints: await requestHints() });
   // "Address just taken" (two sign-ups racing for it) belongs on the address field.
   if (!created.ok) return { ok: false, errors: /address/i.test(created.error) ? { slug: created.error } : { form: created.error } };
 
@@ -273,6 +282,7 @@ export async function confirmSignup(token: string, ctx: { hostHint: string | nul
     slug: doc.slug,
     owner: { email: doc.email, name: doc.name, passwordHash: doc.passwordHash, mustChangePassword: false, emailVerified: true }, // confirmed through the emailed link
     business: doc.business,
+    ...(doc.plan ? { plan: doc.plan } : {}),
   });
   if (!created.ok) {
     // Put it back so the user can retry from the same link once they've been told why.
@@ -348,6 +358,7 @@ export async function approveSignup(id: string, ctx: { hostHint: string | null }
     slug: doc.slug,
     owner: { email: doc.email, name: doc.name, passwordHash: doc.passwordHash, mustChangePassword: false, emailVerified: false },
     business: doc.business,
+    ...(doc.plan ? { plan: doc.plan } : {}),
   });
   if (!created.ok) {
     await pending.insertOne(doc);

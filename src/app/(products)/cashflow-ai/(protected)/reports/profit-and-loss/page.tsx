@@ -34,7 +34,7 @@ export default async function ProfitAndLossPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Profit & Loss" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Profit & Loss" }]}
         title={<>Profit &amp; Loss</>}
         description={<>Income and expense account totals for the selected range, computed from posted journal entries.</>}
       />

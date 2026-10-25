@@ -92,7 +92,7 @@ export async function projectIdsForEmployee(employeeId: string): Promise<string[
 
 /** Employees available to add to a project (all HRMS employees). */
 export async function availableEmployees() {
-  return listEmployeeOptions();
+  return listEmployeeOptions({ activeOnly: true });
 }
 
 // ---------------------------------------------------------------------------

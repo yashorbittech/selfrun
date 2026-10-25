@@ -213,7 +213,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
           "Roles per product: each product has its own roles, and on top of a role you can grant or remove a single permission for one person.",
           "Custom roles: build a role from the permissions you choose and give it to people, instead of making everyone an administrator.",
           "Sensitive areas: payroll, salaries, bank details, finance statements and stored credentials need their own permission, even for managers.",
-          "Delegated administrators: an administrator who is not a Super Admin cannot grant a role they do not hold themselves, cannot raise their own access and cannot change a Super Admin's account.",
+          "Delegated administrators: an administrator who is not a Director cannot grant a role they do not hold themselves, cannot raise their own access and cannot change a Director's account.",
           "Checked on the server: permissions are enforced on pages, actions, APIs and exports, not only by hiding buttons.",
           "Plans: a product opens only if the company's plan includes it, and a suspended or unpaid workspace becomes read-only instead of being switched off.",
           "Audit log: sign-ins and failed sign-ins are recorded with their device and place, changes are recorded in each product's activity log, and the central Audit log brings the products' activity and the company's business events together for administrators to filter.",
@@ -223,7 +223,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         heading: "Sign-in and account protection",
         list: [
           "Passwords: stored only as salted hashes. Five wrong attempts lock the account for 15 minutes.",
-          "Two-step sign-in: anyone can turn on a second step with an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password). A password alone then does not sign in: the six-digit code is needed too. Codes work once, wrong codes count towards the same lock-out, ten single-use recovery codes cover a lost phone, and a Super Admin can reset it for someone who lost both.",
+          "Two-step sign-in: each person chooses it for their own account, either an authenticator app (Google Authenticator, Microsoft Authenticator, Authy, 1Password) or a six-digit code sent to their email. A password alone then does not sign in: the code is needed too. Codes work once, wrong codes count towards the same lock-out, the app method comes with ten single-use recovery codes, and a Director can reset it for someone who lost their phone or mailbox.",
           "Sessions: a signed-in session is tied to the browser and network it started on. If the session token is copied somewhere else it is revoked and the owner signs in again.",
           "Devices: each person can see their signed-in devices and sign-in history, and sign a device out.",
           "Abuse protection: sign-in, forms, AI calls and exports are rate-limited, scripted clients are refused on the API, and requests from other websites are rejected.",
@@ -292,7 +292,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         heading: "Your data is yours: export, import and leave",
         list: [
           "Ownership: the records, files and content a company puts in its workspace belong to that company.",
-          "Backups: every week the platform saves a backup of each workspace (the last eight are kept) and the Super Admin can make one any time. Every backup stays in a history you can download from, and what you download is the very file that is stored (Settings → Backups & data). Passwords, tokens and saved API keys are never in a backup, and uploaded files stay in their products.",
+          "Backups: every week the platform saves a backup of each workspace (the last eight are kept) and the Director can make one any time. Every backup stays in a history you can download from, and what you download is the very file that is stored (Settings → Backups & data). Passwords, tokens and saved API keys are never in a backup, and uploaded files stay in their products.",
           "Restore: the workspace can be put back to any backup, after a multi-step confirmation (the exact company name, a phrase, your password and your two-step code). The system first saves a safety copy of what you have, kept for 30 days, and every restore is recorded in its own history.",
           "Export by table: tables in the products can be exported to CSV or Excel, and documents such as invoices and payslips can be downloaded as PDF.",
           "Import: leads, clients and employees can be imported from CSV, with a sample file and a preview before anything is saved.",
@@ -413,7 +413,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
         heading: "How long data is kept",
         list: [
           "Your workspace data stays for as long as your account is active.",
-          "A Super Admin can schedule the company's deletion. It is then deleted for good after 30 days, and until then it can be restored.",
+          "A Director can schedule the company's deletion. It is then deleted for good after 30 days, and until then it can be restored.",
           "Before a restore or a wipe, a safety copy is kept for 30 days so the action can itself be undone.",
           "Backups are rotated automatically: the latest eight scheduled and ten manual backups are kept.",
           "Sign-in history and security events are kept for 180 days.",

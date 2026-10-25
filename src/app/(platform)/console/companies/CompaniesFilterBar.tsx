@@ -47,13 +47,14 @@ export default function CompaniesFilterBar({ initialSearch, initialStatus }: { i
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-medium text-muted-foreground">Status</label>
         <Select value={initialStatus || "all"} onValueChange={(v) => updateParams({ status: !v || v === "all" ? undefined : v })}>
-          <SelectTrigger className="h-9 w-40 rounded-xl border-border/50 bg-background">
+          <SelectTrigger className="h-9 w-52 rounded-xl border-border/50 bg-background">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All statuses</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="suspended">Suspended</SelectItem>
+            <SelectItem value="reactivation">Reactivation requested</SelectItem>
           </SelectContent>
         </Select>
       </div>

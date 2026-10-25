@@ -60,7 +60,7 @@ export default async function UpgradePage({ searchParams }: { searchParams: Prom
                 Back to dashboard
               </Link>
             </div>
-            <p className="mt-4 text-xs text-muted-foreground">Only your workspace Super Admin can change the plan.</p>
+            <p className="mt-4 text-xs text-muted-foreground">Only your workspace Director can change the plan.</p>
           </>
         )}
       </div>

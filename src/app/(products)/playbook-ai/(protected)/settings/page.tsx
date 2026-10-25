@@ -40,7 +40,7 @@ export default async function SopSettingsPage() {
           <CardTitle className="text-sm font-bold">Roles & permissions</CardTitle>
           <CardDescription className="text-xs">
             The default capabilities of each role. There is no review or approval permission — publishing is direct. Roles are assigned, and individual capabilities overridden, per person in the Admin product
-            {isSuper ? <> — <Link href="/commandos/users" className="inline-flex items-center gap-0.5 text-primary hover:underline">open Users & Access <ExternalLink className="size-3" /></Link></> : " by a Super Admin"}.
+            {isSuper ? <> — <Link href="/commandos/users" className="inline-flex items-center gap-0.5 text-primary hover:underline">open Users & Access <ExternalLink className="size-3" /></Link></> : " by a Director"}.
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -68,7 +68,7 @@ export default async function SopSettingsPage() {
             </TableBody>
           </Table>
           <p className="mt-3 text-xs text-muted-foreground">
-            HRMS roles imply an SOP tier: <strong>Employee</strong> → SOP Reader, <strong>Manager</strong> and <strong>HR</strong> → SOP Manager. Managers act on SOPs of their own department (and departments they head in HRMS); authors on SOPs they own or wrote; SOP Admins and Super Admins on everything.
+            TalentOS roles imply an SOP tier: <strong>Employee</strong> → SOP Reader, <strong>Manager</strong> and <strong>HR</strong> → SOP Manager. Managers act on SOPs of their own department (and departments they head in TalentOS); authors on SOPs they own or wrote; SOP Admins and Directors on everything.
           </p>
         </CardContent>
       </GlassCard>

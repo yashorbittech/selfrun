@@ -5,7 +5,7 @@ import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import type { LeadStatus } from "@/lib/lead-status";
 
 /**
- * Cross-category Leads listing for the Super Admin CRM product. `src/lib/leads.ts`
+ * Cross-category Leads listing for the Director CRM product. `src/lib/leads.ts`
  * stores each category's leads in its own collection (`leads_software_development`,
  * …) — real server-side pagination across all of them needs a Mongo `$unionWith`
  * aggregation rather than 5 separate queries merged in JS (which can't paginate

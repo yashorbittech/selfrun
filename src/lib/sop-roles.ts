@@ -11,7 +11,7 @@
  * direct action for anyone holding `PUBLISH`.
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries live in `src/lib/commandos/permission-catalog.ts`).
  *
  * This file is pure (no server-only imports) so client components can use it
@@ -26,24 +26,24 @@ export type SopRole = (typeof SOP_ROLES)[number];
 
 export const SOP_ROLE_META: Record<SopRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
-    description: "Every SOP operation across all departments, plus templates, structure, settings and audit.",
+    label: "Director",
+    description: "Everything in Playbook across all departments, plus templates, structure, settings and audit.",
   },
   sop_admin: {
-    label: "SOP Admin",
-    description: "Manage every SOP in every department, templates, categories, structure, settings, reports and the audit log.",
+    label: "Playbook Admin",
+    description: "Manage every procedure in every department, templates, categories, structure, settings, reports and the audit log.",
   },
   sop_manager: {
-    label: "SOP Manager",
-    description: "Create, edit, publish, assign and archive SOPs for their own department(s); monitor acknowledgements and compliance.",
+    label: "Playbook Manager",
+    description: "Create, edit, publish, assign and archive procedures for their own department(s); monitor acknowledgements and compliance.",
   },
   sop_author: {
-    label: "SOP Author",
-    description: "Create SOPs in their department and edit the SOPs they own or author. Cannot publish unless granted.",
+    label: "Playbook Author",
+    description: "Create procedures in their department and edit the procedures they own or author. Cannot publish unless granted.",
   },
   sop_employee: {
-    label: "SOP Reader",
-    description: "Read permitted SOPs, acknowledge assignments, complete checklists and submit feedback.",
+    label: "Playbook Reader",
+    description: "Read permitted procedures, acknowledge assignments, complete checklists and submit feedback.",
   },
 };
 
@@ -63,7 +63,7 @@ export const SOP_PERMISSIONS = [
 ] as const;
 export type SopPermission = (typeof SOP_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const SOP_PERMISSION_KEY: Record<SopPermission, string> = {
   VIEW: "sop.canView",
   CREATE: "sop.canCreate",
@@ -80,18 +80,18 @@ export const SOP_PERMISSION_KEY: Record<SopPermission, string> = {
 };
 
 export const SOP_PERMISSION_META: Record<SopPermission, { label: string; description: string }> = {
-  VIEW: { label: "View", description: "Open and search the SOPs their confidentiality level allows." },
-  CREATE: { label: "Create", description: "Start new SOP drafts in their department." },
-  EDIT: { label: "Edit", description: "Edit SOP drafts and metadata within their scope." },
+  VIEW: { label: "View", description: "Open and search the procedures their confidentiality level allows." },
+  CREATE: { label: "Create", description: "Start new procedure drafts in their department." },
+  EDIT: { label: "Edit", description: "Edit procedure drafts and metadata within their scope." },
   PUBLISH: { label: "Publish", description: "Publish a draft or a new version directly — there is no approval step." },
-  ASSIGN: { label: "Assign", description: "Assign SOPs to employees, teams, departments and roles." },
-  ACKNOWLEDGE: { label: "Acknowledge", description: "Acknowledge SOPs and complete assigned checklists." },
-  ARCHIVE: { label: "Archive", description: "Archive and restore SOPs." },
-  DOWNLOAD: { label: "Download", description: "Download attachments and print/save SOPs that allow it." },
-  EXPORT: { label: "Export", description: "Export SOP lists and compliance reports as CSV." },
+  ASSIGN: { label: "Assign", description: "Assign procedures to employees, teams, departments and roles." },
+  ACKNOWLEDGE: { label: "Acknowledge", description: "Acknowledge procedures and complete assigned checklists." },
+  ARCHIVE: { label: "Archive", description: "Archive and restore procedures." },
+  DOWNLOAD: { label: "Download", description: "Download attachments and print/save procedures that allow it." },
+  EXPORT: { label: "Export", description: "Export procedure lists and compliance reports as CSV." },
   MANAGE_TEMPLATES: { label: "Manage templates & structure", description: "Edit templates, categories, departments, functions and processes." },
-  MANAGE_PERMISSIONS: { label: "Manage permissions", description: "Change SOP settings and grant explicit access to restricted SOPs." },
-  VIEW_AUDIT: { label: "View audit", description: "Read the SOP audit trail." },
+  MANAGE_PERMISSIONS: { label: "Manage permissions", description: "Change procedure settings and grant explicit access to restricted procedures." },
+  VIEW_AUDIT: { label: "View audit", description: "Read the procedure audit trail." },
 };
 
 const READER: SopPermission[] = ["VIEW", "ACKNOWLEDGE", "DOWNLOAD"];

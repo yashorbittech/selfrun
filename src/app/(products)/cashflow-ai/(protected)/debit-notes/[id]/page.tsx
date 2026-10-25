@@ -23,7 +23,7 @@ export default async function DebitNoteDetailPage({ params }: { params: Promise<
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Debit Notes", href: "/cashflow-ai/debit-notes" }, { label: note.debitNoteNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Debit Notes", href: "/cashflow-ai/debit-notes" }, { label: note.debitNoteNumber }]}
         title={<>{note.debitNoteNumber}</>}
         description={<>{note.vendorName}</>}
         actions={<><div className="flex items-center gap-2">

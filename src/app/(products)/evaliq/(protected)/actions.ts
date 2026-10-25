@@ -357,7 +357,7 @@ export async function revokeCertificateAction(id: string, revoke: boolean, reaso
 export async function saveSettingsAction(raw: Record<string, unknown>) {
   return run(["MANAGE_SETTINGS"], async (v) => {
     const { before, after } = await saveOtsSettings(raw, v.userId);
-    await recordAudit({ ...who(v), action: "settings", entity: "settings", entityId: "global", entityLabel: "OTS settings", summary: diffSummary(before as unknown as Record<string, unknown>, after as unknown as Record<string, unknown>, ["organizationName", "certificateNumberFormat", "signatoryName", "signatoryTitle", "defaultValidityMonths", "reminderHoursBeforeDue", "graceSeconds", "evaluatorUserIds"]) });
+    await recordAudit({ ...who(v), action: "settings", entity: "settings", entityId: "global", entityLabel: "EvalIQ settings", summary: diffSummary(before as unknown as Record<string, unknown>, after as unknown as Record<string, unknown>, ["organizationName", "certificateNumberFormat", "signatoryName", "signatoryTitle", "defaultValidityMonths", "reminderHoursBeforeDue", "graceSeconds", "evaluatorUserIds"]) });
     return {};
   });
 }

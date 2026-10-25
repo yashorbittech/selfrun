@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { runFmsSweep } from "@/lib/notify/sweeps";
 import { panelUnread } from "@/lib/notify";
 import { redirect } from "next/navigation";
@@ -15,6 +16,7 @@ import { brandedMetadata } from "@/lib/platform/branding/metadata";
 export const generateMetadata = () => brandedMetadata("{brand} {product:fms}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedFmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("fms");
   const user = await getCurrentFmsUser();
   if (!user) redirect("/cashflow-ai/login");

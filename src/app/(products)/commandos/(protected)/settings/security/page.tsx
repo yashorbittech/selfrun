@@ -77,7 +77,7 @@ export default async function SecurityPage() {
             <dl id="security-accounts" className="grid gap-3 sm:grid-cols-4">
               {[
                 ["Active accounts", s.accounts],
-                ["Super Admins", s.superAdmins],
+                ["Directors", s.superAdmins],
                 ["Must change password", s.mustChangePassword],
                 ["Locked right now", s.locked],
               ].map(([label, value]) => (

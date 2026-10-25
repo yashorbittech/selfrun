@@ -19,6 +19,8 @@ import PlanChooser from "@/components/billing/PlanChooser";
 import UsageMeters from "@/components/billing/UsageMeters";
 import { buildShowcase } from "@/lib/platform/billing/showcase";
 import { getUsageSummary } from "@/lib/platform/billing/usage-summary";
+import { describeOverrides } from "@/lib/platform/billing/overrides";
+import { downgradeGuarded } from "@/lib/platform/billing/plan-order-rule";
 import {
   cancelSubscriptionAction,
   changePlanAction,
@@ -78,6 +80,8 @@ export default async function BillingSettingsPage() {
 
   const usageRows = await getUsageSummary().catch(() => []);
   const showcase = buildShowcase(plans);
+  const perksOf = (sp: (typeof showcase)[number] | undefined) =>
+    sp ? [{ label: "Users", value: sp.seats === null ? "Unlimited" : sp.seats === 1 ? "1" : `Up to ${sp.seats.toLocaleString("en-IN")}` }, ...sp.limits.filter((l) => l.included).map((l) => ({ label: l.short, value: l.shortValue }))] : [];
   const options: PlanOption[] = plans.filter((p) => !p.lifetimeFree && !p.contactSales).map((p) => ({
     id: p._id,
     name: p.name,
@@ -85,6 +89,7 @@ export default async function BillingSettingsPage() {
     currency: p.currency,
     priceMonthly: planPrice(p, "monthly"),
     priceYearly: planPrice(p, "yearly"),
+    perks: perksOf(showcase.find((x) => x.id === p._id)),
   }));
 
   const view: BillingView = {
@@ -105,14 +110,32 @@ export default async function BillingSettingsPage() {
       ? { planId: sub.pendingChange.planId, planName: pendingPlan?.name ?? sub.pendingChange.planId, interval: sub.pendingChange.interval, effectiveAt: sub.pendingChange.effectiveAt?.toISOString() ?? null }
       : null,
     billingDetails: sub.billingDetails ?? null,
+    blockDowngrade: downgradeGuarded(entitlements.status),
+    autopay: Boolean(sub.provider?.subscriptionId),
+    lastPayment: sub.lastPayment ? { amount: sub.lastPayment.amount, currency: sub.lastPayment.currency, at: sub.lastPayment.at.toISOString() } : null,
   };
+
+  const custom = describeOverrides(sub.overrides, currentPlan?.limits, entitlements.limits);
 
   return (
     <Shell title="Plan & billing" description="Your plan, what you have used, and the details printed on your GST invoices.">
+      {custom.length > 0 && (
+        <GlassCard interactive={false} containerClassName="h-auto">
+          <CardHeader>
+            <CardTitle className="text-base">Adjusted for your workspace</CardTitle>
+            <CardDescription>SelfRun has changed these for you on top of your plan. They are already in effect.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1 text-sm">
+              {custom.map((line) => <li key={line} className="flex items-start gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />{line}</li>)}
+            </ul>
+          </CardContent>
+        </GlassCard>
+      )}
       <BillingManager
         view={view}
         plans={options}
-        plansSlot={<PlanChooser plans={showcase} currentPlanId={sub.planId} interval={sub.interval} />}
+        plansSlot={<PlanChooser plans={showcase} currentPlanId={sub.planId} interval={sub.interval} blockDowngrade={downgradeGuarded(entitlements.status)} allowCurrent={entitlements.status === "trialing" && !hasLiveSubscription(sub)} />}
         usageSlot={usageRows.length > 0 ? <UsageMeters rows={usageRows} /> : null}
         actions={{
           quote: quoteAction,

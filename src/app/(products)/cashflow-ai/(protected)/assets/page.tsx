@@ -27,9 +27,9 @@ export default async function AssetsFinancePage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Asset Register" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Asset Register" }]}
         title={<>Asset Register</>}
-        description={<>Financial view over PRMS&apos;s real asset register — {result.total} asset{result.total === 1 ? "" : "s"}.</>}
+        description={<>Financial view over SpendIQ&apos;s real asset register — {result.total} asset{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -64,7 +64,7 @@ export default async function AssetsFinancePage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No assets found — assets are registered in PRMS."
+        emptyLabel="No assets found — assets are registered in SpendIQ."
       />
     </div>
   );

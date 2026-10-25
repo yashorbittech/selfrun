@@ -46,7 +46,7 @@ function ReportDocument({ report, brandName }: { report: Report; brandName: stri
         ))}
         {report.rows.length === 0 && <Text style={{ marginTop: 12, color: C.mute }}>No data.</Text>}
 
-        <PdfFooter note={`${report.title} — ${brandName} PRMS`} />
+        <PdfFooter note={`${report.title} — ${brandName} SpendIQ`} />
       </Page>
     </Document>
   );

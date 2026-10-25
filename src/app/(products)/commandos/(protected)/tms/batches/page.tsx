@@ -45,7 +45,7 @@ export default async function AdminBatchesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "TMS", panel: "tms" }, { label: "Batches" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Cohort AI", panel: "tms" }, { label: "Batches" }]}
         title={<>Batches</>}
         description={<>{total} batch{total === 1 ? "" : "es"}.</>}
       />

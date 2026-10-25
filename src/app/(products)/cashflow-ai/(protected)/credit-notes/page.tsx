@@ -31,7 +31,7 @@ export default async function CreditNotesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Credit Notes" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Credit Notes" }]}
         title={<>Credit Notes</>}
         description={<>{result.total} credit note{result.total === 1 ? "" : "s"}. Issue one from an invoice&apos;s detail page.</>}
       />

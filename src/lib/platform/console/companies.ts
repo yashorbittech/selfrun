@@ -43,6 +43,8 @@ export interface CompanyRow {
   domains: string[];
   onboarding: OnboardingProgress;
   createdAt: Date;
+  /** A suspended company's people asked to be reactivated and nobody has decided yet. */
+  reactivationPending: boolean;
 }
 
 export interface CompanyDetail extends CompanyRow {
@@ -54,6 +56,8 @@ export interface CompanyDetail extends CompanyRow {
   lastSignInAt: Date | null;
   statusChangedAt: Date | null;
 }
+
+import { pendingReactivationIds } from "@/lib/platform/reactivation-pending";
 
 async function db() {
   const platform = await getPlatformDb();
@@ -71,7 +75,7 @@ function progress(state: OnboardingState | undefined): OnboardingProgress {
   return { done, total: ONBOARDING_STEPS.length, completedAt: state?.completedAt ?? null, dismissedAt: state?.dismissedAt ?? null };
 }
 
-/** Per company: user count, first Super Admin (the owner), latest sign-in; and its hostnames. */
+/** Per company: user count, first Director (the owner), latest sign-in; and its hostnames. */
 async function companyFacts(ids: string[]) {
   const { users, domains } = await db();
   const [counts, owners, domainRows] = await Promise.all([
@@ -102,22 +106,26 @@ function toRow(c: CompanyDoc, facts: Awaited<ReturnType<typeof companyFacts>>): 
     domains: (facts.domains.get(c._id) ?? []).map((d) => d._id),
     onboarding: progress(c.onboarding),
     createdAt: c.createdAt,
+    reactivationPending: false,
   };
 }
 
 export interface ListCompaniesInput {
-  /** Matches company name, slug, or any of its Super Admins' email. */
+  /** Matches company name, slug, or any of its Directors' email. */
   q?: string;
-  status?: CompanyStatus | "all";
+  /** "reactivation" = companies with a reactivation request waiting. */
+  status?: CompanyStatus | "reactivation" | "all";
   page?: number;
   pageSize?: number;
 }
 
-export async function listCompanies(input: ListCompaniesInput = {}): Promise<{ rows: CompanyRow[]; total: number; page: number; totalPages: number }> {
+export async function listCompanies(input: ListCompaniesInput = {}): Promise<{ rows: CompanyRow[]; total: number; page: number; totalPages: number; waiting: number }> {
   const { companies, users } = await db();
   const pageSize = Math.min(Math.max(input.pageSize ?? CONSOLE_PAGE_SIZE, 1), 100);
   const filter: Filter<CompanyDoc> = {};
   if (input.status === "active" || input.status === "suspended") filter.status = input.status;
+  const waiting = await pendingReactivationIds().catch(() => [] as string[]);
+  if (input.status === "reactivation") filter._id = { $in: waiting };
 
   const q = input.q?.trim().slice(0, 100);
   if (q) {
@@ -136,7 +144,8 @@ export async function listCompanies(input: ListCompaniesInput = {}): Promise<{ r
     .limit(pageSize)
     .toArray();
   const facts = await companyFacts(docs.map((d) => d._id));
-  return { rows: docs.map((d) => toRow(d, facts)), total, page, totalPages };
+  const flagged = new Set(waiting);
+  return { rows: docs.map((d) => ({ ...toRow(d, facts), reactivationPending: flagged.has(d._id) })), total, page, totalPages, waiting: waiting.length };
 }
 
 export async function getCompanyDetail(id: string): Promise<CompanyDetail | null> {

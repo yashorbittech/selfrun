@@ -38,11 +38,11 @@ export const PRMS_STAFF_ROLES: PrmsRole[] = [
 
 export const PRMS_ROLE_META: Record<PrmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
+    label: "Director",
     description: "Full access: procurement, expenses, assets, finance, budgets, reports, settings and the audit log.",
   },
   prms_admin: {
-    label: "PRMS Admin",
+    label: "SpendIQ Admin",
     description: "Run the whole procure-to-pay pipeline, expenses, assets, finance, budgets, settings and reports.",
   },
   procurement_manager: {

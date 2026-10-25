@@ -32,7 +32,7 @@ export default async function FinancialSummaryPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Financial Summary" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Financial Summary" }]}
         title={<>Financial Summary</>}
         description={<>An executive overview for the current month, combining P&amp;L, Balance Sheet, Cash Flow and Tax — each
           figure links to its own full report for detail.</>}

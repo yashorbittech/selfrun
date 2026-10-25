@@ -47,7 +47,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Budget Management" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Budget Management" }]}
         title={<>Budget Management</>}
         description={<>{total} budget{total === 1 ? "" : "s"}.</>}
         actions={<><div className="flex gap-2">

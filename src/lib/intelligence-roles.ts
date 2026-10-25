@@ -19,15 +19,15 @@ export type IntelligenceRole = (typeof INTELLIGENCE_ROLES)[number];
 
 export const INTELLIGENCE_ROLE_META: Record<IntelligenceRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
-    description: "Opens AI Intelligence and can ask about every part of the company's data.",
+    label: "Director",
+    description: "Opens DataBrain and can ask about every part of the company's data.",
   },
   intelligence_admin: {
-    label: "AI Intelligence Admin",
-    description: "Opens AI Intelligence. Answers still only use data this person may already see in the other products.",
+    label: "DataBrain Admin",
+    description: "Opens DataBrain. Answers still only use data this person may already see in the other products.",
   },
   intelligence_user: {
-    label: "AI Intelligence User",
+    label: "DataBrain User",
     description: "Ask business questions in plain language. Answers only use data this person may already see in the other products.",
   },
 };
@@ -35,13 +35,13 @@ export const INTELLIGENCE_ROLE_META: Record<IntelligenceRole, { label: string; d
 export const INTELLIGENCE_PERMISSIONS = ["USE"] as const;
 export type IntelligencePermission = (typeof INTELLIGENCE_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const INTELLIGENCE_PERMISSION_KEY: Record<IntelligencePermission, string> = {
   USE: "intelligence.canUse",
 };
 
 export const INTELLIGENCE_PERMISSION_META: Record<IntelligencePermission, { label: string; description: string }> = {
-  USE: { label: "Use AI Intelligence", description: "Open the product and ask questions. Which records an answer may use is decided by the person's access in the other products, not by this." },
+  USE: { label: "Use DataBrain", description: "Open the product and ask questions. Which records an answer may use is decided by the person's access in the other products, not by this." },
 };
 
 export function isIntelligenceRole(value: unknown): value is IntelligenceRole {
@@ -58,7 +58,7 @@ export function hasIntelligenceAccess(roles: readonly string[] | undefined | nul
   return normalizeIntelligenceRoles(roles).length > 0;
 }
 
-/** The single permission check every page, action and route uses. Super Admin overrides are honoured (a denial removes the product). */
+/** The single permission check every page, action and route uses. Director overrides are honoured (a denial removes the product). */
 export function intelligenceCan(user: RoleContext, permission: IntelligencePermission): boolean {
   return resolvePermission(user, INTELLIGENCE_PERMISSION_KEY[permission], () => hasIntelligenceAccess(user.roles));
 }

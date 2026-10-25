@@ -25,7 +25,7 @@ export default function AibotsProfileMenu({
       createdAt={createdAt}
       lastLoginAt={lastLoginAt}
       onLogout={() => aibotsLogoutAction()}
-      panelName="AI Bots Management"
+      panelName="AgentOS Management"
     />
   );
 }

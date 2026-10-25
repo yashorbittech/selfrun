@@ -28,7 +28,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Analytics" crumbs={[{ label: "Analytics" }]} description="Department, role, designation, candidate type, batch and course analytics — people are grouped by their CURRENT department / role / batch in HRMS and TMS." />
+      <PageHeader title="Analytics" crumbs={[{ label: "Analytics" }]} description="Department, role, designation, candidate type, batch and course analytics — people are grouped by their CURRENT department / role / batch in TalentOS and Cohort AI." />
       <PanelTabs label="Group by" active={groupBy} tabs={GROUP_BYS.map((g) => ({ key: g.value, label: `By ${g.label}`, href: href(g.value) }))} />
       <SmmsFilterBar
         values={{ from: sp.from ?? "", to: sp.to ?? "", testId: sp.testId ?? "", kind: sp.kind ?? "", departmentId: sp.departmentId ?? "", designationId: sp.designationId ?? "" }}

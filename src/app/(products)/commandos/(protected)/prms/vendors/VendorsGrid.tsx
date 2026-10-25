@@ -73,7 +73,7 @@ function RowActions({ row, onViewDetails }: { row: AdminVendorRow; onViewDetails
             render={
               <a href={`/spendiq/vendors/${row._id}`}>
                 <ExternalLink className="size-3.5" />
-                Open in PRMS
+                Open in SpendIQ
               </a>
             }
           />

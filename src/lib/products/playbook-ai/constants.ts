@@ -79,12 +79,12 @@ export const NO_DOWNLOAD_BY_DEFAULT: readonly Confidentiality[] = ["highly_confi
 // ---------------------------------------------------------------------------
 
 export const SOP_MODULES = [
-  { value: "hrms", label: "HRMS", href: "/talentos" },
-  { value: "pms", label: "PMS (Projects)", href: "/sprintos" },
-  { value: "prms", label: "PRMS (Procurement)", href: "/spendiq" },
-  { value: "fms", label: "FMS (Finance)", href: "/cashflow-ai" },
-  { value: "tms", label: "TMS (Training)", href: "/cohort-ai" },
-  { value: "lms", label: "LMS (Sales & CRM)", href: "/dealflow-ai" },
+  { value: "hrms", label: "TalentOS", href: "/talentos" },
+  { value: "pms", label: "SprintOS (Projects)", href: "/sprintos" },
+  { value: "prms", label: "SpendIQ (Procurement)", href: "/spendiq" },
+  { value: "fms", label: "CashFlow (Finance)", href: "/cashflow-ai" },
+  { value: "tms", label: "Cohort AI (Training)", href: "/cohort-ai" },
+  { value: "lms", label: "DealFlow (Sales & CRM)", href: "/dealflow-ai" },
   { value: "messenger", label: "Team Chat", href: "/huddle-ai" },
 ] as const;
 export type SopModule = (typeof SOP_MODULES)[number]["value"];
@@ -224,7 +224,7 @@ export const DEFAULT_DEPARTMENTS: { name: string; code: string }[] = [
   { name: "Operations", code: "OPS" },
   { name: "Administration", code: "ADM" },
   { name: "Training", code: "TRN" },
-  { name: "TMS", code: "TMS" },
+  { name: "Cohort AI", code: "Cohort AI" },
   { name: "LMS", code: "LMS" },
   { name: "Legal", code: "LEG" },
   { name: "Compliance", code: "CMP" },

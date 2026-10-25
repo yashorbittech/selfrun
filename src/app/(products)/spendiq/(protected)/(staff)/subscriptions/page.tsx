@@ -47,7 +47,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Software & SaaS Services" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Software & SaaS Services" }]}
         title={<>Software &amp; SaaS Services</>}
         description={<>{total} subscription{total === 1 ? "" : "s"}.</>}
         actions={<>{canManage && (

@@ -2,7 +2,7 @@ import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Building, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, Lock, Palette, Plug, ReceiptText, Smartphone, Users, Zap, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Building, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, Lock, Mail, Palette, Plug, ReceiptText, Smartphone, Users, Zap, type LucideIcon } from "lucide-react";
 import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getCurrentHubUser } from "@/lib/hub-auth";
@@ -20,8 +20,8 @@ const ICONS: Record<string, LucideIcon> = {
   "company.invoices": ReceiptText,
   "company.usage": Gauge,
   "company.domains": Globe,
-  "company.website-domain": Globe2,
-  "company.app-domain": Smartphone,
+  "company.email": Mail,
+  "company.addresses": Globe2,
   "company.branding": Palette,
   "company.payments": Landmark,
   "company.integrations": Plug,
@@ -49,7 +49,7 @@ export default async function CompanySettingsPage() {
       <div className="space-y-4">
 <PanelPageHeader
           title={<>{brand.name} settings</>}
-          description={<>Company-wide configuration. Only Super Admins see this.</>}
+          description={<>Company-wide configuration. Only Directors see this.</>}
         />
 <div className="space-y-6">
         <div className="grid gap-3 sm:grid-cols-2">

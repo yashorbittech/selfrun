@@ -83,7 +83,7 @@ export default async function AdminApplicantsPage({
         breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Careers" }, { label: "Applicants" }]}
         title={<>Job Applicants</>}
         description={<>{total} applicant{total === 1 ? "" : "s"}. Interview Schedule and Offer Status come from real linked
-          records (portal interviews, HRMS offers) — not every applicant has either yet.</>}
+          records (portal interviews, TalentOS offers) — not every applicant has either yet.</>}
       />
 
       <ApplicantsGrid

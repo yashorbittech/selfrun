@@ -45,7 +45,7 @@ export default async function AdminProgramsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "TMS", panel: "tms" }, { label: "Programs" }]}
+        breadcrumbs={[{ label: "Workspace", href: "/commandos" }, { label: "Cohort AI", panel: "tms" }, { label: "Programs" }]}
         title={<>Programs</>}
         description={<>{total} program{total === 1 ? "" : "s"}.</>}
       />

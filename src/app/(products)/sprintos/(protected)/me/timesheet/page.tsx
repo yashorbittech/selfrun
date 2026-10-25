@@ -83,7 +83,7 @@ export default async function MyTimesheetPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos/me" }, { label: "Timesheet" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos/me" }, { label: "Timesheet" }]}
         title={<>Timesheet</>}
         description={<>Log your work hours and track them against your projects.</>}
         actions={<><TimesheetLogger

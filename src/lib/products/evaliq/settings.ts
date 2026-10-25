@@ -26,7 +26,7 @@ export interface OtsSettings {
 
 const DEFAULTS: OtsSettings = {
   organizationName: "",
-  certificateNumberFormat: "OTS-{yyyy}-{n}",
+  certificateNumberFormat: "EvalIQ-{yyyy}-{n}",
   signatoryName: "",
   signatoryTitle: "Head of Assessments",
   defaultValidityMonths: 24,

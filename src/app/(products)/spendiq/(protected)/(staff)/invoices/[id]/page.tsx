@@ -41,7 +41,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Invoices & Payments", href: "/spendiq/invoices" }, { label: i.invoiceNumber }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Invoices & Payments", href: "/spendiq/invoices" }, { label: i.invoiceNumber }]}
         title={<>{i.invoiceNumber}</>}
         description={<>{i.vendorName} · <InvoiceStatusBadge status={i.status} /> · {formatMoney(i.netPayable, i.currency)} net</>}
         actions={<>{canManage && !["paid", "partially_paid"].includes(i.status) && (

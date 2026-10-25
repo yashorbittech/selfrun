@@ -24,9 +24,9 @@ export default async function ApprovalsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Approvals" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Approvals" }]}
         title={<>Pending Approvals</>}
-        description={<>An aggregated inbox across FMS transactions, refunds, and PRMS personal expense claims. Each item links to its
+        description={<>An aggregated inbox across CashFlow transactions, refunds, and SpendIQ personal expense claims. Each item links to its
           own real detail page for the actual approve/reject action.</>}
       />
 

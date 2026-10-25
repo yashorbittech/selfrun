@@ -33,7 +33,7 @@ export default async function ChartOfAccountsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Chart of Accounts" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Chart of Accounts" }]}
         title={<>Chart of Accounts</>}
         description={<>{accounts.length} account{accounts.length === 1 ? "" : "s"} configured.</>}
         actions={<>{canManage && (

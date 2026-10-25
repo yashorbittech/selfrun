@@ -21,7 +21,7 @@ export default async function OtsSettingsPage() {
         />
       </SectionCard>
       <Notice>
-        Who can do what is managed centrally by the Super Admin at Admin → Users (roles <code>ots_admin</code>, <code>ots_manager</code>, <code>ots_author</code>, <code>ots_evaluator</code>, <code>ots_candidate</code>, plus per-permission overrides). Every HRMS employee can take tests; HR and TMS admins/managers manage them; mentors evaluate. Applicants and students take tests from the External Portal.
+        Who can do what is managed centrally by the Director at Admin → Users (roles <code>ots_admin</code>, <code>ots_manager</code>, <code>ots_author</code>, <code>ots_evaluator</code>, <code>ots_candidate</code>, plus per-permission overrides). Every TalentOS employee can take tests; HR and Cohort AI admins/managers manage them; mentors evaluate. Applicants and students take tests from the External Portal.
       </Notice>
     </div>
   );

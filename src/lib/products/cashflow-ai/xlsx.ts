@@ -22,7 +22,7 @@ export interface SheetSpec {
 /** Builds a formatted .xlsx workbook as a Node Buffer. */
 export async function buildWorkbook(sheets: SheetSpec[]): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = `${(await getCompanyBrand()).name} FMS`;
+  wb.creator = `${(await getCompanyBrand()).name} CashFlow`;
   wb.created = new Date();
 
   for (const spec of sheets) {

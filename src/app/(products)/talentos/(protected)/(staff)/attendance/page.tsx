@@ -36,7 +36,7 @@ export default async function AttendancePage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Attendance" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Attendance" }]}
         title={<>Attendance</>}
         description={<>{canEdit ? "Record and correct daily attendance." : "Daily attendance overview."}</>}
       />

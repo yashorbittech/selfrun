@@ -7,7 +7,7 @@ import SecuritySections from "../../settings/security/SecuritySections";
 export const metadata: Metadata = { title: "Security & sessions", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
-/** Everyone's own devices and sign-in history (the company Security page shows the same for the Super Admin, next to company-wide numbers). */
+/** Everyone's own devices and sign-in history (the company Security page shows the same for the Director, next to company-wide numbers). */
 export default async function SessionsPage() {
   const user = await requireWorkspaceAccess("account.sessions");
   return (

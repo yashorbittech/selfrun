@@ -80,7 +80,7 @@ export default async function HrmsDashboardPage({
   return (
     <div className="relative space-y-4">
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Dashboard" }]}
         title="Workforce Overview"
         description={<>Welcome back{user ? `, ${user.email.split("@")[0]}` : ""}. Monitor headcount, hiring, attendance and leave across the organization.</>}
         actions={

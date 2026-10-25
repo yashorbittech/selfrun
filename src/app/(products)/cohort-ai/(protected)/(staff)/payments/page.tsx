@@ -39,7 +39,7 @@ export default async function PaymentsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Payments" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Payments" }]}
         title={<>Payments</>}
         description={<>{analytics.planCount} fee plan{analytics.planCount === 1 ? "" : "s"}.</>}
         actions={<><PaymentPlanForm

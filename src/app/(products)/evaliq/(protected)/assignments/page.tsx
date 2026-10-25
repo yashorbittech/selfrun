@@ -67,7 +67,7 @@ export default async function AssignmentsPage({ searchParams }: { searchParams: 
       <GlassCard interactive={false}>
         <CardContent>
           {r.items.length === 0 ? (
-            <EmptyState icon={<Send className="size-5" />} title="No assignments match">Assign a published test to people from HRMS, Careers or TMS.</EmptyState>
+            <EmptyState icon={<Send className="size-5" />} title="No assignments match">Assign a published test to people from TalentOS, Careers or Cohort AI.</EmptyState>
           ) : (
             <Table>
               <TableHeader>

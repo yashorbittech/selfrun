@@ -5,7 +5,7 @@ import type { SopDoc, SopSummary, SopViewer } from "@/lib/products/playbook-ai/t
 
 /**
  * The single source of truth for "who can do what to which SOP". Two layers:
- *   1. capability   — `sopCan(viewer, PERM)` (role + Super Admin override)
+ *   1. capability   — `sopCan(viewer, PERM)` (role + Director override)
  *   2. object scope — WHICH SOPs: all (admin) / own department(s) (manager) /
  *      own (author, or an employee granted a write permission by override)
  * plus confidentiality for reads. Every list, page, file route and server

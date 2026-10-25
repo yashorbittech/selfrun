@@ -69,7 +69,7 @@ export default async function LpmsDashboardPage({ searchParams }: { searchParams
             { key: "to", label: "To", type: "date" },
           ]}
         />}
-        breadcrumbs={[{ label: 'LPMS', href: '/contractflow-ai' }, { label: 'Dashboard' }]}
+        breadcrumbs={[{ label: 'ContractFlow', href: '/contractflow-ai' }, { label: 'Dashboard' }]}
         title="Legal Documents Overview"
         description="Monitor legal documents, templates and approval workflows, and act quickly on items that need review."
         actions={

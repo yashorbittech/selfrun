@@ -63,7 +63,7 @@ export default async function EmployeeDashboardPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "My Dashboard" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "My Dashboard" }]}
         title={<>Hi, {user.email.split("@")[0]}</>}
         description={<>Your projects, tasks and logged hours at a glance.</>}
       />

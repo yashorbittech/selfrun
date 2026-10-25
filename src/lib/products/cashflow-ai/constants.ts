@@ -152,12 +152,12 @@ export function paymentMethodLabel(value: string | undefined | null): string {
 // ---------------------------------------------------------------------------
 
 export const SOURCE_MODULES = [
-  { value: "fms", label: "FMS (Manual Entry)" },
-  { value: "hrms", label: "HRMS" },
-  { value: "pms", label: "PMS" },
-  { value: "prms", label: "PRMS" },
-  { value: "tms", label: "TMS" },
-  { value: "lms", label: "LMS" },
+  { value: "fms", label: "CashFlow (Manual Entry)" },
+  { value: "hrms", label: "TalentOS" },
+  { value: "pms", label: "SprintOS" },
+  { value: "prms", label: "SpendIQ" },
+  { value: "tms", label: "Cohort AI" },
+  { value: "lms", label: "DealFlow" },
 ] as const;
 export type SourceModule = (typeof SOURCE_MODULES)[number]["value"];
 

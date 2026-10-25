@@ -2,7 +2,7 @@
 
 import { startTransition, useActionState, useEffect, useId, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, Eye, EyeOff, Loader2, Clock, X } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Gift, Loader2, Clock, X } from "lucide-react";
 import Link from "next/link";
 import { slugFormatError, slugFromName } from "@/lib/platform/tenancy/slug";
 import { checkSlugAction, startSignupAction, validateSignupAction, type SignupState } from "./actions";
@@ -14,9 +14,42 @@ import SearchMultiSelect, { type MultiOption, type SearchExtra } from "@/compone
 const CATEGORY_OPTIONS: MultiOption[] = BUSINESS_CATEGORIES.map((c) => ({ value: c.code, label: c.name, description: categoryDescription(c), keywords: categoryKeywords(c) }));
 
 const initialState: SignupState = {};
+
+/** The plan picked on the pricing page (already checked on the server): it starts as a free trial. */
+export interface SelectedPlan {
+  id: string;
+  name: string;
+  interval: "monthly" | "yearly";
+  trial: string;
+  priceLabel: string;
+}
+
+/** A quick guide for the person typing: longer and more varied is stronger. The server applies the real rules. */
+function strengthOf(p: string): { score: number; label: string; tone: string } {
+  if (!p) return { score: 0, label: "", tone: "" };
+  let score = 0;
+  if (p.length >= 10) score++;
+  if (p.length >= 14) score++;
+  if (/[a-z]/.test(p) && /[A-Z]/.test(p)) score++;
+  if (/\d/.test(p)) score++;
+  if (/[^A-Za-z0-9]/.test(p)) score++;
+  if (p.length < 10) score = Math.min(score, 1);
+  const label = ["Too short", "Weak", "Okay", "Good", "Strong", "Strong"][score];
+  const tone = score <= 1 ? "bg-rose-500" : score === 2 ? "bg-amber-500" : "bg-emerald-500";
+  return { score, label, tone };
+}
+
+function StepHead({ n, title, note }: { n: number; title: string; note: string }) {
+  return (
+    <div className="flex items-center gap-3 border-b border-border/60 pb-3">
+      <span className="sr-circle h-8 w-8 flex-none text-sm font-black">{n}</span>
+      <div><p className="text-sm font-black uppercase tracking-widest">{title}</p><p className="text-xs text-muted-foreground">{note}</p></div>
+    </div>
+  );
+}
 type SlugCheck = { for: string; state: "idle" | "checking" | "ok" | "bad"; message: string | null };
 
-export default function SignupForm({ rootDomain, approval = false }: { rootDomain: string; approval?: boolean }) {
+export default function SignupForm({ rootDomain, approval = false, selectedPlan = null }: { rootDomain: string; approval?: boolean; selectedPlan?: SelectedPlan | null }) {
   const [state, formAction] = useActionState(startSignupAction, initialState);
   // Two phases: the server validates first (`checking`), and only then the creation starts and the progress replaces the form (`creating`).
   const [checking, setChecking] = useState(false);
@@ -27,6 +60,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
   const [slugEdited, setSlugEdited] = useState(false);
   const [check, setCheck] = useState<SlugCheck>({ for: "", state: "idle", message: null });
   const [showPassword, setShowPassword] = useState(false);
+  const [pw, setPw] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [subCategories, setSubCategories] = useState<string[]>([]);
   // Sub-categories of the chosen categories, grouped by category.
@@ -133,6 +167,21 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
           <p className="mt-1.5 text-muted-foreground">{approval ? "Free to start. New workspaces are approved by our team before they go live." : "Free to start. Set up takes a few seconds."}</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-5" noValidate>
+          {selectedPlan && (
+            <>
+              <input type="hidden" name="plan" value={selectedPlan.id} />
+              <input type="hidden" name="interval" value={selectedPlan.interval} />
+              <div className="flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-4" role="note">
+                <span className="sr-icon h-10 w-10 flex-none rounded-xl"><Gift className="h-5 w-5" /></span>
+                <div className="min-w-0 flex-1 text-sm">
+                  <p className="font-black leading-snug">{selectedPlan.name} plan · {selectedPlan.trial} free</p>
+                  <p className="mt-0.5 text-muted-foreground">No card needed now. After the trial it is {selectedPlan.priceLabel}; cancel any time.</p>
+                  <Link href="/pricing" className="mt-1.5 inline-block text-xs font-bold text-primary hover:underline">Change plan</Link>
+                </div>
+              </div>
+            </>
+          )}
+          <StepHead n={1} title="Your business" note="Tell us what you run, so we can set it up for you." />
           <div>
             <label htmlFor={ids.company} className="sr-label">Business name</label>
             <input
@@ -229,6 +278,7 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
             {fieldError(errors.businessSubCategories)}
           </div>
 
+          <div className="pt-2"><StepHead n={2} title="Your account" note="You will use these to sign in." /></div>
           <div>
             <label htmlFor={ids.email} className="sr-label">Email address</label>
             <input id={ids.email} name="email" type="email" required autoComplete="email" placeholder="Enter your email address" className="sr-input" style={{ ...inputStyle, ...(errors.email ? bad : null) }} aria-invalid={!!errors.email || undefined} />
@@ -238,12 +288,19 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
           <div>
             <label htmlFor={ids.password} className="sr-label">Password</label>
             <div className="relative">
-              <input id={ids.password} name="password" type={showPassword ? "text" : "password"} required minLength={10} autoComplete="new-password" placeholder="Enter your password" className="sr-input" style={{ ...inputStyle, paddingRight: 48, ...(errors.password ? bad : null) }} aria-invalid={!!errors.password || undefined} />
+              <input id={ids.password} name="password" type={showPassword ? "text" : "password"} required minLength={10} autoComplete="new-password" placeholder="Enter your password" className="sr-input" style={{ ...inputStyle, paddingRight: 48, ...(errors.password ? bad : null) }} aria-invalid={!!errors.password || undefined}  value={pw} onChange={(e) => setPw(e.target.value)} />
               <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"} tabIndex={-1}>
                 {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
-            {fieldError(errors.password) ?? <p className="mt-1.5 text-xs text-muted-foreground">At least 10 characters.</p>}
+            {fieldError(errors.password) ?? (
+              pw ? (
+                <div className="mt-2" aria-live="polite">
+                  <div className="flex gap-1.5" aria-hidden>{[1, 2, 3, 4].map((n) => <span key={n} className={`h-1.5 flex-1 rounded-full ${strengthOf(pw).score >= n ? strengthOf(pw).tone : "bg-border"}`} />)}</div>
+                  <p className="mt-1.5 text-xs text-muted-foreground"><b className="text-foreground">{strengthOf(pw).label}.</b> Use at least 10 characters. A longer password with a mix of letters, numbers and symbols is stronger.</p>
+                </div>
+              ) : <p className="mt-1.5 text-xs text-muted-foreground">At least 10 characters. A longer password with a mix of letters, numbers and symbols is stronger.</p>
+            )}
           </div>
 
           <div>
@@ -271,6 +328,9 @@ export default function SignupForm({ rootDomain, approval = false }: { rootDomai
               </>
             )}
           </button>
+          <ul className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs font-semibold text-muted-foreground">
+            {["Free to start", "No card needed", "Every feature included"].map((t) => <li key={t} className="inline-flex items-center gap-1.5"><Check className="size-3.5 text-emerald-600" strokeWidth={3} />{t}</li>)}
+          </ul>
           <p className="text-center text-sm text-muted-foreground">
             Already have a workspace? <Link href="/login" className="font-bold text-primary hover:underline">Log in</Link>
           </p>

@@ -1,3 +1,4 @@
+import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
@@ -109,6 +110,6 @@ export async function queuePush(actor: PushActor, userIds: string[], message: Pu
 
 /** Staff accounts of the company holding any of `roles` (for product broadcasts such as "tell HR"). */
 export async function userIdsWithRoles(roles: string[]): Promise<string[]> {
-  const rows = await (await getDb()).collection<{ _id: ObjectId }>("admin_users").find({ roles: { $in: roles } }, { projection: { _id: 1 } }).limit(200).toArray();
+  const rows = await (await getDb()).collection<{ _id: ObjectId }>("admin_users").find({ roles: { $in: roles }, status: { $nin: BLOCKED_STATUSES } }, { projection: { _id: 1 } }).limit(200).toArray();
   return rows.map((r) => String(r._id));
 }

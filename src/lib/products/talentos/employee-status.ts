@@ -9,6 +9,8 @@ export const EMPLOYEE_STATUSES = [
   { value: "active", label: "Active", badgeClass: "bg-green-500/15 text-green-600 dark:text-green-400", dotClass: "bg-green-500", active: true },
   { value: "on_leave", label: "On Leave", badgeClass: "bg-primary/10 text-primary", dotClass: "bg-primary/70", active: true },
   { value: "notice_period", label: "Notice Period", badgeClass: "bg-amber-500/15 text-amber-600 dark:text-amber-400", dotClass: "bg-amber-500", active: true },
+  { value: "suspended", label: "Suspended", badgeClass: "bg-destructive/10 text-destructive", dotClass: "bg-destructive/70", active: false },
+  { value: "deactivated", label: "Deactivated", badgeClass: "bg-muted text-muted-foreground", dotClass: "bg-muted-foreground/40", active: false },
   { value: "relieved", label: "Relieved", badgeClass: "bg-muted text-muted-foreground", dotClass: "bg-muted-foreground/60", active: false },
   { value: "terminated", label: "Terminated", badgeClass: "bg-destructive/15 text-destructive", dotClass: "bg-destructive", active: false },
 ] as const;
@@ -21,7 +23,7 @@ export const DEFAULT_EMPLOYEE_STATUS: EmployeeStatus = "probation";
 export const ACTIVE_EMPLOYEE_STATUSES: EmployeeStatus[] = EMPLOYEE_STATUSES.filter((s) => s.active).map((s) => s.value);
 
 /** Statuses that represent someone who has left — used for attrition. */
-export const EXITED_EMPLOYEE_STATUSES: EmployeeStatus[] = EMPLOYEE_STATUSES.filter((s) => !s.active).map((s) => s.value);
+export const EXITED_EMPLOYEE_STATUSES: EmployeeStatus[] = ["relieved", "terminated"];
 
 export function isValidEmployeeStatus(value: string): value is EmployeeStatus {
   return EMPLOYEE_STATUSES.some((s) => s.value === value);

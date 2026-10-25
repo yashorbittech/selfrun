@@ -96,7 +96,7 @@ export const OFFER_TYPES = [
   { value: "limited_time", label: "Limited-Time", blurb: "Strong deadline, live countdown" },
   { value: "flash", label: "Flash", blurb: "Short-duration special deals" },
   { value: "combo", label: "Combo", blurb: "Bundled services or courses" },
-  { value: "course", label: "LMS Courses", blurb: "Course discounts & enrollments" },
+  { value: "course", label: "DealFlow Courses", blurb: "Course discounts & enrollments" },
   { value: "student", label: "Student", blurb: "Student-only pricing" },
   { value: "hourly", label: "Hourly Rates", blurb: "Developer rate per hour" },
   { value: "hiring", label: "Developer Hiring", blurb: "Dedicated developers & teams" },

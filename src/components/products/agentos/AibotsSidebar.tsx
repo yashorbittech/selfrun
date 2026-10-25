@@ -100,7 +100,7 @@ export default function AibotsSidebar({ flags, bots, onNavigate, collapsed = fal
       <NavLink {...common} href={`/agentos/b/${GENERAL_BOT_ID}`} label="Start New Chat" icon={<MessageSquarePlus className="size-4" />} highlight />
       {flags.createBot && <NavLink {...common} href="/agentos/bots/new" label="Create Bot" icon={<Plus className="size-4" />} exact />}
 
-      <SectionLabel collapsed={collapsed}>AI Bots</SectionLabel>
+      <SectionLabel collapsed={collapsed}>AgentOS</SectionLabel>
       {!collapsed && bots.length > 8 && (
         <label className="mb-1 flex items-center gap-2 rounded-lg border border-border/50 bg-background/60 px-2.5 py-1.5 text-xs text-muted-foreground focus-within:border-primary/40">
           <Search className="size-3.5 shrink-0" />

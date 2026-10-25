@@ -53,7 +53,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "PMS", href: "/sprintos" },
+          { label: "SprintOS", href: "/sprintos" },
           { label: "Projects", href: "/sprintos/projects" },
           { label: project.name },
         ]}

@@ -1,5 +1,6 @@
 import { PLAN_FLAGS, USAGE_SERVICES, formatLimitValue, type BillingInterval, type Plan } from "@/lib/platform/billing/types";
 import { planPrice } from "@/lib/platform/billing/pricing";
+import { signupTrialDays } from "@/lib/platform/billing/signup-plan-rule";
 
 /**
  * A plan as the pricing screens show it (the marketing page and the in-app plan chooser share it). Pure and serialisable: built on the
@@ -21,6 +22,8 @@ export interface ShowcasePlan {
   /** Every paid service with this plan's allowance, in `USAGE_SERVICES` order (seats excluded: it is shown as "Up to N users"). */
   limits: { key: string; label: string; /** Short name and value for the cards ("AI", "300K"). */ short: string; shortValue: string; provider: string | null; value: string; included: boolean; /** The number (null = unlimited) for drawing bars. */ raw: number | null }[];
   popular: boolean;
+  /** Free-trial days a new sign-up on this plan gets (paid plans). */
+  trialDays: number;
 }
 
 const n1 = (v: number) => v.toLocaleString("en-IN", { maximumFractionDigits: 1 });
@@ -32,7 +35,7 @@ const SHORT: Record<string, { label: string; fmt: (v: number) => string }> = {
   customDomains: { label: "Domains", fmt: (v) => String(v) },
 };
 
-export function buildShowcase(plans: Plan[]): ShowcasePlan[] {
+export function buildShowcase(plans: Plan[], defaultTrialDays = 30): ShowcasePlan[] {
   const paid = plans.filter((p) => !p.lifetimeFree && !p.contactSales);
   const popularId = paid.length >= 3 ? paid[Math.floor(paid.length / 2)]._id : (paid[0]?._id ?? "");
   return plans.map((p) => ({
@@ -56,5 +59,6 @@ export function buildShowcase(plans: Plan[]): ShowcasePlan[] {
       return { key: u.limitKey, label: u.label, short: sh?.label ?? u.label, shortValue, provider: u.provider, value: u.comingSoon && (v === 0 || v === undefined) ? "Coming soon" : formatLimitValue(u.limitKey, v ?? (u.limitKey in p.limits ? null : 0)), included: v === null || (typeof v === "number" && v > 0), raw: typeof v === "number" ? v : null };
     }),
     popular: p._id === popularId,
+    trialDays: p.lifetimeFree || p.contactSales ? 0 : signupTrialDays(p.trialDays, defaultTrialDays),
   }));
 }

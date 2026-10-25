@@ -53,7 +53,7 @@ export interface CurrentOtsUser {
   roles: string[];
   /** Explicit + implied OTS roles, for display only. */
   otsRoles: ReturnType<typeof effectiveOtsRoles>;
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   /** TMS student logins (`training_student`) carry their `training_students._id`. */

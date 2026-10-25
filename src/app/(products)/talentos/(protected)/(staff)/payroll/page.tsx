@@ -19,7 +19,7 @@ export default async function PayrollPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Payroll" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Payroll" }]}
         title={<>Payroll</>}
         description={<>Generate monthly runs, review payslips, and approve. Disbursement happens under Salary Payouts.</>}
         actions={<><Link href="/talentos/payroll/payouts" className={buttonVariants({ variant: "outline", size: "sm" })}>

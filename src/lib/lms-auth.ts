@@ -10,7 +10,7 @@ import { hasLmsAccess, lmsCan, type LmsPermission } from "@/lib/lms-roles";
 import { cmsCan, hasCmsAccess, type CmsPermission } from "@/lib/cms-roles";
 
 // NOTE: was literally `admin_session` — an accidental exact collision with
-// the separate Super Admin Command Center's own cookie of the same name
+// the separate Director Command Center's own cookie of the same name
 // (the former admin product, since removed). Both use `path: "/"`,
 // so whichever was set last silently overwrote the other for any browser with
 // both sessions active. Renamed to fix the collision and to allow the Command
@@ -50,7 +50,7 @@ export interface CurrentLmsUser {
    * role literals (notably `super_admin`) still show up here since identity is
    * shared. Used e.g. to conditionally show a "Back to Admin" link. */
   roles: string[];
-  /** The Super Admin's per-user capability overrides (`permission-overrides.ts`). */
+  /** The Director's per-user capability overrides (`permission-overrides.ts`). */
   permissionOverrides: Record<string, boolean>;
   createdAt: Date;
   lastLoginAt: Date | null;
@@ -184,7 +184,7 @@ export async function getCurrentLmsUser(): Promise<CurrentLmsUser | null> {
 }
 
 /**
- * The signed-in person ONLY if they may use the CRM (an LMS role, or Super Admin) — and, when `permission` is given,
+ * The signed-in person ONLY if they may use the CRM (an LMS role, or Director) — and, when `permission` is given,
  * hold that capability. `getCurrentLmsUser()` alone is just "a signed-in staff account": other products' roles reach it too,
  * so every CRM page, action and route calls this instead.
  */

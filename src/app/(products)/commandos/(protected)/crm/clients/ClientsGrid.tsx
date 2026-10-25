@@ -82,7 +82,7 @@ function RowActions({ row, onViewActivity }: { row: AdminClientRow; onViewActivi
             render={
               <a href={`/sprintos/clients/${row._id}`}>
                 <ExternalLink className="size-3.5" />
-                Open in PMS
+                Open in SprintOS
               </a>
             }
           />

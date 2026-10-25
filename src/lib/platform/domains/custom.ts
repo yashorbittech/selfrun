@@ -14,7 +14,7 @@ import type { DnsHistoryEntry, CompanyDomainView, DnsRecord, DomainActionResult,
 import { forgetCompanySiteUrls } from "@/lib/platform/tenancy/site-url";
 
 /**
- * A company's own domains (`www.acme.com`), managed by its Super Admin from
+ * A company's own domains (`www.acme.com`), managed by its Director from
  * Settings → Domains. Every function acts for the CURRENT company only.
  *
  * Lifecycle: added → `pending` → the owner proves control of the DNS zone by

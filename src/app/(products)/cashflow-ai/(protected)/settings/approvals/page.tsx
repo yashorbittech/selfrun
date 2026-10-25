@@ -18,7 +18,7 @@ export default function ApprovalsSettingsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Approvals" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Settings" }, { label: "Approvals" }]}
         title={<>Approval Configuration</>}
         description={<>The current, real approval model — who can approve, and the controlled state transitions every
           transaction follows. Not a configurable rules engine.</>}

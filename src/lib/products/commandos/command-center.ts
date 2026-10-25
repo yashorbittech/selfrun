@@ -17,7 +17,7 @@ import { getVoiceDashboardStats } from "@/lib/voice-analytics";
 import { getFmsDashboardStats } from "@/lib/products/cashflow-ai/dashboard";
 
 /**
- * Super Admin Command Center aggregation — Phase 1 (executive KPIs, financial
+ * Director Command Center aggregation — Phase 1 (executive KPIs, financial
  * intelligence, module overview). Composes the existing per-module dashboard
  * aggregators (`getPmsDashboardStats`, `getTmsDashboardStats`, …) rather than
  * re-querying their collections, per the "don't duplicate data" requirement.

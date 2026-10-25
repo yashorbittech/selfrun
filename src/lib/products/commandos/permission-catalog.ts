@@ -42,7 +42,7 @@ export interface PermissionGroup {
 
 export const PERMISSION_GROUPS: PermissionGroup[] = [
   {
-    module: "Team Chat",
+    module: "Huddle",
     permissions: [
       {
         key: "messenger.hasChatStaffRole",
@@ -77,12 +77,12 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    module: "Training (TMS)",
+    module: "Cohort AI",
     permissions: [
       {
         key: "tms.isTmsAdmin",
-        label: "TMS admin actions",
-        description: "Everything a TMS Admin can do — the broadest single grant in this module.",
+        label: "Cohort AI admin actions",
+        description: "Everything a Cohort AI Admin can do — the broadest single grant in this module.",
       },
       {
         key: "tms.canManageTraining",
@@ -111,18 +111,18 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
       {
         key: "tms.canManageSettings",
-        label: "Manage TMS settings",
+        label: "Manage Cohort AI settings",
         description: "Edit categories, technology suggestions and institute identity.",
       },
       {
         key: "tms.canViewAuditLog",
         label: "View audit log",
-        description: "Read the TMS audit trail.",
+        description: "Read the Cohort AI audit trail.",
       },
     ],
   },
   {
-    module: "HRMS",
+    module: "TalentOS",
     permissions: [
       {
         key: "hrms.canRunPayroll",
@@ -162,7 +162,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "hrms.canViewAuditLog",
         label: "View audit log",
-        description: "Read the HRMS audit trail. Denied to every role by default — even HR.",
+        description: "Read the TalentOS audit trail. Denied to every role by default — even HR.",
       },
       {
         key: "hrms.canManageAttendance",
@@ -181,18 +181,18 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
       {
         key: "hrms.canManageSettings",
-        label: "Manage HRMS settings",
+        label: "Manage TalentOS settings",
         description: "Edit the org-wide work schedule and leave-type configuration. Denied to every role by default.",
       },
     ],
   },
   {
-    module: "Projects (PMS)",
+    module: "SprintOS",
     permissions: [
       {
         key: "pms.isPmsAdmin",
-        label: "PMS admin actions",
-        description: "Everything a PMS Admin can do — the broadest single grant in this module.",
+        label: "SprintOS admin actions",
+        description: "Everything a SprintOS Admin can do — the broadest single grant in this module.",
       },
       {
         key: "pms.canViewCosting",
@@ -221,23 +221,23 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
       {
         key: "pms.canManageSettings",
-        label: "Manage PMS settings",
+        label: "Manage SprintOS settings",
         description: "Edit categories, default currency and technology suggestions.",
       },
       {
         key: "pms.canViewActivityLog",
         label: "View activity log",
-        description: "Read the PMS activity log.",
+        description: "Read the SprintOS activity log.",
       },
     ],
   },
   {
-    module: "Procurement (PRMS)",
+    module: "SpendIQ",
     permissions: [
       {
         key: "prms.isPrmsAdmin",
-        label: "PRMS admin actions",
-        description: "Everything a PRMS Admin can do — the broadest single grant in this module.",
+        label: "SpendIQ admin actions",
+        description: "Everything a SpendIQ Admin can do — the broadest single grant in this module.",
       },
       {
         key: "prms.canManageProcurement",
@@ -261,27 +261,27 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       },
       {
         key: "prms.canManageSettings",
-        label: "Manage PRMS settings",
+        label: "Manage SpendIQ settings",
         description: "Edit company identity, approval thresholds and category suggestions.",
       },
       {
         key: "prms.canViewAuditLog",
         label: "View audit log",
-        description: "Read the PRMS audit trail.",
+        description: "Read the SpendIQ audit trail.",
       },
       {
         key: "prms.canViewReports",
         label: "View reports",
-        description: "View PRMS reports and analytics.",
+        description: "View SpendIQ reports and analytics.",
       },
     ],
   },
   {
-    module: "Finance (FMS)",
+    module: "CashFlow",
     permissions: [
       {
         key: "fms.isFmsAdmin",
-        label: "FMS admin actions",
+        label: "CashFlow admin actions",
         description: "Everything a Finance Admin can do — the broadest single grant in this module.",
       },
       {
@@ -297,12 +297,12 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "fms.canManageAccounts",
         label: "Manage chart of accounts",
-        description: "Create and edit Chart of Accounts entries and other FMS settings.",
+        description: "Create and edit Chart of Accounts entries and other CashFlow settings.",
       },
       {
         key: "fms.canViewAuditLog",
         label: "View audit log",
-        description: "Read the FMS audit trail.",
+        description: "Read the CashFlow audit trail.",
       },
       {
         key: "fms.canReconcile",
@@ -317,7 +317,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "fms.canViewReports",
         label: "View reports",
-        description: "View the full FMS dashboard detail and reports.",
+        description: "View the full CashFlow dashboard detail and reports.",
       },
       {
         key: "fms.canManageTaxConfig",
@@ -332,7 +332,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "fms.canViewPayrollFinance",
         label: "View payroll finance",
-        description: "Open salary payments, payroll runs and the HR payroll view inside FMS.",
+        description: "Open salary payments, payroll runs and the HR payroll view inside CashFlow.",
       },
       {
         key: "fms.canViewFinancialStatements",
@@ -352,7 +352,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    module: "LMS (CRM & Learning)",
+    module: "DealFlow",
     // Derived from the LMS role model so the catalog can never drift from the permissions `lmsCan()` actually checks.
     permissions: LMS_PERMISSIONS.map((p) => ({
       key: LMS_PERMISSION_KEY[p],
@@ -361,7 +361,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "External Portal",
+    module: "ClientOS",
     permissions: [
       {
         key: "portal.isPortalAdmin",
@@ -381,7 +381,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    module: "SOP Product",
+    module: "Playbook",
     // Derived from the SOP role model so the catalog can never drift from the
     // permissions `sopCan()` actually checks. There is no review/approve entry —
     // SOP publishing is a direct action.
@@ -392,7 +392,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "SEO Product",
+    module: "RankMax",
     // Derived from the SEO role model so the catalog can never drift from the
     // permissions `seoCan()` actually checks.
     permissions: SEO_PERMISSIONS.map((p) => ({
@@ -402,7 +402,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "Digi Locker (DLMS)",
+    module: "CyberVault",
     // Derived from the DLMS role model so the catalog can never drift from the
     // permissions `dlmsCan()` actually checks.
     permissions: DLMS_PERMISSIONS.map((p) => ({
@@ -412,7 +412,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "AI Bots",
+    module: "AgentOS",
     // Derived from the AI Bots role model so the catalog can never drift from
     // the permissions `aibotsCan()` actually checks.
     permissions: AIBOTS_PERMISSIONS.map((p) => ({
@@ -422,7 +422,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "AI Intelligence",
+    module: "DataBrain",
     // Derived from the AI Intelligence role model. Which records an answer may use
     // is decided by the person's access in each data product, never by this.
     permissions: INTELLIGENCE_PERMISSIONS.map((p) => ({
@@ -432,7 +432,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "Social Media (SMMS)",
+    module: "ViralPulse",
     // Derived from the SMMS role model so the catalog can never drift from
     // the permissions `smmsCan()` actually checks.
     permissions: SMMS_PERMISSIONS.map((p) => ({
@@ -442,7 +442,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "Online Tests (OTS)",
+    module: "EvalIQ",
     // Derived from the OTS role model so the catalog can never drift from
     // the permissions `otsCan()` actually checks.
     permissions: OTS_PERMISSIONS.map((p) => ({
@@ -452,7 +452,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "Website CMS",
+    module: "SiteCraft",
     // Derived from the CMS role model so the catalog can never drift from
     // the permissions `cmsCan()` actually checks.
     permissions: CMS_PERMISSIONS.map((p) => ({
@@ -462,7 +462,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     })),
   },
   {
-    module: "Workspace Product",
+    module: "CommandOS",
     permissions: [
       {
         key: "workspace.isWorkspaceAdmin",
@@ -483,12 +483,12 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     // Company-wide management pages of the Workspace (`workspace/nav.ts` →
-    // MANAGE_PERMISSIONS). Super Admins hold all of them; granting one here
+    // MANAGE_PERMISSIONS). Directors hold all of them; granting one here
     // opens that page, its actions and its exports to the person.
-    module: "Workspace management",
+    module: "CommandOS management",
     permissions: [
       { key: "workspace.viewCommandCenter", label: "Command Center", description: "The executive dashboard and the full company-wide product analytics." },
-      { key: "workspace.manageUsers", label: "Manage users & roles", description: "Create accounts, assign product roles, reset passwords, deactivate. Cannot grant Super Admin or change permissions." },
+      { key: "workspace.manageUsers", label: "Manage users & roles", description: "Create accounts, assign product roles, reset passwords, deactivate. Cannot grant Director or change permissions." },
       { key: "workspace.viewAuditLog", label: "View the audit log", description: "The cross-product audit trail and its export." },
       { key: "workspace.manageDocuments", label: "Manage documents", description: "The company documents register across products." },
       { key: "workspace.manageCrm", label: "Manage CRM records", description: "Company-wide leads and clients registers." },
@@ -502,7 +502,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    module: 'LPMS (Legal & Documents)',
+    module: 'ContractFlow',
     permissions: LPMS_PERMISSIONS.map((p) => ({
       key: LPMS_PERMISSION_KEY[p],
       label: LPMS_PERMISSION_META[p].label,

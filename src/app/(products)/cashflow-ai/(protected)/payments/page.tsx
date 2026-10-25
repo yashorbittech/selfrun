@@ -49,7 +49,7 @@ export default async function FmsPaymentsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Central Payments" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Central Payments" }]}
         title={<>Central Payment Engine</>}
         description={<>Single financial source of truth for all {brand.name} payment operations & collections.</>}
         actions={<><div className="flex items-center gap-2">
@@ -155,9 +155,9 @@ export default async function FmsPaymentsPage({
             label: "Source Module",
             value: sp.sourceModule ?? "",
             options: [
-              { value: "TMS", label: panelName("tms", "TMS (Training)") },
-              { value: "PMS", label: panelName("pms", "PMS (Projects)") },
-              { value: "PRMS", label: panelName("prms", "PRMS (Procurement)") },
+              { value: "Cohort AI", label: panelName("tms", "Cohort AI (Training)") },
+              { value: "SprintOS", label: panelName("pms", "SprintOS (Projects)") },
+              { value: "SpendIQ", label: panelName("prms", "SpendIQ (Procurement)") },
               { value: "PORTAL", label: "Client Portal" },
               { value: "OFFERS", label: "Offers Engine" },
               { value: "DIRECT", label: "Direct Payment Link" },

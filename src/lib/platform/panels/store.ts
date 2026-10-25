@@ -8,7 +8,7 @@ import { productSlugFor } from "@/lib/platform/saas/product-routes";
 export const PANELS_COLLECTION = "platform_panels";
 
 /** Products listed here are never routable products of their own (reserved segments the registry must not claim). */
-const RESERVED = new Set(["api", ...PLATFORM_ONLY_KEYS, "login", "signup", "admin", "workspace-not-found", "product-unavailable"]);
+const RESERVED = new Set(["api", ...PLATFORM_ONLY_KEYS, "login", "signup", "admin", "workspace-not-found", "company-suspended", "product-unavailable"]);
 
 const TTL_MS = 10_000;
 let cache: { at: number; rows: PanelRecord[] } | null = null;

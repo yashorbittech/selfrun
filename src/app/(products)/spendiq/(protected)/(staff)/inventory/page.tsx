@@ -34,7 +34,7 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Inventory & Stationery" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Inventory & Stationery" }]}
         title={<>Inventory &amp; Stationery</>}
         description={<>{total} consumable item{total === 1 ? "" : "s"}.</>}
         actions={<>{canManage && (

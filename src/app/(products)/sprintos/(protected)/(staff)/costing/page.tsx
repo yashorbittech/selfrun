@@ -64,7 +64,7 @@ export default async function CostingPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos" }, { label: "Costing" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos" }, { label: "Costing" }]}
         title={<>Project Costing</>}
         description={<>Financials computed live from timesheets and team rates.</>}
         actions={<><a href={`/api/sprintos/reports/portfolio?format=xlsx${dateFrom ? `&dateFrom=${dateFrom}&dateTo=${dateTo}` : ""}`} className={buttonVariants({ variant: "outline", size: "sm" })}>

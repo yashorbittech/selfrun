@@ -1,3 +1,4 @@
+import { blockedMessage, canSignIn, statusOf } from "@/lib/security/account-status";
 import { passwordPolicyError } from "@/lib/security/password";
 import { accountWithinSeats } from "@/lib/platform/billing/enforce";
 import "server-only";
@@ -39,8 +40,13 @@ interface HubUserDoc {
   permissionOverrides?: Record<string, boolean>;
   mustChangePassword?: boolean;
   emailVerified?: boolean;
+  /** Account status (see security/account-status.ts); absent on older accounts. */
+  status?: string;
+  platformRoleId?: string | null;
   /** Set once the person has turned on two-step sign-in (see security/two-factor.ts). */
   twoFactor?: { secret: { c: string; iv: string; t: string }; enabledAt: Date; lastStep: number; recovery: string[] } | null;
+  /** Two-step sign-in by a code sent to the account's own email (the person's choice; see `security/two-factor.ts`). */
+  twoFactorEmail?: { enabledAt: Date } | null;
 }
 
 interface HubSessionDoc {
@@ -57,7 +63,7 @@ export interface CurrentHubUser {
   /** Raw `admin_users.roles` — Hub has no role vocabulary of its own; this is
    * used only to decide which OTHER products' dashboard tiles to show. */
   roles: string[];
-  /** The Super Admin's per-user capability overrides (`permission-overrides.ts`). */
+  /** The Director's per-user capability overrides (`permission-overrides.ts`). */
   permissionOverrides?: Record<string, boolean>;
   mustChangePassword: boolean;
   /** false only for a new sign-up that hasn't verified its email; a missing field counts as verified. */
@@ -97,8 +103,9 @@ function hashToken(token: string): string {
 export async function verifyHubCredentials(
   email: string,
   password: string,
-  code?: string
-): Promise<{ ok: true; adminId: ObjectId } | { ok: false; error: string; needsCode?: boolean }> {
+  code?: string,
+  opts: { resend?: boolean } = {}
+): Promise<{ ok: true; adminId: ObjectId } | { ok: false; error: string; needsCode?: boolean; method?: "app" | "email"; hint?: string; info?: string }> {
   const users = await getHubUsersCollection();
   const normalizedEmail = email.trim().toLowerCase();
   const user = await users.findOne({ email: normalizedEmail });
@@ -126,16 +133,43 @@ export async function verifyHubCredentials(
     return { ok: false, error: GENERIC };
   }
 
+  // Status: someone who is suspended, deactivated or has left the company never signs in, however right the password is (and no code is emailed).
+  if (!canSignIn(user)) {
+    await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: `account_${statusOf(user)}` });
+    return { ok: false, error: blockedMessage(statusOf(user)) };
+  }
+
+  // Two-step sign-in by email: the password was right, so a code goes to the account's own address (never before: the mailbox can't be
+  // flooded by someone who doesn't know the password). It is asked for next, and checked here without counting the asking as a failure.
+  if (user.twoFactorEmail && !user.twoFactor) {
+    const { sendEmailCode, checkEmailCode, maskEmail } = await import("@/lib/security/email-otp");
+    const typed = (code ?? "").trim();
+    if (!typed || opts.resend) {
+      const sent = await sendEmailCode(user._id, user.email, "login");
+      if (sent.ok) return { ok: false, error: "", needsCode: true, method: "email", hint: sent.hint, info: `We sent a 6-digit code to ${sent.hint}. It works for 10 minutes.` };
+      // Asked again too soon: the code already sent is still the one to use.
+      if (sent.waitSeconds) return { ok: false, error: "", needsCode: true, method: "email", hint: maskEmail(user.email), info: `A code was sent to ${maskEmail(user.email)} a moment ago. Check your inbox (and spam). You can ask for another in ${sent.waitSeconds} seconds.` };
+      return { ok: false, error: sent.error };
+    }
+    if (!(await checkEmailCode(user._id, "login", typed))) {
+      await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: "wrong_second_step" });
+      const attempts = (user.failedLoginAttempts ?? 0) + 1;
+      const lockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_MS) : null;
+      await users.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockedUntil } });
+      return { ok: false, error: "That code isn't right or has expired. Ask for a new one.", needsCode: true, method: "email", hint: maskEmail(user.email) };
+    }
+  }
+
   // Two-step sign-in: the password was right, so ask for the second step (without counting it as a failure) and check it.
   if (user.twoFactor) {
-    if (!code || !code.trim()) return { ok: false, error: "Enter the 6-digit code from your authenticator app, or a recovery code.", needsCode: true };
+    if (!code || !code.trim()) return { ok: false, error: "Enter the 6-digit code from your authenticator app, or a recovery code.", needsCode: true, method: "app" };
     const { verifySecondStep } = await import("@/lib/security/two-factor");
     if (!(await verifySecondStep(user as never, code))) {
       await recordLoginEvent({ type: "login_failed", email: normalizedEmail, adminId: user._id.toString(), reason: "wrong_second_step" });
       const attempts = (user.failedLoginAttempts ?? 0) + 1;
       const lockedUntil = attempts >= MAX_FAILED_ATTEMPTS ? new Date(Date.now() + LOCKOUT_MS) : null;
       await users.updateOne({ _id: user._id }, { $set: { failedLoginAttempts: attempts, lockedUntil } });
-      return { ok: false, error: "That code isn't right. Try the next one in your app, or use a recovery code.", needsCode: true };
+      return { ok: false, error: "That code isn't right. Try the next one in your app, or use a recovery code.", needsCode: true, method: "app" };
     }
   }
 

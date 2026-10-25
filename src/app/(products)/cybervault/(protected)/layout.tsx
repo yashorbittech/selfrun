@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
 import { getCurrentDlmsUser } from "@/lib/dlms-auth";
@@ -19,6 +20,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:dlms}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedDlmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("dlms");
   const user = await getCurrentDlmsUser();
   if (!user) redirect("/cybervault/login");
@@ -66,7 +68,7 @@ export default async function ProtectedDlmsLayout({ children }: { children: Reac
                 children
               ) : (
                 <EmptyState icon={<ShieldAlert className="size-5" />} title="You don't have permission to view the vault">
-                  Ask a Super Admin to grant the “View” capability for Digi Locker.
+                  Ask a Director to grant the “View” capability for Digi Locker.
                 </EmptyState>
               )}
             </main>

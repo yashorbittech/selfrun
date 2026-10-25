@@ -9,7 +9,7 @@ import { workspaceEvents } from "@/lib/notify/triggers/workspace";
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
 
-/** Defining who can do what is the Super Admin's alone: a custom role is a way to hand out permissions. */
+/** Defining who can do what is the Director's alone: a custom role is a way to hand out permissions. */
 async function superAdminOnly() {
   const user = await requireWorkspaceAction("company.roles");
   if (!user.roles.includes("super_admin")) throw new Error("Forbidden");

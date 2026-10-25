@@ -31,7 +31,7 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Payment Receipts", href: "/cashflow-ai/receipts" }, { label: receipt.receiptNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Payment Receipts", href: "/cashflow-ai/receipts" }, { label: receipt.receiptNumber }]}
         title={<>{receipt.receiptNumber}</>}
         description={<>{receipt.customerName} · {formatMoney(receipt.amount, receipt.currency)}</>}
         actions={<><div className="flex items-center gap-2">

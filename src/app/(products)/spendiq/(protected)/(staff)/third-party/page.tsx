@@ -37,7 +37,7 @@ export default async function ThirdPartyPage({ searchParams }: { searchParams: P
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Third-Party Services" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Third-Party Services" }]}
         title={<>Third-Party Services</>}
         description={<>{total} outsourced service{total === 1 ? "" : "s"}.</>}
         actions={<>{canManage && (

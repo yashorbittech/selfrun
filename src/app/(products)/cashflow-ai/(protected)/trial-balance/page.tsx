@@ -26,7 +26,7 @@ export default async function TrialBalancePage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Trial Balance" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Trial Balance" }]}
         title={<>Trial Balance</>}
         description={<>Every account&apos;s total debits and credits{result.asOf ? ` as of ${new Date(result.asOf).toLocaleDateString()}` : ""}.</>}
       />

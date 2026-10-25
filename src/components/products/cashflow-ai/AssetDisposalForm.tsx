@@ -79,7 +79,7 @@ export default function AssetDisposalForm({
       <SheetContent className="sm:max-w-md">
         <SheetHeader className="border-b border-border/60">
           <SheetTitle>Dispose Asset</SheetTitle>
-          <SheetDescription>{assetName} — current book value {formatMoney(bookValue, currency)}. This retires the asset in PRMS too.</SheetDescription>
+          <SheetDescription>{assetName} — current book value {formatMoney(bookValue, currency)}. This retires the asset in SpendIQ too.</SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
           <div className="grid grid-cols-2 gap-3">

@@ -144,7 +144,7 @@ export async function linkLmsCampaignsAction(id: string, keys: string[]) {
   return run(["EDIT_CAMPAIGNS"], async (v) => {
     const c = await requireCampaign(id);
     await setLmsLinks(id, Array.isArray(keys) ? keys : [], v.userId);
-    await recordAudit({ ...who(v), action: "update", entity: "campaign", entityId: id, entityLabel: c.name, recordId: id, summary: `Linked ${keys.length} LMS campaign${keys.length === 1 ? "" : "s"}` });
+    await recordAudit({ ...who(v), action: "update", entity: "campaign", entityId: id, entityLabel: c.name, recordId: id, summary: `Linked ${keys.length} DealFlow campaign${keys.length === 1 ? "" : "s"}` });
     return {};
   });
 }

@@ -27,9 +27,9 @@ export default async function SalaryPaymentsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Salary Payments" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Salary Payments" }]}
         title={<>Salary Payments</>}
-        description={<>Read-only financial view over HRMS&apos;s real salary payouts — {result.total} payment{result.total === 1 ? "" : "s"}.</>}
+        description={<>Read-only financial view over TalentOS&apos;s real salary payouts — {result.total} payment{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -61,7 +61,7 @@ export default async function SalaryPaymentsPage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No salary payments found — payments are executed in HRMS."
+        emptyLabel="No salary payments found — payments are executed in TalentOS."
       />
 
       <p className="text-xs text-muted-foreground">Initiate or reconcile payouts at /talentos/payroll.</p>

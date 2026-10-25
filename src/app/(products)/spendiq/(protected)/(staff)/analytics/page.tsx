@@ -98,7 +98,7 @@ export default async function PrmsAnalyticsPage({
 
       {/* Breadcrumbs */}
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Analytics" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Analytics" }]}
         title={<>
             Procurement Analytics</>}
         description={<>In-depth analytical breakdown of organizational spend, vendor concentration, software costs, and growth trends.</>}

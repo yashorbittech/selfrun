@@ -31,7 +31,7 @@ export default async function ExpenseDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Expense Management", href: "/spendiq/expenses" }, { label: e.expenseCode }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Expense Management", href: "/spendiq/expenses" }, { label: e.expenseCode }]}
         title={<>{e.expenseCode}</>}
         actions={<>{e.approvalStatus === "pending" && (isOwner || canApprove) && (
           <ExpenseForm

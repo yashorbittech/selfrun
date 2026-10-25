@@ -103,6 +103,10 @@ export interface RazorpayPayment {
   invoice_id?: string | null;
   subscription_id?: string | null;
   error_description?: string | null;
+  /** upi | card | netbanking | wallet | emandate … */
+  method?: string;
+  /** Set when the payment was made against an order (a one-time purchase, not a subscription charge). */
+  order_id?: string | null;
 }
 
 // ── Signatures ───────────────────────────────────────────────────────────────
@@ -118,6 +122,13 @@ export async function verifyCheckoutSignature(paymentId: string, subscriptionId:
   const secret = (await getRazorpayCredentials())?.keySecret;
   if (!secret || !paymentId || !subscriptionId || !signature) return false;
   return safeEqualHex(createHmac("sha256", secret).update(`${paymentId}|${subscriptionId}`).digest("hex"), signature);
+}
+
+/** Checkout handler signature for an ORDER payment: HMAC-SHA256(`order_id|payment_id`, key secret). */
+export async function verifyOrderSignature(orderId: string, paymentId: string, signature: string): Promise<boolean> {
+  const secret = (await getRazorpayCredentials())?.keySecret;
+  if (!secret || !orderId || !paymentId || !signature) return false;
+  return safeEqualHex(createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex"), signature);
 }
 
 /** Webhook signature: HMAC-SHA256(raw body, webhook secret) in `x-razorpay-signature`. */
@@ -259,6 +270,33 @@ export async function fetchInvoiceSubscriptionId(invoiceId: string): Promise<str
 }
 
 /** Refunds part of a captured payment (used for the unused part of a period on an immediate upgrade). */
+/** Razorpay's own invoices of a subscription (one per charge): the way to find the payments a subscription has taken. */
+export async function listSubscriptionInvoices(subscriptionId: string): Promise<{ id: string; status: string; payment_id?: string | null }[]> {
+  const res = await call<{ items?: { id: string; status: string; payment_id?: string | null }[] }>("GET", `/invoices?subscription_id=${encodeURIComponent(subscriptionId)}&count=100`);
+  return res.items ?? [];
+}
+
+/** A one-time payment request (used for top-ups): the customer pays it in Checkout, and the payment carries this order's id. */
+export interface RazorpayOrder {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  receipt?: string | null;
+  notes?: Record<string, string> | [];
+}
+export async function createOrder(input: { amount: number; currency: string; receipt: string; notes: Record<string, string> }): Promise<RazorpayOrder> {
+  return call<RazorpayOrder>("POST", "/orders", { amount: input.amount, currency: input.currency, receipt: input.receipt.slice(0, 40), notes: input.notes });
+}
+export async function fetchOrder(id: string): Promise<RazorpayOrder> {
+  return call<RazorpayOrder>("GET", `/orders/${encodeURIComponent(id)}`);
+}
+
+/** What Razorpay holds for one payment: how it was paid and whether it captured. */
+export async function fetchPayment(id: string): Promise<RazorpayPayment> {
+  return call<RazorpayPayment>("GET", `/payments/${encodeURIComponent(id)}`);
+}
+
 export async function refundPayment(paymentId: string, amount: number, notes: Record<string, string>): Promise<{ id: string; amount: number }> {
   return call<{ id: string; amount: number }>("POST", `/payments/${encodeURIComponent(paymentId)}/refund`, { amount, notes });
 }

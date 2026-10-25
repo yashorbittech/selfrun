@@ -24,7 +24,7 @@ export default async function MyProjectsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos/me" }, { label: "My Projects" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos/me" }, { label: "My Projects" }]}
         title={<>My Projects</>}
         description={<>Projects you’re assigned to or manage.</>}
       />

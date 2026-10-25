@@ -94,7 +94,7 @@ export default async function SmmsDashboardPage({ searchParams }: { searchParams
             ))}
           </div>
         </SectionCard>
-        <SectionCard title="Campaign performance" description={d.paid.linkedCampaigns > 0 ? `From LMS ad imports for ${d.paid.linkedCampaigns} linked campaign${d.paid.linkedCampaigns === 1 ? "" : "s"}` : "Link a campaign to its LMS ad-platform import to see spend and results"}>
+        <SectionCard title="Campaign performance" description={d.paid.linkedCampaigns > 0 ? `From DealFlow ad imports for ${d.paid.linkedCampaigns} linked campaign${d.paid.linkedCampaigns === 1 ? "" : "s"}` : "Link a campaign to its DealFlow ad-platform import to see spend and results"}>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {[
               { label: "Spend", v: formatCurrency(d.paid.spend, d.paid.currency) },
@@ -193,7 +193,7 @@ export default async function SmmsDashboardPage({ searchParams }: { searchParams
           )}
         </SectionCard>
       </div>
-      <p className="text-[11px] text-muted-foreground">{`Paid numbers come from the LMS ad imports (${Object.values(PLATFORM_META).filter((m) => m.lmsPlatform).length} ad platforms); organic numbers are what the team records per published post. AI cost is an estimate.`}</p>
+      <p className="text-[11px] text-muted-foreground">{`Paid numbers come from the DealFlow ad imports (${Object.values(PLATFORM_META).filter((m) => m.lmsPlatform).length} ad platforms); organic numbers are what the team records per published post. AI cost is an estimate.`}</p>
     </div>
   );
 }

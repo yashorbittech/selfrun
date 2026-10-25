@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentHubUser } from "@/lib/hub-auth";
 import { countForCompany } from "@/lib/support/requests";
@@ -20,6 +21,7 @@ export const generateMetadata = () => brandedMetadata("{brand} {product:support}
  * company (the Workspace session) can get help and send requests — the data itself is SelfRun AI's, see `lib/resolveiq`.
  */
 export default async function ProtectedSupportLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   const user = await getCurrentHubUser();
   if (!user) redirect("/commandos/login");
   if (user.mustChangePassword) redirect("/commandos/change-password");

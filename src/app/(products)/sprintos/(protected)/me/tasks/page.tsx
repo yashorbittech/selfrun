@@ -15,7 +15,7 @@ export default async function MyTasksPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PMS", href: "/sprintos/me" }, { label: "My Tasks" }]}
+        breadcrumbs={[{ label: "SprintOS", href: "/sprintos/me" }, { label: "My Tasks" }]}
         title={<>My Tasks</>}
         description={<>Every task assigned to you, across all projects. Open one to update it.</>}
       />

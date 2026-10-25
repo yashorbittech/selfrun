@@ -10,7 +10,7 @@ export interface AgentUser {
   employeeId?: string | null;
   /** The training student record linked to this login (students see their own training data). */
   studentId?: string | null;
-  /** The Super Admin's per-person capability overrides; every product's own `canX(user)` rules honour them. */
+  /** The Director's per-person capability overrides; every product's own `canX(user)` rules honour them. */
   permissionOverrides?: Record<string, boolean>;
   /** Platform Console only: the platform permissions of this person (e.g. "companies.read"; "*" = Platform Owner). */
   platformPermissions?: string[];

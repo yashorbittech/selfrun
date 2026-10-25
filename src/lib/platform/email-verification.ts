@@ -7,6 +7,7 @@ import { getCompany } from "@/lib/platform/tenancy/companies";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { isEmailVerified } from "@/lib/platform/email-verification-rule";
+import { forgetEmailLapse } from "@/lib/platform/email-lapse";
 
 export { isEmailVerified, showVerifyStrip, verifyStripHiddenOn } from "@/lib/platform/email-verification-rule";
 
@@ -104,5 +105,6 @@ export async function consumeVerification(token: string): Promise<{ ok: true; em
   if (!doc) return { ok: false, error: "This link has expired or was already used." };
   const now = new Date();
   await (await getDb()).collection("admin_users").updateOne({ _id: new ObjectId(doc.userId), email: doc.email }, { $set: { emailVerified: true, emailVerifiedAt: now } });
+  forgetEmailLapse(); // a company on hold is released at once
   return { ok: true, email: doc.email };
 }

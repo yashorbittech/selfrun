@@ -45,7 +45,7 @@ export default async function ProjectCostingPage({ params }: { params: Promise<{
     <div className="space-y-4">
       <PanelPageHeader
         breadcrumbs={[
-          { label: "PMS", href: "/sprintos" },
+          { label: "SprintOS", href: "/sprintos" },
           { label: "Costing", href: "/sprintos/costing" },
           { label: project.name },
         ]}
@@ -97,7 +97,7 @@ export default async function ProjectCostingPage({ params }: { params: Promise<{
       {actual && (
         <GlassCard interactive={false}>
           <CardHeader>
-            <CardTitle>Actual Financials (FMS Ledger)</CardTitle>
+            <CardTitle>Actual Financials (CashFlow Ledger)</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-3 text-xs text-muted-foreground">

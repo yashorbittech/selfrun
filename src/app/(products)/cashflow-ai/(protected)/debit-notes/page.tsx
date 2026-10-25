@@ -30,7 +30,7 @@ export default async function DebitNotesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Debit Notes" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Debit Notes" }]}
         title={<>Debit Notes</>}
         description={<>{result.total} debit note{result.total === 1 ? "" : "s"}. Issue one from a bill&apos;s detail page.</>}
       />

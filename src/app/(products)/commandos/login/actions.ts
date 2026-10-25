@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import {
   verifyHubCredentials,
   createHubSession,
@@ -18,7 +17,14 @@ export interface HubLoginState {
   error?: string;
   /** The password was right and the account has two-step sign-in: the form now asks for the code. */
   needsCode?: boolean;
+  /** Which second step is asked for, and (email) where the code was sent, masked. */
+  method?: "app" | "email";
+  hint?: string;
+  /** A plain message (not an error), e.g. "We sent a code to j***@acme.com". */
+  info?: string;
   /** The plan allows one device at a time and the account is signed in elsewhere: the page asks before signing that device out. */
+  /** Signed in: the form opens this address with a full page load, so nothing the browser kept from before sign-in is reused. */
+  redirectTo?: string;
   conflict?: { ticket: string; devices: { label: string; detail: string; place: string; lastActiveAt: string }[] };
 }
 
@@ -30,9 +36,9 @@ export async function hubLoginAction(_prevState: HubLoginState, formData: FormDa
     return { error: "Enter your email and password." };
   }
 
-  const result = await verifyHubCredentials(email, password, String(formData.get("code") ?? ""));
+  const result = await verifyHubCredentials(email, password, String(formData.get("code") ?? ""), { resend: formData.get("resend") === "1" });
   if (!result.ok) {
-    return { error: result.error, needsCode: result.needsCode };
+    return { error: result.error, needsCode: result.needsCode, method: result.method, hint: result.hint, info: result.info };
   }
 
   // Free plan: one device at a time. If the account is already signed in somewhere else, nothing is signed in yet: the person is asked first.
@@ -66,8 +72,8 @@ async function finishHubLogin(adminId: ObjectId, email: string, next: FormDataEn
   if (limited) await endOtherDevices(adminId, loginId);
 
   const user = await getSessionHubUser(token);
-  if (user?.mustChangePassword) redirect("/commandos/change-password");
+  if (user?.mustChangePassword) return { redirectTo: "/commandos/change-password" };
   // Back to the product the person came from — validated again here, the form field is user input.
   // An explicit, validated `next` wins; otherwise an owner with open setup lands on the onboarding wizard.
-  redirect(await loginLanding(user?.roles ?? [], safeNextPath(next), user?.id));
+  return { redirectTo: await loginLanding(user?.roles ?? [], safeNextPath(next), user?.id) };
 }

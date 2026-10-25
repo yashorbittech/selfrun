@@ -29,7 +29,7 @@ export default async function SignaturesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Signatures" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Signatures" }]}
         title={<>Signature Requests</>}
         description={<>{requests.length} signature request{requests.length !== 1 ? "s" : ""}</>}
       />

@@ -57,7 +57,7 @@ export async function markOnboardingStep(step: OnboardingStep): Promise<void> {
   await col.updateOne({ _id: id }, { $addToSet: { "onboarding.completedSteps": step }, $set: { updatedAt: new Date() } });
   const doc = await col.findOne({ _id: id }, { projection: { onboarding: 1 } });
   if (ONBOARDING_STEPS.every((s) => doc?.onboarding?.completedSteps.includes(s.key))) {
-    // Setup finished. The company's apps are NOT built automatically: a Super Admin presses "Generate … App" in Settings → Apps.
+    // Setup finished. The company's apps are NOT built automatically: a Director presses "Generate … App" in Settings → Apps.
     await col.updateOne({ _id: id, "onboarding.completedAt": { $in: [null, undefined] } }, { $set: { "onboarding.completedAt": new Date() } });
   }
 }

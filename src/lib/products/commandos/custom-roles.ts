@@ -5,6 +5,7 @@ import { getDb } from "@/lib/mongodb";
 import { ALL_KNOWN_ROLES } from "@/lib/products/commandos/role-catalog";
 import { ALL_PERMISSION_KEYS } from "@/lib/products/commandos/permission-catalog";
 import type { CustomRoleInput, CustomRoleView } from "@/lib/products/commandos/custom-roles-shared";
+import { DESIGNATION_TEMPLATES } from "@/lib/platform/designations";
 import { MAX_CUSTOM_ROLES, MAX_ROLES_PER_USER, validateCustomRoleInput } from "@/lib/products/commandos/custom-roles-shared";
 
 /**
@@ -14,11 +15,11 @@ import { MAX_CUSTOM_ROLES, MAX_ROLES_PER_USER, validateCustomRoleInput } from "@
  * Every product already decides access from `admin_users.roles` and `admin_users.permissionOverrides`, so a custom role is
  * MATERIALISED into those two fields — no product needs to know custom roles exist, and none can be missed:
  *   roles                = manual built-in roles ∪ the base roles of every assigned custom role
- *   permissionOverrides  = custom-role permissions (a deny from any role beats a grant), then the Super Admin's manual overrides on top
+ *   permissionOverrides  = custom-role permissions (a deny from any role beats a grant), then the Director's manual overrides on top
  * `manualRoles` / `manualOverrides` / `customRoleIds` are the inputs; `roles` / `permissionOverrides` are the computed result,
  * rewritten whenever an input or a custom role changes.
  *
- * Safety: custom roles can never contain `super_admin`; only a Super Admin creates, edits, deletes or hands out a custom
+ * Safety: custom roles can never contain `super_admin`; only a Director creates, edits, deletes or hands out a custom
  * role that carries permission grants (a delegated user manager may assign plain role bundles they could grant themselves).
  * Every change is written to the access audit log.
  */
@@ -37,6 +38,9 @@ export interface CustomRoleDoc {
   updatedAt: Date;
   createdBy: string;
   updatedBy: string;
+  /** Created by the platform for every company (see `platform/designations.ts`); recognised by this key even if renamed. */
+  builtinKey?: string;
+  department?: string;
 }
 
 interface AccessUserDoc {
@@ -48,6 +52,8 @@ interface AccessUserDoc {
   manualOverrides?: Record<string, boolean>;
   customRoleIds?: string[];
   savedRoles?: string[];
+  designationId?: string | null;
+  status?: string;
 }
 
 async function rolesCol(): Promise<Collection<CustomRoleDoc>> {
@@ -63,7 +69,7 @@ async function usersCol(): Promise<Collection<AccessUserDoc>> {
 const norm = (s: string) => s.trim().replace(/\s+/g, " ");
 
 function view(d: CustomRoleDoc, userCount = 0): CustomRoleView {
-  return { id: d._id, name: d.name, description: d.description, baseRoles: d.baseRoles, permissions: d.permissions, userCount, updatedAt: d.updatedAt.toISOString() };
+  return { id: d._id, name: d.name, description: d.description, baseRoles: d.baseRoles, permissions: d.permissions, userCount, updatedAt: d.updatedAt.toISOString(), builtinKey: d.builtinKey ?? null, department: d.department ?? "Custom" };
 }
 
 // ── audit ───────────────────────────────────────────────────────────────────
@@ -154,9 +160,46 @@ export async function getCustomRoles(ids: readonly string[]): Promise<CustomRole
   return (await rolesById(ids)).map((d) => view(d));
 }
 
-/** Whether any of these roles carries permission grants / denials (those can only be handed out by a Super Admin). */
+/** Whether any of these roles carries permission grants / denials (those can only be handed out by a Director). */
 export async function customRolesCarryPermissions(ids: readonly string[]): Promise<boolean> {
   return (await rolesById(ids)).some((r) => Object.keys(r.permissions).length > 0);
+}
+
+// ── the built-in designations ───────────────────────────────────────────────
+
+const seeded = new Map<string, number>();
+
+/**
+ * Makes sure the company has every built-in designation (`platform/designations.ts`), as normal custom roles. Created once, then left
+ * alone: a renamed or edited one stays as the Director made it, a deleted-by-hand one is not brought back (they can't be deleted here).
+ * Cheap to call: it is remembered for a few minutes.
+ */
+export async function ensureDesignations(): Promise<void> {
+  const companyId = await (await import("@/lib/platform/tenancy/context")).currentCompanyId();
+  if (Date.now() - (seeded.get(companyId) ?? 0) < 5 * 60_000) return;
+  const col = await rolesCol();
+  const have = new Set((await col.find({ builtinKey: { $exists: true } }, { projection: { builtinKey: 1 } }).toArray()).map((d) => d.builtinKey));
+  const now = new Date();
+  const names = new Set((await col.find({}, { projection: { nameKey: 1 } }).toArray()).map((d) => d.nameKey));
+  const docs: CustomRoleDoc[] = [];
+  for (const t of DESIGNATION_TEMPLATES) {
+    if (have.has(t.key)) continue;
+    let title = t.title;
+    if (names.has(title.toLowerCase())) title = `${t.title} (standard)`; // the company already made a role with this name
+    names.add(title.toLowerCase());
+    docs.push({ _id: randomUUID(), name: title, nameKey: title.toLowerCase(), description: t.description, baseRoles: t.roles, permissions: {}, createdAt: now, updatedAt: now, createdBy: "platform", updatedBy: "platform", builtinKey: t.key, department: t.department });
+  }
+  if (docs.length > 0) {
+    try {
+      // One write for all of them; a name that was taken a moment ago by someone else is skipped, not fatal.
+      await col.insertMany(docs, { ordered: false });
+    } catch (err) {
+      const code = (err as { code?: number; writeErrors?: { code?: number }[] }).code;
+      const onlyDuplicates = code === 11000 || ((err as { writeErrors?: { code?: number }[] }).writeErrors ?? []).every((w) => w.code === 11000);
+      if (!onlyDuplicates) throw err;
+    }
+  }
+  seeded.set(companyId, Date.now());
 }
 
 // ── create / update / delete ────────────────────────────────────────────────
@@ -207,6 +250,9 @@ export async function deleteCustomRole(id: string, actorId: string): Promise<Res
   const col = await rolesCol();
   const role = await col.findOne({ _id: id });
   if (!role) return { ok: false, error: "That custom role no longer exists." };
+  if (role.builtinKey) return { ok: false, error: "This is one of the standard designations, so it can't be deleted. You can edit it, or simply not use it." };
+  const holdersAsDesignation = await (await usersCol()).countDocuments({ designationId: id });
+  if (holdersAsDesignation > 0) return { ok: false, error: `${holdersAsDesignation} ${holdersAsDesignation === 1 ? "person holds" : "people hold"} this as their designation. Give them another designation first.` };
   // Take it off everyone first, so nobody keeps access that came only from it.
   const users = await usersCol();
   const holders = await users.find({ customRoleIds: id }).toArray();

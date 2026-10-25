@@ -4,7 +4,7 @@ import { requirePlatformPermission } from "@/lib/platform/console/access";
 import { loginAsCompany, type LoginAsCompanyResult } from "@/lib/platform/console/impersonate";
 import { requestOrigin } from "@/lib/platform/request";
 
-/** Platform user → one-time sign-in link into a company's products as its Super Admin. */
+/** Platform user → one-time sign-in link into a company's products as its Director. */
 export async function loginAsCompanyAction(companyId: string): Promise<LoginAsCompanyResult> {
   const user = await requirePlatformPermission("companies.status");
   const { host } = await requestOrigin();

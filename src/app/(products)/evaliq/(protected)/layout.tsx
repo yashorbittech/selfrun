@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentOtsUser } from "@/lib/ots-auth";
 import { hasOtsAccess } from "@/lib/ots-roles";
@@ -20,6 +21,7 @@ import PanelBackBar from "@/components/hub/PanelBackBar";
 export const generateMetadata = () => brandedMetadata("{brand} {product:ots}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedOtsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("ots");
   const user = await getCurrentOtsUser();
   if (!user) redirect("/evaliq/login");

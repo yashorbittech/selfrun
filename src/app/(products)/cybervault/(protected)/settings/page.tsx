@@ -42,12 +42,12 @@ export default async function DlmsSettingsPage() {
       )}
 
       {canAccess && (
-        <SectionCard title="Vault access" description="Managers and admins see everything. A DLMS Employee sees only the clients (and the company vault, if ticked) listed here.">
+        <SectionCard title="Vault access" description="Managers and admins see everything. A CyberVault Employee sees only the clients (and the company vault, if ticked) listed here.">
           <AccessManager users={users} clients={clients.map((c) => ({ id: c._id, label: `${c.companyName} (${c.clientCode})` }))} />
         </SectionCard>
       )}
 
-      <SectionCard title="Role permissions" description="Defaults per role. The Super Admin can override individual capabilities per person under Admin → Users.">
+      <SectionCard title="Role permissions" description="Defaults per role. The Director can override individual capabilities per person under Admin → Users.">
         <Notice tone="info">Role tiers are assigned in Admin → Users. Scope (which clients) is controlled by “Vault access” above.</Notice>
         <div className="mt-3 overflow-x-auto">
           <Table>

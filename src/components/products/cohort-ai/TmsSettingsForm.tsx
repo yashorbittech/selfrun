@@ -74,7 +74,7 @@ export default function TmsSettingsForm({ settings }: { settings: TmsSettings })
             </div>
             <div className="space-y-1.5">
               <Label>Certificate number format</Label>
-              <Input value={certFormat} onChange={(e) => setCertFormat(e.target.value)} placeholder="YO-TMS-{yyyy}-{n}" />
+              <Input value={certFormat} onChange={(e) => setCertFormat(e.target.value)} placeholder="YO-Cohort AI-{yyyy}-{n}" />
               <p className="text-xs text-muted-foreground">{"{n}"} sequence · {"{yyyy}"} year</p>
             </div>
             <div className="space-y-1.5">

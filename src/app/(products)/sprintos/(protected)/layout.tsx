@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { hasPmsAccess } from "@/lib/pms-roles";
@@ -11,6 +12,7 @@ import { requireModule } from "@/lib/platform/billing/enforce";
 import PanelBackBar from "@/components/hub/PanelBackBar";
 
 export default async function ProtectedPmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("pms");
   const user = await getCurrentPmsUser();
   if (!user) redirect("/sprintos/login");

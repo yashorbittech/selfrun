@@ -34,7 +34,7 @@ export default async function AssetExpensesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Asset Expenses" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Asset Expenses" }]}
         title={<>Asset Expenses</>}
         description={<>{result.total} recorded expense{result.total === 1 ? "" : "s"} — maintenance, insurance, AMC and other ongoing asset costs.</>}
       />

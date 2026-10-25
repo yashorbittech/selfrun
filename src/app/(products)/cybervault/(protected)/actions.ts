@@ -171,7 +171,7 @@ export async function saveAccessAction(userId: string, input: { companyAccess: b
       metadata: { companyAccess: Boolean(input?.companyAccess), clients: clientIds.length, newlyGranted: added.length },
     });
     if (added.length > 0 || input?.companyAccess) {
-      await notifyDlmsUsers([String(userId)], { type: "dlms_access", title: "Your DLMS access was updated", body: `You can now open ${clientIds.length} client vault${clientIds.length === 1 ? "" : "s"}${input?.companyAccess ? " and the company vault" : ""}.`, link: "/cybervault/clients" });
+      await notifyDlmsUsers([String(userId)], { type: "dlms_access", title: "Your CyberVault access was updated", body: `You can now open ${clientIds.length} client vault${clientIds.length === 1 ? "" : "s"}${input?.companyAccess ? " and the company vault" : ""}.`, link: "/cybervault/clients" });
     }
     return {};
   });
@@ -180,7 +180,7 @@ export async function saveAccessAction(userId: string, input: { companyAccess: b
 export async function saveSettingsAction(input: { warnDays: number; alertsEnabled: boolean }) {
   return run("MANAGE_SETTINGS", async (v) => {
     await saveSettings({ warnDays: Number(input?.warnDays) || 30, alertsEnabled: Boolean(input?.alertsEnabled) }, v.userId);
-    await recordAudit({ actorId: v.userId, actorEmail: v.email, action: "settings", entity: "settings", entityId: "main", entityLabel: "DLMS settings", summary: `Expiry warning window ${Number(input?.warnDays) || 30} days; alerts ${input?.alertsEnabled ? "on" : "off"}` });
+    await recordAudit({ actorId: v.userId, actorEmail: v.email, action: "settings", entity: "settings", entityId: "main", entityLabel: "CyberVault settings", summary: `Expiry warning window ${Number(input?.warnDays) || 30} days; alerts ${input?.alertsEnabled ? "on" : "off"}` });
     return {};
   });
 }

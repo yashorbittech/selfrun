@@ -32,10 +32,12 @@ import {
   setUserTypeAndNotesAction,
   resetAdminUserPasswordAction,
   resetAdminUserTwoFactorAction,
-  deactivateAdminUserAction,
-  reactivateAdminUserAction,
+  getStatusHistoryAction,
   updateAdminUserPermissionOverridesAction,
 } from "./actions";
+import { canSignIn, statusMeta } from "@/lib/security/account-status";
+import type { StatusEventRow } from "@/lib/products/commandos/account-status";
+import { formatDateTime } from "@/lib/utils";
 
 type OverrideState = "default" | "allow" | "deny";
 
@@ -61,12 +63,21 @@ export default function UserDetailDrawer({
   open,
   onOpenChange,
   onOpenRoleEditor,
+  isDirector,
+  currentAdminId,
+  onChangeStatus,
+  onChangeDesignation,
 }: {
   user: AdminUserRow | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onOpenRoleEditor: (user: AdminUserRow) => void;
+  isDirector: boolean;
+  currentAdminId: string;
+  onChangeStatus: (user: AdminUserRow) => void;
+  onChangeDesignation: (user: AdminUserRow) => void;
 }) {
+  const [history, setHistory] = useState<StatusEventRow[] | null>(null);
   const [activeTab, setActiveTab] = useState("profile");
   const [isPending, startTransition] = useTransition();
 
@@ -90,10 +101,21 @@ export default function UserDetailDrawer({
     }
   }, [user]);
 
+  const userId = user?._id;
+  const statusKey = user?.status;
+  useEffect(() => {
+    if (!open || !userId) return;
+    let live = true;
+    setHistory(null);
+    getStatusHistoryAction(userId).then((h) => live && setHistory(h)).catch(() => live && setHistory([]));
+    return () => { live = false; };
+  }, [open, userId, statusKey]);
+
   if (!user) return null;
 
   const isSuperAdmin = user.roles.includes("super_admin");
-  const isActive = user.status === "active";
+  const isActive = canSignIn({ status: user.status, roles: ["x"] });
+  const meta = statusMeta(user.status);
 
   const handleSaveProfile = () => {
     startTransition(async () => {
@@ -123,22 +145,6 @@ export default function UserDetailDrawer({
     });
   };
 
-  const handleToggleActive = () => {
-    startTransition(async () => {
-      if (isActive) {
-        if (!confirm(`Deactivate ${user.email}? All active sessions across all products will be immediately revoked.`))
-          return;
-        const res = await deactivateAdminUserAction(user._id);
-        if (!res.ok) toast.error(res.error ?? "Could not deactivate account.");
-        else toast.success("Account deactivated and sessions revoked everywhere.");
-      } else {
-        const res = await reactivateAdminUserAction(user._id);
-        if (!res.ok) toast.error(res.error ?? "Could not reactivate account.");
-        else toast.success("Account reactivated. Previous roles restored.");
-      }
-    });
-  };
-
   const handleSavePermissions = () => {
     startTransition(async () => {
       const res = await updateAdminUserPermissionOverridesAction(user._id, toOverrides(overrideState));
@@ -154,16 +160,20 @@ export default function UserDetailDrawer({
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                {user.email.slice(0, 2).toUpperCase()}
+                {(user.name || user.email).slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <SheetTitle className="text-lg font-semibold">{user.email}</SheetTitle>
+                <SheetTitle className="text-lg font-semibold">{user.name || user.email}</SheetTitle>
                 <SheetDescription className="flex items-center gap-2 mt-0.5">
-                  <span className="font-mono text-xs text-muted-foreground">ID: {user._id}</span>
+                  <span className="text-xs text-muted-foreground">{user.name ? user.email : `ID: ${user._id}`}</span>
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Briefcase className="size-3 text-primary" />
+                    {user.designation}
+                  </Badge>
                   {user.employeeId && (
                     <Badge variant="outline" className="text-[10px] gap-1">
                       <BadgeCheck className="size-3 text-primary" />
-                      Employee #{user.employeeId}
+                      HR file in TalentOS
                     </Badge>
                   )}
                 </SheetDescription>
@@ -179,7 +189,7 @@ export default function UserDetailDrawer({
                     : "bg-rose-500/10 text-rose-600 border-rose-500/20 font-medium"
                 }
               >
-                {isActive ? "Active" : "Deactivated"}
+                {meta.label}
               </Badge>
               <Badge variant="outline" className="capitalize font-normal text-xs">
                 {user.userType || "Employee"}
@@ -379,37 +389,55 @@ export default function UserDetailDrawer({
                   </Button>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/50">
-                  <div>
-                    <p className="text-xs font-medium text-foreground">
-                      {isActive ? "Deactivate Account" : "Reactivate Account"}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {isActive
-                        ? "Revokes all roles and immediately terminates active sessions everywhere."
-                        : "Restores saved roles and grants access to configured products."}
-                    </p>
+                <div className="space-y-3 pt-3 border-t border-border/50">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Designation: {user.designation}</p>
+                      <p className="text-[11px] text-muted-foreground">Decides what this person can open in every product. Change it when their job changes.</p>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => onChangeDesignation(user)} className="h-8 text-xs gap-1.5">
+                      <Briefcase className="size-3.5" />
+                      Change designation
+                    </Button>
                   </div>
-                  <Button
-                    type="button"
-                    variant={isActive ? "destructive" : "default"}
-                    size="sm"
-                    onClick={handleToggleActive}
-                    disabled={isPending}
-                    className="h-8 text-xs gap-1.5"
-                  >
-                    {isActive ? (
-                      <>
-                        <UserX className="size-3.5" />
-                        Deactivate User
-                      </>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-medium text-foreground">Status: {meta.label}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {isActive ? "Can sign in." : "Cannot sign in. Every sign-in was ended when this status was set."}
+                        {user.lastWorkingDay ? ` Last working day: ${new Date(user.lastWorkingDay).toLocaleDateString()}.` : ""}
+                        {user.statusReason ? ` Reason: ${user.statusReason}` : ""}
+                      </p>
+                    </div>
+                    {isDirector ? (
+                      <Button type="button" variant={isActive ? "outline" : "default"} size="sm" onClick={() => onChangeStatus(user)} disabled={isPending || user._id === currentAdminId} className="h-8 text-xs gap-1.5">
+                        {isActive ? <UserX className="size-3.5" /> : <UserCheck className="size-3.5" />}
+                        Change status
+                      </Button>
                     ) : (
-                      <>
-                        <UserCheck className="size-3.5" />
-                        Reactivate User
-                      </>
+                      <span className="text-[11px] text-muted-foreground">Only a Director can change the status.</span>
                     )}
-                  </Button>
+                  </div>
+
+                  <div>
+                    <p className="mb-1.5 text-[11px] font-semibold text-muted-foreground">Status history</p>
+                    {history === null ? (
+                      <p className="text-[11px] text-muted-foreground">Loading…</p>
+                    ) : history.length === 0 ? (
+                      <p className="text-[11px] text-muted-foreground">No status changes yet.</p>
+                    ) : (
+                      <ul className="space-y-1.5">
+                        {history.map((h) => (
+                          <li key={h.id} className="rounded-lg border bg-background/60 px-2.5 py-1.5 text-[11px]">
+                            <span className="font-medium">{statusMeta(h.from).label} → {statusMeta(h.to).label}</span>
+                            <span className="text-muted-foreground"> · {formatDateTime(h.at)} · {h.source === "hrms" ? "from the HR file" : h.actorEmail ?? "someone"}</span>
+                            {h.reason && <span className="block text-muted-foreground">{h.reason}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -423,7 +451,7 @@ export default function UserDetailDrawer({
                 <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                   <p className="text-xs">
-                    This account holds Super Admin — overrides never apply, since Super Admin automatically bypasses
+                    This person is a Director — overrides never apply, since a Director automatically bypasses
                     every capability check.
                   </p>
                 </div>

@@ -78,7 +78,7 @@ export default function UnifiedProfileMenu({
       ["super_admin", "admin", "owner", "user"].includes(String(r).toLowerCase()) ||
       String(r).toLowerCase().includes("admin")
     );
-  const finalRoleLabel = isSuperAdmin ? "Super Admin" : (roleLabel || "Super Admin");
+  const finalRoleLabel = isSuperAdmin ? "Director" : (roleLabel || "Director");
 
   const handleLogout = () => {
     if (onLogout) {

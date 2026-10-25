@@ -37,7 +37,7 @@ export default async function ProcurementHubPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Procurement Hub" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Procurement Hub" }]}
         title={<>Procurement Hub</>}
         description={<>Startup purchasing workflow — Requisitions, Purchase Orders, and Vendor Directory.</>}
         actions={<><div className="flex items-center gap-2">

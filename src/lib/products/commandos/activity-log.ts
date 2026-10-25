@@ -8,7 +8,7 @@ export { ACTIVITY_LOG_MODULES, activityModuleLabel };
 export type { ActivityLogModule };
 
 /**
- * Cross-module raw activity/audit log for the Super Admin. Every module keeps
+ * Cross-module raw activity/audit log for the Director. Every module keeps
  * its own append-only audit collection with a near-identical shape
  * (`{ actorId, actorEmail?, action, entity, entityId, entityLabel?, summary,
  * metadata?, createdAt }`) — PRMS (`prms_activity_logs`), PMS

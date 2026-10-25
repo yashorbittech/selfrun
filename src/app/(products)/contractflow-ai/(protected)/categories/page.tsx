@@ -23,7 +23,7 @@ export default async function CategoriesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "LPMS", href: "/contractflow-ai" }, { label: "Categories" }]}
+        breadcrumbs={[{ label: "ContractFlow", href: "/contractflow-ai" }, { label: "Categories" }]}
         title={<>Categories</>}
         description={<>Organise documents into categories for easier discovery.</>}
         actions={<>{canManage && (

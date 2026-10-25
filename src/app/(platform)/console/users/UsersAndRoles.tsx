@@ -104,7 +104,7 @@ export default function UsersAndRoles(props: {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 space-y-1">
                 <CardTitle className="text-base">Platform users</CardTitle>
-                <CardDescription>Accounts in your own company that can open the Platform Console. Super Admins without a role keep full access until you give them one.</CardDescription>
+                <CardDescription>Accounts in your own company that can open the Platform Console. Directors without a role keep full access until you give them one.</CardDescription>
               </div>
               {canManage && (
                 <Button type="button" id="add-platform-user" onClick={() => setAddOpen(true)}>
@@ -131,8 +131,8 @@ export default function UsersAndRoles(props: {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       {u.legacy && (
-                        <Badge variant="outline" title="Super Admin with no platform role assigned — full access, as before roles existed.">
-                          Legacy Super Admin
+                        <Badge variant="outline" title="Director with no platform role assigned — full access, as before roles existed.">
+                          Legacy Director
                         </Badge>
                       )}
                       {canTouch ? (

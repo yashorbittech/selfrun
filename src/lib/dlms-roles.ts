@@ -11,7 +11,7 @@
  *      the company vault they were explicitly assigned (see `lib/cybervault/access.ts`).
  *
  * Every predicate is Super-Admin-override-aware (`resolvePermission`), so the
- * Super Admin can dial individual capabilities per user at `/commandos/users`
+ * Director can dial individual capabilities per user at `/commandos/users`
  * (catalog entries are derived from this file in `permission-catalog.ts`).
  *
  * Pure file (no server-only imports) so client components can hide buttons —
@@ -26,19 +26,19 @@ export type DlmsRole = (typeof DLMS_ROLES)[number];
 
 export const DLMS_ROLE_META: Record<DlmsRole, { label: string; description: string }> = {
   super_admin: {
-    label: "Super Admin",
-    description: "Every DLMS operation across the company vault and all clients, plus settings, access assignment and the activity log.",
+    label: "Director",
+    description: "Every CyberVault operation across the company vault and all clients, plus settings, access assignment and the activity log.",
   },
   dlms_admin: {
-    label: "DLMS Admin",
-    description: "Everything a manager can do, plus DLMS settings. Sees every company and client record.",
+    label: "CyberVault Admin",
+    description: "Everything a manager can do, plus CyberVault settings. Sees every company and client record.",
   },
   dlms_manager: {
-    label: "DLMS Manager",
+    label: "CyberVault Manager",
     description: "Manage company and client records, delete, assign employees to clients, and read the activity log. Sees every scope.",
   },
   dlms_employee: {
-    label: "DLMS Employee",
+    label: "CyberVault Employee",
     description: "Work with the client records (and the company vault, if granted) they are assigned to: view, add, edit, reveal credentials, manage and download documents.",
   },
 };
@@ -59,7 +59,7 @@ export const DLMS_PERMISSIONS = [
 ] as const;
 export type DlmsPermission = (typeof DLMS_PERMISSIONS)[number];
 
-/** Key under which the Super Admin stores an override — matches `permission-catalog.ts`. */
+/** Key under which the Director stores an override — matches `permission-catalog.ts`. */
 export const DLMS_PERMISSION_KEY: Record<DlmsPermission, string> = {
   VIEW: "dlms.canView",
   CREATE: "dlms.canCreate",
@@ -85,9 +85,9 @@ export const DLMS_PERMISSION_META: Record<DlmsPermission, { label: string; descr
   DOWNLOAD: { label: "Download documents", description: "Preview and download stored documents." },
   MANAGE_COMPANY: { label: "Manage company records", description: "Create, edit and delete records in the Company Vault." },
   MANAGE_CLIENTS: { label: "Manage client records", description: "Create, edit and delete records that belong to a client." },
-  MANAGE_ACCESS: { label: "Manage access", description: "Assign DLMS employees to specific clients and the company vault." },
-  VIEW_AUDIT: { label: "View activity log", description: "Read the DLMS activity log." },
-  MANAGE_SETTINGS: { label: "Manage settings", description: "Change DLMS alert and security settings." },
+  MANAGE_ACCESS: { label: "Manage access", description: "Assign CyberVault employees to specific clients and the company vault." },
+  VIEW_AUDIT: { label: "View activity log", description: "Read the CyberVault activity log." },
+  MANAGE_SETTINGS: { label: "Manage settings", description: "Change CyberVault alert and security settings." },
 };
 
 const EMPLOYEE: DlmsPermission[] = ["VIEW", "CREATE", "EDIT", "REVEAL", "MANAGE_DOCUMENTS", "DOWNLOAD", "MANAGE_CLIENTS"];

@@ -44,8 +44,13 @@ export interface Company {
   signupHints?: { country?: string; languages?: string; timezone?: string };
   /** Products the platform switched off for THIS company only (Platform Console → Companies). The global switch lives in the Product Registry. */
   disabledPanels?: string[];
-  /** Set when the Super Admin asked for the company to be deleted for good: it is deleted on `purgeAt`, and until then the request can be cancelled. */
+  /** Overrides the 30-day email-verification deadline for this company (see `email-lapse-rule.ts`). Normally unset. */
+  emailVerifyDueAt?: Date;
+  /** Set when the Director asked for the company to be deleted for good: it is deleted on `purgeAt`, and until then the request can be cancelled. */
   deletion?: { requestedAt: Date; purgeAt: Date; requestedBy: string };
+  /** When and by whom the status was last changed in the Platform Console. */
+  statusChangedAt?: Date;
+  statusChangedBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -267,6 +272,56 @@ export async function resolveHostInfo(rawHost: string | null | undefined): Promi
   return info;
 }
 
+/** A host that belongs to a SUSPENDED company (its own address, a verified custom domain or `app.` of one): what the "workspace suspended" page needs. */
+export interface SuspendedHostInfo {
+  companyId: string;
+  name: string;
+  slug: string;
+  suspendedAt: Date | null;
+}
+const suspendedHosts = new Map<string, { info: SuspendedHostInfo | null; at: number }>();
+const SUSPENDED_TTL_MS = 15_000;
+
+/** Same host matching as routing, but for companies whose status is "suspended". Null for any other host (including unknown ones). */
+export async function resolveSuspendedHost(rawHost: string | null | undefined): Promise<SuspendedHostInfo | null> {
+  const host = normalizeHost(rawHost);
+  if (!host) return null;
+  const hit = suspendedHosts.get(host);
+  if (hit && Date.now() - hit.at < SUSPENDED_TTL_MS) return hit.info;
+  let info: SuspendedHostInfo | null = null;
+  try {
+    await loadIntegrationsDoc();
+    info = await lookupSuspendedHost(host);
+  } catch (err) {
+    console.error("[tenancy] suspended-host lookup failed", err);
+  }
+  if (suspendedHosts.size > 500) suspendedHosts.clear();
+  suspendedHosts.set(host, { info, at: Date.now() });
+  return info;
+}
+
+async function lookupSuspendedHost(host: string): Promise<SuspendedHostInfo | null> {
+  if (saasHosts().has(host) || saasAppHosts().has(host) || platformHosts().has(host)) return null;
+  const db = await getPlatformDb();
+  const companies = db.collection<Company>(COMPANIES_COLLECTION);
+  const view = (c: Company | null): SuspendedHostInfo | null => (c && c.status === "suspended" && !c.isPlatformOwner ? { companyId: c._id, name: c.name, slug: c.slug, suspendedAt: c.statusChangedAt ?? null } : null);
+  const bare = host.startsWith("www.") ? host.slice(4) : host;
+  const appBase = host.startsWith("app.") ? host.slice(4) : null;
+  const candidates = [host, bare, `www.${bare}`];
+  if (appBase) candidates.push(appBase, appBase.startsWith("www.") ? appBase.slice(4) : `www.${appBase}`);
+  const domain = await db.collection<CompanyDomain>(COMPANY_DOMAINS_COLLECTION).findOne({ _id: { $in: candidates }, status: "verified" }, { projection: { companyId: 1 } });
+  if (domain) return view(await companies.findOne({ _id: domain.companyId }));
+  for (const root of platformRootDomains()) {
+    if (!host.endsWith(`.${root}`)) continue;
+    const label = host.slice(0, -(root.length + 1));
+    if (!label || label.includes(".") || RESERVED_SLUGS.has(label)) continue;
+    const slug = label.endsWith(APP_SLUG_SUFFIX) ? label.slice(0, -APP_SLUG_SUFFIX.length) : label;
+    if (!slug || RESERVED_SLUGS.has(slug)) continue;
+    return view(await companies.findOne({ slug }));
+  }
+  return null;
+}
+
 export async function resolveCompanyIdByHost(rawHost: string | null | undefined): Promise<string | null> {
   return (await resolveHostInfo(rawHost))?.companyId ?? null;
 }
@@ -277,6 +332,7 @@ export async function resolveCompanyIdByHost(rawHost: string | null | undefined)
  * other instance drops its cache within VERSION_CHECK_MS.
  */
 export function forgetCompanyRouting(): void {
+  suspendedHosts.clear();
   routing.hosts.clear();
   routing.owner = null;
   void getPlatformDb()

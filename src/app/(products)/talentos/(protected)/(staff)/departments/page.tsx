@@ -26,7 +26,7 @@ export default async function DepartmentsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Departments & Teams" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Departments & Teams" }]}
         title={<>Departments &amp; Teams</>}
         description={<>Master data and the reporting hierarchy.</>}
       />

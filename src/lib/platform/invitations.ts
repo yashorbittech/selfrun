@@ -11,7 +11,9 @@ import { hashPassword } from "@/lib/lms-auth";
 import { sendEmail } from "@/lib/platform/email";
 import { renderEmail } from "@/lib/platform/email/template";
 import { ROLE_PRESETS, rolesForPreset } from "@/lib/platform/onboarding/catalog";
-import { computeEffective, getCustomRoles } from "@/lib/products/commandos/custom-roles";
+import { computeEffective, ensureDesignations, getCustomRoles, listCustomRoles } from "@/lib/products/commandos/custom-roles";
+import { designationTemplate, presetToDesignationKey, DIRECTOR_TITLE } from "@/lib/platform/designations";
+import { ensureHrFile } from "@/lib/products/commandos/employee-link";
 import { newAccountBlockReason, rollbackIfOverSeats } from "@/lib/platform/billing/enforce";
 
 /**
@@ -114,7 +116,7 @@ export async function inviteTeammate(input: InviteInput, inviter: { id: string; 
 
   const company = await getCompany(await currentCompanyId());
   const companyName = company?.name ?? "your company";
-  const presetLabel = ROLE_PRESETS.find((p) => p.value === input.preset)?.label ?? "team member";
+  const presetLabel = ROLE_PRESETS.find((p) => p.value === (presetToDesignationKey(input.preset) ?? input.preset))?.label ?? "team member";
   const { html, text } = renderEmail({
     brand: companyName,
     heading: `Join ${companyName}`,
@@ -174,8 +176,9 @@ export async function acceptInvitation(token: string, input: { name: string; pas
   const inv = await c.findOneAndUpdate({ tokenHash: sha256(token), status: "pending", expiresAt: { $gt: new Date() } }, { $set: { status: "accepted", acceptedAt: new Date() } });
   if (!inv) return { ok: false, error: "This invitation has expired or was already used. Ask your admin to send a new one." };
 
-  // HRMS employee record first (skipped for a pure Company Admin with no employee roles), then the linked login.
-  const needsEmployee = !inv.roles.includes("super_admin");
+  // HRMS employee record first, then the linked login.
+  // Everyone, the Director included, has an HR file in TalentOS.
+  const needsEmployee = true;
   const [firstName, ...rest] = name.split(/\s+/);
   // Someone imported or added in HR beforehand already has an employee record: link it instead of creating a second one.
   const existingEmployee = needsEmployee ? await db.collection<{ _id: string }>("hrms_employees").findOne({ workEmail: inv.email, deletedAt: null }, { projection: { _id: 1 } }) : null;
@@ -198,8 +201,25 @@ export async function acceptInvitation(token: string, input: { name: string; pas
 
   const adminId = new ObjectId();
   // Roles = the preset's roles plus whatever the custom roles add (a custom role deleted since the invite is simply skipped).
-  const customFound = await getCustomRoles(inv.customRoleIds ?? []);
-  const eff = computeEffective(inv.roles, {}, customFound);
+  // The invitation was for a designation: the person holds it, so their access follows it (and any later change to it).
+  const key = presetToDesignationKey(inv.preset);
+  const tpl = key && key !== "director" ? designationTemplate(key) : undefined;
+  let designationId: string | null = key === "director" ? "director" : null;
+  let manualRoles: string[] = inv.roles;
+  let customIds = inv.customRoleIds ?? [];
+  if (key === "director") {
+    manualRoles = ["super_admin"];
+  } else if (tpl) {
+    await ensureDesignations();
+    const mine = (await listCustomRoles()).find((r) => r.builtinKey === tpl.key);
+    if (mine) {
+      designationId = mine.id;
+      manualRoles = [];
+      customIds = [mine.id, ...customIds.filter((x) => x !== mine.id)];
+    }
+  }
+  const customFound = await getCustomRoles(customIds);
+  const eff = computeEffective(manualRoles, {}, customFound);
   await users.insertOne({
     _id: adminId,
     email: inv.email,
@@ -207,9 +227,11 @@ export async function acceptInvitation(token: string, input: { name: string; pas
     passwordHash: hashPassword(input.password),
     roles: eff.roles,
     permissionOverrides: eff.overrides,
-    manualRoles: inv.roles,
+    manualRoles,
     manualOverrides: {},
     customRoleIds: customFound.map((r) => r.id),
+    designationId,
+    status: "active",
     employeeId: employee?._id ?? null,
     mustChangePassword: false,
     // The invitation link was sent to this address, so it is verified by accepting.
@@ -226,7 +248,9 @@ export async function acceptInvitation(token: string, input: { name: string; pas
     await c.updateOne({ _id: inv._id }, { $set: { status: "pending", acceptedAt: null } });
     return { ok: false, error: overSeats };
   }
-  if (employee) await db.collection("hrms_employees").updateOne({ _id: employee._id as never }, { $set: { adminUserId: inv.email } });
+  if (employee) await db.collection("hrms_employees").updateOne({ _id: employee._id as never }, { $set: { adminUserId: String(adminId) } });
+  // The HR file shows the designation and the department that goes with it.
+  await ensureHrFile({ userId: adminId, email: inv.email, name, designationTitle: tpl?.title ?? (key === "director" ? DIRECTOR_TITLE : "Team Member"), departmentName: tpl?.department ?? "Management", departmentId: inv.departmentId, actorId: String(adminId) });
   await workspaceEvents.inviteAccepted(inv.email, name);
   return { ok: true, adminId };
 }

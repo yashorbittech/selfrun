@@ -27,7 +27,7 @@ export default async function MyProjectsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "Live Projects" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "Live Projects" }]}
         title={<>Live Projects</>}
       />
 

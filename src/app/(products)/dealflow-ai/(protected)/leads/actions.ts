@@ -92,12 +92,12 @@ export async function linkStudentAction(leadId: string, studentId: string): Prom
   const lead = await getLeadRecord(leadId);
   if (!lead) return { error: "Lead not found." };
   const student = await getStudent(studentId.trim());
-  if (!student) return { error: "No TMS student with that ID." };
+  if (!student) return { error: "No Cohort AI student with that ID." };
   await setLeadLink(leadId, { studentId: student._id }, user.id);
   await mirrorLinkToAccount(lead.externalUserId, { studentId: student._id });
   await recordLeadEvent(leadId, {
     kind: "linked_student",
-    title: "Linked to TMS student",
+    title: "Linked to Cohort AI student",
     detail: `${student.fullName} (${student.studentCode ?? student._id})`,
     actor: "staff",
     actorId: user.id,
@@ -112,11 +112,11 @@ export async function linkClientAction(leadId: string, clientId: string, project
   const lead = await getLeadRecord(leadId);
   if (!lead) return { error: "Lead not found." };
   const client = await getClient(clientId.trim());
-  if (!client) return { error: "No PMS client with that ID." };
+  if (!client) return { error: "No SprintOS client with that ID." };
   let linkedProjectId: string | null = null;
   if (projectId.trim()) {
     const project = await getProject(projectId.trim());
-    if (!project) return { error: "No PMS project with that ID." };
+    if (!project) return { error: "No SprintOS project with that ID." };
     if (project.clientId !== client._id) return { error: "That project belongs to a different client." };
     linkedProjectId = project._id;
   }
@@ -124,7 +124,7 @@ export async function linkClientAction(leadId: string, clientId: string, project
   await mirrorLinkToAccount(lead.externalUserId, { clientId: client._id });
   await recordLeadEvent(leadId, {
     kind: "linked_project",
-    title: "Linked to PMS client",
+    title: "Linked to SprintOS client",
     detail: client.companyName,
     actor: "staff",
     actorId: user.id,

@@ -82,7 +82,7 @@ export default function RecordVendorPaymentForm({
       <SheetContent className="sm:max-w-md">
         <SheetHeader className="border-b border-border/60">
           <SheetTitle>Record Vendor Payment</SheetTitle>
-          <SheetDescription>Against bill {billNumber} — outstanding {formatMoney(outstanding, currency)}. Reuses PRMS&apos;s own payment record.</SheetDescription>
+          <SheetDescription>Against bill {billNumber} — outstanding {formatMoney(outstanding, currency)}. Reuses SpendIQ&apos;s own payment record.</SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
           <div className="grid grid-cols-2 gap-3">

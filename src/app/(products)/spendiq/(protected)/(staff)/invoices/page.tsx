@@ -38,7 +38,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Invoices & Payments" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Invoices & Payments" }]}
         title={<>Invoices &amp; Payments</>}
         description={<>{total} invoice{total === 1 ? "" : "s"} in accounts payable.</>}
         actions={<>{canManage && (

@@ -19,7 +19,7 @@ export default async function HolidaysPage({ searchParams }: { searchParams: Pro
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Holidays" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Holidays" }]}
         title={<>Holiday Calendar</>}
         description={<>Company-wide holidays. Excluded from working-day counts in attendance and leave.</>}
       />

@@ -9,7 +9,7 @@ export default async function CompanyVaultPage({ searchParams }: { searchParams:
   const viewer = await getViewer();
   if (!viewer) redirect("/cybervault/login");
   if (!canReadScope(viewer, "company", null)) {
-    return <EmptyState title="No access to the company vault">Ask a DLMS manager to grant you access to the Company Vault.</EmptyState>;
+    return <EmptyState title="No access to the company vault">Ask a CyberVault manager to grant you access to the Company Vault.</EmptyState>;
   }
   const sp = await searchParams;
   // Company identity is read from the HRMS company record (edited in HRMS → Settings); DLMS never keeps its own copy.
@@ -19,7 +19,7 @@ export default async function CompanyVaultPage({ searchParams }: { searchParams:
     subtitle: `${c.legalName || c.name} — company-level credentials, documents, URLs and notes.`,
     badge: "Company",
     crumbs: [{ label: "Company Vault" }],
-    notice: "Company details come from the HRMS company record.",
+    notice: "Company details come from the TalentOS company record.",
     lines: [
       ...(c.website ? [{ icon: "web" as const, text: c.website, href: /^https?:\/\//i.test(c.website) ? c.website : `https://${c.website}` }] : []),
       ...(c.email ? [{ icon: "mail" as const, text: c.email }] : []),

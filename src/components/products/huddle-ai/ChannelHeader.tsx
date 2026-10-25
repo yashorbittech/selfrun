@@ -115,7 +115,7 @@ export default function ChannelHeader({
         )}
         {isProject && (
           <span className="hidden rounded-full border border-border/60 px-2 py-0.5 text-[11px] text-muted-foreground sm:inline-flex">
-            Synced from PMS
+            Synced from SprintOS
           </span>
         )}
       </div>

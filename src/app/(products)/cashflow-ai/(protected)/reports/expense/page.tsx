@@ -46,7 +46,7 @@ export default async function ExpenseReportPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Expense" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Expense" }]}
         title={<>Expense Report</>}
         description={<>Expenses by account and by vendor for the selected range, from posted journal entries and settled transactions.</>}
       />

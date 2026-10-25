@@ -46,11 +46,11 @@ export function dpaDoc(m: Mailboxes): LegalDoc {
         list: [
           "Strict isolation: every record carries its company, and every database query is confined to it.",
           "Roles and per-action permissions, enforced on the server, with extra permission for payroll, salaries, bank details and stored credentials.",
-          "Two-step sign-in, mandatory for company Super Admins and every Platform Console user; account lock-out after repeated wrong passwords; passwords stored only as salted scrypt hashes.",
+          "Two-step sign-in, mandatory for company Directors and every Platform Console user; account lock-out after repeated wrong passwords; passwords stored only as salted scrypt hashes.",
           "Encryption of connection secrets and vault documents at rest, HTTPS with HSTS for all traffic, and a hardened set of security headers.",
           "Uploaded files are checked by type and size and scanned before they are accepted.",
           "Sign-ins, changes, exports and administrative actions are recorded in audit logs; sign-in records are kept for 180 days.",
-          "Backups of your workspace, with restore and deletion controls for your Super Admin. The Security & Trust page describes these in full.",
+          "Backups of your workspace, with restore and deletion controls for your Director. The Security & Trust page describes these in full.",
         ],
       },
       {
@@ -72,7 +72,7 @@ export function dpaDoc(m: Mailboxes): LegalDoc {
       {
         heading: "Return and deletion",
         body: [
-          "You can export your data at any time while your plan is active. If you cancel, your workspace stays readable for a period so you can export it. A Super Admin can delete the company: it is scheduled for deletion after a 30-day grace period during which it can be restored, then deleted for good. Safety copies made before a restore or wipe are kept for 30 days.",
+          "You can export your data at any time while your plan is active. If you cancel, your workspace stays readable for a period so you can export it. A Director can delete the company: it is scheduled for deletion after a 30-day grace period during which it can be restored, then deleted for good. Safety copies made before a restore or wipe are kept for 30 days.",
           "Backups roll off on their stated schedule after deletion. We keep information beyond that only where the law requires it, such as tax and accounting records.",
         ],
       },
@@ -97,7 +97,7 @@ export const SUB_PROCESSORS: SubProcessor[] = [
   { name: "Resend", purpose: "Delivery of the service's own emails (sign-up, invitations, alerts, receipts)", data: "Recipient email address, name and the message", scope: "platform" },
   { name: "Razorpay", purpose: "Taking payment for plans and add-ons", data: "Billing contact details and payment status. Card details go to Razorpay, not to us", scope: "platform" },
   { name: "OpenAI", purpose: "AI features, only when a person uses one", data: "The question or content needed to answer, and the answer", scope: "platform" },
-  { name: "GitHub", purpose: "Building and publishing a company's desktop and mobile apps, only when a Super Admin presses Generate", data: "The company's name, icon and app address. No personal data", scope: "platform" },
+  { name: "GitHub", purpose: "Building and publishing a company's desktop and mobile apps, only when a Director presses Generate", data: "The company's name, icon and app address. No personal data", scope: "platform" },
   { name: "ElevenLabs", purpose: "Voice features, when a company connects it", data: "Audio and text of a voice conversation", scope: "company" },
   { name: "Twilio and WhatsApp Business", purpose: "SMS and WhatsApp messages, when a company connects them", data: "Phone numbers and message content", scope: "company" },
   { name: "SMTP, Resend or SendGrid (a company's own account)", purpose: "A company sending email from its own address", data: "Recipient details and message content", scope: "company" },

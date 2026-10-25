@@ -22,7 +22,7 @@ export default async function Page() {
       panel="pms"
       live
       panelName="Project Management System"
-      shortCode="PMS"
+      shortCode="SprintOS"
       description="Task assignments, deadlines, milestones, comments and timesheet updates."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body ?? "", createdAt: new Date(n.createdAt).toISOString(), read: n.read, link: n.link ?? undefined }))}
       onMarkRead={markRead}

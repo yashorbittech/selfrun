@@ -1,3 +1,4 @@
+import { twoStepGate } from "@/lib/security/two-step-gate";
 import { runCmsSweep } from "@/lib/notify/sweeps";
 import { panelUnread } from "@/lib/notify";
 import { redirect } from "next/navigation";
@@ -23,6 +24,7 @@ import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 export const generateMetadata = () => brandedMetadata("{brand} {product:cms}", { robots: { index: false, follow: false } });
 
 export default async function ProtectedCmsLayout({ children }: { children: React.ReactNode }) {
+  await twoStepGate();
   await requireModule("cms");
   const user = await getCurrentCmsUser();
   if (!user) redirect("/sitecraft-ai/login");

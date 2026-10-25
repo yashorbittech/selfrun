@@ -619,8 +619,8 @@ export async function getSopAnalytics(filters?: PanelAnalyticsFilters) {
 
   const alerts: PanelAlert[] = [];
   if (ack.overdue > 0) alerts.push({ type: "danger", message: `${ack.overdue} SOP acknowledgement(s) are overdue` });
-  if ((k?.overdueReviews ?? 0) > 0) alerts.push({ type: "warning", message: `${k?.overdueReviews} SOP(s) are past their review date` });
-  if ((k?.expiring ?? 0) > 0) alerts.push({ type: "warning", message: `${k?.expiring} SOP(s) expire within ${d?.expiringSoonDays ?? 30} days` });
+  if ((k?.overdueReviews ?? 0) > 0) alerts.push({ type: "warning", message: `${k?.overdueReviews} procedure(s) are past their review date` });
+  if ((k?.expiring ?? 0) > 0) alerts.push({ type: "warning", message: `${k?.expiring} procedure(s) expire within ${d?.expiringSoonDays ?? 30} days` });
 
   return {
     kpis: {
@@ -995,10 +995,10 @@ export async function getLpmsAnalytics(_filters?: PanelAnalyticsFilters) {
 
 export const PANEL_CONFIGS = {
   aibots: {
-    label: "AI Bots – AI Bots Analytics",
-    description: "Bots, chats, AI executions, token usage, estimated cost and failures across the AI Bots product (last 30 days).",
+    label: "AgentOS – AgentOS Analytics",
+    description: "Bots, chats, AI executions, token usage, estimated cost and failures across the AgentOS product (last 30 days).",
     href: "/agentos",
-    ctaLabel: "Open AI Bots",
+    ctaLabel: "Open AgentOS",
   },
   cms: {
     label: "CMS – Website Analytics",
@@ -1007,31 +1007,31 @@ export const PANEL_CONFIGS = {
     ctaLabel: "Open Website Product",
   },
   dlms: {
-    label: "DLMS – Digi Locker Analytics",
+    label: "CyberVault – CyberVault Analytics",
     description: "Vault size by record type and ownership, records added, and what has expired or is about to. Counts only — never a record or a secret.",
     href: "/cybervault",
-    ctaLabel: "Open Digi Locker",
+    ctaLabel: "Open CyberVault",
   },
   fms: {
-    label: "FMS – Finance Analytics",
+    label: "CashFlow – Finance Analytics",
     description: "Ledger-backed revenue, expenses, profit, cash position, and receivables/payables across the Finance Management System.",
     href: "/cashflow-ai",
     ctaLabel: "Open Finance Product",
   },
   hrms: {
-    label: "HRMS – HR Analytics",
+    label: "TalentOS – HR Analytics",
     description: "Headcount, hiring velocity, attrition, gender & department distribution across the Human Resource Management System.",
     href: "/talentos",
     ctaLabel: "Open HR Product",
   },
   lms: {
-    label: "LMS – Lead Analytics",
+    label: "DealFlow – Lead Analytics",
     description: "Lead pipeline, conversion funnel, source breakdown, stale leads, and campaign performance from the Lead Management System.",
     href: "/dealflow-ai",
-    ctaLabel: "Open LMS Product",
+    ctaLabel: "Open DealFlow Product",
   },
   lpms: {
-    label: "LPMS – Legal & Documents Analytics",
+    label: "ContractFlow – Legal & Documents Analytics",
     description: "Legal agreements, policy documents, maker types, approval workflows and digital signatures.",
     href: "/contractflow-ai",
     ctaLabel: "Open Legal & Documents",
@@ -1043,13 +1043,13 @@ export const PANEL_CONFIGS = {
     ctaLabel: "Open Messenger",
   },
   ots: {
-    label: "OTS – Online Tests Analytics",
+    label: "EvalIQ – Online Tests Analytics",
     description: "Tests, assignments, completion, pass rate, average scores and certificates across the Online Test System.",
     href: "/evaliq",
     ctaLabel: "Open Online Tests",
   },
   pms: {
-    label: "PMS – Project Analytics",
+    label: "SprintOS – Project Analytics",
     description: "Project health, delivery status, team utilization, client portfolio, and deadline risk.",
     href: "/sprintos",
     ctaLabel: "Open Projects Product",
@@ -1061,31 +1061,31 @@ export const PANEL_CONFIGS = {
     ctaLabel: "Open External Portal",
   },
   prms: {
-    label: "PRMS – Procurement Analytics",
+    label: "SpendIQ – Procurement Analytics",
     description: "Procurement spend, vendor management, asset valuation, budget utilization, and operational costs.",
     href: "/spendiq",
     ctaLabel: "Open Procurement Product",
   },
   seo: {
-    label: "SEO – SEO Analytics",
+    label: "SEO – RankMax Analytics",
     description: "Site audit score, open issues, tracked keywords and their positions, backlinks, and SEO tasks.",
     href: "/rankmax-ai",
     ctaLabel: "Open SEO Product",
   },
   smms: {
-    label: "SMMS – Social Media Analytics",
+    label: "ViralPulse – Social Media Analytics",
     description: "Campaigns, posts and ads by status and platform, and the reach and engagement recorded for published posts.",
     href: "/viralpulse-ai",
     ctaLabel: "Open Social Media Product",
   },
   sop: {
-    label: "SOP – SOP Analytics",
-    description: "SOP library size and status, acknowledgement compliance, department coverage, and SOPs due for review or expiring.",
+    label: "Playbook – Playbook Analytics",
+    description: "SOP library size and status, acknowledgement compliance, department coverage, and procedures due for review or expiring.",
     href: "/playbook-ai",
-    ctaLabel: "Open SOP Library",
+    ctaLabel: "Open Playbook Library",
   },
   tms: {
-    label: "TMS – Training Analytics",
+    label: "Cohort AI – Training Analytics",
     description: "Student enrollment, batch occupancy, placement rate, revenue, and certificate issuance.",
     href: "/cohort-ai",
     ctaLabel: "Open Training Product",

@@ -51,7 +51,7 @@ export default async function GrnPage({ searchParams }: { searchParams: Promise<
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Goods Receipt" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Goods Receipt" }]}
         title={<>Goods Receipt (GRN)</>}
         description={<>{total} receipt{total === 1 ? "" : "s"} recorded.</>}
         actions={<>{canManage && (

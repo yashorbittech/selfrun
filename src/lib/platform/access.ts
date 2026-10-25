@@ -20,7 +20,7 @@ export interface AccessUser {
   id: string;
   email: string;
   roles: readonly string[];
-  /** The Super Admin's per-user capability overrides, where a product's "see everything" rule honours them. */
+  /** The Director's per-user capability overrides, where a product's "see everything" rule honours them. */
   permissionOverrides?: Record<string, boolean> | null;
 }
 

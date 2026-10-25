@@ -3,5 +3,5 @@ import UnifiedNotificationsPage from "@/components/platform/panel/UnifiedNotific
 export const dynamic = "force-dynamic";
 
 export default function IntelligenceNotificationsPage() {
-  return <UnifiedNotificationsPage panel="intelligence" panelName="AI Intelligence" shortCode="AI" description="Usage and plan alerts for AI analysis." />;
+  return <UnifiedNotificationsPage panel="intelligence" panelName="DataBrain" shortCode="AI" description="Usage and plan alerts for AI analysis." />;
 }

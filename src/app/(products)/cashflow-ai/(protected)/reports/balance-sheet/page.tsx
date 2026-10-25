@@ -57,7 +57,7 @@ export default async function BalanceSheetPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Balance Sheet" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Balance Sheet" }]}
         title={<>Balance Sheet</>}
         description={<>Assets, liabilities and equity as of {new Date(result.asOf).toLocaleDateString()}. Retained Earnings is computed live, not journal-posted.</>}
       />

@@ -14,7 +14,7 @@ export default async function MyProfilePage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "Profile" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "Profile" }]}
         title={<>My Profile</>}
         description={<>Keep your contact details and links up to date. <span className="font-mono">{student.studentCode}</span></>}
       />

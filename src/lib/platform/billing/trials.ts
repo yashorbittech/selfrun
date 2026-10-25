@@ -59,7 +59,7 @@ export interface TrialSweepResult {
   /** Trials (or trial grace periods) that ended into read-only. */
   suspended: number;
   emailFailures: number;
-  /** Companies with no Super Admin to email (transitions still applied). */
+  /** Companies with no Director to email (transitions still applied). */
   noOwner: number;
   /** Companies whose processing threw (logged; retried next run). */
   errors: number;

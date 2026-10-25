@@ -12,13 +12,16 @@ import { getFeatureModules } from "@/lib/platform/saas/modules";
 import { CtaBand, HeroCtas, PageHero, SectionHead } from "@/components/platform/saas/blocks";
 import FaqSection from "@/components/platform/saas/FaqSection";
 import Reveal from "@/components/platform/saas/Reveal";
+import { getBillingSettings } from "@/lib/platform/billing/settings";
+import { signupPlanHref, trialLabel } from "@/lib/platform/billing/signup-plan-rule";
 import { productPath, SAAS_PRODUCT_COUNT } from "@/lib/platform/saas/product-routes";
 import ProductLogo from "@/components/products/ProductLogo";
 
 export const dynamic = "force-dynamic";
 
 async function load(id: string) {
-  const plans = buildShowcase(await getStandardPlans().catch(() => []));
+  const days = await getBillingSettings().then((s) => s.billing.defaultTrialDays).catch(() => 30);
+  const plans = buildShowcase(await getStandardPlans().catch(() => []), days);
   const i = plans.findIndex((p) => p.id === id);
   return i < 0 ? null : { plan: plans[i], plans, prev: plans[i - 1] ?? null, next: plans[i + 1] ?? null };
 }
@@ -41,7 +44,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
         webPage({ path: `/pricing/${plan.id}`, name: `${plan.name} plan`, description: plan.description }),
         breadcrumbList([{ name: "Home", path: "/" }, { name: "Pricing", path: "/pricing" }, { name: `${plan.name} plan`, path: `/pricing/${plan.id}` }]),, planOffers([{ id: plan.id, name: plan.name, description: plan.description, currency: plan.currency, kind: plan.kind, monthly: plan.offer.monthly, validUntil: null }])]} />
       <PageHero art={`plan-${plan.id}`} eyebrow={`${plan.name} plan`} title={`${plan.name}.`} accent={plan.kind === "free" ? "Free, forever." : plan.kind === "contact" ? "Built around your team." : "Everything included."} lead={plan.description} photo="analytics" shot="workspace" shotName="Workspace" chip={{ title: `All ${SAAS_PRODUCT_COUNT} products`, text: "Every feature included" }}>
-        <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started", href: plan.kind === "contact" ? "/contact" : "/signup" }} secondary={{ label: "All plans", href: "/pricing" }} />
+        <HeroCtas primary={{ label: plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : plan.trialDays > 0 ? `Try free for ${trialLabel(plan.trialDays)}` : "Get started", href: plan.kind === "contact" ? "/contact" : plan.kind === "free" ? "/signup" : signupPlanHref(plan.id, "monthly") }} secondary={{ label: "All plans", href: "/pricing" }} />
       </PageHero>
 
       <section className="sr-section">
@@ -62,7 +65,7 @@ export default async function PlanDetailPage({ params }: { params: Promise<{ pla
                 )}
                 <p className="text-sm text-white/75">Excludes applicable taxes.</p>
                 <p className="rounded-2xl border border-white/20 bg-white/10 p-4 text-sm text-white"><b>People · </b>{plan.seats ? `Up to ${plan.seats.toLocaleString("en-IN")}` : "Unlimited"}</p>
-                <Link href={plan.kind === "contact" ? "/contact" : "/signup"} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-black shadow-xl transition-transform hover:scale-[1.03]">{plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : "Get started"} <ArrowRight className="h-4 w-4" /></Link>
+                <Link href={plan.kind === "contact" ? "/contact" : plan.kind === "free" ? "/signup" : signupPlanHref(plan.id, "monthly")} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-bold text-black shadow-xl transition-transform hover:scale-[1.03]">{plan.kind === "contact" ? "Contact us" : plan.kind === "free" ? "Start free forever" : plan.trialDays > 0 ? `Try free for ${trialLabel(plan.trialDays)}` : "Get started"} <ArrowRight className="h-4 w-4" /></Link>
               </div>
             </Reveal>
             <Reveal delay={100} className="lg:col-span-2">

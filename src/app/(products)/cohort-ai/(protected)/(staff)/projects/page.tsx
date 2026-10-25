@@ -43,7 +43,7 @@ export default async function ProjectsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Projects" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Projects" }]}
         title={<>Live Projects</>}
         description={<>{total} project{total === 1 ? "" : "s"} assigned to students.</>}
         actions={<>{canManage && (

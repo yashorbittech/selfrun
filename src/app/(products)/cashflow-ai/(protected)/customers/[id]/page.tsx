@@ -21,7 +21,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Customers", href: "/cashflow-ai/customers" }, { label: client.companyName }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Customers", href: "/cashflow-ai/customers" }, { label: client.companyName }]}
         title={<>{client.companyName}</>}
         description={<>{client.clientCode} · {client.industry ?? "No industry set"}</>}
         actions={<><Badge className={getClientStatusMeta(client.status).badgeClass}>{getClientStatusMeta(client.status).label}</Badge></>}

@@ -45,7 +45,7 @@ export default async function DlmsDashboardPage({ searchParams }: { searchParams
   return (
     <div className="space-y-4">
       <PanelDashboardHeader
-        title="Digi Locker Overview" breadcrumbs={[{ label: "Digi Locker", href: "/cybervault" }, { label: "Dashboard" }]} description="Securely manage company and client credentials, documents, links and notes, and stay ahead of expiring records and access changes."
+        title="CyberVault Overview" breadcrumbs={[{ label: "CyberVault", href: "/cybervault" }, { label: "Dashboard" }]} description="Securely manage company and client credentials, documents, links and notes, and stay ahead of expiring records and access changes."
         filters={<PanelFilterBar fields={fields} />}
       />
 

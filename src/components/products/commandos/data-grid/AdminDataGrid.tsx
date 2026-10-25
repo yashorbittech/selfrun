@@ -14,7 +14,7 @@ import { Popover, PopoverTrigger, PopoverContent, PopoverHeader, PopoverTitle } 
 import { cn } from "@/lib/utils";
 
 /**
- * Generic enterprise data grid for the Super Admin product-wise listings
+ * Generic enterprise data grid for the Director product-wise listings
  * (spec: search, filters, sort, pagination, sticky header, column visibility,
  * bulk selection + actions, responsive). Generalizes the proven pattern from
  * `src/components/dealflow-ai/SubmissionsDataTable.tsx` — server-driven pagination via

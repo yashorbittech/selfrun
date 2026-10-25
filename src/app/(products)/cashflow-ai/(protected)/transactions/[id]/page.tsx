@@ -45,7 +45,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Transactions", href: "/cashflow-ai/transactions" }, { label: t.transactionNumber }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Transactions", href: "/cashflow-ai/transactions" }, { label: t.transactionNumber }]}
         title={<>{t.transactionNumber}
             <TransactionTypeBadge type={t.type} /></>}
         description={<>{formatMoney(t.amount, t.currency)} · {formatDate(t.transactionDate)}</>}

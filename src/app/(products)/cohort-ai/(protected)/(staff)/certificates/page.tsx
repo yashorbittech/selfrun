@@ -37,7 +37,7 @@ export default async function CertificatesPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Certificates" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Certificates" }]}
         title={<>Certificates</>}
         description={<>{total} certificate{total === 1 ? "" : "s"} issued.</>}
         actions={<>{canIssue && (
@@ -68,7 +68,7 @@ export default async function CertificatesPage() {
           {certs.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
               No certificates yet.{" "}
-              {canIssue ? "Use “Issue Certificate”." : "Ask a TMS admin to issue one."}
+              {canIssue ? "Use “Issue Certificate”." : "Ask a Cohort AI admin to issue one."}
             </p>
           ) : (
             <Table>

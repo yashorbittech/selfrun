@@ -185,9 +185,9 @@ export default function WorkflowForm({ workflow }: WorkflowFormProps) {
                       onChange={(e) => handleStepChange(idx, "role", e.target.value)}
                       className="w-full rounded-lg border border-border/60 bg-background px-2 py-1.5 text-xs"
                     >
-                      <option value="lpms_manager">LPMS Manager</option>
-                      <option value="lpms_admin">LPMS Admin</option>
-                      <option value="lpms_author">LPMS Author</option>
+                      <option value="lpms_manager">ContractFlow Manager</option>
+                      <option value="lpms_admin">ContractFlow Admin</option>
+                      <option value="lpms_author">ContractFlow Author</option>
                     </select>
                   </div>
                   <button

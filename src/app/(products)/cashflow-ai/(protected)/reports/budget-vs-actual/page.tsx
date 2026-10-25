@@ -15,10 +15,10 @@ export default async function BudgetVsActualPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Budget vs Actual" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Reports" }, { label: "Budget vs Actual" }]}
         title={<>Budget vs Actual</>}
-        description={<>PRMS&apos;s real budget allocations against FMS&apos;s own settled ledger spend — the actual figure here is
-            Finance&apos;s own money, not PRMS&apos;s expense+PO consumption estimate.</>}
+        description={<>SpendIQ&apos;s real budget allocations against CashFlow&apos;s own settled ledger spend — the actual figure here is
+            Finance&apos;s own money, not SpendIQ&apos;s expense+PO consumption estimate.</>}
         actions={<><div className="flex items-center gap-3 text-sm">
           {(["csv", "xlsx", "pdf"] as const).map((fmt) => (
             <Link key={fmt} href={`/api/cashflow-ai/reports/budget-vs-actual?format=${fmt}`} className="text-primary hover:underline">
@@ -47,7 +47,7 @@ export default async function BudgetVsActualPage() {
             <TableBody>
               {result.rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">No company or project budgets configured in PRMS yet.</TableCell>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground">No company or project budgets configured in SpendIQ yet.</TableCell>
                 </TableRow>
               )}
               {result.rows.map((r) => (
@@ -75,8 +75,8 @@ export default async function BudgetVsActualPage() {
           <CardHeader><CardTitle>Department &amp; Category Budgets</CardTitle></CardHeader>
           <CardContent className="p-0">
             <p className="px-4 pt-2 text-xs text-muted-foreground">
-              Not yet comparable to Finance spend — PRMS budgets at this level use a real department/category id
-              that Finance transactions don&apos;t carry yet. Shown here with PRMS&apos;s own consumption figure only.
+              Not yet comparable to Finance spend — SpendIQ budgets at this level use a real department/category id
+              that Finance transactions don&apos;t carry yet. Shown here with SpendIQ&apos;s own consumption figure only.
             </p>
             <Table>
               <TableHeader>
@@ -85,7 +85,7 @@ export default async function BudgetVsActualPage() {
                   <TableHead>Level</TableHead>
                   <TableHead>Scope</TableHead>
                   <TableHead className="text-right">Allocated</TableHead>
-                  <TableHead className="text-right">Consumed (PRMS)</TableHead>
+                  <TableHead className="text-right">Consumed (SpendIQ)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -105,7 +105,7 @@ export default async function BudgetVsActualPage() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Budget allocations are owned by PRMS. Create or edit a budget at{" "}
+        Budget allocations are owned by SpendIQ. Create or edit a budget at{" "}
         <Link href="/spendiq/budgets" className="text-primary hover:underline">/spendiq/budgets</Link>.
       </p>
 </PanelListFilters>

@@ -64,12 +64,12 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
       },
       {
         q: "Can CommandOS use custom roles?",
-        a: "Yes. A Super Admin can define custom roles that combine product access with specific permissions.",
+        a: "Yes. A Director can define custom roles that combine product access with specific permissions.",
         evidence: ["src/app/(products)/commandos/(protected)/roles/page.tsx:11-21"],
       },
       {
         q: "Who is allowed to define a custom role?",
-        a: "Role definitions grant permissions, so creating or changing them is reserved for a Super Admin.",
+        a: "Role definitions grant permissions, so creating or changing them is reserved for a Director.",
         evidence: ["src/app/(products)/commandos/(protected)/roles/page.tsx:11-14"],
       },
       {
@@ -204,7 +204,7 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
       },
       {
         q: "Who can run a CommandOS data import?",
-        a: "The import endpoint explicitly restricts import execution to a Super Admin.",
+        a: "The import endpoint explicitly restricts import execution to a Director.",
         evidence: ["src/app/(products)/commandos/(protected)/settings/import/run/route.ts:17-20"],
       },
       {
@@ -234,7 +234,7 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
       },
       {
         q: "Who can open billing settings?",
-        a: "The billing page redirects users who are not Super Admins, so billing access is restricted by role.",
+        a: "The billing page redirects users who are not Directors, so billing access is restricted by role.",
         evidence: ["src/app/(products)/commandos/(protected)/settings/billing/page.tsx:50-56"],
       },
       {
@@ -244,7 +244,7 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
       },
       {
         q: "Are company payment settings available to every user?",
-        a: "No. The Payments page checks for a Super Admin role and redirects users without it.",
+        a: "No. The Payments page checks for a Director role and redirects users without it.",
         evidence: ["src/app/(products)/commandos/(protected)/settings/payments/page.tsx:18-20"],
       },
       {
@@ -1175,7 +1175,7 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
       },
       {
         q: "Can the company import employee records?",
-        a: "CommandOS offers an employee CSV import with a preview before saving; the import requires Super Admin access.",
+        a: "CommandOS offers an employee CSV import with a preview before saving; the import requires Director access.",
         evidence: ["src/app/(products)/commandos/(protected)/settings/import/page.tsx:23-26", "src/app/(products)/commandos/(protected)/settings/import/run/route.ts:17-20"],
       },
       {

@@ -237,7 +237,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   FMS View — Finance Management System
+   CashFlow View — Finance Management System
 ──────────────────────────────────────────────────────── */
 async function FmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getFmsAnalytics(filters);
@@ -323,10 +323,10 @@ async function FmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
       <ExecutiveSection title="Cross-Product Financial Summary" description="Finance exposure across linked products.">
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "PRMS Payables", value: formatCurrency(d.panelSummary.prms.payables), sub: `${d.panelSummary.prms.pendingPaymentsCount} pending payments` },
-            { label: "PMS Receivables", value: formatCurrency(d.panelSummary.pms.receivables), sub: `${d.panelSummary.pms.pendingPaymentsCount} pending invoices` },
-            { label: "HRMS Salary Payable", value: formatCurrency(d.panelSummary.hrms.salaryPayable), sub: `${d.panelSummary.hrms.reimbursementsCount} pending approvals` },
-            { label: "TMS Fee Receivables", value: formatCurrency(d.panelSummary.tms.receivables), sub: `${d.panelSummary.tms.pendingFeesCount} pending fees` },
+            { label: "SpendIQ Payables", value: formatCurrency(d.panelSummary.prms.payables), sub: `${d.panelSummary.prms.pendingPaymentsCount} pending payments` },
+            { label: "SprintOS Receivables", value: formatCurrency(d.panelSummary.pms.receivables), sub: `${d.panelSummary.pms.pendingPaymentsCount} pending invoices` },
+            { label: "TalentOS Salary Payable", value: formatCurrency(d.panelSummary.hrms.salaryPayable), sub: `${d.panelSummary.hrms.reimbursementsCount} pending approvals` },
+            { label: "Cohort AI Fee Receivables", value: formatCurrency(d.panelSummary.tms.receivables), sub: `${d.panelSummary.tms.pendingFeesCount} pending fees` },
           ].map((item) => (
             <GlassCard key={item.label}>
               <CardContent className="pt-5 pb-4 text-center">
@@ -343,7 +343,7 @@ async function FmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   HRMS View — Human Resource Management
+   TalentOS View — Human Resource Management
 ──────────────────────────────────────────────────────── */
 async function HrmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getHrmsAnalytics(filters);
@@ -513,7 +513,7 @@ async function LmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 
       {career && (
         <>
-          <SectionDivider label="Career Applications (HRMS-Linked)" />
+          <SectionDivider label="Career Applications (TalentOS-Linked)" />
           <KpiGrid>
             <KpiCard label="Total Applications" value={career.total} accent trend={career.growthPercent} icon={<Briefcase className="size-4" />} />
             <KpiCard label="Under Review" value={career.byStatus.under_review ?? 0} icon={<Eye className="size-4" />} />
@@ -703,7 +703,7 @@ async function MessengerView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PMS View — Project Management System
+   SprintOS View — Project Management System
 ──────────────────────────────────────────────────────── */
 async function PmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const [d, costing] = await Promise.all([
@@ -907,7 +907,7 @@ async function PortalView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PRMS View — Procurement Management
+   SpendIQ View — Procurement Management
 ──────────────────────────────────────────────────────── */
 async function PrmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getPrmsAnalytics(filters);
@@ -996,7 +996,7 @@ async function PrmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   TMS View — Training Management System
+   Cohort AI View — Training Management System
 ──────────────────────────────────────────────────────── */
 async function TmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getTmsAnalytics(filters);
@@ -1106,7 +1106,7 @@ async function WorkspaceView({ filters }: { filters?: PanelAnalyticsFilters }) {
           <KpiCard label="Total Users" value={d.kpis.totalUsers} accent icon={<Users className="size-4" />} />
           <KpiCard label="Active Users" value={d.kpis.activeUsers} tone="up" icon={<UserCheck className="size-4" />} />
           <KpiCard label="Inactive Users" value={d.kpis.inactiveUsers} tone={d.kpis.inactiveUsers > 0 ? "down" : undefined} icon={<AlertTriangle className="size-4" />} />
-          <KpiCard label="Super Admins" value={d.kpis.superAdminCount} icon={<ShieldCheck className="size-4" />} />
+          <KpiCard label="Directors" value={d.kpis.superAdminCount} icon={<ShieldCheck className="size-4" />} />
           <KpiCard label="Distinct Roles" value={d.kpis.totalRoles} icon={<LayoutGrid className="size-4" />} />
         </KpiGrid>
       </ExecutiveSection>
@@ -1131,7 +1131,7 @@ async function WorkspaceView({ filters }: { filters?: PanelAnalyticsFilters }) {
             { label: "Total Accounts", value: d.kpis.totalUsers, accent: true },
             { label: "Active", value: d.kpis.activeUsers },
             { label: "Inactive", value: d.kpis.inactiveUsers },
-            { label: "Super Admins", value: d.kpis.superAdminCount },
+            { label: "Directors", value: d.kpis.superAdminCount },
           ]} />
         </CardContent>
       </GlassCard>

@@ -20,7 +20,7 @@ export default async function ClientVaultPage({ params, searchParams }: { params
     subtitle: `${c.clientCode}${c.industry ? ` · ${c.industry}` : ""}`,
     badge: getClientStatusMeta(c.status).label,
     crumbs: [{ label: "Clients", href: "/cybervault/clients" }, { label: c.companyName }],
-    notice: "Client details come from the client master (PMS).",
+    notice: "Client details come from the client master (SprintOS).",
     lines: [
       ...(c.website ? [{ icon: "web" as const, text: c.website, href: /^https?:\/\//i.test(c.website) ? c.website : `https://${c.website}` }] : []),
       ...(c.primaryContact.email ? [{ icon: "mail" as const, text: c.primaryContact.email }] : []),

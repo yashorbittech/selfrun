@@ -40,7 +40,7 @@ export default async function RfqPage({ searchParams }: { searchParams: Promise<
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "RFQ & Quotations" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "RFQ & Quotations" }]}
         title={<>RFQ &amp; Quotations</>}
         description={<>{total} RFQ{total === 1 ? "" : "s"}.</>}
         actions={<>{canManage && (

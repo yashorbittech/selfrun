@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import WorkspaceShell from "@/components/hub/WorkspaceShell";
 import { brandedMetadata } from "@/lib/platform/branding/metadata";
 import { getWorkspaceNav } from "@/lib/products/commandos/access";
+import { emailLapseGate } from "@/lib/platform/email-lapse";
 import { mustSetUpTwoFactor } from "@/lib/security/two-factor";
 
 export const generateMetadata = () => brandedMetadata("{brand} {product:workspace}", { robots: { index: false, follow: false } });
@@ -10,7 +11,8 @@ export default async function ProtectedHubLayout({ children }: { children: React
   const session = await getWorkspaceNav();
   if (!session) redirect("/commandos/login");
   if (session.user.mustChangePassword) redirect("/commandos/change-password");
-  // Super Admins must use two-step sign-in: until it is on, every protected page sends them to set it up.
+  await emailLapseGate(); // unverified past 30 days: on hold, with a way to verify
+  // Two-step sign-in off: the setup screen comes first at sign-in ("Skip for now" silences it for 72 hours; where it is required there is no skip).
   if (await mustSetUpTwoFactor(session.user)) redirect("/commandos/two-factor-setup");
 
   return (

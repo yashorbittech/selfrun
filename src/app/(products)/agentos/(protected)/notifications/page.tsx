@@ -25,7 +25,7 @@ export default async function AibotsNotificationsPage() {
     <GenericPanelNotificationsPage
       panel="aibots"
       live
-      panelName="AI Bots Management"
+      panelName="AgentOS Management"
       shortCode="AIBOTS"
       description="Track AI chatbot deployments, knowledge base index status & audit log alerts."
       initialNotifications={items.map((n) => ({ id: n._id, title: n.title, body: n.body, createdAt: n.createdAt, read: n.read, link: n.link ?? undefined }))}

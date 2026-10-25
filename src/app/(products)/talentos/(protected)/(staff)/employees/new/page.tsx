@@ -21,14 +21,14 @@ export default async function NewEmployeePage({
     listDepartments(),
     listDesignations(),
     listTeams(),
-    listEmployeeOptions(),
+    listEmployeeOptions({ activeOnly: true }),
     sp.fromApplication ? getApplicationForConversion(sp.fromApplication) : Promise.resolve(null),
   ]);
 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Employees", href: "/talentos/employees" }, { label: "New" }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Employees", href: "/talentos/employees" }, { label: "New" }]}
         title={<>Add Employee</>}
         description={<>A unique employee ID is generated automatically on save.</>}
       />

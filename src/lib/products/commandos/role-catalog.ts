@@ -58,44 +58,44 @@ export const PORTAL_ADMIN_ROLES = ["portal_admin", "portal_manager"] as const;
 export const WORKSPACE_ROLES = ["workspace_admin", "workspace_member"] as const;
 
 export const ROLE_GROUPS: RoleGroup[] = [
-  group("HRMS", HRMS_ROLES, HRMS_ROLE_META, "hrms"),
-  group("PMS (Projects)", PMS_ROLES, PMS_ROLE_META, "pms"),
-  group("Procurement (PRMS)", PRMS_ROLES, PRMS_ROLE_META, "prms"),
-  group("Training (TMS)", TMS_ROLES, TMS_ROLE_META, "tms"),
-  group("Team Chat (Messenger)", CHAT_ROLES, CHAT_ROLE_META, "messenger"),
-  group("Finance (FMS)", FMS_ROLES, FMS_ROLE_META, "fms"),
-  group("SOP Product", SOP_ROLES, SOP_ROLE_META, "sop"),
-  group("SEO Product", SEO_ROLES, SEO_ROLE_META, "seo"),
-  group("Digi Locker (DLMS)", DLMS_ROLES, DLMS_ROLE_META, "dlms"),
-  group("AI Bots", AIBOTS_ROLES, AIBOTS_ROLE_META, "aibots"),
-  group("AI Intelligence", INTELLIGENCE_ROLES, INTELLIGENCE_ROLE_META, "intelligence"),
-  group("Social Media (SMMS)", SMMS_ROLES, SMMS_ROLE_META, "smms"),
-  group("Online Tests (OTS)", OTS_ROLES, OTS_ROLE_META, "ots"),
-  group("Website CMS", CMS_ROLES, CMS_ROLE_META, "cms"),
-  group("Legal & Documents (LPMS)", LPMS_ROLES, LPMS_ROLE_META, "lpms"),
+  group("TalentOS", HRMS_ROLES, HRMS_ROLE_META, "hrms"),
+  group("SprintOS", PMS_ROLES, PMS_ROLE_META, "pms"),
+  group("SpendIQ", PRMS_ROLES, PRMS_ROLE_META, "prms"),
+  group("Cohort AI", TMS_ROLES, TMS_ROLE_META, "tms"),
+  group("Huddle", CHAT_ROLES, CHAT_ROLE_META, "messenger"),
+  group("CashFlow", FMS_ROLES, FMS_ROLE_META, "fms"),
+  group("Playbook", SOP_ROLES, SOP_ROLE_META, "sop"),
+  group("RankMax", SEO_ROLES, SEO_ROLE_META, "seo"),
+  group("CyberVault", DLMS_ROLES, DLMS_ROLE_META, "dlms"),
+  group("AgentOS", AIBOTS_ROLES, AIBOTS_ROLE_META, "aibots"),
+  group("DataBrain", INTELLIGENCE_ROLES, INTELLIGENCE_ROLE_META, "intelligence"),
+  group("ViralPulse", SMMS_ROLES, SMMS_ROLE_META, "smms"),
+  group("EvalIQ", OTS_ROLES, OTS_ROLE_META, "ots"),
+  group("SiteCraft", CMS_ROLES, CMS_ROLE_META, "cms"),
+  group("ContractFlow", LPMS_ROLES, LPMS_ROLE_META, "lpms"),
   {
-    module: "LMS (CRM & Learning)",
+    module: "DealFlow",
     panel: "lms",
     roles: [
-      { value: "lms_admin", label: "LMS Admin", description: "Full control over leads, marketing campaigns, courses, and sales analytics." },
-      { value: "lms_manager", label: "LMS Manager", description: "Manage lead assignments, sales stages, student enrollments, and reports." },
-      { value: "lms_agent", label: "LMS Executive / Counselor", description: "Manage assigned leads, track call activities, and update status." },
+      { value: "lms_admin", label: "DealFlow Admin", description: "Full control over leads, marketing campaigns, courses, and sales analytics." },
+      { value: "lms_manager", label: "DealFlow Manager", description: "Manage lead assignments, sales stages, student enrollments, and reports." },
+      { value: "lms_agent", label: "DealFlow Executive / Counselor", description: "Manage assigned leads, track call activities, and update status." },
     ],
   },
   {
-    module: "External Portal",
+    module: "ClientOS",
     panel: "portal",
     roles: [
-      { value: "portal_admin", label: "Portal Admin", description: "Full administration of applicant, student, and client portal experiences." },
-      { value: "portal_manager", label: "Portal Manager", description: "Manage job applications, student batches, and client document sharing." },
+      { value: "portal_admin", label: "ClientOS Admin", description: "Full administration of applicant, student, and client portal experiences." },
+      { value: "portal_manager", label: "ClientOS Manager", description: "Manage job applications, student batches, and client document sharing." },
     ],
   },
   {
-    module: "Workspace Product",
+    module: "CommandOS",
     panel: "workspace",
     roles: [
-      { value: "workspace_admin", label: "Workspace Admin", description: "Manage workspace settings, department analytics, and employee product access." },
-      { value: "workspace_member", label: "Workspace Member", description: "Access to workspace dashboard, employee self-service, and department KPIs." },
+      { value: "workspace_admin", label: "CommandOS Admin", description: "Manage workspace settings, department analytics, and employee product access." },
+      { value: "workspace_member", label: "CommandOS Member", description: "Access to workspace dashboard, employee self-service, and department KPIs." },
     ],
   },
 ];
@@ -106,7 +106,7 @@ export const ALL_KNOWN_ROLES: string[] = [
 ];
 
 export function moduleLabelsForRoles(roles: string[]): string[] {
-  if (roles.includes("super_admin")) return ["Super Admin (all modules)"];
+  if (roles.includes("super_admin")) return ["Director (all modules)"];
   const labels: string[] = [];
   for (const g of ROLE_GROUPS) {
     if (g.roles.some((r) => roles.includes(r.value))) labels.push(g.module);
@@ -115,7 +115,7 @@ export function moduleLabelsForRoles(roles: string[]): string[] {
 }
 
 const ROLE_LABEL_BY_VALUE: Record<string, string> = {
-  super_admin: "Super Admin",
+  super_admin: "Director",
   ...Object.fromEntries(ROLE_GROUPS.flatMap((g) => g.roles.map((r) => [r.value, r.label]))),
 };
 
@@ -126,7 +126,7 @@ export function roleLabel(value: string): string {
 /** Each held role's own label, module-qualified when the label alone would be
  * ambiguous across modules (e.g. two modules both have a role labelled "Admin"). */
 export function roleLabelsForRoles(roles: string[]): string[] {
-  if (roles.includes("super_admin")) return ["Super Admin"];
+  if (roles.includes("super_admin")) return ["Director"];
   const labelCounts = new Map<string, number>();
   for (const label of Object.values(ROLE_LABEL_BY_VALUE)) {
     labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);

@@ -288,12 +288,12 @@ const PANEL_FILTER_FIELDS: Record<PanelKey, FilterField[]> = {
       key: "role",
       label: "Staff Role",
       options: [
-        { label: "Super Admin", value: "super_admin" },
+        { label: "Director", value: "super_admin" },
         { label: "Admin", value: "admin" },
         { label: "Finance Admin", value: "finance_admin" },
         { label: "HR Admin", value: "hr_admin" },
-        { label: "PMS Admin", value: "pms_admin" },
-        { label: "TMS Admin", value: "tms_admin" },
+        { label: "SprintOS Admin", value: "pms_admin" },
+        { label: "Cohort AI Admin", value: "tms_admin" },
       ],
     },
     {
@@ -481,7 +481,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   FMS View
+   CashFlow View
 ──────────────────────────────────────────────────────── */
 async function FmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getFmsAnalytics(filters);
@@ -515,7 +515,7 @@ async function FmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   HRMS View
+   TalentOS View
 ──────────────────────────────────────────────────────── */
 async function HrmsView({ filters, userId }: { filters?: PanelAnalyticsFilters; userId: string }) {
   const d = await getHrmsAnalytics({ ...filters, restrictToEmployeeId: userId });
@@ -622,7 +622,7 @@ async function MessengerView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PMS View
+   SprintOS View
 ──────────────────────────────────────────────────────── */
 async function PmsView({ filters, userId }: { filters?: PanelAnalyticsFilters; userId: string }) {
   const [d, costing] = await Promise.all([
@@ -676,7 +676,7 @@ async function PortalView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   PRMS View
+   SpendIQ View
 ──────────────────────────────────────────────────────── */
 async function PrmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getPrmsAnalytics(filters);
@@ -696,7 +696,7 @@ async function PrmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   TMS View
+   Cohort AI View
 ──────────────────────────────────────────────────────── */
 async function TmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getTmsAnalytics(filters);
@@ -743,9 +743,9 @@ async function SopView({ filters }: { filters?: PanelAnalyticsFilters }) {
   return (
     <>
       <AlertBanner alerts={d.alerts} />
-      <ExecutiveSection title="SOP KPIs">
+      <ExecutiveSection title="Playbook KPIs">
         <KpiGrid>
-          <KpiCard label="Total SOPs" value={d.kpis.total} accent icon={<BookText className="size-4" />} />
+          <KpiCard label="Total procedures" value={d.kpis.total} accent icon={<BookText className="size-4" />} />
           <KpiCard label="Published" value={d.kpis.published} tone="up" icon={<CheckCircle2 className="size-4" />} />
           <KpiCard label="Drafts" value={d.kpis.draft} icon={<Clock className="size-4" />} />
           <KpiCard label="Created in Period" value={d.kpis.createdInPeriod} icon={<TrendingUp className="size-4" />} />
@@ -770,14 +770,14 @@ async function SopView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   DLMS (Digi Locker) View
+   CyberVault (Digi Locker) View
 ──────────────────────────────────────────────────────── */
 async function DlmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getDlmsAnalytics(filters);
   return (
     <>
       <AlertBanner alerts={d.alerts} />
-      <ExecutiveSection title="Digi Locker KPIs">
+      <ExecutiveSection title="CyberVault KPIs">
         <KpiGrid>
           <KpiCard label="Vault Records" value={d.kpis.totalRecords} accent icon={<Vault className="size-4" />} />
           <KpiCard label="Credentials" value={d.kpis.credentials} icon={<Lock className="size-4" />} />
@@ -809,7 +809,7 @@ async function DlmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   OTS (Online Tests) View
+   EvalIQ (Online Tests) View
 ──────────────────────────────────────────────────────── */
 async function OtsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getOtsAnalytics(filters);
@@ -858,7 +858,7 @@ async function AibotsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   return (
     <>
       <AlertBanner alerts={d.alerts} />
-      <ExecutiveSection title="AI Bots KPIs" description="Usage figures cover the last 30 days. Cost is an estimate from the per-model prices in AI Bots settings, not an invoice.">
+      <ExecutiveSection title="AgentOS KPIs" description="Usage figures cover the last 30 days. Cost is an estimate from the per-model prices in AgentOS settings, not an invoice.">
         <KpiGrid>
           <KpiCard label="Total Bots" value={d.kpis.totalBots} accent icon={<Bot className="size-4" />} />
           <KpiCard label="Active Bots" value={d.kpis.activeBots} tone="up" icon={<Zap className="size-4" />} />
@@ -891,7 +891,7 @@ async function AibotsView({ filters }: { filters?: PanelAnalyticsFilters }) {
 }
 
 /* ─────────────────────────────────────────────────────────
-   SMMS (Social Media) View
+   ViralPulse (Social Media) View
 ──────────────────────────────────────────────────────── */
 async function SmmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getSmmsAnalytics(filters);
@@ -1126,7 +1126,7 @@ export async function PanelAnalyticsBlock({
 }
 
 /* ─────────────────────────────────────────────────────────
-   LPMS View
+   ContractFlow View
 ──────────────────────────────────────────────────────── */
 async function LpmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
   const d = await getLpmsAnalytics(filters);

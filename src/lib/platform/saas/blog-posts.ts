@@ -759,7 +759,7 @@ export const POSTS: BlogPost[] = [
         heading: "Role-Based Security: Confidentiality Guaranteed",
         body: [
           "Not everyone in your organization should have access to company-wide financial records or executive salary figures. SelfRun AI enforces strict role-based access control inside SelfRun DataBrain AI.",
-          "A project manager asking questions will only receive answers drawn from the projects, timesheets, and tasks they have permission to view. Executive financials, bank account balances, and payroll specifics remain strictly accessible to Super Admins and authorized Finance Officers.",
+          "A project manager asking questions will only receive answers drawn from the projects, timesheets, and tasks they have permission to view. Executive financials, bank account balances, and payroll specifics remain strictly accessible to Directors and authorized Finance Officers.",
         ],
       },
       {

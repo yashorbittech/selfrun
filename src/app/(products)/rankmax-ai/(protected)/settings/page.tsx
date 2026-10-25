@@ -78,7 +78,7 @@ export default async function SeoSettingsPage() {
       />
       <SectionCard
         title="Roles & permissions"
-        description={<>Defaults per SEO role. Grant roles and override individual permissions per person in <Link href="/commandos/users" className="text-primary hover:underline">Admin → Users</Link> (Super Admin). Every permission is enforced on the server.</>}
+        description={<>Defaults per SEO role. Grant roles and override individual permissions per person in <Link href="/commandos/users" className="text-primary hover:underline">Admin → Users</Link> (Director). Every permission is enforced on the server.</>}
       >
         <div className="overflow-auto">
           <Table>

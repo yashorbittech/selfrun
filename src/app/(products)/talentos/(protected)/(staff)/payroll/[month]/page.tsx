@@ -25,7 +25,7 @@ export default async function PayrollRunPage({ params }: { params: Promise<{ mon
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "HRMS", href: "/talentos" }, { label: "Payroll", href: "/talentos/payroll" }, { label: month }]}
+        breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Payroll", href: "/talentos/payroll" }, { label: month }]}
         title={<>Payroll · {month}</>}
         description={<>Review, approve and pay this payroll run.</>}
         actions={

@@ -43,7 +43,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Students", href: "/cohort-ai/students" }, { label: s.fullName }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Students", href: "/cohort-ai/students" }, { label: s.fullName }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{s.fullName}<StudentStatusBadge status={s.status} /></span></>}
         description={<><span className="font-mono">{s.studentCode}</span>
             {s.applicationId ? (

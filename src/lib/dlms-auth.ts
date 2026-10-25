@@ -51,7 +51,7 @@ export interface CurrentDlmsUser {
   roles: string[];
   /** Explicit DLMS roles, for display only. */
   dlmsRoles: ReturnType<typeof normalizeDlmsRoles>;
-  /** Per-capability overrides from the Super Admin — see `permission-overrides.ts`. */
+  /** Per-capability overrides from the Director — see `permission-overrides.ts`. */
   permissionOverrides: Record<string, boolean>;
   employeeId: string | null;
   mustChangePassword: boolean;

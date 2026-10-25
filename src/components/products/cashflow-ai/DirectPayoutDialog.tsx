@@ -242,7 +242,7 @@ export default function DirectPayoutDialog({
                   PO / Invoice Reference
                 </Label>
                 <Input
-                  placeholder="e.g. INV-2026-88 or PO-PRMS-001"
+                  placeholder="e.g. INV-2026-88 or PO-SpendIQ-001"
                   value={form.refNotes}
                   onChange={(e) => set("refNotes", e.target.value)}
                 />

@@ -24,9 +24,9 @@ export default async function EmployeeExpensesPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Employee Expenses" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Employee Expenses" }]}
         title={<>Employee Expenses</>}
-        description={<>Financial view over PRMS&apos;s personal expense claims — {result.total} claim{result.total === 1 ? "" : "s"}.</>}
+        description={<>Financial view over SpendIQ&apos;s personal expense claims — {result.total} claim{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -61,7 +61,7 @@ export default async function EmployeeExpensesPage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No employee expense claims found — claims are submitted in PRMS."
+        emptyLabel="No employee expense claims found — claims are submitted in SpendIQ."
       />
     </div>
   );

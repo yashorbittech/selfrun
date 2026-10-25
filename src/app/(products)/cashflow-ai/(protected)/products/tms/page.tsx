@@ -50,8 +50,8 @@ export default async function TmsFinancePage({
     <div className="relative space-y-6">
 
       <PanelPageHeader
-        title={<>{panelName("tms", "TMS Training")} &amp; Student Fees</>}
-        description={<>Student enrollments flow from TMS → FMS to issue fee invoices, payment links &amp; receipts.</>}
+        title={<>{panelName("tms", "Cohort AI Training")} &amp; Student Fees</>}
+        description={<>Student enrollments flow from Cohort AI → CashFlow to issue fee invoices, payment links &amp; receipts.</>}
       />
 
 
@@ -63,7 +63,7 @@ export default async function TmsFinancePage({
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted-foreground sm:gap-4">
           <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">Enrollment</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
-          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">FMS Invoice</span>
+          <span className="px-3 py-1.5 rounded-lg bg-background border border-border/60 text-foreground">CashFlow Invoice</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
           <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20 font-semibold">Fee Link Sent</span>
           <ArrowRight className="size-3.5 text-primary shrink-0" />
@@ -133,7 +133,7 @@ export default async function TmsFinancePage({
                       </td>
                       <td className="px-4 py-3 font-medium text-foreground">{t.customerName || t.payee || "Student"}</td>
                       <td className="px-4 py-3 font-mono text-muted-foreground">
-                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">TMS</span>{" "}
+                        <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-semibold">Cohort AI</span>{" "}
                         {t.sourceRecordId || "ENR-2026"}
                       </td>
                       <td className="px-4 py-3 font-bold text-foreground whitespace-nowrap">
@@ -188,7 +188,7 @@ export default async function TmsFinancePage({
                             defaultTitle={`Training Fee: ${t.customerName || "Student"}`}
                             defaultCustomerName={t.customerName || t.payee || "Student"}
                             defaultAmount={t.amount || 0}
-                            defaultSourceModule="TMS"
+                            defaultSourceModule="Cohort AI"
                             sourceTransactionId={txnId}
                             triggerLabel={isLinkSent ? "Resend Fee Link" : "Send Fee Link"}
                           />

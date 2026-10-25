@@ -201,7 +201,7 @@ export async function syncFromHrms(force = false): Promise<void> {
       _id: newId(),
       name: h.name,
       code,
-      description: "Mirrored from HRMS.",
+      description: "Mirrored from TalentOS.",
       hrmsDepartmentId: h._id,
       active: true,
       ...createStamp(null),
@@ -249,7 +249,7 @@ export async function createDepartment(
   if (all.some((d) => d.name.toLowerCase() === name.toLowerCase())) return { ok: false, error: "A department with that name already exists." };
   const code = (clean(data.code, 8).toUpperCase().replace(/[^A-Z0-9]/g, "") || slugCode(name, new Set(all.map((d) => d.code))));
   if (all.some((d) => d.code === code)) return { ok: false, error: `Code ${code} is already used.` };
-  if (data.hrmsDepartmentId && all.some((d) => d.hrmsDepartmentId === data.hrmsDepartmentId)) return { ok: false, error: "That HRMS department is already linked." };
+  if (data.hrmsDepartmentId && all.some((d) => d.hrmsDepartmentId === data.hrmsDepartmentId)) return { ok: false, error: "That TalentOS department is already linked." };
   const doc: SopDepartment = {
     _id: newId(),
     name,

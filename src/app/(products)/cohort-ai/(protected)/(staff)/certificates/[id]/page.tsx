@@ -25,7 +25,7 @@ export default async function CertificateDetailPage({ params }: { params: Promis
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai" }, { label: "Certificates", href: "/cohort-ai/certificates" }, { label: cert.certificateNumber }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai" }, { label: "Certificates", href: "/cohort-ai/certificates" }, { label: cert.certificateNumber }]}
         title={<><span className="inline-flex flex-wrap items-center gap-2">{cert.typeLabel}{cert.revoked ? (
               <span className="inline-flex items-center gap-1 rounded-md bg-destructive/15 px-2 py-0.5 text-xs font-medium text-destructive">
                  Revoked

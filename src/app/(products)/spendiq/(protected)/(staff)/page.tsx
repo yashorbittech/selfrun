@@ -104,7 +104,7 @@ export default async function PrmsDashboardPage({
     <div className="relative space-y-6">
 
       <PanelDashboardHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Dashboard" }]}
         title="Procurement Overview"
         description={<>{displayName ? `Welcome back, ${displayName}. ` : ""}Analyze spend, requisitions, vendor orders and company assets to keep purchasing on budget.</>}
         actions={

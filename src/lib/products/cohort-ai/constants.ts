@@ -311,7 +311,7 @@ export const DEFAULT_CURRENCY = "INR";
 export const SUPPORTED_CURRENCIES = ["INR", "USD", "EUR", "GBP", "AUD", "CAD", "SGD", "AED"] as const;
 
 /** `{n}` → padded sequence, `{yyyy}` → year. e.g. "YO-TMS-{yyyy}-{n}". */
-export const DEFAULT_CERTIFICATE_NUMBER_FORMAT = "YO-TMS-{yyyy}-{n}";
+export const DEFAULT_CERTIFICATE_NUMBER_FORMAT = "YO-Cohort AI-{yyyy}-{n}";
 
 // ---------------------------------------------------------------------------
 // Generic label helper

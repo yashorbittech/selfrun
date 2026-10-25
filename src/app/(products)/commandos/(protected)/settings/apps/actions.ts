@@ -15,7 +15,7 @@ async function requireOwner() {
 
 /**
  * The Generate button of ONE platform (Generate Android App, Generate iOS App, Generate Windows App …). This is the only way an app
- * is ever built: nothing runs on its own. Super Admins only.
+ * is ever built: nothing runs on its own. Directors only.
  */
 export async function buildAppAction(platform: AppPlatform): Promise<{ ok: true; message: string } | { ok: false; error: string }> {
   await requireOwner();

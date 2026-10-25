@@ -31,9 +31,9 @@ export default async function BillsPage({
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "FMS", href: "/cashflow-ai" }, { label: "Bills" }]}
+        breadcrumbs={[{ label: "CashFlow", href: "/cashflow-ai" }, { label: "Bills" }]}
         title={<>Bills</>}
-        description={<>Financial view over PRMS&apos;s vendor bills — {result.total} bill{result.total === 1 ? "" : "s"}.</>}
+        description={<>Financial view over SpendIQ&apos;s vendor bills — {result.total} bill{result.total === 1 ? "" : "s"}.</>}
       />
 
       <KpiGrid>
@@ -72,7 +72,7 @@ export default async function BillsPage({
         page={result.page}
         totalPages={result.totalPages}
         total={result.total}
-        emptyLabel="No vendor bills found — bills are created in PRMS."
+        emptyLabel="No vendor bills found — bills are created in SpendIQ."
       />
     </div>
   );

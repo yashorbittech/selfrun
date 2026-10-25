@@ -26,7 +26,7 @@ export default async function MyPaymentsPage() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "TMS", href: "/cohort-ai/me" }, { label: "Payments" }]}
+        breadcrumbs={[{ label: "Cohort AI", href: "/cohort-ai/me" }, { label: "Payments" }]}
         title={<>Payments</>}
       />
 

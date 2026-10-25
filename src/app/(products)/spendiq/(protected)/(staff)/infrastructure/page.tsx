@@ -37,7 +37,7 @@ export default async function InfrastructurePage({ searchParams }: { searchParam
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "Infrastructure & Servers" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "Infrastructure & Servers" }]}
         title={<>Infrastructure &amp; Servers</>}
         description={<>{total} resource{total === 1 ? "" : "s"} tracked.</>}
         actions={<>{canManage && (

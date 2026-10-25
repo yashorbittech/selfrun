@@ -2,6 +2,7 @@ import "server-only";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { getPlan } from "@/lib/platform/billing/plans";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
+import { applyLimitOverrides } from "@/lib/platform/billing/overrides";
 import type { CompanySubscription, Plan, PlanLimits } from "@/lib/platform/billing/types";
 
 /**
@@ -63,13 +64,16 @@ async function addonDocs(ids: string[]): Promise<AddonLimitDoc[]> {
     .toArray();
 }
 
-/** Effective limits for a subscription whose plan is already loaded: the plan's, plus any add-ons. */
+/**
+ * Effective limits for a subscription whose plan is already loaded: the plan's, plus any add-ons, then whatever the platform admin set for
+ * this company in the Platform Console (see `overrides.ts`). Every limit check in the product reads this, so one change applies everywhere.
+ */
 export async function effectiveLimitsFor(sub: CompanySubscription | null, plan: Plan | null): Promise<PlanLimits> {
   if (!sub || sub.status === "internal") return { ...UNLIMITED_LIMITS };
   const base = plan?.limits ?? UNLIMITED_LIMITS;
   const addons = subscriptionAddons(sub);
-  if (addons.length === 0) return { ...base };
-  return applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
+  const withAddons = addons.length === 0 ? { ...base } : applyAddonExtras(base, addons, await addonDocs(addons.map((a) => a.addonId)));
+  return applyLimitOverrides(withAddons, sub.overrides);
 }
 
 /** Plan limits + purchased add-on extras for a company. The platform owner is unlimited. */

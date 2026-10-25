@@ -38,6 +38,7 @@ const loadPlatformUser = cache(async (): Promise<{ user: PlatformUser } | { reas
 
 async function gate(): Promise<PlatformUser> {
   const res = await loadPlatformUser();
+  console.error("[console-dbg] gate", "user" in res ? "ok" : res.reason);
   if ("user" in res) return res.user;
   if (res.reason === "not_owner") notFound();
   if (res.reason === "signed_out") redirect("/commandos/login");

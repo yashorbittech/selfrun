@@ -41,7 +41,7 @@ export default async function EmployeePortalHome() {
   return (
     <div className="space-y-4">
       <PanelPageHeader
-        breadcrumbs={[{ label: "PRMS", href: "/spendiq" }, { label: "My Dashboard" }]}
+        breadcrumbs={[{ label: "SpendIQ", href: "/spendiq" }, { label: "My Dashboard" }]}
         title={<>Welcome, {user.email.split("@")[0]}</>}
         description={<>Raise purchase requisitions and track your approvals.</>}
         actions={<><RequisitionForm
