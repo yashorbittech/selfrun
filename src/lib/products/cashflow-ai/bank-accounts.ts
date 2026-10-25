@@ -10,7 +10,7 @@ import { encryptField, decryptField, last4Of, maskAccountNumber, isEncryptionCon
  * (HRMS's `hrms_bank_accounts` is strictly employee payout destinations).
  * The account number is encrypted at rest (mirrors HRMS's own approach for
  * employee bank details) — a full number can only be stored once
- * `FMS_ENCRYPTION_KEY` is configured; otherwise the write is refused rather
+ * `PLATFORM_ENCRYPTION_KEY` is configured; otherwise the write is refused rather
  * than falling back to plaintext.
  */
 
@@ -133,7 +133,7 @@ export async function createBankAccount(
   actorId: string
 ): Promise<{ ok: true; account: BankAccount } | { ok: false; reason: string }> {
   if (data.accountNumber && !isEncryptionConfigured()) {
-    return { ok: false, reason: "FMS_ENCRYPTION_KEY is not configured — cannot store an account number. Leave it blank or ask an admin to set the key." };
+    return { ok: false, reason: "PLATFORM_ENCRYPTION_KEY is not configured — cannot store an account number. Leave it blank or ask an admin to set the key." };
   }
   const collection = await getCollection();
   const opening = round2(data.openingBalance);
@@ -162,7 +162,7 @@ export async function updateBankAccount(
   actorId: string
 ): Promise<{ ok: true; account: BankAccount } | { ok: false; reason: string }> {
   if (data.accountNumber && !isEncryptionConfigured()) {
-    return { ok: false, reason: "FMS_ENCRYPTION_KEY is not configured — cannot store an account number." };
+    return { ok: false, reason: "PLATFORM_ENCRYPTION_KEY is not configured — cannot store an account number." };
   }
   const collection = await getCollection();
   const patch: Record<string, unknown> = {

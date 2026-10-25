@@ -1,15 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runLifecycleJobs } from "@/lib/products/commandos/data-lifecycle";
-
-export const maxDuration = 300;
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily, with `Authorization: Bearer $CRON_SECRET`: weekly backups for the companies that are due (one per company a week), the clean-up of
- * old backups, and the deletion of companies whose 30 days have ended. It stops before the time limit and carries on the next day.
+ * Scheduled job "backups": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, ...(await runLifecycleJobs()) });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export const GET = cronRoute("backups");

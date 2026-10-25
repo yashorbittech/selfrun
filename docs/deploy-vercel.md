@@ -8,6 +8,16 @@ the [Troubleshooting](#troubleshooting) table at the end.
 Time needed: about 2 to 3 hours the first time (most of it waiting for DNS). Customers need none of this: they sign up on your
 website and everything is created for them.
 
+> [!IMPORTANT]
+> **Two places hold settings, and each setting lives in exactly one of them.**
+> - **Vercel environment variables** hold only the six values the app needs *before* it can read the database: `MONGODB_URI`,
+>   `SAAS_ADMIN_EMAIL`, `SAAS_ADMIN_PASSWORD`, `PLATFORM_ENCRYPTION_KEY`, `SAAS_HOSTS` and `CRON_SECRET` (step 6).
+> - **The Platform Console** holds everything else, section by section: email, domains, file storage, AI, voice and messaging,
+>   push notifications, search and calls, payments, plans and more (step 11). Saving there needs **no redeploy**.
+>
+> Each company can also save its **own** keys under *Settings → Integrations*. A company's own key is used first; the platform's key
+> from the Console is the fallback for companies that have not added one.
+
 **How to read this guide**
 
 | Mark | Meaning |
@@ -51,16 +61,16 @@ website and everything is created for them.
 | --- | --- | --- | --- | --- |
 | 1 | Collect accounts and notes | 10 min | Yes | A notes file |
 | 2 | MongoDB Atlas database | 15 min | Yes | `MONGODB_URI` |
-| 3 | Vercel Blob storage | 5 min | Yes | `BLOB_READ_WRITE_TOKEN` |
-| 4 | Generate secret keys | 10 min | Yes | 6 keys, push keys, staff login |
+| 3 | Vercel Blob storage | 5 min | Yes | `BLOB_READ_WRITE_TOKEN` (saved in the Console in step 11) |
+| 4 | Generate secret keys | 10 min | Yes | 2 keys, push keys, staff login |
 | 5 | Create the Vercel project | 5 min | Yes | A project |
-| 6 | Add environment variables | 20 min | Yes | Configured app |
+| 6 | Add the 6 environment variables | 10 min | Yes | The app can start |
 | 7 | Add 4 domains in Vercel | 10 min | Yes | Domains attached |
 | 8 | Point DNS | 15 min + wait | Yes | HTTPS addresses |
 | 9 | Deploy and check | 10 min | Yes | **Your live website** |
-| 10 | Email (Resend) | 20 min | For sign-up emails | `RESEND_API_KEY` |
-| 11 | First sign-in and Platform Console | 10 min | Yes | Plans and settings |
-| 12 | Test the whole flow | 30 min | Recommended | Proof it works |
+| 10 | Email (Resend) | 20 min | For sign-up emails | `RESEND_API_KEY` (saved in the Console in step 11) |
+| 11 | First sign-in and Platform Console | 30 min | Yes | Every key and setting, section by section |
+| 12 | Test the whole flow | 45 min | Recommended | Proof it works |
 | 13 to 15 | Payments, customers' domains, desktop and mobile apps | 20 + 15 + 40 min | Optional | Extras |
 
 > [!TIP]
@@ -86,7 +96,7 @@ Open a product URL on the website address and you are sent to the app address au
 Two settings drive this:
 
 - `SAAS_HOSTS`: the website addresses of the product itself (`selfrunbusiness.com`). `app.selfrunbusiness.com` is derived from it.
-- `PLATFORM_ROOT_DOMAIN`: the domain under which every company's automatic addresses live (`selfrunbusiness.com`).
+- The **root domain**: the domain under which every company's automatic addresses live (`selfrunbusiness.com`). You do not set it in Vercel: on a Vercel production deployment it is worked out from the production domain you attach in step 7, and it can also be typed in *Console → Integrations → Domains & hosting* (step 11).
 
 Words used below:
 
@@ -120,19 +130,19 @@ Open a notes file (a password manager is best). You will paste values into it as
 - **1.2** In your notes file create empty lines for the values you will collect:
 
   ```
+  # Go in Vercel (step 6)
   MONGODB_URI            =
-  BLOB_READ_WRITE_TOKEN  =
   PLATFORM_ENCRYPTION_KEY=
-  HRMS_ENCRYPTION_KEY    =
-  FMS_ENCRYPTION_KEY     =
-  DLMS_ENCRYPTION_KEY    =
-  SMMS_ENCRYPTION_KEY    =
   CRON_SECRET            =
+  SAAS_ADMIN_EMAIL       =
+  SAAS_ADMIN_PASSWORD    =
+
+  # Go in the Platform Console (step 11), not in Vercel
+  BLOB_READ_WRITE_TOKEN  =
   VAPID_PUBLIC_KEY       =
   VAPID_PRIVATE_KEY      =
   RESEND_API_KEY         =
-  SAAS_ADMIN_EMAIL       =
-  SAAS_ADMIN_PASSWORD    =
+  OPENAI_API_KEY         =   (when you want AI)
   ```
 
 > ✅ **Checkpoint:** you can sign in to Vercel, Atlas and your domain provider, and your notes file has the empty lines above.
@@ -194,7 +204,7 @@ All uploads (logos, documents, chat attachments) go to Vercel Blob.
 
 - **3.3** Create it, then open the store → **Settings** (or the **.env.local** tab) and copy the **Read/Write token**.
 
-- **3.4** Paste it into your notes as `BLOB_READ_WRITE_TOKEN`.
+- **3.4** Paste it into your notes as `BLOB_READ_WRITE_TOKEN`. It is saved in the Platform Console (*Integrations → File storage*, step 11.2), not in Vercel.
 
 > ✅ **Checkpoint:** the token starts with `vercel_blob_rw_`.
 
@@ -202,13 +212,13 @@ All uploads (logos, documents, chat attachments) go to Vercel Blob.
 
 ## 4. Generate your secret keys
 
-⏱ *10 min · required · you get: 6 secret keys, the push key pair, the staff login*
+⏱ *10 min · required · you get: 2 secret keys, the push key pair, the staff login*
 
 These protect sensitive data. You create them yourself, once.
 
 - **4.1** Open a terminal on your computer (any folder).
 
-- **4.2** Run this command **six times**. Each run prints a different random value. Copy each into your notes next to the name in the table:
+- **4.2** Run this command **twice**. Each run prints a different random value. Copy each into your notes next to the name in the table:
 
   ```bash
   openssl rand -base64 32
@@ -216,12 +226,10 @@ These protect sensitive data. You create them yourself, once.
 
   | Name in your notes | Protects |
   | --- | --- |
-  | `PLATFORM_ENCRYPTION_KEY` | Secrets the platform stores (payment keys, provider tokens) |
-  | `HRMS_ENCRYPTION_KEY` | Employee bank details |
-  | `FMS_ENCRYPTION_KEY` | Company bank account numbers |
-  | `DLMS_ENCRYPTION_KEY` | Digi Locker passwords and credentials |
-  | `SMMS_ENCRYPTION_KEY` | Social media account tokens |
-  | `CRON_SECRET` | The scheduled jobs (Vercel sends it to them) |
+  | `PLATFORM_ENCRYPTION_KEY` | **The single encryption key** for everything sensitive: every key saved in the Platform Console or by a company, employee bank details, finance accounts, Digi Locker credentials, social tokens |
+  | `CRON_SECRET` | The scheduled-job URLs (Vercel Cron sends it; without it every call is refused). Put the same value in the Console in step 11.2 |
+
+  There is no other encryption key to create. Older guides listed separate HR, Finance, Digi Locker and Social keys: they are no longer used.
 
 - **4.3** Generate the push-notification key pair (one command, prints two lines):
 
@@ -229,15 +237,16 @@ These protect sensitive data. You create them yourself, once.
   npx web-push generate-vapid-keys
   ```
 
-Copy **Public Key** into your notes as `VAPID_PUBLIC_KEY` and **Private Key** as `VAPID_PRIVATE_KEY`.
+Copy **Public Key** into your notes as `VAPID_PUBLIC_KEY` and **Private Key** as `VAPID_PRIVATE_KEY`. You will paste them into the Platform Console in step 11, not into Vercel.
 
 - **4.4** Decide the platform staff login and write it in your notes: `SAAS_ADMIN_EMAIL` (your email) and `SAAS_ADMIN_PASSWORD` (a strong password).
 
-> ✅ **Checkpoint:** six random values, two VAPID values, and the admin email and password are all in your notes, and no two values are the same.
+> ✅ **Checkpoint:** two random values, two VAPID values, and the admin email and password are all in your notes, and no two values are the same.
 
 > [!WARNING]
-> **Keep these keys forever.** If you lose or change an encryption key, the data it protected can no longer be read. If you change
-> the VAPID pair, every device must turn notifications on again. Use a different set for production than for local development.
+> **Keep these keys forever.** If you lose or change `PLATFORM_ENCRYPTION_KEY`, everything it protected can no longer be read: saved
+> keys, bank details and credentials. If you change the VAPID pair, every device must turn notifications on again. Use a different
+> set for production than for local development.
 
 ---
 
@@ -253,7 +262,7 @@ Copy **Public Key** into your notes as `VAPID_PUBLIC_KEY` and **Private Key** as
 - **5.3** Leave *Framework Preset* as **Next.js** and the build settings as they are.
 
 - **5.4** You can add the environment variables on this same screen (open **Environment Variables**), or deploy first and add them in step 6.
-  Either way, the first deployment fails or shows an error page until the variables exist. That is expected.
+  Either way, the first deployment fails or shows an error page until the six variables of step 6 exist. That is expected.
 
 - **5.5** Click **Deploy** if you are on the import screen. It may fail: that is fine, you will redeploy in step 9.
 
@@ -263,7 +272,7 @@ Copy **Public Key** into your notes as `VAPID_PUBLIC_KEY` and **Private Key** as
 
 ## 6. Add the environment variables
 
-⏱ *20 min · required · you get: the app configured*
+⏱ *10 min · required · you get: the app able to start*
 
 - **6.1** Vercel → your project → **Settings** → **Environment Variables**.
 
@@ -274,58 +283,47 @@ Copy **Public Key** into your notes as `VAPID_PUBLIC_KEY` and **Private Key** as
 > In Vercel you type values **without quotes**. (Quotes are only for a local `.env` file, where a `#` or a space in a password
 > would otherwise cut the value off.)
 
-### 6A. Required
+### 6A. The six variables (all required)
 
 | Key | Value |
 | --- | --- |
 | `MONGODB_URI` | From step 2 |
 | `SAAS_ADMIN_EMAIL` | Your staff email (step 4.4) |
 | `SAAS_ADMIN_PASSWORD` | Your staff password (step 4.4) |
+| `PLATFORM_ENCRYPTION_KEY` | From step 4.2 |
 | `SAAS_HOSTS` | `selfrunbusiness.com` |
-| `PLATFORM_ROOT_DOMAIN` | `selfrunbusiness.com` |
-| `NEXT_PUBLIC_APP_URL` | `https://www.selfrunbusiness.com` |
-| `PLATFORM_ENCRYPTION_KEY` | From step 4 |
-| `HRMS_ENCRYPTION_KEY` | From step 4 |
-| `FMS_ENCRYPTION_KEY` | From step 4 |
-| `DLMS_ENCRYPTION_KEY` | From step 4 |
-| `SMMS_ENCRYPTION_KEY` | From step 4 |
-| `CRON_SECRET` | From step 4 |
-| `BLOB_READ_WRITE_TOKEN` | From step 3 |
+| `CRON_SECRET` | From step 4.2 |
 
-### 6B. Email (so sign-up confirmation emails can be sent)
+That is everything the app needs to start. `PLATFORM_ENCRYPTION_KEY` has to stay here because it opens everything saved in the Console, so it cannot be saved there. `CRON_SECRET` has to be here because Vercel Cron can only send what is in the Vercel environment; the same value is also saved in the Console (11.2), which is what any other scheduler uses. **Do not add anything else here**: email, storage, AI, push, domains and payments are saved in the
+Platform Console (step 11), where each has its own labelled section, and a key saved there needs no redeploy.
 
-| Key | Value |
-| --- | --- |
-| `EMAIL_PROVIDER` | `resend` |
-| `RESEND_API_KEY` | Added in step 10 (you can add it now as a placeholder and fix it later) |
-| `EMAIL_FROM` | `SelfRun Business <no-reply@selfrunbusiness.com>` |
+What you do **not** need to set any more:
 
-### 6C. Push notifications
+- The company root domain: on a Vercel production deployment it is worked out from your production domain (7.2), and you can also type it in
+  *Console → Integrations → Domains & hosting*.
+- Separate HR, Finance, Digi Locker or Social encryption keys: `PLATFORM_ENCRYPTION_KEY` covers them all.
+- The Razorpay billing webhook secret, `REQUIRE_PRIVILEGED_MFA` and `DEV_TUNNEL_HOST`: the first is saved in *Console → Payments & Razorpay*,
+  the others no longer exist.
+
+### 6B. Only if you choose DNS Option A (step 8)
 
 | Key | Value |
 | --- | --- |
-| `VAPID_PUBLIC_KEY` | From step 4.3 |
-| `VAPID_PRIVATE_KEY` | From step 4.3 |
-| `VAPID_SUBJECT` | Optional: `mailto:support@selfrunbusiness.com` |
+| `PLATFORM_WILDCARD_SUBDOMAINS` | `1` (tells the app the project has the `*.selfrunbusiness.com` domain, so each new company's addresses need no per-company work) |
 
-Without these two keys the apps still install and work, but push notifications are switched off.
+You add this one in step 8 (A.6), not now.
 
-### 6D. Optional, add when you need the feature
+### 6C. Only if you build desktop and mobile apps (step 15)
 
-| Key | Feature | Where it comes from |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | AI chatbot, assistants, Intelligence | platform.openai.com → API keys |
-| `PLATFORM_WILDCARD_SUBDOMAINS` = `1` | Instant HTTPS for every company address | Set after step 8 (Option A) |
-| `DOMAIN_PROVIDER` = `vercel`, `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` | Customers' own domains, and Option B in step 8 | Step 14 |
-| `RAZORPAY_BILLING_WEBHOOK_SECRET` | Charging companies | Step 13 |
-| `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET` | Automatic desktop and mobile apps | Step 15 |
+`GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN` and `DESKTOP_BUILD_SECRET` (plus the optional `DESKTOP_RELEASES_REPO`, `GITHUB_WORKFLOW_FILE`, `GITHUB_WORKFLOW_REF`).
+These are the only other variables, because the build service is GitHub's, not the app's. You add them in step 15.
 
-- **6.3** When all rows are saved, scroll the list and tick them off against the tables above.
+- **6.3** When all six rows are saved, scroll the list and tick them off against the table above.
 
-> ✅ **Checkpoint:** all 13 required keys are listed under **Production**, none has quotes around its value, and `SAAS_HOSTS` is exactly `selfrunbusiness.com`.
+> ✅ **Checkpoint:** the six keys are listed under **Production**, none has quotes around its value, and `SAAS_HOSTS` is exactly `selfrunbusiness.com`.
 
 > [!IMPORTANT]
-> **A change to any variable only takes effect after a redeploy.** Always redeploy after editing one.
+> **A change to an environment variable only takes effect after a redeploy.** Settings saved in the Platform Console do not need one.
 
 ---
 
@@ -389,7 +387,7 @@ If the provider refuses, first turn off DNSSEC for the domain, then try again.
 
 - **A.5** Back in Vercel → **Settings → Domains**: refresh until all four domains show **Valid Configuration**.
 
-- **A.6** Add one more environment variable: `PLATFORM_WILDCARD_SUBDOMAINS` = `1` → Save. You will redeploy in step 9.
+- **A.6** Add one more environment variable in Vercel: `PLATFORM_WILDCARD_SUBDOMAINS` = `1` (6B) → Save. You will redeploy in step 9.
 
 ### Option B: keep your DNS provider
 
@@ -404,8 +402,8 @@ If the provider refuses, first turn off DNSSEC for the domain, then try again.
 
 - **B.2** In the Name box most providers want only `www`, `app`, `*`, `@`, not the whole domain.
 
-- **B.3** Do **not** set `PLATFORM_WILDCARD_SUBDOMAINS`. Instead finish [step 14](#14-optional-customers-own-domains) (Vercel API token), so each
-  new company's addresses are attached when it signs up.
+- **B.3** Do **not** set `PLATFORM_WILDCARD_SUBDOMAINS`. Instead finish [step 14](#14-optional-customers-own-domains) (the Vercel API token, saved in the
+  Platform Console), so each new company's addresses are attached when it signs up.
 
 - **B.4** Know the limits: every company uses **two** domains of your Vercel plan's domain limit, new workspaces can show a
   certificate warning for a short time, and an unknown name such as `nope.selfrunbusiness.com` shows a certificate error instead of "No workspace here".
@@ -440,7 +438,9 @@ This line means the first start created your operator company, your staff accoun
 - **9.6** Open `https://www.selfrunbusiness.com/console`. It must **redirect** to `https://app.selfrunbusiness.com/console`.
   (products never open on the website address.)
 
-> ✅ **Checkpoint:** the SelfRun Business website shows with a valid HTTPS padlock, the log line `[saas] Platform operator … created` exists, and `/console` redirects to the `app.` address.
+- **9.7** Open `https://www.selfrunbusiness.com/api/notify/announcements/cron` in the browser. It must answer **401** (refused: it needs `CRON_SECRET`). That proves the scheduled jobs are protected.
+
+> ✅ **Checkpoint:** the SelfRun Business website shows with a valid HTTPS padlock, the log line `[saas] Platform operator … created` exists, `/console` redirects to the `app.` address, and the cron URL answers 401.
 
 > [!TIP]
 > A 404 with a small monogram header on the main domain means the host is not recognised as a website host. Re-check
@@ -452,7 +452,8 @@ This line means the first start created your operator company, your staff accoun
 
 ⏱ *20 min · required for sign-up emails · you get: `RESEND_API_KEY`*
 
-Sign-up confirmation, "workspace ready", invitations and approvals are sent through Resend.
+Sign-up confirmation, "workspace ready", invitations, trial reminders and approvals are sent through Resend. You prepare the account here and
+save the key in the Platform Console in step 11.2.
 
 - **10.1** In Resend → **Domains** → **Add Domain** → `selfrunbusiness.com` → choose the region → **Add**.
 
@@ -463,33 +464,63 @@ Sign-up confirmation, "workspace ready", invitations and approvals are sent thro
 
 - **10.4** In Resend → **API Keys** → **Create API Key** (permission: *Sending access*) → copy it.
 
-- **10.5** Paste it into your notes as `RESEND_API_KEY`, then set that variable in Vercel (step 6B) and **redeploy**.
-
-- **10.6** Make sure `EMAIL_FROM` uses an address on the verified domain (`no-reply@selfrunbusiness.com`).
+- **10.5** Paste it into your notes as `RESEND_API_KEY`. Do **not** add it to Vercel: it is saved in *Console → Integrations → Email* (11.2).
 
 > ✅ **Checkpoint:** the domain shows **Verified** in Resend. (You will confirm email works in step 12.)
 
 > [!NOTE]
-> With `EMAIL_PROVIDER=console` mail is only written to the logs: fine in development, never in production.
+> Until the email provider is saved in the Console, mail is only written to the logs. That is fine in development, never in production.
+> A company can also send from its own address (*Settings → Sender email*) or use its own provider key (*Settings → Integrations*); if it does
+> not, the platform's sender is used.
 
 ---
 
 ## 11. First sign-in and Platform Console setup
 
-⏱ *10 min · required · you get: your Platform Console set up*
+⏱ *30 min · required · you get: every key and setting saved, section by section*
 
 - **11.1** Open `https://app.selfrunbusiness.com/workspace/login` (the **app** address, not `www`).
 
-- **11.2** Sign in with `SAAS_ADMIN_EMAIL` and `SAAS_ADMIN_PASSWORD`. If you did not set a password, use the temporary one printed once in the logs.
+  Sign in with `SAAS_ADMIN_EMAIL` and `SAAS_ADMIN_PASSWORD`. If you did not set a password, use the temporary one printed once in the logs.
+  Then open `/console` (the Platform Console).
 
-- **11.3** Open `/console` (the Platform Console). Set up, in this order:
+- **11.2** **Console → Integrations.** This page keeps every provider key in clearly named sections. Each secret is stored encrypted with
+  `PLATFORM_ENCRYPTION_KEY`, only its last four characters are ever shown again, and it takes effect immediately (no redeploy). Fill in, in this order:
 
-1. **Plans**: review plans and prices, and which products each plan includes.
-2. **Platform settings**: platform name, support details, seller details for invoices, and the **sign-up mode** (open, approval or closed).
-3. **Payments**: Razorpay keys (step 13), when you are ready.
-4. **Integrations**: email and domain providers, if you prefer saving them here rather than in environment variables.
+  | Section | What to enter | Needed for |
+  | --- | --- | --- |
+  | **Email** | Provider `resend`, the `RESEND_API_KEY` from step 10, and the From address (`SelfRun Business <no-reply@selfrunbusiness.com>`) | Sign-up and notification emails |
+  | **Domains & hosting** | Root domain `selfrunbusiness.com` (optional on a Vercel production deployment). Provider, token, project and team IDs only if you do step 14 | Company addresses, customers' own domains |
+  | **File storage** | The `BLOB_READ_WRITE_TOKEN` from step 3 | Every upload and backup |
+  | **Push notifications** | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and a contact address (step 4.3) | Notifications to installed apps and websites |
+  | **AI** | The platform's OpenAI key | Chatbots, assistants, Intelligence, content generation (metered per plan) |
+  | **Voice & messaging** | ElevenLabs key, Twilio SID, token and WhatsApp sender | Voice mode and WhatsApp |
+  | **Search & calls** | PageSpeed key, Google service-account email and private key, TURN server | SEO audits, Messenger calls |
+  | **Scheduled jobs** | Cron secret: press *Generate a strong value*, copy it, **put the same value in Vercel as `CRON_SECRET`**, then Save | Any scheduler that calls the job URLs (Vercel Cron, GitHub Actions, cron-job.org) |
+  | **Email testing** | Leave empty. Only while testing: one inbox that receives every email instead of its real recipient | Testing before the email domain is verified |
+  | **Upload safety check** | VirusTotal key (optional) | A second check on uploaded files |
 
-> ✅ **Checkpoint:** you see the Platform Console dashboard on `app.selfrunbusiness.com`.
+  Leave any section empty that you do not use; the feature that needs it explains what is missing.
+
+- **11.3** **Console → Payments & Razorpay.** Enter the Razorpay Key ID, Key Secret and webhook secret when you are ready (step 13).
+
+- **11.4** **Console → Plans & pricing.** Review plans and prices, and which products each plan includes. Check the trial length and reminder days.
+
+- **11.5** **Console → Platform settings.** Platform name, support details, seller details for invoices, and the **sign-up mode** (open, approval or closed).
+
+- **11.6** **Console → Cron jobs.** Every scheduled job is listed with its next run. All should read **healthy** after their first run (step 16). *Run now* tests one immediately.
+
+- **11.7** **Console → Notification center, Documents & PDFs and AI prompts.** Defaults are already on; review them once:
+  - *Notification center*: every email, in-app and push event, switchable per channel for all companies (security and billing emails cannot be switched off).
+  - *Documents & PDFs*: every PDF the system makes, with a sample in your letterhead; any kind can be switched off for everyone.
+  - *AI prompts*: every instruction sent to an AI model. Leave them on their built-in text to start; change one only when you need to. Here you also decide whether companies may reword the prompts that allow it.
+
+- **11.8** **Console → Support settings / Help content** (Support requests, Help content, Support settings) for the help centre and the assistant's articles, and **Maintenance** and **Incidents & status** when you need them.
+
+> ✅ **Checkpoint:** you see the Platform Console dashboard on `app.selfrunbusiness.com`; Integrations shows **Email**, **File storage** and **Push notifications** as saved; and no section reports "cannot be decrypted".
+
+> [!NOTE]
+> If a section says its saved value "cannot be decrypted", `PLATFORM_ENCRYPTION_KEY` in Vercel is missing or was changed. Put the original back and redeploy.
 
 ---
 
@@ -524,7 +555,17 @@ Do this once after the first deployment. Use a throwaway company.
 
 - **12.9** (Optional) Fill the test company with demo data: put the production `MONGODB_URI` in a local `.env` **only for this throwaway company** and run `npm run demo:seeders -- --company testco`. Never do this for a real company.
 
-> ✅ **Checkpoint:** every line of 12.1 to 12.8 behaves as described.
+- **12.10** **Workspace settings.** In `testco`'s Workspace open **Settings** (Company settings) and check the new pages open: **Integrations**
+  (sections for Email, AI & Voice, Payments and more; saving a company key there makes that company use its own key, and removing it falls back to yours),
+  **Notification center** (the full list of emails, in-app and push messages; edit one and see the preview), **Documents & PDFs** (open a preview in the
+  company's letterhead), **Scheduled jobs** (read-only list with times in the company's time zone) and **AI prompts** (editable prompts, plus the locked ones).
+
+- **12.11** **Platform switches.** In the Console switch one notification channel and one PDF kind off, check `testco` shows them as turned off, then switch them back on.
+
+- **12.12** **Trial end.** A company whose free trial has ended without a plan is locked: every page leads to **Subscribe to continue**, changes are refused, sign-in
+  and *Plan & billing* still work, and nothing is deleted. After a plan is bought everything opens again. The trial cron (step 16) moves companies on when their trial ends.
+
+> ✅ **Checkpoint:** every line of 12.1 to 12.8 behaves as described, and the pages in 12.10 open.
 
 ---
 
@@ -536,14 +577,14 @@ This is how the platform charges companies for plans. It can wait until after la
 
 - **13.1** In Razorpay → **Settings → API Keys** → generate a Key ID and Key Secret.
 
-- **13.2** In your Platform Console → **Payments & Razorpay** → enter the Key ID and Key Secret → Save. They are stored encrypted.
+- **13.2** In your Platform Console → **Payments & Razorpay** → enter the Key ID and Key Secret → Save. They are stored encrypted. No environment variable is used.
 
 - **13.3** In Razorpay → **Settings → Webhooks** → **Add New Webhook**:
   - URL: `https://www.selfrunbusiness.com/api/platform/billing/webhook`
   - Secret: choose a long random value and copy it.
   - Events: the subscription and payment events.
 
-- **13.4** In Vercel set `RAZORPAY_BILLING_WEBHOOK_SECRET` to the same secret → **redeploy**.
+- **13.4** In the Platform Console → Payments & Razorpay, paste the same secret in **Webhook secret** and **Save keys**. No environment variable or redeploy is needed.
 
 > ✅ **Checkpoint:** a test payment on a test company's **Plan & billing** page upgrades its plan.
 
@@ -565,8 +606,7 @@ the steps itself on its **Workspace → Settings → Custom domains** page, whic
 
 - **14.3** If the project belongs to a team, copy the **Team ID** (team **Settings → General**).
 
-- **14.4** In Vercel add these variables: `DOMAIN_PROVIDER` = `vercel`, `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, and `VERCEL_TEAM_ID` if you use a team. **Redeploy.**
-  (They can also be saved in Platform Console → Integrations.)
+- **14.4** In the Platform Console → **Integrations → Domains & hosting** choose provider **Vercel** and save the token, the Project ID, and the Team ID if you use a team. No redeploy is needed.
 
 - **14.5** Test: on the test company's **Custom domains** page add a domain you own. The page lists the exact DNS records to create. Create them at that domain's DNS, press **Check now**, and watch it become **Verified** with **SSL active**.
 
@@ -616,7 +656,7 @@ reports the download links back. Set this up once:
   2. *New repository secret*: `RELEASES_TOKEN` (from 15.3).
   3. **Variables** tab → *New repository variable*: `DESKTOP_RELEASES_REPO` = `your-org/selfrun-app-releases`.
 
-- **15.6** **Settings in Vercel** (Production):
+- **15.6** **Settings in Vercel** (Production). These are the only variables beyond the six in step 6, because the build service is GitHub's:
   - `GITHUB_REPOSITORY` = `your-org/your-code-repo`
   - `GITHUB_DISPATCH_TOKEN` = from 15.4
   - `DESKTOP_BUILD_SECRET` = from 15.2 (the **same** value as in GitHub)
@@ -640,22 +680,29 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 
 ⏱ *read only · nothing to set up*
 
-`vercel.json` registers ten daily jobs. They start automatically after deployment and are protected by `CRON_SECRET`.
+`vercel.json` registers 13 jobs. They start automatically after deployment and are protected by `CRON_SECRET` (without it every call is refused). The list lives in one place, `src/lib/cron/registry.ts`; `vercel.json` is generated from it (`npm run cron:sync`) and `npm run test:cron` fails if the two, or the routes on disk, ever disagree.
 
 | Job | Time (UTC) | Does |
 | --- | --- | --- |
-| `/api/wallet/expiry-sweep` | 02:30 | Expires wallet credits |
-| `/api/playbook-ai/cron` | 03:00 | SOP review and acknowledgement upkeep |
-| `/api/rankmax-ai/cron` | 03:30 | SEO audits and rank checks |
-| `/api/cybervault/cron` | 04:00 | Digi Locker expiry alerts |
-| `/api/viralpulse-ai/cron` | 04:30 | Scheduled social posts |
-| `/api/evaliq/cron` | 05:00 | Test deadlines and auto-submission |
-| `/api/platform/domains/cron` | 05:30 | Re-checks custom domains |
-| `/api/platform/billing/trials/cron` | 06:00 | Trial reminders and expiry |
-| `/api/platform/billing/subscriptions/cron` | 06:00 | Renewals and grace periods |
-| `/api/apps/builds/cron` | 07:00 | Hands over builds a person already requested, and fails builds that never finished (never starts one) |
+| `/api/backup/cron` | 01:30 | Backups & data lifecycle: Makes the weekly backup for each company that is due, removes old backups, and deletes the companies whose 30-day deletion period has ended. |
+| `/api/wallet/expiry-sweep` | 02:30 | Wallet expiry: Expires reward credits that have passed their date and warns people whose credits are about to expire. |
+| `/api/playbook-ai/cron` | 03:00 | Procedure reminders: Moves procedures through their date-driven statuses (review due, expired) and sends acknowledgement reminders. |
+| `/api/rankmax-ai/cron` | 03:30 | SEO housekeeping: Syncs Search Console and Analytics, runs the scheduled website audit, re-checks backlinks on Mondays and flags big ranking drops, for the companies that turned those on. |
+| `/api/cybervault/cron` | 04:00 | Vault expiry alerts: Tells the vault's owners about credentials and documents that have expired or are about to. |
+| `/api/viralpulse-ai/cron` | 04:30 | Scheduled posts: Publishes approved scheduled posts that are due and reminds publishers about due posts nobody approved and ads due to go live. |
+| `/api/evaliq/cron` | 05:00 | Test deadlines: Finishes timed-out test attempts, expires missed assignments, sends opens-soon / due-soon / expired notices and releases results after a test closes. |
+| `/api/platform/domains/cron` | 05:30 | Custom domain re-check: Re-checks every company's pending custom domains so they go live as soon as their DNS is right. |
+| `/api/platform/billing/trials/cron` | 06:00 | Trial reminders & expiry: Emails trial reminders at the platform's reminder days and moves ended trials on (the workspace locks until a plan is subscribed). |
+| `/api/platform/billing/subscriptions/cron` | 06:00 | Subscription renewals & dunning: Moves past-due subscriptions through grace to suspended, handles missed renewals and closes expired trials. |
+| `/api/notify/cron` | 06:15 | Time-based notifications: Overdue invoices, stale leads, expiring documents, ending offers and HR, project, procurement and training deadlines: tells people even if nobody opened the product. |
+| `/api/apps/builds/cron` | 07:00 | App builds: Hands over desktop-app builds that were requested while no build service was connected, and fails builds that never finished. It never starts a build by itself. |
+| `/api/notify/announcements/cron` | every 5 minutes | Scheduled announcements: Sends the announcements companies scheduled for a time that has now come. |
 
-To confirm they are registered: Vercel → project → **Settings → Cron Jobs**. Vercel's Hobby plan allows daily schedules only; these are all daily.
+**Watching them.** Platform Console → **Cron jobs** shows every job with its next run, its last run, what it did and whether it ran when it was due (healthy, overdue, failing). Each run is kept for 30 days. A Platform Console user with *Change platform settings* can press **Run now**. Two runs of the same job never overlap (a lock in the database), so a late or doubled call is harmless.
+
+**Plan.** Vercel's Hobby plan only accepts daily schedules. *Scheduled announcements* runs every 5 minutes, so it needs the **Pro** plan; on Hobby, remove that entry from the registry (then `npm run cron:sync`) and announcements are sent when someone opens the workspace instead of at the minute.
+
+To confirm they are registered: Vercel → project → **Settings → Cron Jobs**. (Not on Vercel? Set `RUN_SCHEDULER=1` on exactly one instance and the app runs the same list itself; see [deploy-aws.md](./deploy-aws.md).)
 
 ---
 
@@ -671,7 +718,12 @@ Tick these before you tell customers the platform is open.
 - [ ] Plans and prices are set in the Platform Console; sign-up mode is what you want (open, approval or closed)
 - [ ] Email arrives from `no-reply@selfrunbusiness.com`
 - [ ] A phone installed the app and received a test notification
-- [ ] Your encryption keys and `MONGODB_URI` are saved in a password manager (and nowhere else)
+- [ ] Console → Integrations shows Email, File storage and Push notifications as saved, with no "cannot be decrypted" warning
+- [ ] Console → Cron jobs lists every job as healthy (or not yet due), and the cron URLs answer 401 without `CRON_SECRET`
+- [ ] A test company's Settings pages open: Integrations, Notification center, Documents & PDFs, Scheduled jobs, AI prompts
+- [ ] A test company whose trial has ended is sent to **Subscribe to continue** and gets access back after subscribing
+- [ ] Only the six variables of step 6 (plus `PLATFORM_WILDCARD_SUBDOMAINS` for Option A) are set in Vercel
+- [ ] `PLATFORM_ENCRYPTION_KEY`, `CRON_SECRET` and `MONGODB_URI` are saved in a password manager (and nowhere else)
 - [ ] Atlas backups are on, and the Atlas and Vercel accounts use two-factor sign-in
 - [ ] (Optional) A Razorpay test payment upgraded a plan
 - [ ] (Optional) The Apps page of a test company shows Ready download buttons
@@ -683,21 +735,26 @@ Tick these before you tell customers the platform is open.
 | Problem | Cause and fix |
 | --- | --- |
 | 404 with a small monogram header on the main domain | The host is not a website host. Set `SAAS_HOSTS=selfrunbusiness.com`, make the domain the production domain (7.2), redeploy |
-| Build fails in Vercel | Read the build log. Usually a missing or misspelled variable (6A) |
+| Build fails in Vercel | Read the build log. Usually a missing or misspelled variable from the six in 6A |
 | Staff cannot sign in | Sign in at `https://app.selfrunbusiness.com/workspace/login` (not `www`). Check `SAAS_ADMIN_EMAIL` and `SAAS_ADMIN_PASSWORD` for typos (no quotes in Vercel), fix and redeploy |
 | No `[saas] Platform operator … created` in the logs | `SAAS_ADMIN_EMAIL` or `MONGODB_URI` is missing or wrong. Check them and redeploy |
 | `MongoServerSelectionError` or timeout in the logs | Atlas Network Access does not allow Vercel: add `0.0.0.0/0` (2.4). Or the password in `MONGODB_URI` has special characters that must be URL-encoded |
 | `E11000 duplicate key` in the first-start logs | A race on the very first start. Redeploy once; if it persists, use a fresh empty database |
-| Company address shows `localhost` | `PLATFORM_ROOT_DOMAIN` is missing. Set it and redeploy |
+| Company address shows `localhost` | The root domain is not known. Make `selfrunbusiness.com` the production domain (7.2), or type it in Console → Integrations → Domains & hosting |
 | `app.selfrunbusiness.com` shows a certificate error or "not found" | Add `app.selfrunbusiness.com` to the project (7.4) and, for Option B, its DNS record |
 | "No workspace here" on `<slug>.selfrunbusiness.com` | The company is suspended (Platform Console → Companies), the slug is wrong, or the wildcard domain is missing |
 | Certificate error on a new company address | The wildcard is not active yet (step 8), or with Option B the address was not attached yet (step 14) |
-| Sign-up email never arrives | `EMAIL_PROVIDER` is `console`, the Resend domain is not verified, or `EMAIL_FROM` is on another domain (step 10) |
-| Uploads fail | `BLOB_READ_WRITE_TOKEN` is missing, or the Blob store is not private |
-| Bank details cannot be saved | The matching `*_ENCRYPTION_KEY` is missing |
-| AI features say they are unavailable | `OPENAI_API_KEY` is not set |
-| Push notifications "not enabled on this server" | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` are missing (6C) |
-| Apps page says "Waiting for the platform's build service" | Step 15.6 is not done yet |
+| Sign-up email never arrives | Console → Integrations → Email has no provider or key saved, the Resend domain is not verified, or the From address is on another domain (steps 10 and 11.2) |
+| Uploads fail | The Blob token is not saved in Console → Integrations → File storage, or the Blob store is not private |
+| Bank details or a saved key cannot be saved or read | `PLATFORM_ENCRYPTION_KEY` is missing or was changed. Restore the original and redeploy |
+| Console says a saved value "cannot be decrypted" | Same cause: `PLATFORM_ENCRYPTION_KEY` differs from the one used when it was saved. Restore it, or re-enter the value |
+| AI features say they are unavailable | No OpenAI key in Console → Integrations → AI, and the company has not saved its own (Settings → Integrations) |
+| Push notifications "not enabled on this server" | The VAPID keys are not saved in Console → Integrations → Push notifications (11.2) |
+| A whole company sees "Subscribe to continue" | Its free trial ended without a plan. It opens again as soon as a plan is subscribed under Plan & billing |
+| A cron job shows overdue or failing in Console → Cron jobs | Open the job for its last error; check `CRON_SECRET` is set; press *Run now* to retry |
+| Scheduled announcements go out late | The every-5-minutes job needs Vercel Pro (step 16) |
+| An AI prompt change does nothing | It applies within seconds, but a company's own wording wins for that company, and a prompt switched off for companies uses the standard text |
+| Apps page says "Waiting for the platform's build service" | The three GitHub variables of step 15.6 are not set yet |
 | A build fails | Open the **Build log** link on the Apps page (GitHub Actions run). Check the repository secrets and variables in 15.5 |
 | Header or menu changes show late | Public navigation is cached for up to an hour; publishing in the CMS or redeploying refreshes it |
 | Changes to a variable do nothing | Variables apply only after a redeploy |
@@ -714,20 +771,37 @@ domains, team members). Every company uses two of your plan's domain slots if yo
 
 ## Appendix: every variable at a glance
 
+### Vercel environment variables
+
 | Key | Required? | Where it comes from |
 | --- | --- | --- |
 | `MONGODB_URI` | Yes | Step 2 |
 | `SAAS_ADMIN_EMAIL`, `SAAS_ADMIN_PASSWORD` | Yes | Step 4.4 |
-| `SAAS_HOSTS`, `PLATFORM_ROOT_DOMAIN` | Yes | `selfrunbusiness.com` |
-| `NEXT_PUBLIC_APP_URL` | Yes | `https://www.selfrunbusiness.com` |
-| `PLATFORM_ENCRYPTION_KEY`, `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`, `DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY` | Yes | Step 4.2 |
-| `CRON_SECRET` | Yes | Step 4.2 |
-| `BLOB_READ_WRITE_TOKEN` | Yes | Step 3 |
-| `EMAIL_PROVIDER` (`resend`), `RESEND_API_KEY`, `EMAIL_FROM` | For sign-up email | Step 10 |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | For push | Step 4.3 |
-| `OPENAI_API_KEY` | For AI | OpenAI |
-| `PLATFORM_WILDCARD_SUBDOMAINS` (`1`) | Option A | Step 8 A.6 |
-| `DOMAIN_PROVIDER` (`vercel`), `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` | Option B and customers' domains | Step 14 |
-| `RAZORPAY_BILLING_WEBHOOK_SECRET` | For billing | Step 13 |
-| `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET` | For the Generate buttons | Step 15 |
+| `PLATFORM_ENCRYPTION_KEY` | Yes | Step 4.2 (the single encryption key) |
+| `SAAS_HOSTS` | Yes | `selfrunbusiness.com` |
+| `CRON_SECRET` | Yes on Vercel (Vercel Cron can only send what is in its environment); also saved in the Console | Step 4.2 |
+| `PLATFORM_WILDCARD_SUBDOMAINS` (`1`) | Only for DNS Option A | Step 8 A.6 |
+| `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET` | Only for the Generate buttons | Step 15 |
 | `DESKTOP_RELEASES_REPO`, `GITHUB_WORKFLOW_FILE`, `GITHUB_WORKFLOW_REF` | Optional | Step 15 |
+
+### Saved in the Platform Console (no environment variable, no redeploy)
+
+| Where in the Console | What | Step |
+| --- | --- | --- |
+| Integrations → Email | Provider, Resend API key, From address | 10, 11.2 |
+| Integrations → Domains & hosting | Root domain; Vercel token, project and team IDs | 11.2, 14 |
+| Integrations → File storage | Blob read/write token | 3, 11.2 |
+| Integrations → Push notifications | VAPID public and private key, contact | 4.3, 11.2 |
+| Integrations → AI | The platform's OpenAI key | 11.2 |
+| Integrations → Voice & messaging | ElevenLabs, Twilio SID, token, WhatsApp sender | 11.2 |
+| Integrations → Search & calls | PageSpeed key, Google service account, TURN server | 11.2 |
+| Integrations → Scheduled jobs | Cron secret (same value as the `CRON_SECRET` environment variable on Vercel) | 4.2, 11.2 |
+| Integrations → Email testing | Test inbox that receives all email (testing only; leave empty in normal use) | 11.2 |
+| Integrations → Upload safety check | VirusTotal key (optional) | 11.2 |
+| Payments & Razorpay | Key ID, Key Secret, billing webhook secret | 13 |
+| Plans & pricing, Platform settings | Plans, prices, trial, sign-up mode, seller details | 11.4, 11.5 |
+
+### Saved by each company (Workspace → Settings)
+
+A company can save its **own** keys under *Integrations*, *Sender email* and *Payment account*. Its own key is always used first; the platform's key above is the
+fallback. Keys are stored encrypted, belong to that company alone and are never shown again in full.

@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { getOpenAI } from "@/lib/openai";
 import OpenAI from "openai";
@@ -81,28 +82,6 @@ const SCHEMA = obj({
   sitePrompt: str,
 });
 
-const SYSTEM = `You are a product designer, local-market researcher and strategist who plans websites for every kind of person who runs a business or has something to show, anywhere in the world. You never use one template. You think about the real person behind this business, who their customers are, where they live, how they read, and how they prefer to reach a business, then plan the site that fits THEM.
-
-WHO USES THIS PLATFORM (all of these, and everything between): people who read and write well and people who barely read; village and farming communities, small-town and big-city people; traditional "desi" local trades and very modern businesses; people with only a basic phone and people who are highly technical; highly educated professionals; street vendors, shopkeepers, artisans, performers, service providers, students, creators, freelancers, small companies, large enterprises, schools and colleges, clinics and hospitals, charities, religious and community groups, government offices; in every country and language.
-
-Decide, using the categories and sub-categories first, then the country and language hints, then the business name:
-
-1. scale: individual | micro (street or home trader) | small | medium | large | enterprise | institution (school, college, hospital, clinic) | nonprofit | government | creator (artist, performer, influencer) | student.
-2. setting: village | town | city | online | regional | global. literacy: how comfortable the visitors are with reading and technology: low (prefer pictures, very short words, a phone call or voice message), mixed, high, professional.
-3. assumedCountry and language. Hints may include a country code, the browser's language list and the time zone; they are clues, not proof. Use them together with the business name and categories. If nothing indicates the place, assume the most likely market for the business and SAY SO in assumptions. Language: write in the language the business's own customers actually use, in the script they actually read. Examples: for small local trades in India with everyday customers "Hinglish (Hindi in English letters)" or "Hindi (Devanagari)", or the regional language (Bengali, Tamil, Telugu, Marathi, Gujarati, Punjabi, Kannada, Malayalam, Odia, Urdu...); Spanish in Latin America and Spain, Portuguese in Brazil and Portugal, Arabic (set direction rtl) in the Arab world, Urdu or Persian (rtl), Swahili or English in East Africa, French in francophone Africa, Indonesian, Filipino/Taglish, Vietnamese, Thai, Turkish, Russian, German, Japanese, Korean, Chinese, and so on. Use "English (simple)" for professionals, students, institutions, companies, international audiences, or when unsure. Give the language as its English name with the variant or script in brackets when useful, for example "Spanish (Mexico)", "Japanese", "Arabic", "Hindi (Devanagari)", "English (Nigeria)"; never a language code. Never choose a language you cannot write correctly. Set direction "rtl" only for right-to-left languages.
-4. preferredChannel: how people in that country and trade prefer to contact a business (WhatsApp is dominant in India, Brazil, Mexico, Argentina, Indonesia, Nigeria, South Africa, Egypt and much of the Gulf; LINE in Japan, Thailand and Taiwan; KakaoTalk in Korea; Zalo in Vietnam; Telegram in parts of Russia and Ukraine; WeChat in China; phone call for many trades; email or contact form for professionals and enterprises). Use it in the wording of the main action.
-5. purpose and primaryAction: what a visitor should do first (call, whatsapp, book, order, visit, enquire); pick the nearest of these for a channel the site cannot link directly.
-6. vocabulary: what THIS business calls its offerings in the site's language, the singular form, and the main button wording.
-7. pages: ONLY the pages this business genuinely needs besides the home page (the contact page and a privacy page are added automatically, so never list them). 5 to 8 pages (a rich site, not a thin one: cover everything a visitor of this trade would want to read before getting in touch, split into focused pages: what is offered, how it works, how to choose or prepare, how to look after or use what they get, safety and care, common questions, offers or packages in words). Patterns, to be adapted and never copied blindly: a vegetable or fruit seller: what is fresh, how to order, offers; a band, orchestra or wedding performer: what we play or perform, packages, how to book; a dancer or teacher: shows or classes, how to book; a beauty parlour or salon: treatments, offers, how to book; a student or freelancer: about me, projects or work, skills; a shop: products, offers, how to order, find us; a repair, trade or home-service worker: what I fix or make, how it works, areas I serve (only if given); a farm or farmer: what we grow, how to buy; a restaurant or tiffin or sweet shop: menu or what we make, how to order; a school or college: about, programs, admissions, student life; a clinic or hospital: departments or treatments, how to book, visiting information; a professional (lawyer, accountant, consultant): practice areas, how it works, about; a charity or community group: our work, how to help, get involved; a government office: services offered, how to apply, who to contact; an enterprise or large company: what we do, solutions or industries, about the company, careers, newsroom-style updates only if they fit, investor information only for listed companies; an online-only seller: products, how to order, delivery information only if given; a creator or influencer: about, what I make, collaborate; a farmer cooperative or self-help group: our members' products, how to buy, about the group. Use "services", "about", "products" or "offers" only when they fit, in the words the customers say. Never plan a gallery, photo or video page (the owner adds photos later). slug is lowercase kebab-case in plain ASCII letters even if the title is in another script.
-8. offeringBase: one short lowercase ASCII word that is the URL home of the single-offering pages (every offering also gets its own detailed page), in the words customers use ("sabziyan", "packages", "treatments", "services", "products", "classes", "rooms", "menu").
-8b. homeOutline: 6 to 9 blocks after the hero, in the best order for this business. kind is one of: ${BLOCK_KINDS.join(", ")}. Low-literacy and village audiences: short words and short sentences, but still plenty of useful content; steps and lists over long paragraphs; professional and enterprise audiences: more structured and formal.
-9. needsAccounts: true only if customers realistically need to sign in (a membership, classes with a portal, a learning product, a customer portal for a larger business). Street traders, performers, parlours, shops and most small businesses: false.
-10. lookAndFeel: art direction in two or three sentences: mood, named colours, type feel (large and friendly for low-literacy audiences; refined for professionals; bold for performers; calm for clinics and schools), density (airy or busy), imagery style. It must clearly differ between a vegetable seller, a band, a dancer, a beauty parlour, a student, a hospital, a law firm and a large enterprise, and fit the local culture (festive colours where appropriate, restraint where appropriate).
-11. tone: how the text should sound (warm and chatty, respectful and plain, formal and precise...).
-12. assumptions: 2 to 6 short sentences stating what you had to guess (country, language, scale, anything the categories did not settle). The owner will read these.
-13. sitePrompt: the complete website-building brief (200 to 350 words, plain prose in English) that another writer could follow to build this exact site: who it is for and how they read, the goal, the language and script, the pages and what each is for, the home page flow, the words to use, the main action and where it appears, the look and feel, and what must NOT be claimed. Never invent facts about the business (prices, hours, address, years in business, customers, awards, certifications, sizes, accreditations); where a detail is unknown the site invites the visitor to ask.
-
-If the categories are unusual, custom-typed or broad, use the plain meaning of the words and plan a sensible general site for that kind of work. Several categories: build around the main one and mention the rest, do not list everything. Return minified JSON on a single line.`;
 
 async function client(): Promise<OpenAI> {
   // The company's metered client: planning the site counts against its AI-token allowance like everything else.
@@ -184,14 +163,18 @@ export async function planWebsite(b: WebsiteBrief, knowledge = "", ownerPrompt =
   // No OpenAI key at all: this throws, and the caller reports it (the website cannot be written without AI).
   const c = await client();
   const hints = b.hints ?? {};
-  const user = `Business name: ${b.name}
-Business categories: ${b.categories.join("; ") || "not stated"}
-Business sub-categories (what it actually does): ${b.subCategories.map((x) => `${x.name} (${x.category})`).join("; ") || "not stated"}
-Country (stated by the owner): ${b.country || "not stated"}
-Hints from the sign-up request (clues only): country code ${hints.country || "unknown"}; browser languages ${hints.languages || "unknown"}; time zone ${hints.timezone || "unknown"}
-
-${knowledge ? `\nDOMAIN KNOWLEDGE for the chosen categories (researched; follow it unless the sub-categories clearly say otherwise):\n${knowledge}\n` : ""}${ownerPrompt ? `\nTHE OWNER\u2019S OWN INSTRUCTIONS FOR THEIR WEBSITE (highest priority: follow them exactly, including the language, the pages they ask for and their names, the look and the tone, even where they differ from your usual choices; only never invent facts about the business). Turn them into the plan; the sitePrompt you write must contain their instructions in full:\n"""${ownerPrompt.slice(0, 4000)}"""\n` : ""}
-Plan its website. Return minified JSON on a single line.`;
+  const user = await getPrompt("website.plan.user", {
+    name: b.name,
+    categories: b.categories.join("; ") || await getPrompt("website.not_stated"),
+    sub_categories: b.subCategories.map((x) => `${x.name} (${x.category})`).join("; ") || await getPrompt("website.not_stated"),
+    country: b.country || await getPrompt("website.not_stated"),
+    hint_country: hints.country || await getPrompt("website.unknown"),
+    hint_languages: hints.languages || await getPrompt("website.unknown"),
+    hint_timezone: hints.timezone || await getPrompt("website.unknown"),
+    knowledge_block: knowledge ? await getPrompt("website.plan.knowledge", { knowledge }) : "",
+    owner_block: ownerPrompt ? await getPrompt("website.plan.owner", { owner_prompt: ownerPrompt.slice(0, 4000) }) : "",
+  });
+  const system = await getPrompt("website.plan.system", { block_kinds: BLOCK_KINDS.join(", ") });
   const primary = process.env.WEBSITE_AI_MODEL || "gpt-4.1";
   const attempts: { model: string; temperature: number }[] = [
     { model: primary, temperature: 0.8 },
@@ -205,7 +188,7 @@ Plan its website. Return minified JSON on a single line.`;
         temperature: a.temperature,
         max_completion_tokens: 5000,
         response_format: { type: "json_schema", json_schema: { name: "plan", strict: true, schema: SCHEMA as unknown as Record<string, unknown> } },
-        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
+        messages: [{ role: "system", content: system }, { role: "user", content: user }],
       });
       const plan = repair(JSON.parse(res.choices[0]?.message?.content ?? "null"), b, !!ownerPrompt);
       if (plan) return plan;

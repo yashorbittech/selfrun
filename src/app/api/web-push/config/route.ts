@@ -12,11 +12,11 @@ async function handleGET(req: Request) {
   const blocked = await siteGuard(req, "wp-config", 120);
   if (blocked) return blocked;
   const s = await getWebPushSettings();
-  const enabled = s.enabled && pushConfigured();
+  const enabled = s.enabled && (await pushConfigured());
   return NextResponse.json(
     {
       enabled,
-      publicKey: enabled ? vapidPublicKey() : null,
+      publicKey: enabled ? await vapidPublicKey() : null,
       topics: enabled ? WEB_PUSH_TOPICS.filter((t) => s.topics[t]).map((t) => ({ key: t, ...WEB_PUSH_TOPIC_META[t] })) : [],
       title: s.promptTitle,
       text: s.promptText,

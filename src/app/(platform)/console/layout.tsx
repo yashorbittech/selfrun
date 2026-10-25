@@ -24,7 +24,6 @@ export default async function PlatformPanelLayout({ children }: { children: Reac
   const user = await requirePlatformAccess();
   // Two-step sign-in is asked of Platform Console people like everyone else (they can skip for 72 hours); mandatory only when the operator sets REQUIRE_PRIVILEGED_MFA=1.
   const tfDue = await mustSetUpTwoFactor({ id: user.id, roles: user.roles }, { alwaysPrivileged: true });
-  console.error("[console-dbg] layout twoFactorDue=", tfDue);
   if (tfDue) redirect("/commandos/two-factor-setup");
   const flags: PlatformNavFlags = {
     pendingApprovals: can(user, "signups.read") ? await countAwaitingApproval() : 0,

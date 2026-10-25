@@ -56,8 +56,8 @@ export async function starterSiteInfo(name: string, namePrimary: string, nameAcc
         whatsappLabel: "Chat on WhatsApp",
         about: fillName(pack.tagline, name),
         copyright: "All rights reserved.",
-        legalLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }],
-        compactLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }],
+        legalLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms of Service", href: "/terms" }],
+        compactLinks: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms of Service", href: "/terms" }],
       },
       shareImage: { alt: name, tag: "", headline: name, subline: fillName(pack.tagline, name), domain: "", badges: [] },
     }

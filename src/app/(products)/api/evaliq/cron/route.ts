@@ -1,23 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runSweep } from "@/lib/products/evaliq/sweep";
-import { ensureOtsIndexes } from "@/lib/products/evaliq/db";
-import { forEachCompany } from "@/lib/platform/tenancy/context";
-
-export const maxDuration = 300;
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Finalises timed-out attempts, expires missed assignments, sends
- * "opens soon" / "due soon" / "expired" notices and releases after-close
- * results (Vercel Cron, `Authorization: Bearer $CRON_SECRET`). OTS page loads
- * also run the sweep (throttled), so it works on a once-a-day cron plan.
+ * Scheduled job "evaliq": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const companies = await forEachCompany(async () => {
-    await ensureOtsIndexes();
-    return runSweep();
-  });
-  return NextResponse.json({ ok: true, companies });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export const GET = cronRoute("evaliq");

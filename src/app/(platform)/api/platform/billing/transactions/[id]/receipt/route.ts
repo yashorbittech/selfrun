@@ -5,6 +5,7 @@ import { currentCompanyIdOrNull, isPlatformOwnerContext } from "@/lib/platform/t
 import { getPlatformAccessForUser, hasPermission } from "@/lib/platform/console/roles";
 import { getTransactionForViewer } from "@/lib/platform/billing/transactions";
 import { renderTransactionReceiptPdf } from "@/components/platform/billing/TransactionReceiptPdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -25,6 +26,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
 
   const buffer = await renderTransactionReceiptPdf(tx);
   const disposition = req.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline";
+  if (!isPlatformAdmin) await recordPdf({ type: "transaction_receipt", ref: tx.receiptNumber, by: user.email, role: "staff" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

@@ -8,6 +8,12 @@ export interface EmailMessage {
   replyTo?: string;
 }
 
+/** Which Notification-center event an email belongs to (and, for platform mail, which company it is for), so it is logged and can be switched off. */
+export interface EmailEvent {
+  event: string;
+  companyId?: string;
+}
+
 export type EmailResult = { ok: true; id: string | null } | { ok: false; error: string };
 
 export interface EmailProvider {

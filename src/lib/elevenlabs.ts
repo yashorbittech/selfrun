@@ -1,12 +1,17 @@
 import "server-only";
-import { connectionValues } from "@/lib/platform/connections/resolve";
+import { connectionValues, resolveConnection } from "@/lib/platform/connections/resolve";
 
 const API_BASE = "https://api.elevenlabs.io/v1";
 const STT_MODEL = "scribe_v1";
 
-/** The platform's ElevenLabs key (used for every company). */
+/** The company's own ElevenLabs key, else SelfRun's. */
 async function workspaceKey(): Promise<string | null> {
   return (await connectionValues("elevenlabs"))?.apiKey ?? null;
+}
+
+/** True when the company uses its own ElevenLabs account: its voice minutes are then not counted against the plan. */
+export async function usesOwnVoiceKey(): Promise<boolean> {
+  return (await resolveConnection("elevenlabs"))?.source === "workspace";
 }
 
 export async function isElevenLabsConfigured(): Promise<boolean> {

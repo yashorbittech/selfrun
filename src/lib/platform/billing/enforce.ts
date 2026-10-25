@@ -4,6 +4,7 @@ import "server-only";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { getDb } from "@/lib/mongodb";
 import { currentCompanyId, currentCompanyIdOrNull, runAsCompany } from "@/lib/platform/tenancy/context";
+import { resolveConnection } from "@/lib/platform/connections/resolve";
 import { getEntitlements } from "@/lib/platform/billing/entitlements";
 import { getCompanySubscription } from "@/lib/platform/billing/subscription";
 import { getUsage, recordUsage, recordUsageEvent } from "@/lib/platform/billing/usage";
@@ -411,6 +412,8 @@ export async function emailBlockReason(): Promise<string | null> {
 export async function voiceBlockReason(): Promise<string | null> {
   const e = await getEntitlements();
   if (e.readOnly) return READ_ONLY_MESSAGE;
+  // A company on its own ElevenLabs account is not limited by the plan's voice minutes.
+  if ((await resolveConnection("elevenlabs").catch(() => null))?.source === "workspace") return null;
   const limit = e.limits.voiceMinutesPerMonth;
   if (limit === null || limit === undefined) return null;
   if (limit === 0) return "Voice isn't included in your plan. Upgrade your plan in Settings → Billing.";

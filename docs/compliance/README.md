@@ -1,7 +1,7 @@
 # Compliance and security: what is in place, what is not, and what only the owner can do
 
-This folder is the working record of how SelfRunBusiness meets the requirements in *International Compliance and Security Requirements*
-(target markets: United Kingdom, United Arab Emirates, India, United States, Saudi Arabia). It is written to be checked: every statement points
+This folder is the working record of how SelfRunBusiness meets the requirements in *International Compliance and Security Requirements*,
+read for the market the product is sold in: India (see [legal-applicability-register.md](./legal-applicability-register.md)). It is written to be checked: every statement points
 at the code, page or procedure it rests on.
 
 > **No system can guarantee 100% security, and a code review cannot make a company "compliant".** What this folder shows is the technical and

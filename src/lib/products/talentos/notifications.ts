@@ -6,6 +6,7 @@ import type { CurrentHrmsUser } from "@/lib/hrms-auth";
 import { hasStaffRole } from "@/lib/hrms-roles";
 import { todayDateString } from "@/lib/products/talentos/time";
 import { signalNew } from "@/lib/notify/signals";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { queuePush, userIdsWithRoles } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 
@@ -90,13 +91,14 @@ export async function notify(input: NotifyInput): Promise<void> {
       const existing = await collection.findOne({ dedupeKey: input.dedupeKey });
       if (existing) return;
     }
-    await collection.insertOne({
+    const plan = await planNotification({ type: input.type, title: input.title, body: input.body, link: input.link, product: "hrms" });
+    if (plan.inApp.on) await collection.insertOne({
       _id: newId(),
       audience: input.audience,
       recipientUserId: input.recipientUserId ?? null,
       type: input.type,
-      title: input.title,
-      body: input.body,
+      title: plan.inApp.title,
+      body: plan.inApp.body ?? input.body,
       link: input.link ?? null,
       entityType: input.entityType ?? null,
       entityId: input.entityId ?? null,
@@ -105,8 +107,9 @@ export async function notify(input: NotifyInput): Promise<void> {
       createdAt: new Date(),
     });
     const recipients = input.recipientUserId ? [input.recipientUserId] : input.audience === "staff" ? await userIdsWithRoles(["super_admin", "hr", "manager"]) : [];
-    await queuePush("staff", recipients, { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
-    await signalNew("hrms", recipients, { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
+    await queuePush("staff", recipients, { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined, event: input.type, product: "hrms" });
+    if (plan.inApp.on) await signalNew("hrms", recipients, { type: input.type, title: plan.inApp.title, body: plan.inApp.body, link: input.link ?? null });
+    await logBell(plan.inApp.on, { type: input.type, title: input.title, product: "hrms", recipients: recipients.length || 1, reason: plan.inApp.reason });
   } catch {
     // A duplicate-key race on dedupeKey, or any other failure — non-fatal.
   }

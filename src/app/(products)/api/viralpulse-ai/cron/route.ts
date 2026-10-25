@@ -1,18 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runDueSweep } from "@/lib/products/viralpulse-ai/publishing";
-import { forEachCompany } from "@/lib/platform/tenancy/context";
-
-export const maxDuration = 300;
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Publishes APPROVED scheduled posts that are due, and reminds publishers about
- * unapproved due posts and ads due to go live (Vercel Cron,
- * `Authorization: Bearer $CRON_SECRET`). Page loads in the product also run the
- * sweep (throttled), so schedules keep working on a once-a-day cron plan.
+ * Scheduled job "viralpulse": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, companies: await forEachCompany(() => runDueSweep()) });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export const GET = cronRoute("viralpulse");

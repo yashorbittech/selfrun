@@ -26,7 +26,7 @@ export default async function WebPushPage() {
         description={<>Notify your website visitors about offers, credits and rewards, and news, even when they aren&apos;t on your site.</>}
       />
       <WebPushManager
-        serverReady={pushConfigured()}
+        serverReady={await pushConfigured()}
         initialSettings={settings}
         stats={stats}
         broadcasts={broadcasts.map((b) => ({ id: b._id, topic: b.topic, title: b.title, body: b.body, url: b.url, trigger: b.trigger, status: b.status, note: b.note, targeted: b.targeted, sent: b.sent, failed: b.failed, clicks: b.clicks, createdAt: b.createdAt.toISOString() }))}

@@ -10,13 +10,14 @@ import { decryptPlatformSecret, encryptPlatformSecret, isPlatformEncryptionConfi
  * `PLATFORM_ENCRYPTION_KEY` and never leaves the server — the product shows its
  * last 4 characters only.
  *
- * Env fallback (`RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`) is used only while
- * nothing has been saved here. The webhook secret stays env-only
- * (`RAZORPAY_BILLING_WEBHOOK_SECRET`); the product only says whether it is set.
+ * The webhook secret is saved the same way (encrypted, last 4 shown). Env
+ * fallback (`RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` /
+ * `RAZORPAY_BILLING_WEBHOOK_SECRET`) is used only for what has not been saved here.
  */
 
 export const RAZORPAY_CONFIG_DOC_ID = "billing_razorpay";
 export const RAZORPAY_SECRET_CONTEXT = "billing:razorpay:keySecret";
+export const RAZORPAY_WEBHOOK_CONTEXT = "billing:razorpay:webhookSecret";
 
 export type RazorpayMode = "test" | "live";
 
@@ -25,6 +26,8 @@ interface StoredConfig {
   keyId: string;
   keySecret: EncryptedValue | null;
   secretLast4: string | null;
+  webhookSecret?: EncryptedValue | null;
+  webhookLast4?: string | null;
   mode: RazorpayMode;
   lastTest: { ok: boolean; at: Date; message: string } | null;
   updatedAt: Date;
@@ -48,6 +51,10 @@ export interface RazorpayConfigView {
   secretUnreadable: boolean;
   encryptionConfigured: boolean;
   webhookSecretSet: boolean;
+  webhookLast4: string | null;
+  webhookSource: "db" | "env" | "none";
+  /** A webhook secret is saved but can't be decrypted. */
+  webhookUnreadable: boolean;
   lastTest: { ok: boolean; at: string; message: string } | null;
   updatedAt: string | null;
 }
@@ -62,8 +69,13 @@ export function modeOfKeyId(keyId: string): RazorpayMode | null {
   return null;
 }
 
-export function billingWebhookSecret(): string | null {
-  return process.env.RAZORPAY_BILLING_WEBHOOK_SECRET?.trim() || null;
+const envWebhookSecret = () => process.env.RAZORPAY_BILLING_WEBHOOK_SECRET?.trim() || null;
+
+/** The secret Razorpay signs billing webhooks with: the saved one, else env. Server-only. */
+export async function billingWebhookSecret(): Promise<string | null> {
+  const doc = await (await col()).findOne({ _id: RAZORPAY_CONFIG_DOC_ID }, { projection: { webhookSecret: 1 } });
+  if (doc?.webhookSecret) return decryptPlatformSecret(doc.webhookSecret, RAZORPAY_WEBHOOK_CONTEXT);
+  return envWebhookSecret();
 }
 
 function envCredentials(): RazorpayCredentials | null {
@@ -93,7 +105,10 @@ export async function getRazorpayConfigView(): Promise<RazorpayConfigView> {
     source: doc?.keyId ? "db" : env ? "env" : "none",
     secretUnreadable: Boolean(doc?.keyId && !decryptPlatformSecret(doc.keySecret, RAZORPAY_SECRET_CONTEXT)),
     encryptionConfigured: isPlatformEncryptionConfigured(),
-    webhookSecretSet: Boolean(billingWebhookSecret()),
+    webhookSecretSet: Boolean(doc?.webhookSecret || envWebhookSecret()),
+    webhookLast4: doc?.webhookSecret ? (doc.webhookLast4 ?? null) : null,
+    webhookSource: doc?.webhookSecret ? "db" : envWebhookSecret() ? "env" : "none",
+    webhookUnreadable: Boolean(doc?.webhookSecret && !decryptPlatformSecret(doc.webhookSecret, RAZORPAY_WEBHOOK_CONTEXT)),
     lastTest: doc?.lastTest ? { ...doc.lastTest, at: doc.lastTest.at.toISOString() } : null,
     updatedAt: doc?.updatedAt?.toISOString() ?? null,
   };
@@ -105,9 +120,10 @@ export type SaveRazorpayConfigResult = { ok: true } | { ok: false; errors: Recor
  * Saves the key id / mode, and the secret when a new one is typed (blank =
  * keep the saved secret). The key id's prefix must match the mode.
  */
-export async function saveRazorpayConfig(input: { keyId: string; keySecret: string; mode: string }, actorId: string): Promise<SaveRazorpayConfigResult> {
+export async function saveRazorpayConfig(input: { keyId: string; keySecret: string; mode: string; webhookSecret?: string }, actorId: string): Promise<SaveRazorpayConfigResult> {
   const keyId = String(input.keyId ?? "").trim();
   const keySecret = String(input.keySecret ?? "").trim();
+  const webhookSecret = String(input.webhookSecret ?? "").trim();
   const mode = input.mode === "live" ? "live" : input.mode === "test" ? "test" : null;
   const errors: Record<string, string> = {};
   const existing = await (await col()).findOne({ _id: RAZORPAY_CONFIG_DOC_ID });
@@ -118,13 +134,20 @@ export async function saveRazorpayConfig(input: { keyId: string; keySecret: stri
   if (keySecret && (keySecret.length < 8 || keySecret.length > 100 || /\s/.test(keySecret))) errors.keySecret = "That doesn't look like a Razorpay key secret.";
   const keepSecret = !keySecret && existing?.keySecret && existing.keyId === keyId;
   if (!keySecret && !keepSecret) errors.keySecret = existing?.keySecret ? "Changing the key id needs its key secret too." : "Enter the key secret.";
-  if (keySecret && !isPlatformEncryptionConfigured()) errors.keySecret = "PLATFORM_ENCRYPTION_KEY isn't set on the server, so the secret can't be stored safely.";
+  if (webhookSecret && (webhookSecret.length < 8 || webhookSecret.length > 100 || /\s/.test(webhookSecret))) errors.webhookSecret = "That doesn't look like a webhook secret (8–100 characters, no spaces).";
+  if ((keySecret || webhookSecret) && !isPlatformEncryptionConfigured()) {
+    const msg = "PLATFORM_ENCRYPTION_KEY isn't set on the server, so the secret can't be stored safely.";
+    if (keySecret) errors.keySecret = msg;
+    if (webhookSecret) errors.webhookSecret = msg;
+  }
   if (Object.keys(errors).length) return { ok: false, errors };
 
   const doc: Omit<StoredConfig, "_id"> = {
     keyId,
     keySecret: keySecret ? encryptPlatformSecret(keySecret, RAZORPAY_SECRET_CONTEXT) : existing!.keySecret,
     secretLast4: keySecret ? last4(keySecret) : (existing?.secretLast4 ?? null),
+    webhookSecret: webhookSecret ? encryptPlatformSecret(webhookSecret, RAZORPAY_WEBHOOK_CONTEXT) : (existing?.webhookSecret ?? null),
+    webhookLast4: webhookSecret ? last4(webhookSecret) : (existing?.webhookLast4 ?? null),
     mode: mode!,
     lastTest: null,
     updatedAt: new Date(),
@@ -135,7 +158,7 @@ export async function saveRazorpayConfig(input: { keyId: string; keySecret: stri
     actorId,
     action: "settings.razorpay.update",
     target: { type: "platform_settings", id: RAZORPAY_CONFIG_DOC_ID },
-    details: { keyId, mode, secretChanged: Boolean(keySecret), modeChanged: existing ? existing.mode !== mode : null },
+    details: { keyId, mode, secretChanged: Boolean(keySecret), webhookSecretChanged: Boolean(webhookSecret), modeChanged: existing ? existing.mode !== mode : null },
   });
   return { ok: true };
 }

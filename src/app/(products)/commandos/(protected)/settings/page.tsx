@@ -2,7 +2,7 @@ import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Building, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, Lock, Mail, Palette, Plug, ReceiptText, Smartphone, Users, Zap, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Bell, Bot, CalendarClock, FileText, Building, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, Lock, Mail, Palette, Plug, ReceiptText, Smartphone, Users, Zap, type LucideIcon } from "lucide-react";
 import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getCurrentHubUser } from "@/lib/hub-auth";
@@ -26,6 +26,10 @@ const ICONS: Record<string, LucideIcon> = {
   "company.payments": Landmark,
   "company.integrations": Plug,
   "company.automations": Zap,
+  "company.notifications": Bell,
+  "company.pdfs": FileText,
+  "company.prompts": Bot,
+  "company.schedules": CalendarClock,
   "company.import": FileUp,
   "company.activity": History,
   "company.security": Lock,

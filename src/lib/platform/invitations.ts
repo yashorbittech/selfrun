@@ -124,7 +124,7 @@ export async function inviteTeammate(input: InviteInput, inviter: { id: string; 
     action: { label: "Accept invitation", url: `${baseUrl}/commandos/invite?token=${token}` },
     footnote: "This invitation expires in 7 days.",
   });
-  const sent = await sendEmail({ to: email, subject: `You're invited to join ${companyName}`, html, text, replyTo: inviter.email });
+  const sent = await sendEmail({ to: email, subject: `You're invited to join ${companyName}`, html, text, replyTo: inviter.email, event: "team_invitation" });
   if (!sent.ok) {
     await c.updateOne({ tokenHash: sha256(token) }, { $set: { status: "revoked" } });
     return { ok: false, error: `Couldn't send the invitation email to ${email}. Try again shortly.` };

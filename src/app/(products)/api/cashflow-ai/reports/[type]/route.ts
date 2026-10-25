@@ -8,6 +8,7 @@ import { renderFmsReportPdf, type FmsReportPdfData } from "@/components/products
 import { getProfitAndLoss } from "@/lib/products/cashflow-ai/reports/profit-and-loss";
 import { getTaxSummary } from "@/lib/products/cashflow-ai/reports/tax";
 import { getBudgetVsActual } from "@/lib/products/cashflow-ai/reports/budget-vs-actual";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ type: string }> };
 
@@ -83,6 +84,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
       total: { label: totalLabel, value: total },
     };
     const buffer = await renderFmsReportPdf(pdfData);
+    await recordPdf({ type: "fms_report", variant: type, ref: base, by: user.email, role: "staff" });
     return fileResponse(buffer, "application/pdf", `${base}.pdf`);
   }
 
@@ -121,6 +123,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
       sections: [{ rows }],
       total: { label: "Net Payable", value: summary.netPayable },
     });
+    await recordPdf({ type: "fms_report", variant: type, ref: base, by: user.email, role: "staff" });
     return fileResponse(buffer, "application/pdf", `${base}.pdf`);
   }
 
@@ -170,6 +173,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
         },
       ],
     });
+    await recordPdf({ type: "fms_report", variant: type, ref: base, by: user.email, role: "staff" });
     return fileResponse(buffer, "application/pdf", `${base}.pdf`);
   }
 

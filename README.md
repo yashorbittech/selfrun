@@ -149,48 +149,42 @@ The first running costs come from rows 1 to 6 and row 8. OpenAI is usage-based, 
 Copy `.env.example` to `.env` (git-ignored) and fill it in. Never commit real values, and never paste them into chat,
 tickets or docs.
 
-### Required
+### Required (environment)
+
+Only what the server needs before it can read the database. Everything else is set in the Platform Console and kept encrypted in the database.
 
 | Variable | Purpose |
 | --- | --- |
 | `MONGODB_URI` | MongoDB connection string. Use a **new, empty** database; the database name is the URI path |
 | `SAAS_ADMIN_EMAIL` | Email of the first platform staff account, created automatically on first start |
+| `SAAS_ADMIN_PASSWORD` | Optional. Password for that account. If omitted, a temporary one is printed once in the server log. **Wrap it in quotes** if it contains `#` or spaces |
+| `PLATFORM_ENCRYPTION_KEY` | The single encryption key: every secret kept in the database, bank details, finance accounts, Digi Locker credentials, social tokens and API body sealing. `openssl rand -base64 32`; generate once and keep it (changing it makes the encrypted data unreadable) |
+| `SAAS_HOSTS` | Production: comma-separated hosts serving the product website (`www.` variants are added). Development includes `localhost` |
+| `CRON_SECRET` | Production on Vercel: the bearer secret Vercel Cron sends to the cron endpoints. Also managed in Platform Console → Integrations → Scheduled jobs (the Console value works for any other scheduler) |
 
-### Platform setup
+### Set in the Platform Console (not in `.env`)
 
-| Variable | Purpose |
+| Where | What |
 | --- | --- |
-| `SAAS_ADMIN_PASSWORD` | Optional. Password for that account. If omitted, a temporary one is printed once in the server log. **Wrap it in quotes** if it contains `#` or spaces, otherwise `.env` treats the rest as a comment |
-| `SAAS_HOSTS` | Production: comma-separated hosts serving the product website (`www.` variants are added). Required in production (it is the only thing that marks a host as the product's). Development: `localhost` is included |
-| `PLATFORM_ROOT_DOMAIN` | Production: the domain under which company addresses live (`<slug>.<domain>`) |
-| `PLATFORM_WILDCARD_SUBDOMAINS` | `1` once `*.<root domain>` is served by Vercel (see the deploy guide) |
-| `PLATFORM_ENCRYPTION_KEY` | Encrypts platform secrets stored in the database. Generate once and keep it |
-| `API_TRANSPORT_SECRET` | Seals API request/response bodies between browser and server (see [docs/compliance/api-transport-encryption.md](docs/compliance/api-transport-encryption.md)). Falls back to `PLATFORM_ENCRYPTION_KEY` |
-| `CRON_SECRET` | Bearer secret protecting cron endpoints |
-| `NEXT_PUBLIC_APP_URL` | Public base URL |
-| `SAAS_OPERATOR_NAME` | Optional legal name shown in the footer and legal pages |
-| `SAAS_HELLO_EMAIL`, `SAAS_SALES_EMAIL`, `SAAS_SUPPORT_EMAIL`, `SAAS_SECURITY_EMAIL` | Optional public contact addresses |
+| Integrations → Email | Provider, Resend API key, sender address |
+| Integrations → Domains | Custom-domain provider (Vercel token, project, team) and the root domain companies live under |
+| Integrations → AI | OpenAI API key |
+| Integrations → Voice & messaging | ElevenLabs key, Twilio SID / token / WhatsApp sender |
+| Integrations → Push notifications | VAPID key pair (`npx web-push generate-vapid-keys`, once; never change it later) |
+| Integrations → File storage | Vercel Blob read/write token |
+| Integrations → Upload safety check | Optional VirusTotal key |
+| Payments | Razorpay key id, key secret and billing webhook secret |
 
-### Storage, email, domains
+The same-named environment variables (`OPENAI_API_KEY`, `RESEND_API_KEY`, `VAPID_*`, `BLOB_READ_WRITE_TOKEN`, `RAZORPAY_*`, …) still work as a fallback for older deployments; anything saved in the console wins.
 
-| Variable | Purpose |
-| --- | --- |
-| `BLOB_READ_WRITE_TOKEN`, `BLOB_STORE_ID`, `BLOB_WEBHOOK_PUBLIC_KEY` | Vercel Blob (private store) for every file upload |
-| `EMAIL_PROVIDER`, `RESEND_API_KEY`, `EMAIL_FROM` | Outgoing email (`console` only logs mail in development) |
-| `DOMAIN_PROVIDER`, `VERCEL_API_TOKEN`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` | Automatic custom-domain attach on Vercel |
-
-### Feature keys (each is optional and enables one feature)
+### Optional feature variables
 
 | Variable | Feature |
 | --- | --- |
-| `OPENAI_API_KEY`, `OPENAI_CHATBOT_VECTOR_STORE_ID`, `CHATBOT_CRAWL_BASE_URL`, `CHATBOT_ADMIN_API_SECRET` | AI chatbot, AI assistants, AI Intelligence and AI generation |
-| `ELEVENLABS_API_KEY` | Voice mode |
-| `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`, `DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY` | Encryption of bank details, finance accounts, Digi Locker credentials and social tokens. Generate each with `openssl rand -base64 32` |
 | `HRMS_API_SECRET`, `LEADS_API_SECRET`, `INDEXING_API_SECRET` | Bearer secrets for API and export endpoints |
-| `HRMS_PAYOUT_PROVIDER`, `RAZORPAY_*` | Salary payouts and subscription billing |
+| `HRMS_PAYOUT_PROVIDER`, `RAZORPAY_ACCOUNT_NUMBER`, `RAZORPAY_WEBHOOK_SECRET` | Salary payouts from the platform account |
 | `MESSENGER_TURN_URL`, `MESSENGER_TURN_USERNAME`, `MESSENGER_TURN_CREDENTIAL`, `MESSENGER_CALL_MAX` | TURN relay for Team Chat calls |
-| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Push notifications to the installed app. Generate the pair once with `npx web-push generate-vapid-keys`; `VAPID_SUBJECT` (a `mailto:` address) is optional and defaults to `SAAS_ADMIN_EMAIL` |
-| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Search Console token |
+| `NEXT_PUBLIC_APP_URL`, `PLATFORM_WILDCARD_SUBDOMAINS`, `SAAS_OPERATOR_NAME`, `SAAS_*_EMAIL` | Public URL, wildcard subdomains, legal name and contact addresses |
 | `META_*`, `GOOGLE_OAUTH_*`, `LINKEDIN_*` | Social publishing |
 
 > Treat encryption keys as permanent once data is written. Do not change them without re-encrypting the stored data.

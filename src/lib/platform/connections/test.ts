@@ -1,5 +1,6 @@
 import "server-only";
 import nodemailer from "nodemailer";
+import webpush from "web-push";
 import { getServiceAccountToken } from "@/lib/google-service-account";
 import { connectionValues } from "@/lib/platform/connections/resolve";
 import { recordTestResult } from "@/lib/platform/connections/store";
@@ -53,6 +54,13 @@ async function run(provider: string, v: Record<string, string>): Promise<TestOut
         return fail(`SMTP check failed: ${err instanceof Error ? err.message : "could not connect"}.`);
       }
     }
+    case "vapid":
+      try {
+        webpush.setVapidDetails(v.subject || "mailto:support@example.com", v.publicKey, v.privateKey);
+        return { ok: true, message: "These two keys are a valid pair." };
+      } catch {
+        return fail("These two keys aren't a valid pair. Generate them together with  npx web-push generate-vapid-keys.");
+      }
     default:
       return { ok: true, message: "Saved. This service has no automatic check — it is verified the first time a product uses it." };
   }

@@ -4,6 +4,7 @@ import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canViewCommercialFinance } from "@/lib/fms-roles";
 import { getReceiptByNumber } from "@/lib/products/cashflow-ai/receipts";
 import { renderReceiptPdf } from "@/components/products/cashflow-ai/ReceiptPdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ receiptNumber: string }> };
 
@@ -18,6 +19,7 @@ async function handleGET(_req: NextRequest, { params }: Context) {
 
   const buffer = await renderReceiptPdf(receipt);
 
+  await recordPdf({ type: "fms_receipt", ref: receipt.receiptNumber, by: user.email, role: "staff" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

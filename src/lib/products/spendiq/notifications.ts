@@ -1,6 +1,7 @@
 import "server-only";
 import { BLOCKED_STATUSES } from "@/lib/security/account-status";
 import { signalNew } from "@/lib/notify/signals";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { getDb } from "@/lib/mongodb";
@@ -62,20 +63,22 @@ export interface NotifyInput {
 export async function notify(input: NotifyInput): Promise<void> {
   try {
     const collection = await getCollection();
-    await collection.insertOne({
+    const plan = await planNotification({ type: input.type, title: input.title, body: input.body, link: input.link, product: "prms" });
+    if (plan.inApp.on) await collection.insertOne({
       _id: newId(),
       recipientUserId: input.recipientUserId,
       audience: input.audience,
       type: input.type,
-      title: input.title,
-      body: input.body ?? null,
+      title: plan.inApp.title,
+      body: plan.inApp.body,
       link: input.link ?? null,
       read: false,
       ...(input.dedupeKey ? { dedupeKey: input.dedupeKey } : {}),
       createdAt: new Date(),
     } as PrmsNotification);
-    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
-    await signalNew("prms", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
+    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined, event: input.type, product: "prms" });
+    if (plan.inApp.on) await signalNew("prms", [input.recipientUserId], { type: input.type, title: plan.inApp.title, body: plan.inApp.body, link: input.link ?? null });
+    await logBell(plan.inApp.on, { type: input.type, title: input.title, product: "prms", reason: plan.inApp.reason });
   } catch {
     // dup dedupeKey or transient error — ignore.
   }

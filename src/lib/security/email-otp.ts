@@ -90,7 +90,7 @@ export async function sendEmailCode(adminId: ObjectId, email: string, purpose: O
       paragraphs: [copy.lead, `Your code: ${code}`, "It works once and expires in 10 minutes."],
       footnote: "If this wasn't you, someone may know your password. Change it, and do not share this code with anyone.",
     });
-    const sent = await sendEmail({ to: email, subject: `${copy.subject} — ${name}`, html, text });
+    const sent = await sendEmail({ to: email, subject: `${copy.subject} — ${name}`, html, text, event: "auth_email_otp" });
     if (!sent.ok) {
       await c.deleteOne({ _id: id });
       return { ok: false, error: "We couldn't send the email right now. Please try again in a moment." };

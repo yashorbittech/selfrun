@@ -1,12 +1,10 @@
-import { NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runBuildCron } from "@/lib/apps/enqueue";
+import { cronRoute } from "@/lib/cron/runner";
 
-/** Daily (Vercel Cron, `Authorization: Bearer $CRON_SECRET`): hands over builds that were requested while no build service was connected, and fails builds that never finished. Never starts a build by itself. */
+/**
+ * Scheduled job "apps": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
+ */
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-export async function GET(req: Request) {
-  if (!hasBearer(req, process.env.CRON_SECRET)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, ...(await runBuildCron()) });
-}
+export const GET = cronRoute("apps");

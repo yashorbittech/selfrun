@@ -11,7 +11,7 @@ import { SmmsInputError } from "@/lib/products/viralpulse-ai/viewer";
  * Platform connections, one document per OAuth provider (`smms_integrations`,
  * `_id` = provider): Meta (Facebook Pages + Instagram professional accounts),
  * Google (YouTube + Business Profile) and LinkedIn. Tokens are encrypted with
- * `SMMS_ENCRYPTION_KEY` (AES-256-GCM, record id as AAD) and only decrypted at
+ * `PLATFORM_ENCRYPTION_KEY` (AES-256-GCM, record id as AAD) and only decrypted at
  * the moment a publish call needs them — never sent to a page or logged.
  *
  * Google Ads is deliberately not a publishing target: SMMS never creates paid
@@ -258,7 +258,7 @@ async function discoverTargets(p: Provider, access: string): Promise<{ accountNa
 }
 
 export async function completeOAuth(p: Provider, code: string, redirectUri: string, actorId: string): Promise<IntegrationDoc> {
-  if (!isEncryptionConfigured()) throw new SmmsInputError("SMMS_ENCRYPTION_KEY isn't set on the server, so tokens can't be stored safely.");
+  if (!isEncryptionConfigured()) throw new SmmsInputError("PLATFORM_ENCRYPTION_KEY isn't set on the server, so tokens can't be stored safely.");
   const tokens = await exchangeCode(p, code, redirectUri);
   const { accountName, targets } = await discoverTargets(p, tokens.access);
   const selected: Partial<Record<Platform, string>> = {};

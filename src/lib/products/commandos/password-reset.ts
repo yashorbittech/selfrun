@@ -56,7 +56,7 @@ export async function requestPasswordReset(emailInput: string): Promise<void> {
     action: { label: "Choose a new password", url: `${origin}/commandos/reset-password?token=${token}` },
     footnote: "This link works once and expires in 30 minutes.",
   });
-  await sendEmail({ to: email, subject: `Reset your ${name} password`, html, text }).catch(() => {});
+  await sendEmail({ to: email, subject: `Reset your ${name} password`, html, text, event: "auth_password_reset" }).catch(() => {});
 }
 
 export type ResetResult = { ok: true } | { ok: false; error: string };

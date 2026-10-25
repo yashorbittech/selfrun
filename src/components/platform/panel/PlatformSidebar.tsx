@@ -28,7 +28,11 @@ import {
   SlidersHorizontal,
   Wrench,
   Sparkles,
+  MessageSquareText,
+  Scale,
   AlertTriangle,
+  Clock,
+  BellRing,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -97,6 +101,11 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
       { href: "/console/audit", label: "Audit log", icon: ScrollText },
       { href: "/console/settings", label: "Platform settings", icon: Settings2, exact: true },
       { href: "/console/maintenance", label: "Maintenance", icon: Wrench },
+      { href: "/console/notification-center", label: "Notification center", icon: BellRing },
+      { href: "/console/documents", label: "Documents & PDFs", icon: FileText },
+      { href: "/console/prompts", label: "AI prompts", icon: MessageSquareText },
+      { href: "/console/legal", label: "Legal & compliance", icon: Scale },
+      { href: "/console/scheduled-jobs", label: "Cron jobs", icon: Clock },
       { href: "/console/incidents", label: "Incidents & status", icon: AlertTriangle },
       { href: "/commandos", label: "Workspace", icon: LayoutGrid, exact: true },
     ],

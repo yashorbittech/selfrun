@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { getOpenAI } from "@/lib/openai";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
@@ -138,44 +139,38 @@ function hash(s: string): number {
   return h;
 }
 
-function prompt(b: WebsiteBrief, plan: WebsitePlan, knowledge = "") {
+async function prompt(b: WebsiteBrief, plan: WebsitePlan, knowledge = ""): Promise<{ system: string; user: string }> {
   const direction = DESIGN_DIRECTIONS[hash(b.slug + b.name) % DESIGN_DIRECTIONS.length];
   const subs = b.subCategories.map((s) => `${s.name} (${s.category})`).join("; ");
-  const system = `You are a senior brand strategist, web designer and copywriter. You write the COMPLETE public website for one business, following a website-building brief that was written for it. The text must be genuinely useful production copy for that business's real customers, never placeholder text. Write all visitor-facing text in the language the brief names, using short, common words that a person with little schooling would understand.
-
-Hard rules:
-- Be truthful. You do NOT know this business's ownership, history, opening hours, delivery, prices, ingredients, materials, speed, quality, hygiene, guarantees, customisation, certifications, staff, address, phone or email. Never state or imply any of these as fact, never invent statistics, years in business, number of customers, awards, client names, testimonials or prices. Describe only WHAT the business offers (from its categories and sub-categories) and HOW a customer can get started (call, message, ask, book, order, visit), and phrase anything uncertain as an invitation to ask ("Pooch lijiye", "Ask us", "Get in touch to confirm").
-- Use the vocabulary and main action given in the brief. The offerings list is the business's real offerings, named the way its customers say them; do not call them "services" unless that is the brief's word.
-- Build exactly the pages the brief plans. The home page flow follows the brief's home outline. Every page's blocks must fit that page's purpose. Never add pages that are not planned. Do not write a gallery, photos or videos page; the owner adds photos later.
-- Blocks: kind "services-grid" shows the business's offerings (the offerings list you write in pack.services); "features" and "checklist" are short lists (items with title and text); "why" is exactly 3 or 4 reasons; "steps" is exactly 3 or 4 steps; "faq" is items whose title is the question and text is the answer; "text" is a heading and a paragraph; "cta" is a closing call to action (heading, text, ctaLabel; items are short checklist titles). Item icons come from the allowed list and are ignored by other blocks. Every block must have at least one item; for "services-grid" and "text" blocks give one item whose title, text and icon are empty strings. Other unused fields are empty strings.
-- Every page must be COMPLETE and genuinely useful the moment it is published: no placeholders, no "coming soon", no empty sections, and no page that depends on facts only the owner has. Fill each page with real, accurate, general knowledge a customer of this trade needs, written in this business's voice: how things work, what to know before choosing, how to prepare, how to look after or use what they buy, common mistakes to avoid, what to ask, what to bring or have ready, simple safe tips. Each page has 4 to 6 blocks and is long enough to feel like a real page of a real website; list blocks (features, checklist) have 5 to 8 items, each with a title and 2 to 3 plain, informative sentences; text blocks are a full paragraph of 4 to 6 sentences; a faq block has 8 to 10 questions with real, complete answers (6 on the home page). Where the answer needs a fact only the business knows (price, stock, time, place), say how to ask for it, in the same breath as giving the general part. Follow the care notes of the domain knowledge (for health and similar trades, give general information and tell visitors to ask a qualified person for advice).
-- Counts: offerings (pack.services) 4 to 8; why reasons exactly 4; steps items exactly 4; faqs exactly 6; hero chips exactly 3; status and perf each exactly 2 entries; checklist exactly 3; homeBlocks follows the outline (6 to 9); extraPages are exactly the planned pages (4 to 6 blocks each); offeringPages are one detailed page for every offering (3 to 5 blocks); nav 3 to 6 entries; footerColumns 2 to 3 with 2 to 5 links each.
-- Menu and footer targets must be "/", "/contact", "/privacy-policy", or "/" + the slug of one of the planned pages${plan.needsAccounts ? ', or "/login" and "/register"' : ""}. Menu labels use the customers' own words.
-- Hero chips are the three main offerings as short nouns. The two "status" and two "perf" pairs are small badges: use ["What we offer", <main offerings>] and ["Ask us", <how to start>] style content with no quality or speed claims.
-- Style recipes (design.style): pick ONE option for each group so this site looks clearly its own, not just a different colour: buttons (pill, soft, sharp, chunky, outline), headings (plain, tight, accent-bar, uppercase, underline), bands (how sections alternate: none, banded, hairline, framed, tinted-rows), heroDecor (none, grid, dots, stripes, glow), cardAccent (none, top-bar, left-bar, tint, corner), headerStyle (plain, accent-line, tinted, elevated, underlined), texture (plain, paper, mesh, dotgrid), links (plain, underline, highlight). Match the brief's mood: a village produce seller or a band is warm and lively, a clinic calm and clean, a law firm restrained, a creator bold. Do not choose the plain/none option for most groups.
-- Design: the palette, fonts and layout options must express the brief's look and feel and the design direction; colours are hex like #1f6f5c; fonts only from the allowed list; choose layout options that suit, not generic defaults.
-- The "copy" object is the wording for the contact page and the other supporting pages. The contact heading is lead + highlight + tail. ${plan.needsAccounts ? "The sign-in and sign-up pages are for the business's customers; describe a simple customer account." : "No sign-in or sign-up pages exist for this site; fill those fields with short neutral text anyway."}
-- Return minified JSON on a single line.`;
-  const user = `Business name: ${b.name}
-Country: ${b.country || "not stated"}
-Business categories: ${b.categories.join("; ") || "not stated"}
-Business sub-categories (what it actually does): ${subs || "not stated"}
-Design direction (for variety): ${direction}
-
-WEBSITE-BUILDING BRIEF
-${plan.sitePrompt}
-
-Language of all visitor-facing text: ${plan.language}${plan.direction === "rtl" ? " (right-to-left)" : ""}
-Country assumed: ${plan.assumedCountry}. Visitors prefer to be reached by: ${plan.preferredChannel}. Scale: ${plan.scale}; setting: ${plan.setting}; reading and technology comfort: ${plan.literacy}.
-Audience: ${plan.audience}
-Tone: ${plan.tone}
-Look and feel: ${plan.lookAndFeel}
-Offerings are called: "${plan.vocabulary.offerings}" (one: "${plan.vocabulary.offeringsOne}"). Main action button: "${plan.vocabulary.mainAction}" (${plan.primaryAction}).
-Pages to build (besides home, contact and privacy): ${plan.pages.map((p) => `/${p.slug} "${p.title}" (menu: "${p.navLabel}") for: ${p.purpose}`).join(" | ")}
-Home outline after the hero: ${plan.homeOutline.map((h) => `${h.kind} (${h.purpose})`).join(" > ")}
-
-${knowledge ? `DOMAIN KNOWLEDGE for this trade (follow its NEVER-claim list, avoid its off-topic words, and respect its care notes):\n${knowledge}\n` : ""}
-Write the website now.`;
+  const system = await getPrompt("website.generate.system", {
+    accounts_targets: plan.needsAccounts ? await getPrompt("website.generate.accounts_targets") : "",
+    accounts_copy: await getPrompt(plan.needsAccounts ? "website.generate.accounts_yes" : "website.generate.accounts_no"),
+  });
+  const user = await getPrompt("website.generate.user", {
+    name: b.name,
+    country: b.country || await getPrompt("website.not_stated"),
+    categories: b.categories.join("; ") || await getPrompt("website.not_stated"),
+    sub_categories: subs || await getPrompt("website.not_stated"),
+    direction,
+    site_prompt: plan.sitePrompt,
+    language: plan.language,
+    rtl_note: plan.direction === "rtl" ? await getPrompt("website.generate.rtl") : "",
+    assumed_country: plan.assumedCountry,
+    preferred_channel: plan.preferredChannel,
+    scale: plan.scale,
+    setting: plan.setting,
+    literacy: plan.literacy,
+    audience: plan.audience,
+    tone: plan.tone,
+    look_and_feel: plan.lookAndFeel,
+    offerings: plan.vocabulary.offerings,
+    offerings_one: plan.vocabulary.offeringsOne,
+    main_action: plan.vocabulary.mainAction,
+    primary_action: plan.primaryAction,
+    pages: plan.pages.map((p) => `/${p.slug} "${p.title}" (menu: "${p.navLabel}") for: ${p.purpose}`).join(" | "),
+    home_outline: plan.homeOutline.map((h) => `${h.kind} (${h.purpose})`).join(" > "),
+    knowledge_block: knowledge ? await getPrompt("website.generate.knowledge", { knowledge }) : "",
+  });
   return { system, user };
 }
 
@@ -368,9 +363,13 @@ async function pool<T>(tasks: (() => Promise<T>)[], size: number): Promise<T[]> 
  */
 export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowledge = "", fix?: { raw: RawSite; issues: FixIssue[] }): Promise<RawSite> {
   const client = await platformClient();
-  const base = prompt(brief, plan, knowledge);
-  const task = (what: string, issues?: FixIssue[], draft?: unknown) =>
-    `${base.user}\n\nYOUR TASK NOW: ${what}${draft && issues?.length ? `\n\nA first draft of this part exists:\n${JSON.stringify(draft)}\n\nIt has problems. Rewrite it completely, fixing ONLY these (keep everything else good):\n${issues.map((i, n) => `${n + 1}. ${i.path}: ${i.reason} — "${i.text.slice(0, 140)}"`).join("\n")}` : ""}`;
+  const base = await prompt(brief, plan, knowledge);
+  const task = async (what: string, issues?: FixIssue[], draft?: unknown) =>
+    getPrompt("website.generate.task", {
+      user: base.user,
+      what,
+      draft_block: draft && issues?.length ? await getPrompt("website.generate.draft", { draft: JSON.stringify(draft), issues: issues.map((i, n) => `${n + 1}. ${i.path}: ${i.reason} — "${i.text.slice(0, 140)}"`).join("\n") }) : "",
+    });
   const oldPages = (fix?.raw.structure.extraPages ?? []) as { slug: string; title: string; navLabel: string; intro: string; blocks: Block[] }[];
   const oldDetails = (fix?.raw.structure.offeringPages ?? []) as { slug: string; title: string; intro: string; blocks: Block[] }[];
   const partOf = (path: string): string => {
@@ -388,7 +387,7 @@ export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowl
     redo("core", true)
       ? callJson<Pick<RawSite, "design" | "pack"> & { structure: { nav: RawSite["structure"]["nav"]; footerColumns: unknown[]; headerCta: string } }>(
           client, base.system,
-          task("Write ONLY the site-wide parts: design, structure (nav, footerColumns, headerCta; do not write home blocks or pages here) and pack (hero, tagline, footerCta, servicesIntro, services, why, steps, faqs, cta, about, copy). Nothing in this answer is a page: pages are written separately.", issuesFor("core"), fix ? { design: fix.raw.design, structure: { nav: fix.raw.structure.nav, footerColumns: fix.raw.structure.footerColumns, headerCta: fix.raw.structure.headerCta }, pack: fix.raw.pack } : undefined),
+          await task(await getPrompt("website.generate.task.core"), issuesFor("core"), fix ? { design: fix.raw.design, structure: { nav: fix.raw.structure.nav, footerColumns: fix.raw.structure.footerColumns, headerCta: fix.raw.structure.headerCta }, pack: fix.raw.pack } : undefined),
           schemaCore(), "core", 9000)
       : { design: fix!.raw.design, pack: fix!.raw.pack, structure: { nav: fix!.raw.structure.nav, footerColumns: fix!.raw.structure.footerColumns, headerCta: fix!.raw.structure.headerCta } };
 
@@ -396,7 +395,7 @@ export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowl
     redo("home", true)
       ? callJson<{ blocks: Block[] }>(
           client, base.system,
-          task("Write ONLY the blocks of the home page that come after the hero, following the home outline above, in that order. Make each block complete and specific to this business. Do not repeat the offerings list word for word; the services-grid block only needs its heading and eyebrow.", issuesFor("home"), fix ? { blocks: fix.raw.structure.homeBlocks } : undefined),
+          await task(await getPrompt("website.generate.task.home"), issuesFor("home"), fix ? { blocks: fix.raw.structure.homeBlocks } : undefined),
           schemaHome(), "home", 9000)
       : { blocks: fix!.raw.structure.homeBlocks as Block[] };
 
@@ -406,7 +405,7 @@ export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowl
     if (!redo(part, !!old)) return { ...old!, slug: pg.slug };
     const d = await callJson<PageDraft>(
       client, base.system,
-      task(`Write ONLY this one page: /${pg.slug} "${pg.title}" (menu label "${pg.navLabel}"). Its purpose: ${pg.purpose}. Give it a title, a menu label, a one-or-two sentence intro, and 4 to 6 complete, substantial blocks of real, useful content for this page alone (do not repeat the home page or the other pages). The page must be fully useful on its own and long enough to feel like a real page.`, issuesFor(part), old ? { title: old.title, navLabel: old.navLabel, intro: old.intro, blocks: old.blocks } : undefined),
+      await task(await getPrompt("website.generate.task.page", { slug: pg.slug, title: pg.title, nav_label: pg.navLabel, purpose: pg.purpose }), issuesFor(part), old ? { title: old.title, navLabel: old.navLabel, intro: old.intro, blocks: old.blocks } : undefined),
       schemaPage(), "page", 9000);
     return { slug: pg.slug, ...d };
   });
@@ -423,7 +422,7 @@ export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowl
     if (!redo(part, !!old)) return { slug, title: old!.title, intro: old!.intro, blocks: old!.blocks };
     const d = await callJson<DetailDraft>(
       client, base.system,
-      task(`Write ONLY the detailed page for this one offering: "${sv.title}" (${sv.subtitle ?? ""}; ${sv.description ?? ""}). Give a one-or-two sentence intro and 3 to 5 complete blocks that tell a visitor everything useful about THIS offering: what it is, who it is for, what to know before choosing it, how it works or how to get it, how to prepare or look after it, common mistakes, and its own questions and answers. General, accurate knowledge only; never prices, stock, times or any fact about this specific business (invite the visitor to ask for those).`, issuesFor(part), old ? { intro: old.intro, blocks: old.blocks } : undefined),
+      await task(await getPrompt("website.generate.task.detail", { title: String(sv.title ?? ""), subtitle: String(sv.subtitle ?? ""), description: String(sv.description ?? "") }), issuesFor(part), old ? { intro: old.intro, blocks: old.blocks } : undefined),
       schemaDetail(), "detail", 8000);
     return { slug, title: String(sv.title ?? ""), ...d };
   });
@@ -433,14 +432,16 @@ export async function writeWebsite(brief: WebsiteBrief, plan: WebsitePlan, knowl
 }
 
 /** What the three photos show, written from the business itself (so they can be made while the website text is being written). */
-export function imagePrompts(b: WebsiteBrief): { hero: string; about: string; services: string } {
+export async function imagePrompts(b: WebsiteBrief): Promise<{ hero: string; about: string; services: string }> {
   const what = b.subCategories.slice(0, 3).map((s) => s.name).join(", ") || b.categories.slice(0, 2).join(", ");
   const kind = b.categories[0] || what;
-  return {
-    hero: `A bright, welcoming photograph of the everyday setting of a ${kind} business (${what}), shot wide, with the products, tools or workplace that belong to it, no people facing the camera`,
-    about: `People at work in a ${kind} business, candid and natural, seen from a respectful distance or from behind, doing ordinary work related to ${what}`,
-    services: `A tidy close-up arrangement of the main things a ${kind} business offers (${what}), editorial still-life style`,
-  };
+  const vars = { kind, what };
+  const [hero, about, services] = await Promise.all([
+    getPrompt("website.image.hero", vars),
+    getPrompt("website.image.about", vars),
+    getPrompt("website.image.services", vars),
+  ]);
+  return { hero, about, services };
 }
 
 /** Photos for the hero, about and services banners. Each is best effort: a failed image leaves that slot empty (the sections handle that), never the whole site. */
@@ -453,7 +454,7 @@ export async function makeImages(prompts: { hero: string; about: string; service
   }
   const one = async (text: string, name: string): Promise<string> => {
     try {
-      const r = await client.images.generate({ model: IMAGE_MODEL(), prompt: `${text}. Photorealistic editorial photograph, natural light, no text, no logos, no watermark.`, size: "1536x1024", quality: "low", n: 1 });
+      const r = await client.images.generate({ model: IMAGE_MODEL(), prompt: await getPrompt("website.image", { text }), size: "1536x1024", quality: "low", n: 1 });
       const b64 = r.data?.[0]?.b64_json;
       return b64 ? await store(Buffer.from(b64, "base64"), name) : "";
     } catch (err) {

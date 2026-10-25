@@ -6,6 +6,7 @@ import { certificateWithMeta } from "@/lib/products/cohort-ai/certificates";
 import { getTmsSettings } from "@/lib/products/cohort-ai/settings";
 import { renderCertificatePdf } from "@/components/products/cohort-ai/CertificatePdf";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -43,6 +44,7 @@ async function handleGET(_req: Request, { params }: Context) {
     },
   });
 
+  await recordPdf({ type: "tms_certificate", ref: cert.certificateNumber, by: user.email, role: isStaff ? "staff" : "student" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

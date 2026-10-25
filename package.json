@@ -22,7 +22,11 @@
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "test:password": "npx --yes tsx scripts/test-password.ts",
     "test:transport": "npx --yes tsx scripts/test-transport.ts",
-    "test:device-limit": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env.local scripts/test-device-limit.ts"
+    "test:device-limit": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env.local scripts/test-device-limit.ts",
+    "cron:sync": "npx --yes tsx scripts/sync-vercel-crons.ts",
+    "test:legal": "npx --yes tsx scripts/test-legal.ts",
+    "test:prompts": "npx --yes tsx scripts/test-prompts-registry.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_prompts npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-prompts-store.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_prompts_co npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-prompts-company.ts",
+    "test:cron": "npx --yes tsx scripts/test-cron-schedule.ts && npx --yes tsx scripts/test-cron-registry.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

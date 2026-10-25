@@ -1,14 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runDunningSweep } from "@/lib/platform/billing/subscriptions";
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily subscription dunning (Vercel Cron, `Authorization: Bearer $CRON_SECRET`):
- * past_due → grace → suspended, expired trials, missed renewals.
- * Refuses to run without a configured secret.
+ * Scheduled job "subscriptions": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, ...(await runDunningSweep()) });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 120;
+
+export const GET = cronRoute("subscriptions");

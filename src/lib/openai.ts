@@ -2,27 +2,29 @@ import "server-only";
 import OpenAI from "openai";
 import { unstable_rethrow } from "next/navigation";
 import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
-import { assertAiAvailable, meterAiTokens } from "@/lib/platform/billing/enforce";
-import { connectionValues } from "@/lib/platform/connections/resolve";
+import { assertAiAvailable, assertWritable, meterAiTokens } from "@/lib/platform/billing/enforce";
+import { resolveConnection } from "@/lib/platform/connections/resolve";
 import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
 import { resolveUsageActor } from "@/lib/platform/billing/usage-actor";
 import { SYSTEM_ACTOR, type UsageActor } from "@/lib/platform/billing/usage-actor-store";
 
-// One client per distinct credential set (the platform's own OpenAI key, used for every company),
-// reused across hot reloads and invocations. Created lazily, so a workspace without a key only gets a clear error when it
-// actually tries to use AI.
+// One client per distinct credential set (a company's own OpenAI key, else SelfRun's), reused across hot reloads and invocations.
+// Created lazily, so nothing is built until a company actually uses AI. Calls made with a company's OWN key are not counted against
+// the plan's AI allowance (they are still logged in the usage history); calls on SelfRun's key are.
 const globalForOpenAI = globalThis as unknown as { _openAIClients?: Map<string, OpenAI> };
 
 export const OPENAI_NOT_CONNECTED = "AI isn't available right now. Please contact support.";
 
 export async function getOpenAI(opts: { timeoutMs?: number; maxRetries?: number } = {}): Promise<OpenAI> {
-  const creds = await connectionValues("openai");
+  const resolved = await resolveConnection("openai");
+  const creds = resolved?.values;
   if (!creds?.apiKey) throw new Error(OPENAI_NOT_CONNECTED);
+  const own = resolved?.source === "workspace";
   const clients = (globalForOpenAI._openAIClients ??= new Map());
-  const id = `${creds.apiKey}|${creds.organization ?? ""}|${creds.project ?? ""}|${opts.timeoutMs ?? ""}|${opts.maxRetries ?? ""}`;
+  const id = `${own ? "own" : "platform"}|${creds.apiKey}|${creds.organization ?? ""}|${creds.project ?? ""}|${opts.timeoutMs ?? ""}|${opts.maxRetries ?? ""}`;
   let metered = clients.get(id);
   if (!metered) {
-    metered = meteredClient(new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined, ...(opts.timeoutMs ? { timeout: opts.timeoutMs } : {}), ...(opts.maxRetries !== undefined ? { maxRetries: opts.maxRetries } : {}) }));
+    metered = meteredClient(own, new OpenAI({ apiKey: creds.apiKey, organization: creds.organization || undefined, project: creds.project || undefined, ...(opts.timeoutMs ? { timeout: opts.timeoutMs } : {}), ...(opts.maxRetries !== undefined ? { maxRetries: opts.maxRetries } : {}) }));
     clients.set(id, metered);
   }
   return metered;
@@ -56,7 +58,7 @@ const estimateTokens = (chars: number) => Math.ceil(chars / 3.5);
 /** A generated image bills as image tokens; when the response carries no usage, count this much per image so it is never free. */
 const IMAGE_FALLBACK_TOKENS = 4000;
 
-function meterStream<T extends object>(stream: T, companyId: string, model: string, endpoint: string, promptChars: number, actor: UsageActor): T {
+function meterStream<T extends object>(own: boolean, stream: T, companyId: string, model: string, endpoint: string, promptChars: number, actor: UsageActor): T {
   let metered = false;
   let chars = 0;
   // A reply that ends without the final usage event (the visitor closed the tab, a network cut) still cost tokens: count an estimate.
@@ -65,7 +67,7 @@ function meterStream<T extends object>(stream: T, companyId: string, model: stri
     metered = true;
     if (chars > 0) {
       const tokens = estimateTokens(promptChars + chars);
-      await meterAiTokens(tokens, companyId);
+      if (!own) await meterAiTokens(tokens, companyId);
       await recordAiUsage({ usage: { total_tokens: tokens }, model, endpoint: `${endpoint} (estimated)`, companyId, actor });
     }
   };
@@ -88,7 +90,7 @@ function meterStream<T extends object>(stream: T, companyId: string, model: stri
                   const tokens = tokensOf(streamEventUsage(r.value));
                   if (tokens > 0) {
                     metered = true;
-                    await meterAiTokens(tokens, companyId);
+                    if (!own) await meterAiTokens(tokens, companyId);
                     await recordAiUsage({ usage: streamEventUsage(r.value), model, endpoint, companyId, actor });
                   }
                 }
@@ -114,7 +116,7 @@ function meterStream<T extends object>(stream: T, companyId: string, model: stri
   });
 }
 
-function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpoint: string) {
+function meteredMethod(own: boolean, owner: object, fn: (...args: unknown[]) => unknown, endpoint: string) {
   return async (...args: unknown[]) => {
     let companyId: string | null = null;
     try {
@@ -123,13 +125,13 @@ function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpo
       unstable_rethrow(err);
     }
     // Outside any company (scripts) there is no plan to check or meter against.
-    if (companyId) await assertAiAvailable();
+    if (companyId) await (own ? assertWritable() : assertAiAvailable());
     // Who is asking, captured now (a streamed reply finishes after the request context is gone).
     const actor = companyId ? await resolveUsageActor() : SYSTEM_ACTOR;
     const result = await fn.apply(owner, args);
     const model = String((args[0] as { model?: string } | undefined)?.model ?? "");
     const streaming = Boolean((args[0] as { stream?: boolean } | undefined)?.stream);
-    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(result, companyId, model, endpoint, JSON.stringify((args[0] as { input?: unknown; messages?: unknown } | undefined)?.input ?? (args[0] as { messages?: unknown } | undefined)?.messages ?? "").length, actor);
+    if (companyId && streaming && result && typeof result === "object" && Symbol.asyncIterator in result) return meterStream(own, result, companyId, model, endpoint, JSON.stringify((args[0] as { input?: unknown; messages?: unknown } | undefined)?.input ?? (args[0] as { messages?: unknown } | undefined)?.messages ?? "").length, actor);
     if (companyId) {
       let usage = (result as { usage?: Usage } | null)?.usage;
       let tokens = tokensOf(usage);
@@ -138,7 +140,7 @@ function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpo
         tokens = IMAGE_FALLBACK_TOKENS * n;
         usage = { total_tokens: tokens };
       }
-      await meterAiTokens(tokens, companyId);
+      if (!own) await meterAiTokens(tokens, companyId);
       await recordAiUsage({ usage, model, endpoint, companyId, actor });
     }
     return result;
@@ -146,18 +148,18 @@ function meteredMethod(owner: object, fn: (...args: unknown[]) => unknown, endpo
 }
 
 /** Wraps `resource[method]` (e.g. `responses.create`) with the check + meter; everything else is untouched. */
-function wrapResource<T extends object>(resource: T, methods: string[], children: Record<string, string[]> = {}, path = ""): T {
+function wrapResource<T extends object>(own: boolean, resource: T, methods: string[], children: Record<string, string[]> = {}, path = ""): T {
   return new Proxy(resource, {
     get(target, prop) {
       const v = Reflect.get(target, prop, target);
-      if (typeof prop === "string" && methods.includes(prop) && typeof v === "function") return meteredMethod(target, v as (...args: unknown[]) => unknown, `${path}${prop}`);
-      if (typeof prop === "string" && prop in children && v && typeof v === "object") return wrapResource(v as object, children[prop], {}, `${path}${prop}.`);
+      if (typeof prop === "string" && methods.includes(prop) && typeof v === "function") return meteredMethod(own, target, v as (...args: unknown[]) => unknown, `${path}${prop}`);
+      if (typeof prop === "string" && prop in children && v && typeof v === "object") return wrapResource(own, v as object, children[prop], {}, `${path}${prop}.`);
       return typeof v === "function" ? v.bind(target) : v;
     },
   });
 }
 
-function meteredClient(client: OpenAI): OpenAI {
+function meteredClient(own: boolean, client: OpenAI): OpenAI {
   const wrapped: Record<string, [string[], Record<string, string[]>?]> = {
     responses: [["create"]],
     images: [["generate", "edit"]],
@@ -169,16 +171,16 @@ function meteredClient(client: OpenAI): OpenAI {
       const v = Reflect.get(target, prop, target);
       if (typeof prop === "string" && prop in wrapped && v && typeof v === "object") {
         const [methods, children] = wrapped[prop];
-        return wrapResource(v as object, methods, children, `${prop}.`);
+        return wrapResource(own, v as object, methods, children, `${prop}.`);
       }
       return typeof v === "function" ? v.bind(target) : v;
     },
   });
 }
 
-/** True when this workspace has an OpenAI key (its own, from Integrations). */
+/** True when this workspace can use AI: it saved its own OpenAI key, or SelfRun's is available. */
 export async function isOpenAIConfigured(): Promise<boolean> {
-  return Boolean((await connectionValues("openai"))?.apiKey);
+  return Boolean((await resolveConnection("openai"))?.values.apiKey);
 }
 
 /**

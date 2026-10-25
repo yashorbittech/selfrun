@@ -4,6 +4,7 @@ import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
 import { UPLOAD_PATH } from "@/lib/products/viralpulse-ai/media";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, VIDEO_TYPES } from "@/lib/products/viralpulse-ai/constants";
+import { blobAuth } from "@/lib/storage/blob-token";
 
 /**
  * Issues a short-lived Vercel Blob client-upload token so the BROWSER uploads
@@ -29,6 +30,7 @@ async function handlePOST(req: NextRequest) {
 
   try {
     const json = await handleUpload({
+      ...(await blobAuth()),
       body,
       request: req,
       onBeforeGenerateToken: async (pathname) => {

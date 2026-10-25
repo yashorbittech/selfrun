@@ -414,7 +414,7 @@ async function notify(companyId: string, kind: NoticeKind): Promise<void> {
     };
     const c = copy[kind];
     const { html, text } = renderEmail({ brand: company.name, heading: c.heading, paragraphs: c.paragraphs, action: { label: c.label, url } });
-    await sendEmail({ to, subject: c.subject, html, text });
+    await sendEmail({ to, subject: c.subject, html, text, event: "billing_subscription", companyId });
   } catch (err) {
     console.error(`[billing] ${kind} email failed for ${companyId}`, err);
   }

@@ -1,18 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runSopReminders } from "@/lib/products/playbook-ai/reminders";
-import { forEachCompany } from "@/lib/platform/tenancy/context";
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily SOP housekeeping (date-driven status changes + reminders). Vercel Cron
- * calls this with `Authorization: Bearer $CRON_SECRET`; without a configured
- * secret the route refuses to run, so it can never be triggered anonymously.
+ * Scheduled job "playbook": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  // Once per company, each in its own scope.
-  return NextResponse.json({ ok: true, companies: await forEachCompany(() => runSopReminders()) });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+export const GET = cronRoute("playbook");

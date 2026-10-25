@@ -1,15 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runAllSweeps } from "@/lib/notify/sweeps";
-
-export const maxDuration = 300;
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily time-based notifications for every company (overdue invoices, stale leads, expiring documents, ending offers, HR / project /
- * procurement / training deadlines …) so people are told even if nobody opens the product. Vercel Cron, `Authorization: Bearer $CRON_SECRET`.
+ * Scheduled job "notifications": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, companies: await runAllSweeps() });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+export const GET = cronRoute("notifications");

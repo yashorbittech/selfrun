@@ -9,6 +9,7 @@ import { KEY_SEPARATOR } from "@/lib/platform/tenancy/collections";
 import { activeDomainProvider } from "@/lib/platform/domains";
 import { appHostOf } from "@/lib/platform/domains/custom";
 import { PLATFORM_AUDIT_COLLECTION } from "@/lib/platform/audit";
+import { blobAuth } from "@/lib/storage/blob-token";
 
 /**
  * Permanently deletes a company: its domains at the hosting provider (Vercel), its uploaded files, every database row it owns, and
@@ -144,7 +145,7 @@ export async function purgeCompanyNow(companyId: string): Promise<PurgeResult> {
   for (let i = 0; i < all.length; i += 100) {
     const batch = all.slice(i, i + 100);
     try {
-      await del(batch);
+      await del(batch, await blobAuth());
       filesRemoved += batch.length;
     } catch (err) {
       console.error("[delete-company] file removal failed", err instanceof Error ? err.message : err);

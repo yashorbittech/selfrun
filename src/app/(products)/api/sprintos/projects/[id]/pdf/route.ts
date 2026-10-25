@@ -1,4 +1,5 @@
 import { withTransport } from "@/lib/security/transport";
+import { recordPdf } from "@/lib/pdf/activity";
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { hasPmsStaffRole } from "@/lib/pms-roles";
@@ -99,6 +100,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
 
   const filename = `PROJECT_${pdfType.toUpperCase()}_${project.projectCode}.pdf`;
 
+  await recordPdf({ type: "pms_billing", variant: pdfType, ref: project.projectCode, by: user.email, role: "staff" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

@@ -1,15 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { runTrialSweep } from "@/lib/platform/billing/trials";
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily free-trial sweep across every company — reminder emails at the
- * platform's trial-reminder days, ended trials move to grace then read-only
- * (see `billing/trials.ts`). Vercel Cron, `Authorization: Bearer $CRON_SECRET`.
- * Refuses to run without a configured secret.
+ * Scheduled job "trials": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, ...(await runTrialSweep(new Date())) });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 120;
+
+export const GET = cronRoute("trials");

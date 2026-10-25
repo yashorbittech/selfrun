@@ -278,7 +278,7 @@ async function emailInvoice(inv: SaasInvoice, slug: string): Promise<void> {
     action: { label: "View invoices", url },
     footnote: inv.paymentRef ? `Payment reference: ${inv.paymentRef}` : undefined,
   });
-  const res = await sendEmail({ to: inv.buyer.email, subject: `Invoice ${inv.number} — ${inv.seller.name}`, html, text });
+  const res = await sendEmail({ to: inv.buyer.email, subject: `Invoice ${inv.number} — ${inv.seller.name}`, html, text, event: "billing_invoice", companyId: inv.companyId });
   if (res.ok) await (await invoices()).updateOne({ _id: inv._id }, { $set: { emailedAt: new Date() } });
 }
 

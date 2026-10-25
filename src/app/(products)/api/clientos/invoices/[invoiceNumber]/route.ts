@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentPortalUser } from "@/lib/portal-auth";
 import { getInvoiceByNumber } from "@/lib/products/cashflow-ai/invoices";
 import { renderInvoicePdf } from "@/components/products/cashflow-ai/InvoicePdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ invoiceNumber: string }> };
 
@@ -28,6 +29,7 @@ async function handleGET(_req: NextRequest, { params }: Context) {
 
   const buffer = await renderInvoicePdf(invoice);
 
+  await recordPdf({ type: "portal_invoice", ref: invoice.invoiceNumber, by: user.email, role: "client" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

@@ -257,7 +257,7 @@ export async function generateAiWebsite(opts: { force?: boolean; ownerPrompt?: s
       writeWebsite(brief, plan, knowledge),
       keepLook && prev?.images && (prev.images.hero || prev.images.about || prev.images.services)
         ? Promise.resolve(prev.images)
-        : makeImages(imagePrompts(brief), (png, name) => createCmsMediaFromBuffer(png, `${brief.name} — ${name}`, `${brief.name} — ${name}`, ACTOR)),
+        : imagePrompts(brief).then((p) => makeImages(p, (png, name) => createCmsMediaFromBuffer(png, `${brief.name} — ${name}`, `${brief.name} — ${name}`, ACTOR))),
     ]);
     // Check what was written; one repair pass for anything invented, off-topic or in the wrong language; then remove whatever is left.
     const banned = { ...bannedFromPlaybooks(playbooks), techBusiness: brief.categories.some((c) => /software|information technology|ai, |cyber|cloud|blockchain|digital|internet|telecom|vertical tech|emerging/i.test(c)) };

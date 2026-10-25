@@ -34,6 +34,7 @@ export const LEGAL_LINKS: NavLink[] = [
   { href: "/dpa", label: "Data Processing Addendum", hint: "How we process personal data for our customers" },
   { href: "/subprocessors", label: "Sub-processors and International Transfers", hint: "The providers we use and how data crosses borders" },
   { href: "/data-requests", label: "Your Data Rights and Requests", hint: "Access, correct, delete or export your information" },
+  { href: "/grievance", label: "Grievance Redressal", hint: "Our Grievance Officer, how fast complaints are answered, where to escalate" },
   { href: "/vulnerability-disclosure", label: "Vulnerability Disclosure Policy", hint: "Report a security issue to us privately" },
 ];
 
@@ -119,7 +120,7 @@ export interface LegalDoc {
 
 const SERVICE = "SelfRun AI";
 
-export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "security" | "sla", LegalDoc> = {
+export const LEGAL_EXTRA: Record<"security" | "sla", LegalDoc> = {
   sla: {
     slug: "sla",
     title: "Uptime SLA",
@@ -282,7 +283,7 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       },
       {
         heading: "When something goes wrong",
-        body: ["We watch the service, and when an incident is confirmed we contain it, fix it and tell affected customers without undue delay, with what happened, what was affected and what we are doing. Open incidents appear on the System status page. If an incident affects personal data, we help the customer meet its own duty to notify regulators and people within the time the law gives it."],
+        body: ["We watch the service, and when an incident is confirmed we contain it, fix it and tell affected customers without undue delay, with what happened, what was affected and what we are doing. Open incidents appear on the System status page. We report cyber security incidents to CERT-In within 6 hours of noticing them, as its directions of 28 April 2022 require, and keep system logs for 180 days. If an incident affects personal data, we tell the customer without undue delay so that it can meet its own duty under the Digital Personal Data Protection Act, 2023 to inform the Data Protection Board of India and the people concerned."],
       },
       {
         heading: "Reporting a vulnerability",
@@ -311,9 +312,9 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
       {
         heading: "Privacy and compliance",
         list: [
-          "Published policies: the Privacy Policy, Data Policy, Terms of Service and Cookie Policy are public and linked from every page.",
+          "Published policies: the Privacy Policy, Data Policy, Terms of Service, Cookie Policy, Refund & Cancellation Policy, Data Processing Addendum and Grievance Redressal page are public and linked from every page, with the name of our Grievance Officer.",
           "No advertising cookies and no selling of data.",
-          "Tools for your own duties: role-based access, an audit log, export and deletion on request help a company meet its own obligations under the laws that apply to it.",
+          "Tools for your own duties: role-based access, an audit log, export and deletion on request help a company meet its own obligations as a Data Fiduciary under the Digital Personal Data Protection Act, 2023, the Information Technology Act, 2000 and the other laws that apply to it.",
           "Security questions: if your organisation needs a security questionnaire answered, send it through the contact page.",
         ],
       },
@@ -345,82 +346,6 @@ export const LEGAL_EXTRA: Record<"cookies" | "data-policy" | "refund-policy" | "
           "Devices: web, installable app, and apps for Android, iOS, Windows, macOS and Linux that carry your company's name and icon.",
         ],
       },
-    ],
-  },
-  cookies: {
-    slug: "cookies",
-    title: "Cookie Policy",
-    description: `The cookies and similar browser storage ${SERVICE} uses, and why.`,
-    intro: `This page explains what is stored in your browser when you use the ${SERVICE} website and your workspace, and the choices you have.`,
-    highlights: [
-      { icon: "shield", title: "No advertising cookies", text: "We keep only what is needed to run and secure the service." },
-      { icon: "lock", title: "Sign-in and device protection", text: "Cookies keep you signed in and keep your device list and sign-in history accurate." },
-      { icon: "check", title: "Your choice", text: "Delete or block cookies in your browser any time; clearing preferences resets your interface." },
-    ],
-    sections: [
-      { heading: "What we store", body: ["We keep this to what is needed to run and secure the service. We do not use advertising cookies."] },
-      {
-        heading: "Cookies we use",
-        list: [
-          "Sign-in cookies: keep you signed in to your workspace or product and protect your session. They are removed when you sign out or the session ends.",
-          "Device cookie: recognises your browser so your list of signed-in devices and your sign-in history are accurate. It is kept for up to a year.",
-          "Referral cookie: if you arrive through a referral link, the referral code is remembered for 30 days so a later sign-up is credited correctly.",
-          "Preference storage: your chosen theme and similar interface choices are kept in your browser's local storage.",
-        ],
-      },
-      { heading: "Analytics and advertising", body: ["This website does not run third-party analytics or advertising trackers, and we do not sell or share personal information for advertising. Companies that build their own website on the platform may add analytics or advertising tools to that website; those websites ask visitors for permission before loading them, and say so in their own cookie notice."] },
-      { heading: "Your choices", body: ["You can delete or block cookies in your browser settings. Blocking the sign-in cookies means you will not be able to sign in. Clearing stored preferences resets your interface choices."] },
-      { heading: "Questions", body: ["Contact us through the contact page if you want to know more."] },
-    ],
-  },
-  "data-policy": {
-    slug: "data-policy",
-    title: "Data Policy",
-    description: `How ${SERVICE} treats the data stored in a workspace: ownership, isolation, AI processing and export.`,
-    intro: `This policy describes what happens to the business data a customer keeps in ${SERVICE}. It complements the Privacy Policy, which covers personal information about website visitors and account holders.`,
-    highlights: [
-      { icon: "shield", title: "Isolated per company", text: "Every record belongs to one company and every query is confined to it by the platform itself." },
-      { icon: "brain", title: "AI stays in your permissions", text: "AI answers use read-only queries with the asker's permissions, and any change an assistant proposes waits for approval." },
-      { icon: "check", title: "Yours to export", text: "Export your records any time; import leads, clients and employees from CSV." },
-    ],
-    sections: [
-      { heading: "You own your data", body: ["The records, files and content a company puts into its workspace belong to that company. We process them only to provide the service."] },
-      { heading: "Isolation between companies", body: ["Every record belongs to one company and every database query is confined to that company by the platform itself. One company cannot read another company's data."] },
-      { heading: "Access inside your company", body: ["Administrators control who can see and do what through roles and fine-grained permissions per module and action. Sign-ins, changes and administrative actions are recorded in an audit log."] },
-      { heading: "AI and your data", body: ["AI features run against the requesting company's own workspace, with the permissions of the person asking. Business questions are answered with read-only queries, and answers show how they were calculated. When an AI assistant in a product proposes a change, nothing happens until the person approves it. AI usage is metered according to your plan."] },
-      { heading: "Secrets", body: ["Credentials, API keys and vault documents are encrypted at rest with keys held outside the database."] },
-      { heading: "Export and portability", body: ["You can export your records at any time. Leads, clients and employees can also be imported from CSV."] },
-      { heading: "When a plan ends", body: ["After a plan ends, the workspace stays readable for a period so you can export what you need. You can ask us to delete your data."] },
-    ],
-  },
-  "refund-policy": {
-    slug: "refund-policy",
-    title: "Refund & Cancellation Policy",
-    description: `The free plan, cancelling a subscription and how billing questions are handled for ${SERVICE}.`,
-    intro: `This policy explains how the free plan and cancellation work and what to do if something on a bill looks wrong. Plans, prices and limits are always the ones shown on the pricing page and in your billing settings.`,
-    highlights: [
-      { icon: "wallet", title: "Free plan, no card", text: "Free forever for one person, with every product and every feature." },
-      { icon: "check", title: "Cancel from billing", text: "Cancel any time from your billing page; your workspace stays readable so you can export." },
-      { icon: "chat", title: "Billing mistakes fixed", text: "Charged in error or twice? Tell us and we will review and correct it." },
-    ],
-    sections: [
-      { heading: "Free plan", body: ["The Free plan is free forever for one person, with every product and every feature, and needs no card. Paid plans add people and bigger allowances."] },
-      { heading: "Subscriptions", body: ["A paid subscription renews each billing period until it is cancelled. Prices exclude applicable taxes."] },
-      { heading: "Cancelling", body: ["You can cancel at any time from your billing page. Your workspace then stays readable for a period so you can export your data."] },
-      { heading: "Failed payments", body: ["If a payment fails we give a grace period before restricting your workspace, and your data remains available to export."] },
-      { heading: "Refunds and billing mistakes", body: ["If you were charged in error, charged twice or were billed after cancelling, contact us and we will review the case and correct it. Include your workspace address and the invoice number so we can find it quickly."] },
-      {
-        heading: "How long data is kept",
-        list: [
-          "Your workspace data stays for as long as your account is active.",
-          "A Director can schedule the company's deletion. It is then deleted for good after 30 days, and until then it can be restored.",
-          "Before a restore or a wipe, a safety copy is kept for 30 days so the action can itself be undone.",
-          "Backups are rotated automatically: the latest eight scheduled and ten manual backups are kept.",
-          "Sign-in history and security events are kept for 180 days.",
-          "Billing and tax records are kept as long as the law requires.",
-        ],
-      },
-      { heading: "Contact", body: ["Write to us through the contact page for any billing or cancellation question."] },
     ],
   },
 };

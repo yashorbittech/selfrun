@@ -5,6 +5,7 @@ import { currentCompanyIdOrNull, isPlatformOwnerContext } from "@/lib/platform/t
 import { getPlatformAccessForUser, hasPermission } from "@/lib/platform/console/roles";
 import { getSaasInvoiceForViewer } from "@/lib/platform/billing/invoices";
 import { renderSaasInvoicePdf } from "@/components/platform/billing/SaasInvoicePdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -28,6 +29,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
   const buffer = await renderSaasInvoicePdf(invoice);
   const filename = `${invoice.number.replace(/[^A-Za-z0-9-]+/g, "-")}.pdf`;
   const disposition = req.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline";
+  await recordPdf({ type: "saas_invoice", variant: invoice.kind, ref: invoice.number, by: user.email, role: isPlatformAdmin && invoice.companyId !== companyId ? "platform" : "staff", companyId: invoice.companyId });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

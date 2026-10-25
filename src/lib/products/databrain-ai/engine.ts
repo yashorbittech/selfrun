@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
@@ -136,7 +137,7 @@ export async function answerQuestion(input: TurnInput): Promise<TurnOutput> {
 
   const deadline = Date.now() + TURN_DEADLINE_MS;
   const modelInput: unknown[] = [...input.history.map((h) => ({ role: h.role, content: h.text })), { role: "user", content: input.question }];
-  const instructions = `${systemPrompt(view)}\n\n${scopeBlock("workspace")}\n\n${languageBlock(lang)}`;
+  const instructions = await getPrompt("databrain.instructions", { system: await systemPrompt(view), scope_block: await scopeBlock("workspace"), language_block: await languageBlock(lang) });
 
   const finish = (blocks: Block[], notes: string[], error: string | null = null): TurnOutput => {
     const rows = [...results.values()].reduce((n, r) => n + r.rowCount, 0);

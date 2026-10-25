@@ -21,7 +21,6 @@ export default async function IntegrationsPage() {
   const trackingOn = !!tracking && (tracking.ga4Ids.length + tracking.gtmIds.length + tracking.clarityIds.length + tracking.metaPixelIds.length + tracking.scripts.length > 0 || !!tracking.tawkId);
 
   const providers: HubProvider[] = [];
-  // Email, AI & voice and automations are provided by the platform: they are not set up here.
   for (const p of CONNECTION_PROVIDERS.filter((x) => !HIDDEN_FROM_COMPANIES.includes(x.key))) {
     const view = views[p.key];
     let environment = false;
@@ -38,7 +37,8 @@ export default async function IntegrationsPage() {
       }
     } else {
       connected = !!view?.saved;
-      if (!connected) environment = (await resolveConnection(p.key))?.source === "environment";
+      // Not connected: SelfRun's own account is used for email, push and the services it provides; the card says so.
+      if (!connected) environment = p.group === "email" || p.key === "vapid" || (await resolveConnection(p.key))?.source === "platform";
     }
     providers.push({
       key: p.key, name: p.name, group: p.group, description: p.description, usedBy: p.usedBy, fields: p.fields, docsUrl: p.docsUrl ?? null, note: p.note ?? null,
@@ -53,7 +53,7 @@ export default async function IntegrationsPage() {
 <PanelPageHeader
           breadcrumbs={[{ label: "Company settings", href: "/commandos/settings" }, { label: "Integrations" }]}
           title={<>Integrations</>}
-          description={<>Connect your own accounts once — social, Google, payments and more. Email, AI and voice are already included in your plan, so there is nothing to set up for them. Keys are encrypted and are never shown again.</>}
+          description={<>Connect your own accounts once — email, AI, voice, WhatsApp, push, social, Google and more. Anything you connect is used by your workspace only; anything you leave unconnected runs on SelfRun&apos;s account and counts against your plan. Keys are encrypted and are never shown again.</>}
         />
 <div className="space-y-6">
         <ConnectionsHub providers={providers} encryptionReady={isPlatformEncryptionConfigured()} />

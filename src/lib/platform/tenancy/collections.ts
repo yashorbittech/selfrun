@@ -37,6 +37,14 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "game_scores",
   // Desktop app builds: the platform's build pipeline (rows carry their companyId; see lib/apps/store.ts)
   "app_builds",
+  // Scheduled jobs: the run history and the locks that keep two servers from running one job at once (see lib/cron/runner.ts)
+  "cron_runs",
+  "cron_locks",
+  // Prompt management: platform-wide overrides of the AI prompts, their version history and use counters (see lib/prompts/)
+  "prompt_overrides",
+  "prompt_versions",
+  "prompt_stats",
+  "cron_settings", // per-job pause / schedule override, and who is alerted when one fails
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
   "saas_inquiries",
 ]);
@@ -67,6 +75,8 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "aibots_settings",
   "cms_settings",
   "web_push_settings",
+  "company_prompt_overrides", // a company's own wording of an AI prompt, `_id` = the prompt key (see lib/prompts/company-store.ts)
+  "notification_rules", // the Notification center: one rule per event, `_id` = the event key
   "email_sender", // the company's own sending address (`_id: "main"`)
   "pwa_settings",
   "dlms_settings",

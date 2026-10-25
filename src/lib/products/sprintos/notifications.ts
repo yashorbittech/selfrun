@@ -1,5 +1,6 @@
 import "server-only";
 import { signalNew } from "@/lib/notify/signals";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { ObjectId } from "mongodb";
@@ -90,20 +91,22 @@ export async function notify(input: NotifyInput): Promise<void> {
       const existing = await collection.findOne({ recipientUserId: input.recipientUserId, dedupeKey: input.dedupeKey });
       if (existing) return;
     }
-    await collection.insertOne({
+    const plan = await planNotification({ type: input.type, title: input.title, body: input.body, link: input.link, product: "pms" });
+    if (plan.inApp.on) await collection.insertOne({
       _id: newId(),
       recipientUserId: input.recipientUserId,
       type: input.type,
-      title: input.title,
-      body: input.body ?? null,
+      title: plan.inApp.title,
+      body: plan.inApp.body,
       link: input.link ?? null,
       projectId: input.projectId ?? null,
       read: false,
       dedupeKey: input.dedupeKey ?? null,
       createdAt: new Date(),
     });
-    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
-    await signalNew("pms", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null });
+    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined, event: input.type, product: "pms" });
+    if (plan.inApp.on) await signalNew("pms", [input.recipientUserId], { type: input.type, title: plan.inApp.title, body: plan.inApp.body, link: input.link ?? null });
+    await logBell(plan.inApp.on, { type: input.type, title: input.title, product: "pms", reason: plan.inApp.reason });
   } catch {
     // Notifications must never break the primary mutation.
   }

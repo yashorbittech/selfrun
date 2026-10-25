@@ -1,5 +1,6 @@
 import "server-only";
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import { derivedKey } from "@/lib/security/derived-key";
 
 /**
  * App-level secret encryption for DLMS: AES-256-GCM keyed by
@@ -26,11 +27,7 @@ export interface EncryptedValue {
 const ALGO = "aes-256-gcm";
 
 function getKey(): Buffer | null {
-  const raw = process.env.DLMS_ENCRYPTION_KEY;
-  if (!raw) return null;
-  const key = Buffer.from(raw, "base64");
-  if (key.length !== 32) throw new Error("DLMS_ENCRYPTION_KEY must be a base64-encoded 32-byte key (openssl rand -base64 32).");
-  return key;
+  return derivedKey("dlms", "DLMS_ENCRYPTION_KEY");
 }
 
 export function isEncryptionConfigured(): boolean {

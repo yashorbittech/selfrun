@@ -8,6 +8,7 @@ import { getProgram } from "@/lib/products/cohort-ai/programs";
 import { getBatch } from "@/lib/products/cohort-ai/batches";
 import { getTmsSettings } from "@/lib/products/cohort-ai/settings";
 import { renderInvoicePdf } from "@/components/products/cohort-ai/InvoicePdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ invoiceNumber: string }> };
 
@@ -57,6 +58,7 @@ async function handleGET(_req: Request, { params }: Context) {
     },
   });
 
+  await recordPdf({ type: "tms_invoice", ref: invoiceNumber, by: user.email, role: isStaff ? "staff" : "student" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

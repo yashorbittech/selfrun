@@ -153,7 +153,7 @@ async function notify(result: TrialSweepResult, companyId: string, message: { su
     result.noOwner++;
     return false;
   }
-  const sent = await sendEmail({ to, ...message });
+  const sent = await sendEmail({ to, ...message, event: "billing_trial", companyId });
   if (!sent.ok) result.emailFailures++;
   return sent.ok;
 }

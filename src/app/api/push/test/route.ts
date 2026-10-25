@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 async function handlePOST() {
   const who = await pushCaller();
   if (who instanceof NextResponse) return who;
-  if (!pushConfigured()) return NextResponse.json({ error: "Push notifications aren't enabled on this server." }, { status: 503 });
+  if (!(await pushConfigured())) return NextResponse.json({ error: "Push notifications aren't enabled on this server." }, { status: 503 });
   if (!rateLimit(`${who.actor}:${who.userId}`, 5, 60_000)) return NextResponse.json({ error: "Please wait a minute before sending another test." }, { status: 429 });
   const delivered = await pushToUsers(who.actor, [who.userId], {
     category: "alerts", // a test must arrive even in quiet hours or with a category off; "alerts" is the one that ignores both

@@ -7,6 +7,7 @@ import { getPortfolioCosting } from "@/lib/products/sprintos/costing";
 import { renderProjectReportPdf } from "@/components/products/sprintos/reports/ProjectReportPdf";
 import { buildWorkbook } from "@/lib/products/sprintos/xlsx";
 import { toCsv } from "@/lib/csv";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ projectId: string }> };
 
@@ -109,6 +110,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
 
   if (format === "pdf") {
     const buffer = await renderProjectReportPdf(report);
+    await recordPdf({ type: "pms_report", ref: report.summary.projectCode, by: user.email, role: "staff" });
     return fileResponse(buffer, "application/pdf", `${base}.pdf`);
   }
 

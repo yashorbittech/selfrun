@@ -1,5 +1,6 @@
 import "server-only";
 import { signalNew } from "@/lib/notify/signals";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 import { getDb } from "@/lib/mongodb";
@@ -53,19 +54,21 @@ export async function notifyPortalUser(input: {
 }): Promise<void> {
   try {
     const c = await collection();
-    await c.insertOne({
+    const plan = await planNotification({ type: input.type, title: input.title, body: input.body, link: input.link, product: "portal" });
+    if (plan.inApp.on) await c.insertOne({
       _id: newId(),
       recipientUserId: input.recipientUserId,
       type: input.type,
-      title: input.title,
-      body: input.body ?? null,
+      title: plan.inApp.title,
+      body: plan.inApp.body,
       link: input.link ?? null,
       read: false,
       dedupeKey: input.dedupeKey ?? null,
       createdAt: new Date(),
     });
-    await queuePush("portal", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
-    await signalNew("portal", [input.recipientUserId], { type: input.type, title: input.title, body: input.body ?? null, link: input.link ?? null }, "portal");
+    await queuePush("portal", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined, event: input.type, product: "portal" });
+    if (plan.inApp.on) await signalNew("portal", [input.recipientUserId], { type: input.type, title: plan.inApp.title, body: plan.inApp.body, link: input.link ?? null }, "portal");
+    await logBell(plan.inApp.on, { type: input.type, title: input.title, product: "portal", reason: plan.inApp.reason });
   } catch {
     /* dup dedupeKey / transient — ignore */
   }

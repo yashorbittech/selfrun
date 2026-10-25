@@ -4,6 +4,7 @@ import { putObject, deleteObject } from "@/lib/storage/blob";
 import { COLLECTIONS, smmsCollection, newId, createStamp, updateStamp, notDeleted, str, strList, escapeRegex, type Stamps } from "@/lib/products/viralpulse-ai/db";
 import { IMAGE_TYPES, VIDEO_TYPES, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, isPlatform, type MediaKind } from "@/lib/products/viralpulse-ai/constants";
 import { SmmsInputError, NotFoundError } from "@/lib/products/viralpulse-ai/viewer";
+import { blobAuth } from "@/lib/storage/blob-token";
 
 /**
  * The central media library: every image and video used by an ad or a post.
@@ -118,7 +119,7 @@ async function inspectUpload(pathname: string): Promise<{ contentType: string; s
   if (!UPLOAD_PATH.test(pathname)) throw new SmmsInputError("That upload isn't valid.");
   let meta;
   try {
-    meta = await head(pathname);
+    meta = await head(pathname, await blobAuth());
   } catch {
     throw new SmmsInputError("The upload didn't finish — please try again.");
   }

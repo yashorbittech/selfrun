@@ -5,7 +5,8 @@ import { getDb } from "@/lib/mongodb";
 import { afterForCompany, currentCompanyIdOrNull, runAsCompany } from "@/lib/platform/tenancy/context";
 import { inQuietHours, PUSH_CATEGORY_META, type PushCategory } from "@/lib/push/categories";
 import { getPreferencesMany, subscriptionsCol, type PushActor } from "@/lib/push/store";
-import { pushConfigured, webpush } from "@/lib/push/vapid";
+import { pushKeys, vapidDetails, webpush } from "@/lib/push/vapid";
+import { logDeliveries, offDetail, planNotification } from "@/lib/notify/center/store";
 
 /**
  * Sends a Web Push notification to people of the CURRENT company. Always best-effort: it never throws and never delays the
@@ -23,6 +24,16 @@ export interface PushMessage {
   tag?: string | null;
   /** false = push only, no email (the default is to email whoever's own settings allow it). */
   email?: boolean;
+  /** The event type (e.g. `expense_approved`). With it, the company's Notification center decides which channels carry it and how it reads. */
+  event?: string;
+  /** The product (panel key) the event belongs to, for the Notification center's list and log. */
+  product?: string;
+  /** Email subject override (from the Notification center); by default derived from the title. */
+  subject?: string;
+  /** Narrows the channels for this one send (e.g. an announcement by email only); never widens what the company allows. */
+  channels?: Partial<Record<"inApp" | "push" | "email", boolean>>;
+  /** Email wording from the Notification center: greeting, button label and small print (with {firstName} / {settingsLink}), null = the original. */
+  emailExtras?: { greeting: string | null; button: string | null; footnote: string | null };
 }
 
 const MAX_FAILURES = 5;
@@ -45,7 +56,8 @@ async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<v
 /** Delivers to every device of `userIds` that wants it. Returns how many pushes the services accepted. */
 export async function pushToUsers(actor: PushActor, userIds: string[], message: PushMessage): Promise<number> {
   try {
-    if (!pushConfigured()) return 0;
+    const keys = await pushKeys();
+    if (!keys) return 0;
     const ids = [...new Set(userIds.filter(Boolean))].slice(0, 500);
     if (ids.length === 0) return 0;
 
@@ -73,7 +85,7 @@ export async function pushToUsers(actor: PushActor, userIds: string[], message: 
     let delivered = 0;
     await mapLimit(rows, CONCURRENCY, async (row) => {
       try {
-        await webpush.sendNotification({ endpoint: row.endpoint, keys: row.keys }, payload, { TTL: 60 * 60 * 24, urgency: urgent ? "high" : "normal" });
+        await webpush.sendNotification({ endpoint: row.endpoint, keys: row.keys }, payload, { TTL: 60 * 60 * 24, urgency: urgent ? "high" : "normal", vapidDetails: vapidDetails(keys) });
         delivered++;
         await subs.updateOne({ _id: row._id }, { $set: { lastSuccessAt: new Date(), failures: 0 } });
       } catch (err) {
@@ -84,6 +96,7 @@ export async function pushToUsers(actor: PushActor, userIds: string[], message: 
         else await subs.updateOne({ _id: row._id }, { $inc: { failures: 1 } });
       }
     });
+    await logDeliveries([{ channel: "push", event: message.event ?? "other", product: message.product, title: message.title, status: delivered > 0 ? "sent" : "failed", recipient: `${wanted.length} ${wanted.length === 1 ? "person" : "people"}`, detail: `${delivered} of ${rows.length} ${rows.length === 1 ? "device" : "devices"} reached` }]);
     return delivered;
   } catch (err) {
     console.error("[push] delivery failed", err);
@@ -103,7 +116,24 @@ export async function queuePush(actor: PushActor, userIds: string[], message: Pu
     if (!companyId) return;
     const deliver = async () => {
       const { emailToUsers } = await import("@/lib/notify/email-channel");
-      await Promise.all([pushToUsers(actor, userIds, message), message.email === false ? 0 : emailToUsers(actor, userIds, message)]);
+      let pushMessage = message;
+      let emailMessage = message;
+      let pushOn = true;
+      let emailOn = message.email !== false;
+      // The company's Notification center: which channels carry this event, and any wording it changed.
+      if (message.event) {
+        const plan = await planNotification({ type: message.event, title: message.title, body: message.body, link: message.url, product: message.product, only: message.channels });
+        pushOn = plan.push.on;
+        emailOn = emailOn && plan.email.on;
+        pushMessage = { ...message, title: plan.push.title, body: plan.push.body };
+        emailMessage = { ...message, title: plan.email.title, body: plan.email.body, subject: plan.email.subject !== message.title ? plan.email.subject : undefined, emailExtras: { greeting: plan.email.greeting, button: plan.email.button, footnote: plan.email.footnote } };
+        const people = `${userIds.length} ${userIds.length === 1 ? "person" : "people"}`;
+        await logDeliveries([
+          ...(pushOn ? [] : [{ channel: "push" as const, event: message.event, product: message.product, title: message.title, status: "off" as const, recipient: people, detail: offDetail(plan.push.reason) }]),
+          ...(plan.email.on || message.email === false ? [] : [{ channel: "email" as const, event: message.event, product: message.product, title: message.title, status: "off" as const, recipient: people, detail: offDetail(plan.email.reason) }]),
+        ]);
+      }
+      await Promise.all([pushOn ? pushToUsers(actor, userIds, pushMessage) : 0, emailOn ? emailToUsers(actor, userIds, emailMessage) : 0]);
     };
     try {
       await afterForCompany(deliver);

@@ -4,6 +4,7 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { signalNew } from "@/lib/notify/signals";
 import { queuePush } from "@/lib/push/send";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 
 /**
  * Company-wide in-app notifications, one row per recipient, shown by the
@@ -79,9 +80,12 @@ export async function notify(input: { to: NotifyTarget; title: string; body?: st
   const now = new Date();
   const body = (input.body ?? "").trim().slice(0, 1000);
   const url = safeInternalUrl(input.url);
-  await (await col()).insertMany(recipients.map((userId) => ({ _id: new ObjectId(), userId, title, body, url, readAt: null, createdAt: now })));
-  await queuePush("staff", recipients, { category: "workflow", title, body, url });
-  await signalNew("workspace", recipients, { type: "workflow", title, body, link: url });
+  // Automations are the company's own; the Notification center can still switch a channel off for all of them.
+  const plan = await planNotification({ type: "automation_notification", title, body, link: url, product: "workspace" });
+  if (plan.inApp.on) await (await col()).insertMany(recipients.map((userId) => ({ _id: new ObjectId(), userId, title: plan.inApp.title, body: plan.inApp.body ?? body, url, readAt: null, createdAt: now })));
+  await queuePush("staff", recipients, { category: "workflow", title, body, url, event: "automation_notification", product: "workspace" });
+  if (plan.inApp.on) await signalNew("workspace", recipients, { type: "workflow", title: plan.inApp.title, body: plan.inApp.body ?? body, link: url });
+  await logBell(plan.inApp.on, { type: "automation_notification", title, product: "workspace", recipients: recipients.length, reason: plan.inApp.reason });
   return recipients.length;
 }
 

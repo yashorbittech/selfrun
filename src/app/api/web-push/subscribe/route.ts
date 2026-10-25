@@ -15,7 +15,7 @@ async function handlePOST(req: Request) {
   const blocked = await siteGuard(req, "wp-sub", 20);
   if (blocked) return blocked;
   const settings = await getWebPushSettings();
-  if (!settings.enabled || !pushConfigured()) return NextResponse.json({ error: "Notifications aren't available on this site." }, { status: 503 });
+  if (!settings.enabled || !(await pushConfigured())) return NextResponse.json({ error: "Notifications aren't available on this site." }, { status: 503 });
 
   const body = (await req.json().catch(() => null)) as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown }; topics?: unknown; source?: unknown } | null;
   const endpoint = body?.endpoint;

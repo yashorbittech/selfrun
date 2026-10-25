@@ -13,7 +13,7 @@ subdomain and every customer-owned domain**, from Vercel to **one small AWS serv
 | Vercel hosting | The app in a Docker container on EC2 | EC2 only |
 | MongoDB Atlas | **MongoDB in a container** on the same server, with daily backups | none |
 | Vercel Blob (file storage) | **A folder on the server's disk** (the code goes back to plain files) | none |
-| Vercel Cron | **A small scheduler inside the app** (runs the same ten jobs at the same times) | none |
+| Vercel Cron | **The scheduler inside the app** (runs the same jobs at the same times; `RUN_SCHEDULER=1`) | none |
 | Vercel domains + TLS for customers' own domains | **Caddy** gets and renews free HTTPS certificates for any customer domain by itself | none |
 | Secrets Manager / Parameter Store | **One `.env` file on the server** (permissions `600`) | none |
 | ALB, NAT gateway, ECS, ECR | **Not used** (they cost more than the app itself) | none |
@@ -84,7 +84,7 @@ then a **short cut-over window** and a **few weeks** while customers re-point th
  ┌────────────────────────── ONE EC2 SERVER ──────────────────────────┐
  │  Caddy      :80 :443   automatic HTTPS, wildcard + on-demand certs  │
  │     │                                                               │
- │  app (Next.js, port 3000)  ── scheduler inside (the ten daily jobs) │
+ │  app (Next.js, port 3000)  ── scheduler inside (the scheduled jobs) │
  │     │            │                                                  │
  │  MongoDB      /data/uploads  (files on the disk)                    │
  │  backup job ── nightly dump ──► disk + S3 (off-server copy)         │
@@ -226,66 +226,17 @@ with `fetch("/api/sitecraft-ai/media/upload", { method: "POST", body: formData }
 > [!WARNING]
 > Files are private (HR documents, resumes, finance). They must stay behind the app's authenticated routes. The uploads folder is **never** served directly by Caddy.
 
-### A.2 Scheduled jobs: Vercel Cron → a scheduler inside the app (required)
+### A.2 Scheduled jobs: Vercel Cron → the scheduler inside the app (required)
 
-The ten cron URLs already check `Authorization: Bearer $CRON_SECRET`. Add a tiny scheduler that calls them at the same UTC times, from inside the app.
+The app already contains the scheduler (`src/lib/cron/scheduler.ts`, started from `src/instrumentation.ts`). It reads the same list as `vercel.json` (`src/lib/cron/registry.ts`, UTC), checks every 20 seconds which jobs are due and runs them in the app: no HTTP call, no secret. Turn it on with one setting on **exactly one** app container:
 
-Create `src/lib/scheduler.ts`:
-
-```ts
-import "server-only";
-
-/** The same ten daily jobs `vercel.json` ran (UTC), now run by the app itself. */
-const JOBS: { path: string; h: number; m: number }[] = [
-  { path: "/api/wallet/expiry-sweep", h: 2, m: 30 },
-  { path: "/api/playbook-ai/cron", h: 3, m: 0 },
-  { path: "/api/rankmax-ai/cron", h: 3, m: 30 },
-  { path: "/api/cybervault/cron", h: 4, m: 0 },
-  { path: "/api/viralpulse-ai/cron", h: 4, m: 30 },
-  { path: "/api/evaliq/cron", h: 5, m: 0 },
-  { path: "/api/platform/domains/cron", h: 5, m: 30 },
-  { path: "/api/platform/billing/trials/cron", h: 6, m: 0 },
-  { path: "/api/platform/billing/subscriptions/cron", h: 6, m: 0 },
-  { path: "/api/apps/builds/cron", h: 7, m: 0 },
-];
-
-const DAY = 86_400_000;
-const nextRun = (h: number, m: number) => {
-  const now = new Date();
-  const t = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), h, m, 0);
-  return t > now.getTime() ? t : t + DAY;
-};
-
-async function run(path: string) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return console.error("[scheduler] CRON_SECRET is not set; jobs are not run");
-  try {
-    const res = await fetch(`http://127.0.0.1:${process.env.PORT || 3000}${path}`, { headers: { authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(15 * 60_000) });
-    console.log(`[scheduler] ${path} -> ${res.status}`);
-  } catch (e) {
-    console.error(`[scheduler] ${path} failed`, e);
-  }
-}
-
-export function startScheduler() {
-  const g = globalThis as { __srScheduler?: boolean };
-  if (g.__srScheduler) return;
-  g.__srScheduler = true;
-  for (const job of JOBS) {
-    const schedule = () => setTimeout(async () => { await run(job.path); schedule(); }, nextRun(job.h, job.m) - Date.now()).unref?.();
-    schedule();
-  }
-  console.log(`[scheduler] ${JOBS.length} daily jobs scheduled (UTC)`);
-}
+```
+RUN_SCHEDULER=1
 ```
 
-Start it from `src/instrumentation.ts` (the file already exists). Put this **at the very top of `register()`**, right after the `NEXT_RUNTIME` check and **before** the early `return` that depends on `SAAS_ADMIN_EMAIL`:
+That is all. Every run is recorded and a lock stops two runs of one job overlapping, so a second container with the scheduler on (or Vercel Cron still active) cannot run a job twice at once; it is still wasteful, so keep it to one. Watch the jobs in Platform Console → **Cron jobs** (next run, last run, healthy / overdue / failing, **Run now**). The page says "Started by: The in-app scheduler" when it is on.
 
-```ts
-if (process.env.RUN_SCHEDULER === "1") void import("@/lib/scheduler").then((m) => m.startScheduler());
-```
-
-Run **exactly one** app container with `RUN_SCHEDULER=1` (the guide's compose file does). If you later run two app containers, only one may have it set.
+The jobs run on the schedule in the registry; the every-5-minutes *Scheduled announcements* job has no plan limit here (that limit is Vercel Hobby's). If you would rather drive them from the host's own cron, each job is also a URL: `curl -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3000/api/<job path>` (paths are in the registry and in section 16 of the Vercel guide).
 
 ### A.3 Let Caddy ask the app which domains are real (required for customers' own domains)
 
@@ -485,7 +436,7 @@ All settings and secrets live in **one file**, `/opt/selfrun/.env`, readable onl
   openssl rand -base64 32      # run once per secret below
   npx web-push generate-vapid-keys   # on your computer, once: VAPID pair
   ```
-- **5.2** **Reuse, never regenerate, the keys of the live platform.** From Vercel (project → Settings → Environment Variables → Production → *Reveal*) copy these **exact values**: `PLATFORM_ENCRYPTION_KEY`, `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`, `DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `OPENAI_API_KEY` and every other key you use (Appendix A).
+- **5.2** **Reuse, never regenerate, the keys of the live platform.** From Vercel (project → Settings → Environment Variables → Production → *Reveal*) copy these **exact values**: `PLATFORM_ENCRYPTION_KEY` (plus `HRMS_`, `FMS_`, `DLMS_`, `SMMS_ENCRYPTION_KEY` only if the live platform had set them), `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `OPENAI_API_KEY` and every other key you use (Appendix A).
 
   > [!WARNING]
   > **Never generate new encryption keys for an existing database.** Bank details, finance accounts, Digi Locker credentials and social tokens would become unreadable. Only a brand-new, empty installation may use new keys.
@@ -515,10 +466,6 @@ All settings and secrets live in **one file**, `/opt/selfrun/.env`, readable onl
 
   # --- encryption keys (SAME as the live platform) ---
   PLATFORM_ENCRYPTION_KEY=...
-  HRMS_ENCRYPTION_KEY=...
-  FMS_ENCRYPTION_KEY=...
-  DLMS_ENCRYPTION_KEY=...
-  SMMS_ENCRYPTION_KEY=...
 
   # --- first staff account (used only if the database has none) ---
   SAAS_ADMIN_EMAIL=you@selfrunbusiness.com
@@ -1222,7 +1169,7 @@ After **30 quiet days** and all customer domains moved:
 | Uploads fail | `/data/uploads` is not writable by the app | `sudo chown -R 1000:1000 /data/uploads` |
 | Old files do not open | The copy is incomplete, or `.type` files are missing | Re-run the copy script (it skips existing files) |
 | Emails do not arrive | SES in the sandbox, or DKIM not verified | Part 9 |
-| Scheduled jobs did not run | `RUN_SCHEDULER` is not `1`, or `CRON_SECRET` is empty | Check the `[scheduler]` lines in the web log |
+| Scheduled jobs did not run | `RUN_SCHEDULER` is not `1` on the running container | Check the `[scheduler]` line in the web log, and Platform Console → Cron jobs (it says what starts the jobs and which are overdue) |
 | A job ran twice | Two app containers have the scheduler on, or Vercel crons are still active | One scheduler only; remove Vercel's crons (14.4) |
 | Live chat disconnects | Something in front buffers streaming | Caddy has `flush_interval -1`; do not put another proxy in front |
 | Disk full | Logs, backups or uploads grew | `df -h /data`; delete old `/data/backups`; enlarge the volume (16.4) |
@@ -1248,14 +1195,14 @@ All of these go in `/opt/selfrun/.env` (Part 5.3).
 | `UPLOAD_DIR` | `/data/uploads` |
 | `RUN_SCHEDULER` | `1` on exactly one app container |
 | `CRON_SECRET` | Same as before (the scheduler uses it to call the cron URLs) |
-| `PLATFORM_ENCRYPTION_KEY`, `HRMS_ENCRYPTION_KEY`, `FMS_ENCRYPTION_KEY`, `DLMS_ENCRYPTION_KEY`, `SMMS_ENCRYPTION_KEY` | **The same values as on the live platform** |
+| `PLATFORM_ENCRYPTION_KEY` (plus `HRMS_`, `FMS_`, `DLMS_`, `SMMS_ENCRYPTION_KEY` only if the live platform had set them) | **The same values as on the live platform** |
 | `SAAS_ADMIN_EMAIL`, `SAAS_ADMIN_PASSWORD` | First staff account (only when the database has none) |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Same pair as before |
 | `OPENAI_API_KEY`, `OPENAI_CHATBOT_VECTOR_STORE_ID`, `CHATBOT_CRAWL_BASE_URL` | As today |
 | `EMAIL_PROVIDER`, `EMAIL_FROM` | `ses` (or `resend`), the from address |
 | `SES_SMTP_HOST`, `SES_SMTP_USERNAME`, `SES_SMTP_PASSWORD` | SES (Part 9) |
 | `RESEND_API_KEY` | Only if you keep Resend |
-| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_BILLING_WEBHOOK_SECRET`, `HRMS_PAYOUT_PROVIDER` | As today |
+| `HRMS_PAYOUT_PROVIDER` | As today (the Razorpay keys and billing webhook secret live in the database, set in the Platform Console) |
 | `WALLET_CRON_SECRET`, `HRMS_API_SECRET`, `LEADS_API_SECRET`, `INDEXING_API_SECRET`, `CHATBOT_ADMIN_API_SECRET` | Only if you use them today |
 | `MESSENGER_TURN_URL`, `MESSENGER_TURN_USERNAME`, `MESSENGER_TURN_CREDENTIAL`, `MESSENGER_CALL_MAX` | Only if you use a TURN relay (the same coturn setup can run on this server or a small separate one) |
 | `GITHUB_REPOSITORY`, `GITHUB_DISPATCH_TOKEN`, `DESKTOP_BUILD_SECRET`, `DESKTOP_RELEASES_REPO`, `GITHUB_WORKFLOW_FILE`, `GITHUB_WORKFLOW_REF` | Desktop builds: unchanged |
@@ -1272,7 +1219,7 @@ All of these go in `/opt/selfrun/.env` (Part 5.3).
 | Where | What |
 | --- | --- |
 | `src/lib/storage/blob.ts` + four files that used Blob | Files on the server's disk (A.1) |
-| `src/lib/scheduler.ts`, `src/instrumentation.ts` | The in-app scheduler replacing Vercel Cron (A.2) |
+| `RUN_SCHEDULER=1` (setting, no file to add) | The in-app scheduler that replaces Vercel Cron (A.2) |
 | `src/app/api/internal/tls-ask/route.ts` | Lets Caddy ask which domains are real (A.3) |
 | `next.config.ts`, `package.json`, `src/app/api/health/route.ts` | Standalone build, `sharp`, health endpoint (A.4) |
 | `src/lib/platform/integrations/resolve.ts` | Add `ses` (A.5, optional) |

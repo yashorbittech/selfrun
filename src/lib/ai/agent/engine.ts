@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import type OpenAI from "openai";
 import { revalidatePath } from "next/cache";
@@ -358,13 +359,8 @@ async function stepLoop(ctx: Ctx, run: Run): Promise<AgentResponse> {
 
 // ── Public entry points ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-/** Products whose reach differs from "this company's records": said plainly so the model neither over-promises nor goes looking in the wrong place. */
-const SCOPE_NOTES: Record<string, string> = {
-  platform: "\n\nScope: this is the platform owner's console. You see ALL companies on the platform (not one company's records): use run_report to read companies, subscriptions, invoices, revenue, plans, coupons, add-ons, usage, AI token history, sign-ups, support requests and the audit log, and run_action to change them. There are no generic records here. Every tool is limited by the person's platform role; a missing tool means their role does not allow it. Deleting a company, changing payment keys and platform integrations are done on their own screens, never by you. Money and access changes are significant: state the company and the exact change in your reply.",
-  portal: "\n\nScope: you are talking to an EXTERNAL person (an applicant, intern, trainee or client of this company), not staff. Help them with their own request, progress, interviews, messages, documents, wallet and notifications only. Never mention or reveal anything about other people, the company's internal records, staff or other customers. You cannot change anything except sending a message to the team, switching their active request and marking notifications read.",
-  support: "\n\nScope: this is the company's Help & Support centre. Search the help articles first (support.search_help) and answer from them; if they do not cover the problem, offer to raise a support request to the support team (ask for the type, a clear title and the steps), and help follow or reply to the company's existing requests.",
-  cms: "\n\nScope: the company's public website. Page content, menus, footer, blog/jobs/products collections, media, forms, offers, wallet, chatbot, push and settings are all yours to read and (with approval) change. Never invent business facts.",
-};
+/** Products whose reach differs from "this company's records" have their own scope note (the "Agent scope note" prompts): said plainly so the model neither over-promises nor goes looking in the wrong place. */
+const SCOPE_NOTE_PANELS = new Set(["platform", "portal", "support", "cms"]);
 
 const scopeKind = (panel: string): ScopeKind => (panel === "platform" ? "platform" : panel === "portal" ? "portal" : panel === "support" ? "support" : "workspace");
 
@@ -374,32 +370,38 @@ async function systemPrompt(ctx: Ctx, page?: string): Promise<string> {
   const list = ctx.entities.map((e) => `- ${e.key}: ${e.label} — ${e.description}${canWrite(ctx.user, e) ? ` [${[canCreate(e) && "create", canUpdate(e) && "edit", canRemove(e) && "delete"].filter(Boolean).join("/") || "read"}]` : " [read only]"}`).join("\n");
   const reps = ctx.reports.map((r) => `- ${r.key}: ${r.label} — ${r.description}`).join("\n");
   const acts = ctx.actions.map((a) => `- ${a.key}: ${a.label} — ${a.description}`).join("\n");
-  const where = ctx.panel === "workspace" ? "the Workspace (it spans every product you have access to)" : ctx.panel === "platform" ? "the Platform Console (the SaaS owner's console)" : ctx.panel === "portal" ? "the external user Portal" : ctx.panel === "support" ? "the Help & Support centre" : `the ${ctx.panel.toUpperCase()} product`;
-  const scope = SCOPE_NOTES[ctx.panel] ?? "";
-  return `You are the AI agent inside ${where} of "${brand.name}". Today is ${new Date().toISOString().slice(0, 10)}. You act as ${ctx.user.email} (roles: ${ctx.user.roles.join(", ") || "none"}), with exactly their permissions${ctx.panel === "platform" ? "" : ", only inside this company"}.${page ? `\nThe person is on this page: ${page}.` : ""}
-
-You can read this company's real records and, with the person's approval, create, change or delete them and run business actions. You can also read attached screenshots, photos, PDFs, spreadsheets and documents.${scope}
-
-How to work:
-1. Look things up before acting. Names the person says ("the Acme project") must be resolved to real ids with find_records; never guess or invent ids. If several match, ask which one (ask_user, with choices).
-2. Anything that changes data goes through create_record / update_record / delete_record / run_action. The person then sees an approval card and nothing is saved until they approve, so do NOT ask "should I go ahead?" in text first. Collect every required value first (ask_user for what is missing, one short question at a time, with choices when the options are known; use describe_entity to know the required fields), then make the call with complete values. Related changes that belong together go in the same turn.
-3. After the result comes back, say exactly what happened (name, code, id). If it failed, say why in plain words and what to do. Never claim something was done unless the tool result says so.
-4. For attachments: read them carefully. If a screenshot shows a record or a form, you can explain it, answer questions about it, or use its data to fill a record; when a value is unclear or illegible, ask rather than guess.
-5. For "how do I…", "where is…" or "what does… mean" questions, call panel_guide (and find_screen) and answer from it with the exact screen as a link; offer to do it for them when you can. Questions about numbers ("how many", "total") are answered from real data with find_records / group_records, not from memory. If nothing is found, say so.
-6. Never invent facts. Never reveal passwords, tokens, keys or bank/ID numbers. If something is not possible here (not in your tools, or you lack permission), say so and point to where in the product it is done.
-7. Be brief and concrete; use short lists for several items. The LANGUAGE and SCOPE sections below are binding.
-
-${ctx.panel !== "workspace" && routeSummary(ctx.panel) ? `\nScreens in this product (give them as markdown links, e.g. [Projects](/sprintos/projects)):\n${routeSummary(ctx.panel)}\n` : ""}${ctx.cms ? "" : list ? `Records you can work with (${panels.join(", ")}):\n${list}\n` : reps || acts ? "" : "In this product you have no record tools. You can answer how-to questions from the guide (panel_guide), read what the person attaches or pastes, explain it, and help them think it through; for anything that needs the product's data or a change, tell them plainly you can't do that from here and which product can.\n"}${reps ? `\nReports (use run_report):\n${reps}\n` : ""}${acts ? `\nActions (use run_action, needs approval):\n${acts}\n` : ""}\n${scopeBlock(scopeKind(ctx.panel))}\n\n${languageBlock(ctx.lang)}`;
+  // Every piece of wording below is a prompt (Platform Console → AI prompts); this function only decides which pieces apply and fills in the data.
+  const where = ctx.panel === "workspace" || ctx.panel === "platform" || ctx.panel === "portal" || ctx.panel === "support" ? await getPrompt(`agent.where.${ctx.panel}`) : await getPrompt("agent.where.product", { panel: ctx.panel.toUpperCase() });
+  const scope = SCOPE_NOTE_PANELS.has(ctx.panel) ? await getPrompt(`agent.scope.${ctx.panel}`) : "";
+  const screensList = ctx.panel !== "workspace" ? routeSummary(ctx.panel) : "";
+  return getPrompt("agent.system", {
+    where,
+    brand: brand.name,
+    today: new Date().toISOString().slice(0, 10),
+    email: ctx.user.email,
+    roles: ctx.user.roles.join(", ") || "none",
+    company_scope: ctx.panel === "platform" ? "" : await getPrompt("agent.company_scope"),
+    page_line: page ? await getPrompt("agent.page_line", { page }) : "",
+    scope,
+    screens: screensList ? await getPrompt("agent.section.screens", { list: screensList }) : "",
+    records: ctx.cms ? "" : list ? await getPrompt("agent.section.records", { panels: panels.join(", "), list }) : reps || acts ? "" : await getPrompt("agent.section.no_tools"),
+    reports: reps ? await getPrompt("agent.section.reports", { list: reps }) : "",
+    actions: acts ? await getPrompt("agent.section.actions", { list: acts }) : "",
+    scope_block: await scopeBlock(scopeKind(ctx.panel)),
+    language_block: await languageBlock(ctx.lang),
+  });
 }
 
-function historyMessages(history: ClientMessage[], attachedParts: { parts: OpenAI.Chat.ChatCompletionContentPart[] }[]): Msg[] {
-  return history.map((m, i) => {
-    if (m.role === "assistant") return { role: "assistant", content: m.content };
-    const prepared = attachedParts[i];
-    if (prepared?.parts.length) return { role: "user", content: [{ type: "text", text: m.content || "(see the attached file)" }, ...prepared.parts] };
-    const names = (m.attachments ?? []).map((a) => a.name);
-    return { role: "user", content: names.length ? `${m.content}\n[earlier attachments not shown again: ${names.join(", ")}]` : m.content };
-  });
+async function historyMessages(history: ClientMessage[], attachedParts: { parts: OpenAI.Chat.ChatCompletionContentPart[] }[]): Promise<Msg[]> {
+  return Promise.all(
+    history.map(async (m, i): Promise<Msg> => {
+      if (m.role === "assistant") return { role: "assistant", content: m.content };
+      const prepared = attachedParts[i];
+      if (prepared?.parts.length) return { role: "user", content: [{ type: "text", text: m.content || (await getPrompt("agent.note.see_attachment")) }, ...prepared.parts] };
+      const names = (m.attachments ?? []).map((a) => a.name);
+      return { role: "user", content: names.length ? await getPrompt("agent.note.earlier_attachments", { message: m.content, names: names.join(", ") }) : m.content };
+    }),
+  );
 }
 
 export async function runAgent(input: { user: AgentUser; panel: string; history: ClientMessage[]; page?: string; autoApprove?: boolean }): Promise<AgentResponse & { attachmentErrors?: string[] }> {
@@ -426,7 +428,7 @@ export async function runAgent(input: { user: AgentUser; panel: string; history:
     }
   }
   const system = (ctx.cms ? `${await cmsSystem("")}\n\n` : "") + (await systemPrompt(ctx, input.page));
-  const run: Run = { messages: [{ role: "system", content: system }, ...historyMessages(input.history, prepared)], steps: [], changed: false, autoApprove: !!input.autoApprove };
+  const run: Run = { messages: [{ role: "system", content: system }, ...(await historyMessages(input.history, prepared))], steps: [], changed: false, autoApprove: !!input.autoApprove };
   const out = await stepLoop(ctx, run);
   return errors.length ? { ...out, attachmentErrors: errors } : out;
 }
@@ -444,8 +446,9 @@ export async function decideProposal(input: { user: AgentUser; panel: string; pr
   const toolMsg = (id: string, out: Json): Msg => ({ role: "tool", tool_call_id: id, content: JSON.stringify(out).slice(0, RESULT_CAP) });
 
   if (input.decision === "reject") {
-    for (const c of p.calls) run.messages.push(toolMsg(c.id, { rejected: true, note: input.note?.slice(0, 500) || "The person did not approve this change. Nothing was changed." }));
-    run.messages.push({ role: "user", content: `[I rejected that proposal.${input.note ? ` Reason: ${input.note.slice(0, 500)}` : ""} Don't make the change; ask what I'd like instead.]` });
+    const rejectedNote = input.note?.slice(0, 500) || (await getPrompt("agent.note.rejected_tool"));
+    for (const c of p.calls) run.messages.push(toolMsg(c.id, { rejected: true, note: rejectedNote }));
+    run.messages.push({ role: "user", content: await getPrompt("agent.note.rejected", { reason: input.note ? await getPrompt("agent.note.rejected_reason", { note: input.note.slice(0, 500) }) : "" }) });
     await finishProposal(p._id);
     return stepLoop(ctx, run);
   }

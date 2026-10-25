@@ -1,16 +1,18 @@
 import "server-only";
 import { isPlatformOwnerContext, currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { getSavedConnection } from "@/lib/platform/connections/store";
-import { PLATFORM_PROVIDED_PROVIDERS } from "@/lib/platform/connections/catalog";
+import { PLATFORM_FALLBACK } from "@/lib/platform/connections/catalog";
+import { getConfig } from "@/lib/platform/config/store";
 
 /**
  * What the rest of the app asks for: "the credentials for <provider>, for the current company".
  *
- *  0. email, AI and voice (`PLATFORM_PROVIDED_PROVIDERS`): always the deployment's own credentials, for every company
- *  1. the company's own saved connection (Workspace → Settings → Integrations)
- *  2. else — for the PLATFORM OWNER's own workspace only — the deployment's environment variables, so an existing
- *     env-configured deployment keeps working
- *  3. else nothing. No company ever falls back to another company's or the platform's keys.
+ *  1. the company's own saved connection (Workspace → Settings → Integrations): used by that company only
+ *  2. else, for the services SelfRun can provide (`PLATFORM_FALLBACK`: AI, voice, WhatsApp/SMS, PageSpeed, TURN, Google service account),
+ *     the platform's own keys from Platform Console → Integrations (or the server environment); those uses count against the plan
+ *  3. else, for the PLATFORM OWNER's own workspace only, the deployment's environment variables (social apps)
+ *  4. else nothing. A company never gets another company's keys, and never the platform's keys for payments or social apps.
+ * Email and push have the same rule in `email/index.ts` and `push/vapid.ts`.
  */
 export const ENV_CONNECTION_PROVIDERS = (): string[] => Object.keys(ENV);
 const ENV: Record<string, Record<string, string[]>> = {
@@ -25,34 +27,35 @@ const ENV: Record<string, Record<string, string[]>> = {
   linkedin: { clientId: ["LINKEDIN_CLIENT_ID"], clientSecret: ["LINKEDIN_CLIENT_SECRET"] },
 };
 
-/** The credentials a deployment's environment holds for `provider` (null when none) — used by the platform operator, and by the operator-separation migration. */
-export function fromEnv(provider: string): Record<string, string> | null {
+/**
+ * The credentials the deployment holds for `provider` (null when none): the keys saved in Platform Console → Integrations, else the
+ * environment variables — used by the platform operator's own workspace and for the platform-provided services.
+ */
+export async function fromEnv(provider: string): Promise<Record<string, string> | null> {
   const map = ENV[provider];
   if (!map) return null;
   const out: Record<string, string> = {};
   for (const [field, names] of Object.entries(map)) {
-    const v = names.map((n) => process.env[n]?.trim()).find(Boolean);
-    if (v) out[field] = v;
+    for (const n of names) {
+      const v = await getConfig(n);
+      if (v) {
+        out[field] = field === "privateKey" ? v.replace(/\\n/g, "\n") : v;
+        break;
+      }
+    }
   }
   return Object.keys(out).length ? out : null;
 }
 
-export type ResolvedConnection = { values: Record<string, string>; source: "workspace" | "environment" };
-
-const PLATFORM_PROVIDED = new Set<string>(PLATFORM_PROVIDED_PROVIDERS);
+export type ResolvedConnection = { values: Record<string, string>; source: "workspace" | "platform" };
 
 export async function resolveConnection(provider: string): Promise<ResolvedConnection | null> {
   if (!(await currentCompanyIdOrNull())) return null;
-  // Email, AI and voice are the platform's: every company uses the deployment's credentials, never its own.
-  if (PLATFORM_PROVIDED.has(provider)) {
-    const env = fromEnv(provider);
-    return env ? { values: env, source: "environment" } : null;
-  }
   const saved = await getSavedConnection(provider);
   if (saved && Object.keys(saved).length) return { values: saved, source: "workspace" };
-  if (await isPlatformOwnerContext()) {
-    const env = fromEnv(provider);
-    if (env) return { values: env, source: "environment" };
+  if (PLATFORM_FALLBACK.includes(provider) || (await isPlatformOwnerContext())) {
+    const env = await fromEnv(provider);
+    if (env) return { values: env, source: "platform" };
   }
   return null;
 }

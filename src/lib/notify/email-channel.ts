@@ -6,9 +6,11 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { getCompany } from "@/lib/platform/tenancy/companies";
 import { companyAppBaseUrl } from "@/lib/platform/tenancy/provisioning";
 import { sendEmail } from "@/lib/platform/email";
+import { logDeliveries, maskEmail } from "@/lib/notify/center/store";
 import { renderEmail } from "@/lib/platform/email/template";
 import { getPreferencesMany, type PushActor } from "@/lib/push/store";
 import type { PushMessage } from "@/lib/push/send";
+import { DEFAULT_FOOTNOTE, renderTemplate } from "@/lib/notify/center/shared";
 import { dayKey, emailCaps, emailSubject, hourKey, safeEmailPath, wantsEmail } from "@/lib/notify/email-channel-rule";
 
 /**
@@ -76,15 +78,22 @@ export async function emailToUsers(actor: PushActor, userIds: string[], message:
     for (const p of people) {
       if (!wantsEmail(prefs.get(p.id) ?? DEFAULT_PREFERENCES, message.category)) continue;
       if (!(await admit(p.id, message))) continue;
+      // Greeting, button and small print follow the company's wording (Notification center), filled in for this person.
+      const first = p.name.split(" ")[0] ?? "";
+      const values = { firstName: first, settingsLink: `${base}${settings}` };
+      const general = { company: company.name, link, title: message.title, body: message.body ?? "" };
+      const extra = (custom: string | null | undefined, fallback: string | null) => (custom ? renderTemplate(custom, general, values) : null) ?? fallback;
+      const greeting = extra(message.emailExtras?.greeting, first ? `Hi ${first},` : null);
       const { html, text } = renderEmail({
         brand: company.name,
         heading: message.title,
-        paragraphs: [...(p.name ? [`Hi ${p.name.split(" ")[0]},`] : []), ...(message.body ? [message.body] : [])],
-        action: { label: "Open it", url: link },
-        footnote: `You get this because of your notification settings for ${company.name}. Change which emails you get: ${base}${settings}`,
+        paragraphs: [...(greeting ? [greeting] : []), ...(message.body ? [message.body] : [])],
+        action: { label: extra(message.emailExtras?.button, "Open it") ?? "Open it", url: link },
+        footnote: extra(message.emailExtras?.footnote, renderTemplate(DEFAULT_FOOTNOTE, general, values)) ?? undefined,
       });
-      const res = await sendEmail({ to: p.email, subject: emailSubject(company.name, message.title), html, text });
+      const res = await sendEmail({ to: p.email, subject: message.subject ? emailSubject(company.name, message.subject) : emailSubject(company.name, message.title), html, text });
       if (res.ok) sent++;
+      await logDeliveries([{ channel: "email", event: message.event ?? "other", product: message.product, title: message.title, status: res.ok ? "sent" : "failed", recipient: maskEmail(p.email), detail: res.ok ? "" : res.error }]);
     }
     return sent;
   } catch (err) {

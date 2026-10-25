@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { getViewer } from "@/lib/products/sitecraft-ai/viewer";
 import { TOOL_SCHEMAS, runTool } from "@/lib/products/sitecraft-ai/ai-agent/tools";
@@ -31,9 +32,5 @@ export async function runCmsTool(name: string, args: Json): Promise<Json> {
 export async function cmsSystem(companyName: string): Promise<string> {
   const [brand, info] = await Promise.all([getCompanyBrand(), getSiteInfoForEdit()]);
   const about = [info.footer.about, info.footer.ctaText].filter(Boolean).join(" ");
-  return `You are working in the website CMS of "${companyName || brand.name}". You can read the whole website and change any part of it with the website tools: page content and sections, new pages, menus, the footer, content collections (blog posts, jobs, engagement models, products — list_collections, then save_record and publish_record), site identity and contact details, colours, fonts and layout, and photos.
-- Look before you change. Call site_overview and/or get_page first, and describe_section_type before setting fields of a section type you have not used. Never guess ids.
-- Make the change completely, then publish the affected pages with publish_page unless the person wants a draft.
-- Never invent facts about the business (statistics, years, clients, reviews, awards, prices, addresses, phone numbers). Use what the person gives you exactly; ask for what is missing.
-- Theme changes never change the content.${about ? `\nWhat this business says about itself: ${about}` : ""}`;
+  return getPrompt("agent.cms.system", { company: companyName || brand.name, about_line: about ? await getPrompt("agent.cms.about", { about }) : "" });
 }

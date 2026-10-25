@@ -950,7 +950,7 @@ export const PEOPLE_TRAINING_SECURITY_FAQS: FaqHubGroup[] = [
       },
       {
         q: "What configuration is required to encrypt passwords?",
-        a: "The encryption key must be set as a base64-encoded 32-byte DLMS_ENCRYPTION_KEY; encryption fails when the key is missing or malformed.",
+        a: "The encryption key must be set as a base64-encoded 32-byte PLATFORM_ENCRYPTION_KEY; encryption fails when the key is missing or malformed.",
         evidence: ["src/lib/products/cybervault/crypto.ts:26-42", "src/lib/products/cybervault/records.ts:452-473"],
       },
       {

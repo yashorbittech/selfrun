@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { getDb } from "@/lib/mongodb";
 import { queuePush } from "@/lib/push/send";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { categorizeType, type PushCategory } from "@/lib/push/categories";
 import { audienceUserIds, canOpen, userIdsByRoles, type Audience } from "@/lib/notify/audience";
 import { signalUsers } from "@/lib/notify/signals";
@@ -45,6 +46,8 @@ export interface NotifyInput {
   dedupeKey?: string | null;
   /** Push category override; by default it is derived from `type`. */
   category?: PushCategory;
+  /** Narrows the channels for this one send; never widens what the company allows. */
+  channels?: Partial<Record<"inApp" | "push" | "email", boolean>>;
 }
 
 let indexed = false;
@@ -78,8 +81,14 @@ export async function notifyUsers(panel: NotifyPanel, userIds: string[], n: Noti
     const expiresAt = new Date(now.getTime() + TTL_DAYS * 86_400_000);
     const delivered: string[] = [];
     let last: PanelNotification | null = null;
+    // The company's Notification center: which channels carry this event, and any wording it changed.
+    const plan = await planNotification({ type: n.type, title: clip(n.title, 160), body: clip(n.body, 400) || null, link: safeLink(n.link), product: panel, only: n.channels });
     for (const userId of allowed) {
-      const doc: PanelNotification = { _id: randomUUID(), userId, panel, type: n.type, title: clip(n.title, 160), body: clip(n.body, 400) || null, link: safeLink(n.link), priority: n.priority ?? "normal", dedupeKey: n.dedupeKey ?? null, read: false, createdAt: now, expiresAt };
+      if (!plan.inApp.on) {
+        delivered.push(userId); // no bell row, but push and email still follow their own rules
+        continue;
+      }
+      const doc: PanelNotification = { _id: randomUUID(), userId, panel, type: n.type, title: clip(plan.inApp.title, 160), body: clip(plan.inApp.body, 400) || null, link: safeLink(n.link), priority: n.priority ?? "normal", dedupeKey: n.dedupeKey ?? null, read: false, createdAt: now, expiresAt };
       if (doc.dedupeKey) {
         const res = await c.updateOne({ userId, dedupeKey: doc.dedupeKey }, { $setOnInsert: doc }, { upsert: true });
         if (!res.upsertedCount) continue;
@@ -89,10 +98,13 @@ export async function notifyUsers(panel: NotifyPanel, userIds: string[], n: Noti
       delivered.push(userId);
       last = doc;
     }
-    if (last && delivered.length) {
-      const item: SignalItem = { id: last._id, type: last.type, title: last.title, body: last.body, link: last.link, priority: last.priority, createdAt: now.toISOString() };
-      await signalUsers(panel, delivered, item);
-      await queuePush("staff", delivered, { category: n.category ?? categorizeType(n.type), title: last.title, body: last.body, url: last.link ?? `/${panel}/notifications`, tag: n.dedupeKey ?? undefined });
+    if (delivered.length) {
+      if (last) {
+        const item: SignalItem = { id: last._id, type: last.type, title: last.title, body: last.body, link: last.link, priority: last.priority, createdAt: now.toISOString() };
+        await signalUsers(panel, delivered, item);
+      }
+      await queuePush("staff", delivered, { category: n.category ?? categorizeType(n.type), title: clip(n.title, 160), body: clip(n.body, 400) || null, url: safeLink(n.link) ?? `/${panel}/notifications`, tag: n.dedupeKey ?? undefined, event: n.type, product: panel, channels: n.channels });
+      await logBell(plan.inApp.on, { type: n.type, title: clip(n.title, 160), product: panel, recipients: delivered.length, reason: plan.inApp.reason });
     }
     return delivered.length;
   } catch (err) {

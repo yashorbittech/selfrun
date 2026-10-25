@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { COLLECTIONS, updateStamp, str } from "@/lib/products/agentos/db";
@@ -22,17 +23,15 @@ export interface AibotsSettings {
 }
 
 const ID = "main";
-export const DEFAULT_GENERAL_INSTRUCTIONS =
-  "You are the company's general AI assistant for employees. Help with writing, analysis, planning, research and everyday work questions. Be accurate and concise, ask a clarifying question when a request is ambiguous, and say when you don't know something rather than guessing.";
-
-export const DEFAULT_SETTINGS = { models: DEFAULT_MODELS, defaultModel: DEFAULT_MODELS[0].id, maxOutputTokens: 4000, dailyMessageLimit: 200, generalInstructions: DEFAULT_GENERAL_INSTRUCTIONS };
+export const DEFAULT_SETTINGS = { models: DEFAULT_MODELS, defaultModel: DEFAULT_MODELS[0].id, maxOutputTokens: 4000, dailyMessageLimit: 200, generalInstructions: "" };
 
 export async function getSettings(): Promise<AibotsSettings> {
   const db = await getDb();
   const doc = await db.collection<AibotsSettings>(COLLECTIONS.settings).findOne({ _id: ID });
   const merged = { _id: ID, ...DEFAULT_SETTINGS, updatedAt: new Date(0), updatedBy: null, ...(doc ?? {}) };
   if (!merged.models?.length) merged.models = DEFAULT_MODELS;
-  if (!merged.generalInstructions?.trim()) merged.generalInstructions = DEFAULT_GENERAL_INSTRUCTIONS;
+  // Left empty, a company uses the platform's general-assistant prompt (Platform Console → AI prompts).
+  if (!merged.generalInstructions?.trim()) merged.generalInstructions = await getPrompt("agentos.general.default");
   return merged;
 }
 
@@ -77,7 +76,7 @@ export async function saveSettings(
         defaultModel: seen.has(defaultModel) ? defaultModel : models[0].id,
         maxOutputTokens,
         dailyMessageLimit,
-        generalInstructions: str(input.generalInstructions, 20000) || DEFAULT_GENERAL_INSTRUCTIONS,
+        generalInstructions: str(input.generalInstructions, 20000) || (await getPrompt("agentos.general.default")),
         ...updateStamp(actorId),
       },
     },

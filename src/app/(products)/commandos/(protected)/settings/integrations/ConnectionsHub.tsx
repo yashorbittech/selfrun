@@ -31,7 +31,7 @@ export interface HubProvider {
   saved: { values: Record<string, string>; secrets: Record<string, { set: true; last4: string }>; lastTest: { ok: boolean; at: string; message: string } | null; updatedAt: string | null } | null;
 }
 
-const GROUP_ORDER: ConnectionGroup[] = ["email", "messaging", "ai", "social", "search", "realtime", "payments", "other"];
+const GROUP_ORDER: ConnectionGroup[] = ["email", "messaging", "push", "ai", "social", "search", "realtime", "payments", "other"];
 
 export default function ConnectionsHub({ providers, encryptionReady }: { providers: HubProvider[]; encryptionReady: boolean }) {
   const [query, setQuery] = useState("");

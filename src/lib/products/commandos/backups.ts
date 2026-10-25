@@ -7,6 +7,7 @@ import { del, get, put } from "@vercel/blob";
 import { getDb } from "@/lib/mongodb";
 import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { buildArchive } from "@/lib/products/commandos/data-archive";
+import { blobAuth, blobTokenConfigured } from "@/lib/storage/blob-token";
 
 /**
  * Backups of a company's workspace: the archive from `data-archive.ts`, saved in private storage with a history row for each. Scheduled ones
@@ -52,19 +53,19 @@ export interface BackupStorage {
 }
 const blobStorage: BackupStorage = {
   async put(key, body) {
-    await put(key, body, { access: "private", contentType: "application/zip", addRandomSuffix: false, allowOverwrite: true });
+    await put(key, body, { ...(await blobAuth()), access: "private", contentType: "application/zip", addRandomSuffix: false, allowOverwrite: true });
   },
   async get(key) {
-    const r = await get(key, { access: "private" });
+    const r = await get(key, { ...(await blobAuth()), access: "private" });
     return r && r.statusCode === 200 && r.stream ? { stream: r.stream } : null;
   },
   async read(key) {
-    const r = await get(key, { access: "private" });
+    const r = await get(key, { ...(await blobAuth()), access: "private" });
     if (!r || r.statusCode !== 200 || !r.stream) return null;
     return Buffer.from(await new Response(r.stream).arrayBuffer());
   },
   async del(key) {
-    await del(key);
+    await del(key, await blobAuth());
   },
 };
 /** Development only, with no Blob token: files in the machine's temp folder, so the pages can be tried locally. Never used in production. */
@@ -87,9 +88,9 @@ const diskStorage: BackupStorage = {
   },
 };
 let override: BackupStorage | null = null;
-const storageNow = (): BackupStorage => override ?? (process.env.NODE_ENV !== "production" && !process.env.BLOB_READ_WRITE_TOKEN ? diskStorage : blobStorage);
+const storageNow = async (): Promise<BackupStorage> => override ?? (process.env.NODE_ENV !== "production" && !(await blobTokenConfigured()) ? diskStorage : blobStorage);
 /** A proxy so the code below keeps calling `storage.put(...)`. */
-const storage: BackupStorage = { put: (k, b) => storageNow().put(k, b), get: (k) => storageNow().get(k), read: (k) => storageNow().read(k), del: (k) => storageNow().del(k) };
+const storage: BackupStorage = { put: async (k, b) => (await storageNow()).put(k, b), get: async (k) => (await storageNow()).get(k), read: async (k) => (await storageNow()).read(k), del: async (k) => (await storageNow()).del(k) };
 export function useBackupStorage(s: BackupStorage | null): void {
   override = s;
 }

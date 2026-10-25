@@ -207,20 +207,53 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
     ],
   };
 
+  const reach = v.email ? `by writing to ${v.email}` : "through the Contact page of this website";
+  const doc = (id: string, title: string, icon: string, paragraphs: string[], bullets: string[] = []) => ({ id, title, icon, paragraphs, bullets });
   const privacy: StarterPage = {
     path: "/privacy-policy",
     title: "Privacy Policy",
-    seo: { title: `Privacy Policy | ${v.name}`, description: `How ${v.name} handles personal data.` },
+    seo: { title: `Privacy Policy | ${v.name}`, description: `How ${v.name} collects, uses and protects personal data under Indian law, and your rights.` },
     sections: [
-      section("page-hero", { category: "legal", categoryLabel: "legal", title: "Privacy Policy", subtitle: "How we handle your information.", description: "A starting template — review and adapt it to your company's practices and applicable law before relying on it.", icon: "ShieldCheck", image: IMG.privacy, primaryCtaExternal: false }),
+      section("page-hero", { category: "legal", categoryLabel: "legal", title: "Privacy Policy", subtitle: "How we handle your personal data.", description: `This notice explains what personal data ${v.name} collects through this website, why, how long we keep it and your rights under the Digital Personal Data Protection Act, 2023 and the Information Technology Act, 2000.`, icon: "ShieldCheck", image: IMG.privacy, primaryCtaExternal: false }),
       section("legal-document", {
         sections: [
-          { id: "collect", title: "Information we collect", icon: "FileText", paragraphs: [`${v.name} collects the information you choose to share with us — for example your name, email address, phone number and message when you contact us.`], bullets: [] },
-          { id: "use", title: "How we use it", icon: "Settings", paragraphs: ["We use this information to respond to your enquiry, provide our services and improve our website. We don't sell your personal information."], bullets: [] },
-          { id: "rights", title: "Your choices", icon: "UserCheck", paragraphs: [`You can ask us to access, correct or delete your information at any time${v.email ? ` by writing to ${v.email}` : ""}.`], bullets: [] },
+          doc("who", "Who we are", "Building2", [`${v.name} (“we”, “us”) is the Data Fiduciary for the personal data collected through this website. You can reach us ${reach}.`]),
+          doc("collect", "Personal data we collect", "FileText", ["We collect only what you choose to give us, and basic technical data needed to run and secure the website."], ["Contact details and messages: your name, email address, phone number and the message you send through a form or by email.", "Account details, if this website has sign-in: your name, email, phone number and a password that we store only as a secure hash.", "Technical data: IP address, browser type and the pages you open, kept in server logs for security."]),
+          doc("why", "Why we use it", "Settings", ["We use your personal data to answer your enquiry, provide the service or product you asked for, keep the website secure, and meet legal duties such as tax and accounting. We use it for marketing messages only if you have agreed. We do not sell your personal data."]),
+          doc("consent", "Consent", "UserCheck", ["Where we rely on your consent we ask for it clearly, for a stated purpose, and you can withdraw it at any time as easily as you gave it, by writing to us. Withdrawing consent does not affect what was done before. On request we give you this notice in English or in any language listed in the Eighth Schedule to the Constitution of India."]),
+          doc("share", "Who we share it with", "Share2", ["We share personal data only with providers that help us run this website and our business (for example hosting, email and payment services), who may use it only for that purpose, and with courts, government agencies and regulators when the law requires it. Some providers may process data outside India; we do not transfer personal data to any country the Central Government has restricted."]),
+          doc("keep", "How long we keep it", "Clock", ["We keep personal data only as long as the purpose needs, and as long as the law requires for tax and accounting records. When the purpose is served and no law needs us to keep it, we erase it."]),
+          doc("security", "How we protect it", "Lock", ["We take reasonable security safeguards, such as access control, encrypted connections and limiting who can see the data. If a personal data breach happens we will inform the Data Protection Board of India and the people affected as the law requires."]),
+          doc("rights", "Your rights", "UserCheck", ["Under the Digital Personal Data Protection Act, 2023 you have the right to:"], ["Get a summary of the personal data we hold about you and how we process it.", "Have inaccurate or incomplete data corrected, completed or updated.", "Have your data erased when it is no longer needed for its purpose.", "Have a grievance answered, and nominate another person to exercise these rights if you die or cannot do so yourself.", "Withdraw consent at any time."]),
+          doc("children", "Children", "Baby", ["This website is not meant for anyone under 18. We do not knowingly collect a child's personal data without the verifiable consent of a parent or guardian, and we never track the behaviour of children or show them targeted advertising."]),
+          doc("cookies", "Cookies", "Cookie", ["We use only the cookies and browser storage this website needs to work and stay secure. Any tool that is not strictly necessary, such as analytics or advertising, is loaded only after you agree."]),
+          doc("grievance", "Grievance and contact", "Mail", [`To use a right, withdraw consent or complain, write to us ${reach}. We acknowledge every complaint within 24 hours and resolve it within 30 days. If you are not satisfied you can complain to the Data Protection Board of India after using this process.`]),
+          doc("changes", "Changes", "RefreshCw", ["We may update this notice when the law or our practices change, and will show the updated notice on this page."]),
         ],
       }),
       section("detail-cta", { heading: "Questions about your data?", description: "Reach out any time.", ctaLabel: "Contact Us", external: false, checklist: [] }),
+    ],
+  };
+  const terms: StarterPage = {
+    path: "/terms",
+    title: "Terms of Service",
+    seo: { title: `Terms of Service | ${v.name}`, description: `The terms for using the ${v.name} website and its services.` },
+    sections: [
+      section("page-hero", { category: "legal", categoryLabel: "legal", title: "Terms of Service", subtitle: "The terms for using this website and our services.", description: `By using this website or our services you agree to these terms. They are governed by the laws of India.`, icon: "FileText", image: IMG.privacy, primaryCtaExternal: false }),
+      section("legal-document", {
+        sections: [
+          doc("accept", "Accepting these terms", "FileText", [`These terms are an agreement between you and ${v.name}. This is an electronic record under the Information Technology Act, 2000 and needs no signature. If you do not agree, please do not use the website.`]),
+          doc("use", "Using the website", "Settings", ["Use the website lawfully. You must not misuse it, try to break its security, copy it in bulk, send spam through it, or post content that is unlawful, defamatory, obscene, infringing or that impersonates anyone."]),
+          doc("accounts", "Accounts", "UserCheck", ["Where the website has accounts, you must give accurate details, keep your password secret and tell us if you think your account has been used without your permission. You must be at least 18 to open an account."]),
+          doc("orders", "Prices, payment and GST", "Wallet", ["Prices are in Indian rupees. Goods and Services Tax is charged where it applies and shown on the invoice. Where an order or service is paid online, the payment is processed by a payment provider regulated in India; we do not store your card details."]),
+          doc("refunds", "Cancellations and refunds", "RefreshCw", [`The terms of any cancellation or refund for a particular product or service are given when you order it. If you were charged by mistake or twice, contact us ${reach} and we will correct it.`]),
+          doc("ip", "Our content", "Copyright", ["The content of this website, including text, images, logos and design, belongs to us or our licensors and may not be copied or used without our written permission."]),
+          doc("liability", "Limits of our responsibility", "ShieldCheck", ["The website and its information are provided as they are. To the extent the law permits, we are not liable for indirect or consequential loss arising from your use of the website. Nothing in these terms limits any right you have under the Consumer Protection Act, 2019 or any liability that cannot be limited by law."]),
+          doc("law", "Governing law and disputes", "Scale", ["These terms are governed by the laws of India. The courts having territorial jurisdiction over our place of business have jurisdiction over any dispute, after you have first tried to settle it with us."]),
+          doc("complaints", "Complaints", "Mail", [`To make a complaint, write to us ${reach}. We acknowledge a complaint within 48 hours and resolve it within one month.`]),
+        ],
+      }),
+      section("detail-cta", { heading: "Questions about these terms?", description: "Reach out any time.", ctaLabel: "Contact Us", external: false, checklist: [] }),
     ],
   };
 
@@ -312,11 +345,11 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         typeClient: c.register?.clientLabel ?? "Customer",
         typeJobSeeker: "",
         nameLabel: "Full Name",
-        namePlaceholder: "John Doe",
+        namePlaceholder: "Your full name",
         emailLabel: "Email Address",
         emailPlaceholder: "john@example.com",
         phoneLabel: "Phone Number",
-        phonePlaceholder: "+1 (555) 000-0000",
+        phonePlaceholder: "+91 98XXX XXXXX",
         passwordLabel: "Password",
         passwordPlaceholder: "••••••••",
         confirmLabel: "Confirm Password",
@@ -326,7 +359,7 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
         referralPlaceholder: "Enter referral code",
         termsLead: "By signing up, you agree to our ",
         termsLinkLabel: "Terms of Service",
-        termsHref: "/privacy-policy",
+        termsHref: "/terms",
         termsJoin: " and ",
         privacyLinkLabel: "Privacy Policy",
         privacyHref: "/privacy-policy",
@@ -369,16 +402,16 @@ export function starterPages(v: StarterVars, pack: StarterPack): StarterPage[] {
 
   // A planned site has exactly the pages planned for the business: no fixed Services / About / per-service pages, and sign-in and
   // sign-up only when its customers need accounts.
-  if (planMode) return [home, ...extra, ...offeringDetails, contact, privacy, ...(pack.structure?.accounts ? [login, register] : [])];
-  return [home, services, about, contact, privacy, login, register, ...extra, ...details];
+  if (planMode) return [home, ...extra, ...offeringDetails, contact, privacy, terms, ...(pack.structure?.accounts ? [login, register] : [])];
+  return [home, services, about, contact, privacy, terms, login, register, ...extra, ...details];
 }
 
 type NavTop = { name: string; href: string; iconKey: string; featured: { title: string; description: string; image: string }; items: { name: string; href: string; description: string; iconKey: string }[] };
 
 /** Every path a generated site really has, so a menu or footer link can never point at a page that does not exist. */
 export function knownPaths(pack: StarterPack): Set<string> {
-  if (pack.structure?.mode === "plan") return new Set(["/", "/contact", "/privacy-policy", ...(pack.structure.accounts ? ["/login", "/register"] : []), ...pack.structure.extraPages.map((p) => `/${p.slug}`), ...(pack.structure.offeringPages ?? []).map((p) => `/${pack.structure!.offeringBase ?? "offerings"}/${p.slug}`)]);
-  return new Set(["/", "/services", "/about", "/contact", "/privacy-policy", ...(pack.structure?.extraPages ?? []).map((p) => `/${p.slug}`), ...pack.services.map((s) => `/services/${serviceSlug(s.title)}`)]);
+  if (pack.structure?.mode === "plan") return new Set(["/", "/contact", "/privacy-policy", "/terms", ...(pack.structure.accounts ? ["/login", "/register"] : []), ...pack.structure.extraPages.map((p) => `/${p.slug}`), ...(pack.structure.offeringPages ?? []).map((p) => `/${pack.structure!.offeringBase ?? "offerings"}/${p.slug}`)]);
+  return new Set(["/", "/services", "/about", "/contact", "/privacy-policy", "/terms", ...(pack.structure?.extraPages ?? []).map((p) => `/${p.slug}`), ...pack.services.map((s) => `/services/${serviceSlug(s.title)}`)]);
 }
 
 export function starterNavigation(pack: StarterPack): NavTop[] {
@@ -409,7 +442,7 @@ export function starterNavigation(pack: StarterPack): NavTop[] {
     const known = knownPaths(pack);
     const plain = (label: string, href: string): NavTop => ({ name: label, href, iconKey: "Sparkles", featured: { title: "", description: "", image: "" }, items: [] });
     const out: NavTop[] = [];
-    for (const item of st.nav) if (known.has(item.target) && item.label.trim() && !out.some((o) => o.href === item.target) && item.target !== "/privacy-policy") out.push(plain(item.label, item.target));
+    for (const item of st.nav) if (known.has(item.target) && item.label.trim() && !out.some((o) => o.href === item.target) && item.target !== "/privacy-policy" && item.target !== "/terms") out.push(plain(item.label, item.target));
     if (!out.some((o) => o.href === "/contact")) out.push(plain("Contact", "/contact"));
     return out.slice(0, 7);
   }
@@ -432,7 +465,7 @@ export function starterFooter(pack?: StarterPack): { title: string; viewAllHref?
   if (!pack || !st) {
     return [
       { title: "Company", links: [{ label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Contact", href: "/contact" }] },
-      { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }] },
+      { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms of Service", href: "/terms" }] },
     ];
   }
   const known = knownPaths(pack);
@@ -440,6 +473,6 @@ export function starterFooter(pack?: StarterPack): { title: string; viewAllHref?
     .map((c) => ({ title: c.title, links: c.links.filter((l) => known.has(l.target) && l.label.trim()).map((l) => ({ label: l.label, href: l.target })) }))
     .filter((c) => c.title.trim() && c.links.length)
     .slice(0, 4);
-  if (!cols.some((c) => c.links.some((l) => l.href === "/privacy-policy"))) cols.push({ title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }] });
+  if (!cols.some((c) => c.links.some((l) => l.href === "/privacy-policy"))) cols.push({ title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy-policy" }, { label: "Terms of Service", href: "/terms" }] });
   return cols;
 }

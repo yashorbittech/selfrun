@@ -5,6 +5,7 @@ import { canRunPayroll, canManagePayroll } from "@/lib/hrms-roles";
 import { getPayslipPdfData } from "@/lib/products/talentos/payslip-pdf";
 import { renderPayslipPdf } from "@/components/products/talentos/PayslipPdfDocument";
 import { recordAudit } from "@/lib/products/talentos/audit";
+import { recordPdf } from "@/lib/pdf/activity";
 
 export const runtime = "nodejs";
 
@@ -37,6 +38,7 @@ async function handleGET(_req: NextRequest, { params }: Context) {
     summary: `Payslip PDF downloaded${isOwner && !isStaff ? " by employee" : ""}`,
   });
 
+  await recordPdf({ type: "hrms_payslip", ref: `${data.employee.code}-${data.month}`, by: user.email, role: isStaff ? "staff" : "employee" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

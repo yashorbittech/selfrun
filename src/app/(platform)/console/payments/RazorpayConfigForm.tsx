@@ -8,7 +8,6 @@ import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import type { RazorpayConfigView } from "@/lib/platform/billing/razorpay-config";
 import { saveRazorpayConfigAction, testRazorpayConnectionAction } from "./actions";
 
@@ -25,6 +24,7 @@ export default function RazorpayConfigForm({ view, webhookUrl }: { view: Razorpa
   const router = useRouter();
   const [keyId, setKeyId] = useState(view.keyId);
   const [keySecret, setKeySecret] = useState("");
+  const [webhookSecret, setWebhookSecret] = useState("");
   const [mode, setMode] = useState(view.mode);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
@@ -48,10 +48,11 @@ export default function RazorpayConfigForm({ view, webhookUrl }: { view: Razorpa
               e.preventDefault();
               setSaved(false);
               startSave(async () => {
-                const res = await saveRazorpayConfigAction({ keyId, keySecret, mode });
+                const res = await saveRazorpayConfigAction({ keyId, keySecret, mode, webhookSecret });
                 if (res.ok) {
                   setErrors({});
                   setKeySecret("");
+                  setWebhookSecret("");
                   setSaved(true);
                   setTest(null);
                   router.refresh();
@@ -96,6 +97,20 @@ export default function RazorpayConfigForm({ view, webhookUrl }: { view: Razorpa
                 />
                 {errors.keySecret && <p className="text-xs text-destructive">{errors.keySecret}</p>}
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rzp-webhook-secret">Webhook secret</Label>
+              <Input
+                id="rzp-webhook-secret"
+                type="password"
+                value={webhookSecret}
+                onChange={(e) => setWebhookSecret(e.target.value)}
+                placeholder={view.webhookLast4 ? `Saved — ends in ${view.webhookLast4}. Leave blank to keep.` : "The secret you set on the webhook in Razorpay"}
+                autoComplete="new-password"
+                spellCheck={false}
+              />
+              {errors.webhookSecret && <p className="text-xs text-destructive">{errors.webhookSecret}</p>}
+              <p className="text-xs text-muted-foreground">Use the same value when you add the webhook in Razorpay (see Webhook below).</p>
             </div>
             {!view.encryptionConfigured && <Status ok={false}>PLATFORM_ENCRYPTION_KEY isn&apos;t set on the server — secrets can&apos;t be saved until it is.</Status>}
             <div className="flex flex-wrap items-center gap-3">
@@ -150,13 +165,13 @@ export default function RazorpayConfigForm({ view, webhookUrl }: { view: Razorpa
               <Copy className="size-4" /> {copied ? "Copied" : "Copy"}
             </Button>
           </div>
-          <Status ok={view.webhookSecretSet}>
-            {view.webhookSecretSet ? (
-              <>
-                Webhook secret is set <Badge variant="outline">RAZORPAY_BILLING_WEBHOOK_SECRET</Badge>. Use the same secret in Razorpay.
-              </>
+          <Status ok={view.webhookSecretSet && !view.webhookUnreadable}>
+            {view.webhookUnreadable ? (
+              <>The saved webhook secret can&apos;t be decrypted (PLATFORM_ENCRYPTION_KEY is missing or changed). Enter it again under Razorpay keys.</>
+            ) : view.webhookSecretSet ? (
+              <>Webhook secret is set{view.webhookLast4 ? ` (ends in ${view.webhookLast4})` : ""}. Use the same secret in Razorpay.</>
             ) : (
-              <>Webhook secret is not set. Add RAZORPAY_BILLING_WEBHOOK_SECRET to the server environment (it stays out of the database) and use the same value in Razorpay — until then every webhook is refused.</>
+              <>Webhook secret is not set. Enter it under Razorpay keys and use the same value in Razorpay — until then every webhook is refused.</>
             )}
           </Status>
         </CardContent>

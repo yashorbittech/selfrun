@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type { TemplateBlock, LpmsViewer } from "@/lib/products/contractflow-ai/types";
@@ -31,21 +32,7 @@ export async function generateLpmsDocument(
     return { ok: false, error: err?.message ?? "OpenAI client not configured" };
   }
 
-  const systemPrompt = `You are a professional legal and business document writer.
-Generate a structured document based on the user's request.
-Return a JSON array of document blocks using ONLY these block types:
-- { type: "heading", level: 1|2|3|4, content: "..." }
-- { type: "paragraph", content: "..." }
-- { type: "bullets", items: ["...", "..."] }
-- { type: "numbered", items: ["...", "..."] }
-- { type: "note", variant: "info"|"warning"|"important", content: "..." }
-- { type: "divider" }
-
-Use variables with {{variable.name}} syntax for dynamic data.
-Keep the document professional, clear and legally appropriate.
-Only draft business, legal, HR, finance or operational documents for this one company; if the request is for anything else, return a single paragraph block saying you can only draft the company's business documents. Never include facts about any other company.
-Write the document text in the language of the request (Hindi in Devanagari, English, or Hinglish in Roman letters); keep variable names, clause numbers and defined terms exactly as given.
-Return ONLY the JSON array, no other text.`;
+  const systemPrompt = await getPrompt("contractflow.generate");
 
   const userMessage = [
     opts.prompt,

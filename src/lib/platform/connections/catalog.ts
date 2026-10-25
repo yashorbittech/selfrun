@@ -20,10 +20,11 @@ export interface ConnectionField {
   defaultValue?: string;
 }
 
-export type ConnectionGroup = "email" | "messaging" | "ai" | "social" | "search" | "realtime" | "payments" | "other";
+export type ConnectionGroup = "email" | "messaging" | "push" | "ai" | "social" | "search" | "realtime" | "payments" | "other";
 
 export const GROUP_LABELS: Record<ConnectionGroup, { title: string; description: string }> = {
   email: { title: "Email", description: "How your workspace sends emails — invitations, notifications, reports and automations." },
+  push: { title: "Push notifications", description: "Your own web-push keys, so the installed app sends notifications under your identity." },
   messaging: { title: "WhatsApp", description: "WhatsApp messages from your automations and products." },
   ai: { title: "AI & Voice", description: "Your own AI keys. Powers the assistants, chatbots, content generation and voice in every product." },
   social: { title: "Social & Advertising", description: "App credentials for publishing to Facebook, Instagram, LinkedIn, YouTube and Google Business." },
@@ -149,6 +150,13 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     usedBy: ["SEO product"],
     fields: [secret("apiKey", "API key")],
   },
+  // ── Push ─────────────────────────────────────────────────────────────
+  {
+    key: "vapid", name: "Web Push (VAPID keys)", group: "push", testable: true,
+    description: "Your own VAPID key pair for push notifications to your team's and visitors' devices. Without it, SelfRun's keys are used. Create the pair once with  npx web-push generate-vapid-keys  and do not change it later: every device would have to subscribe again.",
+    usedBy: ["Push notifications", "Website push"],
+    fields: [text("publicKey", "Public key"), secret("privateKey", "Private key"), text("subject", "Contact", "mailto:support@yourcompany.com", "A mailto: address or https URL the push services can contact.", false)],
+  },
   // ── Calls & Realtime ─────────────────────────────────────────────────
   {
     key: "turn", name: "TURN server (calls)", group: "realtime",
@@ -184,10 +192,10 @@ export const providerByKey = new Map(CONNECTION_PROVIDERS.map((p) => [p.key, p])
 
 
 /**
- * Services the PLATFORM provides to every company (email, AI, voice): companies never bring their own keys, so they are not shown in a
- * company's Integrations and anything saved for them earlier is ignored. They use the deployment's own credentials and count against the
- * company's plan allowance.
+ * Services SelfRun can provide to every company with its own keys (Platform Console → Integrations). A company that saves its own keys here
+ * uses its own account; one that does not uses SelfRun's, counted against its plan. Email works the same way (see `email/index.ts`).
+ * Payments and the social apps never fall back: money and publishing identities stay with the company.
  */
-export const PLATFORM_PROVIDED_PROVIDERS = ["smtp", "resend", "sendgrid", "twilio", "openai", "elevenlabs"] as const;
-/** Everything hidden from a company's Integrations page: the platform-provided services and the automations tile. */
-export const HIDDEN_FROM_COMPANIES: readonly string[] = [...PLATFORM_PROVIDED_PROVIDERS, "webhooks"];
+export const PLATFORM_FALLBACK: readonly string[] = ["openai", "elevenlabs", "twilio", "pagespeed", "turn", "google-service-account"];
+/** Hidden from a company's Integrations page: the automations tile has its own page. */
+export const HIDDEN_FROM_COMPANIES: readonly string[] = ["webhooks"];

@@ -81,7 +81,7 @@ export async function sendVerificationEmail(userId: string, origin: string): Pro
       action: { label: "Verify email", url: `${origin}/commandos/verify-email?token=${token}` },
       footnote: "This link expires in 24 hours. If you didn't create this account, ignore this email.",
     });
-    const sent = await sendEmail({ to: user.email, subject: `Verify your email for ${brand}`, html, text });
+    const sent = await sendEmail({ to: user.email, subject: `Verify your email for ${brand}`, html, text, event: "auth_verify_email" });
     if (!sent.ok) {
       await c.deleteOne({ _id: id });
       return { ok: false, error: "We couldn't send the email right now. Please try again in a few minutes." };

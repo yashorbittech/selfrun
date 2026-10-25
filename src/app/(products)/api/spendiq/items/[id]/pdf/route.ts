@@ -6,6 +6,7 @@ import { getDb } from "@/lib/mongodb";
 import { getPrmsSettings } from "@/lib/products/spendiq/settings";
 import { getPurchaseOrder, getPurchaseOrderByNumber } from "@/lib/products/spendiq/purchase-orders";
 import { renderItemInvoicePdf, renderItemReceiptPdf, type PdfItemDetails } from "@/components/products/spendiq/ItemInvoiceReceiptPdf";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -174,6 +175,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
 
   const filename = `${pdfType.toUpperCase()}_${itemDetails.code}.pdf`;
 
+  await recordPdf({ type: "prms_item", variant: pdfType, ref: itemDetails.code, by: user.email, role: "staff" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

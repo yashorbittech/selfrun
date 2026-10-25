@@ -1,7 +1,7 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { getChatbotConfig } from "@/lib/chatbot-config";
-import { isElevenLabsConfigured, streamTts } from "@/lib/elevenlabs";
+import { isElevenLabsConfigured, streamTts, usesOwnVoiceKey } from "@/lib/elevenlabs";
 import { getSessionFromRequest } from "@/lib/chatbot-sessions";
 import { ensureVoiceConversation, recordVoiceTurn } from "@/lib/voice-conversations";
 import { saveVoiceAudio } from "@/lib/voice-storage";
@@ -91,7 +91,7 @@ async function handlePOST(req: NextRequest) {
       const audio = Buffer.concat(chunks.map((c) => Buffer.from(c)));
       const ttsMs = Date.now() - startedAt;
       const assistantDurationMs = Math.round((audio.byteLength / MP3_BYTES_PER_SEC) * 1000);
-      await recordUsage("voice_seconds", assistantDurationMs / 1000, new Date(), { source: "Voice reply (assistant speaking)" }).catch(() => {});
+      if (!(await usesOwnVoiceKey())) await recordUsage("voice_seconds", assistantDurationMs / 1000, new Date(), { source: "Voice reply (assistant speaking)" }).catch(() => {});
 
       const stored = await saveVoiceAudio(audio, "mp3");
       const conversationId = await ensureVoiceConversation(session, voice.voiceId);

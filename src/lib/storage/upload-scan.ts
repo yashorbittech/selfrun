@@ -2,6 +2,7 @@ import "server-only";
 import { createHash } from "node:crypto";
 import JSZip from "jszip";
 import { getDb } from "@/lib/mongodb";
+import { getConfig } from "@/lib/platform/config/store";
 
 /**
  * The safety check every upload passes before it is stored (called from `putObject`, which every product's file storage goes through).
@@ -10,7 +11,7 @@ import { getDb } from "@/lib/mongodb";
  * still caught), documents with macros (Word, Excel, PowerPoint — old and new formats), PDFs that launch programs, HTML and SVG that carry
  * script, archives that hold any of those or are built to blow up when opened, and the standard EICAR antivirus test file.
  *
- * What it can add: when `VIRUSTOTAL_API_KEY` is set, the file's SHA-256 is looked up at VirusTotal (only the hash is sent, never the file)
+ * What it can add: when a VirusTotal key is saved (Platform Console → Integrations), the file's SHA-256 is looked up at VirusTotal (only the hash is sent, never the file)
  * and a file that several engines already know as malware is refused. A lookup that fails or times out lets the upload through.
  *
  * What it is not: an antivirus engine that reads every byte for unknown malware. Files are stored privately and only delivered through
@@ -114,7 +115,7 @@ export async function scanUploadBuiltIn(input: { filename: string; contentType?:
 
 /** Optional: a file that several VirusTotal engines already know as malware (hash lookup only). */
 async function knownMalware(contentType: string, body: Buffer): Promise<boolean> {
-  const key = process.env.VIRUSTOTAL_API_KEY;
+  const key = await getConfig("VIRUSTOTAL_API_KEY");
   if (!key || VT_SKIP.test(contentType) || body.length > 650 * 1024 * 1024) return false;
   try {
     const sha = createHash("sha256").update(body).digest("hex");

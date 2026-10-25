@@ -226,13 +226,16 @@ const added: Doc[] = [
       { heading: "What a plan sets", body: ["Every plan includes every product and every feature. A plan sets the number of people and the allowances for storage, AI, email and voice. The Free plan is free forever. The Free plan lets each person stay signed in on one device at a time; paid plans have no limit."] },
       { heading: "See what you use", body: ["Workspace → Usage shows seats, AI, email, voice and storage against your plan."] },
       { heading: "Change plan or cancel", body: ["Upgrade or move down at any time from Plan & billing. Invoices, credit notes and payments for your subscription are under Invoices & payments."] },
+      { heading: "When the free trial ends", body: ["If the trial ends and no plan has been bought, the workspace is locked: every page leads to a “Subscribe to continue” screen and changes are refused. Nothing is deleted. You can still sign in and open Plan & billing, and the moment a plan is subscribed everything is available again, exactly as you left it."], tip: "Subscribe before the trial ends and your team never notices a break." },
     ],
   }),
   d({
     slug: "integrations-and-webhooks", title: "Connect other services: payments, email, AI and alerts", summary: "Connect your payment account, email sender and AI key, and send secure alerts to other software.", category: "Security & admin", readMinutes: 4, shot: "workspace", panel: "workspace",
     sections: [
-      { heading: "What you can connect", list: ["A payment gateway account to collect invoice payments and pay salaries", "Your own email sender for workflow and transactional emails", "Your own AI provider key, so AI usage runs on your account", "Social platforms for publishing", "Signed webhooks from any workflow to the systems you already use"] },
-      { heading: "Where to find them", body: ["Workspace → Integrations lists what is connected and what is not, and Workspace → Automations is where webhooks are used as workflow actions."] },
+      { heading: "What you can connect", list: ["A payment gateway account to collect invoice payments and pay salaries", "Your own email sender for workflow and transactional emails", "Your own AI provider key, so AI usage runs on your account", "WhatsApp, voice, web-push keys for your installed app, social and advertising accounts, Google Search and Analytics, and call servers", "Signed webhooks from any workflow to the systems you already use"] },
+      { heading: "Your keys first, SelfRun's as the fallback", body: ["Whatever you connect is used by your workspace only. Anything you leave unconnected keeps working on SelfRun's own account and counts against your plan's allowance. As soon as you connect your own key, your workspace uses it instead, and if you disconnect it, SelfRun's account takes over again without a gap."] },
+      { heading: "Where to find them", body: ["Workspace → Integrations lists every connection in sections — Email, Push notifications, WhatsApp, AI & Voice, Social & Advertising, Search & Analytics, Calls & Realtime and Payments — with a search box and the status of each. Some are set up on their own screens (Sender email, Payment account, Custom domains) and are linked from here. Workspace → Automations is where webhooks are used as workflow actions."] },
+      { heading: "Keys stay private", body: ["Keys you save are stored encrypted, are never shown again in full, and belong to your workspace alone; no other business can use or see them."] },
     ],
   }),
   d({
@@ -241,6 +244,53 @@ const added: Doc[] = [
       { heading: "Who it is for", body: ["The portal is where people outside your business see what concerns them: clients follow projects and pay invoices, students follow their program and download certificates, applicants track their application and take assessments."] },
       { heading: "How people join", body: ["People register themselves or you invite them. Each person sees only their own records, and your team manages portal users from the Workspace."] },
       { heading: "Keep them engaged", body: ["Rewards, referrals and a wallet are built in, so the portal gives people a reason to come back."] },
+    ],
+  }),
+  d({
+    slug: "notification-center", title: "Notification center: every email, in-app and push message", summary: "See every notification your workspace sends, change its wording, switch channels on or off and send your own announcements.", category: "Your brand & apps", readMinutes: 6, shot: "workspace", panel: "workspace",
+    sections: [
+      { heading: "One list for everything that is sent", body: ["Workspace → Notification center lists every email, in-app notification and push notification your workspace sends, grouped by product. Nothing is hidden: if the system sends it, it is on this list, with who receives it and when it is sent."] },
+      { heading: "Turn channels on or off", list: ["Each notification has its own switches for email, in-app and push", "Security and billing emails cannot be switched off, so important messages always arrive", "If SelfRun has turned a notification off for every business, the screen says so"] },
+      { heading: "Change the wording", body: ["Open any notification to see its subject and message exactly as they are sent, already filled in. Edit the text, use the values shown in curly braces such as {name} or {amount} to insert details that change each time, and preview the result before saving. Reset puts the original wording back."] },
+      { heading: "Send your own announcements", list: ["Choose New announcement to open the form in a side panel", "Write the title and message, and choose email, in-app, push or any mix", "Send to everyone, to a role, or to specific people you pick from the list", "Send now, or schedule a date and time; scheduled announcements can be edited or cancelled until they go out", "The Custom tab lists every announcement you created, with its status"] },
+      { heading: "See what was delivered", body: ["The activity view lists recent notifications with channel, recipient and outcome, so you can answer “did they get it?” without asking anyone."] },
+    ],
+  }),
+  d({
+    slug: "documents-and-pdf-library", title: "Documents & PDFs: every PDF your workspace makes", summary: "A library of invoices, receipts, certificates, payslips and reports, with a preview in your own letterhead.", category: "Your brand & apps", readMinutes: 4, shot: "workspace", panel: "workspace",
+    sections: [
+      { heading: "What the library shows", body: ["Workspace → Documents & PDFs lists every kind of PDF the system produces for your business — invoices, receipts, certificates, payslips, reports and more — grouped by product. For each one you can see what is on it, when it is made, where your team uses it and how it reaches people (download, email or both)."] },
+      { heading: "Preview in your own letterhead", body: ["Choose Preview to see a sample in your own logo, name and colours. Previews use made-up figures, so nothing real is ever shown or sent."], tip: "Change your logo or colours under Branding and every preview follows." },
+      { heading: "Find and track", list: ["Search by name, or filter by product and by category", "Each PDF shows how many your workspace has produced recently and when one was last made", "It also shows who can open it and which notifications tell people about it"] },
+      { heading: "If SelfRun switches one off", body: ["SelfRun can turn a kind of PDF off for every business. It is then marked as turned off, and anyone who tries to produce it is told so instead of getting an error."] },
+    ],
+  }),
+  d({
+    slug: "scheduled-jobs", title: "Scheduled jobs: what runs by itself, and when", summary: "Backups, reminders, notifications, billing checks and more — with their schedules in your time zone.", category: "Security & admin", readMinutes: 3, shot: "workspace", panel: "workspace",
+    sections: [
+      { heading: "Nothing runs in secret", body: ["Workspace → Scheduled jobs lists the things your workspace does on its own: backups, reminders, notification sweeps, billing and trial checks, domain checks, reports, social and SEO routines, and announcements you scheduled."] },
+      { heading: "What each row tells you", list: ["What the job does for your workspace, in plain words", "When it runs — shown in your own time zone as well as UTC, which is what the schedules use", "When it last ran, and a status: On schedule, Delayed, Not run yet or Paused by SelfRun", "A link to the setting that controls it, for example the Notification center for reminders", "Your scheduled announcements, with their date and time"] },
+      { heading: "Who controls the schedule", body: ["The platform runs and supervises these jobs, and can pause one or change its schedule for everyone. Your view is read-only, so you always know what is happening without being able to break it."] },
+    ],
+  }),
+  d({
+    slug: "ai-prompts", title: "AI prompts: change how your assistants write and behave", summary: "Reword the instructions behind your AI assistants for your workspace only, with every version kept and security rules always applied.", category: "Automation & AI", readMinutes: 6, shot: "aibots", panel: "workspace",
+    sections: [
+      { heading: "What a prompt is", body: ["A prompt is the set of instructions behind an AI feature: how the Ask AI assistant answers, how the workspace assistant speaks, how social posts and contract drafts are written. Workspace → AI prompts lists every prompt in the system, grouped by area."] },
+      { heading: "Which ones you can change", body: ["Prompts that shape tone and content — the Ask AI assistant, the workspace assistant, contract drafting and the social-media writers — can be reworded for your business. The rest decide what an assistant may talk about, how it handles each language and what data it can reach, so SelfRun keeps them the same for everyone. They are listed with a Locked badge so you can see exactly what exists."] },
+      { heading: "Edit, preview and test", list: ["Open a prompt to see its full text, already filled in, in a side panel", "Tap a variable, such as {{brand}}, to insert a value the system fills in each time; variables that carry rules, language and identity must stay", "Preview shows how the text reads with example values, together with the security rules around it", "Compare shows your wording against the standard line by line", "Test run tries your draft on a sample message without saving anything"] },
+      { heading: "Every version is kept", body: ["Each save, restore, reset and on/off switch is a new numbered version. Nothing is ever deleted: open History, pick any version and restore it — that creates a new version, so you can always go forward again as well as back. Reset returns to the standard wording."] },
+      { heading: "Your wording stays yours — and stays safe", body: ["Your changes apply to your workspace only and never to another business. Whatever you write, SelfRun's fixed security rules are added before and after it on every request: the assistant works with your company's information only, never reveals its instructions or any other business's information, treats text from people and documents as data rather than orders, and never outputs secrets. Wording that tries to get around this, or that mentions other companies, secrets or the database, cannot be saved."], tip: "Start small: add one or two lines about tone or terms to use, test, then build from there." },
+    ],
+  }),
+  d({
+    slug: "company-settings-map", title: "Company settings: where everything lives", summary: "A map of every screen under Workspace → Company settings, by what you want to do.", category: "Getting started", readMinutes: 4, shot: "workspace", panel: "workspace",
+    sections: [
+      { heading: "Organization", list: ["Company setup and Organization profile — your name, country, currency, time zone and which products your team uses", "People & access — everyone who can sign in, their status and access in every product", "Designations & permissions — the jobs in your company and what each may do"] },
+      { heading: "Billing & plan", list: ["Plan & billing — your plan, payments, coupons and GST details; this stays open even if a trial has ended", "Invoices & payments — tax invoices, credit notes and every payment for your subscription", "Usage & limits — seats, AI, storage, email, voice and domains against your plan"] },
+      { heading: "Branding & domains", list: ["Branding — logo, name and colours across products, emails and PDFs", "Default domain and Custom domains — your addresses, with automatic SSL", "Sender email — send from your own address", "Apps & downloads — your own phone and desktop apps"] },
+      { heading: "Connections & automation", list: ["Integrations — your own email, AI, voice, WhatsApp, push, social, Google and payment keys, with SelfRun's as the fallback", "Payment account — your own gateway for invoices and salaries", "Notification center — every email, in-app and push message, and your announcements", "Documents & PDFs — every PDF with a preview in your letterhead", "AI prompts — the wording behind your AI assistants", "Scheduled jobs — what runs by itself, and when", "Automations — when something happens, notify, email or call a webhook"] },
+      { heading: "Data and security", list: ["Import data — bring leads, clients and employees in from CSV", "Backups & data — weekly backups to download and restore, and deleting your data", "Audit log — who did what, across products", "Security — your sign-in, password, sessions and accounts that need attention"] },
     ],
   }),
 ];

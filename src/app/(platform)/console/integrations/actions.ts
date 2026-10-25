@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requirePlatformPermission } from "@/lib/platform/console/access";
+import { saveConfig, type ConfigInput, type SaveConfigResult } from "@/lib/platform/config/store";
 import { saveIntegrations, sendIntegrationsTestEmail, testDomainProvider, type IntegrationsInput, type IntegrationsResult, type TestResult } from "@/lib/platform/integrations";
 
 export async function saveIntegrationsAction(input: IntegrationsInput): Promise<IntegrationsResult> {
@@ -35,4 +36,14 @@ export async function sendTestEmailAction(): Promise<TestResult> {
 export async function testDomainProviderAction(): Promise<TestResult> {
   const user = await requirePlatformPermission("integrations.manage");
   return testDomainProvider(user.id);
+}
+
+/** Saves the server keys (AI, voice, push, storage, upload safety). A blank field keeps what is saved. */
+export async function saveServerKeysAction(input: ConfigInput): Promise<SaveConfigResult> {
+  const user = await requirePlatformPermission("integrations.manage");
+  const clean: ConfigInput = {};
+  for (const [key, v] of Object.entries(input ?? {})) clean[key] = v && typeof v === "object" ? { clear: true } : String(v ?? "");
+  const res = await saveConfig(clean, user.id);
+  if (res.ok) revalidatePath("/console", "layout");
+  return res;
 }

@@ -4,11 +4,11 @@
 
 | Provider | Data | Region (to confirm) | Ground (to confirm with counsel) | Safeguards |
 | --- | --- | --- | --- | --- |
-| MongoDB Atlas | All application data | Cluster region chosen in Atlas | SCCs / UK addendum / adequacy | Encryption in transit and at rest, DPA |
-| Vercel | Application traffic | Edge and function region setting | SCCs / UK addendum | DPA |
-| Resend | Email address, message | Provider region | SCCs / UK addendum | DPA |
+| MongoDB Atlas | All application data | Cluster region chosen in Atlas | Permitted unless the country is restricted (DPDP Act s. 16) | Encryption in transit and at rest, DPA |
+| Vercel | Application traffic | Edge and function region setting | Permitted unless the country is restricted (DPDP Act s. 16) | DPA |
+| Resend | Email address, message | Provider region | Permitted unless the country is restricted (DPDP Act s. 16) | DPA |
 | Razorpay | Payer details for the payment | India | Contract; no card data on our systems | PCI DSS level 1 provider |
-| OpenAI | Prompts and outputs sent by users | Provider region | SCCs / contract | DPA, no training on API data per provider terms |
-| GitHub | App identity for builds | Provider region | SCCs | DPA |
+| OpenAI | Prompts and outputs sent by users | Provider region | Permitted unless the country is restricted (DPDP Act s. 16) | DPA, no training on API data per provider terms |
+| GitHub | App identity for builds | Provider region | Permitted unless the country is restricted (DPDP Act s. 16) | DPA |
 
-Rules: UK → UK addendum or adequacy; UAE and KSA → the transfer conditions in the PDPL and the KSA transfer regulation; India → permitted unless a country is restricted by notification; USA → SCCs or provider certification. Review at each new provider and yearly.
+Rule: the Digital Personal Data Protection Act, 2023 (s. 16) permits transfer except to countries the Central Government restricts by notification; any stricter sector law (RBI, SEBI, health) still applies. Check the notified list at each review.

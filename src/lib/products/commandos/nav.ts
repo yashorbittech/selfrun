@@ -246,7 +246,7 @@ const COMPANY_GROUPS: Record<string, string> = {
   setup: "Organization", profile: "Organization", users: "Organization", roles: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
   branding: "Branding & domains", addresses: "Branding & domains", domains: "Branding & domains", email: "Branding & domains", app: "Branding & domains",
-  payments: "Connections & automation", integrations: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Security & logs",
+  payments: "Connections & automation", integrations: "Connections & automation", notifications: "Connections & automation", schedules: "Connections & automation", pdfs: "Connections & automation", prompts: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Security & logs",
   audit: "Security & logs", security: "Security & logs",
 };
 const company = (key: string, href: string, icon: NavIcon, label: string, description: string, title?: string): NavItemDef => ({ key: `company.${key}`, section: "company", group: COMPANY_GROUPS[key], label, title, description, href, icon, allow: superAdmin });
@@ -265,6 +265,10 @@ const COMPANY: NavItemDef[] = [
   company("email", "/commandos/settings/email", "mail", "Sender email", "Send your emails from your own address, like hello@yourbusiness.com, by connecting your domain.", "Sender email"),
   company("payments", "/commandos/settings/payments", "bank", "Payment account", "Connect your own Razorpay account to collect invoice payments and pay salaries.", "Payments & payouts"),
   company("integrations", "/commandos/settings/integrations", "plug", "Integrations", "What your workspace is connected to: payment gateway, webhooks and your own domain."),
+  company("notifications", "/commandos/settings/notifications", "bell", "Notification center", "Every email, in-app and push notification your workspace sends: turn each on or off, change its wording, send your own announcements, and see what was delivered."),
+  company("prompts", "/commandos/settings/prompts", "bot", "AI prompts", "How your AI assistants are told to write and behave: change the wording for your own workspace, with every version kept so you can go back to any of them. Fixed security rules always apply.", "AI prompts"),
+  company("schedules", "/commandos/settings/schedules", "history", "Scheduled jobs", "What runs on its own and when: backups, reminders, notifications, billing checks and more. When each runs, when it last ran and what it does for your workspace.", "Scheduled jobs"),
+  company("pdfs", "/commandos/settings/documents", "file", "Documents & PDFs", "Every PDF your workspace produces — invoices, receipts, certificates, payslips, reports — with a preview in your own letterhead, when each is made, where it is used and how it reaches people.", "Documents & PDFs"),
   company("automations", "/commandos/settings/automations", "zap", "Automations", "When something happens, notify people, send an email or call a webhook."),
   company("backups", "/commandos/settings/backups", "history", "Backups & data", "Weekly backups you can download and restore, and deleting your data or your company."),
   company("import", "/commandos/settings/import", "upload", "Import data", "Bring leads, clients and employees in from CSV files, or download a copy of everything your workspace holds."),

@@ -3,7 +3,7 @@ export type InquiryKind = "demo" | "contact" | "privacy";
 
 /** The days we have to answer a privacy request. */
 export const PRIVACY_REQUEST_DAYS = 30;
-export const PRIVACY_REQUEST_TYPES = ["Access a copy of my information", "Correct my information", "Delete my information", "Export my information (portability)", "Object to or restrict how it is used", "Withdraw my consent", "Opt out of sale or sharing (California)", "Something else"] as const;
+export const PRIVACY_REQUEST_TYPES = ["Get a summary of my personal data", "Correct, complete or update my data", "Erase my data", "Withdraw my consent", "Nominate someone to exercise my rights", "Make a grievance or complaint", "Something else"] as const;
 
 export interface Inquiry {
   _id: string;

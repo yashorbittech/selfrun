@@ -199,7 +199,7 @@ export async function createBankAccount(
   actor: { id: string; email: string }
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   if (!isEncryptionConfigured()) {
-    return { ok: false, error: "Set HRMS_ENCRYPTION_KEY before storing bank details." };
+    return { ok: false, error: "Set PLATFORM_ENCRYPTION_KEY on the server before storing bank details." };
   }
   const collection = await getCollection();
   const existingCount = await collection.countDocuments({ employeeId, ...notDeleted });
@@ -244,7 +244,7 @@ export async function updateBankAccount(
   input: BankAccountInput,
   actor: { id: string; email: string }
 ): Promise<{ ok: boolean; error?: string }> {
-  if (!isEncryptionConfigured()) return { ok: false, error: "Set HRMS_ENCRYPTION_KEY before storing bank details." };
+  if (!isEncryptionConfigured()) return { ok: false, error: "Set PLATFORM_ENCRYPTION_KEY on the server before storing bank details." };
   const collection = await getCollection();
   const account = await collection.findOne({ _id: id, ...notDeleted });
   if (!account) return { ok: false, error: "Bank account not found." };
@@ -332,7 +332,7 @@ export async function revealAccountNumber(
   const account = await getBankAccount(id);
   if (!account) return { ok: false, error: "Bank account not found." };
   const accountNumber = decryptField(account.accountNumberEnc);
-  if (accountNumber === null) return { ok: false, error: "Could not decrypt — check HRMS_ENCRYPTION_KEY." };
+  if (accountNumber === null) return { ok: false, error: "Could not decrypt — check PLATFORM_ENCRYPTION_KEY." };
 
   const emp = await getEmployee(account.employeeId);
   await recordAudit({

@@ -2,7 +2,7 @@ import { cmsEvents } from "@/lib/notify/triggers/cms";
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { afterForCompany, currentCompanyIdOrNull, runAsCompany } from "@/lib/platform/tenancy/context";
-import { pushConfigured, webpush } from "@/lib/push/vapid";
+import { pushConfigured, pushKeys, vapidDetails, webpush } from "@/lib/push/vapid";
 import { broadcastsCol, getWebPushSettings, subscribersCol, type Broadcast } from "@/lib/webpush/store";
 import { safeSitePath, type WebPushTopic } from "@/lib/webpush/topics";
 
@@ -35,7 +35,8 @@ const startOfUtcDay = () => {
 };
 
 export async function sendBroadcast(input: BroadcastInput): Promise<BroadcastResult> {
-  if (!pushConfigured()) return { ok: false, error: "Push notifications aren't enabled on this server yet." };
+  const keys = await pushKeys();
+  if (!keys) return { ok: false, error: "Push notifications aren't enabled on this server yet." };
   const settings = await getWebPushSettings();
   if (!settings.enabled) return { ok: false, error: "Website notifications are switched off. Turn them on first." };
   if (!settings.topics[input.topic]) return { ok: false, error: "That topic is switched off." };
@@ -86,7 +87,7 @@ export async function sendBroadcast(input: BroadcastInput): Promise<BroadcastRes
           while (next < rows.length) {
             const row = rows[next++];
             try {
-              await webpush.sendNotification({ endpoint: row.endpoint, keys: row.keys }, payload, { TTL: 60 * 60 * 24 * 2, urgency: "normal" });
+              await webpush.sendNotification({ endpoint: row.endpoint, keys: row.keys }, payload, { TTL: 60 * 60 * 24 * 2, urgency: "normal", vapidDetails: vapidDetails(keys) });
               sent++;
             } catch (err) {
               failed++;
@@ -112,7 +113,7 @@ export async function sendBroadcast(input: BroadcastInput): Promise<BroadcastRes
 /** For the automations: run after the response, in the current company's scope. Never throws. */
 export async function queueBroadcast(input: BroadcastInput): Promise<void> {
   try {
-    if (!pushConfigured()) return;
+    if (!(await pushConfigured())) return;
     const companyId = await currentCompanyIdOrNull();
     if (!companyId) return;
     const run = () => sendBroadcast(input).then((r) => (!r.ok && !r.broadcast ? undefined : undefined));

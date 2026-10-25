@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { voiceBlockReason } from "@/lib/platform/billing/enforce";
 import { recordUsage } from "@/lib/platform/billing/usage";
 import { getChatbotConfig } from "@/lib/chatbot-config";
-import { isElevenLabsConfigured, transcribeAudio } from "@/lib/elevenlabs";
+import { isElevenLabsConfigured, transcribeAudio, usesOwnVoiceKey } from "@/lib/elevenlabs";
 import { checkRateLimit } from "@/lib/chatbot-rate-limit";
 import { applyChatCookies, resolveSession } from "@/lib/chatbot-sessions";
 import { getVisitorProfile } from "@/lib/chat-visitors";
@@ -82,7 +82,7 @@ async function handlePOST(req: NextRequest) {
     return applyChatCookies(res, cookiesToSet);
   }
 
-  if (result.audioDurationSecs) await recordUsage("voice_seconds", result.audioDurationSecs, new Date(), { source: "Voice input (visitor speaking)" }).catch(() => {});
+  if (result.audioDurationSecs && !(await usesOwnVoiceKey())) await recordUsage("voice_seconds", result.audioDurationSecs, new Date(), { source: "Voice input (visitor speaking)" }).catch(() => {});
   await ensureVoiceConversation(session, config.voice.voiceId);
   const transcriptId = await recordVoiceTranscript({
     sessionId: session.sessionId,

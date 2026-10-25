@@ -28,7 +28,7 @@ export default async function DlmsSettingsPage() {
 
       <SectionCard title="Security" description="How the vault protects what it stores.">
         <ul className="space-y-1.5 text-sm">
-          <li className="flex items-center gap-2">{encrypted ? <Check className="size-4 text-emerald-600" /> : <Minus className="size-4 text-rose-600" />}Password encryption (AES-256-GCM){encrypted ? " is active" : " is NOT configured — set DLMS_ENCRYPTION_KEY"}</li>
+          <li className="flex items-center gap-2">{encrypted ? <Check className="size-4 text-emerald-600" /> : <Minus className="size-4 text-rose-600" />}Password encryption (AES-256-GCM){encrypted ? " is active" : " is NOT configured — set PLATFORM_ENCRYPTION_KEY"}</li>
           <li className="flex items-center gap-2"><Check className="size-4 text-emerald-600" />Passwords are masked by default and re-mask {LIMITS.revealSeconds}s after being shown</li>
           <li className="flex items-center gap-2"><Check className="size-4 text-emerald-600" />Every reveal, copy, preview and download is written to the activity log — never the secret itself</li>
           <li className="flex items-center gap-2"><Check className="size-4 text-emerald-600" />Documents live in a private store and are served only through this product after a permission check</li>

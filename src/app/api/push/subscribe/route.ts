@@ -13,7 +13,7 @@ const B64URL = /^[A-Za-z0-9_-]{16,200}$/;
 async function handlePOST(req: Request) {
   const who = await pushCaller();
   if (who instanceof NextResponse) return who;
-  if (!pushConfigured()) return NextResponse.json({ error: "Push notifications aren't enabled on this server." }, { status: 503 });
+  if (!(await pushConfigured())) return NextResponse.json({ error: "Push notifications aren't enabled on this server." }, { status: 503 });
 
   const body = (await req.json().catch(() => null)) as { endpoint?: unknown; keys?: { p256dh?: unknown; auth?: unknown } } | null;
   const endpoint = body?.endpoint;

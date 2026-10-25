@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type { CmsViewer } from "@/lib/products/sitecraft-ai/viewer";
@@ -440,7 +441,7 @@ const TOOLS: Tool[] = [
     run: async (a, v) => {
       setAiFeature("Website assistant");
       const client = await getOpenAI();
-      const r = await client.images.generate({ model: process.env.WEBSITE_AI_IMAGE_MODEL || "gpt-image-1", prompt: `${s(a.prompt, 900)}. Photorealistic editorial photograph, natural light, no text, no logos, no watermark.`, size: "1536x1024", quality: "medium", n: 1 });
+      const r = await client.images.generate({ model: process.env.WEBSITE_AI_IMAGE_MODEL || "gpt-image-1", prompt: await getPrompt("website.image", { text: s(a.prompt, 900) }), size: "1536x1024", quality: "medium", n: 1 });
       const b64 = r.data?.[0]?.b64_json;
       if (!b64) return err("The image could not be created.");
       const url = await createCmsMediaFromBuffer(Buffer.from(b64, "base64"), s(a.name, 80) || "AI image", s(a.prompt, 120), v.userId);

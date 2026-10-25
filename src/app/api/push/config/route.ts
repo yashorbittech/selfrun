@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 
 async function handleGET() {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ enabled: pushConfigured(), publicKey: pushConfigured() ? vapidPublicKey() : null }, { headers: { "Cache-Control": "no-store" } });
+  const enabled = await pushConfigured();
+  return NextResponse.json({ enabled, publicKey: enabled ? await vapidPublicKey() : null }, { headers: { "Cache-Control": "no-store" } });
 }
 
 export const GET = withTransport(handleGET);

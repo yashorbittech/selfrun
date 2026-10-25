@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { hasBearer } from "@/lib/security/bearer";
-import { recheckPendingDomains } from "@/lib/platform/domains/custom";
+import { cronRoute } from "@/lib/cron/runner";
 
 /**
- * Daily re-check of every company's pending custom domains (Vercel Cron,
- * `Authorization: Bearer $CRON_SECRET`). Refuses to run without a configured secret.
+ * Scheduled job "domains": see `src/lib/cron/registry.ts` for what it does and when it runs, and `src/lib/cron/jobs.ts` for the code.
+ * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
-export async function GET(req: NextRequest) {
-  const secret = process.env.CRON_SECRET;
-  if (!secret || !hasBearer(req, secret)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ ok: true, companies: await recheckPendingDomains() });
-}
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+export const GET = cronRoute("domains");

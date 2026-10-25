@@ -58,7 +58,7 @@ async function runAction(action: WorkflowAction, wf: Pick<WorkflowDoc, "_id" | "
     if (action.type === "email") {
       const mail = buildWorkflowEmail(action, event.ctx, { brand: env.brand, link });
       if (!isEmailAddress(mail.to)) return { action: "email", ok: false, detail: mail.to ? `"${mail.to.slice(0, 80)}" isn't an email address.` : "No recipient: the field was empty for this event." };
-      const sent = await sendEmail({ to: mail.to, subject: mail.subject, html: mail.html, text: mail.text });
+      const sent = await sendEmail({ to: mail.to, subject: mail.subject, html: mail.html, text: mail.text, event: "automation_notification" });
       return sent.ok ? { action: "email", ok: true, detail: `Sent to ${mail.to}` } : { action: "email", ok: false, detail: "The email couldn't be sent." };
     }
     if (action.type === "whatsapp") {

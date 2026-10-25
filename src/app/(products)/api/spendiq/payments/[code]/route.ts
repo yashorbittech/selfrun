@@ -7,6 +7,7 @@ import { getInvoice } from "@/lib/products/spendiq/invoices";
 import { getPrmsSettings } from "@/lib/products/spendiq/settings";
 import { renderPaymentReceiptPdf } from "@/components/products/spendiq/PaymentReceiptPdf";
 import type { Payment } from "@/lib/products/spendiq/payments";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ code: string }> };
 
@@ -26,6 +27,7 @@ async function handleGET(_req: NextRequest, { params }: Context) {
   const settings = await getPrmsSettings();
   const buffer = await renderPaymentReceiptPdf(payment, invoice, settings.company);
 
+  await recordPdf({ type: "prms_payment", ref: payment.paymentCode, by: user.email, role: "staff" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",

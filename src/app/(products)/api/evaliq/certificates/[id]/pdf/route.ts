@@ -6,6 +6,7 @@ import { getCertificate } from "@/lib/products/evaliq/certificates";
 import { getOtsSettings } from "@/lib/products/evaliq/settings";
 import { renderOtsCertificatePdf } from "@/components/products/evaliq/CertificatePdf";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -40,6 +41,7 @@ async function handleGET(_req: Request, { params }: Context) {
     signatoryName: settings.signatoryName,
     signatoryTitle: settings.signatoryTitle,
   });
+  await recordPdf({ type: "ots_certificate", ref: cert.certificateNumber, by: viewer?.email, role: isStaff ? "staff" : "candidate" });
   return new NextResponse(new Uint8Array(buffer), {
     headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="${cert.certificateNumber}.pdf"`, "Cache-Control": "private, no-store" },
   });

@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { getCompanyDetails } from "@/lib/products/talentos/company";
@@ -88,7 +89,7 @@ export async function getBrandSnapshot(): Promise<BrandSnapshot> {
 export async function brandPrompt(opts: { clientId?: string | null; offerId?: string | null } = {}): Promise<string> {
   if (opts.clientId) {
     const client = await clientSummary(opts.clientId);
-    if (client) return `BRAND CONTEXT (content is for a client of the agency — write in the client's voice, not the agency's):\n${client}`;
+    if (client) return await getPrompt("smms.brand.client", { client });
   }
   const s = await getBrandSnapshot();
   const b = s.brand;
@@ -104,10 +105,10 @@ export async function brandPrompt(opts: { clientId?: string | null; offerId?: st
     b.websiteInfo && `Website information: ${b.websiteInfo}`,
     b.sellingPoints.length > 0 && `Key selling points: ${b.sellingPoints.join("; ")}`,
     b.brandHashtags.length > 0 && `Branded hashtags: ${b.brandHashtags.join(" ")}`,
-    b.avoid.length > 0 && `Never use or claim: ${b.avoid.join("; ")}`,
+    b.avoid.length > 0 && (await getPrompt("smms.brand.avoid", { avoid: b.avoid.join("; ") })),
   ].filter(Boolean);
   let offers = s.offers;
   if (opts.offerId) offers = offers.filter((o) => o._id === opts.offerId);
-  if (offers.length > 0) lines.push(`Current offers (only mention when relevant; never invent other discounts): ${offers.map((o) => `${o.title} (${o.badge}, valid until ${o.validUntil.slice(0, 10)})`).join("; ")}`);
-  return `BRAND CONTEXT:\n${lines.join("\n")}`;
+  if (offers.length > 0) lines.push(await getPrompt("smms.brand.offers", { offers: offers.map((o) => `${o.title} (${o.badge}, valid until ${o.validUntil.slice(0, 10)})`).join("; ") }));
+  return await getPrompt("smms.brand.company", { lines: lines.join("\n") });
 }

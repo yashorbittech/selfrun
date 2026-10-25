@@ -2,6 +2,7 @@ import "server-only";
 import { put, get, del, head } from "@vercel/blob";
 import { BillingLimitError, assertStorageAvailable, meterStorage } from "@/lib/platform/billing/enforce";
 import { recordBlockedUpload, scanUpload } from "@/lib/storage/upload-scan";
+import { blobAuth } from "@/lib/storage/blob-token";
 
 /**
  * Shared Vercel Blob core — every `*-storage.ts` module in this codebase
@@ -53,6 +54,7 @@ export async function putObject(folder: string, filename: string, body: Buffer, 
   // Plan storage limit (throws a friendly BillingLimitError when full); metered once stored.
   await assertStorageAvailable(body.byteLength);
   await put(storageKey, body, {
+    ...(await blobAuth()),
     access: "private",
     contentType: resolvedContentType,
     addRandomSuffix: false, // the key is already a random UUID — don't let Blob mangle it further
@@ -63,7 +65,7 @@ export async function putObject(folder: string, filename: string, body: Buffer, 
 
 /** Returns `null` on a clean "not found"; throws on any other failure (auth error, outage, ...) so that never gets silently mapped to a 404. */
 export async function getObject(storageKey: string): Promise<GetResult | null> {
-  const result = await get(storageKey, { access: "private" });
+  const result = await get(storageKey, { ...(await blobAuth()), access: "private" });
   if (!result || result.statusCode !== 200 || !result.stream) return null;
   return { stream: result.stream, contentType: result.blob.contentType };
 }
@@ -71,9 +73,9 @@ export async function getObject(storageKey: string): Promise<GetResult | null> {
 export async function deleteObject(storageKey: string | null | undefined): Promise<void> {
   if (!storageKey) return;
   // Size first (best effort) so the storage meter can be credited back.
-  const size = await head(storageKey).then((b) => b.size, () => 0);
+  const size = await head(storageKey, await blobAuth()).then((b) => b.size, () => 0);
   let deleted = true;
-  await del(storageKey).catch(() => {
+  await del(storageKey, await blobAuth()).catch(() => {
     deleted = false;
   });
   if (deleted && size > 0) await meterStorage(-size, { source: storageKey.split("/")[0] || "files", detail: `deleted ${storageKey.split("/").slice(1).join("/")}` });

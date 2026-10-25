@@ -3,6 +3,7 @@ import { getDb } from "@/lib/mongodb";
 import { newId } from "@/lib/products/huddle-ai/db";
 import { signalNew } from "@/lib/notify/signals";
 import { panelOfChatType, MESSENGER_ONLY_TYPE } from "@/lib/notify/panels";
+import { logBell, planNotification } from "@/lib/notify/center/store";
 import { queuePush } from "@/lib/push/send";
 import { categorizeType } from "@/lib/push/categories";
 
@@ -72,19 +73,22 @@ export interface NotifyInput {
 export async function notify(input: NotifyInput): Promise<void> {
   try {
     const collection = await getCollection();
-    await collection.insertOne({
+    const product = panelOfChatType(String(input.type));
+    const plan = await planNotification({ type: String(input.type), title: input.title, body: input.body, link: input.link, product });
+    if (plan.inApp.on) await collection.insertOne({
       _id: newId(),
       recipientUserId: input.recipientUserId,
       type: input.type,
-      title: input.title,
-      body: input.body ?? null,
+      title: plan.inApp.title,
+      body: plan.inApp.body,
       link: input.link ?? null,
       read: false,
       dedupeKey: input.dedupeKey ?? null,
       createdAt: new Date(),
     });
-    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined });
-    await signalNew(panelOfChatType(String(input.type)), [input.recipientUserId], { type: String(input.type), title: input.title, body: input.body ?? null, link: input.link ?? null });
+    await queuePush("staff", [input.recipientUserId], { category: categorizeType(input.type), title: input.title, body: input.body, url: input.link, tag: input.dedupeKey ?? undefined, event: String(input.type), product });
+    if (plan.inApp.on) await signalNew(product, [input.recipientUserId], { type: String(input.type), title: plan.inApp.title, body: plan.inApp.body, link: input.link ?? null });
+    await logBell(plan.inApp.on, { type: String(input.type), title: input.title, product, reason: plan.inApp.reason });
   } catch {
     // dup dedupeKey or transient error — ignore.
   }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { emailLapseFor } from "@/lib/platform/email-lapse";
+import { getFeatureControls, pdfOff } from "@/lib/platform/feature-controls";
+import { pdfTypeOfRequest } from "@/lib/pdf/gate";
 import { trialLockedFor } from "@/lib/platform/billing/trial-lock";
 import { TRIAL_LOCK_OPEN_PATH } from "@/lib/platform/billing/trial-lock-rule";
 import { LAPSE_OPEN_PATH } from "@/lib/platform/email-lapse-rule";
@@ -129,6 +131,19 @@ async function planGate(request: NextRequest, companyId: string | null | undefin
   return null;
 }
 
+/** A kind of PDF the platform switched off (Platform Console → Documents & PDFs) answers 403 for every company. Fails open on a lookup error. */
+async function pdfGate(request: NextRequest): Promise<NextResponse | null> {
+  if (request.method !== "GET") return null;
+  const type = pdfTypeOfRequest(request.nextUrl.pathname, request.nextUrl.searchParams);
+  if (!type) return null;
+  try {
+    if (pdfOff(await getFeatureControls(), type.key)) return NextResponse.json({ error: `${type.name} is turned off by the platform.` }, { status: 403, headers: { "Cache-Control": "no-store" } });
+  } catch (err) {
+    console.error("[pdf] gate lookup failed in proxy", err);
+  }
+  return null;
+}
+
 export async function proxy(request: NextRequest) {
   // API calls: only the product gate applies (everything below is about page views).
   const hostHeader0 = request.headers.get("host") ?? "";
@@ -167,6 +182,8 @@ export async function proxy(request: NextRequest) {
     if (blocked) return blocked;
     const planBlocked = await planGate(request, apiCompany);
     if (planBlocked) return planBlocked;
+    const pdfBlocked = await pdfGate(request);
+    if (pdfBlocked) return pdfBlocked;
     if (!isAssetPath(request.nextUrl.pathname, request.method)) {
       const copied = await gateSessionBinding(request, true);
       if (copied) return copied;

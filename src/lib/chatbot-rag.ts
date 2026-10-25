@@ -1,4 +1,5 @@
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
 import { detectLanguage, languageBlock, scopeBlock, type Lang } from "@/lib/ai/policy";
 import type OpenAI from "openai";
@@ -60,7 +61,7 @@ export async function streamAnswer(
 
   const base: OpenAI.Responses.ResponseCreateParamsStreaming = {
     model: config.model,
-    instructions: `${config.systemPrompt}\n\n${scopeBlock("website")}\n- Answer only from the knowledge-base search results. If they do not contain the answer, say you do not have that information and suggest contacting the company; never guess prices, dates, policies or facts.\n\n${languageBlock(lang)}`,
+    instructions: await getPrompt("chatbot.rag", { persona: config.systemPrompt, scope_block: await scopeBlock("website"), language_block: await languageBlock(lang) }),
     input,
     max_output_tokens: config.maxOutputTokens,
     store: false,

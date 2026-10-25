@@ -1,3 +1,4 @@
+import { getPrompt } from "@/lib/prompts/store";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import "server-only";
 import type OpenAI from "openai";
@@ -39,7 +40,6 @@ const VIDEO = S.obj({
   thumbnailConcept: S.str(),
   durationSec: S.num("Total length in seconds"),
 });
-const EMPTY_IMAGE_NOTE = "Fill `image` only for an image ad and `video` only for a video ad; leave every field of the other one empty (empty strings, empty arrays, 0).";
 
 export const SCHEMAS = {
   campaign: S.obj({
@@ -80,13 +80,6 @@ export const SCHEMAS = {
 
 export type SchemaName = keyof typeof SCHEMAS;
 
-export const SYSTEM = [
-  "You are the senior social media strategist and copywriter of an in-house marketing team.",
-  "Write platform-native content: respect each platform's character limits, conventions and audience. Never exceed a limit you are given.",
-  "Use only facts from the brand context and the brief. Do not invent statistics, prices, discounts, awards, client names or testimonials.",
-  "Write in the requested language and tone. Hashtags must start with #. Keep claims compliant with ad platform policies (no misleading or sensational claims, no personal-attribute targeting language).",
-  "Return only the JSON the schema asks for.",
-].join("\n");
 
 export function platformGuide(platforms: string[]): string {
   return platforms
@@ -135,7 +128,7 @@ export async function generateStructured<T>(opts: { userId: string; schema: Sche
   const started = Date.now();
   const params: OpenAI.Responses.ResponseCreateParamsNonStreaming = {
     model: ai.textModel,
-    instructions: SYSTEM,
+    instructions: await getPrompt("smms.system"),
     input: opts.input,
     max_output_tokens: ai.maxOutputTokens,
     text: { format: { type: "json_schema", name: `smms_${opts.schema}`, schema: SCHEMAS[opts.schema] as Record<string, unknown>, strict: true } },
@@ -176,10 +169,9 @@ export async function generateImage(opts: { userId: string; prompt: string; size
   return { data: Buffer.from(b64, "base64"), model: ai.imageModel, inputTokens: usage?.input_tokens ?? 0, outputTokens: usage?.output_tokens ?? 0, costUsd: ai.imageCostUsd, durationMs: Date.now() - started };
 }
 
-/** Appended to a prompt when the user asked to refine the existing content rather than start over. */
-export function refineBlock(current: unknown, instruction: string | null): string {
+/** Appended to a prompt when the user asked to refine the existing content rather than start over (the "Refine existing content" prompt). */
+export async function refineBlock(current: unknown, instruction: string | null): Promise<string> {
   if (!instruction) return "";
-  return `\n\nCURRENT CONTENT (JSON):\n${JSON.stringify(current).slice(0, 12000)}\n\nREVISION REQUEST: ${instruction}\nApply the request to the current content and keep everything the request doesn't touch.`;
+  return getPrompt("smms.refine", { current_json: JSON.stringify(current).slice(0, 12000), instruction });
 }
 
-export { EMPTY_IMAGE_NOTE };

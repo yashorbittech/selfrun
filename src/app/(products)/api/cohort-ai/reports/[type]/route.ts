@@ -6,6 +6,7 @@ import { buildReport, isValidReportType } from "@/lib/products/cohort-ai/reports
 import { buildWorkbook } from "@/lib/products/cohort-ai/xlsx";
 import { renderReportPdf } from "@/components/products/cohort-ai/ReportPdf";
 import { toCsv } from "@/lib/csv";
+import { recordPdf } from "@/lib/pdf/activity";
 
 type Context = { params: Promise<{ type: string }> };
 
@@ -41,6 +42,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
 
   if (format === "pdf") {
     const buffer = await renderReportPdf(report);
+    await recordPdf({ type: "tms_report", variant: type, ref: base, by: user.email, role: "staff" });
     return fileResponse(buffer, "application/pdf", `${base}.pdf`);
   }
 

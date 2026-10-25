@@ -47,7 +47,7 @@ export interface PublishOutput {
 export async function publicMediaUrl(mediaId: string): Promise<string> {
   const exp = Date.now() + 60 * 60 * 1000;
   const sig = signMediaToken(mediaId, exp);
-  if (!sig) throw new SmmsInputError("SMMS_ENCRYPTION_KEY isn't set, so media can't be handed to the platform.");
+  if (!sig) throw new SmmsInputError("PLATFORM_ENCRYPTION_KEY isn't set, so media can't be handed to the platform.");
   const override = process.env.SMMS_PUBLIC_BASE_URL && (await isPlatformOwnerContext()) ? process.env.SMMS_PUBLIC_BASE_URL : null;
   const base = (override || (await companySiteUrl())).replace(/\/$/, "");
   return `${base}/api/viralpulse-ai/media/public/${mediaId}?exp=${exp}&sig=${sig}`;

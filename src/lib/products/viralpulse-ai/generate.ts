@@ -1,5 +1,6 @@
+import { getPrompt } from "@/lib/prompts/store";
 import "server-only";
-import { generateStructured, generateImage, platformGuide, refineBlock, EMPTY_IMAGE_NOTE } from "@/lib/products/viralpulse-ai/ai";
+import { generateStructured, generateImage, platformGuide, refineBlock } from "@/lib/products/viralpulse-ai/ai";
 import { brandPrompt } from "@/lib/products/viralpulse-ai/brand";
 import { recordVersion } from "@/lib/products/viralpulse-ai/generations";
 import { briefPrompt, saveCampaignAi, type CampaignDoc } from "@/lib/products/viralpulse-ai/campaigns";
@@ -38,8 +39,8 @@ export async function generateCampaignStrategy(c: CampaignDoc, actor: Actor, ins
     await brandPrompt({ clientId: c.clientId, offerId: c.offerId }),
     `CAMPAIGN BRIEF:\n${briefPrompt(c)}`,
     `PLATFORM RULES:\n${platformGuide(c.platforms)}`,
-    "TASK: Produce the campaign strategy: summary, positioning, key messages, a channel plan across ONLY the brief's platforms (budget percentages summing to 100), a phased timeline, KPIs, 4-6 campaign ideas, 2-4 audience suggestions with interests, keywords, hashtag suggestions, and 2 ad concepts per platform (mix image and video where the platform supports both) with headline, primary text, description and CTA written for that platform.",
-    refineBlock(c.ai, instruction),
+    await getPrompt("smms.task.campaign"),
+    await refineBlock(c.ai, instruction),
   ].join("\n\n");
   const r = await generateStructured({ userId: actor.userId, schema: "campaign", input, normalize: normalizeCampaignAi });
   await saveCampaignAi(c._id, r.data, statusAfterGenerate(c.status).status, actor.userId);
@@ -60,9 +61,9 @@ export async function generateAdCreative(ad: AdDoc, c: CampaignDoc, actor: Actor
     `PLATFORM RULES:\n${platformGuide([ad.platform])}`,
     `AD: ${ad.name} — a ${ad.format} ad for ${meta.label}${fmt ? `, format ${fmt.label} (${fmt.width}x${fmt.height})` : ""}.`,
     ad.content.headline && `Starting point from the campaign concept: headline "${ad.content.headline}"; primary text "${ad.content.primaryText.slice(0, 600)}"`,
-    `TASK: Write the complete ad: headline, primary text, description, CTA, caption, hashtags (${meta.hashtagAdvice}), keywords and audience suggestions, the ${ad.format} creative direction, and 3 variations with different angles. ${EMPTY_IMAGE_NOTE}` +
-      (ad.format === "video" ? " The video needs a scroll-stopping hook, a scene-by-scene structure with timings, the full voiceover script, on-screen text and a thumbnail concept." : " The image needs a concept, a detailed AI image prompt, overlay text and design notes with safe zones for the format."),
-    refineBlock(ad.content, instruction),
+    await getPrompt("smms.task.ad", { hashtag_advice: meta.hashtagAdvice, format: ad.format, empty_image_note: await getPrompt("smms.empty_image_note") }) +
+      (ad.format === "video" ? await getPrompt("smms.task.ad_video") : await getPrompt("smms.task.ad_image")),
+    await refineBlock(ad.content, instruction),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -86,8 +87,8 @@ export async function generatePostContent(p: PostDoc, actor: Actor, instruction:
     await brandPrompt({ clientId: p.clientId, offerId: p.offerId }),
     `POST BRIEF:\n${postBriefPrompt(p)}`,
     `PLATFORM RULES:\n${platformGuide(p.platforms)}`,
-    `TASK: Develop ONE post idea and adapt it into a separate, platform-native version for EACH of these platforms (one variant per platform, using the platform value exactly): ${p.platforms.join(", ")}. For each: title/headline where the platform has one (YouTube video title, LinkedIn/Facebook headline, Google Business Profile event/offer title; else empty), the post body, a short caption or first-line hook, a CTA, hashtags per the platform's convention and keywords. Also write the creative: ${p.contentType === "video" ? "a video concept, hook, full video script, scene-by-scene structure and a thumbnail concept (leave the image fields empty)" : "an image concept and a detailed AI image prompt (leave the video fields empty)"}.`,
-    refineBlock(postSnapshot(p), instruction),
+    await getPrompt("smms.task.post", { platforms: p.platforms.join(", "), creative: p.contentType === "video" ? await getPrompt("smms.task.post_video") : await getPrompt("smms.task.post_image") }),
+    await refineBlock(postSnapshot(p), instruction),
   ].join("\n\n");
   const r = await generateStructured({
     userId: actor.userId,
@@ -120,8 +121,8 @@ export async function regenerateVariant(p: PostDoc, platform: string, actor: Act
     `POST BRIEF:\n${postBriefPrompt(p)}`,
     p.idea && `CORE IDEA: ${p.idea}`,
     `PLATFORM RULES:\n${platformGuide([platform])}`,
-    `TASK: Write the ${PLATFORM_META[platform as Platform].label} version of this post: title/headline where applicable (else empty), body, short caption/hook, CTA, hashtags and keywords.`,
-    refineBlock(current, instruction),
+    await getPrompt("smms.task.variant", { platform: PLATFORM_META[platform as Platform].label }),
+    await refineBlock(current, instruction),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -154,7 +155,7 @@ export async function generateMediaPrompt(m: MediaDoc, actor: Actor): Promise<Im
     m.description && `Description: ${m.description}`,
     m.caption && `Caption: ${m.caption}`,
     m.creativePrompt && `Existing prompt: ${m.creativePrompt}`,
-    `TASK: Write a creative concept and a detailed, reusable AI image-generation prompt that recreates or improves this ${m.kind === "video" ? "video's key frame / thumbnail" : "image"} on-brand, plus overlay text and design notes.`,
+    await getPrompt("smms.task.image_prompt", { what: m.kind === "video" ? await getPrompt("smms.task.image_prompt_video") : await getPrompt("smms.task.image_prompt_image") }),
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -177,17 +178,6 @@ export interface WorkspaceInput {
   clientId: string | null;
 }
 
-const WORKSPACE_TASK: Record<GeneratorType, string> = {
-  campaign_ideas: "Produce {n} distinct campaign ideas. For each item: heading = campaign name; body = the big idea, angle, target audience, channel mix, key message and a sample hook (Markdown); cta = the recommended CTA.",
-  ad_copy: "Produce {n} ad copy variations. For each item: heading = headline; body = primary text then a 'Description:' line (Markdown); cta = the CTA button; hashtags where the platform uses them.",
-  social_post: "Produce {n} ready-to-post social posts. For each item: heading = hook/title; body = the full post (Markdown), then an 'Image concept:' or 'Video concept:' line; cta; hashtags.",
-  captions: "Produce {n} caption options of different lengths and angles. For each item: heading = angle; body = the caption; cta; hashtags.",
-  video_script: "Produce {n} video scripts. For each item: heading = video title; body = Markdown with Hook, a scene-by-scene table (scene, duration, visual, on-screen text, voiceover), full voiceover script, on-screen text list and a thumbnail concept; cta.",
-  headlines: "Produce {n} headlines/titles within the platform's headline limit. For each item: heading = the headline; body = one line on why it works; cta = a matching CTA.",
-  ctas: "Produce {n} call-to-action options. For each item: heading = the button label; body = a supporting CTA line; cta = the button label again.",
-  hashtags: "Produce hashtag and keyword sets. Items: 'Broad', 'Niche', 'Branded', 'Location' and 'Keywords' groups (body lists them one per line; hashtags holds the hashtags for the hashtag groups).",
-  creative_concept: "Produce {n} creative concepts. For each item: heading = concept name; body = Markdown with the visual idea, composition, colour and typography, overlay text, a ready-to-use AI image prompt, and a matching short video concept; cta.",
-};
 
 export async function runWorkspace(input: WorkspaceInput, actor: Actor): Promise<{ id: string; output: WorkspaceOutput }> {
   if (!input.brief.trim()) throw new SmmsInputError("Describe what you want to generate.");
@@ -199,7 +189,7 @@ export async function runWorkspace(input: WorkspaceInput, actor: Actor): Promise
     `BRIEF: ${input.brief}`,
     input.audience && `Audience: ${input.audience}`,
     `Tone: ${input.tone || "brand default"}. Language: ${input.language || "English"}.`,
-    `TASK (${typeLabel}): ${WORKSPACE_TASK[input.type].replace("{n}", String(n))} Set each item's platform to "${input.platform || "any"}". The summary is one or two sentences on the approach.`,
+    await getPrompt("smms.task.workspace", { type_label: typeLabel, task: await getPrompt(`smms.workspace.${input.type}`, { n }), platform: input.platform || "any" }),
   ]
     .filter(Boolean)
     .join("\n\n");
