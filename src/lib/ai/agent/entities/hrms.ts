@@ -26,7 +26,7 @@ import { validateSalaryRevision, validatePayslipOverrides, validateManualPayoutR
 import { EMPLOYEE_STATUSES, EMPLOYMENT_TYPES, GENDERS, WORK_LOCATIONS, isValidEmployeeStatus } from "@/lib/products/talentos/employee-status";
 import { HOLIDAY_TYPES } from "@/lib/products/talentos/holiday-types";
 import { OFFER_STATUSES, isValidOfferStatus } from "@/lib/products/talentos/offers-status";
-import { canApproveLeave, canManageAttendance, canManageEmployees, canManageHolidays, canManageMasters, canManagePayroll, canRunPayroll, canManageSettings, canViewAllEmployees, canViewAuditLog } from "@/lib/hrms-roles";
+import { canApproveLeave, canManageAttendance, canManageEmployees, canManageHolidays, canManageMasters, canManagePayroll, canManagePayrollConfig, canRunPayroll, canManageSettings, canViewAllEmployees, canViewAuditLog } from "@/lib/hrms-roles";
 import * as Bank from "@/app/(products)/talentos/(protected)/(staff)/employees/[id]/bank-actions";
 import { check, fail, formInput, str, viaAction } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
@@ -717,7 +717,7 @@ export const HRMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "hrms.save_payroll_config", panel: "hrms", label: "Change statutory payroll rates", description: "PF/ESI percentages and ceilings, professional tax, TDS regime, financial year start month.", level: "admin", allow: canManageSettings,
+    key: "hrms.save_payroll_config", panel: "hrms", label: "Change statutory payroll rates", description: "PF/ESI percentages and ceilings, professional tax, TDS regime, financial year start month.", level: "admin", allow: canManagePayrollConfig,
     params: [
       { key: "pfEmployeePercent", label: "PF employee %", type: "number" }, { key: "pfWageCeiling", label: "PF wage ceiling", type: "number" }, { key: "epsPercent", label: "EPS %", type: "number" }, { key: "pfEmployerPercent", label: "PF employer %", type: "number" },
       { key: "esiEmployeePercent", label: "ESI employee %", type: "number" }, { key: "esiEmployerPercent", label: "ESI employer %", type: "number" }, { key: "esiGrossThreshold", label: "ESI gross threshold", type: "number" },

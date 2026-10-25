@@ -12,7 +12,8 @@ export const PERMISSION_GROUPS = [
     area: "Tenants",
     permissions: [
       { key: "companies.read", label: "View companies" },
-      { key: "companies.status", label: "Suspend / reactivate companies" },
+      { key: "companies.status", label: "Suspend / reactivate companies, decide reactivation requests" },
+      { key: "companies.impersonate", label: "Sign in as a company's Director (support access to its data)" },
       { key: "companies.manage", label: "Manage companies (all company actions)" },
       { key: "signups.read", label: "View sign-ups" },
       { key: "signups.manage", label: "Approve / reject sign-ups, change sign-up mode" },

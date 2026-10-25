@@ -198,6 +198,16 @@ export function canRefundPayments(user: RoleContext): boolean {
   );
 }
 
+/**
+ * Who may move a refund from one status to the next. DECIDING a request (approve it, or turn it down) belongs to the approver; RUNNING it
+ * (processing, completed — which posts the money-out entry — or failing one already approved) belongs to whoever may refund payments.
+ * Asking for a refund stays with `canManageTransactions`, so an accountant can raise one and a finance manager decides and pays it.
+ */
+export function canMoveRefund(user: RoleContext, from: string, to: string): boolean {
+  const decision = from === "requested" && (to === "approved" || to === "failed");
+  return decision ? canApproveTransactions(user) : canRefundPayments(user);
+}
+
 export function primaryFmsRoleLabel(roles: readonly FmsRole[]): string {
   if (roles.includes("super_admin")) return FMS_ROLE_META.super_admin.label;
   for (const r of FMS_ROLES) {

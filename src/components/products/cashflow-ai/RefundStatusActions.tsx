@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { REFUND_TRANSITIONS, getRefundStatusMeta, type RefundStatus } from "@/lib/products/cashflow-ai/constants";
 import { changeRefundStatusAction } from "@/app/(products)/cashflow-ai/(protected)/refunds/actions";
 
-export default function RefundStatusActions({ id, status }: { id: string; status: RefundStatus }) {
+export default function RefundStatusActions({ id, status, allowed }: { id: string; status: RefundStatus; /** The moves this person may make (decided on the server). */ allowed: RefundStatus[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const nextStates = REFUND_TRANSITIONS[status] ?? [];
+  const nextStates = (REFUND_TRANSITIONS[status] ?? []).filter((s) => allowed.includes(s));
 
   if (nextStates.length === 0) return null;
 

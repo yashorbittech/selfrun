@@ -21,7 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { HrmsRole } from "@/lib/hrms-roles";
-import { canViewAuditLog, canManageSettings, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
+import { canViewAuditLog, canManagePayrollConfig, canManageSettings, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
 
 function NavLink({
   href,
@@ -172,7 +172,7 @@ export default function HrmsSidebar({
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {nav({ href: "/talentos/analytics", label: "Analytics", icon: BarChart3 })}
-      {canManageSettings(roleCtx) && nav({ href: "/talentos/settings", label: "Settings", icon: Settings })}
+      {(canManageSettings(roleCtx) || canManagePayrollConfig(roleCtx)) && nav({ href: "/talentos/settings", label: "Settings", icon: Settings })}
 
       {employeeId && !roles.includes("super_admin") && (
         <>

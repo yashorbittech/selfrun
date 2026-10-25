@@ -55,8 +55,8 @@ const BUILT_INS: { _id: string; name: string; description: string; permissions: 
   {
     _id: "support",
     name: "Support",
-    description: "Companies (view, suspend / reactivate), sign-ups and domains (view).",
-    permissions: ["companies.read", "companies.status", "signups.manage", "domains.read"],
+    description: "Companies (view, suspend / reactivate, sign in as their Director for support), sign-ups and domains (view).",
+    permissions: ["companies.read", "companies.status", "companies.impersonate", "signups.manage", "domains.read"],
   },
   { _id: "viewer", name: "Viewer", description: "Read-only access to every page.", permissions: VIEWER_PERMISSIONS },
 ];

@@ -5,7 +5,7 @@ import type { EventArea } from "@/lib/platform/events/catalog";
 import { hasLmsAccess, lmsCan } from "@/lib/lms-roles";
 import { hasPmsStaffRole, normalizePmsRoles } from "@/lib/pms-roles";
 import { canViewAllEmployees } from "@/lib/hrms-roles";
-import { hasFmsAccess } from "@/lib/fms-roles";
+import { canViewCommercialFinance, hasFmsAccess } from "@/lib/fms-roles";
 
 /**
  * Which cross-product areas a person may see company-wide data for — the one
@@ -40,7 +40,8 @@ function roleAllows(area: Area, user: Pick<AccessUser, "roles" | "permissionOver
     case "tasks":
       return hasPmsStaffRole(normalizePmsRoles([...roles]));
     case "invoices":
-      return hasFmsAccess(roles);
+      // Customer invoices are the CashFlow "commercial finance" tier: a payroll-only accountant, or someone the Director removed it from, gets none.
+      return hasFmsAccess(roles) && canViewCommercialFinance({ roles, permissionOverrides: user.permissionOverrides });
     case "employees":
     case "leave":
       return canViewAllEmployees({ roles, permissionOverrides: user.permissionOverrides });

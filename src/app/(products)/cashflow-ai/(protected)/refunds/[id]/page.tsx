@@ -7,7 +7,8 @@ import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import { RefundStatusBadge } from "@/components/products/cashflow-ai/StatusBadges";
 import RefundStatusActions from "@/components/products/cashflow-ai/RefundStatusActions";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
-import { canManageTransactions, canApproveTransactions } from "@/lib/fms-roles";
+import { canMoveRefund } from "@/lib/fms-roles";
+import { REFUND_TRANSITIONS } from "@/lib/products/cashflow-ai/constants";
 import { getRefund, serializeRefund } from "@/lib/products/cashflow-ai/refunds";
 import { formatMoney } from "@/lib/products/cashflow-ai/constants";
 import { formatDateTime } from "@/lib/utils";
@@ -18,7 +19,9 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ i
   const raw = await getRefund(id);
   if (!raw) notFound();
   const refund = serializeRefund(raw);
-  const canAct = user ? canManageTransactions(user) || canApproveTransactions(user) : false;
+  // Only the moves this person is allowed to make (the action checks the same rule again).
+  const allowed = user ? (REFUND_TRANSITIONS[refund.status] ?? []).filter((to) => canMoveRefund(user, refund.status, to)) : [];
+  const canAct = allowed.length > 0;
 
   return (
     <div className="space-y-4">
@@ -33,7 +36,7 @@ export default async function RefundDetailPage({ params }: { params: Promise<{ i
         <GlassCard>
           <CardHeader><CardTitle>Actions</CardTitle></CardHeader>
           <CardContent>
-            <RefundStatusActions id={refund._id} status={refund.status} />
+            <RefundStatusActions id={refund._id} status={refund.status} allowed={allowed} />
           </CardContent>
         </GlassCard>
       )}

@@ -295,6 +295,16 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "Move a transaction through pending approval to approved or rejected.",
       },
       {
+        key: "fms.canRefundPayments",
+        label: "Run refunds",
+        description: "Process a refund and complete it (which posts the money-out entry), or fail one that was already approved. Deciding a request is \"Approve transactions\".",
+      },
+      {
+        key: "fms.canManagePaymentLinks",
+        label: "Create payment links",
+        description: "Create payment links that customers can pay online.",
+      },
+      {
         key: "fms.canManageAccounts",
         label: "Manage chart of accounts",
         description: "Create and edit Chart of Accounts entries and other CashFlow settings.",

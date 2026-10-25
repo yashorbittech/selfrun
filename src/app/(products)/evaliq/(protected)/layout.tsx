@@ -49,6 +49,7 @@ export default async function ProtectedOtsLayout({ children }: { children: React
     audit: can(viewer, "VIEW_AUDIT_LOG"),
     settings: can(viewer, "MANAGE_SETTINGS"),
     takeTests: can(viewer, "TAKE_TEST"),
+    myResults: can(viewer, "TAKE_TEST") && can(viewer, "VIEW_RESULTS"),
     certificates: can(viewer, "VIEW_CERTIFICATES") || can(viewer, "VERIFY_CERTIFICATE") || can(viewer, "REVOKE_CERTIFICATE"),
     myOpen: counts.myOpen,
     toEvaluate: counts.toEvaluate,

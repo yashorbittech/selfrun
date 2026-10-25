@@ -5,6 +5,7 @@ import type { PaymentMethod } from "@/lib/products/cashflow-ai/payments/intents"
 import { getPaymentIntent, getPaymentIntentByGatewayPayment, markPaymentIntentSuccessful, markPaymentIntentFailed } from "@/lib/products/cashflow-ai/payments/intents";
 import { getPaymentProvider } from "@/lib/products/cashflow-ai/payments/provider";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canManageTransactions } from "@/lib/fms-roles";
 import { simulatedPaymentsAllowed, SIMULATED_PAYMENTS_MESSAGE } from "@/lib/products/cashflow-ai/payments/guard";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
@@ -67,8 +68,10 @@ async function handlePOST(req: Request) {
     }
 
     if (intent.paymentProvider === "mock" || intent.paymentProvider === "offline") {
-      // A simulated payment moves no money — only signed-in staff may settle one, or the operator must opt in (staging demos).
-      if (!(await getCurrentFmsUser()) && !simulatedPaymentsAllowed()) {
+      // A simulated or offline payment moves no money in this app: marking one received is a bookkeeping act, so only finance staff who may
+      // manage transactions can settle one (a read-only or audit login cannot), or the operator must opt in (staging demos).
+      const staff = await getCurrentFmsUser();
+      if (!(staff && canManageTransactions(staff)) && !simulatedPaymentsAllowed()) {
         return NextResponse.json({ ok: false, error: SIMULATED_PAYMENTS_MESSAGE }, { status: 403 });
       }
       const markRes = await markPaymentIntentSuccessful(intentId, {

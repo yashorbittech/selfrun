@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { requirePlatformPermission } from "@/lib/platform/console/access";
+import { can, requirePlatformPermission } from "@/lib/platform/console/access";
 import { listCompanies } from "@/lib/platform/console/companies";
 import PlatformPageHeader from "@/components/platform/panel/PlatformPageHeader";
 import CompaniesFilterBar from "./CompaniesFilterBar";
@@ -10,7 +10,7 @@ import CompaniesGrid from "./CompaniesGrid";
 export const metadata: Metadata = { title: "Companies" };
 
 export default async function PlatformCompaniesPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string; page?: string }> }) {
-  await requirePlatformPermission("companies.read");
+  const user = await requirePlatformPermission("companies.read");
   const sp = await searchParams;
   const status = sp.status === "active" || sp.status === "suspended" || sp.status === "reactivation" ? sp.status : "all";
   const list = await listCompanies({ q: sp.q, status, page: Number(sp.page) || 1 });
@@ -26,6 +26,7 @@ export default async function PlatformCompaniesPage({ searchParams }: { searchPa
         </Link>
       )}
       <CompaniesGrid
+          canImpersonate={can(user, "companies.impersonate")}
           rows={list.rows}
           total={list.total}
           page={list.page}

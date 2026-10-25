@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
-import { canManageTransactions, canApproveTransactions } from "@/lib/fms-roles";
+import { canManageTransactions, canMoveRefund } from "@/lib/fms-roles";
 import { requestRefund, changeRefundStatus, getRefund, type RefundWriteData } from "@/lib/products/cashflow-ai/refunds";
 import { isValidRefundStatus } from "@/lib/products/cashflow-ai/constants";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
@@ -47,10 +47,11 @@ export async function changeRefundStatusAction(id: string, status: string): Prom
   if (!user) throw new Error("Unauthorized");
   if (!isValidRefundStatus(status)) return { ok: false, error: "Unknown status." };
 
-  const needsApproval = status === "approved";
-  if (needsApproval ? !canApproveTransactions(user) : !canManageTransactions(user)) throw new Error("Forbidden");
-
   const before = await getRefund(id);
+  if (!before) return { ok: false, error: "Refund not found." };
+  // The status it is moving FROM decides who may do it (see canMoveRefund): the UI hiding a button is never the boundary.
+  if (!canMoveRefund(user, before.status, status)) throw new Error("Forbidden");
+
   const res = await changeRefundStatus(id, status, user.id, user.email);
   if (!res.ok) return { ok: false, error: res.reason };
   await recordAudit({

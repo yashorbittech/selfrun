@@ -9,7 +9,7 @@ import type { CompanyRow } from "@/lib/platform/console/companies";
 import StatusBadge from "./StatusBadge";
 import LoginAsCompanyButton from "./LoginAsCompanyButton";
 
-const columns: AdminDataGridColumn<CompanyRow>[] = [
+const buildColumns = (canImpersonate: boolean): AdminDataGridColumn<CompanyRow>[] => [
   {
     key: "name",
     label: "Company",
@@ -55,7 +55,7 @@ const columns: AdminDataGridColumn<CompanyRow>[] = [
       {row.reactivationPending && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-semibold text-primary">Reactivation requested</span>}
     </span>
   ) },
-  { key: "access", label: "", render: (row) => (row.isPlatformOwner || row.status !== "active" ? null : <LoginAsCompanyButton companyId={row.id} companyName={row.name} label="Login" />) },
+  { key: "access", label: "", render: (row) => (!canImpersonate || row.isPlatformOwner || row.status !== "active" ? null : <LoginAsCompanyButton companyId={row.id} companyName={row.name} label="Login" />) },
 ];
 
 export default function CompaniesGrid({
@@ -65,6 +65,7 @@ export default function CompaniesGrid({
   totalPages,
   filters,
   hasActiveFilters,
+  canImpersonate = false,
 }: {
   rows: CompanyRow[];
   total: number;
@@ -72,10 +73,12 @@ export default function CompaniesGrid({
   totalPages: number;
   filters: ReactNode;
   hasActiveFilters: boolean;
+  /** May sign in as a company's Director (`companies.impersonate`). */
+  canImpersonate?: boolean;
 }) {
   return (
     <AdminDataGrid
-      columns={columns}
+      columns={buildColumns(canImpersonate)}
       rows={rows}
       getRowId={(row) => row.id}
       total={total}

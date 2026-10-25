@@ -7,7 +7,7 @@ import LeaveTypesManager from "@/components/products/talentos/LeaveTypesManager"
 import PayrollConfigForm from "@/components/products/talentos/PayrollConfigForm";
 import CompanyDetailsForm from "@/components/products/talentos/CompanyDetailsForm";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
-import { canManageSettings } from "@/lib/hrms-roles";
+import { canManagePayrollConfig, canManageSettings } from "@/lib/hrms-roles";
 import { getOrgSettings } from "@/lib/products/talentos/settings";
 import { listLeaveTypes } from "@/lib/products/talentos/leave";
 import { getPayrollConfig } from "@/lib/products/talentos/payroll-config";
@@ -15,16 +15,21 @@ import { getCompanyDetails } from "@/lib/products/talentos/company";
 
 export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const user = await getCurrentHrmsUser();
-  if (!user || !canManageSettings(user)) redirect("/talentos");
+  // Two separate permissions: the company / schedule / leave settings, and the statutory payroll rates (PF, ESI, professional tax, TDS).
+  // Each tab, and the data behind it, is only for the one who holds its permission.
+  const manageSettings = !!user && canManageSettings(user);
+  const managePayroll = !!user && canManagePayrollConfig(user);
+  if (!user || (!manageSettings && !managePayroll)) redirect("/talentos");
 
   const sp = await searchParams;
-  const tab = ["company", "schedule", "leave", "payroll"].includes(sp.tab ?? "") ? sp.tab! : "company";
+  const allowedTabs = [...(manageSettings ? ["company", "schedule", "leave"] : []), ...(managePayroll ? ["payroll"] : [])];
+  const tab = allowedTabs.includes(sp.tab ?? "") ? sp.tab! : allowedTabs[0];
 
   const [settings, leaveTypes, payrollConfig, company] = await Promise.all([
-    getOrgSettings(),
-    listLeaveTypes(true),
-    getPayrollConfig(),
-    getCompanyDetails(),
+    manageSettings ? getOrgSettings() : null,
+    manageSettings ? listLeaveTypes(true) : [],
+    managePayroll ? getPayrollConfig() : null,
+    manageSettings ? getCompanyDetails() : null,
   ]);
 
   return (
@@ -39,6 +44,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         initial={tab}
         syncParam="tab"
         tabs={[
+          ...(manageSettings && company && settings ? [
           {
             key: "company",
             label: "Company",
@@ -104,6 +110,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               />
             ),
           },
+          ] : []),
+          ...(managePayroll && payrollConfig ? [
           {
             key: "payroll",
             label: "Payroll",
@@ -124,6 +132,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
               />
             ),
           },
+          ] : []),
         ]}
       />
     </div>

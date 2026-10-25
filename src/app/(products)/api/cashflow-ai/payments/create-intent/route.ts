@@ -4,6 +4,7 @@ import { limitOr429 } from "@/lib/security/rate-limit";
 import { createPaymentIntent, CreatePaymentIntentData } from "@/lib/products/cashflow-ai/payments/intents";
 import { acquireIdempotencyLock, releaseIdempotencyLock } from "@/lib/products/cashflow-ai/payments/idempotency";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canApproveTransactions, canManageTransactions } from "@/lib/fms-roles";
 import { getPaymentLinkByToken } from "@/lib/products/cashflow-ai/payments/links";
 import { simulatedPaymentsAllowed, SIMULATED_PAYMENTS_MESSAGE } from "@/lib/products/cashflow-ai/payments/guard";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
@@ -32,7 +33,15 @@ async function handlePOST(req: Request) {
     const idempotencyKey = str(req.headers.get("x-idempotency-key") || body.idempotencyKey, 120) || undefined;
 
     let input: CreatePaymentIntentData;
-    if (staff) {
+    // Someone paying through a link (even while signed in as staff) is a payer: amount and customer come from the stored link.
+    if (staff && !str(body.linkToken, 64)) {
+      // Any amount, discount or wallet credit the caller names is accepted on this path, so it is for the people who run payments, not for
+      // every finance login (a read-only or audit role can open the product but must not start a payment). Discounts and wallet credits
+      // change what a customer owes: those need the approver's right on top.
+      if (!canManageTransactions(staff)) return NextResponse.json({ ok: false, error: "You don't have permission to create payments." }, { status: 403 });
+      if ((Number(body.walletCreditsUsed) > 0 || Number(body.offerDiscountAmount) > 0) && !canApproveTransactions(staff)) {
+        return NextResponse.json({ ok: false, error: "Applying a discount or wallet credit needs approval rights." }, { status: 403 });
+      }
       input = {
         sourceModule: body.sourceModule as CreatePaymentIntentData["sourceModule"],
         sourceType: str(body.sourceType),

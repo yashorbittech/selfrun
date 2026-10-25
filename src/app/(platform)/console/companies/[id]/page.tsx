@@ -84,10 +84,10 @@ export default async function ConsoleCompanyPage({ params }: { params: Promise<{
           actions={
             company.isPlatformOwner ? (
               <p className="max-w-56 text-xs text-muted-foreground">The platform owner company runs the platform and can&apos;t be suspended.</p>
-            ) : !can(user, "companies.status") ? null : (
+            ) : !can(user, "companies.status") && !can(user, "companies.impersonate") ? null : (
               <div className="flex flex-wrap items-start gap-2">
-                {company.status === "active" && <LoginAsCompanyButton companyId={company.id} companyName={company.name} variant="default" />}
-                <StatusControl companyId={company.id} companyName={company.name} status={company.status} />
+                {company.status === "active" && can(user, "companies.impersonate") && <LoginAsCompanyButton companyId={company.id} companyName={company.name} variant="default" />}
+                {can(user, "companies.status") && <StatusControl companyId={company.id} companyName={company.name} status={company.status} />}
                 {user.platform.permissions.includes("*") && <DeleteCompanyControl companyId={company.id} companyName={company.name} />}
               </div>
             )

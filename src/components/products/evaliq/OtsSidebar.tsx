@@ -34,6 +34,8 @@ export interface OtsNavFlags {
   audit: boolean;
   settings: boolean;
   takeTests: boolean;
+  /** May see their own results (separate from taking tests). */
+  myResults: boolean;
   certificates: boolean;
   /** Tests waiting for the viewer to start / continue. */
   myOpen: number;
@@ -122,7 +124,7 @@ export default function OtsSidebar({ flags, onNavigate, collapsed = false }: { f
 
       {flags.takeTests && <SectionLabel collapsed={collapsed}>My Tests</SectionLabel>}
       {flags.takeTests && nav({ href: "/evaliq/my-tests", label: "My Tests", icon: ClipboardList, badge: flags.myOpen })}
-      {flags.takeTests && nav({ href: "/evaliq/my-results", label: "My Results", icon: Trophy })}
+      {flags.myResults && nav({ href: "/evaliq/my-results", label: "My Results", icon: Trophy })}
       {flags.certificates && nav({ href: "/evaliq/certificates", label: "Certificates", icon: Award })}
 
       {insights && <SectionLabel collapsed={collapsed}>Insights</SectionLabel>}

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
-import { canManageSettings } from "@/lib/hrms-roles";
+import { canManagePayrollConfig, canManageSettings } from "@/lib/hrms-roles";
 import { updateOrgSettings } from "@/lib/products/talentos/settings";
 import { upsertLeaveType, deleteLeaveType } from "@/lib/products/talentos/leave";
 import { updatePayrollConfig } from "@/lib/products/talentos/payroll-config";
@@ -21,6 +21,14 @@ async function requireSettings() {
   const user = await getCurrentHrmsUser();
   if (!user) throw new Error("Unauthorized");
   if (!canManageSettings(user)) throw new Error("Forbidden");
+  return user;
+}
+
+/** The statutory payroll rates (PF, ESI, professional tax, TDS) are their own permission, not part of "settings". */
+async function requirePayrollConfig() {
+  const user = await getCurrentHrmsUser();
+  if (!user) throw new Error("Unauthorized");
+  if (!canManagePayrollConfig(user)) throw new Error("Forbidden");
   return user;
 }
 
@@ -98,7 +106,7 @@ export async function saveCompanyDetailsAction(input: Record<string, unknown>): 
 }
 
 export async function savePayrollConfigAction(input: Record<string, unknown>): Promise<SettingsActionResult> {
-  const user = await requireSettings();
+  const user = await requirePayrollConfig();
   const v = validatePayrollConfig(input);
   if (!v.valid) return { ok: false, fieldErrors: v.errors };
 
