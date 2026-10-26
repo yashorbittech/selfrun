@@ -80,8 +80,8 @@ export const CRON_JOBS: CronJob[] = [
   },
   {
     key: "notifications", name: "Time-based notifications", product: "workspace", scope: "each company", path: "/api/notify/cron", schedule: "15 6 * * *", maxDurationSec: 300,
-    description: "Overdue invoices, stale leads, expiring documents, ending offers and HR, project, procurement and training deadlines: tells people even if nobody opened the product.",
-    alsoRunsOn: "Opening the product (each product runs its own sweep, throttled; every notification dedupes per day).",
+    description: "Overdue invoices, stale leads, expiring documents, ending offers and HR, project, procurement and training deadlines: tells people even if nobody opened the product. Also sends announcements a company scheduled that have come due.",
+    alsoRunsOn: "Opening the product (each product runs its own sweep, throttled; every notification dedupes per day). Scheduled announcements are sent the moment anyone opens the workspace, and by this job at least once a day.",
     configure: { label: "Notification center", href: "/commandos/settings/notifications" },
   },
   {

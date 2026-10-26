@@ -80,6 +80,7 @@ export async function runAllSweeps() {
       ["fms", async () => { const [o, s, b] = await Promise.all([overdueInvoices(), invoicesDueWithin(3), overdueBills()]); await fmsEvents.receivablesDigest(o, s); await fmsEvents.payablesDigest(b); }],
       ["lms", async () => { const [l, a] = await Promise.all([getStaleLeadsSummary(), getStaleApplicationsSummary()]); await lmsEvents.staleDigest({ count: l.count, names: l.items.slice(0, 3).map((x) => String((x as { name?: string }).name ?? "")).filter(Boolean) }, { count: a.count, names: a.items.slice(0, 3).map((x) => String((x as { name?: string }).name ?? "")).filter(Boolean) }); }],
       ["lpms", () => lpmsEvents.expiryDigest()],
+      ["announcements", async () => { await (await import("@/lib/notify/center/announcements")).dispatchDue(); }],
     ];
     for (const [name, fn] of jobs) {
       try { await fn(); out[name] = "ok"; } catch (err) { out[name] = err instanceof Error ? err.message.slice(0, 120) : "failed"; }

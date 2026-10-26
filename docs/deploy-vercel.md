@@ -438,7 +438,7 @@ This line means the first start created your operator company, your staff accoun
 - **9.6** Open `https://www.selfrunbusiness.com/console`. It must **redirect** to `https://app.selfrunbusiness.com/console`.
   (products never open on the website address.)
 
-- **9.7** Open `https://www.selfrunbusiness.com/api/notify/announcements/cron` in the browser. It must answer **401** (refused: it needs `CRON_SECRET`). That proves the scheduled jobs are protected.
+- **9.7** Open `https://www.selfrunbusiness.com/api/notify/cron` in the browser. It must answer **401** (refused: it needs `CRON_SECRET`). That proves the scheduled jobs are protected.
 
 > ✅ **Checkpoint:** the SelfRun Business website shows with a valid HTTPS padlock, the log line `[saas] Platform operator … created` exists, `/console` redirects to the `app.` address, and the cron URL answers 401.
 
@@ -680,7 +680,7 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 
 ⏱ *read only · nothing to set up*
 
-`vercel.json` registers 13 jobs. They start automatically after deployment and are protected by `CRON_SECRET` (without it every call is refused). The list lives in one place, `src/lib/cron/registry.ts`; `vercel.json` is generated from it (`npm run cron:sync`) and `npm run test:cron` fails if the two, or the routes on disk, ever disagree.
+`vercel.json` registers 12 jobs, all daily, so it fits Vercel's Hobby plan. They start automatically after deployment and are protected by `CRON_SECRET` (without it every call is refused). The list lives in one place, `src/lib/cron/registry.ts`; `vercel.json` is generated from it (`npm run cron:sync`) and `npm run test:cron` fails if the two, or the routes on disk, ever disagree.
 
 | Job | Time (UTC) | Does |
 | --- | --- | --- |
@@ -696,11 +696,10 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 | `/api/platform/billing/subscriptions/cron` | 06:00 | Subscription renewals & dunning: Moves past-due subscriptions through grace to suspended, handles missed renewals and closes expired trials. |
 | `/api/notify/cron` | 06:15 | Time-based notifications: Overdue invoices, stale leads, expiring documents, ending offers and HR, project, procurement and training deadlines: tells people even if nobody opened the product. |
 | `/api/apps/builds/cron` | 07:00 | App builds: Hands over desktop-app builds that were requested while no build service was connected, and fails builds that never finished. It never starts a build by itself. |
-| `/api/notify/announcements/cron` | every 5 minutes | Scheduled announcements: Sends the announcements companies scheduled for a time that has now come. |
 
 **Watching them.** Platform Console → **Cron jobs** shows every job with its next run, its last run, what it did and whether it ran when it was due (healthy, overdue, failing). Each run is kept for 30 days. A Platform Console user with *Change platform settings* can press **Run now**. Two runs of the same job never overlap (a lock in the database), so a late or doubled call is harmless.
 
-**Plan.** Vercel's Hobby plan only accepts daily schedules. *Scheduled announcements* runs every 5 minutes, so it needs the **Pro** plan; on Hobby, remove that entry from the registry (then `npm run cron:sync`) and announcements are sent when someone opens the workspace instead of at the minute.
+**Plan.** Vercel's Hobby plan only accepts daily schedules, and every job here is daily. Announcements a company scheduled are sent the moment anyone opens the workspace and by the daily *Time-based notifications* job; for minute-accurate sending, run the in-app scheduler (`RUN_SCHEDULER=1`, not on Vercel).
 
 To confirm they are registered: Vercel → project → **Settings → Cron Jobs**. (Not on Vercel? Set `RUN_SCHEDULER=1` on exactly one instance and the app runs the same list itself; see [deploy-aws.md](./deploy-aws.md).)
 
@@ -763,9 +762,16 @@ Tick these before you tell customers the platform is open.
 
 ## About the Free (Hobby) plan
 
-Two things worth knowing, independent of this code: Vercel's Hobby plan is meant for personal, non-commercial projects, and a SaaS
-that bills customers normally belongs on Pro (check Vercel's current terms). Hobby also has lower limits (function duration,
-domains, team members). Every company uses two of your plan's domain slots if you use Option B. The code works on either plan.
+**This platform does not fit Vercel's Hobby plan.** Hobby accepts at most 12 serverless functions in one deployment
+(*"No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan"*). Vercel turns every API route and every server-rendered
+page into function code, and this application has over 900 of them (about 230 API routes and 690 pages, across the website, the Platform Console and
+every product). No setting or code change can bring that under 12; a deploy on Hobby will always stop with that message. Choose one of:
+
+- **Vercel Pro** (a team): the function limit is far higher, and it also allows faster cron schedules. Everything in this guide then works as written.
+- **Your own server or AWS**: run the same app with `next start` and the in-app scheduler (`RUN_SCHEDULER=1`). There is no function limit. Follow [deploy-aws.md](./deploy-aws.md).
+
+Separately, Hobby is meant for personal, non-commercial projects, and a SaaS that bills customers normally belongs on Pro (check Vercel's current terms).
+Hobby also allows only **daily** cron schedules (the 12 jobs in step 16 are all daily, so that part fits) and has lower limits on function duration, domains and team members.
 
 ---
 
