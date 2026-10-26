@@ -22,7 +22,6 @@ export const JOB_RUNNERS: Record<string, () => Promise<unknown>> = {
   subscriptions: async () => (await import("@/lib/platform/billing/subscriptions")).runDunningSweep(),
   notifications: async () => (await import("@/lib/notify/sweeps")).runAllSweeps(),
   apps: async () => (await import("@/lib/apps/enqueue")).runBuildCron(),
-  announcements: async () => (await import("@/lib/notify/center/announcements")).dispatchDueEverywhere(),
 };
 
 /** A short, log-sized reading of what a job returned: per-company runs become "12 companies, 1 failed". */

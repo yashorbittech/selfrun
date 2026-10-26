@@ -89,12 +89,6 @@ export const CRON_JOBS: CronJob[] = [
     description: "Hands over desktop-app builds that were requested while no build service was connected, and fails builds that never finished. It never starts a build by itself.",
     configure: { label: "Apps & downloads", href: "/commandos/settings/apps" },
   },
-  {
-    key: "announcements", name: "Scheduled announcements", product: "workspace", scope: "each company", path: "/api/notify/announcements/cron", schedule: "*/5 * * * *", maxDurationSec: 300, frequent: true,
-    description: "Sends the announcements companies scheduled for a time that has now come.",
-    alsoRunsOn: "Opening any workspace page or the Notification center (at most once a minute per company), so a late run only delays them.",
-    configure: { label: "Notification center → Announcements", href: "/commandos/settings/notifications" },
-  },
 ];
 
 export const CRON_BY_KEY = new Map(CRON_JOBS.map((j) => [j.key, j]));
