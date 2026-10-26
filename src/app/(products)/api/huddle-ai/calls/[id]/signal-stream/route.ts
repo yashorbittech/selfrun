@@ -3,7 +3,6 @@ import { requireCallAccess } from "@/lib/products/huddle-ai/call-guard";
 import { pull, latestSeq, scopeKey } from "@/lib/products/huddle-ai/events";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * Dedicated fast SSE channel for one call's WebRTC signaling. Polls the event

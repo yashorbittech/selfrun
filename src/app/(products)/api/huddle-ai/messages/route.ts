@@ -14,7 +14,6 @@ import { advanceDirectRead } from "@/lib/products/huddle-ai/conversations";
 import type { Attachment } from "@/lib/products/huddle-ai/attachments";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** GET  /api/huddle-ai/messages?scopeType=&scopeId=&beforeSeq=&threadRootId= */
 async function handleGET(request: NextRequest) {

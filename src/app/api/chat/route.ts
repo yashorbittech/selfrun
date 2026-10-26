@@ -19,7 +19,7 @@ import { checkScope, detectLanguage, refusalText } from "@/lib/ai/policy";
 import { getVisitorProfile } from "@/lib/chat-visitors";
 
 // Long-running streamed completion.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /** What a website visitor sees when the company's AI allowance is used up. */
 const ASSISTANT_PAUSED = "Our assistant is unavailable right now. Please contact us directly, or try again a little later.";

@@ -10,7 +10,7 @@ import { rateLimit } from "@/lib/push/rate-limit";
  * images the app itself shows, and the mobile/desktop builds download them. Rendered on demand, cached by the browser/CDN.
  */
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 async function handleGET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await onAppSurface())) return NextResponse.json({ error: "Not found" }, { status: 404 });

@@ -8,7 +8,7 @@ import { pushConfigured } from "@/lib/push/vapid";
 
 export const dynamic = "force-dynamic";
 /** Sending to many subscribers can take a while. */
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export default async function WebPushPage() {
   const viewer = await getViewer();

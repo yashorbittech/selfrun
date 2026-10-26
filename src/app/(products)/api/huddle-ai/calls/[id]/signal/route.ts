@@ -5,7 +5,6 @@ import { requireCallAccess } from "@/lib/products/huddle-ai/call-guard";
 import { emit } from "@/lib/products/huddle-ai/events";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * POST /api/huddle-ai/calls/[id]/signal  { to, type: "offer"|"answer"|"ice"|"bye", data }

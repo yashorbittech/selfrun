@@ -8,7 +8,6 @@ import { getDb } from "@/lib/mongodb";
 import { canSignIn } from "@/lib/security/account-status";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 export const maxDuration = 300;
 
 const POLL_MS = 2000;

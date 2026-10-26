@@ -6,7 +6,7 @@ import { listCategories } from "@/lib/products/evaliq/categories";
 import { recordAudit } from "@/lib/products/evaliq/audit";
 import { OtsInputError } from "@/lib/products/evaliq/viewer";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * Question import (CSV / XLSX). `commit=0` validates every row and returns a

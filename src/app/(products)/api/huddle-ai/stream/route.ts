@@ -5,7 +5,6 @@ import { resolveVisibleScopes } from "@/lib/products/huddle-ai/access";
 import { latestSeq, pull, serializeEvent } from "@/lib/products/huddle-ai/events";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * Server-Sent Events stream — the realtime transport for Messenger.

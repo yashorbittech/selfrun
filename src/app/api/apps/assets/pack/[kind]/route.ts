@@ -11,7 +11,7 @@ import { getCompanyBrand } from "@/lib/platform/branding";
  * single assets (they are the company's own branding), because the mobile and desktop builds download it; rate limited.
  */
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const KINDS = new Set(["pwa", "android", "ios", "desktop", "all"]);
 

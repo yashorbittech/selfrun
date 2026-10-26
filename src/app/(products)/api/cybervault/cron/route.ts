@@ -5,6 +5,6 @@ import { cronRoute } from "@/lib/cron/runner";
  * Vercel Cron calls it with `Authorization: Bearer $CRON_SECRET`; without that secret it refuses to run.
  */
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export const GET = cronRoute("cybervault");

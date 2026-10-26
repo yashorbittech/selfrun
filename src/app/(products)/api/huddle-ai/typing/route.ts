@@ -5,7 +5,6 @@ import { emit } from "@/lib/products/huddle-ai/events";
 import { getChatUser } from "@/lib/products/huddle-ai/users";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/typing  { scopeType, scopeId }  — emits an ephemeral typing ping. */
 async function handlePOST(request: NextRequest) {

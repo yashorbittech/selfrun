@@ -10,7 +10,7 @@ import { afterForCompany } from "@/lib/platform/tenancy/context";
 import { voiceBlockReason } from "@/lib/platform/billing/enforce";
 import { recordUsage } from "@/lib/platform/billing/usage";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const MAX_TTS_CHARS = 5000;
 // mp3 @ 128 kbps ≈ 16000 bytes/sec — used to estimate spoken duration.

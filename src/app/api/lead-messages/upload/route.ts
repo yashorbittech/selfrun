@@ -7,7 +7,6 @@ import { getLeadRecord } from "@/lib/lead-management/records";
 import { saveLeadAttachment } from "@/lib/lead-management/attachment-storage";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * POST /api/lead-messages/upload  (multipart/form-data: `file`, `leadId`)

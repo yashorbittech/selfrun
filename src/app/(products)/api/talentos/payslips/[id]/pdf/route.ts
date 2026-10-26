@@ -7,7 +7,6 @@ import { renderPayslipPdf } from "@/components/products/talentos/PayslipPdfDocum
 import { recordAudit } from "@/lib/products/talentos/audit";
 import { recordPdf } from "@/lib/pdf/activity";
 
-export const runtime = "nodejs";
 
 type Context = { params: Promise<{ id: string }> };
 

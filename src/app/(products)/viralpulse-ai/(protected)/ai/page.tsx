@@ -8,7 +8,7 @@ import { listLiveOffers, listClientChoices } from "@/lib/products/viralpulse-ai/
 import { normalizeWorkspace } from "@/lib/products/viralpulse-ai/content";
 import { isOpenAIConfigured } from "@/lib/openai";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export default async function AiGeneratorPage() {
   const viewer = await getViewer();

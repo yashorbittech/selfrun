@@ -5,7 +5,7 @@ import { EMPTY_CAMPAIGN_FORM } from "@/lib/products/viralpulse-ai/form-defaults"
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
 import { briefPickers } from "@/lib/products/viralpulse-ai/page-data";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export default async function NewCampaignPage() {
   const viewer = await getViewer();

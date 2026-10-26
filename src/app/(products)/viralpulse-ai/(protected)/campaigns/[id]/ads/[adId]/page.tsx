@@ -19,7 +19,7 @@ import { defaultScheduleInput } from "@/lib/products/viralpulse-ai/page-data";
 import { formatDateTime } from "@/lib/utils";
 import { archiveAdAction, deleteAdAction, duplicateAdAction, generateAdAction, markAdLiveAction, scheduleAdAction } from "@/app/(products)/viralpulse-ai/(protected)/actions";
 
-export const maxDuration = 180;
+export const maxDuration = 300;
 
 export default async function AdPage({ params }: { params: Promise<{ id: string; adId: string }> }) {
   const viewer = await getViewer();

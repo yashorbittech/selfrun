@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getViewer, can } from "@/lib/products/evaliq/viewer";
 import { putObject } from "@/lib/storage/blob";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const MAX = 4 * 1024 * 1024; // Vercel caps request bodies at 4.5 MB.
 

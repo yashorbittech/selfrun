@@ -4,9 +4,8 @@ import { signedClientIp } from "@/lib/security/transport-ip";
 import { b64uDecode, b64uEncode } from "@/lib/security/transport-shared";
 import { withTransport } from "@/lib/security/transport";
 
-export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * Sealed Server Actions. The browser seals an action call (page, Next's action headers, arguments) and posts it here; this opens it, makes the

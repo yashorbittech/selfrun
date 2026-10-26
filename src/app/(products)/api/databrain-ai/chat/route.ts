@@ -4,7 +4,7 @@ import { getCurrentIntelligenceUser } from "@/lib/intelligence-auth";
 import { executeTurn, prepareTurn } from "@/lib/products/databrain-ai/turn";
 
 // Long-running: several model rounds and queries.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function fail(error: string, status: number) {
   return NextResponse.json({ ok: false, error }, { status });

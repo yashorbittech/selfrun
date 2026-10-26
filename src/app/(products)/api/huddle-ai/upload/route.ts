@@ -4,7 +4,6 @@ import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/produc
 import { saveAttachment } from "@/lib/products/huddle-ai/attachments";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * POST /api/huddle-ai/upload  (multipart/form-data)

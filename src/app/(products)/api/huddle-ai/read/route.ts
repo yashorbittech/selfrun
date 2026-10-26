@@ -5,7 +5,6 @@ import { advanceChannelRead } from "@/lib/products/huddle-ai/channels";
 import { advanceDirectRead } from "@/lib/products/huddle-ai/conversations";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/read  { scopeType, scopeId, seq }  — advances the caller's read cursor. */
 async function handlePOST(request: NextRequest) {

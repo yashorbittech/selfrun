@@ -21,7 +21,6 @@ import {
 import type { ScreenSurface } from "@/lib/products/huddle-ai/call-constants";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/calls/[id] — full room state (roster, hands, presenter, timer). */
 async function handleGET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {

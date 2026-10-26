@@ -10,7 +10,7 @@ import { listMedia, getMediaMany, toMediaCard } from "@/lib/products/viralpulse-
 import { isOpenAIConfigured } from "@/lib/openai";
 import { PLATFORMS, PLATFORM_META } from "@/lib/products/viralpulse-ai/constants";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export default async function MediaPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const viewer = await getViewer();

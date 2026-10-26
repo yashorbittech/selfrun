@@ -4,7 +4,6 @@ import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helper
 import { globalSearch, type SearchType } from "@/lib/products/huddle-ai/search";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 const VALID_TYPES: SearchType[] = ["messages", "channels", "users", "files", "projects", "groups"];
 

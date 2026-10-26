@@ -5,7 +5,6 @@ import { pinMessage, unpinMessage } from "@/lib/products/huddle-ai/channels";
 import { recordAudit } from "@/lib/products/huddle-ai/audit";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/pin  { scopeType, scopeId, messageId, pinned } — channel only. */
 async function handlePOST(request: NextRequest) {

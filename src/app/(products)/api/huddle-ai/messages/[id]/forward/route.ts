@@ -7,7 +7,6 @@ import { advanceDirectRead } from "@/lib/products/huddle-ai/conversations";
 import { getChatUsers } from "@/lib/products/huddle-ai/users";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * POST /api/huddle-ai/messages/[id]/forward

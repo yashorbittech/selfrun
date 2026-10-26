@@ -32,12 +32,12 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "Backups & data", href: "/commandos/settings/backups" },
   },
   {
-    key: "wallet-expiry", name: "Wallet expiry", product: "lms", scope: "each company", path: "/api/wallet/expiry-sweep", schedule: "30 2 * * *", maxDurationSec: 60,
+    key: "wallet-expiry", name: "Wallet expiry", product: "lms", scope: "each company", path: "/api/wallet/expiry-sweep", schedule: "30 2 * * *", maxDurationSec: 300,
     description: "Expires reward credits that have passed their date and warns people whose credits are about to expire.",
     alsoRunsOn: "Every wallet read or spend (expiry is also settled then); a signed-in manager can run it for their own company.",
   },
   {
-    key: "playbook", name: "Procedure reminders", product: "sop", scope: "each company", path: "/api/playbook-ai/cron", schedule: "0 3 * * *", maxDurationSec: 60,
+    key: "playbook", name: "Procedure reminders", product: "sop", scope: "each company", path: "/api/playbook-ai/cron", schedule: "0 3 * * *", maxDurationSec: 300,
     description: "Moves procedures through their date-driven statuses (review due, expired) and sends acknowledgement reminders.",
     configure: { label: "PlayBook settings", href: "/playbook-ai/settings" },
   },
@@ -47,7 +47,7 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "RankMax settings", href: "/rankmax-ai/settings" },
   },
   {
-    key: "cybervault", name: "Vault expiry alerts", product: "dlms", scope: "each company", path: "/api/cybervault/cron", schedule: "0 4 * * *", maxDurationSec: 60,
+    key: "cybervault", name: "Vault expiry alerts", product: "dlms", scope: "each company", path: "/api/cybervault/cron", schedule: "0 4 * * *", maxDurationSec: 300,
     description: "Tells the vault's owners about credentials and documents that have expired or are about to.",
     configure: { label: "CyberVault settings", href: "/cybervault/settings" },
   },
@@ -64,17 +64,17 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "EvalIQ settings", href: "/evaliq/settings" },
   },
   {
-    key: "domains", name: "Custom domain re-check", product: "platform", scope: "each company", path: "/api/platform/domains/cron", schedule: "30 5 * * *", maxDurationSec: 60,
+    key: "domains", name: "Custom domain re-check", product: "platform", scope: "each company", path: "/api/platform/domains/cron", schedule: "30 5 * * *", maxDurationSec: 300,
     description: "Re-checks every company's pending custom domains so they go live as soon as their DNS is right.",
     configure: { label: "Custom domains", href: "/commandos/settings/domains" },
   },
   {
-    key: "trials", name: "Trial reminders & expiry", product: "platform", scope: "platform", path: "/api/platform/billing/trials/cron", schedule: "0 6 * * *", maxDurationSec: 120,
+    key: "trials", name: "Trial reminders & expiry", product: "platform", scope: "platform", path: "/api/platform/billing/trials/cron", schedule: "0 6 * * *", maxDurationSec: 300,
     description: "Emails trial reminders at the platform's reminder days and moves ended trials on (the workspace locks until a plan is subscribed).",
     configure: { label: "Plan & billing", href: "/commandos/settings/billing" },
   },
   {
-    key: "subscriptions", name: "Subscription renewals & dunning", product: "platform", scope: "platform", path: "/api/platform/billing/subscriptions/cron", schedule: "0 6 * * *", maxDurationSec: 120,
+    key: "subscriptions", name: "Subscription renewals & dunning", product: "platform", scope: "platform", path: "/api/platform/billing/subscriptions/cron", schedule: "0 6 * * *", maxDurationSec: 300,
     description: "Moves past-due subscriptions through grace to suspended, handles missed renewals and closes expired trials.",
     configure: { label: "Plan & billing", href: "/commandos/settings/billing" },
   },
@@ -85,7 +85,7 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "Notification center", href: "/commandos/settings/notifications" },
   },
   {
-    key: "apps", name: "App builds", product: "platform", scope: "platform", path: "/api/apps/builds/cron", schedule: "0 7 * * *", maxDurationSec: 60,
+    key: "apps", name: "App builds", product: "platform", scope: "platform", path: "/api/apps/builds/cron", schedule: "0 7 * * *", maxDurationSec: 300,
     description: "Hands over desktop-app builds that were requested while no build service was connected, and fails builds that never finished. It never starts a build by itself.",
     configure: { label: "Apps & downloads", href: "/commandos/settings/apps" },
   },

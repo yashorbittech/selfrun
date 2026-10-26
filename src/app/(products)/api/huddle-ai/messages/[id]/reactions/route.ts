@@ -4,7 +4,6 @@ import { resolveScope, requireSession, jsonError, HttpError } from "@/lib/produc
 import { toggleReaction } from "@/lib/products/huddle-ai/messages";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/messages/[id]/reactions  { scopeType, scopeId, emoji } */
 async function handlePOST(request: NextRequest, ctx: RouteContext<"/api/huddle-ai/messages/[id]/reactions">) {

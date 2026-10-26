@@ -5,7 +5,6 @@ import { startCall, getActiveCallForScope, serializeCall, getIceServers } from "
 import type { CallMode } from "@/lib/products/huddle-ai/call-constants";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/calls?scopeType=&scopeId=  — the active call for a conversation, if any. */
 async function handleGET(request: NextRequest) {

@@ -10,7 +10,7 @@ import { cronRoute } from "@/lib/cron/runner";
  * reconciled on every read/spend); it just makes it timely and sends the warnings.
  */
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const scheduled = cronRoute("wallet-expiry", { extraSecrets: [process.env.WALLET_CRON_SECRET] });
 

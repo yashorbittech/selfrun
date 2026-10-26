@@ -4,7 +4,6 @@ import { requireSession, jsonError, HttpError } from "@/lib/products/huddle-ai/r
 import { toggleStarredMessage } from "@/lib/products/huddle-ai/users";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/star  { messageId } — toggles a personal star. */
 async function handlePOST(request: NextRequest) {

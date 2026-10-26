@@ -8,7 +8,6 @@ import { readLeadAttachmentStream } from "@/lib/lead-management/attachment-stora
 import type { LeadMessage } from "@/lib/lead-management/types";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * Authenticated streamer for attachments in `uploads/lead-message-files/`.

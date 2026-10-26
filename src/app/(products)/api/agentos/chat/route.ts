@@ -14,7 +14,7 @@ import { LIMITS } from "@/lib/products/agentos/constants";
 import { aiBlockReason } from "@/lib/platform/billing/enforce";
 
 // Long-running streamed completion.
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 const GENERIC_ERROR = "Sorry — the bot couldn't generate a reply. Please try again.";
 

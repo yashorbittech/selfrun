@@ -4,7 +4,6 @@ import { requireSession, jsonError } from "@/lib/products/huddle-ai/route-helper
 import { heartbeat, type PresenceStatus } from "@/lib/products/huddle-ai/presence";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 const CHOOSABLE: PresenceStatus[] = ["online", "away", "busy", "in_meeting"];
 

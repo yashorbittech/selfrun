@@ -5,7 +5,6 @@ import { latestSeq, pull, serializeEvent } from "@/lib/products/huddle-ai/events
 import { scopeKey } from "@/lib/products/huddle-ai/event-key";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * Server-Sent Events stream for the LMS side of a lead's Communication

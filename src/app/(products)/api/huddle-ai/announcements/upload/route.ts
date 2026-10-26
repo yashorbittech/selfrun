@@ -5,7 +5,6 @@ import { canPostAnnouncements } from "@/lib/messenger-roles";
 import { saveAttachment } from "@/lib/products/huddle-ai/attachments";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** POST /api/huddle-ai/announcements/upload (multipart) — author-only attachment upload. */
 async function handlePOST(request: NextRequest) {

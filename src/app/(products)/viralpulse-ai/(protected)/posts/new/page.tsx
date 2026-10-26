@@ -6,7 +6,7 @@ import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
 import { briefPickers } from "@/lib/products/viralpulse-ai/page-data";
 import { listCampaignOptions } from "@/lib/products/viralpulse-ai/campaigns";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export default async function NewPostPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const viewer = await getViewer();

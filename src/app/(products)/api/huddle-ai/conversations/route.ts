@@ -5,7 +5,6 @@ import { listConversationsForUser } from "@/lib/products/huddle-ai/conversations
 import { getChatUsers } from "@/lib/products/huddle-ai/users";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /** GET /api/huddle-ai/conversations — the caller's channels + DMs, for pickers (forward, share). */
 async function handleGET() {

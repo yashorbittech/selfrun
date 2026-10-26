@@ -5,7 +5,6 @@ import { resolveVisibleScopes } from "@/lib/products/huddle-ai/access";
 import { listAccessibleFiles, type AttachmentKind } from "@/lib/products/huddle-ai/attachments";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 const KINDS: AttachmentKind[] = ["image", "voice", "video", "file"];
 

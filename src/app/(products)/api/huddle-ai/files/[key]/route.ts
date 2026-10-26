@@ -10,7 +10,6 @@ import { recordAudit } from "@/lib/products/huddle-ai/audit";
 import type { Attachment } from "@/lib/products/huddle-ai/attachments";
 
 export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
 
 /**
  * Authenticated streamer for attachments in `uploads/messenger-files/`. Access

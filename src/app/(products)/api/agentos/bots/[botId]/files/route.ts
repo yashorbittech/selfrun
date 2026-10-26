@@ -7,7 +7,7 @@ import { getBot } from "@/lib/products/agentos/bots";
 import { replaceBotFile, uploadBotFile, friendlyError } from "@/lib/products/agentos/knowledge";
 import { recordAudit } from "@/lib/products/agentos/audit";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 /**
  * Multipart upload into ONE bot's knowledge base (a route rather than a server

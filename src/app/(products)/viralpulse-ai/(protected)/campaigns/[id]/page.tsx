@@ -33,7 +33,7 @@ import {
   setCampaignLifecycleAction,
 } from "@/app/(products)/viralpulse-ai/(protected)/actions";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export default async function CampaignPage({ params }: { params: Promise<{ id: string }> }) {
   const viewer = await getViewer();

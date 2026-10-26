@@ -9,7 +9,7 @@ import { applyChatCookies, resolveSession } from "@/lib/chatbot-sessions";
 import { getVisitorProfile } from "@/lib/chat-visitors";
 import { ensureVoiceConversation, recordVoiceTranscript } from "@/lib/voice-conversations";
 
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 const MAX_AUDIO_BYTES = 12 * 1024 * 1024; // ~12 MB (roughly 2–3 min of Opus/webm)
 
