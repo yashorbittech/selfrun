@@ -19,6 +19,8 @@ export interface PayLine {
   name: string;
   amount: number;
   ytd: number;
+  /** For an earning cut for loss of pay: what it is at full pay for the month. */
+  fixed?: number;
 }
 
 export interface PayslipPdfData {
@@ -64,7 +66,12 @@ export interface PayslipPdfData {
     lopDays: number;
     daysPaid: number;
     payDate: string | null;
+    monthDays: number | null;
+    /** Why days were not paid, in words. */
+    notes: string[];
   };
+  /** How the income tax was worked out (payslips made by the statutory engine). */
+  tax: { regime: "new" | "old"; fy: string; taxableIncome: number; yearTax: number; thisMonth: number; deductedSoFar: number } | null;
 
   earnings: PayLine[];
   deductions: PayLine[];
@@ -131,7 +138,9 @@ export async function getPayslipPdfData(payslipId: string): Promise<PayslipPdfDa
   const ytdFor = (name: string, kind: "earnings" | "deductions") =>
     fySlips.reduce((acc, p) => acc + sumBy(p[kind], name), 0);
 
-  const earnings: PayLine[] = slip.earnings.map((e) => ({ name: e.name, amount: e.amount, ytd: ytdFor(e.name, "earnings") }));
+  const earnings: PayLine[] = slip.earnings.map((e) => ({ name: e.name, amount: e.amount, ytd: ytdFor(e.name, "earnings"), fixed: e.fixedAmount !== undefined && e.fixedAmount !== e.amount ? e.fixedAmount : undefined }));
+  const tdsThisMonth = slip.deductions.filter((d) => d.code === "TDS" || (!d.code && d.name === "TDS")).reduce((n, d) => n + d.amount, 0);
+  const tdsBefore = fySlips.filter((p) => p.month < slip.month).reduce((n, p) => n + p.deductions.filter((d) => d.code === "TDS" || (!d.code && d.name === "TDS")).reduce((m, d) => m + d.amount, 0), 0);
   const deductions: PayLine[] = slip.deductions.map((d) => ({ name: d.name, amount: d.amount, ytd: ytdFor(d.name, "deductions") }));
 
   const ytd = {
@@ -185,9 +194,12 @@ export async function getPayslipPdfData(payslipId: string): Promise<PayslipPdfDa
     period: {
       workingDays: slip.workingDays,
       lopDays: slip.lopDays,
-      daysPaid: Math.max(0, slip.workingDays - slip.lopDays),
+      daysPaid: slip.paidDays ?? Math.max(0, slip.workingDays - slip.lopDays),
       payDate: payDate ? new Date(payDate).toISOString() : null,
+      monthDays: slip.monthDays ?? null,
+      notes: slip.daysNotes ?? [],
     },
+    tax: slip.tax?.annual ? { regime: slip.tax.regime, fy: slip.tax.fy, taxableIncome: slip.tax.annual.taxableIncome, yearTax: slip.tax.annual.totalTax, thisMonth: tdsThisMonth, deductedSoFar: tdsBefore + tdsThisMonth } : null,
 
     earnings,
     deductions,

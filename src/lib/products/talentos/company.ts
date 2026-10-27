@@ -33,6 +33,10 @@ export interface CompanyDetails {
   pfEstablishmentCode: string;
   esiEstablishmentCode: string;
   lin: string;
+  /** Tax deduction account number (TAN): needed on Form 16 and the quarterly TDS returns. */
+  tan: string;
+  /** Professional tax registration (PTEC / PTRC) number. */
+  ptRegistration: string;
   signatoryName: string;
   signatoryDesignation: string;
   payslipNote: string;
@@ -59,6 +63,8 @@ const BASE_DEFAULTS: Omit<CompanyDetails, "_id" | "updatedAt" | "updatedBy"> = {
   pfEstablishmentCode: "",
   esiEstablishmentCode: "",
   lin: "",
+  tan: "",
+  ptRegistration: "",
   signatoryName: "",
   signatoryDesignation: "Authorised Signatory",
   payslipNote: "This payslip is confidential. Contact HR for any discrepancy within 30 days.",

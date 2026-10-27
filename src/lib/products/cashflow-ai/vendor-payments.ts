@@ -1,16 +1,15 @@
 import { fmsEvents } from "@/lib/notify/triggers/fms";
 import "server-only";
-import { getDb } from "@/lib/mongodb";
 import {
   recordPayment as prmsRecordPayment,
-  markPaymentProcessed as prmsMarkPaymentProcessed,
   getPayment as getPrmsPayment,
   searchPayments as searchPrmsPayments,
   type PaymentWriteData as PrmsPaymentWriteData,
 } from "@/lib/products/spendiq/payments";
 import { getInvoice as getPrmsBill } from "@/lib/products/spendiq/invoices";
-import { postSystemTransaction, type Transaction } from "@/lib/products/cashflow-ai/transactions";
-import type { PaymentMethod, FundAccountType } from "@/lib/products/cashflow-ai/constants";
+import type { FundAccountType } from "@/lib/products/cashflow-ai/constants";
+import { startPayout } from "@/lib/products/cashflow-ai/payments/payouts";
+import { vendorPayee } from "@/lib/products/cashflow-ai/payments/payees";
 
 /**
  * FMS's "Vendor Payments" (§11 — "FMS should manage the financial portion:
@@ -23,91 +22,76 @@ import type { PaymentMethod, FundAccountType } from "@/lib/products/cashflow-ai/
  * truth for the payment record itself.
  */
 
-const TRANSACTIONS_COLLECTION = "fms_transactions";
-
-async function postLinkedTransaction(
-  paymentId: string,
-  actorId: string,
-  actorEmail: string | null,
-  fundAccountId: string | null = null,
-  fundAccountType: FundAccountType | null = null
-): Promise<Transaction | null> {
-  const payment = await getPrmsPayment(paymentId);
-  if (!payment || payment.status !== "processed") return null;
-
-  // Idempotent — `markPaymentProcessed` can be called on an already-processed
-  // payment without creating a second linked transaction.
-  const db = await getDb();
-  const already = await db
-    .collection(TRANSACTIONS_COLLECTION)
-    .findOne({ sourceModule: "prms", sourceRecordId: paymentId, deletedAt: null });
-  if (already) return null;
-
-  const bill = await getPrmsBill(payment.invoiceId);
-  const txn = await postSystemTransaction(
-    {
-      type: "expense",
-      transactionDate: payment.paymentDate,
-      postingDate: payment.paymentDate,
-      amount: payment.amount,
-      currency: bill?.currency ?? "INR",
-      paymentMethod: (payment.method as PaymentMethod) || "bank_transfer",
-      sourceModule: "prms",
-      sourceRecordId: paymentId,
-      customerId: null,
-      vendorId: payment.vendorId,
-      employeeId: null,
-      projectId: null,
-      department: null,
-      accountId: null,
-      fundAccountId,
-      fundAccountType,
-      taxAmount: payment.tdsDeducted,
-      referenceNumber: payment.transactionReference,
-      description: `Vendor payment ${payment.paymentCode} for bill ${payment.invoiceNumber}`,
-      attachments: [],
-    },
-    actorId,
-    actorEmail
-  );
-  // The PRMS payment itself already succeeded (this only runs after it's
-  // "processed") — a closed-period rejection here means no matching FMS
-  // ledger entry gets posted for it, not that the payment should be undone.
-  return "ok" in txn ? null : txn;
-}
-
 export interface RecordVendorPaymentResult {
   ok: boolean;
   reason?: string;
   paymentId?: string;
 }
 
+const MODE_OF: Record<string, "NEFT" | "RTGS" | "IMPS" | "UPI"> = { neft: "NEFT", rtgs: "RTGS", imps: "IMPS", upi: "UPI" };
+
+/** Starts the Razorpay payout for a vendor payment that exists (scheduled) and has not been paid. */
+async function payViaRazorpay(paymentId: string, actorId: string, actorEmail: string | null): Promise<{ ok: boolean; reason?: string }> {
+  const payment = await getPrmsPayment(paymentId);
+  if (!payment) return { ok: false, reason: "Payment not found." };
+  if (payment.status === "processed") return { ok: false, reason: "This payment has already been made." };
+  const payee = await vendorPayee(payment.vendorId, payment.vendorName);
+  if (!payee.ok) return { ok: false, reason: payee.error };
+  const res = await startPayout(
+    {
+      purpose: "vendor_bill",
+      sourceModule: "prms",
+      sourceRecordId: payment._id,
+      payee: payee.payee,
+      amount: payment.amount,
+      narration: `Bill ${payment.invoiceNumber}`,
+      vendorId: payment.vendorId,
+      mode: MODE_OF[String(payment.method)] ?? null,
+      description: `Vendor payment ${payment.paymentCode} for bill ${payment.invoiceNumber}`,
+    },
+    { id: actorId, email: actorEmail },
+  );
+  return res.ok ? { ok: true } : { ok: false, reason: res.error };
+}
+
+/**
+ * Pays a vendor bill through Razorpay. The payment is saved first (scheduled) and its payout started; it becomes "processed", and the bill
+ * is reduced, only when Razorpay reports the money paid. Choose "scheduled" to pay later with `markVendorPaymentProcessed`.
+ */
 export async function recordVendorPayment(
   data: PrmsPaymentWriteData,
   actorId: string,
   actorEmail: string | null,
-  fundAccountId: string | null = null,
-  fundAccountType: FundAccountType | null = null
+  _fundAccountId: string | null = null,
+  _fundAccountType: FundAccountType | null = null,
 ): Promise<RecordVendorPaymentResult> {
-  const res = await prmsRecordPayment(data, actorId);
+  void _fundAccountId;
+  void _fundAccountType;
+  const bill = await getPrmsBill(data.invoiceId);
+  if (!bill) return { ok: false, reason: "Bill not found." };
+  const payee = await vendorPayee(bill.vendorId, bill.vendorName);
+  if (data.status !== "scheduled" && !payee.ok) return { ok: false, reason: payee.error };
+
+  const res = await prmsRecordPayment({ ...data, status: "scheduled" }, actorId);
   if (!res.ok || !res.id) return { ok: false, reason: res.reason };
-  if (data.status === "processed") {
-    await postLinkedTransaction(res.id, actorId, actorEmail, fundAccountId, fundAccountType);
+  if (data.status === "scheduled") {
+    await fmsEvents.vendorPayment({ id: res.id, amount: Number((data as { amount?: number }).amount ?? 0), vendorName: bill.vendorName, reference: null }, "recorded", actorId);
+    return { ok: true, paymentId: res.id };
   }
-  await fmsEvents.vendorPayment({ id: res.id, amount: Number((data as { amount?: number }).amount ?? 0), vendorName: String((data as { vendorName?: string }).vendorName ?? "") || null, reference: String((data as { reference?: string }).reference ?? "") || null }, data.status === "processed" ? "processed" : "recorded", actorId);
+  const paid = await payViaRazorpay(res.id, actorId, actorEmail);
+  if (!paid.ok) {
+    // Nothing went out, so no half-made payment is left behind.
+    const { deletePayment } = await import("@/lib/products/spendiq/payments");
+    await deletePayment(res.id, actorId);
+    return { ok: false, reason: paid.reason };
+  }
+  await fmsEvents.vendorPayment({ id: res.id, amount: Number((data as { amount?: number }).amount ?? 0), vendorName: bill.vendorName, reference: null }, "recorded", actorId);
   return { ok: true, paymentId: res.id };
 }
 
-export async function markVendorPaymentProcessed(
-  id: string,
-  actorId: string,
-  actorEmail: string | null
-): Promise<{ ok: boolean; reason?: string }> {
-  const res = await prmsMarkPaymentProcessed(id, actorId);
-  if (!res.ok) return res;
-  await postLinkedTransaction(id, actorId, actorEmail);
-  await fmsEvents.vendorPayment({ id, amount: 0 }, "processed", actorId);
-  return { ok: true };
+/** Pays a scheduled (or earlier failed) vendor payment now, through Razorpay. */
+export async function markVendorPaymentProcessed(id: string, actorId: string, actorEmail: string | null): Promise<{ ok: boolean; reason?: string }> {
+  return payViaRazorpay(id, actorId, actorEmail);
 }
 
 export async function listVendorPayments(opts: Parameters<typeof searchPrmsPayments>[0] = {}) {

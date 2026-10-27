@@ -117,8 +117,8 @@ export async function savePayrollConfigAction(input: Record<string, unknown>): P
     action: "update",
     entity: "payroll_config",
     entityId: "org",
-    entityLabel: "Statutory rates",
-    summary: `PF ${v.data.pfEmployeePercent}%, PT ₹${v.data.professionalTaxMonthly}, ESI ≤ ₹${v.data.esiGrossThreshold}`,
+    entityLabel: "Payroll policy",
+    summary: `days: ${v.data.paidDaysBasis}${v.data.paidDaysBasis === "fixed" ? ` ${v.data.fixedDays}` : ""}, sandwich ${v.data.sandwichRule}, tax ${v.data.tdsEnabled ? v.data.defaultTaxRegime : "off"}, cap ${v.data.deductionCapPercent}%`,
   });
   revalidatePath("/talentos/settings");
   revalidatePath("/talentos/payroll");

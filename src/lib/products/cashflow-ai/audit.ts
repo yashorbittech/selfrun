@@ -32,7 +32,9 @@ export type AuditEntity =
   | "payment_link"
   | "webhook_event"
   | "bank_statement"
-  | "payment_reminders";
+  | "payment_reminders"
+  | "payout"
+  | "payment_controls";
 
 export type AuditAction =
   | "create"

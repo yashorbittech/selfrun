@@ -44,6 +44,7 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "prompt_overrides",
   "prompt_versions",
   "prompt_stats",
+  "payroll_statutory_rates", // the law's payroll figures (tax slabs, PF, ESI, professional tax …), published by the platform for every company (see lib/products/talentos/payroll/rates-store.ts)
   "cron_settings", // per-job pause / schedule override, and who is alerted when one fails
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
   "saas_inquiries",
@@ -83,6 +84,7 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "hrms_settings",
   "hrms_company",
   "hrms_payroll_config",
+  "fms_payment_controls", // limits and approval rules for money leaving the company (see lib/products/cashflow-ai/payment-controls.ts)
   "ots_settings",
   "pms_settings",
   "prms_settings",

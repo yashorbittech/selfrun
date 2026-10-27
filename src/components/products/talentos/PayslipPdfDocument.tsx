@@ -89,7 +89,7 @@ function LineRows({ rows }: { rows: PayLine[] }) {
       )}
       {rows.map((r, i) => (
         <View style={s.tr} key={i}>
-          <Text style={s.tdName}>{r.name}</Text>
+          <Text style={s.tdName}>{r.name}{r.fixed !== undefined ? ` (of ${inr(r.fixed)})` : ""}</Text>
           <Text style={s.tdNum}>{inr(r.amount)}</Text>
           <Text style={s.tdNum}>{inr(r.ytd)}</Text>
         </View>
@@ -134,10 +134,11 @@ function PayslipDocument({ data }: { data: PayslipPdfData }) {
         <View style={s.strip}>
           <View style={s.stripCell}><Text style={s.stripLabel}>Pay period</Text><Text style={s.stripValue}>{data.monthLabel}</Text></View>
           <View style={s.stripCell}><Text style={s.stripLabel}>Pay date</Text><Text style={s.stripValue}>{fmtDate(data.period.payDate)}</Text></View>
-          <View style={s.stripCell}><Text style={s.stripLabel}>Working days</Text><Text style={s.stripValue}>{data.period.workingDays}</Text></View>
+          <View style={s.stripCell}><Text style={s.stripLabel}>{data.period.monthDays ? "Days in month" : "Working days"}</Text><Text style={s.stripValue}>{data.period.monthDays ?? data.period.workingDays}</Text></View>
           <View style={s.stripCell}><Text style={s.stripLabel}>LOP days</Text><Text style={s.stripValue}>{data.period.lopDays}</Text></View>
           <View style={s.stripCell}><Text style={s.stripLabel}>Days paid</Text><Text style={s.stripValue}>{data.period.daysPaid}</Text></View>
         </View>
+        {data.period.notes.length > 0 ? <Text style={s.smallNote}>{data.period.notes.join(" ")}</Text> : null}
 
         <View style={s.tablesRow}>
           <View style={s.tableCol}>
@@ -175,6 +176,12 @@ function PayslipDocument({ data }: { data: PayslipPdfData }) {
           </View>
           <Text style={s.netAmount}>{inr(data.netPay)}</Text>
         </View>
+
+        {data.tax ? (
+          <Text style={s.smallNote}>
+            Income tax ({data.tax.regime === "new" ? "new" : "old"} regime, FY {data.tax.fy}): estimated taxable income for the year {inr(data.tax.taxableIncome)}, tax for the year {inr(data.tax.yearTax)}, deducted this month {inr(data.tax.thisMonth)}, deducted so far this year {inr(data.tax.deductedSoFar)}.
+          </Text>
+        ) : null}
 
         <Text style={s.smallNote}>
           Employer contributions (not deducted from pay):{" "}

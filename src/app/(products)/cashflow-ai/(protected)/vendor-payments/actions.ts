@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
-import { canManageTransactions } from "@/lib/fms-roles";
+import { canApproveTransactions, canManageTransactions } from "@/lib/fms-roles";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import { recordVendorPayment, markVendorPaymentProcessed } from "@/lib/products/cashflow-ai/vendor-payments";
 import { isValidPaymentMethod, isValidFundAccountType } from "@/lib/products/cashflow-ai/constants";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
@@ -39,6 +40,12 @@ export async function recordVendorPaymentAction(input: Record<string, unknown>):
   if (!billId) return { ok: false, fieldErrors: { invoiceId: "Missing bill reference." } };
 
   const status = input.status === "scheduled" ? "scheduled" : "processed";
+  // Sending money to a vendor is the finance manager's act; an accountant can record a payment as scheduled, and the manager pays it.
+  if (status === "processed") {
+    if (!canApproveTransactions(user)) return { ok: false, error: "Only someone who can approve transactions can send a vendor payment. Record it as scheduled and ask them to pay it." };
+    const blocked = await paymentGate(user.id, input.code);
+    if (blocked) return { ok: false, error: blocked };
+  }
   const data: PaymentWriteData = {
     invoiceId: billId,
     amount,
@@ -77,10 +84,12 @@ export async function recordVendorPaymentAction(input: Record<string, unknown>):
   return { ok: true, paymentId: res.paymentId };
 }
 
-export async function markVendorPaymentProcessedAction(id: string, billId: string): Promise<VendorPaymentActionResult> {
+export async function markVendorPaymentProcessedAction(id: string, billId: string, code?: string): Promise<VendorPaymentActionResult> {
   const user = await getCurrentFmsUser();
   if (!user) throw new Error("Unauthorized");
-  if (!canManageTransactions(user)) throw new Error("Forbidden");
+  if (!canApproveTransactions(user)) throw new Error("Forbidden");
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
 
   const res = await markVendorPaymentProcessed(id, user.id, user.email);
   if (!res.ok) return { ok: false, error: res.reason };

@@ -5,9 +5,8 @@ import { createTransaction, updateTransaction, deleteTransaction, changeTransact
 import { createCreditNote, issueCreditNote, cancelCreditNote, getCreditNote } from "@/lib/products/cashflow-ai/credit-notes";
 import { createDebitNote, issueDebitNote, cancelDebitNote, getDebitNote } from "@/lib/products/cashflow-ai/debit-notes";
 import { requestRefund, changeRefundStatus, getRefund } from "@/lib/products/cashflow-ai/refunds";
-import { recordReimbursement } from "@/lib/products/cashflow-ai/reimbursements";
 import { requestAdvance, changeAdvanceStatus, recordRepayment, getAdvance } from "@/lib/products/cashflow-ai/employee-advances";
-import { recordVendorPayment, markVendorPaymentProcessed } from "@/lib/products/cashflow-ai/vendor-payments";
+import { recordVendorPayment } from "@/lib/products/cashflow-ai/vendor-payments";
 import { recordTransfer } from "@/lib/products/cashflow-ai/fund-transfers";
 import { createBankAccount, updateBankAccount, deleteBankAccount, getBankAccount } from "@/lib/products/cashflow-ai/bank-accounts";
 import { createCashAccount, updateCashAccount, deleteCashAccount, getCashAccount } from "@/lib/products/cashflow-ai/cash-accounts";
@@ -46,6 +45,7 @@ import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from 
  * movement goes through the product's own functions (balances, ledger postings, period locks, approvals) and is written to the FMS audit log.
  */
 
+const MONEY_MOVES_IN_THE_APP = "Money is never sent from the assistant. Open the payment in the app and confirm it there with your confirmation code.";
 const soft = { deletedAt: null };
 const vals = (a: readonly { value: string }[]) => a.map((x) => x.value);
 const TXN_TYPES = vals(TRANSACTION_TYPES); const TXN_STATUS = vals(TRANSACTION_STATUSES); const METHODS = vals(PAYMENT_METHODS); const SOURCES = vals(SOURCE_MODULES);
@@ -334,8 +334,8 @@ export const FMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "fms.record_receipt", panel: "fms", label: "Record a payment received against invoices", description: "Record money received from a customer and apply it to their open invoices (updates balances and paid status).", level: "staff", allow: canManageTransactions,
-    params: [ref("customerId", "Customer (pms.client id)", "pms.client"), { key: "receiptDate", label: "Date received", type: "dateString", required: true }, { key: "amount", label: "Amount received", type: "number", required: true }, { key: "method", label: "Method", type: "enum", options: METHODS, required: true }, { key: "allocations", label: "Which invoices it pays: [{invoiceId, amount}]", type: "json" }, { key: "transactionReference", label: "Reference / UTR / cheque no.", type: "string" }, FUND, { key: "notes", label: "Notes", type: "string" }],
+    key: "fms.record_receipt", panel: "fms", label: "Record a payment received against invoices", description: "Record money received from a customer (cash, cheque, bank transfer) and apply it to their open invoices. A cheque waits as awaiting clearance until it is marked cleared. Cash of ₹2,00,000 or more in a day from one customer is refused.", level: "staff", allow: canManageTransactions,
+    params: [ref("customerId", "Customer (pms.client id)", "pms.client"), { key: "receiptDate", label: "Date received", type: "dateString", required: true }, { key: "amount", label: "Amount received", type: "number", required: true }, { key: "method", label: "Method", type: "enum", options: METHODS, required: true }, { key: "allocations", label: "Which invoices it pays: [{invoiceId, amount}]", type: "json" }, { key: "transactionReference", label: "Reference / UTR / cheque no.", type: "string" }, FUND, { key: "notes", label: "Notes", type: "string" }, { key: "chequeNumber", label: "Cheque number (6 digits, for a cheque)", type: "string" }, { key: "chequeDate", label: "Date on the cheque", type: "dateString" }, { key: "chequeBank", label: "Bank the cheque is drawn on", type: "string" }],
     run: async (v, u) => {
       const client = await getClient(String(v.customerId));
       if (!client) return fail("Customer not found.");
@@ -343,7 +343,7 @@ export const FMS_ACTIONS: ActionDef[] = [
       if (!isValidPaymentMethod(method)) return fail("Unknown payment method.", { allowed: METHODS });
       const allocations = (Array.isArray(v.allocations) ? (v.allocations as Json[]) : []).map((a) => ({ invoiceId: String(a.invoiceId), amount: Number(a.amount) || 0 })).filter((a) => a.amount > 0);
       const first = allocations[0] ? await getInvoice(allocations[0].invoiceId) : null;
-      const data: RecordReceiptData = { customerId: client._id, customerName: client.companyName, receiptDate: String(v.receiptDate), amount: Number(v.amount), method, transactionReference: str(v.transactionReference), allocations, currency: first?.currency ?? client.billing?.currency ?? DEFAULT_CURRENCY, ...fundKey(v), notes: str(v.notes) };
+      const data: RecordReceiptData = { customerId: client._id, customerName: client.companyName, receiptDate: String(v.receiptDate), amount: Number(v.amount), method, transactionReference: str(v.transactionReference), allocations, currency: first?.currency ?? client.billing?.currency ?? DEFAULT_CURRENCY, ...fundKey(v), notes: str(v.notes), chequeNumber: str(v.chequeNumber), chequeDate: str(v.chequeDate), chequeBank: str(v.chequeBank) };
       const r = await recordReceipt(data, u.id, u.email);
       if (!r.ok) return fail(r.reason);
       await audit(u, { action: "create", entity: "receipt", entityId: r.receipt._id, entityLabel: r.receipt.receiptNumber });
@@ -439,25 +439,18 @@ export const FMS_ACTIONS: ActionDef[] = [
       const status = String(v.status);
       if (!isValidRefundStatus(status)) return fail("Unknown status.", { allowed: REFUND_STATUS });
       if (status === "approved" && !canApproveTransactions(u)) return fail("You don't have authority to approve refunds.");
+      if (status === "processing" || status === "completed") return fail(MONEY_MOVES_IN_THE_APP);
       const before = await getRefund(String(v.refundId));
       const r = await changeRefundStatus(String(v.refundId), status, u.id, u.email);
       if (!r.ok) return fail(r.reason ?? "Could not change the refund.");
-      await audit(u, { action: status === "completed" ? "approve" : status === "failed" ? "reject" : "status_change", entity: "refund", entityId: String(v.refundId), entityLabel: before?.refundNumber, summary: `status → ${status}` });
+      await audit(u, { action: status === "failed" ? "reject" : status === "approved" ? "approve" : "status_change", entity: "refund", entityId: String(v.refundId), entityLabel: before?.refundNumber, summary: `status → ${status}` });
       return { ok: true, id: String(v.refundId), result: `Refund is now ${status}.` };
     },
   },
   {
-    key: "fms.record_reimbursement", panel: "fms", label: "Reimburse an employee expense", description: "Pay back an approved employee expense (from a bank or cash account).", level: "staff", allow: canManageTransactions,
+    key: "fms.record_reimbursement", panel: "fms", label: "Reimburse an employee expense", description: "Pay back an approved employee expense through Razorpay, into the employee's bank account.", level: "staff", allow: canManageTransactions,
     params: [{ key: "expenseId", label: "Expense id (prms.expense)", type: "ref", ref: "prms.expense", required: true }, { key: "amount", label: "Amount", type: "number", required: true }, { key: "method", label: "Method", type: "enum", options: METHODS }, { key: "paymentDate", label: "Payment date", type: "dateString" }, { key: "transactionReference", label: "Reference", type: "string" }, FUND, { key: "notes", label: "Notes", type: "string" }],
-    run: async (v, u) => {
-      const method = String(v.method ?? "bank_transfer");
-      if (!isValidPaymentMethod(method)) return fail("Unknown payment method.", { allowed: METHODS });
-      if (!(Number(v.amount) > 0)) return fail("Enter a reimbursement amount.");
-      const r = await recordReimbursement({ expenseId: String(v.expenseId), amount: Number(v.amount), method, transactionReference: str(v.transactionReference), paymentDate: day(v.paymentDate), ...fundKey(v), notes: str(v.notes) }, u.id, u.email);
-      if (!r.ok) return fail(r.reason);
-      await audit(u, { action: "record", entity: "transaction", entityId: r.reimbursement._id, entityLabel: r.reimbursement.reimbursementNumber, summary: `Reimbursed ${Number(v.amount)} for expense ${r.reimbursement.expenseCode}` });
-      return { ok: true, id: r.reimbursement._id, result: `Reimbursement ${r.reimbursement.reimbursementNumber} recorded.` };
-    },
+    run: async () => fail(MONEY_MOVES_IN_THE_APP),
   },
   {
     key: "fms.request_advance", panel: "fms", label: "Request an employee advance", description: "Record an advance requested by an employee.", level: "staff", allow: canManageTransactions,
@@ -476,6 +469,7 @@ export const FMS_ACTIONS: ActionDef[] = [
       const status = String(v.status);
       if (!isValidAdvanceStatus(status)) return fail("Unknown status.", { allowed: ADVANCE_STATUS });
       if ((status === "approved" || status === "rejected") && !canApproveTransactions(u)) return fail("You don't have authority to approve or reject advances.");
+      if (status === "disbursed") return fail(MONEY_MOVES_IN_THE_APP);
       const f = fundKey(v);
       const before = await getAdvance(String(v.advanceId));
       const r = await changeAdvanceStatus(String(v.advanceId), status, u.id, u.email, f.fundAccountId, f.fundAccountType);
@@ -498,26 +492,24 @@ export const FMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "fms.record_vendor_payment", panel: "fms", label: "Pay a vendor bill", description: "Record (or schedule) a payment against a vendor bill. This moves money from a bank/cash account.", level: "staff", allow: canManageTransactions, destructive: true,
+    key: "fms.record_vendor_payment", panel: "fms", label: "Pay a vendor bill", description: "Pay a vendor bill through Razorpay to the vendor's saved bank details (or schedule it for later). The bill is reduced when Razorpay confirms.", level: "staff", allow: canManageTransactions, destructive: true,
     params: [{ key: "billId", label: "Vendor bill id (prms.invoice)", type: "ref", ref: "prms.invoice", required: true }, { key: "amount", label: "Amount", type: "number", required: true }, { key: "method", label: "Method", type: "enum", options: METHODS }, { key: "paymentDate", label: "Payment date", type: "dateString" }, { key: "transactionReference", label: "Reference / UTR", type: "string" }, { key: "tdsDeducted", label: "TDS deducted", type: "number" }, { key: "status", label: "processed or scheduled", type: "enum", options: ["processed", "scheduled"] }, FUND, { key: "notes", label: "Notes", type: "string" }],
     run: async (v, u) => {
       const method = String(v.method ?? "bank_transfer");
       if (!isValidPaymentMethod(method)) return fail("Unknown payment method.", { allowed: METHODS });
       if (!(Number(v.amount) > 0)) return fail("Enter a payment amount.");
+      if (v.status !== "scheduled") return fail(MONEY_MOVES_IN_THE_APP + " You can schedule it here instead.");
       const f = fundKey(v);
       const r = await recordVendorPayment({ invoiceId: String(v.billId), amount: Number(v.amount), paymentDate: day(v.paymentDate), method, transactionReference: str(v.transactionReference), tdsDeducted: Number(v.tdsDeducted) || 0, status: v.status === "scheduled" ? "scheduled" : "processed", notes: str(v.notes) } as never, u.id, u.email, f.fundAccountId, f.fundAccountType);
       if (!r.ok) return fail(r.reason);
       await audit(u, { action: "record", entity: "transaction", entityId: r.paymentId!, summary: `Vendor payment of ${Number(v.amount)} recorded via FMS (PRMS payment ${r.paymentId})` });
-      return { ok: true, id: r.paymentId, result: "Vendor payment recorded." };
+      return { ok: true, id: r.paymentId, result: "Vendor payment sent through Razorpay. The bill is reduced once the bank confirms." };
     },
   },
   {
-    key: "fms.mark_vendor_payment_processed", panel: "fms", label: "Mark a scheduled vendor payment as processed", description: "Confirm that a scheduled vendor payment has gone out.", level: "staff", allow: canManageTransactions, destructive: true,
+    key: "fms.mark_vendor_payment_processed", panel: "fms", label: "Pay a scheduled vendor payment now", description: "Send a scheduled vendor payment through Razorpay now.", level: "staff", allow: canManageTransactions, destructive: true,
     params: [{ key: "paymentId", label: "Vendor payment id (prms.payment)", type: "ref", ref: "prms.payment", required: true }],
-    run: async (v, u) => {
-      const r = await markVendorPaymentProcessed(String(v.paymentId), u.id, u.email);
-      return r.ok ? { ok: true, id: String(v.paymentId), result: "Payment marked processed." } : fail(r.reason ?? "Could not mark the payment.");
-    },
+    run: async () => fail(MONEY_MOVES_IN_THE_APP),
   },
   {
     key: "fms.record_transfer", panel: "fms", label: "Transfer money between bank/cash accounts", description: "Move an amount from one bank or cash account to another.", level: "staff", allow: canManageTransactions, destructive: true,

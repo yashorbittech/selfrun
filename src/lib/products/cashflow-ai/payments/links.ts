@@ -207,3 +207,23 @@ export async function cancelPaymentLink(id: string, actorId: string | null = nul
   );
   return res.modifiedCount === 1;
 }
+
+/**
+ * One more attempt to pay this link. Refused when the link is no longer open, was paid, expired, or has used up its attempts: the check and
+ * the count are one atomic step, so many people (or one script) opening the same link cannot make more attempts than it allows.
+ */
+export async function claimLinkAttempt(linkId: string): Promise<boolean> {
+  const collection = await getCollection();
+  const now = new Date();
+  const res = await collection.findOneAndUpdate(
+    { _id: linkId, status: "ACTIVE", ...notDeleted, $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }], $expr: { $lt: ["$usageCount", "$maxAttempts"] } } as never,
+    { $inc: { usageCount: 1 } },
+    { returnDocument: "after" },
+  );
+  return !!res;
+}
+
+/** The customer has paid: the link is done and cannot be paid again. */
+export async function markLinkPaid(linkId: string, intentId: string): Promise<void> {
+  await (await getCollection()).updateOne({ _id: linkId, status: { $in: ["ACTIVE", "PARTIALLY_PAID"] } }, { $set: { status: "PAID", paymentIntentId: intentId, updatedAt: new Date() } });
+}

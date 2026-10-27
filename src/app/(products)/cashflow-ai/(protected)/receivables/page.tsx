@@ -1,14 +1,12 @@
 import PanelListFilters from "@/components/platform/panel/PanelListFilters";
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import { panelNameMap } from "@/lib/platform/panels/store";
-import Link from "next/link";
 import {
   ArrowDownLeft,
   CheckCircle2,
   Clock,
   AlertCircle,
   Plus,
-  QrCode,
   Link2,
   Sparkles,
   ExternalLink,
@@ -18,10 +16,9 @@ import KpiCard from "@/components/products/dealflow-ai/KpiCard";
 import KpiGrid from "@/components/products/dealflow-ai/KpiGrid";
 import { getDb } from "@/lib/mongodb";
 import { Badge } from "@/components/ui/badge";
-import { getCurrentFmsUser } from "@/lib/fms-auth";
 import PaymentLinkDialog from "@/components/products/cashflow-ai/PaymentLinkDialog";
 import CopyButton from "@/components/products/cashflow-ai/CopyButton";
-import { revalidatePath } from "next/cache";
+import CollectMoneyForm from "@/components/products/cashflow-ai/CollectMoneyForm";
 
 export default async function CollectMoneyPage({
   searchParams,
@@ -29,8 +26,6 @@ export default async function CollectMoneyPage({
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
   const panelName = await panelNameMap();
-  const sp = await searchParams;
-  const user = await getCurrentFmsUser();
 
   const db = await getDb();
 
@@ -53,41 +48,6 @@ export default async function CollectMoneyPage({
   const totalOutstanding = pendingInvoices.reduce((sum, inv) => sum + (inv.amount || inv.totalAmount || 0), 0);
   const overdueCount = pendingInvoices.filter((inv) => inv.status === "OVERDUE").length;
 
-  async function createInstantCollectLinkAction(formData: FormData) {
-    "use server";
-    const currUser = await getCurrentFmsUser();
-    if (!currUser) return;
-
-    const name = formData.get("payerName") as string;
-    const amount = Number(formData.get("amount") || 0);
-    const purpose = formData.get("purpose") as string;
-    const portal = formData.get("portal") as string; // Cohort AI, SprintOS, DIRECT
-
-    if (!name || amount <= 0) return;
-
-    const token = `pay_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    
-    const newLinkDoc: Record<string, unknown> = {
-      _id: `PL-${Date.now()}`,
-      token,
-      title: purpose || "Payment Collection",
-      amount: amount,
-      currency: "INR",
-      customerName: name,
-      sourceModule: portal || "DIRECT",
-      status: "ACTIVE",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      createdBy: currUser.id,
-      deletedAt: null,
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await db.collection("fms_payment_links").insertOne(newLinkDoc as any);
-
-    revalidatePath("/cashflow-ai/receivables");
-    revalidatePath("/cashflow-ai/payment-links");
-  }
-
   return (
     <div className="relative space-y-6">
 
@@ -97,7 +57,7 @@ export default async function CollectMoneyPage({
         actions={
             <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary border-primary/20">
           <Sparkles className="size-3.5 mr-1" />
-          UPI QR Code &amp; Card Gateway Active
+          Customers pay through Razorpay
         </Badge>
           }
         />
@@ -141,62 +101,13 @@ export default async function CollectMoneyPage({
           <p className="text-xs text-muted-foreground">Type student/client name &amp; amount to instantly create and send a payment link</p>
         </div>
 
-        <form action={createInstantCollectLinkAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase">Payer / Customer / Student Name *</label>
-            <input
-              type="text"
-              name="payerName"
-              required
-              placeholder="e.g. Rahul Sharma / ABC Tech"
-              className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase">Amount to Collect (₹) *</label>
-            <input
-              type="number"
-              name="amount"
-              step="0.01"
-              required
-              placeholder="e.g. 25000"
-              className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs font-bold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase">Purpose / Title</label>
-            <input
-              type="text"
-              name="purpose"
-              placeholder="e.g. AI Batch Course Fee / Milestone 2"
-              className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-muted-foreground uppercase">Target Portal / Channel</label>
-            <select
-              name="portal"
-              className="mt-1 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="TMS">{panelName("tms", "TMS")} Student Portal (Course Fee)</option>
-              <option value="PMS">{panelName("pms", "PMS")} Client Portal (Project Invoice)</option>
-              <option value="DIRECT">Direct Payment Link (Public URL)</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-4 flex justify-end">
-            <button
-              type="submit"
-              className="rounded-lg bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90 flex items-center gap-1.5 shadow-sm"
-            >
-              <Link2 className="size-4" />
-              Generate &amp; Send Payment Link Now
-            </button>
-          </div>
-        </form>
+        <CollectMoneyForm
+          portals={[
+            { value: "TMS", label: `${panelName("tms", "TMS")} Student Portal (Course Fee)` },
+            { value: "PMS", label: `${panelName("pms", "PMS")} Client Portal (Project Invoice)` },
+            { value: "DIRECT", label: "Direct Payment Link (Public URL)" },
+          ]}
+        />
       </GlassCard>
 
       {/* ACTIVE PAYMENT LINKS LISTING WITH DIRECT CTA */}

@@ -1,12 +1,11 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextResponse } from "next/server";
+import { createHmac, timingSafeEqual } from "node:crypto";
+import { resolveRazorpayCredentials } from "@/lib/platform/integrations/payments";
 import { limitOr429 } from "@/lib/security/rate-limit";
 import type { PaymentMethod } from "@/lib/products/cashflow-ai/payments/intents";
 import { getPaymentIntent, getPaymentIntentByGatewayPayment, markPaymentIntentSuccessful, markPaymentIntentFailed } from "@/lib/products/cashflow-ai/payments/intents";
 import { getPaymentProvider } from "@/lib/products/cashflow-ai/payments/provider";
-import { getCurrentFmsUser } from "@/lib/fms-auth";
-import { canManageTransactions } from "@/lib/fms-roles";
-import { simulatedPaymentsAllowed, SIMULATED_PAYMENTS_MESSAGE } from "@/lib/products/cashflow-ai/payments/guard";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
 async function handlePOST(req: Request) {
@@ -41,12 +40,22 @@ async function handlePOST(req: Request) {
 
     const provider = getPaymentProvider(intent.paymentProvider);
     if (gatewayPaymentId && typeof gatewayPaymentId === "string") {
+      // Razorpay signs "order_id|payment_id" with the account's key secret when Checkout succeeds; a wrong signature is a forged claim.
+      if (gatewaySignature) {
+        const creds = await resolveRazorpayCredentials("payments");
+        const expected = creds && intent.gatewayOrderId ? createHmac("sha256", creds.keySecret).update(`${intent.gatewayOrderId}|${gatewayPaymentId}`).digest("hex") : null;
+        const given = Buffer.from(gatewaySignature);
+        const want = expected ? Buffer.from(expected) : null;
+        if (!want || want.length !== given.length || !timingSafeEqual(want, given)) {
+          return NextResponse.json({ ok: false, error: "The payment signature does not match" }, { status: 400 });
+        }
+      }
       const statusRes = await provider.getPaymentStatus(gatewayPaymentId);
       // This route is public, so the gateway payment must be THIS intent's payment:
       // made against this intent's gateway order (the gateway fixes the order's
       // amount) and not already used to settle another intent. Otherwise any
       // captured payment on the account could mark any intent paid.
-      if (statusRes.ok && intent.paymentProvider !== "mock" && intent.paymentProvider !== "offline") {
+      if (statusRes.ok) {
         const paidOrder = statusRes.providerOrderId ?? null;
         const reused = await getPaymentIntentByGatewayPayment(gatewayPaymentId);
         if (!intent.gatewayOrderId || paidOrder !== intent.gatewayOrderId || (reused && reused._id !== intent._id)) {
@@ -60,26 +69,20 @@ async function handlePOST(req: Request) {
           utr: utr || statusRes.utr,
           paymentMethod: (paymentMethod || statusRes.paymentMethod) as PaymentMethod | undefined,
         });
-        return NextResponse.json({ ok: markRes.ok, intent: markRes.intent });
+        if (!markRes.ok) {
+          // The webhook is booking this very payment at the same moment: give it a few seconds, then report what it did.
+          for (let i = 0; i < 8; i++) {
+            await new Promise((r) => setTimeout(r, 800));
+            const now = await getPaymentIntent(intentId);
+            if (now?.status === "SUCCESS") return NextResponse.json({ ok: true, intent: now });
+          }
+          return NextResponse.json({ ok: false, error: markRes.reason ?? "The payment is being confirmed. If money was deducted it will show shortly." });
+        }
+        return NextResponse.json({ ok: true, intent: markRes.intent });
       } else if (statusRes.ok && statusRes.status === "FAILED") {
         await markPaymentIntentFailed(intentId, statusRes.failureReason || "Payment verification failed");
         return NextResponse.json({ ok: false, error: "Payment failed at gateway" });
       }
-    }
-
-    if (intent.paymentProvider === "mock" || intent.paymentProvider === "offline") {
-      // A simulated or offline payment moves no money in this app: marking one received is a bookkeeping act, so only finance staff who may
-      // manage transactions can settle one (a read-only or audit login cannot), or the operator must opt in (staging demos).
-      const staff = await getCurrentFmsUser();
-      if (!(staff && canManageTransactions(staff)) && !simulatedPaymentsAllowed()) {
-        return NextResponse.json({ ok: false, error: SIMULATED_PAYMENTS_MESSAGE }, { status: 403 });
-      }
-      const markRes = await markPaymentIntentSuccessful(intentId, {
-        gatewayPaymentId: gatewayPaymentId || `mock_${Date.now()}`,
-        utr: utr || `UTR_MOCK_${Date.now()}`,
-        paymentMethod: (paymentMethod || "UPI") as PaymentMethod,
-      });
-      return NextResponse.json({ ok: markRes.ok, intent: markRes.intent });
     }
 
     return NextResponse.json({ ok: false, status: intent.status, message: "Payment pending completion" });

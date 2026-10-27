@@ -33,7 +33,9 @@ export type NotificationType =
   | "payroll_ready"
   | "salary_paid"
   | "payout_failed"
-  | "leave_cancelled";
+  | "leave_cancelled"
+  | "request_submitted"
+  | "request_decided";
 
 export interface HrmsNotification {
   _id: string;

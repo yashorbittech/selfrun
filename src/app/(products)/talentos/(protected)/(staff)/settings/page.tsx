@@ -37,7 +37,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <PanelPageHeader
         breadcrumbs={[{ label: "TalentOS", href: "/talentos" }, { label: "Settings" }]}
         title={<>Settings</>}
-        description={<>Company identity, work schedule, leave configuration and statutory payroll rates.</>}
+        description={<>Company identity, work schedule, leave configuration and payroll policy.</>}
       />
 
       <Tabs
@@ -67,6 +67,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                   cin: company.cin,
                   pfEstablishmentCode: company.pfEstablishmentCode,
                   esiEstablishmentCode: company.esiEstablishmentCode,
+                  tan: company.tan,
+                  ptRegistration: company.ptRegistration,
                   lin: company.lin,
                   signatoryName: company.signatoryName,
                   signatoryDesignation: company.signatoryDesignation,
@@ -89,6 +91,8 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                   halfDayHours: settings.halfDayHours,
                   fullDayHours: settings.fullDayHours,
                   timezone: settings.timezone,
+                  saturdayOffs: settings.saturdayOffs ?? [],
+                  state: settings.state ?? null,
                 }}
               />
             ),
@@ -116,20 +120,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             key: "payroll",
             label: "Payroll",
             content: (
-              <PayrollConfigForm
-                config={{
-                  pfEmployeePercent: payrollConfig.pfEmployeePercent,
-                  pfWageCeiling: payrollConfig.pfWageCeiling,
-                  epsPercent: payrollConfig.epsPercent,
-                  pfEmployerPercent: payrollConfig.pfEmployerPercent,
-                  esiEmployeePercent: payrollConfig.esiEmployeePercent,
-                  esiEmployerPercent: payrollConfig.esiEmployerPercent,
-                  esiGrossThreshold: payrollConfig.esiGrossThreshold,
-                  professionalTaxMonthly: payrollConfig.professionalTaxMonthly,
-                  tdsRegime: payrollConfig.tdsRegime,
-                  financialYearStartMonth: payrollConfig.financialYearStartMonth,
-                }}
-              />
+              <PayrollConfigForm config={payrollConfigView(payrollConfig)} />
             ),
           },
           ] : []),
@@ -137,4 +128,12 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       />
     </div>
   );
+}
+
+function payrollConfigView(c: Awaited<ReturnType<typeof getPayrollConfig>>) {
+  const { _id, updatedAt, updatedBy, ...rest } = c;
+  void _id;
+  void updatedAt;
+  void updatedBy;
+  return rest;
 }

@@ -5,6 +5,9 @@ import { escapeRegExp } from "@/lib/text-search";
 import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/products/cashflow-ai/db";
 import { DEFAULT_CURRENCY, round2, type PaymentMethod, type FundAccountType } from "@/lib/products/cashflow-ai/constants";
 import { getInvoice, applyReceiptToInvoice, invoiceBalance, type Invoice } from "@/lib/products/cashflow-ai/invoices";
+import { checkReceiptRules } from "@/lib/products/cashflow-ai/receipt-rules";
+import { listBankAccounts } from "@/lib/products/cashflow-ai/bank-accounts";
+import { listCashAccounts } from "@/lib/products/cashflow-ai/cash-accounts";
 import { postSystemTransaction, changeTransactionStatus } from "@/lib/products/cashflow-ai/transactions";
 
 /**
@@ -37,7 +40,13 @@ export interface Receipt extends AuditFields {
   /** `amount` minus the sum of `allocations` — an unapplied advance. */
   advanceAmount: number;
   currency: string;
-  status: "completed" | "voided";
+  /** "pending_clearance": a cheque received but not yet cleared by the bank (nothing is applied or booked yet); "bounced": it did not clear. */
+  status: "completed" | "voided" | "pending_clearance" | "bounced";
+  chequeNumber?: string | null;
+  chequeDate?: string | null;
+  chequeBank?: string | null;
+  clearedAt?: Date | null;
+  bounceReason?: string | null;
   transactionId: string | null;
   notes: string | null;
 }
@@ -144,6 +153,11 @@ export interface RecordReceiptData {
   currency: string;
   fundAccountId?: string | null;
   fundAccountType?: FundAccountType | null;
+  chequeNumber?: string | null;
+  chequeDate?: string | null;
+  chequeBank?: string | null;
+  /** Made by the Razorpay checkout (the gateway has already proved the money arrived), not entered by hand. */
+  viaGateway?: boolean;
   notes: string | null;
 }
 
@@ -173,8 +187,28 @@ export async function recordReceipt(
     invoices.push(inv);
   }
 
-  const receiptDate = new Date(`${data.receiptDate}T00:00:00`);
   const collection = await getCollection();
+  const isCheque = data.method === "cheque" && !data.viaGateway;
+
+  // Rules for a payment that did not come through the gateway: cash limit, cheque details, the bank's reference.
+  const cashToday = data.method === "cash"
+    ? (await collection.find({ customerId: data.customerId, method: "cash", receiptDate: new Date(`${data.receiptDate}T00:00:00`), status: { $in: ["completed", "pending_clearance"] }, ...notDeleted }).toArray()).reduce((n, r) => n + r.amount, 0)
+    : 0;
+  const broken = data.viaGateway ? null : checkReceiptRules({ method: data.method, amount, currency: data.currency || DEFAULT_CURRENCY, receiptDate: data.receiptDate, reference: data.transactionReference, chequeNumber: data.chequeNumber, chequeDate: data.chequeDate, chequeBank: data.chequeBank, cashToday });
+  if (broken) return { ok: false, reason: broken };
+  // The money has to land somewhere: if the company has accounts, say which one.
+  if (!data.fundAccountId && !data.viaGateway) {
+    const [banks, cash] = await Promise.all([listBankAccounts({ status: "active" }), listCashAccounts()]);
+    if (banks.length + cash.length > 0) return { ok: false, reason: isCheque ? "Choose the bank account the cheque will be deposited in." : data.method === "cash" ? "Choose the cash account the money was put in." : "Choose the bank account the money was received in." };
+  }
+  // The same payment is not recorded twice.
+  if (isCheque) {
+    if (await collection.findOne({ chequeNumber: data.chequeNumber!.trim(), chequeBank: data.chequeBank!.trim(), status: { $in: ["completed", "pending_clearance"] }, ...notDeleted })) return { ok: false, reason: "This cheque is already recorded." };
+  } else if (!data.viaGateway && data.method !== "cash" && data.transactionReference?.trim()) {
+    if (await collection.findOne({ transactionReference: data.transactionReference.trim(), amount, status: { $in: ["completed", "pending_clearance"] }, ...notDeleted })) return { ok: false, reason: "A receipt with this bank reference and amount is already recorded." };
+  }
+
+  const receiptDate = new Date(`${data.receiptDate}T00:00:00`);
   const doc: Receipt = {
     _id: newId(),
     receiptNumber: await generateReceiptNumber(receiptDate.getFullYear()),
@@ -192,11 +226,20 @@ export async function recordReceipt(
       .filter((a) => a.amount > 0),
     advanceAmount: round2(amount - allocatedTotal),
     currency: data.currency || DEFAULT_CURRENCY,
-    status: "completed",
+    status: isCheque ? "pending_clearance" : "completed",
     transactionId: null,
     notes: data.notes,
+    ...(isCheque ? { chequeNumber: data.chequeNumber!.trim(), chequeDate: data.chequeDate!, chequeBank: data.chequeBank!.trim() } : {}),
     ...createStamp(actorId),
   };
+
+  // A cheque is only a promise until the bank clears it: nothing is applied to the invoices or booked until then (see `clearCheque`).
+  if (isCheque) {
+    (doc as Receipt & { fundAccountId?: string | null; fundAccountType?: FundAccountType | null }).fundAccountId = data.fundAccountId ?? null;
+    (doc as Receipt & { fundAccountType?: FundAccountType | null }).fundAccountType = data.fundAccountType ?? null;
+    await collection.insertOne(doc);
+    return { ok: true, receipt: doc };
+  }
 
   for (const alloc of doc.allocations) {
     await applyReceiptToInvoice(alloc.invoiceId, alloc.amount, actorId);
@@ -252,13 +295,65 @@ export async function voidReceipt(id: string, actorId: string): Promise<{ ok: bo
   if (!receipt) return { ok: false, reason: "Receipt not found." };
   if (receipt.status === "voided") return { ok: true };
 
-  for (const alloc of receipt.allocations) {
-    await applyReceiptToInvoice(alloc.invoiceId, -alloc.amount, actorId);
-  }
-  if (receipt.transactionId) {
-    await changeTransactionStatus(receipt.transactionId, "reversed", actorId, null);
+  // A cheque that never cleared (or bounced) applied nothing and booked nothing, so there is nothing to take back.
+  if (receipt.status === "completed") {
+    for (const alloc of receipt.allocations) {
+      await applyReceiptToInvoice(alloc.invoiceId, -alloc.amount, actorId);
+    }
+    if (receipt.transactionId) {
+      await changeTransactionStatus(receipt.transactionId, "reversed", actorId, null);
+    }
   }
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "voided", ...updateStamp(actorId) } });
   await fmsEvents.receiptVoided({ id: receipt._id, receiptNumber: receipt.receiptNumber, customerName: receipt.customerName, amount: receipt.amount, currency: receipt.currency }, actorId);
+  return { ok: true };
+}
+
+/** The bank has cleared the cheque: only now is the money applied to the invoices and booked to the account it was deposited in. */
+export async function clearCheque(id: string, clearedOn: string, actorId: string, actorEmail: string | null): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const collection = await getCollection();
+  const r = (await collection.findOne({ _id: id, ...notDeleted })) as (Receipt & { fundAccountId?: string | null; fundAccountType?: FundAccountType | null }) | null;
+  if (!r) return { ok: false, reason: "Receipt not found." };
+  if (r.status !== "pending_clearance") return { ok: false, reason: `This cheque is ${r.status.replace("_", " ")}, not waiting for clearance.` };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(clearedOn)) return { ok: false, reason: "Enter the date the cheque cleared." };
+  if (clearedOn > new Date().toISOString().slice(0, 10)) return { ok: false, reason: "The clearing date cannot be in the future." };
+
+  for (const alloc of r.allocations) {
+    const inv = await getInvoice(alloc.invoiceId);
+    if (!inv) return { ok: false, reason: `Invoice ${alloc.invoiceNumber} no longer exists.` };
+    if (alloc.amount > invoiceBalance(inv) + 0.01) return { ok: false, reason: `${alloc.invoiceNumber} has been paid in the meantime: its balance is now less than this cheque's share. Bounce or void the cheque, or record it again against the right invoice.` };
+  }
+  const date = new Date(`${clearedOn}T00:00:00`);
+  const txn = await postSystemTransaction(
+    {
+      type: "income", transactionDate: date, postingDate: date, amount: r.amount, currency: r.currency, paymentMethod: "cheque", sourceModule: "fms", sourceRecordId: r._id,
+      customerId: r.customerId, vendorId: null, employeeId: null, projectId: null, department: null, accountId: null,
+      fundAccountId: r.fundAccountId ?? null, fundAccountType: r.fundAccountType ?? null, taxAmount: 0,
+      referenceNumber: `Cheque ${r.chequeNumber}`, description: `Receipt ${r.receiptNumber} from ${r.customerName} (cheque ${r.chequeNumber}, ${r.chequeBank})`, attachments: [],
+    },
+    actorId,
+    actorEmail,
+  );
+  if ("ok" in txn) return txn;
+  for (const alloc of r.allocations) await applyReceiptToInvoice(alloc.invoiceId, alloc.amount, actorId);
+  await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "completed", transactionId: txn._id, clearedAt: date, ...updateStamp(actorId) } });
+  try {
+    const { qualifyReferralForRecord } = await import("@/lib/wallet/referrals");
+    await qualifyReferralForRecord({ clientId: r.customerId });
+  } catch {
+    /* non-blocking */
+  }
+  await fmsEvents.receiptRecorded({ id: r._id, receiptNumber: r.receiptNumber, customerName: r.customerName, amount: r.amount, currency: r.currency, method: "cheque" }, actorId);
+  return { ok: true };
+}
+
+/** The cheque bounced: nothing was applied or booked, the invoices stay unpaid, and the reason is kept. */
+export async function bounceCheque(id: string, reason: string, actorId: string): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const collection = await getCollection();
+  const r = await collection.findOne({ _id: id, ...notDeleted });
+  if (!r) return { ok: false, reason: "Receipt not found." };
+  if (r.status !== "pending_clearance") return { ok: false, reason: `This cheque is ${r.status.replace("_", " ")}, not waiting for clearance.` };
+  if (!reason.trim()) return { ok: false, reason: "Say why it bounced (for example insufficient funds), so the customer can be asked for another payment." };
+  await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "bounced", bounceReason: reason.trim().slice(0, 300), ...updateStamp(actorId) } });
   return { ok: true };
 }

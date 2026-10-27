@@ -127,7 +127,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "hrms.canRunPayroll",
         label: "Run payroll",
-        description: "Run payroll, approve runs, mark paid, download the bank file.",
+        description: "Run payroll, approve runs, pay salaries through Razorpay.",
       },
       {
         key: "hrms.canManageEmployeeDocuments",

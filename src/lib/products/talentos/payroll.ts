@@ -12,7 +12,44 @@ export const PAYROLL_PROFILES_COLLECTION = "hrms_payroll_profiles";
 export interface PayComponent {
   name: string;
   amount: number; // monthly, INR
+  /** Taxable salary (default true). */
+  taxable?: boolean;
+  /** Counted in PF wages (default false). */
+  pf?: boolean;
+  /** Counted in ESI wages (default true). */
+  esi?: boolean;
+  /** Paid in proportion to the days paid (default true). */
+  prorate?: boolean;
 }
+
+/** Which statutory deductions apply to one employee, and how. */
+export interface StatutoryFlags {
+  pfApplicable: boolean;
+  /** "ceiling", "actual", or null to follow the company's default. */
+  pfMode: "ceiling" | "actual" | null;
+  /** Member of the pension scheme (EPS). Not for someone who first joined PF after 1 September 2014 with wages above the ceiling. */
+  epsEligible: boolean;
+  esiApplicable: boolean;
+  /** A person with disability (higher ESI wage threshold). */
+  esiDisabled: boolean;
+  ptApplicable: boolean;
+  lwfApplicable: boolean;
+  tdsApplicable: boolean;
+  /** The state the person works in (professional tax, labour welfare fund and state holidays); null = the office's state. */
+  workState: string | null;
+}
+
+export const DEFAULT_STATUTORY: StatutoryFlags = {
+  pfApplicable: true,
+  pfMode: null,
+  epsEligible: true,
+  esiApplicable: true,
+  esiDisabled: false,
+  ptApplicable: true,
+  lwfApplicable: true,
+  tdsApplicable: true,
+  workState: null,
+};
 
 export interface BankDetails {
   accountName: string | null;
@@ -27,13 +64,18 @@ export interface PayrollProfile extends AuditFields {
   employeeId: string;
   currency: string;
   basic: number;
+  /** Dearness allowance. */
+  da: number;
   hra: number;
   allowances: PayComponent[];
   deductions: PayComponent[];
+  /** The employer's NPS contribution per month. */
+  employerNps: number;
   pfNumber: string | null;
   esiNumber: string | null;
   uan: string | null;
   panNumber: string | null;
+  statutory: StatutoryFlags;
   bank: BankDetails;
 }
 
@@ -59,21 +101,21 @@ export function emptyBank(): BankDetails {
   return { accountName: null, accountNumber: null, ifsc: null, bankName: null, branch: null };
 }
 
-/** Gross monthly earnings = basic + hra + all allowances. */
-export function computeGrossMonthly(p: Pick<PayrollProfile, "basic" | "hra" | "allowances">): number {
-  return p.basic + p.hra + p.allowances.reduce((sum, a) => sum + a.amount, 0);
+/** Gross monthly earnings = basic + DA + hra + all allowances. */
+export function computeGrossMonthly(p: Pick<PayrollProfile, "basic" | "hra" | "allowances"> & { da?: number }): number {
+  return p.basic + (p.da ?? 0) + p.hra + p.allowances.reduce((sum, a) => sum + a.amount, 0);
 }
 
 export function computeTotalDeductions(p: Pick<PayrollProfile, "deductions">): number {
   return p.deductions.reduce((sum, d) => sum + d.amount, 0);
 }
 
-export function computeNetMonthly(p: Pick<PayrollProfile, "basic" | "hra" | "allowances" | "deductions">): number {
+export function computeNetMonthly(p: Pick<PayrollProfile, "basic" | "hra" | "allowances" | "deductions"> & { da?: number }): number {
   return computeGrossMonthly(p) - computeTotalDeductions(p);
 }
 
 /** Annual cost to company = gross monthly * 12 (employer deductions excluded in Phase 1). */
-export function computeAnnualCtc(p: Pick<PayrollProfile, "basic" | "hra" | "allowances">): number {
+export function computeAnnualCtc(p: Pick<PayrollProfile, "basic" | "hra" | "allowances"> & { da?: number }): number {
   return computeGrossMonthly(p) * 12;
 }
 
@@ -86,21 +128,30 @@ export function serializePayrollProfile(p: PayrollProfile): SerializedPayrollPro
   };
 }
 
+/** A profile saved before DA, employer NPS and the statutory flags existed gets their defaults. */
+function withDefaults(p: PayrollProfile): PayrollProfile {
+  return { ...p, da: p.da ?? 0, employerNps: p.employerNps ?? 0, statutory: { ...DEFAULT_STATUTORY, ...(p.statutory ?? {}) } };
+}
+
 export async function getPayrollProfile(employeeId: string): Promise<PayrollProfile | null> {
   const collection = await getCollection();
-  return collection.findOne({ employeeId, ...notDeleted });
+  const p = await collection.findOne({ employeeId, ...notDeleted });
+  return p ? withDefaults(p) : null;
 }
 
 export interface PayrollWriteData {
   currency: string;
   basic: number;
+  da?: number;
   hra: number;
   allowances: PayComponent[];
   deductions: PayComponent[];
+  employerNps?: number;
   pfNumber: string | null;
   esiNumber: string | null;
   uan: string | null;
   panNumber: string | null;
+  statutory?: StatutoryFlags;
   /** Legacy — bank details now live in `hrms_bank_accounts`. Ignored on write. */
   bank?: BankDetails;
 }
@@ -114,8 +165,10 @@ export async function upsertPayrollProfile(
 ): Promise<PayrollProfile> {
   const collection = await getCollection();
   const existing = await collection.findOne({ employeeId });
-  const { bank: _ignored, ...persist } = data;
+  const { bank: _ignored, ...given } = data;
   void _ignored;
+  // Only what was given is written, so a caller that knows nothing of DA, employer NPS or the flags (a salary revision) leaves them as they were.
+  const persist = Object.fromEntries(Object.entries(given).filter(([, v]) => v !== undefined)) as Omit<PayrollWriteData, "bank">;
 
   if (existing) {
     const updated = await collection.findOneAndUpdate(
@@ -130,6 +183,9 @@ export async function upsertPayrollProfile(
     _id: newId(),
     employeeId,
     ...persist,
+    da: persist.da ?? 0,
+    employerNps: persist.employerNps ?? 0,
+    statutory: { ...DEFAULT_STATUTORY, ...(persist.statutory ?? {}) },
     bank: emptyBank(),
     ...createStamp(actorId),
   };

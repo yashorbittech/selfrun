@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
-import { canManageTransactions } from "@/lib/fms-roles";
+import { canApproveTransactions } from "@/lib/fms-roles";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import { recordReimbursement, type RecordReimbursementData } from "@/lib/products/cashflow-ai/reimbursements";
 import { isValidPaymentMethod, isValidFundAccountType } from "@/lib/products/cashflow-ai/constants";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
@@ -25,7 +26,10 @@ function revalidate(expenseId?: string) {
 export async function recordReimbursementAction(input: Record<string, unknown>): Promise<ReimbursementActionResult> {
   const user = await getCurrentFmsUser();
   if (!user) throw new Error("Unauthorized");
-  if (!canManageTransactions(user)) throw new Error("Forbidden");
+  // Sending money to an employee is the finance manager's act.
+  if (!canApproveTransactions(user)) throw new Error("Forbidden");
+  const blocked = await paymentGate(user.id, input.code);
+  if (blocked) return { ok: false, error: blocked };
 
   const method = String(input.method ?? "bank_transfer");
   if (!isValidPaymentMethod(method)) return { ok: false, fieldErrors: { method: "Unknown payment method." } };
@@ -66,10 +70,10 @@ export async function recordReimbursementAction(input: Record<string, unknown>):
     actorEmail: user.email,
     action: "record",
     entity: "transaction",
-    entityId: res.reimbursement._id,
-    entityLabel: res.reimbursement.reimbursementNumber,
-    summary: `Reimbursed ${amount} for expense ${res.reimbursement.expenseCode}`,
+    entityId: res.payoutId,
+    entityLabel: "Reimbursement payment",
+    summary: `Sent ${amount} through Razorpay for expense ${expenseId}`,
   });
   revalidate(expenseId);
-  return { ok: true, id: res.reimbursement._id };
+  return { ok: true, id: res.payoutId };
 }

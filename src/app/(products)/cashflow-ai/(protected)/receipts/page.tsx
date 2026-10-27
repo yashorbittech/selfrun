@@ -77,8 +77,8 @@ export default async function ReceiptsPage({
             amount: formatMoney(r.amount, r.currency),
             method: r.method?.replace(/_/g, " ") ?? "—",
             status: (
-              <Badge className={r.status === "voided" ? "bg-muted text-muted-foreground" : "bg-green-500/15 text-green-600 dark:text-green-400"}>
-                {r.status === "voided" ? "Voided" : "Completed"}
+              <Badge className={r.status === "pending_clearance" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : r.status === "bounced" ? "bg-destructive/15 text-destructive" : r.status === "voided" ? "bg-muted text-muted-foreground" : "bg-green-500/15 text-green-600 dark:text-green-400"}>
+                {({ completed: "Completed", voided: "Voided", pending_clearance: "Awaiting clearance", bounced: "Bounced" } as Record<string, string>)[r.status]}
               </Badge>
             ),
             date: formatDate(r.receiptDate),

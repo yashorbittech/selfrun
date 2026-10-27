@@ -5,10 +5,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { DEFAULT_CURRENCY, formatMoney } from "@/lib/products/cashflow-ai/constants";
+import { formatMoney } from "@/lib/products/cashflow-ai/constants";
+import PaymentCodeField from "@/components/products/cashflow-ai/PaymentCodeField";
 import { changeAdvanceStatusAction } from "@/app/(products)/cashflow-ai/(protected)/advances/actions";
 import type { FundAccountOption } from "@/lib/products/cashflow-ai/fund-accounts";
 
@@ -22,7 +21,6 @@ import type { FundAccountOption } from "@/lib/products/cashflow-ai/fund-accounts
 export default function DisburseAdvanceForm({
   advanceId,
   amount,
-  fundAccounts = [],
   trigger,
 }: {
   advanceId: string;
@@ -33,22 +31,21 @@ export default function DisburseAdvanceForm({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
-  const [fundAccountKey, setFundAccountKey] = useState("");
-  const matchingFundAccounts = fundAccounts.filter((a) => a.currency === DEFAULT_CURRENCY);
 
   function onOpenChange(next: boolean) {
-    if (next) setFundAccountKey("");
     setOpen(next);
   }
 
+  const [code, setCode] = useState("");
+
   function submit() {
     startTransition(async () => {
-      const res = await changeAdvanceStatusAction(advanceId, "disbursed", fundAccountKey || undefined);
+      const res = await changeAdvanceStatusAction(advanceId, "disbursed", undefined, code);
       if (!res.ok) {
         toast.error(res.error ?? "Could not disburse the advance.");
         return;
       }
-      toast.success("Advance disbursed");
+      toast.success("Payment sent to Razorpay");
       setOpen(false);
       router.refresh();
     });
@@ -63,22 +60,8 @@ export default function DisburseAdvanceForm({
           <SheetDescription>Amount: {formatMoney(amount)}.</SheetDescription>
         </SheetHeader>
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {matchingFundAccounts.length > 0 ? (
-            <div className="space-y-1.5">
-              <Label>Fund Account (bank/cash this pays from)</Label>
-              <Select value={fundAccountKey || "none"} onValueChange={(v) => setFundAccountKey(!v || v === "none" ? "" : v)}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {matchingFundAccounts.map((a) => (
-                    <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No bank/cash accounts configured yet — this will post against the payables control account.</p>
-          )}
+          <PaymentCodeField value={code} onChange={setCode} />
+          <p className="text-sm text-muted-foreground">Paid through Razorpay from your RazorpayX balance, into the employee&apos;s primary bank account. The advance shows as disbursed when the bank confirms.</p>
         </div>
         <div className="flex justify-end gap-2 border-t border-border/60 p-4">
           <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={pending}>

@@ -44,3 +44,23 @@ export async function limitOr429(req: Request, bucket: string, limit: number, wi
   res.headers.set("Retry-After", String(r.retryAfter));
   return res;
 }
+
+/**
+ * The same fixed-window limit, counted per signed-in person rather than per address: for actions that move money, where an attacker with one
+ * stolen session must not be able to start payments faster than a person could.
+ */
+export async function userRateLimit(bucket: string, userId: string, limit: number, windowSeconds: number): Promise<{ ok: true } | { ok: false; retryAfter: number }> {
+  try {
+    const windowMs = windowSeconds * 1000;
+    const now = Date.now();
+    const slot = Math.floor(now / windowMs);
+    const id = `${bucket}:u:${createHash("sha256").update(userId).digest("hex").slice(0, 24)}:${slot}`;
+    const col = (await getPlatformDb()).collection<{ _id: string; n: number; expireAt: Date }>(COLLECTION);
+    const doc = await col.findOneAndUpdate({ _id: id }, { $inc: { n: 1 }, $setOnInsert: { expireAt: new Date((slot + 2) * windowMs) } }, { upsert: true, returnDocument: "after" });
+    if ((doc?.n ?? 1) > limit) return { ok: false, retryAfter: Math.max(1, Math.ceil(((slot + 1) * windowMs - now) / 1000)) };
+    return { ok: true };
+  } catch {
+    // For money the limiter fails closed: if it cannot count, it does not let the payment through.
+    return { ok: false, retryAfter: 30 };
+  }
+}

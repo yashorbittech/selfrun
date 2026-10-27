@@ -1,5 +1,6 @@
 "use client";
 
+import PaymentCodeField from "@/components/products/cashflow-ai/PaymentCodeField";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Send, Loader2, CheckCircle2, Building2, IndianRupee, Hash, FileText, Landmark } from "lucide-react";
@@ -42,13 +43,15 @@ export default function DirectPayoutDialog({
     payeeAccount: "",
     ifscCode: "",
     amount: defaultAmount ? String(defaultAmount) : "",
-    channel: "neft",
+    channel: "imps",
     sourceModule: defaultSourceModule,
     refNotes: "",
     remarks: "",
   });
 
   const [form, setForm] = useState(seed);
+  const [code, setCode] = useState("");
+  const [requestId, setRequestId] = useState(() => crypto.randomUUID());
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   function onOpenChange(next: boolean) {
@@ -73,6 +76,9 @@ export default function DirectPayoutDialog({
           body: JSON.stringify({
             payeeName: form.payeeName,
             payeeAccount: form.payeeAccount,
+            ifscCode: form.ifscCode,
+            code,
+            clientRequestId: requestId,
             amount: Number(form.amount),
             channel: form.channel,
             sourceModule: form.sourceModule,
@@ -82,8 +88,10 @@ export default function DirectPayoutDialog({
         });
         const data = await res.json();
         if (!res.ok || !data.ok) throw new Error(data.error || "Payout failed");
-        setSuccessTxn(data.referenceNumber || data.txnId);
-        toast.success("Bank payout executed successfully!");
+        setSuccessTxn(data.referenceNumber || data.payoutId);
+        toast.success("Payment sent to Razorpay. It shows as paid once the bank confirms.");
+        setCode("");
+        setRequestId(crypto.randomUUID());
         router.refresh();
       } catch (err: unknown) {
         toast.error(err instanceof Error ? err.message : String(err));
@@ -128,7 +136,7 @@ export default function DirectPayoutDialog({
               </div>
               <div>
                 <h3 className="text-base font-bold text-foreground">Transfer Complete</h3>
-                <p className="text-xs text-muted-foreground mt-1">UTR Reference Number</p>
+                <p className="text-xs text-muted-foreground mt-1">Razorpay reference (the UTR follows once the bank confirms)</p>
                 <p className="mt-2 font-mono text-sm font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg border border-primary/20 inline-block">
                   {successTxn}
                 </p>
@@ -191,12 +199,10 @@ export default function DirectPayoutDialog({
                     onChange={(e) => set("channel", e.target.value)}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                   >
-                    <option value="neft">NEFT (up to ₹2L)</option>
-                    <option value="rtgs">RTGS (above ₹2L)</option>
-                    <option value="imps">IMPS (instant)</option>
+                    <option value="neft">NEFT</option>
+                    <option value="rtgs">RTGS (₹2L or more)</option>
+                    <option value="imps">IMPS (instant, up to ₹5L)</option>
                     <option value="upi">UPI</option>
-                    <option value="razorpayx">RazorpayX API</option>
-                    <option value="manual">Manual Transfer</option>
                   </select>
                 </div>
               </div>
@@ -206,14 +212,15 @@ export default function DirectPayoutDialog({
                 <div className="space-y-1.5">
                   <Label className="flex items-center gap-1.5">
                     <Hash className="size-3.5 text-muted-foreground" />
-                    Bank Account No.
+                    {form.channel === "upi" ? "UPI id" : "Bank Account No."}
                   </Label>
                   <Input
-                    placeholder="50100987654321"
+                    placeholder={form.channel === "upi" ? "name@bank" : "50100987654321"}
                     value={form.payeeAccount}
                     onChange={(e) => set("payeeAccount", e.target.value)}
                   />
                 </div>
+                {form.channel !== "upi" && (
                 <div className="space-y-1.5">
                   <Label>IFSC Code</Label>
                   <Input
@@ -222,7 +229,10 @@ export default function DirectPayoutDialog({
                     onChange={(e) => set("ifscCode", e.target.value)}
                   />
                 </div>
+                )}
               </div>
+
+              <PaymentCodeField value={code} onChange={setCode} />
 
               {/* Source Module (read-only tag) */}
               <div className="space-y-1.5">

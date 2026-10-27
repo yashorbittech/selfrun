@@ -6,11 +6,12 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { PAYMENT_METHODS, formatMoney } from "@/lib/products/cashflow-ai/constants";
+import PaymentCodeField from "@/components/products/cashflow-ai/PaymentCodeField";
 import { recordVendorPaymentAction } from "@/app/(products)/cashflow-ai/(protected)/vendor-payments/actions";
 import type { FundAccountOption } from "@/lib/products/cashflow-ai/fund-accounts";
 
@@ -19,7 +20,6 @@ export default function RecordVendorPaymentForm({
   billNumber,
   outstanding,
   currency,
-  fundAccounts = [],
   trigger,
   onSaved,
 }: {
@@ -50,7 +50,6 @@ export default function RecordVendorPaymentForm({
   const [form, setForm] = useState(seed);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
-  const matchingFundAccounts = fundAccounts.filter((a) => a.currency === currency);
 
   function onOpenChange(next: boolean) {
     if (next) {
@@ -60,16 +59,18 @@ export default function RecordVendorPaymentForm({
     setOpen(next);
   }
 
+  const [code, setCode] = useState("");
+
   function submit() {
     setErrors({});
     startTransition(async () => {
-      const res = await recordVendorPaymentAction({ ...form, invoiceId: billId });
+      const res = await recordVendorPaymentAction({ ...form, invoiceId: billId, code });
       if (!res.ok) {
         if (res.fieldErrors) setErrors(res.fieldErrors);
         toast.error(res.error ?? "Please fix the highlighted fields.");
         return;
       }
-      toast.success("Vendor payment recorded");
+      toast.success("Payment sent to Razorpay");
       setOpen(false);
       onSaved?.();
       router.refresh();
@@ -132,20 +133,9 @@ export default function RecordVendorPaymentForm({
             </div>
           </div>
 
-          {matchingFundAccounts.length > 0 && (
-            <div className="space-y-1.5">
-              <Label>Fund Account (bank/cash this settles through)</Label>
-              <Select value={form.fundAccountKey || "none"} onValueChange={(v) => set("fundAccountKey", !v || v === "none" ? "" : v)}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {matchingFundAccounts.map((a) => (
-                    <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <p className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">Paid through Razorpay from your RazorpayX balance, into the saved bank details. It shows as paid, with its UTR, when the bank confirms.</p>
+
+          {form.status !== "scheduled" && <PaymentCodeField value={code} onChange={setCode} />}
 
           <div className="space-y-1.5">
             <Label>Notes</Label>

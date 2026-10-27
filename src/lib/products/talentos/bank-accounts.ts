@@ -26,6 +26,8 @@ export interface BankAccount extends AuditFields {
   verificationNote: string | null;
   providerContactId: string | null;
   providerFundAccountId: string | null;
+  /** When the number, IFSC or holder was last entered or changed. A payment to a freshly changed account waits (Payments → Limits). */
+  detailsChangedAt?: Date | null;
   /**
    * Which payout account (Razorpay key id) the cached contact/fund account
    * ids belong to. Absent on ids cached before per-company payout accounts —
@@ -223,6 +225,7 @@ export async function createBankAccount(
     verificationNote: null,
     providerContactId: null,
     providerFundAccountId: null,
+    detailsChangedAt: new Date(),
     ...createStamp(actor.id),
   });
   if (isPrimary) await clearOtherPrimaries(employeeId, id);
@@ -266,10 +269,17 @@ export async function updateBankAccount(
         verifiedAt: null,
         providerContactId: null,
         providerFundAccountId: null,
+        detailsChangedAt: new Date(),
         ...updateStamp(actor.id),
       },
     }
   );
+  // A change to where an employee is paid is told to the owners at once: it is the commonest way salary is redirected.
+  {
+    const { alertOwners } = await import("@/lib/products/cashflow-ai/payment-alerts");
+    const emp = await getEmployee(account.employeeId);
+    await alertOwners("An employee's bank details were changed", [`${emp ? employeeFullName(emp) : "An employee"}'s bank account was changed by ${actor.email} (now ${input.bankName}, ending ${last4Of(input.accountNumber)}).`, "Payments to it are held for the cooling-off period. If this was not expected, review it before anyone is paid."]);
+  }
   if (input.isPrimary && !account.isPrimary) {
     await collection.updateOne({ _id: id }, { $set: { isPrimary: true } });
     await clearOtherPrimaries(account.employeeId, id);

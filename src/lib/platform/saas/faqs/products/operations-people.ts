@@ -1119,11 +1119,6 @@ export const OPERATIONS_PEOPLE_FAQS: FaqHubGroup[] = [
         evidence: ["src/app/(products)/talentos/(protected)/(staff)/payroll/payouts/page.tsx:37"],
       },
       {
-        q: "Can HR generate a bank file for a payroll run?",
-        a: "TalentOS has a run-specific bank-file route for payroll disbursement.",
-        evidence: ["src/app/(products)/api/talentos/payroll/runs/[id]/bank-file/route.ts:1-20"],
-      },
-      {
         q: "Can I export a payouts report?",
         a: "A payroll payout report endpoint is available for reporting disbursements.",
         evidence: ["src/app/(products)/api/talentos/payroll/payouts/report/route.ts:1-20"],

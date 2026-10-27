@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import RefundForm from "@/components/products/cashflow-ai/RefundForm";
+import ChequeActions from "@/components/products/cashflow-ai/ChequeActions";
 import VoidReceiptButton from "@/components/products/cashflow-ai/VoidReceiptButton";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManageTransactions } from "@/lib/fms-roles";
@@ -35,8 +36,8 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
         title={<>{receipt.receiptNumber}</>}
         description={<>{receipt.customerName} · {formatMoney(receipt.amount, receipt.currency)}</>}
         actions={<><div className="flex items-center gap-2">
-          <Badge className={receipt.status === "voided" ? "bg-muted text-muted-foreground" : "bg-green-500/15 text-green-600 dark:text-green-400"}>
-            {receipt.status === "voided" ? "Voided" : "Completed"}
+          <Badge className={receipt.status === "pending_clearance" ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : receipt.status === "bounced" ? "bg-destructive/15 text-destructive" : receipt.status === "voided" ? "bg-muted text-muted-foreground" : "bg-green-500/15 text-green-600 dark:text-green-400"}>
+            {({ completed: "Completed", voided: "Voided", pending_clearance: "Awaiting clearance", bounced: "Bounced" } as Record<string, string>)[receipt.status]}
           </Badge>
           <a href={`/api/cashflow-ai/receipts/${receipt.receiptNumber}`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
             <Download className="size-3.5" data-icon="inline-start" />
@@ -44,6 +45,22 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
           </a>
         </div></>}
       />
+
+      {canManage && receipt.status === "pending_clearance" && (
+        <GlassCard>
+          <CardHeader><CardTitle>Cheque {receipt.chequeNumber}</CardTitle></CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">Drawn on {receipt.chequeBank}, dated {receipt.chequeDate}. The invoices stay unpaid and nothing is booked until the bank clears it.</p>
+            <ChequeActions id={receipt._id} />
+            <VoidReceiptButton id={receipt._id} />
+          </CardContent>
+        </GlassCard>
+      )}
+      {receipt.status === "bounced" && (
+        <GlassCard>
+          <CardContent className="py-4 text-sm"><span className="font-medium text-destructive">Bounced.</span> {receipt.bounceReason} The invoices are unpaid: ask the customer for another payment.</CardContent>
+        </GlassCard>
+      )}
 
       {canManage && receipt.status === "completed" && (
         <GlassCard>
@@ -74,6 +91,7 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
           <CardContent className="space-y-2 text-sm">
             <Row label="Method" value={receipt.method?.replace(/_/g, " ") ?? "—"} />
             <Row label="Transaction Reference" value={receipt.transactionReference ?? "—"} />
+            {receipt.chequeNumber && <Row label="Cheque" value={`${receipt.chequeNumber}, ${receipt.chequeBank}, dated ${receipt.chequeDate}`} />}
             <Row label="Receipt Date" value={formatDateTime(receipt.receiptDate)} />
             <Row label="Unapplied Advance" value={formatMoney(receipt.advanceAmount, receipt.currency)} />
           </CardContent>

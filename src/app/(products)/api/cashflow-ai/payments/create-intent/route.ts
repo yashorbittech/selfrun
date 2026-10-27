@@ -5,8 +5,8 @@ import { createPaymentIntent, CreatePaymentIntentData } from "@/lib/products/cas
 import { acquireIdempotencyLock, releaseIdempotencyLock } from "@/lib/products/cashflow-ai/payments/idempotency";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canApproveTransactions, canManageTransactions } from "@/lib/fms-roles";
-import { getPaymentLinkByToken } from "@/lib/products/cashflow-ai/payments/links";
-import { simulatedPaymentsAllowed, SIMULATED_PAYMENTS_MESSAGE } from "@/lib/products/cashflow-ai/payments/guard";
+import { claimLinkAttempt, getPaymentLinkByToken } from "@/lib/products/cashflow-ai/payments/links";
+import { resolveRazorpayCredentials } from "@/lib/platform/integrations/payments";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
 const str = (v: unknown, max = 200) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -48,7 +48,7 @@ async function handlePOST(req: Request) {
         sourceId: str(body.sourceId),
         customerId: body.customerId ? str(body.customerId) : undefined,
         customerName: str(body.customerName) || "Customer",
-        customerEmail: str(body.customerEmail) || "customer@example.com",
+        customerEmail: str(body.customerEmail, 200),
         customerPhone: body.customerPhone ? str(body.customerPhone, 40) : undefined,
         invoiceId: body.invoiceId ? str(body.invoiceId) : undefined,
         amount: Number(body.amount),
@@ -56,7 +56,7 @@ async function handlePOST(req: Request) {
         offerDiscountAmount: body.offerDiscountAmount ? Number(body.offerDiscountAmount) : 0,
         currency: str(body.currency, 8) || "INR",
         paymentMethod: (str(body.paymentMethod, 20) || "UPI") as CreatePaymentIntentData["paymentMethod"],
-        paymentProvider: (str(body.paymentProvider, 30) || "mock") as CreatePaymentIntentData["paymentProvider"],
+        paymentProvider: "razorpay",
         idempotencyKey,
         metadata: body.metadata && typeof body.metadata === "object" ? (body.metadata as Record<string, unknown>) : undefined,
       };
@@ -65,7 +65,10 @@ async function handlePOST(req: Request) {
       if (!link || link.status === "PAID" || link.status === "EXPIRED" || link.status === "CANCELLED" || link.status === "DRAFT") {
         return NextResponse.json({ ok: false, error: "This payment link isn't available." }, { status: 403 });
       }
-      if (!simulatedPaymentsAllowed()) return NextResponse.json({ ok: false, error: SIMULATED_PAYMENTS_MESSAGE }, { status: 403 });
+      // Counted atomically: a link allows only so many attempts, and a paid or expired one allows none.
+      if (!(await claimLinkAttempt(link._id))) {
+        return NextResponse.json({ ok: false, error: "This payment link can't be used any more (it was paid, has expired or has had too many attempts). Ask for a new one." }, { status: 403 });
+      }
       input = {
         sourceModule: link.sourceModule,
         sourceType: "DIRECT_LINK",
@@ -80,7 +83,7 @@ async function handlePOST(req: Request) {
         offerDiscountAmount: 0,
         currency: link.currency,
         paymentMethod: "UPI",
-        paymentProvider: "mock",
+        paymentProvider: "razorpay",
         idempotencyKey,
       };
     }
@@ -104,8 +107,13 @@ async function handlePOST(req: Request) {
       return NextResponse.json({ ok: false, error: res.reason }, { status: 400 });
     }
 
+    // The browser needs the key id (public by design) to open Razorpay Checkout for the order.
+    const creds = res.intent.paymentProvider === "razorpay" ? await resolveRazorpayCredentials("payments") : null;
     const responseData = {
       ok: true,
+      keyId: creds?.keyId ?? null,
+      amountPaise: Math.round(res.intent.netAmount * 100),
+      currency: res.intent.currency,
       paymentIntent: res.intent,
       checkoutUrl: res.intent.checkoutUrl,
       clientSecret: res.intent.paymentSessionId,

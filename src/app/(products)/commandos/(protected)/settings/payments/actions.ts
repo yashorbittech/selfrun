@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentHubUser } from "@/lib/hub-auth";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import {
   disconnectPaymentAccount,
   savePaymentAccount,
@@ -17,8 +18,11 @@ async function requireOwner() {
   return user;
 }
 
-export async function savePaymentAccountAction(input: PaymentAccountInput): Promise<PaymentAccountResult> {
+export async function savePaymentAccountAction(input: PaymentAccountInput, code: string): Promise<PaymentAccountResult> {
   const user = await requireOwner();
+  // Changing where payments go, or the keys that can send money, needs the confirmation code like any payment.
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
   return savePaymentAccount(
     {
       keyId: String(input?.keyId ?? ""),
@@ -36,7 +40,9 @@ export async function testPaymentAccountAction(): Promise<PaymentAccountResult> 
   return testPaymentAccount();
 }
 
-export async function disconnectPaymentAccountAction(): Promise<PaymentAccountResult> {
+export async function disconnectPaymentAccountAction(code: string): Promise<PaymentAccountResult> {
   const user = await requireOwner();
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
   return disconnectPaymentAccount({ id: user.id, email: user.email });
 }

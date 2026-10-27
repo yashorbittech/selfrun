@@ -39,7 +39,8 @@ interface Rule { re: RegExp; methods?: string[]; cls: Class }
 // First match wins. Anything not listed is "session": a signed-in person is required.
 const RULES: Rule[] = [
   // Machine-to-machine: signed / bearer requests from payment providers, schedulers and our own build pipeline.
-  { re: /^\/api\/(platform\/billing\/webhook|fms\/webhooks\/|hrms\/payroll\/webhook)/, cls: "machine" },
+  // Razorpay's webhooks (customer payments in CashFlow, RazorpayX payouts in TalentOS): no browser, no session, only the signature header.
+  { re: /^\/api\/(platform\/billing\/webhook|cashflow-ai\/webhooks\/|talentos\/payroll\/webhook)/, cls: "machine" },
   { re: /\/cron$|^\/api\/wallet\/expiry-sweep$|^\/api\/apps\/builds\/(callback|cron)$|^\/api\/indexing$/, cls: "machine" },
   { re: /^\/api\/lms\/chatbot\/reindex$/, cls: "bearer-or-session" },
   // A provider fetches a signed link (the signature is checked by the handler).
@@ -50,6 +51,11 @@ const RULES: Rule[] = [
   // The browser comes back from another site (provider consent screens) or follows a link.
   { re: /^\/api\/smms\/oauth\/[^/]+\/callback$/, cls: "navigation" },
   { re: /^\/workspace\/(handoff|verify-email)/, cls: "navigation" },
+  // A customer paying a payment link is not signed in: these two are called from the public pay page (the link's token authorises the amount,
+  // Razorpay confirms the payment). Browser origin and rate limits still apply; the handlers check everything else.
+  { re: /^\/api\/cashflow-ai\/payments\/(create-intent|verify)$/, methods: ["POST"], cls: "public" },
+  // The customer's own receipt PDF, opened with the link's secret token once the link is paid.
+  { re: /^\/api\/cashflow-ai\/payments\/receipt\/[a-f0-9]{32}$/, methods: ["GET"], cls: "public" },
   // The public website talking to its own backend (forms, chat, offers, push sign-up …).
   { re: /^\/api\/(chat|careers|offers|referral|web-push|voice|game|client-error|consent|push\/config|support\/public)(\/|$)/, cls: "public" },
   { re: /^\/api\/leads\/[^/]+$/, methods: ["POST"], cls: "public" },

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getPaymentLinkByToken, serializePaymentLink } from "@/lib/products/cashflow-ai/payments/links";
+import { receiptForLinkToken } from "@/lib/products/cashflow-ai/payments/public-receipt";
 import PublicCheckoutClient from "./PublicCheckoutClient";
 import { getCompanyBrand } from "@/lib/platform/branding";
 
@@ -17,6 +18,7 @@ export default async function PublicPaymentPage({
   }
 
   const serializedLink = serializePaymentLink(link);
+  const receipt = link.status === "PAID" ? await receiptForLinkToken(token) : null;
 
   return (
     <div className="relative min-h-screen bg-canvas text-foreground flex flex-col justify-center items-center p-4 overflow-hidden">
@@ -27,7 +29,7 @@ export default async function PublicPaymentPage({
       </div>
 
       <main className="w-full max-w-md relative z-10">
-        <PublicCheckoutClient link={serializedLink} />
+        <PublicCheckoutClient link={serializedLink} receipt={receipt} />
       </main>
 
       <footer className="mt-8 text-center text-xs text-muted-foreground relative z-10 space-y-1">

@@ -11,7 +11,7 @@ import { getApplicationForConversion } from "@/lib/products/talentos/recruitment
 import { upsertPayrollProfile, getPayrollProfile } from "@/lib/products/talentos/payroll";
 import { createRevision } from "@/lib/products/talentos/salary-revisions";
 import { createRun, deleteRun, approveRun, getRun, getPayslip, recomputePayslip, updatePayslipOverrides, isMonthLocked } from "@/lib/products/talentos/payroll-run";
-import { bulkInitiate, cancelPayout, retryPayout, recordManualResult } from "@/lib/products/talentos/salary-payouts";
+import { cancelPayout, refreshSalaryPayout } from "@/lib/products/talentos/salary-payouts";
 import { getOrgSettings, updateOrgSettings, isDateString } from "@/lib/products/talentos/settings";
 import { updatePayrollConfig, getPayrollConfig } from "@/lib/products/talentos/payroll-config";
 import { updateCompanyDetails, getCompanyDetails } from "@/lib/products/talentos/company";
@@ -22,7 +22,7 @@ import {
   validateEmployeeCreate, validateDepartment, validateDesignation, validateTeam, validatePayrollProfile,
 } from "@/lib/products/talentos/validation";
 import { validateHoliday, validateLeaveType, validateLeaveRequest, validateAttendanceEntry, validateOrgSettings, validateCompanyDetails } from "@/lib/products/talentos/validation-ops";
-import { validateSalaryRevision, validatePayslipOverrides, validateManualPayoutResult, validateOffer, validateOfferDetails, validateOwnContact, validatePayrollConfig } from "@/lib/products/talentos/validation-payroll";
+import { validateSalaryRevision, validatePayslipOverrides, validateOffer, validateOfferDetails, validateOwnContact, validatePayrollConfig } from "@/lib/products/talentos/validation-payroll";
 import { EMPLOYEE_STATUSES, EMPLOYMENT_TYPES, GENDERS, WORK_LOCATIONS, isValidEmployeeStatus } from "@/lib/products/talentos/employee-status";
 import { HOLIDAY_TYPES } from "@/lib/products/talentos/holiday-types";
 import { OFFER_STATUSES, isValidOfferStatus } from "@/lib/products/talentos/offers-status";
@@ -37,6 +37,7 @@ import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/
  * notifications). Managers act inside their reporting line; employees only on themselves.
  */
 
+const MONEY_MOVES_IN_THE_APP = "Money is never sent from the assistant. Open the payment in the app and confirm it there with your confirmation code.";
 const soft = { deletedAt: null };
 const STATUS = EMPLOYEE_STATUSES.map((s) => s.value) as string[];
 const EMPLOYMENT = EMPLOYMENT_TYPES.map((s) => s.value) as string[];
@@ -655,20 +656,14 @@ export const HRMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "hrms.initiate_payouts", panel: "hrms", label: "Pay salaries (send the payouts)", description: "Initiate salary transfers for one or many payouts. This moves real money.", level: "staff", allow: canRunPayroll, destructive: true,
+    key: "hrms.initiate_payouts", panel: "hrms", label: "Pay salaries (send the payouts)", description: "Not available here: salaries are paid from Payroll → the run → Pay with Razorpay, with a confirmation code.", level: "staff", allow: canRunPayroll, destructive: true,
     params: [{ key: "payoutIds", label: "Payout ids (hrms.salary_payout)", type: "stringList", required: true }],
-    run: async (v, u) => {
-      const r = await bulkInitiate(v.payoutIds as string[], { id: u.id, email: u.email });
-      return r.initiated ? { ok: true, result: `${r.initiated} payout(s) initiated.`, ...(r.errors.length ? { problems: r.errors } : {}) } : fail(r.errors[0] ?? "Nothing was initiated.", { problems: r.errors });
-    },
+    run: async () => fail(MONEY_MOVES_IN_THE_APP),
   },
   {
-    key: "hrms.retry_payout", panel: "hrms", label: "Retry a failed payout", description: "Try a failed salary transfer again.", level: "staff", allow: canRunPayroll, destructive: true,
+    key: "hrms.retry_payout", panel: "hrms", label: "Retry a failed payout", description: "Not available here: retry from the payout in the app, with a confirmation code.", level: "staff", allow: canRunPayroll, destructive: true,
     params: [{ key: "payoutId", label: "Payout id (hrms.salary_payout)", type: "ref", ref: "hrms.salary_payout", required: true }],
-    run: async (v, u) => {
-      const r = await retryPayout(String(v.payoutId), { id: u.id, email: u.email });
-      return r.ok ? { ok: true, id: String(v.payoutId), result: "Payout retried." } : fail(r.error ?? "Could not retry the payout.");
-    },
+    run: async () => fail(MONEY_MOVES_IN_THE_APP),
   },
   {
     key: "hrms.cancel_payout", panel: "hrms", label: "Cancel a salary payout", description: "Cancel a payout that has not been paid.", level: "staff", allow: canRunPayroll, destructive: true,
@@ -679,13 +674,11 @@ export const HRMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "hrms.record_payout_result", panel: "hrms", label: "Record a manual payout result (paid with UTR, or failed)", description: "For salaries paid outside the system: record paid (with the bank reference) or failed (with a reason).", level: "staff", allow: canRunPayroll, destructive: true,
-    params: [{ key: "payoutId", label: "Payout id (hrms.salary_payout)", type: "ref", ref: "hrms.salary_payout", required: true }, { key: "status", label: "Result", type: "enum", options: ["paid", "failed"], required: true }, { key: "utr", label: "UTR / bank reference (for paid)", type: "string" }, { key: "failureReason", label: "Reason (for failed)", type: "string" }, { key: "remarks", label: "Remarks", type: "string" }],
-    run: async (v, u) => {
-      const c = check(validateManualPayoutResult(v));
-      if (!c.ok) return c.error;
-      const r = await recordManualResult(String(v.payoutId), c.data, { id: u.id, email: u.email });
-      return r.ok ? { ok: true, id: String(v.payoutId), result: `Payout marked ${c.data.status}.` } : fail(r.error ?? "Could not record the result.");
+    key: "hrms.refresh_payout", panel: "hrms", label: "Check a salary payout's status with RazorpayX", description: "Asks RazorpayX whether a salary payout was paid, failed or returned. Use it when the status looks stuck.", level: "staff", allow: canRunPayroll,
+    params: [{ key: "payoutId", label: "Payout id (hrms.salary_payout)", type: "ref", ref: "hrms.salary_payout", required: true }],
+    run: async (v) => {
+      const r = await refreshSalaryPayout(String(v.payoutId));
+      return r.ok ? { ok: true, id: String(v.payoutId), result: "Payout status refreshed from RazorpayX." } : fail(r.error ?? "Could not refresh the payout.");
     },
   },
   {
@@ -706,7 +699,7 @@ export const HRMS_ACTIONS: ActionDef[] = [
   },
   {
     key: "hrms.save_company_details", panel: "hrms", label: "Change company details used on payslips", description: "Legal name, address, PAN, GSTIN, PF/ESI codes, signatory and payslip note.", level: "admin", allow: canManageSettings,
-    params: ["name", "legalName", "addressLine1", "addressLine2", "city", "state", "postalCode", "country", "email", "phone", "website", "pan", "gstin", "cin", "pfEstablishmentCode", "esiEstablishmentCode", "lin", "signatoryName", "signatoryDesignation", "payslipNote"].map((k) => ({ key: k, label: k, type: "string" as const })),
+    params: ["name", "legalName", "addressLine1", "addressLine2", "city", "state", "postalCode", "country", "email", "phone", "website", "pan", "gstin", "cin", "pfEstablishmentCode", "esiEstablishmentCode", "lin", "tan", "ptRegistration", "signatoryName", "signatoryDesignation", "payslipNote"].map((k) => ({ key: k, label: k, type: "string" as const })),
     run: async (v, u) => {
       const cur = (await getCompanyDetails()) as unknown as Json;
       const c = check(validateCompanyDetails(formInput(cur, v)));
@@ -717,19 +710,21 @@ export const HRMS_ACTIONS: ActionDef[] = [
     },
   },
   {
-    key: "hrms.save_payroll_config", panel: "hrms", label: "Change statutory payroll rates", description: "PF/ESI percentages and ceilings, professional tax, TDS regime, financial year start month.", level: "admin", allow: canManagePayrollConfig,
+    key: "hrms.save_payroll_config", panel: "hrms", label: "Change payroll policy", description: "How days are counted (calendar/working/fixed), sandwich rule, overtime, late marks, which registrations the company holds (PF, ESI, professional tax, labour welfare fund), default tax regime and deduction limit. The law's own rates (PF, ESI, tax slabs, professional tax) are set by the platform and cannot be changed here.", level: "admin", allow: canManagePayrollConfig,
     params: [
-      { key: "pfEmployeePercent", label: "PF employee %", type: "number" }, { key: "pfWageCeiling", label: "PF wage ceiling", type: "number" }, { key: "epsPercent", label: "EPS %", type: "number" }, { key: "pfEmployerPercent", label: "PF employer %", type: "number" },
-      { key: "esiEmployeePercent", label: "ESI employee %", type: "number" }, { key: "esiEmployerPercent", label: "ESI employer %", type: "number" }, { key: "esiGrossThreshold", label: "ESI gross threshold", type: "number" },
-      { key: "professionalTaxMonthly", label: "Professional tax per month", type: "number" }, { key: "tdsRegime", label: "TDS regime", type: "enum", options: ["new", "manual"] }, { key: "financialYearStartMonth", label: "Financial year start month 1–12", type: "number" },
+      { key: "paidDaysBasis", label: "Pay days basis", type: "enum", options: ["calendar", "working", "fixed"] }, { key: "fixedDays", label: "Fixed days (26 or 30) when basis is fixed", type: "number" },
+      { key: "sandwichRule", label: "Sandwich rule", type: "enum", options: ["none", "unpaid_leave", "all_lop"] }, { key: "unmarkedDay", label: "Working day with no attendance", type: "enum", options: ["lop", "present"] },
+      { key: "lateMarksPerHalfDay", label: "Late marks that cost half a day (0 = off)", type: "number" }, { key: "overtimeEnabled", label: "Pay overtime", type: "boolean" },
+      { key: "pfRegistered", label: "Registered with EPFO", type: "boolean" }, { key: "esiRegistered", label: "Registered with ESIC", type: "boolean" }, { key: "ptRegistered", label: "Professional tax registered", type: "boolean" },
+      { key: "defaultTaxRegime", label: "Default tax regime", type: "enum", options: ["new", "old"] }, { key: "deductionCapPercent", label: "Most that recoveries may take, % of wages", type: "number" }, { key: "requireSeparateApprover", label: "A different person must approve each run", type: "boolean" },
     ],
     run: async (v, u) => {
       const cur = (await getPayrollConfig()) as unknown as Json;
       const c = check(validatePayrollConfig(formInput(cur, v)));
       if (!c.ok) return c.error;
       await updatePayrollConfig(c.data, u.id);
-      await audit(u, { action: "update", entity: "payroll_config", entityId: "org", entityLabel: "Statutory rates", summary: `PF ${c.data.pfEmployeePercent}%, PT ₹${c.data.professionalTaxMonthly}, ESI ≤ ₹${c.data.esiGrossThreshold}` });
-      return { ok: true, result: "Payroll rates saved." };
+      await audit(u, { action: "update", entity: "payroll_config", entityId: "org", entityLabel: "Payroll policy", summary: `days ${c.data.paidDaysBasis}, sandwich ${c.data.sandwichRule}, tax ${c.data.defaultTaxRegime}` });
+      return { ok: true, result: "Payroll policy saved." };
     },
   },
   ...(["save_bank_account", "set_primary_bank_account", "set_bank_verification", "delete_bank_account"] as const).map((k): ActionDef => {

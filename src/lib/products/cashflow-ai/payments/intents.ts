@@ -13,18 +13,24 @@ import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 import { getInvoice, applyReceiptToInvoice } from "@/lib/products/cashflow-ai/invoices";
 import { recordReceipt } from "@/lib/products/cashflow-ai/receipts";
 import { PaymentProviderId, getPaymentProvider } from "./provider";
+import { markLinkPaid } from "./links";
+import { postSystemTransaction } from "@/lib/products/cashflow-ai/transactions";
+import { razorpayCollectionsAccountId } from "./payouts";
+import { alertOwners } from "@/lib/products/cashflow-ai/payment-alerts";
+import type { PaymentMethod as LedgerPaymentMethod } from "@/lib/products/cashflow-ai/constants";
 import "./providers";
-import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { NOT_CONNECTED, NOT_CONNECTED_MESSAGE, resolveRazorpayCredentials } from "@/lib/platform/integrations/payments";
 
-/**
- * Gateways a company can connect its own account for (Settings → Payments &
- * payouts). The others have no per-company credentials and no real
- * integration yet (they resolve to the mock provider), so they stay limited
- * to the platform owner, exactly as before.
- */
-const CONNECTABLE_GATEWAYS = new Set<string>(["razorpay"]);
-const OWNER_ONLY_GATEWAYS = new Set<string>(["stripe", "cashfree", "payu"]);
+/** The gateway's payment method (UPI, CARD, NETBANKING …) as the ledger names methods (upi, credit_card, bank_transfer …). */
+function ledgerMethod(m: string | null | undefined): LedgerPaymentMethod {
+  const v = String(m ?? "").toLowerCase();
+  if (v === "upi") return "upi";
+  if (v === "card" || v === "credit_card") return "credit_card";
+  if (v === "debit_card") return "debit_card";
+  if (v === "netbanking" || v === "bank_transfer" || v === "net_banking") return "bank_transfer";
+  if (v === "neft" || v === "rtgs" || v === "imps") return v;
+  return "payment_gateway";
+}
 
 export const PAYMENT_INTENTS_COLLECTION = "fms_payment_intents";
 const INTENT_NUMBER_PREFIX = "PAY";
@@ -95,6 +101,13 @@ export interface PaymentIntent extends AuditFields {
   metadata: Record<string, unknown>;
   initiatedAt: Date;
   completedAt: Date | null;
+  /** The ledger entry of a payment with no invoice. */
+  transactionId?: string | null;
+  /** The money arrived but could not be booked as it should have been: a person must look (the owners are told). */
+  reviewNote?: string | null;
+  /** Held while one request is completing this payment, so the webhook and the browser cannot both book it. */
+  completing?: boolean;
+  completingAt?: Date | null;
 }
 
 export interface SerializedPaymentIntent
@@ -264,13 +277,10 @@ export async function createPaymentIntent(
     }
   }
 
-  const providerId = data.paymentProvider || "mock";
-  // Live gateways collect into the company's OWN merchant account — never another company's.
-  if (CONNECTABLE_GATEWAYS.has(providerId) && !(await resolveRazorpayCredentials("payments"))) {
+  // Money is collected through Razorpay, into the company's OWN merchant account, never another company's.
+  const providerId = "razorpay" as const;
+  if (!(await resolveRazorpayCredentials("payments"))) {
     return { ok: false, reason: NOT_CONNECTED_MESSAGE, code: NOT_CONNECTED };
-  }
-  if (OWNER_ONLY_GATEWAYS.has(providerId) && !(await isPlatformOwnerContext())) {
-    return { ok: false, reason: "Online payment collection isn't connected for this workspace yet. Record the payment offline instead." };
   }
   const provider = getPaymentProvider(providerId);
   const intentId = newId();
@@ -320,7 +330,7 @@ export async function createPaymentIntent(
     gatewayPaymentId: providerRes.providerPaymentId ?? null,
     gatewaySignature: null,
     checkoutUrl: providerRes.checkoutUrl ?? null,
-    status: providerId === "offline" ? "PENDING" : "CREATED",
+    status: "CREATED",
     utr: null,
     failureReason: null,
     receiptId: null,
@@ -363,29 +373,51 @@ export async function markPaymentIntentSuccessful(
   }
 ): Promise<{ ok: boolean; intent?: PaymentIntent; reason?: string }> {
   const collection = await getCollection();
-  const intent = await collection.findOne({ _id: intentId, ...notDeleted });
-  if (!intent) return { ok: false, reason: "Payment intent not found." };
-  if (intent.status === "SUCCESS") return { ok: true, intent };
-
-  if (["CANCELLED", "EXPIRED"].includes(intent.status)) {
-    return { ok: false, reason: `Cannot complete a ${intent.status} payment intent.` };
-  }
-
   const now = new Date();
+
+  // Claim the payment first: Razorpay's webhook and the customer's browser both report it, usually within a second of each other, and only one
+  // of them may book it. (A claim that was never finished, because the server stopped, can be taken over after two minutes.)
+  const claimed = await collection.findOneAndUpdate(
+    {
+      _id: intentId,
+      ...notDeleted,
+      status: { $in: ["CREATED", "PENDING", "PROCESSING", "FAILED"] },
+      $or: [{ completing: { $ne: true } }, { completingAt: { $lt: new Date(now.getTime() - 120_000) } }],
+    } as never,
+    { $set: { completing: true, completingAt: now } },
+    { returnDocument: "after" },
+  );
+  if (!claimed) {
+    const current = await collection.findOne({ _id: intentId, ...notDeleted });
+    if (!current) return { ok: false, reason: "Payment intent not found." };
+    if (current.status === "SUCCESS") return { ok: true, intent: current };
+    if (current.completing) return { ok: false, reason: "This payment is being confirmed. Check again in a moment." };
+    return { ok: false, reason: `Cannot complete a ${current.status} payment intent.` };
+  }
+  const intent = claimed;
+
   let receiptId: string | null = null;
   let receiptNumber: string | null = null;
-
-  if (intent.invoiceId) {
-    const inv = await getInvoice(intent.invoiceId);
-    if (inv) {
+  let transactionId: string | null = null;
+  let reviewNote: string | null = null;
+  try {
+    // What the customer paid sits at Razorpay until it settles to the bank: it is booked to that account.
+    const accountId = await razorpayCollectionsAccountId(opts.actorId || "razorpay");
+    const inv = intent.invoiceId ? await getInvoice(intent.invoiceId) : null;
+    if (intent.invoiceId && !inv) {
+      reviewNote = "The invoice this payment was for no longer exists.";
+    } else if (inv) {
       const recRes = await recordReceipt(
         {
           customerId: inv.customerId,
           customerName: inv.customerName,
           receiptDate: now.toISOString().slice(0, 10),
           amount: intent.netAmount,
-          method: (opts.paymentMethod || intent.paymentMethod || "UPI") as any,
+          method: ledgerMethod(opts.paymentMethod || intent.paymentMethod),
           transactionReference: opts.utr || opts.gatewayPaymentId || intent.paymentNumber,
+          viaGateway: true,
+          fundAccountId: accountId,
+          fundAccountType: "bank",
           allocations: [{ invoiceId: inv._id, amount: intent.netAmount }],
           currency: intent.currency,
           notes: `Automated payment for ${intent.paymentNumber} (${intent.sourceModule})`,
@@ -396,12 +428,32 @@ export async function markPaymentIntentSuccessful(
       if (recRes.ok) {
         receiptId = recRes.receipt._id;
         receiptNumber = recRes.receipt.receiptNumber;
+      } else {
+        reviewNote = `Money received but the receipt could not be made: ${recRes.reason}`;
       }
+    } else {
+      // A payment link with no invoice behind it: the money is still income and must be in the books.
+      const date = new Date(`${now.toISOString().slice(0, 10)}T00:00:00`);
+      const txn = await postSystemTransaction(
+        {
+          type: "income", transactionDate: date, postingDate: date, amount: intent.netAmount, currency: intent.currency, paymentMethod: ledgerMethod(opts.paymentMethod || intent.paymentMethod),
+          sourceModule: "fms", sourceRecordId: intent._id, customerId: intent.customerId, vendorId: null, employeeId: null, projectId: null, department: null, accountId: null,
+          fundAccountId: accountId, fundAccountType: "bank", taxAmount: 0, referenceNumber: opts.utr || opts.gatewayPaymentId || intent.paymentNumber,
+          description: `Payment ${intent.paymentNumber} from ${intent.customerName}`, attachments: [],
+        },
+        opts.actorId || "system",
+        null,
+      );
+      if ("ok" in txn) reviewNote = `Money received but it could not be booked: ${txn.reason}`;
+      else transactionId = txn._id;
     }
+  } catch (e) {
+    reviewNote = `Money received but booking it failed: ${e instanceof Error ? e.message : String(e)}`;
   }
 
+  // The money did arrive (the gateway says so), so the payment is complete either way; if it could not be booked, a person is told.
   const updated = await collection.findOneAndUpdate(
-    { _id: intentId, status: { $ne: "SUCCESS" } },
+    { _id: intentId },
     {
       $set: {
         status: "SUCCESS",
@@ -411,13 +463,17 @@ export async function markPaymentIntentSuccessful(
         utr: opts.utr || intent.utr,
         receiptId,
         receiptNumber,
+        transactionId,
+        reviewNote,
+        completing: false,
         ...updateStamp(opts.actorId || null),
       },
     },
     { returnDocument: "after" }
   );
+  if (!updated) return { ok: false, reason: "The payment could not be saved." };
 
-  if (!updated) return { ok: false, reason: "Concurrent state change prevented update." };
+  if (intent.sourceType === "DIRECT_LINK") await markLinkPaid(intent.sourceId, intentId);
 
   await recordAudit({
     actorId: opts.actorId || "system",
@@ -426,8 +482,11 @@ export async function markPaymentIntentSuccessful(
     entity: "payment_intent",
     entityId: intentId,
     entityLabel: intent.paymentNumber,
-    summary: `Payment ${intent.paymentNumber} completed successfully. Receipt: ${receiptNumber || "N/A"}`,
+    summary: `Payment ${intent.paymentNumber} completed successfully. Receipt: ${receiptNumber || "N/A"}${reviewNote ? `. NEEDS REVIEW: ${reviewNote}` : ""}`,
   });
+  if (reviewNote) {
+    await alertOwners("A customer payment needs your attention", [`₹${intent.netAmount.toLocaleString("en-IN")} from ${intent.customerName} was received through Razorpay (payment ${intent.paymentNumber}), but: ${reviewNote}`, "The money is safe at Razorpay. Open Payments in CashFlow to book it by hand."]);
+  }
 
   return { ok: true, intent: updated };
 }

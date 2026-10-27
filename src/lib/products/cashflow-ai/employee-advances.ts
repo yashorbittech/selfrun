@@ -3,6 +3,8 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/products/cashflow-ai/db";
 import { round2, canTransitionAdvance, DEFAULT_ADVANCE_STATUS, type AdvanceStatus, type PaymentMethod, type FundAccountType } from "@/lib/products/cashflow-ai/constants";
+import { startPayout } from "@/lib/products/cashflow-ai/payments/payouts";
+import { employeePayee } from "@/lib/products/cashflow-ai/payments/payees";
 import { postSystemTransaction } from "@/lib/products/cashflow-ai/transactions";
 
 /**
@@ -40,6 +42,8 @@ export interface EmployeeAdvance extends AuditFields {
   approvedAt: Date | null;
   disbursedAt: Date | null;
   disbursementTransactionId: string | null;
+  /** The Razorpay payment that disbursed it. */
+  payoutId?: string | null;
   repayments: AdvanceRepayment[];
 }
 
@@ -156,9 +160,11 @@ export async function changeAdvanceStatus(
   toStatus: AdvanceStatus,
   actorId: string,
   actorEmail: string | null,
-  fundAccountId: string | null = null,
-  fundAccountType: FundAccountType | null = null
+  _fundAccountId: string | null = null,
+  _fundAccountType: FundAccountType | null = null
 ): Promise<{ ok: boolean; reason?: string }> {
+  void _fundAccountId;
+  void _fundAccountType;
   const collection = await getCollection();
   const existing = await collection.findOne({ _id: id, ...notDeleted });
   if (!existing) return { ok: false, reason: "Advance not found." };
@@ -172,35 +178,15 @@ export async function changeAdvanceStatus(
     patch.approvedAt = new Date();
   }
   if (toStatus === "disbursed") {
-    const txn = await postSystemTransaction(
-      {
-        type: "expense",
-        transactionDate: new Date(),
-        postingDate: new Date(),
-        amount: existing.amount,
-        currency: "INR",
-        paymentMethod: "bank_transfer",
-        sourceModule: "fms",
-        sourceRecordId: existing._id,
-        customerId: null,
-        vendorId: null,
-        employeeId: existing.employeeId,
-        projectId: null,
-        department: null,
-        accountId: null,
-        fundAccountId,
-        fundAccountType,
-        taxAmount: 0,
-        referenceNumber: null,
-        description: `Advance ${existing.advanceNumber} disbursed to ${existing.employeeName}`,
-        attachments: [],
-      },
-      actorId,
-      actorEmail
+    // The money goes out through Razorpay, into the employee's primary bank account. The advance becomes "disbursed" (and the ledger entry is
+    // made) when Razorpay reports it paid; until then it stays approved with the payment on its way.
+    const payee = await employeePayee(existing.employeeId);
+    if (!payee.ok) return { ok: false, reason: payee.error };
+    const res = await startPayout(
+      { purpose: "advance", sourceModule: "fms", sourceRecordId: existing._id, payee: payee.payee, amount: existing.amount, narration: `Advance ${existing.advanceNumber}`, employeeId: existing.employeeId, description: `Advance ${existing.advanceNumber} disbursed to ${existing.employeeName}` },
+      { id: actorId, email: actorEmail },
     );
-    if ("ok" in txn) return txn;
-    patch.disbursedAt = new Date();
-    patch.disbursementTransactionId = txn._id;
+    return res.ok ? { ok: true } : { ok: false, reason: res.error };
   }
 
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { ...patch, ...updateStamp(actorId) } });

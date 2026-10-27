@@ -97,6 +97,14 @@ payroll with payslips and payouts, and a recruitment pipeline that turns a short
 - Each employee has a full profile with personal, job and salary details, documents (contracts, IDs, certificates) and bank accounts used for salary payouts.
 - Employees get portal access for self-service: their own attendance check-in, leave requests and balance, salary and payslips, documents and a company directory.
 - Leave types, balances, holidays and approval rules are configured by the company, and leave requests reach the right approver as a notification.
+- Indian statutory payroll: PF (with EPS, EDLI and admin charges), ESI, professional tax by state, labour welfare fund, statutory bonus, gratuity, leave encashment and full-and-final settlement, with income tax (TDS) worked out monthly under the old or new regime from each employee's declaration.
+- Paid days come from real attendance, approved leave and the holiday calendar (state-wise holidays, alternate Saturdays, half-days, sandwich rule), so loss of pay is calculated, not typed.
+- Employees ask for overtime, partial leave (two a month) and expense claims for money they spent on work from the portal; managers approve, and payroll pays them automatically.
+- Employees declare investments and choose the tax regime with a live comparison of old and new regime tax, worked out from their actual salary.
+- Every payment goes through the company's own Razorpay account: salaries, vendor bills, refunds and reimbursements are paid by RazorpayX, customers pay invoices and payment links by Razorpay Checkout, and each payment is booked in CashFlow against the RazorpayX balance. The current account tops up RazorpayX; government dues (PF, ESI, tax) are paid on their portals from the current account and recorded.
+- A government payments page shows what is owed to PF, ESI, income tax and the state each month, the due dates, and records the challans.
+- Every run is checked before approval, with blocking and review warnings; individual salaries can be held, and one-off bonuses, recoveries, loans and advances are picked up automatically.
+- PF ECR, ESI, professional tax and TDS files, a payroll register and an accounting journal download straight from the run.
 - Payroll runs for a month in one flow, with salary revisions tracked, payslips generated for each employee and salary payouts posted to SelfRun CashFlow AI automatically.
 - The recruitment pipeline runs from application to offer, and HR analytics show headcount, hiring, attendance and leave trends.
 

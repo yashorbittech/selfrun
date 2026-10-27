@@ -25,6 +25,10 @@ export interface OrgSettings {
   fullDayHours: number;
   /** Display label only (e.g. shown next to times). */
   timezone: string;
+  /** Which Saturdays of the month are off when Saturday is a working day (1 = first, 2 = second …): the "2nd and 4th Saturday off" pattern. */
+  saturdayOffs: number[];
+  /** The state the office is in: state-specific holidays and professional tax are read for it unless an employee works in another state. */
+  state: string | null;
   updatedAt: Date;
   updatedBy: string | null;
 }
@@ -38,6 +42,8 @@ const DEFAULTS: Omit<OrgSettings, "_id" | "updatedAt" | "updatedBy"> = {
   halfDayHours: 4,
   fullDayHours: 8,
   timezone: "Asia/Kolkata",
+  saturdayOffs: [],
+  state: null,
 };
 
 export async function getOrgSettings(): Promise<OrgSettings> {
@@ -70,13 +76,20 @@ export function isWorkingDay(date: string, settings: Pick<OrgSettings, "workingD
 
 export type DayClass = "working" | "weekly_off" | "holiday";
 
+/** Which Saturday of its month a date is (1 to 5), or 0 when it is not a Saturday. */
+export function saturdayOfMonth(date: string): number {
+  return dayOfWeek(date) === 6 ? Math.ceil(Number(date.slice(8, 10)) / 7) : 0;
+}
+
 export function classifyDay(
   date: string,
-  settings: Pick<OrgSettings, "workingDays">,
+  settings: Pick<OrgSettings, "workingDays"> & { saturdayOffs?: number[] },
   holidaySet: Set<string>
 ): DayClass {
   if (holidaySet.has(date)) return "holiday";
   if (!isWorkingDay(date, settings)) return "weekly_off";
+  const sat = saturdayOfMonth(date);
+  if (sat > 0 && settings.saturdayOffs?.includes(sat)) return "weekly_off";
   return "working";
 }
 

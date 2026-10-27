@@ -10,17 +10,20 @@ import {
   getRun,
   getPayslip,
   recomputePayslip,
+  recomputeRun,
+  setPayslipHold,
   updatePayslipOverrides,
 } from "@/lib/products/talentos/payroll-run";
 import {
   initiatePayout,
   bulkInitiate,
-  recordManualResult,
+  refreshSalaryPayout,
   retryPayout,
   cancelPayout,
   reconcilePayouts,
 } from "@/lib/products/talentos/salary-payouts";
-import { validatePayslipOverrides, validateManualPayoutResult } from "@/lib/products/talentos/validation-payroll";
+import { validatePayslipOverrides } from "@/lib/products/talentos/validation-payroll";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import { recordAudit } from "@/lib/products/talentos/audit";
 
 export interface PayrollActionResult {
@@ -74,10 +77,10 @@ export async function deleteRunAction(runId: string): Promise<PayrollActionResul
   return { ok: true };
 }
 
-export async function approveRunAction(runId: string): Promise<PayrollActionResult> {
+export async function approveRunAction(runId: string, acknowledgeWarnings = false): Promise<PayrollActionResult> {
   const user = await requirePayroll();
   const run = await getRun(runId);
-  const result = await approveRun(runId, user.id);
+  const result = await approveRun(runId, user.id, { acknowledgeWarnings: acknowledgeWarnings === true });
   if (!result.ok) return { ok: false, error: result.error };
   await recordAudit({
     actorId: user.id,
@@ -86,9 +89,30 @@ export async function approveRunAction(runId: string): Promise<PayrollActionResu
     entity: "payroll_run",
     entityId: runId,
     entityLabel: run?.month,
-    summary: "Run approved — salary payouts created",
+    summary: acknowledgeWarnings ? "Run approved — salary payouts created (warnings acknowledged)" : "Run approved — salary payouts created",
   });
   revalidate(run?.month);
+  return { ok: true };
+}
+
+export async function recomputeRunAction(runId: string): Promise<PayrollActionResult> {
+  const user = await requirePayroll();
+  const run = await getRun(runId);
+  const result = await recomputeRun(runId);
+  if (!result.ok) return { ok: false, error: result.error };
+  await recordAudit({ actorId: user.id, actorEmail: user.email, action: "update", entity: "payroll_run", entityId: runId, entityLabel: run?.month, summary: "Run recomputed from current attendance, leave, adjustments and declarations" });
+  revalidate(run?.month);
+  return { ok: true };
+}
+
+export async function setPayslipHoldAction(payslipId: string, held: boolean, reason: string): Promise<PayrollActionResult> {
+  const user = await requirePayroll();
+  const slip = await getPayslip(payslipId);
+  if (!slip) return { ok: false, error: "Payslip not found." };
+  const result = await setPayslipHold(payslipId, held === true, String(reason ?? ""));
+  if (!result.ok) return { ok: false, error: result.error };
+  await recordAudit({ actorId: user.id, actorEmail: user.email, action: "update", entity: "payslip", entityId: payslipId, entityLabel: `${slip.employeeName} · ${slip.month}`, summary: held ? `Salary put on hold${reason ? `: ${reason}` : ""}` : "Salary hold released" });
+  revalidatePayouts(slip.month);
   return { ok: true };
 }
 
@@ -100,33 +124,39 @@ function revalidatePayouts(month?: string) {
   revalidatePath("/talentos/leave");
 }
 
-export async function initiatePayoutAction(payoutId: string): Promise<PayrollActionResult> {
+export async function initiatePayoutAction(payoutId: string, code?: string): Promise<PayrollActionResult> {
   const user = await requirePayroll();
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
   const result = await initiatePayout(payoutId, user);
   if (!result.ok) return { ok: false, error: result.error };
   revalidatePayouts();
   return { ok: true };
 }
 
-export async function bulkInitiatePayoutsAction(ids: string[]): Promise<PayrollActionResult & { initiated?: number }> {
+export async function bulkInitiatePayoutsAction(ids: string[], code?: string): Promise<PayrollActionResult & { initiated?: number }> {
   const user = await requirePayroll();
+  if (!Array.isArray(ids) || ids.length === 0 || ids.length > 1000) return { ok: false, error: "Choose the salaries to pay." };
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
   const result = await bulkInitiate(ids, user);
   revalidatePayouts();
   return { ok: true, initiated: result.initiated, error: result.errors[0] };
 }
 
-export async function recordPayoutResultAction(payoutId: string, input: Record<string, unknown>): Promise<PayrollActionResult> {
-  const user = await requirePayroll();
-  const v = validateManualPayoutResult(input);
-  if (!v.valid) return { ok: false, fieldErrors: v.errors };
-  const result = await recordManualResult(payoutId, v.data, user);
+/** Asks RazorpayX where a payout stands, for when its webhook did not arrive. */
+export async function refreshPayoutAction(payoutId: string): Promise<PayrollActionResult> {
+  await requirePayroll();
+  const result = await refreshSalaryPayout(payoutId);
   if (!result.ok) return { ok: false, error: result.error };
   revalidatePayouts();
   return { ok: true };
 }
 
-export async function retryPayoutAction(payoutId: string): Promise<PayrollActionResult> {
+export async function retryPayoutAction(payoutId: string, code?: string): Promise<PayrollActionResult> {
   const user = await requirePayroll();
+  const blocked = await paymentGate(user.id, code);
+  if (blocked) return { ok: false, error: blocked };
   const result = await retryPayout(payoutId, user);
   if (!result.ok) return { ok: false, error: result.error };
   revalidatePayouts();

@@ -6,6 +6,9 @@ import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYe
 import { round2, canTransitionRefund, DEFAULT_REFUND_STATUS, type RefundStatus } from "@/lib/products/cashflow-ai/constants";
 import { getReceipt } from "@/lib/products/cashflow-ai/receipts";
 import { postSystemTransaction } from "@/lib/products/cashflow-ai/transactions";
+import { razorpayCollectionsAccountId } from "@/lib/products/cashflow-ai/payments/payouts";
+import { getPaymentProvider } from "@/lib/products/cashflow-ai/payments/provider";
+import "@/lib/products/cashflow-ai/payments/providers";
 
 /**
  * Refunds (§26) — every refund references its original receipt. Workflow
@@ -30,6 +33,8 @@ export interface Refund extends AuditFields {
   approvedBy: string | null;
   approvedAt: Date | null;
   transactionId: string | null;
+  /** Razorpay's id for the refund, once the money has been sent back to the customer. */
+  providerRefundId?: string | null;
 }
 
 export interface SerializedRefund extends Omit<Refund, "createdAt" | "updatedAt" | "deletedAt" | "approvedAt"> {
@@ -171,15 +176,34 @@ export async function changeRefundStatus(
     patch.approvedAt = new Date();
   }
 
+  // Moving a refund to "processing" is what sends the money back: Razorpay refunds the customer's original payment. A refund is only
+  // "completed" after Razorpay has accepted it, never by someone typing that it was done.
+  if (toStatus === "processing") {
+    // The Razorpay payment this receipt was made from: the payment intent that created it.
+    const intent = await (await getDb()).collection<{ gatewayPaymentId?: string | null; paymentProvider?: string; receiptId?: string | null }>("fms_payment_intents").findOne({ receiptId: existing.receiptId, paymentProvider: "razorpay", status: "SUCCESS" });
+    const paymentId = intent?.gatewayPaymentId ?? "";
+    if (!/^pay_[A-Za-z0-9]+$/.test(paymentId)) {
+      return { ok: false, reason: "This receipt was not paid through Razorpay, so Razorpay cannot refund it. Pay the customer back with a payment from Razorpay (Pay someone), then it can be completed." };
+    }
+    const res = await getPaymentProvider("razorpay").refundPayment({ paymentId, providerPaymentId: paymentId, refundAmount: existing.amount, reason: existing.reason });
+    if (!res.ok) return { ok: false, reason: res.error ?? "Razorpay did not accept the refund." };
+    patch.providerRefundId = res.providerRefundId ?? null;
+  }
+  if (toStatus === "completed" && !existing.providerRefundId) {
+    return { ok: false, reason: "Move the refund to Processing first: that sends the money back through Razorpay." };
+  }
+
   if (toStatus === "completed") {
     const txn = await postSystemTransaction(
       {
-        type: "adjustment",
+        // Razorpay has sent the money back out of what it holds for the company: an expense against the Razorpay collections account, so that
+        // account's balance goes down by what was refunded.
+        type: "expense",
         transactionDate: new Date(),
         postingDate: new Date(),
         amount: existing.amount,
         currency: "INR",
-        paymentMethod: "bank_transfer",
+        paymentMethod: "payment_gateway",
         sourceModule: "fms",
         sourceRecordId: existing._id,
         customerId: existing.customerId,
@@ -188,8 +212,10 @@ export async function changeRefundStatus(
         projectId: null,
         department: null,
         accountId: null,
+        fundAccountId: await razorpayCollectionsAccountId(actorId),
+        fundAccountType: "bank",
         taxAmount: 0,
-        referenceNumber: null,
+        referenceNumber: existing.providerRefundId ?? null,
         description: `Refund ${existing.refundNumber} for ${existing.customerName} (receipt ${existing.receiptNumber})`,
         attachments: [],
       },
@@ -202,5 +228,7 @@ export async function changeRefundStatus(
 
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { ...patch, ...updateStamp(actorId) } });
   await fmsEvents.refundStatus({ id: existing._id, refundNumber: existing.refundNumber, amount: existing.amount, currency: "INR" }, toStatus, actorId);
+  // Razorpay accepted the refund: it is done, so the books are posted straight away.
+  if (toStatus === "processing") return changeRefundStatus(id, "completed", actorId, actorEmail);
   return { ok: true };
 }

@@ -5,7 +5,13 @@ import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 import { getPaymentProvider, PaymentProviderId } from "./provider";
 import "./providers";
 import { getPaymentIntent, getPaymentIntentByGatewayOrder, markPaymentIntentSuccessful, markPaymentIntentFailed } from "./intents";
+import type { PaymentMethod } from "./intents";
 import { resolveRazorpayCredentials } from "@/lib/platform/integrations/payments";
+
+interface RazorpayEventPayload {
+  payment?: { entity?: { id?: string; order_id?: string; method?: string; error_description?: string; acquirer_data?: { rrn?: string; upi_transaction_id?: string } } };
+  order?: { entity?: { id?: string } };
+}
 
 export const WEBHOOK_EVENTS_COLLECTION = "fms_webhook_events";
 
@@ -34,8 +40,6 @@ async function getCollection() {
   return collection;
 }
 
-import { simulatedPaymentsAllowed } from "@/lib/products/cashflow-ai/payments/guard";
-
 export async function processPaymentWebhook(
   providerId: PaymentProviderId,
   rawBody: string,
@@ -52,10 +56,7 @@ export async function processPaymentWebhook(
     if (!getPaymentProvider("razorpay").verifyWebhookSignature(rawBody, signature, secret)) {
       return { ok: false, status: 400, message: "Invalid webhook signature" };
     }
-  } else if (providerId === "mock" && simulatedPaymentsAllowed()) {
-    // Development / explicit staging opt-in only: the simulated gateway's "signature" is not a signature.
   } else {
-    // No other gateway has a real integration (or a secret) yet — and a forged "mock" event must never settle a payment.
     return { ok: false, status: 404, message: "Unsupported payment provider" };
   }
 
@@ -87,7 +88,7 @@ export async function processPaymentWebhook(
 
   try {
     if (providerId === "razorpay") {
-      const payloadObj = body.payload as Record<string, any>;
+      const payloadObj = body.payload as RazorpayEventPayload | undefined;
       if (eventType === "payment.captured" || eventType === "order.paid") {
         const paymentEntity = payloadObj?.payment?.entity;
         const orderId = paymentEntity?.order_id || payloadObj?.order?.entity?.id;
@@ -100,7 +101,7 @@ export async function processPaymentWebhook(
             await markPaymentIntentSuccessful(intent._id, {
               gatewayPaymentId: paymentId,
               utr,
-              paymentMethod: paymentEntity?.method?.toUpperCase() as any,
+              paymentMethod: paymentEntity?.method?.toUpperCase() as PaymentMethod | undefined,
             });
           }
         }
@@ -112,28 +113,6 @@ export async function processPaymentWebhook(
           if (intent) {
             await markPaymentIntentFailed(intent._id, paymentEntity?.error_description || "Razorpay Payment Failed");
           }
-        }
-      }
-    } else if (providerId === "mock") {
-      // The mock webhook is unsigned, so it may only ever complete MOCK intents —
-      // never one collected through a real gateway.
-      const intentId = typeof body.intentId === "string" ? body.intentId : null;
-      const orderId = typeof body.orderId === "string" ? body.orderId : null;
-      if (intentId) {
-        const intent = await getPaymentIntent(intentId);
-        if (intent?.paymentProvider === "mock") {
-          await markPaymentIntentSuccessful(intentId, {
-            gatewayPaymentId: `mock_pay_${Date.now()}`,
-            utr: `UTR_MOCK_${Date.now()}`,
-          });
-        }
-      } else if (orderId) {
-        const intent = await getPaymentIntentByGatewayOrder(orderId);
-        if (intent?.paymentProvider === "mock") {
-          await markPaymentIntentSuccessful(intent._id, {
-            gatewayPaymentId: `mock_pay_${Date.now()}`,
-            utr: `UTR_MOCK_${Date.now()}`,
-          });
         }
       }
     }

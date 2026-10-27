@@ -8,7 +8,6 @@ import { isValidAccountType, type AccountType } from "@/lib/products/talentos/pa
 
 const IFSC_RE = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const ACCOUNT_NUMBER_RE = /^\d{6,18}$/;
-const UTR_RE = /^[A-Za-z0-9]{6,22}$/;
 
 type Ok<T> = { valid: true; data: T };
 type Err = { valid: false; errors: Record<string, string> };
@@ -25,7 +24,7 @@ function optStr(v: unknown, max = 300): string | null {
   const s = str(v);
   return s ? s.slice(0, max) : null;
 }
-function components(v: unknown, errors: Record<string, string>, key: string): PayComponent[] {
+function components(v: unknown, errors: Record<string, string>, key: string, withFlags = false): PayComponent[] {
   if (!Array.isArray(v)) return [];
   const out: PayComponent[] = [];
   for (const raw of v) {
@@ -37,7 +36,8 @@ function components(v: unknown, errors: Record<string, string>, key: string): Pa
       errors[key] = "Amounts must be zero or positive.";
       continue;
     }
-    out.push({ name, amount: Math.round(amount) });
+    const flag = (x: unknown, fallback: boolean) => (x === undefined || x === null || x === "" ? fallback : x === true || x === "true" || x === "on");
+    out.push(withFlags ? { name, amount: Math.round(amount), taxable: flag(rec.taxable, true), pf: flag(rec.pf, false), esi: flag(rec.esi, true), prorate: flag(rec.prorate, true) } : { name, amount: Math.round(amount) });
   }
   return out;
 }
@@ -46,32 +46,56 @@ function components(v: unknown, errors: Record<string, string>, key: string): Pa
 
 export function validatePayrollConfig(input: Record<string, unknown>): Ok<PayrollConfigInput> | Err {
   const errors: Record<string, string> = {};
-  const pct = (v: unknown, k: string, max = 100) => {
+  const pick = <T extends string>(v: unknown, allowed: readonly T[], k: string, fallback: T): T => {
+    const s = str(v) as T;
+    if (!allowed.includes(s)) {
+      errors[k] = "Choose one of the listed options.";
+      return fallback;
+    }
+    return s;
+  };
+  const range = (v: unknown, k: string, min: number, max: number, int = false) => {
     const n = num(v);
-    if (!(n >= 0 && n <= max)) errors[k] = `Enter a percentage between 0 and ${max}.`;
+    if (!(n >= min && n <= max) || (int && !Number.isInteger(n))) errors[k] = `Enter ${int ? "a whole number" : "a number"} from ${min} to ${max}.`;
     return n;
   };
-  const money = (v: unknown, k: string) => {
-    const n = num(v);
-    if (!(n >= 0 && n <= 10_000_000)) errors[k] = "Enter a valid amount.";
-    return Math.round(n);
-  };
+  const bool = (v: unknown) => v === true || v === "true" || v === "on";
 
   const data: PayrollConfigInput = {
-    pfEmployeePercent: pct(input.pfEmployeePercent, "pfEmployeePercent", 50),
-    pfWageCeiling: money(input.pfWageCeiling, "pfWageCeiling"),
-    epsPercent: pct(input.epsPercent, "epsPercent", 50),
-    pfEmployerPercent: pct(input.pfEmployerPercent, "pfEmployerPercent", 50),
-    esiEmployeePercent: pct(input.esiEmployeePercent, "esiEmployeePercent", 20),
-    esiEmployerPercent: pct(input.esiEmployerPercent, "esiEmployerPercent", 20),
-    esiGrossThreshold: money(input.esiGrossThreshold, "esiGrossThreshold"),
-    professionalTaxMonthly: money(input.professionalTaxMonthly, "professionalTaxMonthly"),
-    tdsRegime: str(input.tdsRegime) === "manual" ? "manual" : "new",
-    financialYearStartMonth: (() => {
-      const n = Math.round(num(input.financialYearStartMonth));
-      if (!(n >= 1 && n <= 12)) errors.financialYearStartMonth = "Month 1–12.";
-      return n;
-    })(),
+    pfRegistered: bool(input.pfRegistered),
+    esiRegistered: bool(input.esiRegistered),
+    ptRegistered: bool(input.ptRegistered),
+    lwfRegistered: bool(input.lwfRegistered),
+    paidDaysBasis: pick(input.paidDaysBasis, ["calendar", "working", "fixed"], "paidDaysBasis", "calendar"),
+    fixedDays: range(input.fixedDays, "fixedDays", 20, 31, true),
+    sandwichRule: pick(input.sandwichRule, ["none", "unpaid_leave", "all_lop"], "sandwichRule", "none"),
+    unmarkedDay: pick(input.unmarkedDay, ["lop", "present"], "unmarkedDay", "lop"),
+    lateMarksPerHalfDay: range(input.lateMarksPerHalfDay, "lateMarksPerHalfDay", 0, 31, true),
+    overtimeEnabled: bool(input.overtimeEnabled),
+    overtimeRequiresApproval: input.overtimeRequiresApproval === undefined ? true : bool(input.overtimeRequiresApproval),
+    overtimeMaxMinutesPerDay: range(input.overtimeMaxMinutesPerDay, "overtimeMaxMinutesPerDay", 30, 720, true),
+    overtimeMaxMinutesPerMonth: range(input.overtimeMaxMinutesPerMonth, "overtimeMaxMinutesPerMonth", 60, 20000, true),
+    overtimeMultiplier: range(input.overtimeMultiplier, "overtimeMultiplier", 1, 4),
+    holidayWorkMultiplier: range(input.holidayWorkMultiplier, "holidayWorkMultiplier", 1, 4),
+    hoursPerDay: range(input.hoursPerDay, "hoursPerDay", 1, 24),
+    shortLeavesPerMonth: range(input.shortLeavesPerMonth, "shortLeavesPerMonth", 0, 10, true),
+    shortLeaveMaxMinutes: range(input.shortLeaveMaxMinutes, "shortLeaveMaxMinutes", 30, 480, true),
+    expenseMaxAgeDays: range(input.expenseMaxAgeDays, "expenseMaxAgeDays", 7, 365, true),
+    wageDefinition: pick(input.wageDefinition, ["flags", "fifty_percent_rule"], "wageDefinition", "flags"),
+    pfDefaultMode: pick(input.pfDefaultMode, ["ceiling", "actual"], "pfDefaultMode", "ceiling"),
+    statutoryBonusEnabled: bool(input.statutoryBonusEnabled),
+    statutoryBonusPercent: range(input.statutoryBonusPercent, "statutoryBonusPercent", 8.33, 20),
+    minimumWage: range(input.minimumWage, "minimumWage", 0, 1_000_000),
+    gratuityCovered: bool(input.gratuityCovered),
+    includeGratuityProvision: bool(input.includeGratuityProvision),
+    leaveEncashmentDaysInMonth: pick(String(input.leaveEncashmentDaysInMonth), ["26", "30"], "leaveEncashmentDaysInMonth", "30") === "26" ? 26 : 30,
+    tdsEnabled: bool(input.tdsEnabled),
+    defaultTaxRegime: pick(input.defaultTaxRegime, ["new", "old"], "defaultTaxRegime", "new"),
+    noPanRule: pick(input.noPanRule, ["warn", "apply_20_percent"], "noPanRule", "warn"),
+    proofCutoffMonth: range(input.proofCutoffMonth, "proofCutoffMonth", 1, 3, true),
+    deductionCapPercent: range(input.deductionCapPercent, "deductionCapPercent", 10, 100),
+    requireSeparateApprover: bool(input.requireSeparateApprover),
+    financialYearStartMonth: 4,
   };
 
   if (Object.keys(errors).length > 0) return { valid: false, errors };
@@ -88,13 +112,17 @@ export function validateSalaryRevision(
   if (!(basic >= 0)) errors.basic = "Enter a valid basic amount.";
   const hra = num(input.hra);
   if (!(hra >= 0)) errors.hra = "Enter a valid HRA amount.";
-  const allowances = components(input.allowances, errors, "allowances");
+  const da = input.da === undefined || str(input.da) === "" ? 0 : num(input.da);
+  if (!(da >= 0)) errors.da = "Enter a valid dearness allowance.";
+  const employerNps = input.employerNps === undefined || str(input.employerNps) === "" ? 0 : num(input.employerNps);
+  if (!(employerNps >= 0)) errors.employerNps = "Enter a valid employer NPS amount.";
+  const allowances = components(input.allowances, errors, "allowances", true);
   const deductions = components(input.deductions, errors, "deductions");
 
   if (Object.keys(errors).length > 0) return { valid: false, errors };
   return {
     valid: true,
-    data: { effectiveFrom, reason: optStr(input.reason, 300), basic: Math.round(basic), hra: Math.round(hra), allowances, deductions },
+    data: { effectiveFrom, reason: optStr(input.reason, 300), basic: Math.round(basic), da: Math.round(da), hra: Math.round(hra), allowances, deductions, employerNps: Math.round(employerNps) },
   };
 }
 
@@ -278,29 +306,3 @@ export function validateBankAccount(input: Record<string, unknown>): Ok<{
   };
 }
 
-export function validateManualPayoutResult(
-  input: Record<string, unknown>
-): Ok<{ status: "paid" | "failed"; utr: string | null; failureReason: string | null; remarks: string | null }> | Err {
-  const errors: Record<string, string> = {};
-  const status = str(input.status);
-  if (status !== "paid" && status !== "failed") errors.status = "Choose Paid or Failed.";
-
-  const utr = str(input.utr);
-  if (status === "paid") {
-    if (!utr) errors.utr = "Enter the payment reference / UTR.";
-    else if (!UTR_RE.test(utr)) errors.utr = "UTR must be 6–22 letters or digits.";
-  }
-  const failureReason = str(input.failureReason);
-  if (status === "failed" && !failureReason) errors.failureReason = "Give a failure reason.";
-
-  if (Object.keys(errors).length > 0) return { valid: false, errors };
-  return {
-    valid: true,
-    data: {
-      status: status as "paid" | "failed",
-      utr: status === "paid" ? utr : null,
-      failureReason: status === "failed" ? failureReason.slice(0, 500) : null,
-      remarks: optStr(input.remarks, 500),
-    },
-  };
-}

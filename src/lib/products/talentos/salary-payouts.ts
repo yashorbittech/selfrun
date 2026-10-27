@@ -11,6 +11,7 @@ import {
   cacheProviderIds,
 } from "@/lib/products/talentos/bank-accounts";
 import { getPayoutProvider } from "@/lib/products/talentos/payout-provider";
+const RAZORPAY_NOT_CONNECTED = "Connect your Razorpay account (Settings → Payments), turn on RazorpayX payouts and add the RazorpayX account number to pay salaries.";
 import { canPayoutTransition, type PayoutStatus } from "@/lib/products/talentos/payout-status";
 import { EMPLOYEES_COLLECTION, type Employee } from "@/lib/products/talentos/employees";
 import type { PayrollRun, Payslip } from "@/lib/products/talentos/payroll-run";
@@ -46,6 +47,8 @@ export interface SalaryPayout extends AuditFields {
   remarks: string | null;
   reconciledAt: Date | null;
   reconciledBy: string | null;
+  /** The ledger entry (CashFlow) that records this payout once RazorpayX has paid it. */
+  transactionId?: string | null;
 }
 
 export interface SerializedPayout
@@ -97,7 +100,6 @@ export function serializePayout(p: SalaryPayout): SerializedPayout {
 
 export async function createPayoutsForRun(run: PayrollRun, payslips: Payslip[], actorId: string): Promise<void> {
   const collection = await getCollection();
-  const provider = await getPayoutProvider();
   for (const slip of payslips) {
     const exists = await collection.findOne({ payslipId: slip._id });
     if (exists) continue;
@@ -119,7 +121,7 @@ export async function createPayoutsForRun(run: PayrollRun, payslips: Payslip[], 
       bankName: account?.bankName ?? null,
       ifsc: account?.ifsc ?? null,
       status: "pending",
-      paymentProvider: provider.key,
+      paymentProvider: "razorpay",
       providerPayoutId: null,
       utr: null,
       initiatedBy: null,
@@ -249,15 +251,22 @@ export async function initiatePayout(
   if (!payout.bankAccountId) return { ok: false, error: "No bank account on file for this employee." };
 
   const provider = await getPayoutProvider();
+  if (provider.key !== "razorpay") return { ok: false, error: RAZORPAY_NOT_CONNECTED };
   const now = new Date();
 
-  if (provider.key === "manual") {
-    await collection.updateOne(
-      { _id: id },
-      { $set: { status: "initiated", paymentProvider: "manual", initiatedBy: actor.id, initiatedAt: now, failureReason: null, ...updateStamp(actor.id) } }
-    );
-    await recordAudit({ actorId: actor.id, actorEmail: actor.email, action: "initiate", entity: "salary_payout", entityId: id, entityLabel: `${payout.employeeName} · ${payout.month}` });
-    return { ok: true };
+  // The company's rules: a changed bank account waits, and only so much in salaries goes out in a day.
+  const { getPaymentControls, startOfIstDay } = await import("@/lib/products/cashflow-ai/payment-controls");
+  const controls = await getPaymentControls();
+  const bankDoc = await getBankAccount(payout.bankAccountId);
+  const changedAt = (bankDoc as { detailsChangedAt?: Date | null } | null)?.detailsChangedAt;
+  if (changedAt && controls.payeeHoldHours > 0 && now.getTime() - changedAt.getTime() < controls.payeeHoldHours * 3_600_000) {
+    const until = new Date(changedAt.getTime() + controls.payeeHoldHours * 3_600_000);
+    return { ok: false, error: `${payout.employeeName}'s bank details were changed recently. For safety they cannot be paid until ${until.toLocaleString("en-IN")}. Check with the employee that the change was theirs.` };
+  }
+  const todaysSalaries = await collection.find({ status: { $in: ["processing", "paid"] }, initiatedAt: { $gte: startOfIstDay() }, ...notDeleted }).toArray();
+  const sentToday = todaysSalaries.reduce((n, p) => n + p.paymentAmount, 0);
+  if (sentToday + payout.paymentAmount > controls.salaryDailyMax) {
+    return { ok: false, error: `That would take today's salary payments above the daily limit of ₹${controls.salaryDailyMax.toLocaleString("en-IN")} (₹${sentToday.toLocaleString("en-IN")} already sent today). Pay the rest tomorrow, or ask the company owner to raise the limit under Payments → Limits.` };
   }
 
   // Provider path (RazorpayX).
@@ -311,7 +320,7 @@ export async function initiatePayout(
       }
     );
     await recordAudit({ actorId: actor.id, actorEmail: actor.email, action: "initiate", entity: "salary_payout", entityId: id, summary: `RazorpayX ${result.providerPayoutId}` });
-    if (result.status === "paid") await recomputeRunPaidState(payout.runId);
+    if (result.status === "paid") await onSalaryPaid(payout._id);
     return { ok: true };
   } catch (err) {
     // Never corrupt payout state — leave it as-is and surface the error.
@@ -328,54 +337,6 @@ export async function bulkInitiate(ids: string[], actor: { id: string; email: st
     else if (r.error) errors.push(r.error);
   }
   return { initiated, errors };
-}
-
-export interface ManualResult {
-  status: "paid" | "failed";
-  utr: string | null;
-  failureReason: string | null;
-  remarks: string | null;
-}
-
-export async function recordManualResult(
-  id: string,
-  result: ManualResult,
-  actor: { id: string; email: string }
-): Promise<{ ok: boolean; error?: string }> {
-  const collection = await getCollection();
-  const payout = await collection.findOne({ _id: id, ...notDeleted });
-  if (!payout) return { ok: false, error: "Payout not found." };
-  if (!canPayoutTransition(payout.status, result.status)) {
-    return { ok: false, error: `Can't move a payout from ${payout.status} to ${result.status}.` };
-  }
-  const now = new Date();
-  await collection.updateOne(
-    { _id: id },
-    {
-      $set: {
-        status: result.status,
-        utr: result.status === "paid" ? result.utr : payout.utr,
-        paidAt: result.status === "paid" ? now : null,
-        processedAt: now,
-        failureReason: result.status === "failed" ? result.failureReason : null,
-        remarks: result.remarks ?? payout.remarks,
-        ...updateStamp(actor.id),
-      },
-    }
-  );
-  await recordAudit({
-    actorId: actor.id,
-    actorEmail: actor.email,
-    action: result.status === "paid" ? "pay" : "reject",
-    entity: "salary_payout",
-    entityId: id,
-    entityLabel: `${payout.employeeName} · ${payout.month}`,
-    summary: result.status === "paid" ? `UTR ${result.utr}` : `Failed: ${result.failureReason}`,
-  });
-  await recomputeRunPaidState(payout.runId);
-  if (result.status === "paid") await hrmsEvents.salaryPaid({ id, employeeId: payout.employeeId, month: payout.month, amount: payout.paymentAmount, utr: result.utr });
-  else if (result.status === "failed") await hrmsEvents.payoutFailed({ id, employeeName: payout.employeeName, month: payout.month, reason: result.failureReason });
-  return { ok: true };
 }
 
 export async function retryPayout(id: string, actor: { id: string; email: string }): Promise<{ ok: boolean; error?: string }> {
@@ -414,22 +375,98 @@ export async function reconcilePayouts(ids: string[], actor: { id: string; email
 // Webhook
 // ---------------------------------------------------------------------------
 
-export async function applyWebhookResult(result: { providerPayoutId: string; status: "paid" | "failed" | "reversed"; utr?: string; failureReason?: string }): Promise<void> {
+export async function applyWebhookResult(result: { providerPayoutId: string; status: "paid" | "failed" | "reversed"; utr?: string; failureReason?: string; amountPaise?: number }): Promise<boolean> {
   const collection = await getCollection();
   const payout = await collection.findOne({ providerPayoutId: result.providerPayoutId });
-  if (!payout) return;
+  if (!payout) return false;
+  await applyOutcome(payout._id, result);
+  return true;
+}
 
+/** What RazorpayX says happened to a salary payout: paid (ledger entry, run state, the employee is told), or failed / reversed (the ledger entry is taken back). */
+async function applyOutcome(id: string, result: { status: "paid" | "failed" | "reversed"; utr?: string; failureReason?: string; amountPaise?: number }): Promise<void> {
+  const collection = await getCollection();
+  const payout = await collection.findOne({ _id: id });
+  if (!payout) return;
   const now = new Date();
   if (result.status === "paid" && payout.status !== "paid") {
-    await collection.updateOne({ _id: payout._id }, { $set: { status: "paid", utr: result.utr ?? payout.utr, paidAt: now, processedAt: now, updatedAt: now } });
-    await recomputeRunPaidState(payout.runId);
-    await hrmsEvents.salaryPaid({ id: payout._id, employeeId: payout.employeeId, month: payout.month, amount: payout.paymentAmount, utr: result.utr ?? payout.utr });
-  } else if ((result.status === "failed" || result.status === "reversed") && payout.status !== "failed") {
-    await collection.updateOne(
-      { _id: payout._id },
-      { $set: { status: "failed", failureReason: result.failureReason ?? `Payout ${result.status}`, updatedAt: now } }
-    );
+    // RazorpayX must say it paid exactly what we asked for; anything else is held for a person to look at, not booked as paid.
+    if (result.amountPaise !== undefined && result.amountPaise !== Math.round(payout.paymentAmount * 100)) {
+      const why = `RazorpayX reported ₹${(result.amountPaise / 100).toLocaleString("en-IN")} for a salary of ₹${payout.paymentAmount.toLocaleString("en-IN")}.`;
+      await collection.updateOne({ _id: id }, { $set: { failureReason: why, updatedAt: now } });
+      await recordAudit({ actorId: "razorpayx", actorEmail: null, action: "reject", entity: "salary_payout", entityId: id, entityLabel: `${payout.employeeName} · ${payout.month}`, summary: `Amount mismatch: ${why}` });
+      const { alertOwners } = await import("@/lib/products/cashflow-ai/payment-alerts");
+      await alertOwners("A salary payment did not match", [`${why} Employee: ${payout.employeeName}. It has not been marked paid. Check it in the RazorpayX dashboard.`]);
+      return;
+    }
+    await collection.updateOne({ _id: id }, { $set: { status: "paid", utr: result.utr ?? payout.utr, paidAt: now, processedAt: now, failureReason: null, updatedAt: now } });
+    await onSalaryPaid(id);
+  } else if ((result.status === "failed" || result.status === "reversed") && payout.status !== "failed" && payout.status !== "cancelled") {
+    if (payout.transactionId) {
+      const { changeTransactionStatus } = await import("@/lib/products/cashflow-ai/transactions");
+      await changeTransactionStatus(payout.transactionId, "reversed", "razorpayx", null);
+    }
+    await collection.updateOne({ _id: id }, { $set: { status: "failed", failureReason: result.failureReason ?? `Payout ${result.status}`, transactionId: null, updatedAt: now } });
     await recomputeRunPaidState(payout.runId);
     await hrmsEvents.payoutFailed({ id: payout._id, employeeName: payout.employeeName, month: payout.month, reason: result.failureReason });
+  }
+}
+
+/** A salary has been paid by RazorpayX: post it to the books (one expense from the RazorpayX balance account), update the run, tell the employee. */
+async function onSalaryPaid(id: string): Promise<void> {
+  const collection = await getCollection();
+  const p = await collection.findOne({ _id: id });
+  if (!p) return;
+  if (!p.transactionId) {
+    const { razorpayxAccountId } = await import("@/lib/products/cashflow-ai/payments/payouts");
+    const { postSystemTransaction } = await import("@/lib/products/cashflow-ai/transactions");
+    const date = p.paidAt ?? new Date();
+    const txn = await postSystemTransaction(
+      {
+        type: "expense", transactionDate: date, postingDate: date, amount: p.paymentAmount, currency: "INR", paymentMethod: "imps", sourceModule: "hrms", sourceRecordId: p._id,
+        customerId: null, vendorId: null, employeeId: p.employeeId, projectId: null, department: null, accountId: null, fundAccountId: await razorpayxAccountId("razorpayx"), fundAccountType: "bank",
+        taxAmount: 0, referenceNumber: p.utr, description: `Salary ${p.month}: ${p.employeeName}`, attachments: [],
+      },
+      "razorpayx",
+      null,
+    );
+    if (!("ok" in txn)) await collection.updateOne({ _id: id }, { $set: { transactionId: txn._id } });
+  }
+  await recomputeRunPaidState(p.runId);
+  await hrmsEvents.salaryPaid({ id: p._id, employeeId: p.employeeId, month: p.month, amount: p.paymentAmount, utr: p.utr });
+}
+
+/** Salary payouts RazorpayX has had for over a minute without reporting back (no webhook yet): asked about directly. Best effort and bounded. */
+export async function refreshStaleSalaryPayouts(limit = 25): Promise<number> {
+  try {
+    const collection = await getCollection();
+    const cutoff = new Date(Date.now() - 60_000);
+    const stale = await collection.find({ status: { $in: ["initiated", "processing"] }, providerPayoutId: { $ne: null }, updatedAt: { $lt: cutoff }, ...notDeleted }).sort({ updatedAt: 1 }).limit(limit).toArray();
+    let changed = 0;
+    for (const p of stale) {
+      const r = await refreshSalaryPayout(p._id);
+      if (r.ok && (await collection.findOne({ _id: p._id }))?.status !== p.status) changed++;
+      else await collection.updateOne({ _id: p._id }, { $set: { updatedAt: new Date() } });
+    }
+    return changed;
+  } catch {
+    return 0;
+  }
+}
+
+/** Asks RazorpayX where a salary payout stands (for a missed webhook). */
+export async function refreshSalaryPayout(id: string): Promise<{ ok: boolean; error?: string }> {
+  const collection = await getCollection();
+  const p = await collection.findOne({ _id: id, ...notDeleted });
+  if (!p) return { ok: false, error: "Payout not found." };
+  if (!p.providerPayoutId) return { ok: false, error: "This payout has not reached RazorpayX yet." };
+  const provider = await getPayoutProvider();
+  if (provider.key !== "razorpay") return { ok: false, error: RAZORPAY_NOT_CONNECTED };
+  try {
+    const f = await provider.fetchPayout(p.providerPayoutId);
+    if (f.status === "paid" || f.status === "failed" || f.status === "reversed") await applyOutcome(id, { status: f.status, utr: f.utr, failureReason: f.failureReason, amountPaise: f.amountPaise });
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Could not reach RazorpayX." };
   }
 }

@@ -67,7 +67,7 @@ export function isEmployeeOnly(roles: readonly HrmsRole[]): boolean {
   return roles.length > 0 && !hasStaffRole(roles);
 }
 
-/** Run payroll, approve runs, mark paid, download the bank file. */
+/** Run payroll, approve runs, pay salaries through Razorpay. */
 export function canRunPayroll(user: RoleContext): boolean {
   return resolvePermission(user, "hrms.canRunPayroll", () => user.roles.includes("hr"));
 }

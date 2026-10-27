@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { WEEKDAY_LABELS } from "@/lib/products/talentos/time";
+import { INDIAN_STATES } from "@/lib/products/talentos/payroll/rates";
 import { saveOrgSettingsAction } from "@/app/(products)/talentos/(protected)/(staff)/settings/actions";
 
 interface Settings {
@@ -22,7 +23,11 @@ interface Settings {
   halfDayHours: number;
   fullDayHours: number;
   timezone: string;
+  saturdayOffs: number[];
+  state: string | null;
 }
+
+const ORDINAL = ["", "1st", "2nd", "3rd", "4th", "5th"];
 
 export default function OrgSettingsForm({ settings }: { settings: Settings }) {
   const router = useRouter();
@@ -36,6 +41,8 @@ export default function OrgSettingsForm({ settings }: { settings: Settings }) {
     fullDayHours: String(settings.fullDayHours),
   });
   const [workingDays, setWorkingDays] = useState<number[]>(settings.workingDays);
+  const [saturdayOffs, setSaturdayOffs] = useState<number[]>(settings.saturdayOffs ?? []);
+  const [state, setState] = useState<string>(settings.state ?? "");
 
   function toggleDay(d: number) {
     setWorkingDays((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d].sort()));
@@ -54,6 +61,8 @@ export default function OrgSettingsForm({ settings }: { settings: Settings }) {
         halfDayHours: form.halfDayHours,
         fullDayHours: form.fullDayHours,
         timezone: form.timezone,
+        saturdayOffs: workingDays.includes(6) ? saturdayOffs : [],
+        state,
       });
       if (!result.ok) {
         if (result.fieldErrors) setErrors(result.fieldErrors);
@@ -92,6 +101,35 @@ export default function OrgSettingsForm({ settings }: { settings: Settings }) {
               ))}
             </div>
             {err("workingDays")}
+          </div>
+
+          {workingDays.includes(6) && (
+            <div className="space-y-1.5">
+              <Label>Saturdays that are off</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setSaturdayOffs((cur) => (cur.includes(n) ? cur.filter((x) => x !== n) : [...cur, n].sort()))}
+                    className={cn("rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors", saturdayOffs.includes(n) ? "border-primary/40 bg-primary/10 text-primary" : "border-border/60 text-muted-foreground hover:text-foreground")}
+                  >
+                    {ORDINAL[n]}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">For example the 2nd and 4th Saturday. They count as weekly offs in attendance, leave and payroll.</p>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label>State the office is in</Label>
+            <select value={state} onChange={(e) => setState(e.target.value)} className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm sm:max-w-sm">
+              <option value="">Not set</option>
+              {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+            {err("state")}
+            <p className="text-xs text-muted-foreground">State holidays and professional tax follow the state an employee works in; this is the default for everyone who has none set.</p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

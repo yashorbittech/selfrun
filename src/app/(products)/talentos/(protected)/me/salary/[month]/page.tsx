@@ -51,6 +51,10 @@ export default async function MyPayslipPage({ params }: { params: Promise<{ mont
           bankName: d.payment?.bankName ?? null,
           ifsc: d.payment?.ifsc ?? null,
           runStatus: d.runStatus,
+          monthDays: d.period.monthDays,
+          daysPaid: d.period.daysPaid,
+          notes: d.period.notes,
+          tax: d.tax,
           netInWords: d.netInWords,
           company: {
             name: d.company.name,

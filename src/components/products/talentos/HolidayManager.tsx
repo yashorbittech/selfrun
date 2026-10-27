@@ -24,6 +24,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { INDIAN_STATES } from "@/lib/products/talentos/payroll/rates";
 import { HOLIDAY_TYPES } from "@/lib/products/talentos/holiday-types";
 import { formatDate } from "@/lib/utils";
 import { saveHolidayAction, deleteHolidayAction } from "@/app/(products)/talentos/(protected)/holidays/actions";
@@ -33,6 +34,7 @@ interface HolidayRow {
   date: string;
   name: string;
   type: string;
+  states?: string[];
 }
 
 const typeLabel = (v: string) => HOLIDAY_TYPES.find((t) => t.value === v)?.label ?? v;
@@ -55,7 +57,7 @@ export default function HolidayManager({
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<HolidayRow | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [form, setForm] = useState({ date: "", name: "", type: "public" });
+  const [form, setForm] = useState<{ date: string; name: string; type: string; states: string[] }>({ date: "", name: "", type: "public", states: [] });
 
   const yearOptions = Array.from(new Set([activeYear, activeYear + 1, new Date().getUTCFullYear(), ...years])).sort((a, b) => b - a);
 
@@ -67,13 +69,13 @@ export default function HolidayManager({
 
   function openCreate() {
     setEditing(null);
-    setForm({ date: `${activeYear}-01-01`, name: "", type: "public" });
+    setForm({ date: `${activeYear}-01-01`, name: "", type: "public", states: [] });
     setErrors({});
     setOpen(true);
   }
   function openEdit(h: HolidayRow) {
     setEditing(h);
-    setForm({ date: h.date, name: h.name, type: h.type });
+    setForm({ date: h.date, name: h.name, type: h.type, states: h.states ?? [] });
     setErrors({});
     setOpen(true);
   }
@@ -137,13 +139,14 @@ export default function HolidayManager({
                 <TableHead>Date</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Applies to</TableHead>
                 {canManage && <TableHead className="w-20" />}
               </TableRow>
             </TableHeader>
             <TableBody>
               {holidays.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground">No holidays for {activeYear}.</TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">No holidays for {activeYear}.</TableCell>
                 </TableRow>
               )}
               {holidays.map((h) => (
@@ -152,6 +155,9 @@ export default function HolidayManager({
                   <TableCell>{h.name}</TableCell>
                   <TableCell>
                     <Badge className="bg-secondary/60 text-secondary-foreground">{typeLabel(h.type)}</Badge>
+                  </TableCell>
+                  <TableCell className="max-w-56 truncate text-xs text-muted-foreground" title={(h.states ?? []).join(", ")}>
+                    {h.states?.length ? h.states.join(", ") : "All states"}
                   </TableCell>
                   {canManage && (
                     <TableCell>
@@ -218,6 +224,24 @@ export default function HolidayManager({
                 </SelectContent>
               </Select>
               {err("type")}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Applies to</Label>
+              <p className="text-xs text-muted-foreground">Leave all unticked if every employee gets it. Tick states for a holiday only some states observe; it then counts for employees who work in those states.</p>
+              <div className="max-h-48 overflow-y-auto rounded-md border p-2">
+                {INDIAN_STATES.map((st) => (
+                  <label key={st} className="flex items-center gap-2 py-0.5 text-sm">
+                    <input
+                      type="checkbox"
+                      className="size-3.5 accent-primary"
+                      checked={form.states.includes(st)}
+                      onChange={(e) => setForm((f) => ({ ...f, states: e.target.checked ? [...f.states, st] : f.states.filter((x) => x !== st) }))}
+                    />
+                    {st}
+                  </label>
+                ))}
+              </div>
+              {err("states")}
             </div>
             <Button type="button" onClick={submit} disabled={pending} className="w-full">
               {pending ? <Loader2 className="size-4 animate-spin" /> : "Save"}

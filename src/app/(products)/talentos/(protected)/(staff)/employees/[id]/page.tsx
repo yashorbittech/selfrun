@@ -25,6 +25,7 @@ import { getEmployee, employeeFullName } from "@/lib/products/talentos/employees
 import { masterLookups } from "@/lib/products/talentos/departments";
 import { listEmployeeOptions } from "@/lib/products/talentos/employees";
 import { getPayrollProfile, serializePayrollProfile } from "@/lib/products/talentos/payroll";
+import { getPayrollConfig } from "@/lib/products/talentos/payroll-config";
 import { listBankAccounts, serializeBankAccount } from "@/lib/products/talentos/bank-accounts";
 import { isEncryptionConfigured } from "@/lib/products/talentos/crypto";
 import { listRevisions, serializeRevision } from "@/lib/products/talentos/salary-revisions";
@@ -153,7 +154,7 @@ export default async function EmployeeProfilePage({
 
   const salaryTab = canPayroll || payroll ? (
     <div className="space-y-4">
-      <PayrollForm employeeId={id} profile={payroll ? serializePayrollProfile(payroll) : null} canEdit={canPayroll} />
+      <PayrollForm employeeId={id} profile={payroll ? serializePayrollProfile(payroll) : null} canEdit={canPayroll} companyPfMode={(await getPayrollConfig()).pfDefaultMode} />
       {canPayroll && (
         <BankAccountsManager
           employeeId={id}
@@ -181,13 +182,15 @@ export default async function EmployeeProfilePage({
             _id: r._id,
             effectiveFrom: r.effectiveFrom,
             basic: r.basic,
+            da: r.da,
             hra: r.hra,
             allowances: r.allowances,
             deductions: r.deductions,
+            employerNps: r.employerNps,
             reason: r.reason,
             createdAt: r.createdAt,
           }))}
-          current={payroll ? { basic: payroll.basic, hra: payroll.hra, allowances: payroll.allowances, deductions: payroll.deductions } : null}
+          current={payroll ? { basic: payroll.basic, da: payroll.da, hra: payroll.hra, allowances: payroll.allowances, deductions: payroll.deductions, employerNps: payroll.employerNps } : null}
         />
       )}
       {canEdit && (

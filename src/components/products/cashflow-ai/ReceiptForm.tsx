@@ -48,6 +48,9 @@ export default function ReceiptForm({
     amount: "",
     method: "bank_transfer",
     transactionReference: "",
+    chequeNumber: "",
+    chequeDate: new Date().toISOString().slice(0, 10),
+    chequeBank: "",
     currency: "INR",
     fundAccountKey: "",
     notes: "",
@@ -106,7 +109,7 @@ export default function ReceiptForm({
         toast.error(res.error ?? "Please fix the highlighted fields.");
         return;
       }
-      toast.success("Receipt recorded");
+      toast.success(form.method === "cheque" ? "Cheque recorded: awaiting clearance" : "Receipt recorded");
       setOpen(false);
       if (res.id && onSaved) onSaved(res.id);
       router.refresh();
@@ -175,21 +178,34 @@ export default function ReceiptForm({
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Transaction Reference</Label>
-            <Input value={form.transactionReference} onChange={(e) => set("transactionReference", e.target.value)} />
-          </div>
+          {form.method === "cheque" ? (
+            <div className="space-y-3 rounded-lg border p-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5"><Label>Cheque number *</Label><Input inputMode="numeric" maxLength={6} value={form.chequeNumber} onChange={(e) => set("chequeNumber", e.target.value)} aria-invalid={!!errors.chequeNumber || undefined} /></div>
+                <div className="space-y-1.5"><Label>Date on the cheque *</Label><Input type="date" value={form.chequeDate} onChange={(e) => set("chequeDate", e.target.value)} /></div>
+              </div>
+              <div className="space-y-1.5"><Label>Drawn on (customer&apos;s bank) *</Label><Input value={form.chequeBank} maxLength={80} onChange={(e) => set("chequeBank", e.target.value)} /></div>
+              <p className="text-xs text-muted-foreground">A cheque is kept as <strong>awaiting clearance</strong>. The invoices stay unpaid and nothing is booked until the bank clears it: then mark it cleared on its receipt. If it bounces, mark it bounced.</p>
+            </div>
+          ) : form.method === "cash" ? (
+            <p className="rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">Cash of ₹2,00,000 or more from one customer in a day cannot be received (section 269ST of the Income-tax Act). Ask for a bank transfer or cheque for larger amounts.</p>
+          ) : (
+            <div className="space-y-1.5">
+              <Label>Bank reference (UTR / transaction id) *</Label>
+              <Input value={form.transactionReference} onChange={(e) => set("transactionReference", e.target.value)} placeholder="From the customer's payment confirmation or your bank statement" />
+            </div>
+          )}
 
           {(() => {
             const matchingFundAccounts = fundAccounts.filter((a) => a.currency === form.currency);
             return (
               matchingFundAccounts.length > 0 && (
                 <div className="space-y-1.5">
-                  <Label>Fund Account (bank/cash this settles through)</Label>
+                  <Label>{form.method === "cash" ? "Cash account the money was put in *" : form.method === "cheque" ? "Bank account the cheque is deposited in *" : "Bank account the money was received in *"}</Label>
                   <Select value={form.fundAccountKey || "none"} onValueChange={(v) => set("fundAccountKey", !v || v === "none" ? "" : v)}>
                     <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
+                      <SelectItem value="none">Choose…</SelectItem>
                       {matchingFundAccounts.map((a) => (
                         <SelectItem key={a.key} value={a.key}>{a.label}</SelectItem>
                       ))}

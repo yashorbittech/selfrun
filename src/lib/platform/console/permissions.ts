@@ -128,6 +128,7 @@ export const ROUTE_PERMISSIONS: Record<string, PlatformPermission | null> = {
   "/console/documents": "settings.read",
   "/console/prompts": "settings.read",
   "/console/legal": "settings.read",
+  "/console/payroll-rates": "settings.read",
   "/console/subscriptions": "subscriptions.read",
   "/console/invoices": "invoices.read",
   "/console/coupons": "coupons.read",

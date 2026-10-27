@@ -9,16 +9,18 @@ interface Line {
 
 export default function SalaryStructureView({
   basic,
+  da = 0,
   hra,
   allowances,
   deductions,
 }: {
   basic: number;
+  da?: number;
   hra: number;
   allowances: Line[];
   deductions: Line[];
 }) {
-  const earnings: Line[] = [{ name: "Basic", amount: basic }, { name: "HRA", amount: hra }, ...allowances];
+  const earnings: Line[] = [{ name: "Basic", amount: basic }, ...(da > 0 ? [{ name: "Dearness allowance", amount: da }] : []), { name: "HRA", amount: hra }, ...allowances];
   const gross = earnings.reduce((s, e) => s + e.amount, 0);
   const annual = gross * 12;
 
@@ -59,7 +61,7 @@ export default function SalaryStructureView({
             <span className="tabular-nums">{formatCurrency(annual)}</span>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Statutory deductions (PF, ESI, TDS, PT) and loss of pay are applied each month on the payslip.
+            Statutory deductions (PF, ESI, professional tax, income tax) and loss of pay are worked out each month on the payslip.
           </p>
         </div>
       </CardContent>

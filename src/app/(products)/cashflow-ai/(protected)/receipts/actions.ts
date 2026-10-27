@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManageTransactions } from "@/lib/fms-roles";
-import { recordReceipt, voidReceipt, type RecordReceiptData } from "@/lib/products/cashflow-ai/receipts";
+import { recordReceipt, voidReceipt, clearCheque, bounceCheque, type RecordReceiptData } from "@/lib/products/cashflow-ai/receipts";
 import { listOutstandingInvoicesForCustomer, serializeInvoice, type SerializedInvoice } from "@/lib/products/cashflow-ai/invoices";
 import { getClient } from "@/lib/products/sprintos/clients";
 import { isValidPaymentMethod, isValidFundAccountType } from "@/lib/products/cashflow-ai/constants";
@@ -82,6 +82,9 @@ export async function recordReceiptAction(input: Record<string, unknown>): Promi
     currency: String(input.currency ?? customer.billing?.currency ?? "INR"),
     fundAccountId,
     fundAccountType,
+    chequeNumber: (input.chequeNumber as string)?.trim() || null,
+    chequeDate: (input.chequeDate as string)?.trim() || null,
+    chequeBank: (input.chequeBank as string)?.trim() || null,
     notes: (input.notes as string)?.trim() || null,
   };
 
@@ -104,6 +107,24 @@ export async function voidReceiptAction(id: string): Promise<ReceiptActionResult
   const user = await requireFinance();
   const res = await voidReceipt(id, user.id);
   if (!res.ok) return { ok: false, error: res.reason };
+  revalidate();
+  return { ok: true };
+}
+
+export async function clearChequeAction(id: string, clearedOn: string): Promise<ReceiptActionResult> {
+  const user = await requireFinance();
+  const res = await clearCheque(id, clearedOn, user.id, user.email);
+  if (!res.ok) return { ok: false, error: res.reason };
+  await recordAudit({ actorId: user.id, actorEmail: user.email, action: "update", entity: "receipt", entityId: id, entityLabel: "Cheque cleared" });
+  revalidate();
+  return { ok: true };
+}
+
+export async function bounceChequeAction(id: string, reason: string): Promise<ReceiptActionResult> {
+  const user = await requireFinance();
+  const res = await bounceCheque(id, reason, user.id);
+  if (!res.ok) return { ok: false, error: res.reason };
+  await recordAudit({ actorId: user.id, actorEmail: user.email, action: "update", entity: "receipt", entityId: id, entityLabel: "Cheque bounced", summary: reason.slice(0, 200) });
   revalidate();
   return { ok: true };
 }

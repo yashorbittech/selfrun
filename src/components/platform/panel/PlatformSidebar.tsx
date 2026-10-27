@@ -105,6 +105,7 @@ const SECTIONS: { label: string; items: { href: string; label: string; icon: Ico
       { href: "/console/documents", label: "Documents & PDFs", icon: FileText },
       { href: "/console/prompts", label: "AI prompts", icon: MessageSquareText },
       { href: "/console/legal", label: "Legal & compliance", icon: Scale },
+      { href: "/console/payroll-rates", label: "Payroll rates", icon: Scale },
       { href: "/console/scheduled-jobs", label: "Cron jobs", icon: Clock },
       { href: "/console/incidents", label: "Incidents & status", icon: AlertTriangle },
       { href: "/commandos", label: "Workspace", icon: LayoutGrid, exact: true },

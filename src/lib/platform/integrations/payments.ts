@@ -386,6 +386,10 @@ export async function savePaymentAccount(raw: PaymentAccountInput, actor: Paymen
     mode: modeOf(input.keyId),
     payoutsEnabled: input.payoutsEnabled,
   });
+  {
+    const { alertOwners } = await import("@/lib/products/cashflow-ai/payment-alerts");
+    await alertOwners("The Razorpay connection was changed", [`${actor?.email ?? "A user"} ${stored ? `changed the Razorpay settings (${changed.join(", ") || "no keys"})` : `connected Razorpay (${input.keyId})`}.`, "Keys and the RazorpayX account decide where payments are sent from. If this was not you, disconnect Razorpay now and change your password."]);
+  }
   return { ok: true, account: await getPaymentAccountView(), message: stored ? "Razorpay settings saved." : "Razorpay connected. Run “Test connection” to check the keys." };
 }
 
@@ -433,5 +437,9 @@ export async function testPaymentAccount(): Promise<PaymentAccountResult> {
 export async function disconnectPaymentAccount(actor: PaymentAccountActor | null): Promise<PaymentAccountResult> {
   const removed = await (await collection()).findOneAndDelete({ _id: RAZORPAY });
   if (removed) await audit(actor, "delete", `Razorpay account disconnected (${removed.keyId})`, { keyId: removed.keyId });
+  if (removed) {
+    const { alertOwners } = await import("@/lib/products/cashflow-ai/payment-alerts");
+    await alertOwners("Razorpay was disconnected", [`${actor?.email ?? "A user"} disconnected Razorpay (${removed.keyId}). Payments and payouts stop until it is connected again.`]);
+  }
   return { ok: true, account: await getPaymentAccountView(), message: "Razorpay disconnected. Stored keys were deleted." };
 }

@@ -5,6 +5,7 @@ import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManageTransactions, canMoveRefund } from "@/lib/fms-roles";
 import { requestRefund, changeRefundStatus, getRefund, type RefundWriteData } from "@/lib/products/cashflow-ai/refunds";
 import { isValidRefundStatus } from "@/lib/products/cashflow-ai/constants";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 
 export interface RefundActionResult {
@@ -42,7 +43,7 @@ export async function requestRefundAction(input: Record<string, unknown>): Promi
   return { ok: true, id: res.refund._id };
 }
 
-export async function changeRefundStatusAction(id: string, status: string): Promise<RefundActionResult> {
+export async function changeRefundStatusAction(id: string, status: string, code?: string): Promise<RefundActionResult> {
   const user = await getCurrentFmsUser();
   if (!user) throw new Error("Unauthorized");
   if (!isValidRefundStatus(status)) return { ok: false, error: "Unknown status." };
@@ -51,6 +52,11 @@ export async function changeRefundStatusAction(id: string, status: string): Prom
   if (!before) return { ok: false, error: "Refund not found." };
   // The status it is moving FROM decides who may do it (see canMoveRefund): the UI hiding a button is never the boundary.
   if (!canMoveRefund(user, before.status, status)) throw new Error("Forbidden");
+  // Moving to "processing" is what sends the money back to the customer.
+  if (status === "processing") {
+    const blocked = await paymentGate(user.id, code);
+    if (blocked) return { ok: false, error: blocked };
+  }
 
   const res = await changeRefundStatus(id, status, user.id, user.email);
   if (!res.ok) return { ok: false, error: res.reason };

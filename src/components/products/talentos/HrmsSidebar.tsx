@@ -17,11 +17,12 @@ import {
   UserRound,
   Network,
   BarChart3,
+  Inbox,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { HrmsRole } from "@/lib/hrms-roles";
-import { canViewAuditLog, canManagePayrollConfig, canManageSettings, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
+import { canApproveLeave, canViewAuditLog, canManagePayrollConfig, canManageSettings, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
 
 function NavLink({
   href,
@@ -143,6 +144,8 @@ export default function HrmsSidebar({
         {nav({ href: "/talentos/me/attendance", label: "My Attendance", icon: CalendarClock })}
         {nav({ href: "/talentos/me/leave", label: "My Leave", icon: CalendarDays })}
         {nav({ href: "/talentos/me/salary", label: "My Salary", icon: Wallet })}
+        {nav({ href: "/talentos/me/tax", label: "My Tax", icon: FileText })}
+        {nav({ href: "/talentos/me/requests", label: "My Requests", icon: Inbox })}
         {nav({ href: "/talentos/me/documents", label: "My Documents", icon: FileText })}
         {nav({ href: "/talentos/me/profile", label: "My Profile", icon: UserRound })}
 
@@ -167,6 +170,7 @@ export default function HrmsSidebar({
       <SectionLabel collapsed={collapsed}>Operations</SectionLabel>
       {nav({ href: "/talentos/attendance", label: "Attendance", icon: CalendarClock })}
       {nav({ href: "/talentos/leave", label: "Leave", icon: CalendarDays })}
+      {canApproveLeave(roleCtx) && nav({ href: "/talentos/requests", label: "Requests", icon: Inbox })}
       {nav({ href: "/talentos/holidays", label: "Holidays", icon: CalendarCheck })}
       {canRunPayroll(roleCtx) && nav({ href: "/talentos/payroll", label: "Payroll", icon: Wallet })}
 
@@ -181,6 +185,8 @@ export default function HrmsSidebar({
           {nav({ href: "/talentos/me/attendance", label: "My Attendance", icon: CalendarClock })}
           {nav({ href: "/talentos/me/leave", label: "My Leave", icon: CalendarDays })}
           {nav({ href: "/talentos/me/salary", label: "My Salary", icon: Wallet })}
+          {nav({ href: "/talentos/me/tax", label: "My Tax", icon: FileText })}
+          {nav({ href: "/talentos/me/requests", label: "My Requests", icon: Inbox })}
           {nav({ href: "/talentos/me/documents", label: "My Documents", icon: FileText })}
           {nav({ href: "/talentos/me/profile", label: "My Profile", icon: UserRound })}
           {nav({ href: "/talentos/me/directory", label: "Directory", icon: Network })}

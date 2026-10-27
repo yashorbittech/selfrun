@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import PayoutStatusBadge from "@/components/products/talentos/PayoutStatusBadge";
+import PaymentCodeField from "@/components/products/cashflow-ai/PaymentCodeField";
 import PayoutRowActions from "@/components/products/talentos/PayoutRowActions";
 import { PAYOUT_STATUSES } from "@/lib/products/talentos/payout-status";
 
@@ -88,6 +89,7 @@ export default function PayoutsDashboard({
     return `${pathname}?${params.toString()}`;
   }
 
+  const [code, setCode] = useState("");
   const initiable = items.filter((p) => p.status === "pending");
   const reconcilable = items.filter((p) => p.status === "paid" && !p.reconciledAt);
 
@@ -95,9 +97,10 @@ export default function PayoutsDashboard({
     const ids = Array.from(selected).filter((id) => initiable.some((p) => p._id === id));
     if (ids.length === 0) return;
     startTransition(async () => {
-      const r = await bulkInitiatePayoutsAction(ids);
+      const r = await bulkInitiatePayoutsAction(ids, code);
       toast[r.error ? "warning" : "success"](`${r.initiated ?? 0} initiated${r.error ? ` · ${r.error}` : ""}`);
       setSelected(new Set());
+      setCode("");
       router.refresh();
     });
   }
@@ -218,6 +221,7 @@ export default function PayoutsDashboard({
 
       <GlassCard interactive={false}>
         <CardContent className="max-h-[60vh] overflow-auto">
+          {initiable.length > 0 && <div className="mb-3 max-w-md"><PaymentCodeField value={code} onChange={setCode} /></div>}
           <Table>
             <TableHeader>
               <TableRow>
@@ -276,7 +280,7 @@ export default function PayoutsDashboard({
                   </TableCell>
                   <TableCell className="font-mono text-xs text-muted-foreground">{p.utr ?? "—"}</TableCell>
                   <TableCell>
-                    <PayoutRowActions payout={{ _id: p._id, status: p.status, employeeName: p.employeeName, provider: p.paymentProvider }} />
+                    <PayoutRowActions payout={{ _id: p._id, status: p.status, employeeName: p.employeeName, provider: p.paymentProvider }} code={code} />
                   </TableCell>
                 </TableRow>
               ))}

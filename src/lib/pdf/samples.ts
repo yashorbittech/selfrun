@@ -4,6 +4,7 @@ import { renderSaasInvoicePdf } from "@/components/platform/billing/SaasInvoiceP
 import { renderTransactionReceiptPdf, type ReceiptData } from "@/components/platform/billing/TransactionReceiptPdf";
 import { renderInvoicePdf as renderFmsInvoicePdf } from "@/components/products/cashflow-ai/InvoicePdf";
 import { renderReceiptPdf as renderFmsReceiptPdf } from "@/components/products/cashflow-ai/ReceiptPdf";
+import { renderPublicReceiptPdf } from "@/components/products/cashflow-ai/PaymentReceiptPdf";
 import { renderFmsReportPdf } from "@/components/products/cashflow-ai/reports/FmsReportPdf";
 import { renderCertificatePdf as renderTmsCertificatePdf } from "@/components/products/cohort-ai/CertificatePdf";
 import { renderInvoicePdf as renderTmsInvoicePdf } from "@/components/products/cohort-ai/InvoicePdf";
@@ -84,6 +85,8 @@ function sampleOf(key: string, variant: string, company: Awaited<ReturnType<type
     case "fms_invoice":
     case "portal_invoice":
       return renderFmsInvoicePdf(fmsInvoice());
+    case "fms_payment_receipt":
+      return renderPublicReceiptPdf({ number: "REC-2026-0042", paymentNumber: "PAY-2026-0042", paidAt: "2026-04-15T10:42:00.000Z", amount: 25000, currency: "INR", customerName: "Rahul Sharma", customerEmail: "rahul@example.com", title: "AI Batch Course Fee", method: "UPI", gatewayPaymentId: "pay_Qx1234567890ab", utr: "412345678901" });
     case "fms_receipt":
       return renderFmsReceiptPdf(fmsReceipt());
     case "fms_report":
@@ -138,7 +141,7 @@ function payslip(): PayslipPdfData {
     company: { name: "", legalName: "", address: "", email: "", phone: "", website: "", registrations: [], signatoryName: "Sample Signatory", signatoryDesignation: "HR Manager", note: "This is a computer-generated sample payslip." },
     employeeId: "sample",
     employee: { name: "Sample Employee", code: "EMP-0001", designation: "Software Engineer", department: "Engineering", team: "Platform", location: "Bengaluru", employmentType: "Full-time", gender: "—", dateOfBirth: "1995-04-12", joiningDate: "2022-06-01", pan: "ABCDE1234F", uan: "100000000000", pfNumber: "KN/BLR/0000000", esiNumber: "—" },
-    period: { workingDays: 26, lopDays: 0, daysPaid: 26, payDate: iso() },
+    period: { workingDays: 26, lopDays: 0, daysPaid: 26, payDate: iso(), monthDays: 30, notes: [] }, tax: { regime: "new", fy: "2026-27", taxableIncome: 765000, yearTax: 33800, thisMonth: 2817, deductedSoFar: 16902 },
     earnings: lines([["Basic", 40000], ["House rent allowance", 16000], ["Special allowance", 14000]]), deductions: lines([["Provident fund", 4800], ["Professional tax", 200]]),
     employerContributions: [{ name: "Employer provident fund", amount: 4800 }], grossPay: 70000, totalDeductions: 5000, netPay: 65000, employerCost: 74800, ytd: { gross: 490000, deductions: 35000, net: 455000, monthsCount: 7 },
     netInWords: "Sixty-five thousand rupees only", payment: { mode: "Bank transfer", status: "paid", bankName: "Sample Bank", accountMasked: "XXXX1234", ifsc: "SAMP0000001", utr: "UTR-SAMPLE-0001", paidOn: iso() }, generatedAt: now.toISOString(),

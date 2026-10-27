@@ -24,7 +24,7 @@ interface RazorpayOptions {
   currency?: string;
   name: string;
   description: string;
-  prefill?: { name?: string; email?: string };
+  prefill?: { name?: string; email?: string; contact?: string };
   image?: string;
   theme?: { color?: string; backdrop_color?: string };
   retry?: { enabled: boolean; max_count?: number };
@@ -218,7 +218,7 @@ export async function openOrderCheckout(opts: {
   currency: string;
   name: string;
   description: string;
-  prefill: { name: string; email: string };
+  prefill: { name: string; email: string; contact?: string };
   onPaymentFailed?: (message: string) => void;
   /** Show Checkout inside this element (a dialog) instead of as a full-page window. Falls back to the window if it can't be placed. */
   mount?: HTMLElement | null;

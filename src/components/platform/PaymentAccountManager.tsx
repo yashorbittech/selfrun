@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { AlertTriangle, Check, CheckCircle2, CircleDashed, Copy, Loader2, PlugZap, Trash2, XCircle } from "lucide-react";
+import PaymentCodeField from "@/components/products/cashflow-ai/PaymentCodeField";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,9 @@ import { cn, formatDateTime } from "@/lib/utils";
 import type { PaymentAccountInput, PaymentAccountResult, PaymentAccountView } from "@/lib/platform/integrations/payments";
 
 export interface PaymentAccountActions {
-  save: (input: PaymentAccountInput) => Promise<PaymentAccountResult>;
+  save: (input: PaymentAccountInput, code: string) => Promise<PaymentAccountResult>;
   test: () => Promise<PaymentAccountResult>;
-  disconnect: () => Promise<PaymentAccountResult>;
+  disconnect: (code: string) => Promise<PaymentAccountResult>;
 }
 
 // Mirrors KEY_ID_PATTERN in the server module (which the client can't import).
@@ -71,6 +72,7 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [notice, setNotice] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [code, setCode] = useState("");
   const [saving, startSave] = useTransition();
   const [testing, startTest] = useTransition();
   const [disconnecting, startDisconnect] = useTransition();
@@ -102,9 +104,10 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
 
     startSave(async () => {
       try {
-        const res = await actions.save({ keyId: trimmed, keySecret, webhookSecret, payoutsEnabled, accountNumber });
+        const res = await actions.save({ keyId: trimmed, keySecret, webhookSecret, payoutsEnabled, accountNumber }, code);
         if (res.ok) {
           applyAccount(res.account);
+          setCode("");
           setErrors({});
           setNotice(res.message ? { tone: "ok", text: res.message } : null);
         } else {
@@ -139,9 +142,10 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
     setNotice(null);
     startDisconnect(async () => {
       try {
-        const res = await actions.disconnect();
+        const res = await actions.disconnect(code);
         if (res.ok) {
           applyAccount(res.account);
+          setCode("");
           setConfirmDisconnect(false);
           setNotice(res.message ? { tone: "ok", text: res.message } : null);
         } else setNotice({ tone: "error", text: res.error });
@@ -200,7 +204,7 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
           <p className="text-sm text-muted-foreground">
             {account.usingPlatformEnv.payments || account.usingPlatformEnv.payouts
               ? "This workspace currently uses the platform's built-in Razorpay account (server environment settings). Connecting an account here replaces it for this workspace."
-              : "Until you connect an account, online payments are unavailable (record payments offline) and salaries are paid manually."}
+              : "Connect your Razorpay account to collect payments from customers and to pay salaries, vendors, refunds and reimbursements. Until you do, none of these can be paid from here."}
           </p>
         )}
 
@@ -224,13 +228,16 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
         {confirmDisconnect && (
           <div role="group" aria-label="Confirm disconnecting Razorpay" className="flex flex-col gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm">Disconnect Razorpay? The stored keys are deleted; online payments and automatic salary payouts stop until you connect again.</p>
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2">
+              <PaymentCodeField value={code} onChange={setCode} />
+              <div className="flex gap-2">
               <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={() => setConfirmDisconnect(false)}>
                 Cancel
               </Button>
               <Button id="pay-disconnect-confirm" type="button" variant="destructive" size="sm" disabled={busy} onClick={runDisconnect}>
                 {disconnecting ? <Loader2 className="size-3.5 animate-spin" /> : <Trash2 className="size-3.5" />} Yes, disconnect
               </Button>
+              </div>
             </div>
           </div>
         )}
@@ -277,6 +284,7 @@ export default function PaymentAccountManager({ initial, actions }: { initial: P
               </div>
             )}
           </div>
+          <PaymentCodeField value={code} onChange={setCode} />
           <Button id="pay-submit" type="submit">
             {saving && <Loader2 className="size-4 animate-spin" />} {hasRecord ? "Save changes" : "Connect Razorpay"}
           </Button>

@@ -104,6 +104,15 @@ export const PDF_TYPES: PdfType[] = [
     route: "/api/cashflow-ai/receipts/{receiptNumber}", fileName: "<receipt number>.pdf", letterhead: "company", status: "active",
   },
   {
+    key: "fms_payment_receipt", name: "Online payment receipt", product: "fms", category: "Invoices & receipts",
+    description: "The receipt a customer gets after paying a payment link online.",
+    contains: ["Your letterhead", "Receipt number, date and time", "What it was for, the method and the references (payment id, UTR)", "Amount received"],
+    generated: "On demand, when the customer opens or downloads it from the page they paid on.",
+    usedIn: [{ label: "The payment page the customer sees after paying", href: "/cashflow-ai/payment-links" }],
+    access: "Whoever holds the paid payment link.", delivery: "Downloaded or shared by the customer.", events: ["fms_payment_received"],
+    route: "/api/cashflow-ai/payments/receipt/{token}", fileName: "Receipt-<number>.pdf", letterhead: "company", status: "active",
+  },
+  {
     key: "fms_report", name: "Finance reports", product: "fms", category: "Reports",
     description: "Revenue, expense, tax and budget-versus-actual reports for a period.",
     contains: ["Report title and period", "Sections with line values", "Totals"],

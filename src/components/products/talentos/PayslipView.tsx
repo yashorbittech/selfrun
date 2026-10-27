@@ -9,6 +9,8 @@ import { monthLabelLong } from "@/lib/products/talentos/payroll-status";
 interface Line {
   name: string;
   amount: number;
+  /** For an earning cut for loss of pay: what it is at full pay. */
+  fixed?: number;
 }
 
 export interface PayslipViewData {
@@ -29,6 +31,10 @@ export interface PayslipViewData {
   bankName: string | null;
   ifsc: string | null;
   runStatus: string;
+  monthDays?: number | null;
+  daysPaid?: number;
+  notes?: string[];
+  tax?: { regime: "new" | "old"; fy: string; taxableIncome: number; yearTax: number; thisMonth: number; deductedSoFar: number } | null;
   /** Present on the employee-facing page (assembled by getPayslipPdfData). */
   netInWords?: string;
   company?: {
@@ -68,7 +74,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export default function PayslipView({ data, showPrint = true }: { data: PayslipViewData; showPrint?: boolean }) {
   const provisional = data.runStatus !== "paid";
-  const daysPaid = Math.max(0, data.workingDays - data.lopDays);
+  const daysPaid = data.daysPaid ?? Math.max(0, data.workingDays - data.lopDays);
 
   return (
     <div className="space-y-4">
@@ -142,8 +148,8 @@ export default function PayslipView({ data, showPrint = true }: { data: PayslipV
           {/* Pay period strip */}
           <div className="grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-3 text-center sm:grid-cols-4">
             <div>
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Working days</p>
-              <p className="text-sm font-semibold text-foreground">{data.workingDays}</p>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{data.monthDays ? "Days in month" : "Working days"}</p>
+              <p className="text-sm font-semibold text-foreground">{data.monthDays ?? data.workingDays}</p>
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">LOP days</p>
@@ -159,6 +165,8 @@ export default function PayslipView({ data, showPrint = true }: { data: PayslipV
             </div>
           </div>
 
+          {data.notes && data.notes.length > 0 && <p className="text-xs text-muted-foreground">{data.notes.join(" ")}</p>}
+
           {/* Earnings / Deductions */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
@@ -167,7 +175,7 @@ export default function PayslipView({ data, showPrint = true }: { data: PayslipV
                 <tbody>
                   {data.earnings.map((e, i) => (
                     <tr key={i} className="border-b border-border/40 last:border-0">
-                      <td className="py-1.5">{e.name}</td>
+                      <td className="py-1.5">{e.name}{e.fixed !== undefined && <span className="ml-1 text-[11px] text-muted-foreground">(of {formatCurrency(e.fixed)})</span>}</td>
                       <td className="py-1.5 text-right tabular-nums">{formatCurrency(e.amount)}</td>
                     </tr>
                   ))}
@@ -209,6 +217,12 @@ export default function PayslipView({ data, showPrint = true }: { data: PayslipV
             {data.netInWords && <p className="mt-1 text-xs text-muted-foreground">{data.netInWords}</p>}
           </div>
 
+          {data.tax && (
+            <p className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground">
+              Income tax ({data.tax.regime === "new" ? "new" : "old"} regime, FY {data.tax.fy}): estimated taxable income for the year {formatCurrency(data.tax.taxableIncome)}, tax for the year {formatCurrency(data.tax.yearTax)}, deducted this month {formatCurrency(data.tax.thisMonth)}, deducted so far this year {formatCurrency(data.tax.deductedSoFar)}.
+            </p>
+          )}
+
           {/* Employer contributions */}
           <div className="border-t border-border/60 pt-3">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -240,8 +254,8 @@ export default function PayslipView({ data, showPrint = true }: { data: PayslipV
           )}
 
           <p className={cn("border-t border-border/60 pt-3 text-[11px] text-muted-foreground")}>
-            This is a computer-generated payslip and does not require a signature. Figures follow the configured statutory
-            rates and the India new tax regime.
+            This is a computer-generated payslip and does not require a signature. Statutory deductions follow the rates the law sets
+            for the month, and income tax follows the employee&apos;s declared tax regime.
           </p>
         </div>
       </div>

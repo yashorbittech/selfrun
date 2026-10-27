@@ -3,13 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Send, CircleCheck, RotateCcw, Ban, Loader2 } from "lucide-react";
+import { Send, RefreshCw, RotateCcw, Ban, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -23,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   initiatePayoutAction,
-  recordPayoutResultAction,
+  refreshPayoutAction,
   retryPayoutAction,
   cancelPayoutAction,
 } from "@/app/(products)/talentos/(protected)/(staff)/payroll/actions";
@@ -35,18 +30,15 @@ interface Row {
   provider: "manual" | "razorpay";
 }
 
-export default function PayoutRowActions({ payout }: { payout: Row }) {
+export default function PayoutRowActions({ payout, code }: { payout: Row; /** The confirmation code the person typed above the table. */ code?: string }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [resultOpen, setResultOpen] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [form, setForm] = useState({ status: "paid", utr: "", failureReason: "", remarks: "" });
 
   const refresh = () => router.refresh();
 
   function initiate() {
     startTransition(async () => {
-      const r = await initiatePayoutAction(payout._id);
+      const r = await initiatePayoutAction(payout._id, code);
       if (!r.ok) {
         toast.error(r.error ?? "Could not initiate.");
         return;
@@ -57,7 +49,7 @@ export default function PayoutRowActions({ payout }: { payout: Row }) {
   }
   function retry() {
     startTransition(async () => {
-      const r = await retryPayoutAction(payout._id);
+      const r = await retryPayoutAction(payout._id, code);
       if (!r.ok) {
         toast.error(r.error ?? "Could not retry.");
         return;
@@ -77,23 +69,20 @@ export default function PayoutRowActions({ payout }: { payout: Row }) {
       refresh();
     });
   }
-  function submitResult() {
-    setErrors({});
+  function refreshStatus() {
     startTransition(async () => {
-      const r = await recordPayoutResultAction(payout._id, form);
+      const r = await refreshPayoutAction(payout._id);
       if (!r.ok) {
-        if (r.fieldErrors) setErrors(r.fieldErrors);
-        toast.error(r.error ?? "Please fix the highlighted fields.");
+        toast.error(r.error ?? "Could not check with RazorpayX.");
         return;
       }
-      toast.success(form.status === "paid" ? "Marked paid" : "Marked failed");
-      setResultOpen(false);
+      toast.success("Checked with RazorpayX");
       refresh();
     });
   }
 
   const canInitiate = payout.status === "pending";
-  const canRecordResult = payout.status === "initiated" || payout.status === "processing";
+  const canRefresh = payout.status === "initiated" || payout.status === "processing";
   const canRetry = payout.status === "failed";
   const canCancel = payout.status === "pending" || payout.status === "failed";
 
@@ -105,10 +94,10 @@ export default function PayoutRowActions({ payout }: { payout: Row }) {
           Initiate
         </Button>
       )}
-      {canRecordResult && (
-        <Button type="button" variant="outline" size="sm" disabled={pending} onClick={() => { setForm({ status: "paid", utr: "", failureReason: "", remarks: "" }); setResultOpen(true); }}>
-          <CircleCheck className="size-3.5" data-icon="inline-start" />
-          Record result
+      {canRefresh && (
+        <Button type="button" variant="outline" size="sm" disabled={pending} onClick={refreshStatus}>
+          {pending ? <Loader2 className="size-3.5 animate-spin" /> : <RefreshCw className="size-3.5" data-icon="inline-start" />}
+          Check status
         </Button>
       )}
       {canRetry && (
@@ -139,50 +128,6 @@ export default function PayoutRowActions({ payout }: { payout: Row }) {
         </AlertDialog>
       )}
 
-      <Sheet open={resultOpen} onOpenChange={setResultOpen}>
-        <SheetContent>
-          <SheetHeader className="border-b border-border/60">
-            <SheetTitle>Record payout result — {payout.employeeName}</SheetTitle>
-            <SheetDescription>
-              {payout.provider === "manual"
-                ? "Enter the UTR after paying through your bank, or mark it failed."
-                : "Manually override the provider result if needed."}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 space-y-4 overflow-y-auto p-4">
-            <div className="space-y-1.5">
-              <Label>Result</Label>
-              <Select value={form.status} onValueChange={(v) => v && setForm((f) => ({ ...f, status: v as string }))}>
-                <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="paid">Paid</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            {form.status === "paid" ? (
-              <div className="space-y-1.5">
-                <Label>UTR / payment reference *</Label>
-                <Input value={form.utr} onChange={(e) => setForm((f) => ({ ...f, utr: e.target.value }))} aria-invalid={!!errors.utr || undefined} />
-                {errors.utr && <p className="text-xs text-destructive">{errors.utr}</p>}
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                <Label>Failure reason *</Label>
-                <Input value={form.failureReason} onChange={(e) => setForm((f) => ({ ...f, failureReason: e.target.value }))} aria-invalid={!!errors.failureReason || undefined} />
-                {errors.failureReason && <p className="text-xs text-destructive">{errors.failureReason}</p>}
-              </div>
-            )}
-            <div className="space-y-1.5">
-              <Label>Remarks</Label>
-              <Textarea rows={2} value={form.remarks} onChange={(e) => setForm((f) => ({ ...f, remarks: e.target.value }))} />
-            </div>
-            <Button type="button" onClick={submitResult} disabled={pending} className="w-full">
-              {pending ? <Loader2 className="size-4 animate-spin" /> : "Save"}
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

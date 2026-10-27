@@ -15,9 +15,13 @@ export const SALARY_REVISIONS_COLLECTION = "hrms_salary_revisions";
 
 export interface SalaryStructure {
   basic: number;
+  /** Dearness allowance. */
+  da?: number;
   hra: number;
   allowances: PayComponent[];
   deductions: PayComponent[];
+  /** The employer's NPS contribution per month. */
+  employerNps?: number;
 }
 
 export interface SalaryRevision extends AuditFields, SalaryStructure {
@@ -70,9 +74,11 @@ export async function createRevision(
     effectiveFrom: input.effectiveFrom,
     reason: input.reason,
     basic: input.basic,
+    da: input.da ?? 0,
     hra: input.hra,
     allowances: input.allowances,
     deductions: input.deductions,
+    employerNps: input.employerNps ?? 0,
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
@@ -86,9 +92,11 @@ export async function createRevision(
       {
         currency: "INR",
         basic: input.basic,
+        da: input.da ?? 0,
         hra: input.hra,
         allowances: input.allowances,
         deductions: input.deductions,
+        employerNps: input.employerNps ?? 0,
         pfNumber: existing?.pfNumber ?? null,
         esiNumber: existing?.esiNumber ?? null,
         uan: existing?.uan ?? null,
@@ -110,13 +118,13 @@ export async function effectiveStructure(employeeId: string, onDate: string): Pr
     .limit(1)
     .toArray();
   if (rev[0]) {
-    return { basic: rev[0].basic, hra: rev[0].hra, allowances: rev[0].allowances, deductions: rev[0].deductions };
+    return { basic: rev[0].basic, da: rev[0].da ?? 0, hra: rev[0].hra, allowances: rev[0].allowances, deductions: rev[0].deductions, employerNps: rev[0].employerNps ?? 0 };
   }
   const profile = await getPayrollProfile(employeeId);
   if (!profile) return null;
-  return { basic: profile.basic, hra: profile.hra, allowances: profile.allowances, deductions: profile.deductions };
+  return { basic: profile.basic, da: profile.da, hra: profile.hra, allowances: profile.allowances, deductions: profile.deductions, employerNps: profile.employerNps };
 }
 
 export function structureGross(s: SalaryStructure): number {
-  return s.basic + s.hra + s.allowances.reduce((sum, a) => sum + a.amount, 0);
+  return s.basic + (s.da ?? 0) + s.hra + s.allowances.reduce((sum, a) => sum + a.amount, 0);
 }

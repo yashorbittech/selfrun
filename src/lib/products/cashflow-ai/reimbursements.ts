@@ -3,7 +3,8 @@ import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/products/cashflow-ai/db";
 import { round2, type PaymentMethod, type FundAccountType } from "@/lib/products/cashflow-ai/constants";
 import { getExpense, markExpenseReimbursed, type Expense } from "@/lib/products/spendiq/expenses";
-import { postSystemTransaction } from "@/lib/products/cashflow-ai/transactions";
+import { startPayout, type FmsPayout } from "@/lib/products/cashflow-ai/payments/payouts";
+import { employeePayee } from "@/lib/products/cashflow-ai/payments/payees";
 
 /**
  * Reimbursements (§13) — fills a real gap: PRMS's `markExpenseReimbursed`
@@ -31,6 +32,8 @@ export interface Reimbursement extends AuditFields {
   paymentDate: Date;
   transactionId: string | null;
   notes: string | null;
+  /** The Razorpay payment that paid it. */
+  payoutId?: string | null;
 }
 
 export interface SerializedReimbursement extends Omit<Reimbursement, "createdAt" | "updatedAt" | "deletedAt" | "paymentDate"> {
@@ -103,11 +106,17 @@ export interface RecordReimbursementData {
   notes: string | null;
 }
 
+const MODE_OF: Record<string, "NEFT" | "RTGS" | "IMPS" | "UPI"> = { neft: "NEFT", rtgs: "RTGS", imps: "IMPS", upi: "UPI" };
+
+/**
+ * Pays an approved personal expense back through Razorpay, into the employee's primary bank account. The reimbursement record, and the
+ * expense turning "reimbursed", are made when Razorpay reports the money paid (`finalizeReimbursement`), never before.
+ */
 export async function recordReimbursement(
   data: RecordReimbursementData,
   actorId: string,
   actorEmail: string | null
-): Promise<{ ok: true; reimbursement: Reimbursement } | { ok: false; reason: string }> {
+): Promise<{ ok: true; payoutId: string } | { ok: false; reason: string }> {
   const expense: Expense | null = await getExpense(data.expenseId);
   if (!expense) return { ok: false, reason: "Expense not found." };
   if (expense.vendorId) return { ok: false, reason: "This is a vendor-billed expense, not a personal claim." };
@@ -122,54 +131,59 @@ export async function recordReimbursement(
     return { ok: false, reason: `Amount exceeds the claim total (already reimbursed: ${alreadyPaid}).` };
   }
 
-  const mark = await markExpenseReimbursed(expense._id, actorId);
-  if (!mark.ok) return { ok: false, reason: mark.reason ?? "Could not mark the expense reimbursed." };
-
-  const paymentDate = new Date(`${data.paymentDate}T00:00:00`);
-  const txn = await postSystemTransaction(
+  const payee = await employeePayee(expense.raisedByUserId);
+  if (!payee.ok) return { ok: false, reason: payee.error };
+  const res = await startPayout(
     {
-      type: "expense",
-      transactionDate: paymentDate,
-      postingDate: paymentDate,
-      amount,
-      currency: expense.currency,
-      paymentMethod: data.method,
+      purpose: "reimbursement",
       sourceModule: "prms",
-      sourceRecordId: expense._id,
-      customerId: null,
-      vendorId: null,
+      // One payment per part-payment of the claim: the number after # keeps two part-payments apart.
+      sourceRecordId: `${expense._id}#${existing.length + 1}`,
+      payee: payee.payee,
+      amount,
+      narration: `Claim ${expense.expenseCode}`,
       employeeId: expense.raisedByUserId,
-      projectId: expense.projectId,
-      department: expense.departmentName,
-      accountId: null,
-      fundAccountId: data.fundAccountId ?? null,
-      fundAccountType: data.fundAccountType ?? null,
-      taxAmount: 0,
-      referenceNumber: data.transactionReference,
+      mode: MODE_OF[String(data.method)] ?? null,
       description: `Reimbursement for ${expense.expenseCode} to ${expense.raisedByName}`,
-      attachments: [],
     },
-    actorId,
-    actorEmail
+    { id: actorId, email: actorEmail },
   );
-  if ("ok" in txn) return txn;
+  return res.ok ? { ok: true, payoutId: res.payout._id } : { ok: false, reason: res.error };
+}
 
+/** Razorpay has paid a reimbursement: make the record and mark the expense reimbursed. Safe to call twice. */
+export async function finalizeReimbursement(p: FmsPayout): Promise<void> {
+  const expenseId = (p.sourceRecordId ?? "").split("#")[0];
   const collection = await getCollection();
-  const doc: Reimbursement = {
+  if (await collection.findOne({ payoutId: p._id } as never)) return;
+  const expense = await getExpense(expenseId);
+  if (!expense) return;
+  const paymentDate = p.settledAt ?? new Date();
+  await markExpenseReimbursed(expense._id, "razorpayx");
+  await collection.insertOne({
     _id: newId(),
     reimbursementNumber: await generateReimbursementNumber(paymentDate.getFullYear()),
     expenseId: expense._id,
     expenseCode: expense.expenseCode,
     employeeId: expense.raisedByUserId,
     employeeName: expense.raisedByName,
-    amount,
-    method: data.method,
-    transactionReference: data.transactionReference,
+    amount: p.amount,
+    method: (p.mode === "UPI" ? "upi" : p.mode.toLowerCase()) as PaymentMethod,
+    transactionReference: p.utr ?? p.providerPayoutId,
     paymentDate,
-    transactionId: txn._id,
-    notes: data.notes,
-    ...createStamp(actorId),
-  };
-  await collection.insertOne(doc);
-  return { ok: true, reimbursement: doc };
+    transactionId: p.transactionId,
+    notes: null,
+    payoutId: p._id,
+    ...createStamp("razorpayx"),
+  } as Reimbursement);
+}
+
+/** The bank sent a reimbursement back: the record goes and the claim is payable again. */
+export async function reverseReimbursement(p: FmsPayout): Promise<void> {
+  const collection = await getCollection();
+  const row = await collection.findOne({ payoutId: p._id } as never);
+  if (!row) return;
+  await collection.updateOne({ _id: row._id }, { $set: { deletedAt: new Date() } });
+  const expenseId = (p.sourceRecordId ?? "").split("#")[0];
+  await (await getDb()).collection("prms_expenses").updateOne({ _id: expenseId as never, approvalStatus: "reimbursed" }, { $set: { approvalStatus: "approved", updatedAt: new Date() } });
 }

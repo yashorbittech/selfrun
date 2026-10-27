@@ -3,6 +3,7 @@ import { isDateString, isTimeString, parseHHmm } from "@/lib/products/talentos/t
 import { isValidHolidayType, type HolidayType } from "@/lib/products/talentos/holiday-types";
 import { isValidAttendanceStatus, MANUAL_ATTENDANCE_STATUSES, type AttendanceStatus } from "@/lib/products/talentos/attendance-status";
 import type { CompanyDetailsInput } from "@/lib/products/talentos/company";
+import { normaliseState } from "@/lib/products/talentos/payroll/rates";
 
 /**
  * Server-side validators for the Phase 2a modules — same
@@ -37,6 +38,8 @@ export interface OrgSettingsData {
   halfDayHours: number;
   fullDayHours: number;
   timezone: string;
+  saturdayOffs: number[];
+  state: string | null;
 }
 
 export function validateOrgSettings(input: Record<string, unknown>): Ok<OrgSettingsData> | Err {
@@ -67,6 +70,11 @@ export function validateOrgSettings(input: Record<string, unknown>): Ok<OrgSetti
   }
 
   const timezone = str(input.timezone) || "Asia/Kolkata";
+  const rawSat = Array.isArray(input.saturdayOffs) ? input.saturdayOffs : [];
+  const saturdayOffs = workingDays.includes(6) ? Array.from(new Set(rawSat.map((d) => Number(d)).filter((d) => Number.isInteger(d) && d >= 1 && d <= 5))).sort() : [];
+  const stateRaw = str(input.state);
+  const state = stateRaw ? normaliseState(stateRaw) : null;
+  if (stateRaw && !state) errors.state = "Choose one of the listed states or union territories.";
 
   if (Object.keys(errors).length > 0) return { valid: false, errors };
   return {
@@ -80,6 +88,8 @@ export function validateOrgSettings(input: Record<string, unknown>): Ok<OrgSetti
       halfDayHours,
       fullDayHours,
       timezone,
+      saturdayOffs,
+      state,
     },
   };
 }
@@ -88,7 +98,7 @@ export function validateOrgSettings(input: Record<string, unknown>): Ok<OrgSetti
 // Holiday
 // ---------------------------------------------------------------------------
 
-export function validateHoliday(input: Record<string, unknown>): Ok<{ date: string; name: string; type: HolidayType }> | Err {
+export function validateHoliday(input: Record<string, unknown>): Ok<{ date: string; name: string; type: HolidayType; states: string[] }> | Err {
   const errors: Record<string, string> = {};
   const date = str(input.date);
   if (!isDateString(date)) errors.date = "Select a valid date.";
@@ -97,9 +107,12 @@ export function validateHoliday(input: Record<string, unknown>): Ok<{ date: stri
   else if (name.length > 120) errors.name = "Name must be 120 characters or fewer.";
   const type = str(input.type);
   if (!isValidHolidayType(type)) errors.type = "Select a holiday type.";
+  const rawStates = Array.isArray(input.states) ? input.states : [];
+  const states = Array.from(new Set(rawStates.map((s) => normaliseState(String(s))).filter((s): s is NonNullable<ReturnType<typeof normaliseState>> => !!s)));
+  if (rawStates.length > 0 && states.length !== new Set(rawStates.map((s) => String(s).trim())).size) errors.states = "Choose states from the list.";
 
   if (Object.keys(errors).length > 0) return { valid: false, errors };
-  return { valid: true, data: { date, name, type: type as HolidayType } };
+  return { valid: true, data: { date, name, type: type as HolidayType, states } };
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +200,9 @@ export function validateCompanyDetails(input: Record<string, unknown>): Ok<Compa
   const gstin = cap(input.gstin, 20).toUpperCase();
   if (gstin && !GSTIN_RE.test(gstin)) errors.gstin = "GSTIN must be 15 characters.";
 
+  const tan = cap(input.tan, 12).toUpperCase();
+  if (tan && !/^[A-Z]{4}\d{5}[A-Z]$/.test(tan)) errors.tan = "TAN is 10 characters: four letters, five digits, one letter (MUMA12345B).";
+
   const email = cap(input.email, 254);
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email.";
 
@@ -211,6 +227,8 @@ export function validateCompanyDetails(input: Record<string, unknown>): Ok<Compa
       pfEstablishmentCode: cap(input.pfEstablishmentCode, 40),
       esiEstablishmentCode: cap(input.esiEstablishmentCode, 40),
       lin: cap(input.lin, 40),
+      tan,
+      ptRegistration: cap(input.ptRegistration, 40),
       signatoryName: cap(input.signatoryName, 120),
       signatoryDesignation: cap(input.signatoryDesignation, 80) || "Authorised Signatory",
       payslipNote: cap(input.payslipNote, 400),

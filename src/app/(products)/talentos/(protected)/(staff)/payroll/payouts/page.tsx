@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import PayoutsDashboard from "@/components/products/talentos/PayoutsDashboard";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { canRunPayroll } from "@/lib/hrms-roles";
-import { searchPayouts, distinctPayoutMonths } from "@/lib/products/talentos/salary-payouts";
+import { searchPayouts, distinctPayoutMonths, refreshStaleSalaryPayouts } from "@/lib/products/talentos/salary-payouts";
 import { isValidPayoutStatus, type PayoutStatus } from "@/lib/products/talentos/payout-status";
 import { listDepartments } from "@/lib/products/talentos/departments";
 
@@ -21,6 +21,7 @@ export default async function PayoutsPage({
   const page = Math.max(Number(sp.page) || 1, 1);
   const status = sp.status && isValidPayoutStatus(sp.status) ? (sp.status as PayoutStatus) : undefined;
 
+  await refreshStaleSalaryPayouts();
   const [result, months, departments] = await Promise.all([
     searchPayouts({ month: sp.month, status, departmentId: sp.department, q: sp.q, page, pageSize: 30 }),
     distinctPayoutMonths(),

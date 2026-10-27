@@ -26,7 +26,7 @@ export default async function HolidaysPage({ searchParams }: { searchParams: Pro
 
       <PanelListFilters>
 <HolidayManager
-        holidays={holidays.map(serializeHoliday).map((h) => ({ _id: h._id, date: h.date, name: h.name, type: h.type }))}
+        holidays={holidays.map(serializeHoliday).map((h) => ({ _id: h._id, date: h.date, name: h.name, type: h.type, states: h.states ?? [] }))}
         years={years}
         activeYear={activeYear}
         canManage={canManage}

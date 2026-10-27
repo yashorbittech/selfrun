@@ -53,7 +53,7 @@ export default async function MySalaryPage() {
       </GlassCard>
 
       {profile ? (
-        <SalaryStructureView basic={profile.basic} hra={profile.hra} allowances={profile.allowances} deductions={profile.deductions} />
+        <SalaryStructureView basic={profile.basic} da={profile.da} hra={profile.hra} allowances={profile.allowances} deductions={profile.deductions} />
       ) : (
         <GlassCard interactive={false}>
           <CardContent className="py-8 text-center text-sm text-muted-foreground">Your salary structure has not been set up yet.</CardContent>

@@ -29,6 +29,8 @@ export interface CompanyDetailsValues {
   cin: string;
   pfEstablishmentCode: string;
   esiEstablishmentCode: string;
+  tan: string;
+  ptRegistration: string;
   lin: string;
   signatoryName: string;
   signatoryDesignation: string;
@@ -107,6 +109,8 @@ export default function CompanyDetailsForm({ details }: { details: CompanyDetail
           {field("pfEstablishmentCode", "PF establishment code")}
           {field("esiEstablishmentCode", "ESI establishment code")}
           {field("lin", "Labour Identification No. (LIN)")}
+          {field("tan", "TAN (tax deduction account number)", "e.g. MUMA12345B. Needed on Form 16 and for TDS returns")}
+          {field("ptRegistration", "Professional tax registration number")}
         </CardContent>
       </GlassCard>
 

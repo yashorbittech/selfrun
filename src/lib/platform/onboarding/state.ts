@@ -122,6 +122,8 @@ export async function saveProfile(input: ProfileInput, actorId: string): Promise
       pfEstablishmentCode: c.pfEstablishmentCode,
       esiEstablishmentCode: c.esiEstablishmentCode,
       lin: c.lin,
+      tan: c.tan,
+      ptRegistration: c.ptRegistration,
       signatoryName: c.signatoryName,
       signatoryDesignation: c.signatoryDesignation,
       payslipNote: c.payslipNote,

@@ -4,6 +4,7 @@ import { getDb } from "@/lib/mongodb";
 import { createPaymentLink, CreatePaymentLinkInput } from "@/lib/products/cashflow-ai/payments/links";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManagePaymentLinks } from "@/lib/fms-roles";
+import { emailPaymentLink } from "@/lib/products/cashflow-ai/payments/link-email";
 import { readSafeJson, UnsafeBodyError } from "@/lib/security/safe-json";
 
 async function handlePOST(req: Request) {
@@ -49,19 +50,22 @@ async function handlePOST(req: Request) {
       return NextResponse.json({ ok: false, error: res.reason }, { status: 400 });
     }
 
+    // Email the customer the link. The link only counts as "sent" if the email really went out.
+    const mailed = res.publicUrl ? await emailPaymentLink({ to: input.customerEmail!, name: String(input.customerName), title: String(input.title), amount: input.amount, currency: input.currency || "INR", url: res.publicUrl }) : { sent: false, error: null };
+    const emailSent = mailed.sent;
+    const emailError = mailed.error;
+
     // ── Stamp the source transaction with the generated link URL ──
     if (sourceTransactionId && res.publicUrl) {
       const db = await getDb();
       const now = new Date();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.collection("fms_transactions").updateOne(
-        { _id: sourceTransactionId } as any,
+        { _id: sourceTransactionId } as never,
         {
           $set: {
             paymentLink: res.publicUrl,
             paymentLinkToken: res.paymentLink?.token,
-            paymentLinkSentAt: now,
-            status: "link_sent",
+            ...(emailSent ? { paymentLinkSentAt: now, status: "link_sent" } : { paymentLinkCreatedAt: now }),
             updatedAt: now,
           },
         }
@@ -72,6 +76,8 @@ async function handlePOST(req: Request) {
       ok: true,
       paymentLink: res.paymentLink,
       publicUrl: res.publicUrl,
+      emailSent,
+      emailError,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);

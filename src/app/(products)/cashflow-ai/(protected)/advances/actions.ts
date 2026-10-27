@@ -11,6 +11,7 @@ import {
   type AdvanceWriteData,
 } from "@/lib/products/cashflow-ai/employee-advances";
 import { isValidAdvanceStatus, isValidPaymentMethod, isValidFundAccountType } from "@/lib/products/cashflow-ai/constants";
+import { paymentGate } from "@/lib/products/cashflow-ai/payment-guard";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 
 export interface AdvanceActionResult {
@@ -49,14 +50,20 @@ export async function requestAdvanceAction(input: Record<string, unknown>): Prom
   return { ok: true, id: created._id };
 }
 
-export async function changeAdvanceStatusAction(id: string, status: string, fundAccountKey?: string): Promise<AdvanceActionResult> {
+export async function changeAdvanceStatusAction(id: string, status: string, fundAccountKey?: string, code?: string): Promise<AdvanceActionResult> {
   const user = await getCurrentFmsUser();
   if (!user) throw new Error("Unauthorized");
   if (!isValidAdvanceStatus(status)) return { ok: false, error: "Unknown status." };
 
-  const needsApproval = status === "approved" || status === "rejected";
+  // Sending the advance is money leaving: the finance manager, with a confirmation code.
+  const sendsMoney = status === "disbursed";
+  const needsApproval = status === "approved" || status === "rejected" || sendsMoney;
   if (needsApproval ? !canApproveTransactions(user) : !canManageTransactions(user)) throw new Error("Forbidden");
 
+  if (sendsMoney) {
+    const blocked = await paymentGate(user.id, code);
+    if (blocked) return { ok: false, error: blocked };
+  }
   let fundAccountId: string | null = null;
   let fundAccountType: Parameters<typeof changeAdvanceStatus>[5] = null;
   if (fundAccountKey) {

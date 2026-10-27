@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "check:payments": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env.local scripts/check-payments.ts",
+    "seed:payroll": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env.local scripts/seed-payroll-demo.ts",
     "demo:seeders": "npx --yes tsx --require ./scripts/lib/next-server-shims.cjs --env-file=.env scripts/demo-seeders.ts",
     "apps:check": "node scripts/build-apps.mjs check",
     "apps:install": "node scripts/build-apps.mjs install",
@@ -26,6 +28,8 @@
     "cron:sync": "npx --yes tsx scripts/sync-vercel-crons.ts",
     "test:legal": "npx --yes tsx scripts/test-legal.ts",
     "test:prompts": "npx --yes tsx scripts/test-prompts-registry.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_prompts npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-prompts-store.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_prompts_co npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-prompts-company.ts",
+    "test:receipts": "npx --yes tsx scripts/test-receipts.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_receipts npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-receipts-flow.ts",
+    "test:payroll": "npx --yes tsx scripts/test-payroll-tax.ts && npx --yes tsx scripts/test-payroll-statutory.ts && npx --yes tsx scripts/test-payroll-days.ts && npx --yes tsx scripts/test-payroll-compute.ts && npx --yes tsx scripts/test-payroll-settlement.ts && npx --yes tsx scripts/test-payroll-rates.ts && npx --yes tsx scripts/test-payroll-structure.ts && npx --yes tsx scripts/test-payroll-ytd.ts && npx --yes tsx scripts/test-payroll-exports.ts && npx --yes tsx scripts/test-work-requests.ts && npx --yes tsx scripts/test-payroll-dues.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_custpay PLATFORM_ENCRYPTION_KEY=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY= npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-customer-payments.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_gate npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-gate-rules.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_razorpay PLATFORM_ENCRYPTION_KEY=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY= npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-razorpay-payouts.ts && MONGODB_URI=mongodb://localhost:27017/zz_throwaway_payroll PLATFORM_ENCRYPTION_KEY=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY= npx --yes tsx --require ./scripts/lib/next-server-shims.cjs scripts/test-payroll-run.ts",
     "test:cron": "npx --yes tsx scripts/test-cron-schedule.ts && npx --yes tsx scripts/test-cron-registry.ts"
   },
   "dependencies": {

@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { revalidatePath } from "next/cache";
 import { saveBeneficiary } from "@/lib/products/cashflow-ai/beneficiaries";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
+import { canManageTransactions } from "@/lib/fms-roles";
 
 export default async function BeneficiariesPage({
   searchParams,
@@ -43,7 +44,7 @@ export default async function BeneficiariesPage({
     return (
       b.beneficiaryName.toLowerCase().includes(query) ||
       b.bankName.toLowerCase().includes(query) ||
-      b.accountNumber.toLowerCase().includes(query) ||
+      (b.accountNumberLast4 ?? "").includes(query) ||
       b.ifsc.toLowerCase().includes(query) ||
       (b.upiId && b.upiId.toLowerCase().includes(query))
     );
@@ -57,7 +58,8 @@ export default async function BeneficiariesPage({
   async function addBeneficiaryAction(formData: FormData) {
     "use server";
     const currUser = await getCurrentFmsUser();
-    if (!currUser) return;
+    // A saved bank account is where money can be sent: only people who manage transactions may add or change one.
+    if (!currUser || !canManageTransactions(currUser)) return;
 
     const bName = formData.get("beneficiaryName") as string;
     const eType = formData.get("entityType") as BeneficiaryEntity;
@@ -96,7 +98,7 @@ export default async function BeneficiariesPage({
         actions={
             <Badge variant="outline" className="px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary border-primary/20">
             <ShieldCheck className="size-3.5 mr-1" />
-            Instant Bank Verification Active
+            Account numbers stored encrypted
           </Badge>
           }
         />
@@ -266,7 +268,7 @@ export default async function BeneficiariesPage({
                     </td>
                     <td className="px-4 py-3 font-medium text-foreground">{b.bankName}</td>
                     <td className="px-4 py-3 font-mono text-foreground font-semibold">
-                      •••• {b.accountNumberLast4 || b.accountNumber.slice(-4)}
+                      •••• {b.accountNumberLast4}
                     </td>
                     <td className="px-4 py-3 font-mono text-muted-foreground">{b.ifsc}</td>
                     <td className="px-4 py-3 font-mono text-primary">{b.upiId || "—"}</td>

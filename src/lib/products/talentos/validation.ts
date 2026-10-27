@@ -12,7 +12,8 @@ import type {
   EmployeePersonal,
   EmployeeProfessional,
 } from "@/lib/products/talentos/employees";
-import type { PayrollWriteData, PayComponent } from "@/lib/products/talentos/payroll";
+import type { PayrollWriteData, PayComponent, StatutoryFlags } from "@/lib/products/talentos/payroll";
+import { normaliseState } from "@/lib/products/talentos/payroll/rates";
 import { emptyBank } from "@/lib/products/talentos/payroll";
 
 /**
@@ -199,7 +200,7 @@ export function validateTeam(input: Record<string, unknown>): Ok<{ name: string;
 // Payroll
 // ---------------------------------------------------------------------------
 
-function parseComponents(input: unknown, errors: Record<string, string>, key: string): PayComponent[] {
+function parseComponents(input: unknown, errors: Record<string, string>, key: string, withFlags = false): PayComponent[] {
   if (!Array.isArray(input)) return [];
   const out: PayComponent[] = [];
   for (const raw of input) {
@@ -211,10 +212,13 @@ function parseComponents(input: unknown, errors: Record<string, string>, key: st
       errors[key] = "All amounts must be zero or a positive number.";
       continue;
     }
-    out.push({ name, amount: Math.round(amount) });
+    const flag = (v: unknown, fallback: boolean) => (v === undefined || v === null || v === "" ? fallback : v === true || v === "true" || v === "on");
+    out.push(withFlags ? { name, amount: Math.round(amount), taxable: flag(rec.taxable, true), pf: flag(rec.pf, false), esi: flag(rec.esi, true), prorate: flag(rec.prorate, true) } : { name, amount: Math.round(amount) });
   }
   return out;
 }
+
+const PAN_FORMAT = /^[A-Z]{5}\d{4}[A-Z]$/;
 
 export function validatePayrollProfile(input: Record<string, unknown>): Ok<PayrollWriteData> | Err {
   const errors: Record<string, string> = {};
@@ -225,8 +229,41 @@ export function validatePayrollProfile(input: Record<string, unknown>): Ok<Payro
   const hra = num(input.hra);
   if (!Number.isFinite(hra) || hra < 0) errors.hra = "HRA must be zero or a positive number.";
 
-  const allowances = parseComponents(input.allowances, errors, "allowances");
+  const da = input.da === undefined || str(input.da) === "" ? 0 : num(input.da);
+  if (!Number.isFinite(da) || da < 0) errors.da = "Dearness allowance must be zero or a positive number.";
+  const employerNps = input.employerNps === undefined || str(input.employerNps) === "" ? 0 : num(input.employerNps);
+  if (!Number.isFinite(employerNps) || employerNps < 0) errors.employerNps = "Employer NPS must be zero or a positive number.";
+
+  const allowances = parseComponents(input.allowances, errors, "allowances", true);
   const deductions = parseComponents(input.deductions, errors, "deductions");
+
+  const pan = str(input.panNumber).toUpperCase().replace(/\s/g, "");
+  if (pan && !PAN_FORMAT.test(pan)) errors.panNumber = "PAN has 10 characters: five letters, four digits, one letter (ABCDE1234F).";
+  const uan = str(input.uan).replace(/\s/g, "");
+  if (uan && !/^\d{12}$/.test(uan)) errors.uan = "UAN is 12 digits.";
+  const esi = str(input.esiNumber).replace(/\s/g, "");
+  if (esi && !/^\d{10,17}$/.test(esi)) errors.esiNumber = "An ESI (IP) number is 10 to 17 digits.";
+
+  let statutory: StatutoryFlags | undefined;
+  if (input.statutory && typeof input.statutory === "object") {
+    const f = input.statutory as Record<string, unknown>;
+    const b = (v: unknown, d: boolean) => (v === undefined ? d : v === true || v === "true" || v === "on");
+    const mode = str(f.pfMode);
+    const stateRaw = str(f.workState);
+    const workState = stateRaw ? normaliseState(stateRaw) : null;
+    if (stateRaw && !workState) errors.workState = "Choose one of the listed states or union territories.";
+    statutory = {
+      pfApplicable: b(f.pfApplicable, true),
+      pfMode: mode === "ceiling" || mode === "actual" ? mode : null,
+      epsEligible: b(f.epsEligible, true),
+      esiApplicable: b(f.esiApplicable, true),
+      esiDisabled: b(f.esiDisabled, false),
+      ptApplicable: b(f.ptApplicable, true),
+      lwfApplicable: b(f.lwfApplicable, true),
+      tdsApplicable: b(f.tdsApplicable, true),
+      workState,
+    };
+  }
 
   if (Object.keys(errors).length > 0) return { valid: false, errors };
   return {
@@ -234,16 +271,16 @@ export function validatePayrollProfile(input: Record<string, unknown>): Ok<Payro
     data: {
       currency: "INR",
       basic: Math.round(basic),
+      da: Math.round(da),
       hra: Math.round(hra),
       allowances,
       deductions,
+      employerNps: Math.round(employerNps),
       pfNumber: optStr(input.pfNumber, 40),
-      esiNumber: optStr(input.esiNumber, 40),
-      uan: optStr(input.uan, 40),
-      panNumber: (() => {
-        const p = str(input.panNumber).toUpperCase();
-        return p ? p.slice(0, 15) : null;
-      })(),
+      esiNumber: esi || null,
+      uan: uan || null,
+      panNumber: pan || null,
+      statutory,
       // Bank details now live in `hrms_bank_accounts`, not the payroll profile.
       bank: emptyBank(),
     },

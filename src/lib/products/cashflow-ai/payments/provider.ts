@@ -1,6 +1,7 @@
 import "server-only";
 
-export type PaymentProviderId = "razorpay" | "stripe" | "cashfree" | "payu" | "offline" | "mock";
+/** Razorpay is the only payment gateway. */
+export type PaymentProviderId = "razorpay";
 
 export interface CreateProviderIntentParams {
   intentId: string;
@@ -89,20 +90,8 @@ export function registerPaymentProvider(provider: PaymentProvider) {
   providersRegistry.set(provider.id, provider);
 }
 
-export function getPaymentProvider(id: PaymentProviderId = "mock"): PaymentProvider {
+export function getPaymentProvider(id: PaymentProviderId = "razorpay"): PaymentProvider {
   const provider = providersRegistry.get(id);
-  if (!provider) {
-    const mockProvider = providersRegistry.get("mock");
-    if (mockProvider) return mockProvider;
-    throw new Error(`Payment provider '${id}' is not registered and mock fallback is missing.`);
-  }
+  if (!provider) throw new Error(`Payment provider '${id}' is not available.`);
   return provider;
-}
-
-export function getConfiguredActiveProviderId(): PaymentProviderId {
-  const active = process.env.NEXT_PUBLIC_PAYMENT_PROVIDER as PaymentProviderId;
-  if (active && ["razorpay", "stripe", "cashfree", "payu", "offline", "mock"].includes(active)) {
-    return active;
-  }
-  return "mock";
 }

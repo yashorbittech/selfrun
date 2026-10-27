@@ -29,7 +29,11 @@ export type AuditEntity =
   | "offer"
   | "bank_account"
   | "salary_payout"
-  | "company";
+  | "company"
+  | "payroll_item"
+  | "work_request"
+  | "statutory_payment"
+  | "tax_declaration";
 
 export type AuditAction =
   | "create"
