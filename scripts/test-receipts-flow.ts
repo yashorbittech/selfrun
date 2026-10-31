@@ -12,6 +12,7 @@ const today = new Date().toISOString().slice(0, 10);
 
 (async () => {
   assert.ok((await getPlatformDb()).databaseName.startsWith("zz_throwaway_"), "refusing: not a throwaway database");
+  await (await getPlatformDb()).dropDatabase(); // every run starts clean (only ever a zz_throwaway_ database, checked above)
   await inA(async () => {
     const db = await getDb();
     const made = await createBankAccount({ accountName: "HDFC current", bankName: "HDFC", accountNumber: null, ifsc: null, branch: null, currency: "INR", openingBalance: 100000, status: "active", notes: null }, "u1");

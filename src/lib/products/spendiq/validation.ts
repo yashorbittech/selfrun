@@ -1,4 +1,5 @@
 import "server-only";
+import { panError } from "@/lib/products/cashflow-ai/tds/core";
 import {
   DEFAULT_VENDOR_CATEGORY,
   DEFAULT_VENDOR_STATUS,
@@ -26,7 +27,6 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d\s\-()]{7,20}$/;
 const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 type Ok<T> = { valid: true; data: T };
 type Err = { valid: false; errors: Record<string, string> };
@@ -91,7 +91,10 @@ export function validateVendor(input: Record<string, unknown>): Ok<VendorWriteDa
   if (gstin && !GSTIN_RE.test(gstin)) errors.gstin = "Enter a valid 15-character GSTIN.";
 
   const pan = optStr(input.pan, 10)?.toUpperCase() ?? null;
-  if (pan && !PAN_RE.test(pan)) errors.pan = "Enter a valid PAN (AAAAA0000A).";
+  if (pan) {
+    const problem = panError(pan);
+    if (problem) errors.pan = problem;
+  }
 
   const email = optStr(input.email, 160);
   if (email && !EMAIL_RE.test(email)) errors.email = "Enter a valid email address.";

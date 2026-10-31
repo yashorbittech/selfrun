@@ -1,7 +1,7 @@
 import "server-only";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
-import { getBeneficiaryByEntity, revealBeneficiaryAccount } from "@/lib/products/cashflow-ai/beneficiaries";
+import { vendorVerifiedPayee } from "@/lib/products/cashflow-ai/vendor-controls/store";
 import { bankAccountForPayout, getPrimaryBankAccount } from "@/lib/products/talentos/bank-accounts";
 import { getEmployee, employeeFullName } from "@/lib/products/talentos/employees";
 import type { PayeeInput } from "@/lib/products/cashflow-ai/payments/payouts";
@@ -21,13 +21,12 @@ async function holdProblem(at: Date | null | undefined, who: string): Promise<st
 export type PayeeResult = { ok: true; payee: PayeeInput } | { ok: false; error: string };
 
 export async function vendorPayee(vendorId: string, name: string): Promise<PayeeResult> {
-  const b = await getBeneficiaryByEntity("vendor", vendorId);
-  if (!b) return { ok: false, error: `${name || "This vendor"} has no bank details saved. Add them under Beneficiaries first, then pay.` };
-  const hold = await holdProblem(b.detailsChangedAt, b.beneficiaryName);
+  // Only bank details a person has verified are paid; newer, unchecked ones wait (Vendor controls).
+  const v = await vendorVerifiedPayee(vendorId, name);
+  if (!v.ok) return { ok: false, error: v.error };
+  const hold = await holdProblem(v.holdFrom, v.name);
   if (hold) return { ok: false, error: hold };
-  const account = revealBeneficiaryAccount(b);
-  if (!account && !b.upiId) return { ok: false, error: `${b.beneficiaryName}'s bank details could not be read. Save them again under Beneficiaries.` };
-  return { ok: true, payee: { name: b.beneficiaryName, accountNumber: account, ifsc: b.ifsc, upiId: b.upiId, kind: "vendor" } };
+  return { ok: true, payee: { name: v.name, accountNumber: v.details.account, ifsc: v.details.ifsc, upiId: v.details.upi, kind: "vendor" } };
 }
 
 /** An employee by HR employee id, or by login id (an expense is raised by a login). Paid into their primary bank account. */

@@ -1,10 +1,26 @@
 "use client";
 
-import { useLmsCan } from "@/components/products/dealflow-ai/LmsAccess";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Briefcase, Users, Inbox } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  UserCheck,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+  Building2,
+  MessageSquare,
+  Mail,
+  Radio,
+  PhoneCall,
+  BookOpen,
+  Plug,
+  Bot,
+  Video,
+} from "lucide-react";
+import { useLmsCan } from "@/components/products/dealflow-ai/LmsAccess";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
@@ -14,6 +30,7 @@ function NavLink({
   icon: Icon,
   exact = false,
   collapsed = false,
+  badge,
   onNavigate,
 }: {
   href: string;
@@ -21,6 +38,7 @@ function NavLink({
   icon: React.ComponentType<{ className?: string }>;
   exact?: boolean;
   collapsed?: boolean;
+  badge?: string | number;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -34,7 +52,7 @@ function NavLink({
       className={cn(
         "group relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         collapsed && "justify-center px-0",
-        active ? "text-primary" : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
+        active ? "text-primary font-bold" : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
       )}
     >
       {active && (
@@ -46,6 +64,11 @@ function NavLink({
       )}
       <Icon className="relative size-4 shrink-0 transition-transform duration-200 group-hover:scale-110" />
       {!collapsed && <span className="relative truncate">{label}</span>}
+      {!collapsed && badge && (
+        <span className="relative ml-auto rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-black text-primary">
+          {badge}
+        </span>
+      )}
     </Link>
   );
 
@@ -54,7 +77,10 @@ function NavLink({
   return (
     <Tooltip>
       <TooltipTrigger render={link} />
-      <TooltipContent side="right">{label}</TooltipContent>
+      <TooltipContent side="right">
+        {label}
+        {badge ? ` (${badge})` : ""}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -62,7 +88,7 @@ function NavLink({
 function SectionLabel({ children, collapsed }: { children: React.ReactNode; collapsed?: boolean }) {
   if (collapsed) return <div className="mt-4 mb-1 border-t border-border/50" />;
   return (
-    <div className="mt-4 mb-1 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+    <div className="mt-4 mb-1 px-3 text-[11px] font-black tracking-wider text-muted-foreground uppercase">
       {children}
     </div>
   );
@@ -70,14 +96,34 @@ function SectionLabel({ children, collapsed }: { children: React.ReactNode; coll
 
 export default function LmsSidebar({ onNavigate, collapsed = false }: { onNavigate?: () => void; collapsed?: boolean }) {
   const canCareers = useLmsCan("VIEW_CAREERS");
+
   return (
     <nav className="flex h-full flex-col gap-1 p-3">
       <NavLink href="/dealflow-ai" label="Dashboard" icon={LayoutDashboard} exact collapsed={collapsed} onNavigate={onNavigate} />
 
       <SectionLabel collapsed={collapsed}>Lead Management</SectionLabel>
       <NavLink href="/dealflow-ai/leads" label="Leads" icon={Users} collapsed={collapsed} onNavigate={onNavigate} />
-      <NavLink href="/dealflow-ai/messages" label="Messages" icon={Inbox} collapsed={collapsed} onNavigate={onNavigate} />
-      {canCareers && <NavLink href="/dealflow-ai/careers" label="Applicants" icon={Briefcase} collapsed={collapsed} onNavigate={onNavigate} />}
+      {canCareers && <NavLink href="/dealflow-ai/careers" label="Applicants" icon={UserCheck} collapsed={collapsed} onNavigate={onNavigate} />}
+
+      <SectionLabel collapsed={collapsed}>Pipelines</SectionLabel>
+      <NavLink href="/dealflow-ai/pipeline/jobs" label="Job Applications" icon={Briefcase} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/pipeline/interns" label="Internship" icon={GraduationCap} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/pipeline/trainees" label="Industrial Training" icon={Wrench} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/pipeline/clients" label="Clients" icon={Building2} collapsed={collapsed} onNavigate={onNavigate} />
+
+      <SectionLabel collapsed={collapsed}>AI Communications</SectionLabel>
+      <NavLink href="/dealflow-ai/messages" label="Live Chat" icon={MessageSquare} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/emails" label="Dedicated Email" icon={Mail} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/whatsapp" label="WhatsApp Hub" icon={Radio} badge="Live" collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/voice-calls" label="AI Voice Calls" icon={PhoneCall} collapsed={collapsed} onNavigate={onNavigate} />
+
+      <SectionLabel collapsed={collapsed}>Pre-Sale Meetings</SectionLabel>
+      <NavLink href="/dealflow-ai/meetings" label="Client Meetings" icon={Video} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/agents" label="AI Voice Agents" icon={Bot} collapsed={collapsed} onNavigate={onNavigate} />
+
+      <SectionLabel collapsed={collapsed}>Knowledge & Engine</SectionLabel>
+      <NavLink href="/dealflow-ai/knowledge-base" label="Knowledge Base" icon={BookOpen} collapsed={collapsed} onNavigate={onNavigate} />
+      <NavLink href="/dealflow-ai/integrations" label="Integrations & Sync" icon={Plug} collapsed={collapsed} onNavigate={onNavigate} />
     </nav>
   );
 }

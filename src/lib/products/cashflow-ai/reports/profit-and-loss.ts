@@ -25,9 +25,14 @@ export interface ProfitAndLossResult {
   hasUnratedForeignCurrency: boolean;
 }
 
-export async function getProfitAndLoss(opts: { dateFrom?: Date; dateTo?: Date } = {}): Promise<ProfitAndLossResult> {
-  const [accounts, rawLines] = await Promise.all([listAccounts(), allLinesInRange(opts)]);
-  const { lines, hasUnratedForeignCurrency } = await convertLinesToBase(rawLines, opts.dateTo ?? new Date());
+/**
+ * `includeClosing` keeps the entries that close a fiscal period (they move profit into Retained Earnings). The report leaves them out so a closed
+ * period still shows its profit; the balance sheet keeps them in, because there the posted Retained Earnings already holds the closed profit.
+ */
+export async function getProfitAndLoss(opts: { dateFrom?: Date; dateTo?: Date; includeClosing?: boolean } = {}): Promise<ProfitAndLossResult> {
+  const { includeClosing, ...range } = opts;
+  const [accounts, rawLines] = await Promise.all([listAccounts(), allLinesInRange({ ...range, excludeClosing: !includeClosing })]);
+  const { lines, hasUnratedForeignCurrency } = await convertLinesToBase(rawLines, range.dateTo ?? new Date());
   const accountById = new Map(accounts.map((a) => [a._id, a]));
   const totals = new Map<string, number>();
 
@@ -54,8 +59,8 @@ export async function getProfitAndLoss(opts: { dateFrom?: Date; dateTo?: Date } 
   const totalExpenses = round2(expenses.reduce((s, l) => s + l.amount, 0));
 
   return {
-    dateFrom: opts.dateFrom ? opts.dateFrom.toISOString() : null,
-    dateTo: opts.dateTo ? opts.dateTo.toISOString() : null,
+    dateFrom: range.dateFrom ? range.dateFrom.toISOString() : null,
+    dateTo: range.dateTo ? range.dateTo.toISOString() : null,
     income,
     expenses,
     totalIncome,

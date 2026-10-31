@@ -56,7 +56,7 @@ export default function InvoiceForm({
     lines: invoice
       ? invoice.items.map<EditableLine>((it) => ({
           description: it.description,
-          hsn: "",
+          hsn: it.hsnSac ?? "",
           quantity: String(it.quantity),
           uom: "pcs",
           unitPrice: String(it.unitPrice),
@@ -84,6 +84,7 @@ export default function InvoiceForm({
       quantity: l.quantity,
       unitPrice: l.unitPrice,
       taxRate: l.gstRate,
+      hsnSac: l.hsn,
     }));
     startTransition(async () => {
       const res = await saveInvoiceAction({ ...form, items }, invoice?._id);
@@ -177,6 +178,7 @@ export default function InvoiceForm({
             discount={form.discount}
             onDiscountChange={(v) => set("discount", v)}
             currency={form.currency}
+            showHsn
           />
           {errors.items && <p className="text-xs text-destructive">{errors.items}</p>}
 

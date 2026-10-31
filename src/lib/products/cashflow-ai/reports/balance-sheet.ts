@@ -43,7 +43,7 @@ export async function getBalanceSheet(asOf: Date = new Date()): Promise<BalanceS
   const [accounts, rawLines, pl] = await Promise.all([
     listAccounts(),
     allLinesInRange({ dateTo: asOf }),
-    getProfitAndLoss({ dateTo: asOf }),
+    getProfitAndLoss({ dateTo: asOf, includeClosing: true }),
   ]);
   const { lines, hasUnratedForeignCurrency: linesUnrated } = await convertLinesToBase(rawLines, asOf);
   const accountById = new Map(accounts.map((a) => [a._id, a]));

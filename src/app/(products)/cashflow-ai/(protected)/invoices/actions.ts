@@ -15,6 +15,7 @@ import { getClient } from "@/lib/products/sprintos/clients";
 import { isValidInvoiceStatus } from "@/lib/products/cashflow-ai/constants";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 import type { FmsLineItemInput } from "@/lib/products/cashflow-ai/pricing";
+import { hsnSacError, normalizeHsnSac } from "@/lib/products/cashflow-ai/gst/hsn";
 import { writeBlockReason } from "@/lib/platform/billing/enforce";
 
 export interface InvoiceActionResult {
@@ -44,6 +45,7 @@ interface RawLine {
   quantity: string;
   unitPrice: string;
   taxRate: string;
+  hsnSac?: string;
 }
 
 function parseItems(raw: unknown): FmsLineItemInput[] {
@@ -55,6 +57,7 @@ function parseItems(raw: unknown): FmsLineItemInput[] {
       quantity: Number(l.quantity) || 0,
       unitPrice: Number(l.unitPrice) || 0,
       taxRate: Number(l.taxRate) || 0,
+      hsnSac: normalizeHsnSac(l.hsnSac),
     }));
 }
 
@@ -73,6 +76,8 @@ export async function saveInvoiceAction(input: Record<string, unknown>, id?: str
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) return { ok: false, fieldErrors: { dueDate: "Enter a valid due date." } };
 
   const items = parseItems(input.items);
+  const badHsn = Array.isArray(input.items) ? (input.items as RawLine[]).filter((l) => l.description?.trim()).map((l) => hsnSacError(l.hsnSac)).find(Boolean) : null;
+  if (badHsn) return { ok: false, fieldErrors: { items: badHsn } };
   if (items.length === 0) return { ok: false, fieldErrors: { items: "Add at least one line item." } };
 
   const data: InvoiceWriteData = {

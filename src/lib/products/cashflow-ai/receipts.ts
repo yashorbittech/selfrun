@@ -8,6 +8,10 @@ import { getInvoice, applyReceiptToInvoice, invoiceBalance, type Invoice } from 
 import { checkReceiptRules } from "@/lib/products/cashflow-ai/receipt-rules";
 import { listBankAccounts } from "@/lib/products/cashflow-ai/bank-accounts";
 import { listCashAccounts } from "@/lib/products/cashflow-ai/cash-accounts";
+import type { StoredAttachment } from "@/lib/products/cashflow-ai/attachment-storage";
+import { recordAudit } from "@/lib/products/cashflow-ai/audit";
+import { getAccrualSettings } from "@/lib/products/cashflow-ai/accrual/settings";
+import { postingBlocked, syncReceiptTdsAccrual, trySync } from "@/lib/products/cashflow-ai/accrual/posting";
 import { postSystemTransaction, changeTransactionStatus } from "@/lib/products/cashflow-ai/transactions";
 
 /**
@@ -49,6 +53,13 @@ export interface Receipt extends AuditFields {
   bounceReason?: string | null;
   transactionId: string | null;
   notes: string | null;
+  /** Income tax the customer deducted before paying (TDS). The invoices are settled by the money received plus this. */
+  tdsDeducted?: number;
+  tdsSection?: string | null;
+  /** True for a payment that arrived through Razorpay: the gateway is its proof. */
+  viaGateway?: boolean;
+  /** Proof the money arrived: bank advice, cheque image, deposit slip. Added after the fact and never removed. */
+  documents?: StoredAttachment[];
 }
 
 export interface SerializedReceipt extends Omit<Receipt, "createdAt" | "updatedAt" | "deletedAt" | "receiptDate"> {
@@ -92,6 +103,29 @@ export async function generateReceiptNumber(year = new Date().getFullYear()): Pr
 export async function getReceipt(id: string): Promise<Receipt | null> {
   const collection = await getCollection();
   return collection.findOne({ _id: id, ...notDeleted });
+}
+
+export const MAX_RECEIPT_DOCUMENTS = 10;
+
+/** Adds a proof document to a receipt. Documents are evidence, so they can be added but not removed. */
+export async function addReceiptDocument(
+  id: string,
+  stored: StoredAttachment,
+  actorId: string,
+  actorEmail: string | null
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const collection = await getCollection();
+  const receipt = await collection.findOne({ _id: id, ...notDeleted });
+  if (!receipt) return { ok: false, error: "Receipt not found." };
+  if ((receipt.documents?.length ?? 0) >= MAX_RECEIPT_DOCUMENTS) return { ok: false, error: `A receipt can hold at most ${MAX_RECEIPT_DOCUMENTS} documents.` };
+  // the count is re-checked in the update itself so two uploads at once cannot pass the limit
+  const res = await collection.updateOne(
+    { _id: id, ...notDeleted, [`documents.${MAX_RECEIPT_DOCUMENTS - 1}`]: { $exists: false } },
+    { $push: { documents: stored }, $set: updateStamp(actorId) }
+  );
+  if (res.modifiedCount !== 1) return { ok: false, error: `A receipt can hold at most ${MAX_RECEIPT_DOCUMENTS} documents.` };
+  await recordAudit({ actorId, actorEmail, action: "update", entity: "receipt", entityId: id, entityLabel: receipt.receiptNumber, summary: `proof added: ${stored.filename}` });
+  return { ok: true };
 }
 
 export async function getReceiptByNumber(receiptNumber: string): Promise<Receipt | null> {
@@ -158,6 +192,8 @@ export interface RecordReceiptData {
   chequeBank?: string | null;
   /** Made by the Razorpay checkout (the gateway has already proved the money arrived), not entered by hand. */
   viaGateway?: boolean;
+  tdsDeducted?: number;
+  tdsSection?: string | null;
   notes: string | null;
 }
 
@@ -169,9 +205,17 @@ export async function recordReceipt(
   const amount = round2(data.amount);
   if (amount <= 0) return { ok: false, reason: "Enter a receipt amount." };
 
+  const tds = round2(data.tdsDeducted ?? 0);
+  if (!Number.isFinite(tds) || tds < 0) return { ok: false, reason: "TDS deducted cannot be negative." };
+  if (tds > 0) {
+    if (data.viaGateway) return { ok: false, reason: "A Razorpay payment carries no customer TDS." };
+    const tdsBlocked = await postingBlocked(data.receiptDate);
+    if (tdsBlocked) return { ok: false, reason: tdsBlocked };
+    if (!(await getAccrualSettings())) return { ok: false, reason: "To record TDS deducted by a customer, switch on accrual books first (Settings → Accrual books): the tax credit has to be booked against the invoice." };
+  }
   const allocatedTotal = round2(data.allocations.reduce((s, a) => s + a.amount, 0));
-  if (allocatedTotal > amount + 0.01) {
-    return { ok: false, reason: "Allocated amount cannot exceed the receipt total." };
+  if (allocatedTotal > round2(amount + tds) + 0.01) {
+    return { ok: false, reason: tds > 0 ? "The invoices settled cannot exceed the money received plus the TDS deducted." : "Allocated amount cannot exceed the receipt total." };
   }
 
   const invoices: Invoice[] = [];
@@ -180,6 +224,12 @@ export async function recordReceipt(
     const inv = await getInvoice(alloc.invoiceId);
     if (!inv) return { ok: false, reason: "One of the selected invoices was not found." };
     if (inv.customerId !== data.customerId) return { ok: false, reason: `${inv.invoiceNumber} does not belong to this customer.` };
+    if (inv.status === "cancelled" || inv.status === "void") return { ok: false, reason: `${inv.invoiceNumber} is ${inv.status}: a payment cannot be applied to it.` };
+    // a draft invoice that this payment issues has to be posted too: it must not fall in a closed period
+    if (inv.status === "draft") {
+      const blocked = await postingBlocked(inv.invoiceDate);
+      if (blocked) return { ok: false, reason: `${inv.invoiceNumber}: ${blocked}` };
+    }
     const outstanding = invoiceBalance(inv);
     if (alloc.amount > outstanding + 0.01) {
       return { ok: false, reason: `Allocation to ${inv.invoiceNumber} (${alloc.amount}) exceeds its outstanding balance (${outstanding}).` };
@@ -224,11 +274,13 @@ export async function recordReceipt(
         return { invoiceId: inv._id, invoiceNumber: inv.invoiceNumber, amount: round2(alloc.amount) };
       })
       .filter((a) => a.amount > 0),
-    advanceAmount: round2(amount - allocatedTotal),
+    advanceAmount: round2(amount + tds - allocatedTotal),
+    ...(tds > 0 ? { tdsDeducted: tds, tdsSection: data.tdsSection?.trim().slice(0, 20) || null } : {}),
     currency: data.currency || DEFAULT_CURRENCY,
     status: isCheque ? "pending_clearance" : "completed",
     transactionId: null,
     notes: data.notes,
+    ...(data.viaGateway ? { viaGateway: true } : {}),
     ...(isCheque ? { chequeNumber: data.chequeNumber!.trim(), chequeDate: data.chequeDate!, chequeBank: data.chequeBank!.trim() } : {}),
     ...createStamp(actorId),
   };
@@ -248,6 +300,7 @@ export async function recordReceipt(
   const txn = await postSystemTransaction(
     {
       type: "income",
+      accrualRole: "receivable",
       transactionDate: receiptDate,
       postingDate: receiptDate,
       amount,
@@ -275,6 +328,7 @@ export async function recordReceipt(
   doc.transactionId = txn._id;
 
   await collection.insertOne(doc);
+  if (doc.status === "completed" && tds > 0) await trySync(() => syncReceiptTdsAccrual(doc._id, { id: actorId, email: actorEmail }));
 
   // Wallet & Credits: a real receipt is the "first payment" qualifying event for a pending referral. Best-effort; never affects the receipt.
   try {
@@ -294,6 +348,14 @@ export async function voidReceipt(id: string, actorId: string): Promise<{ ok: bo
   const receipt = await collection.findOne({ _id: id, ...notDeleted });
   if (!receipt) return { ok: false, reason: "Receipt not found." };
   if (receipt.status === "voided") return { ok: true };
+  // A receipt booked before accrual books started went to income, not to the receivable: taking it back here would reopen the invoice
+  // without reopening the receivable. Correct it with a credit note or a journal from the CA.
+  if (receipt.status === "completed") {
+    const settings = await getAccrualSettings();
+    if (settings && receipt.createdAt.getTime() < settings.activatedAt.getTime()) {
+      return { ok: false, reason: "This receipt was recorded before accrual books were switched on, so it cannot be voided here. Ask your CA to correct it." };
+    }
+  }
 
   // A cheque that never cleared (or bounced) applied nothing and booked nothing, so there is nothing to take back.
   if (receipt.status === "completed") {
@@ -305,6 +367,7 @@ export async function voidReceipt(id: string, actorId: string): Promise<{ ok: bo
     }
   }
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "voided", ...updateStamp(actorId) } });
+  await trySync(() => syncReceiptTdsAccrual(id, { id: actorId, email: null }));
   await fmsEvents.receiptVoided({ id: receipt._id, receiptNumber: receipt.receiptNumber, customerName: receipt.customerName, amount: receipt.amount, currency: receipt.currency }, actorId);
   return { ok: true };
 }
@@ -323,10 +386,14 @@ export async function clearCheque(id: string, clearedOn: string, actorId: string
     if (!inv) return { ok: false, reason: `Invoice ${alloc.invoiceNumber} no longer exists.` };
     if (alloc.amount > invoiceBalance(inv) + 0.01) return { ok: false, reason: `${alloc.invoiceNumber} has been paid in the meantime: its balance is now less than this cheque's share. Bounce or void the cheque, or record it again against the right invoice.` };
   }
+  if ((r as { tdsDeducted?: number }).tdsDeducted) {
+    const blocked = await postingBlocked(clearedOn);
+    if (blocked) return { ok: false, reason: blocked };
+  }
   const date = new Date(`${clearedOn}T00:00:00`);
   const txn = await postSystemTransaction(
     {
-      type: "income", transactionDate: date, postingDate: date, amount: r.amount, currency: r.currency, paymentMethod: "cheque", sourceModule: "fms", sourceRecordId: r._id,
+      type: "income", accrualRole: "receivable", transactionDate: date, postingDate: date, amount: r.amount, currency: r.currency, paymentMethod: "cheque", sourceModule: "fms", sourceRecordId: r._id,
       customerId: r.customerId, vendorId: null, employeeId: null, projectId: null, department: null, accountId: null,
       fundAccountId: r.fundAccountId ?? null, fundAccountType: r.fundAccountType ?? null, taxAmount: 0,
       referenceNumber: `Cheque ${r.chequeNumber}`, description: `Receipt ${r.receiptNumber} from ${r.customerName} (cheque ${r.chequeNumber}, ${r.chequeBank})`, attachments: [],
@@ -337,6 +404,7 @@ export async function clearCheque(id: string, clearedOn: string, actorId: string
   if ("ok" in txn) return txn;
   for (const alloc of r.allocations) await applyReceiptToInvoice(alloc.invoiceId, alloc.amount, actorId);
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "completed", transactionId: txn._id, clearedAt: date, ...updateStamp(actorId) } });
+  await trySync(() => syncReceiptTdsAccrual(id, { id: actorId, email: actorEmail }));
   try {
     const { qualifyReferralForRecord } = await import("@/lib/wallet/referrals");
     await qualifyReferralForRecord({ clientId: r.customerId });

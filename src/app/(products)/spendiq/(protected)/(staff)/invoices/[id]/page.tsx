@@ -8,6 +8,7 @@ import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { InvoiceStatusBadge, PaymentStatusBadge } from "@/components/products/spendiq/StatusBadges";
+import { billFormSections, vendorsWithPan } from "@/lib/products/cashflow-ai/tds/bill-sections";
 import InvoiceForm from "@/components/products/spendiq/InvoiceForm";
 import InvoiceWorkflow from "@/components/products/spendiq/InvoiceWorkflow";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
@@ -36,7 +37,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
   if (!invoice) notFound();
   const i = serializeInvoice(invoice);
 
-  const [payments, vendors] = await Promise.all([listPaymentsForInvoice(id), listVendorOptions({ activeOnly: true })]);
+  const [payments, vendors, sections] = await Promise.all([listPaymentsForInvoice(id), listVendorOptions({ activeOnly: true }), billFormSections()]);
+  const withPan = await vendorsWithPan(vendors.map((v) => v._id));
 
   return (
     <div className="space-y-4">
@@ -47,7 +49,8 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
         actions={<>{canManage && !["paid", "partially_paid"].includes(i.status) && (
           <InvoiceForm
             invoice={i}
-            vendors={vendors.map((v) => ({ _id: v._id, companyName: v.companyName }))}
+            vendors={vendors.map((v) => ({ _id: v._id, companyName: v.companyName, hasPan: withPan.has(v._id) }))}
+            tdsSections={sections}
             trigger={
               <Button type="button" size="sm" variant="outline">
                 <Pencil className="size-3.5" data-icon="inline-start" />
@@ -71,6 +74,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <Field label="GST" value={formatMoney(i.gstAmount, i.currency)} />
               <Field label="Invoice total" value={formatMoney(i.totalAmount, i.currency)} />
               <Field label={`TDS (${i.tdsRate}%)`} value={formatMoney(i.tdsAmount, i.currency)} />
+              <Field label="TDS section" value={i.tdsSection ?? null} />
               <Field label="Net payable" value={formatMoney(i.netPayable, i.currency)} />
               <Field label="Paid to date" value={formatMoney(i.amountPaid, i.currency)} />
               <Field label="Outstanding" value={formatMoney(i.netPayable - i.amountPaid, i.currency)} />

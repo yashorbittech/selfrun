@@ -20,6 +20,7 @@ import {
   invoiceBalance,
   type InvoiceStatus,
 } from "@/lib/products/cashflow-ai/constants";
+import { syncInvoiceAccrual, trySync } from "@/lib/products/cashflow-ai/accrual/posting";
 import { priceLineItems, type FmsLineItem, type FmsLineItemInput } from "@/lib/products/cashflow-ai/pricing";
 
 /**
@@ -254,6 +255,10 @@ export async function updateInvoice(
     return { ok: false, reason: "Invoices with payments or credit notes applied cannot be edited." };
   }
   const priced = priceLineItems(data.items, data.discount);
+  // An invoice that was already in the opening balances cannot change its amount: the ledger carries it as it stood. Correct it with a credit note.
+  if ((existing as { openingAccrued?: boolean }).openingAccrued === true && Math.abs(priced.totalAmount - existing.totalAmount) > 0.005) {
+    return { ok: false, reason: "This invoice was issued before accrual books started, so its amount cannot be changed. Issue a credit note for the difference." };
+  }
   await collection.updateOne(
     { _id: id, ...notDeleted },
     {
@@ -274,6 +279,14 @@ export async function updateInvoice(
       },
     }
   );
+  const posted = await trySync(() => syncInvoiceAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    // the ledger could not follow (a closed period): put the invoice back as it was
+    const { _id: _omit, ...before } = existing;
+    void _omit;
+    await collection.updateOne({ _id: id }, { $set: before });
+    return { ok: false, reason: posted.error };
+  }
   return { ok: true };
 }
 
@@ -288,7 +301,16 @@ export async function setInvoiceStatus(
   if (!canTransitionInvoice(existing.status, status)) {
     return { ok: false, reason: `Cannot move a ${existing.status} invoice to ${status}.` };
   }
+  // Credit notes have already reduced what is owed on it: cancelling the invoice as well would take the same money out twice.
+  if ((status === "cancelled" || status === "void") && existing.amountCredited > 0.005) {
+    return { ok: false, reason: "This invoice has credit notes against it. Cancel the credit notes first, then cancel the invoice." };
+  }
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status, ...updateStamp(actorId) } });
+  const posted = await trySync(() => syncInvoiceAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { status: existing.status, updatedAt: existing.updatedAt, updatedBy: existing.updatedBy } });
+    return { ok: false, reason: posted.error };
+  }
   return { ok: true };
 }
 
@@ -305,8 +327,11 @@ export async function applyReceiptToInvoice(invoiceId: string, amount: number, a
   if (!inv) return;
   const amountPaid = round2(inv.amountPaid + amount);
   const balance = round2(inv.totalAmount - amountPaid - inv.amountCredited);
-  const status: InvoiceStatus = balance <= 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : inv.status === "overdue" ? "overdue" : "sent";
+  // A cancelled invoice stays cancelled whatever happens to the money paid against it.
+  const status: InvoiceStatus = inv.status === "cancelled" || inv.status === "void" ? inv.status : balance <= 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : inv.status === "overdue" ? "overdue" : "sent";
   await collection.updateOne({ _id: invoiceId, ...notDeleted }, { $set: { amountPaid, status, ...updateStamp(actorId) } });
+  // a draft invoice that has just been paid is now issued: it must be in the ledger before the receipt settles it
+  await trySync(() => syncInvoiceAccrual(invoiceId, { id: actorId, email: null }));
   await emitIfPaid(inv, status, actorId);
 }
 
@@ -317,8 +342,9 @@ export async function applyCreditToInvoice(invoiceId: string, amount: number, ac
   if (!inv) return;
   const amountCredited = round2(inv.amountCredited + amount);
   const balance = round2(inv.totalAmount - inv.amountPaid - amountCredited);
-  const status: InvoiceStatus = balance <= 0.01 ? "paid" : inv.amountPaid > 0 ? "partially_paid" : inv.status;
+  const status: InvoiceStatus = inv.status === "cancelled" || inv.status === "void" ? inv.status : balance <= 0.01 ? "paid" : inv.amountPaid > 0 ? "partially_paid" : inv.status;
   await collection.updateOne({ _id: invoiceId, ...notDeleted }, { $set: { amountCredited, status, ...updateStamp(actorId) } });
+  await trySync(() => syncInvoiceAccrual(invoiceId, { id: actorId, email: null }));
   await emitIfPaid(inv, status, actorId);
 }
 
@@ -330,5 +356,10 @@ export async function deleteInvoice(id: string, actorId: string): Promise<{ ok: 
     return { ok: false, reason: "Invoices with payments or credit notes cannot be deleted." };
   }
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { deletedAt: new Date(), ...updateStamp(actorId) } });
+  const posted = await trySync(() => syncInvoiceAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { deletedAt: null } });
+    return { ok: false, reason: posted.error };
+  }
   return { ok: true };
 }

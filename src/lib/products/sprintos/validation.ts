@@ -129,6 +129,7 @@ export function validateClient(input: Record<string, unknown>): Ok<ClientWriteDa
         addressLine: optStr(input.billingAddress, 300),
         city: optStr(input.billingCity, 120),
         country: optStr(input.billingCountry, 120),
+        state: optStr(input.billingState, 80),
         gstin: optStr(input.billingGstin, 40),
         currency: currency(input.billingCurrency),
         paymentTermsDays: paymentTermsDays,

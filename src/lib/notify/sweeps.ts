@@ -3,6 +3,11 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { fmsEvents } from "@/lib/notify/triggers/fms";
 import { lmsEvents } from "@/lib/notify/triggers/lms";
 import { overdueInvoices, invoicesDueWithin } from "@/lib/products/cashflow-ai/receivables";
+import { listFilings } from "@/lib/products/cashflow-ai/compliance/filings";
+import { filingState } from "@/lib/products/cashflow-ai/compliance/filings-core";
+import { getPlan, loadWork } from "@/lib/products/cashflow-ai/work/store";
+import { sortInstances, summarise } from "@/lib/products/cashflow-ai/work/engine";
+import { istToday } from "@/lib/products/cashflow-ai/accrual/core";
 import { overdueBills } from "@/lib/products/cashflow-ai/payables";
 import { getStaleLeadsSummary } from "@/lib/leads";
 import { getStaleApplicationsSummary } from "@/lib/career-applications";
@@ -40,6 +45,18 @@ export const runFmsSweep = () =>
     const [overdue, soon, bills] = await Promise.all([overdueInvoices(), invoicesDueWithin(3), overdueBills()]);
     await fmsEvents.receivablesDigest({ ...overdue }, { ...soon });
     await fmsEvents.payablesDigest(bills);
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const filings = (await listFilings()).map((f) => ({ name: f.form ? `${f.name} (${f.form})` : f.name, state: filingState(f, todayStr) }));
+    const pick = (st: string) => filings.filter((f) => f.state === st).map((f) => f.name);
+    await fmsEvents.filingsDigest({ count: pick("overdue").length, names: pick("overdue") }, { count: pick("due_soon").length, names: pick("due_soon") });
+    // "My work": only once the company has switched the plan on
+    if (await getPlan()) {
+      const { instances } = await loadWork(istToday());
+      const sum = summarise(instances);
+      const sorted = sortInstances(instances);
+      const titlesOf = (state: string) => sorted.filter((i) => i.state === state).map((i) => i.task.title);
+      await fmsEvents.workDigest({ overdue: sum.overdue, dueToday: sum.dueToday, overdueTitles: titlesOf("overdue"), dueTodayTitles: titlesOf("due_today"), day: istToday() });
+    }
   });
 
 export const runLmsSweep = () =>

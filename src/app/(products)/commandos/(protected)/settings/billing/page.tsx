@@ -79,7 +79,7 @@ export default async function BillingSettingsPage() {
   const pricing = sub.pricing && sub.pricing.planId === sub.planId && sub.pricing.interval === sub.interval ? sub.pricing : null;
 
   const usageRows = await getUsageSummary().catch(() => []);
-  const showcase = buildShowcase(plans);
+  const showcase = buildShowcase(plans).filter((p) => p.id !== "enterprise");
   const perksOf = (sp: (typeof showcase)[number] | undefined) =>
     sp ? [{ label: "Users", value: sp.seats === null ? "Unlimited" : sp.seats === 1 ? "1" : `Up to ${sp.seats.toLocaleString("en-IN")}` }, ...sp.limits.filter((l) => l.included).map((l) => ({ label: l.short, value: l.shortValue }))] : [];
   const options: PlanOption[] = plans.filter((p) => !p.lifetimeFree && !p.contactSales).map((p) => ({

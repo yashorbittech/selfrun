@@ -146,9 +146,11 @@ const nextConfig: NextConfig = {
     turbopackInputSourceMaps: false,
     turbopackScopeHoisting: false,
     memoryBasedWorkersCount: true,
-    ...(process.env.NODE_ENV !== "production" && {
-      serverActions: { allowedOrigins: ['localhost:3000', '*.localhost:3000', '*.devtunnels.ms', '*.ngrok-free.dev'] },
-    }),
+    serverActions: {
+      // Server actions accept uploads (a GSTR-2B file is up to 5 MB, a bill or receipt up to 15 MB as sent by their own forms); the default is 1 MB.
+      bodySizeLimit: '16mb',
+      ...(process.env.NODE_ENV !== "production" && { allowedOrigins: ['localhost:3000', '*.localhost:3000', '*.devtunnels.ms', '*.ngrok-free.dev'] }),
+    },
   },
 };
 

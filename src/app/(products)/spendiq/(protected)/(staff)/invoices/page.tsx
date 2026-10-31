@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import KpiCard from "@/components/products/dealflow-ai/KpiCard";
 import KpiGrid from "@/components/products/dealflow-ai/KpiGrid";
 import PrmsDataTable from "@/components/products/spendiq/PrmsDataTable";
+import { billFormSections, vendorsWithPan } from "@/lib/products/cashflow-ai/tds/bill-sections";
 import InvoiceForm from "@/components/products/spendiq/InvoiceForm";
 import { InvoiceStatusBadge } from "@/components/products/spendiq/StatusBadges";
 import { RenewalHint } from "@/components/products/spendiq/RenewalHint";
@@ -24,16 +25,18 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
   const sortBy = sp.sortBy || "dueDate";
   const sortDir = sp.sortDir === "desc" ? "desc" : "asc";
 
-  const [result, vendors, total, pending, overdue, payable] = await Promise.all([
+  const [result, vendors, total, pending, overdue, payable, sections] = await Promise.all([
     searchInvoices({ search: sp.search, status, vendorId: sp.vendorId, page, pageSize: 20, sortBy, sortDir }),
     listVendorOptions({ activeOnly: true }),
     countInvoices(),
     countInvoices({ status: "pending" }),
     countInvoices({ status: "overdue" }),
     outstandingPayable(),
+    canManage ? billFormSections() : Promise.resolve([]),
   ]);
 
-  const vOpts = vendors.map((v) => ({ _id: v._id, companyName: v.companyName }));
+  const withPan = canManage ? await vendorsWithPan(vendors.map((v) => v._id)) : new Set<string>();
+  const vOpts = vendors.map((v) => ({ _id: v._id, companyName: v.companyName, hasPan: withPan.has(v._id) }));
 
   return (
     <div className="space-y-4">
@@ -44,6 +47,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
         actions={<>{canManage && (
           <InvoiceForm
             vendors={vOpts}
+            tdsSections={sections}
             trigger={
               <Button type="button" size="sm">
                 <Plus className="size-3.5" data-icon="inline-start" />

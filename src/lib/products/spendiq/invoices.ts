@@ -11,6 +11,7 @@ import {
   formatCode,
   type AuditFields,
 } from "@/lib/products/spendiq/db";
+import { syncBillAccrual, trySync } from "@/lib/products/cashflow-ai/accrual/posting";
 import { DEFAULT_INVOICE_STATUS, DEFAULT_CURRENCY, round2, paymentTermDays, type InvoiceStatus } from "@/lib/products/spendiq/constants";
 import { getPurchaseOrder } from "@/lib/products/spendiq/purchase-orders";
 import { listReceiptsForPo } from "@/lib/products/spendiq/goods-receipts";
@@ -32,6 +33,8 @@ export interface Invoice extends AuditFields {
   gstAmount: number;
   tdsRate: number;
   tdsAmount: number;
+  /** The TDS section the deduction was made under (upper-case code from the company's TDS settings); null when none was chosen. */
+  tdsSection?: string | null;
   totalAmount: number;
   /** Net payable after TDS. */
   netPayable: number;
@@ -159,6 +162,8 @@ export interface InvoiceWriteData {
   subtotal: number;
   gstAmount: number;
   tdsRate: number;
+  /** undefined = leave the bill's section as it is (e.g. when only an attachment changes). */
+  tdsSection?: string | null;
   currency: string;
   notes: string | null;
   storageKey?: string | null;
@@ -202,6 +207,7 @@ export async function createInvoice(data: InvoiceWriteData, actorId: string): Pr
     invoiceDate: data.invoiceDate,
     dueDate: dueDate ?? addDays(data.invoiceDate, 30),
     ...totals,
+    tdsSection: data.tdsSection ?? null,
     amountPaid: 0,
     currency: data.currency || DEFAULT_CURRENCY,
     status: DEFAULT_INVOICE_STATUS,
@@ -213,6 +219,12 @@ export async function createInvoice(data: InvoiceWriteData, actorId: string): Pr
     ...createStamp(actorId),
   };
   await collection.insertOne(doc);
+  const posted = await trySync(() => syncBillAccrual(doc._id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    // never leave a bill the ledger does not know about
+    await collection.deleteOne({ _id: doc._id });
+    throw new Error(posted.error);
+  }
   return doc;
 }
 
@@ -222,6 +234,10 @@ export async function updateInvoice(id: string, data: InvoiceWriteData, actorId:
   if (!existing) return { ok: false, reason: "Invoice not found." };
   if (["paid", "partially_paid"].includes(existing.status)) return { ok: false, reason: "Paid invoices cannot be edited." };
   const totals = computeTotals(data.subtotal, data.gstAmount, data.tdsRate);
+  // A bill that was already in the opening balances cannot change its amount: the ledger carries it as it stood. Correct it with a debit note.
+  if ((existing as { openingAccrued?: boolean }).openingAccrued === true && Math.abs(totals.netPayable - existing.netPayable) > 0.005) {
+    return { ok: false, reason: "This bill was entered before accrual books started, so its amount cannot be changed. Record a debit note for the difference." };
+  }
   await collection.updateOne(
     { _id: id, ...notDeleted },
     {
@@ -230,6 +246,7 @@ export async function updateInvoice(id: string, data: InvoiceWriteData, actorId:
         invoiceDate: data.invoiceDate,
         dueDate: data.dueDate ?? existing.dueDate,
         ...totals,
+        ...(data.tdsSection !== undefined ? { tdsSection: data.tdsSection } : {}),
         currency: data.currency || DEFAULT_CURRENCY,
         notes: data.notes,
         ...(data.storageKey !== undefined ? { storageKey: data.storageKey, filename: data.filename ?? null } : {}),
@@ -237,13 +254,27 @@ export async function updateInvoice(id: string, data: InvoiceWriteData, actorId:
       },
     }
   );
+  const posted = await trySync(() => syncBillAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    const { _id: _omit, ...before } = existing;
+    void _omit;
+    await collection.updateOne({ _id: id }, { $set: before });
+    return { ok: false, reason: posted.error };
+  }
   return { ok: true };
 }
 
-export async function setInvoiceStatus(id: string, status: InvoiceStatus, actorId: string): Promise<{ ok: boolean }> {
+export async function setInvoiceStatus(id: string, status: InvoiceStatus, actorId: string): Promise<{ ok: boolean; reason?: string }> {
   const collection = await getCollection();
   const before = await collection.findOne({ _id: id, ...notDeleted }, { projection: { status: 1, invoiceNumber: 1, vendorName: 1, createdBy: 1 } });
   const res = await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status, ...updateStamp(actorId) } });
+  if (res.modifiedCount === 1 && before) {
+    const posted = await trySync(() => syncBillAccrual(id, { id: actorId, email: null }));
+    if (!posted.ok) {
+      await collection.updateOne({ _id: id }, { $set: { status: before.status } });
+      return { ok: false, reason: posted.error };
+    }
+  }
   // Whoever recorded the invoice hears when its status is decided (approved, rejected, disputed …), from whichever screen it was decided.
   if (res.modifiedCount === 1 && before && before.status !== status && before.createdBy && before.createdBy !== actorId) {
     await notify({
@@ -263,7 +294,8 @@ export async function applyPaymentToInvoice(invoiceId: string, amount: number, a
   const inv = await collection.findOne({ _id: invoiceId, ...notDeleted });
   if (!inv) return;
   const amountPaid = round2(inv.amountPaid + amount);
-  const status: InvoiceStatus = amountPaid >= inv.netPayable - 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : inv.status;
+  // A cancelled bill stays cancelled whatever happens to the payments made against it.
+  const status: InvoiceStatus = inv.status === "cancelled" ? inv.status : amountPaid >= inv.netPayable - 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : inv.status;
   await collection.updateOne({ _id: invoiceId, ...notDeleted }, { $set: { amountPaid, status, ...updateStamp(actorId) } });
 }
 
@@ -273,5 +305,10 @@ export async function deleteInvoice(id: string, actorId: string): Promise<{ ok: 
   if (!existing) return { ok: false, reason: "Invoice not found." };
   if (existing.amountPaid > 0) return { ok: false, reason: "Invoices with payments cannot be deleted." };
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { deletedAt: new Date(), ...updateStamp(actorId) } });
+  const posted = await trySync(() => syncBillAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { deletedAt: null } });
+    return { ok: false, reason: posted.error };
+  }
   return { ok: true };
 }

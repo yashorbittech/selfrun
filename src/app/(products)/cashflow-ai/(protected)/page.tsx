@@ -99,6 +99,13 @@ function SectionHeader({
   );
 }
 
+import { AttentionCard, GetStartedCard } from "@/components/products/cashflow-ai/home/HomeCards";
+import { loadAttention, loadSetupSteps } from "@/lib/products/cashflow-ai/home/home";
+import { canViewFinancialStatements as canSeeBooks } from "@/lib/fms-roles";
+import { istToday } from "@/lib/products/cashflow-ai/accrual/core";
+import TodayWorkCard from "@/components/products/cashflow-ai/home/TodayWorkCard";
+import { loadTodayWork } from "@/lib/products/cashflow-ai/home/today-work";
+
 export default async function FmsDashboardPage({
   searchParams,
 }: {
@@ -106,6 +113,10 @@ export default async function FmsDashboardPage({
 }) {
   const sp = await searchParams;
   const user = await getCurrentFmsUser();
+  // What needs doing, for people who can see the books (the same checks as CA & Compliance, so a number is never different here)
+  const showTodo = !!user && canSeeBooks(user);
+  const [attention, setupSteps] = showTodo ? await Promise.all([loadAttention(istToday()), loadSetupSteps()]) : [null, null];
+  const todayWork = showTodo ? await loadTodayWork(istToday()) : null;
   const panelName = await panelNameMap();
 
   const granularity: DashboardGranularity = VALID_GRANULARITIES.includes(sp.granularity as DashboardGranularity)
@@ -228,6 +239,15 @@ export default async function FmsDashboardPage({
               hasActiveFilters={hasActiveFilters}
             />}
       />
+
+      {todayWork && <TodayWorkCard work={todayWork} />}
+
+      {attention && setupSteps && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <AttentionCard items={attention.items} allChecked={attention.allChecked} />
+          <GetStartedCard steps={setupSteps} />
+        </div>
+      )}
 
       {/* ── §1: Top Executive KPI Grid ── */}
       <DashboardSection>

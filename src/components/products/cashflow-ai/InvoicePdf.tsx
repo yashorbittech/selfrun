@@ -56,7 +56,7 @@ function InvoiceDocument({ invoice }: { invoice: Invoice }) {
         </View>
         {invoice.items.map((it, i) => (
           <View key={i} style={s.tRow}>
-            <Text style={{ flex: 1 }}>{it.description}</Text>
+            <Text style={{ flex: 1 }}>{it.description}{it.hsnSac ? `  (HSN/SAC ${it.hsnSac})` : ""}</Text>
             <Text style={{ width: 45, textAlign: "right" }}>{it.quantity}</Text>
             <Text style={{ width: 70, textAlign: "right" }}>{money(it.unitPrice, invoice.currency)}</Text>
             <Text style={{ width: 40, textAlign: "right" }}>{it.taxRate}%</Text>

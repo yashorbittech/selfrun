@@ -41,7 +41,7 @@ const PAGES: [string, number, "daily" | "weekly" | "monthly" | "yearly"][] = [
 ];
 
 export async function saasSitemap(origin: string): Promise<MetadataRoute.Sitemap> {
-  const plans = ["free", "starter", "growth", "business", "enterprise"];
+  const plans = ["free", "starter", "growth", "business"];
   const panels = (await listPanels().catch(() => [])).filter((p) => p.active && MODULE_COPY[p.key]);
   const now = new Date();
   type Row = { path: string; priority: number; freq: "daily" | "weekly" | "monthly" | "yearly"; last?: Date };

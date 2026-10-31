@@ -3,6 +3,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
 import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/products/cashflow-ai/db";
+import { syncDebitNoteAccrual, trySync } from "@/lib/products/cashflow-ai/accrual/posting";
 import { round2, type NoteStatus, DEFAULT_NOTE_STATUS } from "@/lib/products/cashflow-ai/constants";
 import { getInvoice as getPrmsBill } from "@/lib/products/spendiq/invoices";
 
@@ -161,6 +162,11 @@ export async function issueDebitNote(id: string, actorId: string): Promise<{ ok:
     { _id: id, ...notDeleted },
     { $set: { status: "issued", issuedAt: new Date(), ...updateStamp(actorId) } }
   );
+  const posted = await trySync(() => syncDebitNoteAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { status: "draft", issuedAt: null } });
+    return { ok: false, reason: posted.error };
+  }
   await fmsEvents.debitNote({ id: note._id, debitNoteNumber: note.debitNoteNumber, amount: note.amount }, "issued", actorId);
   return { ok: true };
 }
@@ -171,6 +177,11 @@ export async function cancelDebitNote(id: string, actorId: string): Promise<{ ok
   if (!note) return { ok: false, reason: "Debit note not found." };
   if (note.status !== "issued") return { ok: false, reason: "Only an issued debit note can be cancelled." };
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "cancelled", ...updateStamp(actorId) } });
+  const posted = await trySync(() => syncDebitNoteAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { status: "issued" } });
+    return { ok: false, reason: posted.error };
+  }
   await fmsEvents.debitNote({ id: note._id, debitNoteNumber: note.debitNoteNumber, amount: note.amount }, "cancelled", actorId);
   return { ok: true };
 }

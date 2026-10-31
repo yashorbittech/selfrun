@@ -27,6 +27,7 @@ export default function LineItemsEditor({
   onDiscountChange,
   currency = "INR",
   showPricing = true,
+  showHsn = false,
 }: {
   lines: EditableLine[];
   onChange: (lines: EditableLine[]) => void;
@@ -34,6 +35,8 @@ export default function LineItemsEditor({
   onDiscountChange?: (v: string) => void;
   currency?: string;
   showPricing?: boolean;
+  /** Per-line HSN / SAC input (invoices; GST returns need it). */
+  showHsn?: boolean;
 }) {
   function set(i: number, key: keyof EditableLine, value: string) {
     onChange(lines.map((l, idx) => (idx === i ? { ...l, [key]: value } : l)));
@@ -78,6 +81,15 @@ export default function LineItemsEditor({
                 <Trash2 className="size-3.5 text-destructive" />
               </Button>
             </div>
+            {showHsn && (
+              <Input
+                value={l.hsn}
+                onChange={(e) => set(i, "hsn", e.target.value.replace(/\D/g, "").slice(0, 8))}
+                inputMode="numeric"
+                placeholder="HSN / SAC code (4, 6 or 8 digits, optional)"
+                aria-label="HSN or SAC code"
+              />
+            )}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Input type="number" min={0} value={l.quantity} onChange={(e) => set(i, "quantity", e.target.value)} placeholder="Qty" />
               <Select value={l.uom || "pcs"} onValueChange={(v) => set(i, "uom", v ?? "pcs")}>

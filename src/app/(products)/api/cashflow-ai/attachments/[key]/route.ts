@@ -20,13 +20,14 @@ async function handleGET(_req: NextRequest, { params }: Context) {
   const { key } = await params;
 
   const db = await getDb();
-  const txn = await db
-    .collection<{ attachments?: { storageKey: string; filename: string; contentType: string }[] }>("fms_transactions")
-    .findOne({ "attachments.storageKey": key, deletedAt: null });
+  type Stored = { storageKey: string; filename: string; contentType: string };
+  const txn = await db.collection<{ attachments?: Stored[] }>("fms_transactions").findOne({ "attachments.storageKey": key, deletedAt: null });
+  // proof documents added to a customer receipt
+  const receipt = txn ? null : await db.collection<{ documents?: Stored[] }>("fms_receipts").findOne({ "documents.storageKey": key, deletedAt: null });
 
-  if (!txn) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!txn && !receipt) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const meta = txn.attachments?.find((a) => a.storageKey === key);
+  const meta = (txn?.attachments ?? receipt?.documents)?.find((a) => a.storageKey === key);
   const object = await readAttachmentStream(key);
   if (!object) return NextResponse.json({ error: "Not found" }, { status: 404 });
 

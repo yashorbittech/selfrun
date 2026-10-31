@@ -1,292 +1,378 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Search, Send, Paperclip, FileQuestion, Download, X, MessagesSquare, ExternalLink, StickyNote } from "lucide-react";
-import GlassCard from "@/components/products/dealflow-ai/GlassCard";
+import {
+  Search,
+  Send,
+  Sparkles,
+  PhoneCall,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+  Building2,
+  CheckCircle2,
+  User,
+  Clock,
+  ArrowRight,
+  ExternalLink,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { sendLeadMessageAction } from "../leads/actions";
-import type { SerializedLeadMessage, LeadMessageAttachment } from "@/lib/lead-management/types";
-import type { LeadConversationSummary } from "@/lib/lead-management/messages";
+import { listUnifiedContacts, listMessagesForContact, sendOmnichannelMessage } from "@/lib/dealflow-ai/store";
+import type { PipelineTab, UnifiedPipelineContact, OmnichannelMessage } from "@/lib/dealflow-ai/types";
 
-const TYPE_LABEL: Record<string, string> = {
-  job_applicant: "Job Applicant",
-  intern: "Intern",
-  trainee: "Trainee",
-  client: "Client",
-};
-
-function timeAgo(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const min = Math.floor(diffMs / 60000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  const day = Math.floor(hr / 24);
-  if (day < 7) return `${day}d ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function when(iso: string) {
-  return new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-}
-
-function AttachmentView({ a }: { a: LeadMessageAttachment }) {
-  const url = `/api/lead-messages/files/${a.storageKey}`;
-  if (a.kind === "image") {
-    return (
-      <a href={url} target="_blank" rel="noreferrer" className="mt-1.5 block max-w-[200px] overflow-hidden rounded-xl border border-border/60">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={url} alt={a.filename} className="max-h-48 w-full object-cover" />
-      </a>
-    );
-  }
-  return (
-    <a href={url} target="_blank" rel="noreferrer" className="lms-chip mt-1.5 max-w-[200px] hover:border-primary/40">
-      <Download className="size-3" />
-      <span className="truncate">{a.filename}</span>
-      <span className="text-muted-foreground/70">{(a.size / 1024).toFixed(0)} KB</span>
-    </a>
-  );
-}
+const TABS: { id: PipelineTab; label: string; icon: typeof Briefcase }[] = [
+  { id: "jobs", label: "Job Applications", icon: Briefcase },
+  { id: "interns", label: "Internship", icon: GraduationCap },
+  { id: "trainees", label: "Industrial Training", icon: Wrench },
+  { id: "clients", label: "Clients", icon: Building2 },
+];
 
 export default function LmsMessagesInbox({
-  conversations,
   initialLeadId,
 }: {
-  conversations: LeadConversationSummary[];
+  conversations?: unknown[];
   initialLeadId?: string;
 }) {
-  const [convos, setConvos] = useState(conversations);
-  const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(
-    (initialLeadId && conversations.some((c) => c.leadId === initialLeadId) ? initialLeadId : conversations[0]?.leadId) ?? null
-  );
-  const [messages, setMessages] = useState<SerializedLeadMessage[]>([]);
-  const [loadingThread, setLoadingThread] = useState(false);
-  const [text, setText] = useState("");
-  const [docReq, setDocReq] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [pending, start] = useTransition();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<PipelineTab>("clients");
+  const [contacts, setContacts] = useState<UnifiedPipelineContact[]>([]);
+  const [selectedContactId, setSelectedContactId] = useState<string>("");
+  const [messages, setMessages] = useState<OmnichannelMessage[]>([]);
+  const [search, setSearch] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiRationale, setAiRationale] = useState<string | null>(null);
+
   const listRef = useRef<HTMLDivElement>(null);
-  const seenIds = useRef(new Set<string>());
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return convos;
-    return convos.filter((c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
-  }, [convos, query]);
-
-  const selected = convos.find((c) => c.leadId === selectedId) ?? null;
-
-  // Load the full thread whenever the selected lead changes, and clear its unread flag.
+  // Load contacts for the active tab (real DB data)
   useEffect(() => {
-    if (!selectedId) return;
-    let cancelled = false;
-    setLoadingThread(true);
-    fetch(`/api/dealflow-ai/leads/${selectedId}/messages`)
-      .then((res) => res.json())
-      .then((json: { messages?: SerializedLeadMessage[] }) => {
-        if (cancelled) return;
-        const msgs = json.messages ?? [];
-        seenIds.current = new Set(msgs.map((m) => m._id));
-        setMessages(msgs);
+    const loaded = listUnifiedContacts(activeTab);
+    setContacts(loaded);
+    if (loaded.length > 0) {
+      const match = initialLeadId && loaded.some((c) => c.id === initialLeadId);
+      setSelectedContactId(match ? initialLeadId : loaded[0].id);
+    } else {
+      setSelectedContactId("");
+    }
+    setAiRationale(null);
+
+    // Fetch real contacts from MongoDB
+    fetch(`/api/dealflow-ai/contacts?pipeline=${activeTab}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.contacts && data.contacts.length > 0) {
+          setContacts(data.contacts);
+          const newMatch = initialLeadId && data.contacts.some((c: UnifiedPipelineContact) => c.id === initialLeadId);
+          setSelectedContactId(newMatch ? initialLeadId! : data.contacts[0].id);
+        }
       })
-      .finally(() => {
-        if (!cancelled) setLoadingThread(false);
-      });
-    setConvos((prev) => prev.map((c) => (c.leadId === selectedId ? { ...c, hasUnreadPortalReply: false } : c)));
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedId]);
+      .catch(() => {/* keep in-memory fallback */});
+  }, [activeTab, initialLeadId]);
 
-  // Live updates for whichever conversation is open.
+  // Load messages for selected contact
   useEffect(() => {
-    if (!selectedId) return;
-    const source = new EventSource(`/api/dealflow-ai/leads/${selectedId}/messages/stream`);
-    source.onmessage = (evt) => {
-      try {
-        const data = JSON.parse(evt.data) as { type: string; event?: { kind: string; payload: { message?: SerializedLeadMessage } } };
-        if (data.type !== "event" || data.event?.kind !== "message") return;
-        const message = data.event.payload.message;
-        if (!message || message.visibility !== "portal" || seenIds.current.has(message._id)) return;
-        seenIds.current.add(message._id);
-        setMessages((prev) => [...prev, message]);
-        setConvos((prev) => {
-          const idx = prev.findIndex((c) => c.leadId === selectedId);
-          if (idx === -1) return prev;
-          const updated = { ...prev[idx], lastMessage: message, messageCount: prev[idx].messageCount + 1 };
-          return [updated, ...prev.slice(0, idx), ...prev.slice(idx + 1)];
-        });
-      } catch {
-        /* ignore malformed frames */
-      }
-    };
-    return () => source.close();
-  }, [selectedId]);
+    if (!selectedContactId) {
+      setMessages([]);
+      return;
+    }
+    const msgs = listMessagesForContact(selectedContactId, "chat");
+    setMessages(msgs);
+  }, [selectedContactId]);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
+    if (listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
   }, [messages]);
 
-  function onPickFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) setFile(f);
-    e.target.value = "";
-  }
+  const selectedContact = contacts.find((c) => c.id === selectedContactId) ?? contacts[0] ?? null;
 
-  async function submit() {
-    if (!selectedId || (!text.trim() && !file)) return;
-    setUploading(true);
+  const handleGenerateAiReply = async () => {
+    if (!selectedContact) return;
+    setIsGeneratingAi(true);
+
     try {
-      let attachments: LeadMessageAttachment[] = [];
-      if (file) {
-        const form = new FormData();
-        form.append("file", file);
-        form.append("leadId", selectedId);
-        const res = await fetch("/api/lead-messages/upload", { method: "POST", body: form });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Upload failed.");
-        attachments = [json.attachment];
-      }
-      const body = text;
-      start(async () => {
-        const res = await sendLeadMessageAction(selectedId, body, docReq ? "document_request" : "message", attachments);
-        if (res.error) return void toast.error(res.error);
-        setText("");
-        setDocReq(false);
-        setFile(null);
+      const res = await fetch("/api/dealflow-ai/ai/generate-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          channel: "chat",
+          category: activeTab,
+          contactName: selectedContact.name,
+          contactIdentifier: selectedContact.email || selectedContact.phone,
+          clientSource: selectedContact.sourceLabel,
+          serviceCategory: selectedContact.titleOrService,
+          budgetOrSalary: selectedContact.budgetOrSalary,
+          previousMessages: messages.map((m) => ({ sender: m.senderName, text: m.body })),
+        }),
       });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Couldn't send that message.");
+
+      const data = await res.json();
+      if (data.ok && data.draft) {
+        // Auto-fill directly into composer input!
+        setInputText(data.draft);
+        setAiRationale(data.rationale);
+        toast.success("✨ AI response generated and filled into chat composer! You can review, edit, or hit Send.");
+      } else {
+        toast.error(data.error || "Failed to generate AI response.");
+      }
+    } catch {
+      toast.error("Network error while generating AI response.");
     } finally {
-      setUploading(false);
+      setIsGeneratingAi(false);
     }
-  }
+  };
+
+  const handleSendMessage = () => {
+    if (!inputText.trim() || !selectedContact) return;
+
+    const newMsg = sendOmnichannelMessage({
+      pipeline: activeTab,
+      contactId: selectedContact.id,
+      channel: "chat",
+      direction: "outbound",
+      senderName: "Operations Staff (Human Approved)",
+      senderIdentifier: "support@selfrun.in",
+      recipientIdentifier: selectedContact.email || selectedContact.phone,
+      body: inputText,
+      isAiGenerated: Boolean(aiRationale),
+    });
+
+    setMessages((prev) => [...prev, newMsg]);
+    setInputText("");
+    setAiRationale(null);
+    toast.success("Message dispatched to contact's portal session!");
+  };
+
+  const filteredContacts = contacts.filter((c) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      c.name.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q) ||
+      c.phone.includes(q) ||
+      c.titleOrService.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[20rem_1fr]">
-      {/* Conversation list */}
-      <GlassCard interactive={false} containerClassName="min-h-0 h-full flex flex-col">
-        <div className="flex flex-col gap-2 border-b border-border/50 p-3">
-          <p className="text-sm font-semibold text-foreground">Conversations</p>
-          <div className="relative">
-            <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search leads…"
-              className="w-full rounded-xl border border-border/50 bg-background py-1.5 pr-3 pl-8 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
-            />
-          </div>
+    <div className="flex h-[calc(100vh-115px)] min-h-[600px] flex-col gap-3">
+      {/* 4 Pipeline Tabs */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-2">
+        <div className="flex rounded-xl border border-border/60 bg-muted/30 p-1">
+          {TABS.map((t) => {
+            const Icon = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={cn(
+                  "flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-bold transition-all",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="size-3.5" />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {filtered.length === 0 && <p className="p-4 text-center text-xs text-muted-foreground">No conversations yet.</p>}
-          {filtered.map((c) => (
-            <button
-              key={c.leadId}
-              onClick={() => setSelectedId(c.leadId)}
-              className={cn(
-                "flex w-full flex-col gap-0.5 border-b border-border/30 px-3 py-2.5 text-left transition-colors hover:bg-muted/40",
-                selectedId === c.leadId && "bg-primary/10"
-              )}
-            >
-              <div className="flex items-center gap-1.5">
-                {c.hasUnreadPortalReply && <span className="size-1.5 shrink-0 rounded-full bg-primary" />}
-                <span className={cn("truncate text-sm", c.hasUnreadPortalReply ? "font-bold text-foreground" : "font-medium text-foreground")}>{c.name}</span>
-                <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">{timeAgo(c.lastMessage.createdAt)}</span>
-              </div>
-              <p className={cn("truncate text-xs", c.hasUnreadPortalReply ? "font-semibold text-foreground" : "text-muted-foreground")}>
-                {c.lastMessage.authorType === "staff" ? "You: " : ""}
-                {c.lastMessage.body || (c.lastMessage.attachments.length ? "Sent an attachment" : "")}
-              </p>
-              <span className="text-[10px] text-muted-foreground">{TYPE_LABEL[c.type] ?? c.type} · {c.code}</span>
-            </button>
-          ))}
+
+        <div className="relative w-full max-w-xs">
+          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={`Search ${activeTab}...`}
+            className="rounded-xl pl-9 text-xs"
+          />
         </div>
-      </GlassCard>
+      </div>
 
-      {/* Thread */}
-      <GlassCard interactive={false} containerClassName="min-h-0 h-full flex flex-col">
-        {!selected ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
-            <MessagesSquare className="size-6" />
-            <p className="text-sm">Select a conversation to view messages.</p>
+      {/* Main Two-Pane Chat View */}
+      <div className="grid min-h-0 flex-1 grid-cols-12 gap-4">
+        {/* Left Contacts List */}
+        <div className="col-span-12 flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/60 shadow-sm md:col-span-4">
+          <div className="border-b border-border/60 bg-muted/20 px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+            <span>{activeTab.toUpperCase()} Contacts ({filteredContacts.length})</span>
+            <span className="text-[10px] text-primary font-bold">Live Synchronized</span>
           </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{selected.name}</p>
-                <p className="text-xs text-muted-foreground">{TYPE_LABEL[selected.type] ?? selected.type} · {selected.code} · {selected.email}</p>
-              </div>
-              <Link href={`/dealflow-ai/leads/${selected.leadId}`} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-                Open full lead <ExternalLink className="size-3" />
-              </Link>
-            </div>
 
-            <div ref={listRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto p-4">
-              {loadingThread && <p className="py-4 text-center text-xs text-muted-foreground">Loading…</p>}
-              {!loadingThread && messages.length === 0 && <p className="py-4 text-center text-sm text-muted-foreground">No messages yet.</p>}
-              {messages.map((m) => {
-                const mine = m.authorType === "staff";
+          <div className="min-h-0 flex-1 divide-y divide-border/40 overflow-y-auto">
+            {filteredContacts.length === 0 ? (
+              <div className="p-8 text-center text-xs text-muted-foreground">No contacts in this pipeline.</div>
+            ) : (
+              filteredContacts.map((c) => {
+                const isSelected = c.id === selectedContact?.id;
                 return (
-                  <div key={m._id} className={cn("flex", mine && "justify-end")}>
-                    <div className={cn("max-w-[75%] rounded-2xl border px-3 py-2 text-sm", mine ? "border-primary/20 bg-primary/10" : "border-border/50 bg-card")}>
-                      <div className="mb-0.5 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                        {mine ? <Send className="size-3" /> : <StickyNote className="size-3" />}
-                        {m.channel === "document_request" ? "Document request" : mine ? "You" : selected.name}
-                        <span className="ml-auto">{when(m.createdAt)}</span>
-                      </div>
-                      {m.body && <p className="whitespace-pre-wrap text-foreground">{m.body}</p>}
-                      {m.attachments.map((a) => (
-                        <AttachmentView key={a.storageKey} a={a} />
-                      ))}
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setSelectedContactId(c.id);
+                      setAiRationale(null);
+                    }}
+                    className={cn(
+                      "flex w-full flex-col items-start gap-1 p-3.5 text-left transition-colors",
+                      isSelected ? "bg-primary/10 border-l-4 border-l-primary" : "hover:bg-muted/40"
+                    )}
+                  >
+                    <div className="flex w-full items-center justify-between text-xs">
+                      <span className="font-black text-foreground truncate max-w-[160px]">{c.name}</span>
+                      <span className="rounded-md border px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider">
+                        {c.source}
+                      </span>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
 
-            <div className="space-y-2 border-t border-border/50 p-3">
-              {file && (
-                <div className="lms-chip max-w-full">
-                  <span className="truncate">{file.name}</span>
-                  <button type="button" onClick={() => setFile(null)} aria-label="Remove attachment">
-                    <X className="size-3" />
+                    <span className="text-[11px] text-primary font-semibold truncate max-w-[200px]">
+                      {c.titleOrService}
+                    </span>
+
+                    <div className="mt-1 flex w-full items-center justify-between text-[10px] text-muted-foreground">
+                      <span>{c.sourceLabel}</span>
+                      <span className="font-bold text-foreground">{c.statusLabel}</span>
+                    </div>
                   </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Right Active Chat Window */}
+        <div className="col-span-12 flex min-h-0 flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm md:col-span-8">
+          {selectedContact ? (
+            <div className="flex h-full min-h-0 flex-col">
+              {/* Header */}
+              <div className="border-b border-border/60 bg-muted/20 p-4 flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-foreground">{selectedContact.name}</h3>
+                    <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-primary">
+                      {selectedContact.sourceLabel}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {selectedContact.email} · {selectedContact.phone} {selectedContact.companyOrCollege ? `· ${selectedContact.companyOrCollege}` : ""}
+                  </p>
                 </div>
-              )}
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={2}
-                placeholder="Write a message the lead sees in their portal…"
-                className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-ring"
-              />
-              <div className="flex items-center gap-3">
-                <Button size="sm" onClick={submit} disabled={pending || uploading || (!text.trim() && !file)}>
-                  Send
-                </Button>
-                <input ref={fileInputRef} type="file" className="hidden" onChange={onPickFile} />
-                <Button type="button" variant="outline" size="icon-sm" onClick={() => fileInputRef.current?.click()} aria-label="Attach a file">
-                  <Paperclip className="size-3.5" />
-                </Button>
-                <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={docReq} onChange={(e) => setDocReq(e.target.checked)} />
-                  <FileQuestion className="size-3.5" /> This is a document request
-                </label>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/dealflow-ai/voice-calls?contactId=${selectedContact.id}&phone=${encodeURIComponent(selectedContact.phone)}&name=${encodeURIComponent(selectedContact.name)}`}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-colors"
+                  >
+                    <PhoneCall className="size-3.5" /> Call via AI
+                  </Link>
+                </div>
+              </div>
+
+              {/* Chat Thread */}
+              <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 bg-muted/5">
+                {messages.length === 0 ? (
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-center text-xs text-muted-foreground space-y-2">
+                    <User className="size-8 opacity-30" />
+                    <p>No previous messages with {selectedContact.name}.</p>
+                    <p className="text-[11px]">Click "AI Generate Reply" below to instantly auto-fill an inquiry response based on the Knowledge Base.</p>
+                  </div>
+                ) : (
+                  messages.map((m) => {
+                    const isStaff = m.direction === "outbound";
+                    return (
+                      <div
+                        key={m.id}
+                        className={cn("flex flex-col max-w-[80%]", isStaff ? "ml-auto items-end" : "mr-auto items-start")}
+                      >
+                        <div
+                          className={cn(
+                            "rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm",
+                            isStaff
+                              ? "bg-primary text-primary-foreground rounded-tr-none"
+                              : "bg-card border border-border/60 text-foreground rounded-tl-none"
+                          )}
+                        >
+                          {m.body}
+                          <div
+                            className={cn(
+                              "mt-1 text-[10px] text-right",
+                              isStaff ? "text-primary-foreground/75" : "text-muted-foreground"
+                            )}
+                          >
+                            {new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Composer Box with Instant AI Auto-Fill */}
+              <div className="border-t border-border/60 bg-muted/20 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Direct Chat Composer
+                  </span>
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleGenerateAiReply}
+                    disabled={isGeneratingAi}
+                    className="gap-1.5 rounded-xl border-primary/30 text-xs text-primary hover:bg-primary/10 shadow-sm"
+                  >
+                    <Sparkles className="size-3" />
+                    {isGeneratingAi ? "Querying Knowledge Base..." : "AI Generate Reply"}
+                  </Button>
+                </div>
+
+                {aiRationale && (
+                  <div className="flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/20 px-3 py-1.5 text-[11px] text-emerald-700 dark:text-emerald-300">
+                    <CheckCircle2 className="size-3.5 shrink-0" />
+                    <span><strong>AI Auto-Filled:</strong> {aiRationale}</span>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder="Type your response here or click 'AI Generate Reply' to automatically populate based on company Knowledge Base..."
+                    rows={3}
+                    className="rounded-xl text-xs font-sans leading-relaxed"
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground">
+                      Natural Human Control: Edit any part of the text, then click Send.
+                    </span>
+                    <Button
+                      type="button"
+                      onClick={handleSendMessage}
+                      disabled={!inputText.trim()}
+                      className="gap-2 rounded-xl bg-primary text-xs font-bold text-primary-foreground shadow"
+                    >
+                      <Send className="size-3.5" /> Send Message
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
-          </>
-        )}
-      </GlassCard>
+          ) : (
+            <div className="flex h-full items-center justify-center p-8 text-center text-muted-foreground">
+              Select a contact to view chat history.
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

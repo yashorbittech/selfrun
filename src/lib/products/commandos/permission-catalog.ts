@@ -340,6 +340,11 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
         description: "Define fiscal periods and close/reopen them — closing posts a real journal entry.",
       },
       {
+        key: "fms.canManageCompliance",
+        label: "Manage CA & compliance",
+        description: "Update the CA & Compliance checklist and the filing calendar (viewing needs financial-statement access).",
+      },
+      {
         key: "fms.canViewPayrollFinance",
         label: "View payroll finance",
         description: "Open salary payments, payroll runs and the HR payroll view inside CashFlow.",

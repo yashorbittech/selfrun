@@ -297,7 +297,7 @@ export async function settle(id: string, outcome: Outcome, actor: { id: string; 
     } else {
       const txn = await postSystemTransaction(
         {
-          type: "expense", transactionDate: date, postingDate: date, amount: p.amount, currency: "INR", paymentMethod: p.mode === "UPI" ? "upi" : (p.mode.toLowerCase() as "imps" | "neft" | "rtgs"), sourceModule: p.sourceModule, sourceRecordId: p.sourceRecordId ?? p._id,
+          type: "expense", accrualRole: p.purpose === "vendor_bill" ? "payable" : null, transactionDate: date, postingDate: date, amount: p.amount, currency: "INR", paymentMethod: p.mode === "UPI" ? "upi" : (p.mode.toLowerCase() as "imps" | "neft" | "rtgs"), sourceModule: p.sourceModule, sourceRecordId: p.sourceRecordId ?? p._id,
           customerId: p.ledger.customerId, vendorId: p.ledger.vendorId, employeeId: p.ledger.employeeId, projectId: null, department: null, accountId: null, fundAccountId: accountId, fundAccountType: "bank", taxAmount: 0,
           referenceNumber: outcome.utr ?? p.providerPayoutId, description: p.ledger.description, attachments: [],
         },

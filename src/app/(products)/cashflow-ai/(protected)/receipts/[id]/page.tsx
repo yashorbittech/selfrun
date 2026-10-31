@@ -9,6 +9,7 @@ import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import RefundForm from "@/components/products/cashflow-ai/RefundForm";
 import ChequeActions from "@/components/products/cashflow-ai/ChequeActions";
+import ReceiptDocuments from "@/components/products/cashflow-ai/ReceiptDocuments";
 import VoidReceiptButton from "@/components/products/cashflow-ai/VoidReceiptButton";
 import { getCurrentFmsUser } from "@/lib/fms-auth";
 import { canManageTransactions } from "@/lib/fms-roles";
@@ -93,6 +94,7 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
             <Row label="Transaction Reference" value={receipt.transactionReference ?? "—"} />
             {receipt.chequeNumber && <Row label="Cheque" value={`${receipt.chequeNumber}, ${receipt.chequeBank}, dated ${receipt.chequeDate}`} />}
             <Row label="Receipt Date" value={formatDateTime(receipt.receiptDate)} />
+            {(receipt as { tdsDeducted?: number }).tdsDeducted ? <Row label="TDS deducted by customer" value={`${formatMoney((receipt as { tdsDeducted?: number }).tdsDeducted ?? 0, receipt.currency)}${(receipt as { tdsSection?: string | null }).tdsSection ? ` (section ${(receipt as { tdsSection?: string | null }).tdsSection})` : ""}`} /> : null}
             <Row label="Unapplied Advance" value={formatMoney(receipt.advanceAmount, receipt.currency)} />
           </CardContent>
         </GlassCard>
@@ -131,6 +133,17 @@ export default async function ReceiptDetailPage({ params }: { params: Promise<{ 
           </CardContent>
         </GlassCard>
       )}
+
+      <GlassCard>
+        <CardHeader><CardTitle>Proof of payment</CardTitle></CardHeader>
+        <CardContent>
+          {receipt.viaGateway ? (
+            <p className="text-sm text-muted-foreground">Paid through Razorpay: the payment record is the proof.</p>
+          ) : (
+            <ReceiptDocuments id={receipt._id} documents={(receipt.documents ?? []).map((d) => ({ storageKey: d.storageKey, filename: d.filename, size: d.size }))} canManage={canManage} />
+          )}
+        </CardContent>
+      </GlassCard>
 
       {receipt.notes && (
         <GlassCard>

@@ -1,5 +1,7 @@
 "use server";
 
+import { postingBlocked } from "@/lib/products/cashflow-ai/accrual/posting";
+import { findExistingBill } from "@/lib/products/cashflow-ai/hygiene";
 import { revalidatePath } from "next/cache";
 import { getCurrentPrmsUser } from "@/lib/prms-auth";
 import { canManageFinance } from "@/lib/prms-roles";
@@ -17,6 +19,10 @@ import { getPurchaseOrderByNumber } from "@/lib/products/spendiq/purchase-orders
 import { recordAudit } from "@/lib/products/spendiq/audit";
 import { notifyStaff } from "@/lib/products/spendiq/notifications";
 import { isValidPaymentMethod, isValidInvoiceStatus, type InvoiceStatus } from "@/lib/products/spendiq/constants";
+import { sectionMap } from "@/lib/products/cashflow-ai/tds/store";
+import { financialYearOf } from "@/lib/products/cashflow-ai/tds/core";
+import { istToday } from "@/lib/products/cashflow-ai/accrual/core";
+import { resolveBillSection } from "@/lib/products/cashflow-ai/tds/section-input";
 import { saveAttachmentFile, isAllowedAttachment } from "@/lib/products/spendiq/attachment-storage";
 
 export interface InvoiceActionResult {
@@ -51,6 +57,12 @@ export async function saveInvoiceAction(input: Record<string, unknown>, id?: str
   const subtotal = Number(input.subtotal);
   if (!Number.isFinite(subtotal) || subtotal <= 0) return { ok: false, fieldErrors: { subtotal: "Enter the taxable amount." } };
 
+  // TDS is optional; when a section is named it must be on the list the form offers (this year's rulebook, less what the company switched off) (a bill may keep an old, since switched-off one).
+  const before = id ? await getInvoice(id) : null;
+  if (id && !before) return { ok: false, error: "Invoice not found." };
+  const section = resolveBillSection(input.tdsSection, [...(await sectionMap(financialYearOf(istToday()))).values()], before?.tdsSection ?? null);
+  if (!section.ok) return { ok: false, fieldErrors: { tdsSection: section.error } };
+
   let poId: string | null = null;
   let poNumber: string | null = null;
   const poRef = String(input.poNumber ?? "").trim();
@@ -62,6 +74,9 @@ export async function saveInvoiceAction(input: Record<string, unknown>, id?: str
     }
   }
 
+  const tdsRateInput = input.tdsRate === undefined || input.tdsRate === "" ? 0 : Number(input.tdsRate);
+  if (!Number.isFinite(tdsRateInput) || tdsRateInput < 0 || tdsRateInput > 100) return { ok: false, fieldErrors: { tdsRate: "TDS % must be between 0 and 100." } };
+
   const data: InvoiceWriteData = {
     vendorId,
     vendorName: vendor.companyName,
@@ -72,13 +87,22 @@ export async function saveInvoiceAction(input: Record<string, unknown>, id?: str
     dueDate: (input.dueDate as string) || null,
     subtotal,
     gstAmount: Number(input.gstAmount) || 0,
-    tdsRate: Number(input.tdsRate) || 0,
+    tdsRate: tdsRateInput,
+    tdsSection: section.value,
     currency: String(input.currency ?? vendor.currency ?? "INR"),
     notes: (input.notes as string)?.trim() || null,
   };
 
+  const blocked = await postingBlocked(invoiceDate);
+  if (blocked) return { ok: false, fieldErrors: { invoiceDate: blocked } };
+
+  // The same vendor bill must not be entered twice: it would be paid twice and its GST claimed twice.
+  const existingBill = await findExistingBill(vendorId, data.vendorInvoiceNumber, id);
+  if (existingBill) {
+    return { ok: false, fieldErrors: { vendorInvoiceNumber: `This vendor invoice number is already entered as ${existingBill.invoiceNumber}.` } };
+  }
+
   if (id) {
-    const before = await getInvoice(id);
     if (!before) return { ok: false, error: "Invoice not found." };
     const res = await updateInvoice(id, data, user.id);
     if (!res.ok) return { ok: false, error: res.reason };

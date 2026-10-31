@@ -4,6 +4,8 @@ import { newId, nextYearSequence, formatYearCode } from "@/lib/products/cashflow
 import { type FundAccountType } from "@/lib/products/cashflow-ai/constants";
 import { getAccount, getAccountByCode, CONTROL_ACCOUNT_CODES } from "@/lib/products/cashflow-ai/accounts";
 import type { Transaction } from "@/lib/products/cashflow-ai/transactions";
+import { getAccrualSettings, accrualAppliesTo } from "@/lib/products/cashflow-ai/accrual/settings";
+import { dayOf } from "@/lib/products/cashflow-ai/accrual/core";
 
 /**
  * Double-entry journal (§28/§29 — Phase 5). One journal entry per settled
@@ -36,6 +38,13 @@ export interface JournalEntry {
   description: string | null;
   /** Set only on the equal-and-opposite entry posted when a transaction leaves the settled state, or a period is reopened. */
   reversalOfEntryId: string | null;
+  /** Set on an entry posted for a business document (invoice, bill, credit / debit note, opening balances) rather than a transaction. */
+  sourceType?: string | null;
+  sourceId?: string | null;
+  /** Fingerprint of the lines and date, so an unchanged document is not posted again. */
+  signature?: string | null;
+  /** `<sourceType>:<sourceId>` while the entry is the live posting of its document; removed when it is reversed. Unique, so a document is never posted twice at once. */
+  docKey?: string | null;
   createdAt: Date;
   createdBy: string | null;
 }
@@ -93,6 +102,8 @@ async function getEntriesCollection() {
       collection.createIndex({ transactionId: 1 }).catch(() => {}),
       collection.createIndex({ entryNumber: 1 }, { unique: true }).catch(() => {}),
       collection.createIndex({ reversalOfEntryId: 1 }).catch(() => {}),
+      collection.createIndex({ docKey: 1 }, { unique: true, partialFilterExpression: { docKey: { $type: "string" } } }).catch(() => {}),
+      collection.createIndex({ sourceType: 1, sourceId: 1 }).catch(() => {}),
     ]);
   }
   return collection;
@@ -154,9 +165,15 @@ export async function linesForAccount(accountId: string, opts: LedgerLineFilter 
 }
 
 /** Every line across every account in a date range — the raw material for Trial Balance / P&L / Balance Sheet. */
-export async function allLinesInRange(opts: LedgerLineFilter = {}): Promise<JournalLine[]> {
+export async function allLinesInRange(opts: LedgerLineFilter & { excludeClosing?: boolean } = {}): Promise<JournalLine[]> {
   const collection = await getLinesCollection();
-  return collection.find(dateRangeFilter(opts)).toArray();
+  const lines = await collection.find(dateRangeFilter(opts)).toArray();
+  if (!opts.excludeClosing) return lines;
+  // A period's closing entry (and its reversal when the period is reopened) moves profit into Retained Earnings: it is not income or cost.
+  const closing = await (await getEntriesCollection()).find({ periodId: { $ne: null }, ...dateRangeFilter(opts) }, { projection: { _id: 1 } }).toArray();
+  if (closing.length === 0) return lines;
+  const skip = new Set(closing.map((e) => e._id));
+  return lines.filter((l) => !skip.has(l.entryId));
 }
 
 export interface MiniAccount {
@@ -192,8 +209,14 @@ async function resolveSettlementAccount(txn: Transaction): Promise<MiniAccount |
   return accountByCode(code);
 }
 
-/** The category side — the transaction's own Chart-of-Accounts classification, or a catch-all fallback. */
-async function resolveCategoryAccount(txn: Transaction): Promise<MiniAccount | null> {
+/**
+ * The category side — the transaction's own Chart-of-Accounts classification, or a catch-all fallback. A customer receipt or a vendor
+ * payment recorded after accrual books were switched on settles the receivable / payable (the invoice or bill already booked the income
+ * or cost), so its category is that control account.
+ */
+async function resolveCategoryAccount(txn: Transaction, accrual: boolean): Promise<MiniAccount | null> {
+  if (accrual && txn.accrualRole === "receivable" && txn.type === "income") return accountByCode(CONTROL_ACCOUNT_CODES.accountsReceivable);
+  if (accrual && txn.accrualRole === "payable" && txn.type === "expense") return accountByCode(CONTROL_ACCOUNT_CODES.accountsPayable);
   if (txn.accountId) {
     const account = await getAccount(txn.accountId);
     if (account) return { _id: account._id, code: account.code, name: account.name };
@@ -211,6 +234,7 @@ interface PostEntryParams {
   reversalOfEntryId: string | null;
   actorId: string | null;
   lines: { account: MiniAccount; side: JournalSide; amount: number; currency: string }[];
+  source?: { type: string; id: string; signature: string | null; live: boolean };
 }
 
 /**
@@ -233,6 +257,7 @@ async function postEntry(params: PostEntryParams): Promise<JournalEntry> {
     entryDate: params.entryDate,
     description: params.description,
     reversalOfEntryId: params.reversalOfEntryId,
+    ...(params.source ? { sourceType: params.source.type, sourceId: params.source.id, signature: params.source.signature, ...(params.source.live ? { docKey: `${params.source.type}:${params.source.id}` } : {}) } : {}),
     createdAt: now,
     createdBy: params.actorId,
   };
@@ -252,7 +277,13 @@ async function postEntry(params: PostEntryParams): Promise<JournalEntry> {
     description: params.description,
     createdAt: now,
   }));
-  await linesCol.insertMany(lineDocs);
+  try {
+    await linesCol.insertMany(lineDocs);
+  } catch (err) {
+    // an entry with no lines would block its document from ever being posted: take it back
+    await entriesCol.deleteOne({ _id: entryId }).catch(() => {});
+    throw err;
+  }
   return entry;
 }
 
@@ -260,10 +291,15 @@ async function writeEntry(
   txn: Transaction,
   lines: { account: MiniAccount; side: JournalSide }[],
   actorId: string | null,
-  reversalOfEntryId: string | null
+  reversalOfEntryId: string | null,
+  /** YYYY-MM-DD: the entry is dated no earlier than this. */
+  notBefore: string | null = null,
+  entryDateOverride?: Date
 ): Promise<JournalEntry> {
+  const own = txn.postingDate ?? txn.transactionDate;
+  const entryDate = entryDateOverride ?? (notBefore && dayOf(own) < notBefore ? new Date(`${notBefore}T00:00:00`) : own);
   return postEntry({
-    entryDate: txn.postingDate ?? txn.transactionDate,
+    entryDate,
     description: reversalOfEntryId ? `Reversal — ${txn.transactionNumber}` : txn.description,
     transactionId: txn._id,
     transactionNumber: txn.transactionNumber,
@@ -318,8 +354,12 @@ export async function postJournalEntryForTransaction(txn: Transaction, actorId: 
     if (txn.transferId) return await postTransferJournalEntry(txn, actorId);
     if (txn.type !== "income" && txn.type !== "expense") return null;
 
-    const [settlement, category] = await Promise.all([resolveSettlementAccount(txn), resolveCategoryAccount(txn)]);
+    const settings = txn.accrualRole ? await getAccrualSettings() : null;
+    const accrual = accrualAppliesTo(settings, txn.createdAt);
+    const [settlement, category] = await Promise.all([resolveSettlementAccount(txn), resolveCategoryAccount(txn, accrual)]);
     if (!settlement || !category) return null;
+    // Books never go back before the day accrual started: a receipt dated earlier is posted on that day.
+    const clampTo = accrual && settings ? settings.startDate : null;
 
     const lines: { account: MiniAccount; side: JournalSide }[] =
       txn.type === "income"
@@ -332,7 +372,7 @@ export async function postJournalEntryForTransaction(txn: Transaction, actorId: 
             { account: settlement, side: "credit" },
           ];
 
-    return await writeEntry(txn, lines, actorId, null);
+    return await writeEntry(txn, lines, actorId, null, clampTo);
   } catch {
     return null;
   }
@@ -368,7 +408,8 @@ export async function reverseJournalEntryForTransaction(txn: Transaction, actorI
       side: (l.side === "debit" ? "credit" : "debit") as JournalSide,
     }));
 
-    return await writeEntry(txn, flipped, actorId, original._id);
+    // the reversal is dated like the entry it undoes (which may have been moved forward to the day accrual started)
+    return await writeEntry(txn, flipped, actorId, original._id, null, original.entryDate);
   } catch {
     return null;
   }
@@ -433,4 +474,94 @@ export async function reverseClosingEntry(periodId: string, actorId: string | nu
       currency: l.currency,
     })),
   });
+}
+
+
+// ---------------------------------------------------------------------------
+// Entries for business documents (accrual books). One live entry per document;
+// changing a document reverses the live entry and posts a new one.
+// ---------------------------------------------------------------------------
+
+export async function liveDocumentEntry(sourceType: string, sourceId: string): Promise<JournalEntry | null> {
+  const collection = await getEntriesCollection();
+  return collection.findOne({ docKey: `${sourceType}:${sourceId}` });
+}
+
+/** Posts a document's entry. `exists` when it already has a live one (someone else posted it first). */
+export async function postDocumentEntry(params: {
+  sourceType: string;
+  sourceId: string;
+  signature: string;
+  entryDate: Date;
+  description: string;
+  currency: string;
+  actorId: string | null;
+  lines: { account: MiniAccount; side: JournalSide; amount: number }[];
+}): Promise<{ ok: true; entry: JournalEntry } | { ok: false; reason: "exists" }> {
+  try {
+    const entry = await postEntry({
+      entryDate: params.entryDate,
+      description: params.description,
+      transactionId: null,
+      transactionNumber: null,
+      periodId: null,
+      reversalOfEntryId: null,
+      actorId: params.actorId,
+      lines: params.lines.map((l) => ({ ...l, currency: params.currency })),
+      source: { type: params.sourceType, id: params.sourceId, signature: params.signature, live: true },
+    });
+    return { ok: true, entry };
+  } catch (err) {
+    if ((err as { code?: number }).code === 11000) return { ok: false, reason: "exists" };
+    throw err;
+  }
+}
+
+/**
+ * Takes back a document's live entry with an equal-and-opposite one. Only one caller can win; the rest get `false`. The lines are read
+ * before the entry is released and the entry is put back live if the reversal cannot be written, so a failure never leaves the original
+ * in the ledger without a live marker (which would let it be posted a second time).
+ */
+export async function reverseDocumentEntry(entry: JournalEntry, entryDate: Date, description: string, actorId: string | null): Promise<boolean> {
+  const original = await linesForEntry(entry._id);
+  if (original.length === 0) return false;
+  const entriesCol = await getEntriesCollection();
+  const claimed = await entriesCol.updateOne({ _id: entry._id, docKey: entry.docKey }, { $unset: { docKey: "" } });
+  if (claimed.modifiedCount !== 1) return false;
+  try {
+    await postEntry({
+      entryDate,
+      description,
+      transactionId: null,
+      transactionNumber: null,
+      periodId: null,
+      reversalOfEntryId: entry._id,
+      actorId,
+      lines: original.map((l) => ({ account: { _id: l.accountId, code: l.accountCode, name: l.accountName }, side: (l.side === "debit" ? "credit" : "debit") as JournalSide, amount: l.amount, currency: l.currency })),
+      source: { type: entry.sourceType ?? "", id: entry.sourceId ?? "", signature: null, live: false },
+    });
+  } catch (err) {
+    await entriesCol.updateOne({ _id: entry._id }, { $set: { docKey: entry.docKey } }).catch(() => {});
+    throw err;
+  }
+  return true;
+}
+
+/**
+ * A live entry whose lines never arrived (the server stopped between the two writes) would block its document for ever. Entries older than
+ * a minute with no lines are removed; younger ones may still be being written.
+ */
+export async function healEmptyDocumentEntry(entry: JournalEntry): Promise<boolean> {
+  if (Date.now() - entry.createdAt.getTime() < 60_000) return false;
+  if ((await linesForEntry(entry._id)).length > 0) return false;
+  const entriesCol = await getEntriesCollection();
+  await entriesCol.deleteOne({ _id: entry._id, docKey: entry.docKey });
+  return true;
+}
+
+/** The ids of every document of one kind that has a live entry. */
+export async function liveDocumentIds(sourceType: string): Promise<Set<string>> {
+  const collection = await getEntriesCollection();
+  const rows = await collection.find({ sourceType, docKey: { $type: "string" } }, { projection: { sourceId: 1 } }).toArray();
+  return new Set(rows.map((r) => r.sourceId).filter((x): x is string => !!x));
 }

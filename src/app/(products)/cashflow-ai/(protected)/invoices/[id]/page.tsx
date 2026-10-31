@@ -20,7 +20,10 @@ import { listFundAccountOptions } from "@/lib/products/cashflow-ai/fund-accounts
 import { formatMoney } from "@/lib/products/cashflow-ai/constants";
 import { formatDate, formatDateTime } from "@/lib/utils";
 
+import { getAccrualSettings } from "@/lib/products/cashflow-ai/accrual/settings";
+
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const accrualOn = !!(await getAccrualSettings());
   const { id } = await params;
   const user = await getCurrentFmsUser();
   const raw = await getInvoice(id);
@@ -59,6 +62,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <>
                 <ReceiptForm
                   customers={[{ _id: invoice.customerId, label: invoice.customerName }]}
+                  allowTds={accrualOn}
                   presetCustomerId={invoice.customerId}
                   presetInvoiceId={invoice._id}
                   fundAccounts={fundAccounts}

@@ -28,6 +28,8 @@ export interface ClientBilling {
   addressLine: string | null;
   city: string | null;
   country: string | null;
+  /** The customer's state in India: with its GSTIN it decides CGST + SGST or IGST on a sale. */
+  state?: string | null;
   gstin: string | null;
   currency: string;
   paymentTermsDays: number | null;

@@ -7,6 +7,8 @@ import { recordReceipt, voidReceipt, clearCheque, bounceCheque, type RecordRecei
 import { listOutstandingInvoicesForCustomer, serializeInvoice, type SerializedInvoice } from "@/lib/products/cashflow-ai/invoices";
 import { getClient } from "@/lib/products/sprintos/clients";
 import { isValidPaymentMethod, isValidFundAccountType } from "@/lib/products/cashflow-ai/constants";
+import { addReceiptDocument } from "@/lib/products/cashflow-ai/receipts";
+import { isAllowedAttachment, saveAttachmentFile } from "@/lib/products/cashflow-ai/attachment-storage";
 import { recordAudit } from "@/lib/products/cashflow-ai/audit";
 
 export interface ReceiptActionResult {
@@ -55,6 +57,9 @@ export async function recordReceiptAction(input: Record<string, unknown>): Promi
   const amount = Number(input.amount);
   if (!Number.isFinite(amount) || amount <= 0) return { ok: false, fieldErrors: { amount: "Enter a receipt amount." } };
 
+  const tdsDeducted = input.tdsDeducted === undefined || input.tdsDeducted === "" ? 0 : Number(input.tdsDeducted);
+  if (!Number.isFinite(tdsDeducted) || tdsDeducted < 0) return { ok: false, fieldErrors: { tdsDeducted: "Enter the TDS amount, or leave it empty." } };
+
   const allocationsRaw = Array.isArray(input.allocations) ? (input.allocations as { invoiceId: string; amount: string }[]) : [];
   const allocations = allocationsRaw
     .map((a) => ({ invoiceId: a.invoiceId, amount: Number(a.amount) || 0 }))
@@ -85,6 +90,8 @@ export async function recordReceiptAction(input: Record<string, unknown>): Promi
     chequeNumber: (input.chequeNumber as string)?.trim() || null,
     chequeDate: (input.chequeDate as string)?.trim() || null,
     chequeBank: (input.chequeBank as string)?.trim() || null,
+    tdsDeducted,
+    tdsSection: (input.tdsSection as string)?.trim() || null,
     notes: (input.notes as string)?.trim() || null,
   };
 
@@ -126,5 +133,24 @@ export async function bounceChequeAction(id: string, reason: string): Promise<Re
   if (!res.ok) return { ok: false, error: res.reason };
   await recordAudit({ actorId: user.id, actorEmail: user.email, action: "update", entity: "receipt", entityId: id, entityLabel: "Cheque bounced", summary: reason.slice(0, 200) });
   revalidate();
+  return { ok: true };
+}
+
+export async function uploadReceiptDocumentAction(id: string, formData: FormData): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await requireFinance();
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, error: "Choose a file." };
+  const check = isAllowedAttachment(file);
+  if (!check.ok) return check;
+  const stored = await saveAttachmentFile(file);
+  const res = await addReceiptDocument(id, stored, user.id, user.email);
+  if (!res.ok) {
+    // the file was stored but cannot be attached: do not leave it behind
+    const { deleteAttachmentFile } = await import("@/lib/products/cashflow-ai/attachment-storage");
+    await deleteAttachmentFile(stored.storageKey).catch(() => {});
+    return res;
+  }
+  revalidatePath(`/cashflow-ai/receipts/${id}`);
+  revalidatePath("/cashflow-ai/compliance", "layout");
   return { ok: true };
 }

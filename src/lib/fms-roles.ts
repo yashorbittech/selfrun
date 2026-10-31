@@ -184,6 +184,13 @@ export function canManageFiscalPeriods(user: RoleContext): boolean {
   return resolvePermission(user, "fms.canManageFiscalPeriods", () => isFmsAdmin(user));
 }
 
+/** Tick off checklist items and keep the filing calendar (CA & Compliance). Viewing needs `canViewFinancialStatements`. */
+export function canManageCompliance(user: RoleContext): boolean {
+  return resolvePermission(user, "fms.canManageCompliance", () =>
+    isFmsAdmin(user) || user.roles.includes("finance_manager") || user.roles.includes("accountant")
+  );
+}
+
 export function canManagePaymentLinks(user: RoleContext): boolean {
   return resolvePermission(user, "fms.canManagePaymentLinks", () =>
     isFmsAdmin(user) ||

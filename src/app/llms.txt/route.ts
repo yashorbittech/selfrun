@@ -16,7 +16,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   if (!(await onSaasHost())) return new Response("Not found", { status: 404 });
   const origin = await saasOrigin();
-  const [plans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules().catch(() => [])]);
+  const [allPlans, modules] = await Promise.all([getStandardPlans().then(buildShowcase).catch(() => []), getFeatureModules().catch(() => [])]);
+  const plans = allPlans.filter((p) => p.id !== "enterprise");
   const planLines = plans.map((p) => {
     const m = p.offer.monthly;
     const price = p.kind === "free" ? "free" : p.kind === "contact" || !m ? "contact us" : `${formatMoney(m, p.currency)} per month, before tax`;

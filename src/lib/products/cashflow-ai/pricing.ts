@@ -16,6 +16,8 @@ export interface FmsLineItem {
   /** Pre-tax line total. */
   lineTotal: number;
   taxAmount: number;
+  /** HSN / SAC code, when entered (needed for GST returns). Older invoices have none. */
+  hsnSac?: string | null;
 }
 
 export interface FmsLineItemInput {
@@ -23,6 +25,7 @@ export interface FmsLineItemInput {
   quantity: number;
   unitPrice: number;
   taxRate: number;
+  hsnSac?: string | null;
 }
 
 export interface PricedItems {
@@ -42,6 +45,7 @@ export function priceLineItems(items: FmsLineItemInput[], discount: number): Pri
     taxRate: Number.isFinite(it.taxRate) ? it.taxRate : 0,
     lineTotal: round2(it.quantity * it.unitPrice),
     taxAmount: 0,
+    ...(it.hsnSac?.trim() ? { hsnSac: it.hsnSac.trim() } : {}),
   }));
 
   const subtotal = round2(priced.reduce((s, it) => s + it.lineTotal, 0));

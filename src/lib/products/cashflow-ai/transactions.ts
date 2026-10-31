@@ -87,6 +87,8 @@ export interface Transaction extends AuditFields {
   fundAccountType: FundAccountType | null;
   /** Set on both legs of a fund transfer — see `fms/fund-transfers.ts`. */
   transferId: string | null;
+  /** Set on a customer receipt ("receivable") or a vendor-bill payment ("payable"): under accrual books it settles that balance instead of booking income / cost. */
+  accrualRole?: "receivable" | "payable" | null;
   taxAmount: number;
   referenceNumber: string | null;
   description: string | null;
@@ -271,6 +273,7 @@ export interface TransactionWriteData {
   fundAccountId?: string | null;
   fundAccountType?: FundAccountType | null;
   transferId?: string | null;
+  accrualRole?: "receivable" | "payable" | null;
   taxAmount: number;
   referenceNumber: string | null;
   description: string | null;
@@ -338,6 +341,7 @@ async function insertTransaction(
     fundAccountId: data.fundAccountId ?? null,
     fundAccountType: data.fundAccountType ?? null,
     transferId: data.transferId ?? null,
+    ...(data.accrualRole ? { accrualRole: data.accrualRole } : {}),
     taxAmount: round2(data.taxAmount),
     referenceNumber: data.referenceNumber,
     description: data.description,

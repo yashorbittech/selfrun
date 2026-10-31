@@ -46,6 +46,7 @@ async function seedEmployee(id: string, code: string, first: string) {
 (async () => {
   const db = await getPlatformDb();
   assert.ok(db.databaseName.startsWith("zz_throwaway_"), "refusing: not a throwaway database");
+  await db.dropDatabase(); // every run starts clean (only ever a zz_throwaway_ database, checked above)
 
   await inA(async () => { await seedEmployee("e1", "E001", "Asha"); await seedEmployee("e2", "E002", "Ravi"); });
   let runId = "";

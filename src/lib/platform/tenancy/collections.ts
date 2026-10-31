@@ -44,6 +44,7 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "prompt_overrides",
   "prompt_versions",
   "prompt_stats",
+  "tax_rulebook", // the law's numbers for a company's accounts (TDS sections, income-tax rates, advance-tax dates, filing dates), one document per financial year, published by the platform for every company (see lib/products/cashflow-ai/rulebook/rules-store.ts)
   "payroll_statutory_rates", // the law's payroll figures (tax slabs, PF, ESI, professional tax …), published by the platform for every company (see lib/products/talentos/payroll/rates-store.ts)
   "cron_settings", // per-job pause / schedule override, and who is alerted when one fails
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
@@ -93,6 +94,9 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "sop_settings",
   "training_settings",
   "fms_tax_config",
+  "fms_compliance_profile", // what the company says about itself so the filing calendar holds only what applies (`_id: "main"`, see lib/products/cashflow-ai/compliance/filings.ts)
+  "fms_work_plan", // when the company switched "My work" on (`_id: "main"`, see lib/products/cashflow-ai/work/store.ts)
+  "fms_accrual_settings", // the switch to accrual books and where revenue / cost is booked (`_id: "main"`, see lib/products/cashflow-ai/accrual/settings.ts)
   "ai_chatbot_config",
   // Sweep throttles
   "hrms_meta",

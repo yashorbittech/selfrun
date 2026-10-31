@@ -24,6 +24,7 @@ export default function ReceiptForm({
   customers,
   presetCustomerId,
   presetInvoiceId,
+  allowTds = false,
   fundAccounts = [],
   trigger,
   onSaved,
@@ -32,6 +33,8 @@ export default function ReceiptForm({
   /** Pre-selects a customer and preloads its outstanding invoices, e.g. when triggered from a customer or invoice page. */
   presetCustomerId?: string;
   presetInvoiceId?: string;
+  /** Accrual books are on: the customer's TDS can be recorded. */
+  allowTds?: boolean;
   /** Bank/cash accounts this receipt can settle through — optional, filtered to the receipt's own currency below. */
   fundAccounts?: FundAccountOption[];
   trigger: ReactNode;
@@ -53,6 +56,8 @@ export default function ReceiptForm({
     chequeBank: "",
     currency: "INR",
     fundAccountKey: "",
+    tdsDeducted: "",
+    tdsSection: "",
     notes: "",
   });
 
@@ -144,11 +149,26 @@ export default function ReceiptForm({
               <Input type="date" value={form.receiptDate} onChange={(e) => set("receiptDate", e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label>Amount Received *</Label>
+              <Label>{allowTds ? "Amount received in the bank *" : "Amount Received *"}</Label>
               <Input type="number" min="0" step="0.01" value={form.amount} onChange={(e) => set("amount", e.target.value)} />
               {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
             </div>
           </div>
+
+          {allowTds && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>TDS the customer deducted</Label>
+                <Input type="number" min="0" step="0.01" value={form.tdsDeducted} onChange={(e) => set("tdsDeducted", e.target.value)} placeholder="0.00" />
+                {errors.tdsDeducted && <p className="text-xs text-destructive">{errors.tdsDeducted}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Section (optional)</Label>
+                <Input value={form.tdsSection} maxLength={20} onChange={(e) => set("tdsSection", e.target.value)} placeholder="e.g. 194J" />
+              </div>
+              <p className="col-span-2 text-xs text-muted-foreground">If the customer paid less because it deducted TDS, enter the deduction here. The invoice is settled by the money received plus the TDS, and the TDS is kept as a tax credit to claim.</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -247,7 +267,7 @@ export default function ReceiptForm({
             </div>
             {invoices.length > 0 && (
               <p className="text-right text-xs text-muted-foreground">
-                Allocated: {formatMoney(allocatedTotal)} · Unallocated advance: {formatMoney(round2((Number(form.amount) || 0) - allocatedTotal))}
+                Allocated: {formatMoney(allocatedTotal)} · Unallocated advance: {formatMoney(round2((Number(form.amount) || 0) + (Number(form.tdsDeducted) || 0) - allocatedTotal))}
               </p>
             )}
           </div>

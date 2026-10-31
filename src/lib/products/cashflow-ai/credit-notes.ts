@@ -3,6 +3,7 @@ import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { escapeRegExp } from "@/lib/text-search";
 import { newId, createStamp, updateStamp, notDeleted, nextYearSequence, formatYearCode, type AuditFields } from "@/lib/products/cashflow-ai/db";
+import { syncCreditNoteAccrual, trySync } from "@/lib/products/cashflow-ai/accrual/posting";
 import { round2, type NoteStatus, DEFAULT_NOTE_STATUS } from "@/lib/products/cashflow-ai/constants";
 import { getInvoice, applyCreditToInvoice, invoiceBalance } from "@/lib/products/cashflow-ai/invoices";
 
@@ -156,11 +157,17 @@ export async function issueCreditNote(id: string, actorId: string): Promise<{ ok
     return { ok: false, reason: `Credit amount now exceeds the invoice's outstanding balance (${outstanding}).` };
   }
 
-  await applyCreditToInvoice(note.invoiceId, note.amount, actorId);
+  const issuedAt = new Date();
   await collection.updateOne(
     { _id: id, ...notDeleted },
-    { $set: { status: "issued", issuedAt: new Date(), ...updateStamp(actorId) } }
+    { $set: { status: "issued", issuedAt, ...updateStamp(actorId) } }
   );
+  const posted = await trySync(() => syncCreditNoteAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { status: "draft", issuedAt: null } });
+    return { ok: false, reason: posted.error };
+  }
+  await applyCreditToInvoice(note.invoiceId, note.amount, actorId);
   await fmsEvents.creditNote({ id: note._id, creditNoteNumber: note.creditNoteNumber, amount: note.amount, currency: invoice.currency, invoiceNumber: invoice.invoiceNumber }, "issued", actorId);
   return { ok: true };
 }
@@ -171,8 +178,13 @@ export async function cancelCreditNote(id: string, actorId: string): Promise<{ o
   if (!note) return { ok: false, reason: "Credit note not found." };
   if (note.status !== "issued") return { ok: false, reason: "Only an issued credit note can be cancelled." };
 
-  await applyCreditToInvoice(note.invoiceId, -note.amount, actorId);
   await collection.updateOne({ _id: id, ...notDeleted }, { $set: { status: "cancelled", ...updateStamp(actorId) } });
+  const posted = await trySync(() => syncCreditNoteAccrual(id, { id: actorId, email: null }));
+  if (!posted.ok) {
+    await collection.updateOne({ _id: id }, { $set: { status: "issued" } });
+    return { ok: false, reason: posted.error };
+  }
+  await applyCreditToInvoice(note.invoiceId, -note.amount, actorId);
   await fmsEvents.creditNote({ id: note._id, creditNoteNumber: note.creditNoteNumber, amount: note.amount }, "cancelled", actorId);
   return { ok: true };
 }

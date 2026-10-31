@@ -34,7 +34,20 @@ export type AuditEntity =
   | "bank_statement"
   | "payment_reminders"
   | "payout"
-  | "payment_controls";
+  | "payment_controls"
+  | "gateway_settlement"
+  | "gstr2b_upload"
+  | "tds_challan"
+  | "it_notice"
+  | "it_return"
+  | "it_loss"
+  | "it_schedule"
+  | "it_payment"
+  | "tds26as_upload"
+  | "tds_lower_certificate"
+  | "tds_certificate"
+  | "compliance_item"
+  | "compliance_filing";
 
 export type AuditAction =
   | "create"

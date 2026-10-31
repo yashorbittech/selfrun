@@ -58,6 +58,19 @@ export const fmsEvents = {
     if (overdue.count > 0) await notifyRoles("fms", AR, { type: "fms_invoices_overdue", title: `${plural(overdue.count, "invoice")} overdue`, body: `${inr(overdue.amount)} is past its due date${overdue.oldest ? ` — oldest: ${overdue.oldest}` : ""}.`, link: "/cashflow-ai/invoices?status=overdue", priority: "high", dedupeKey: `fms-overdue:${today()}` });
     if (dueSoon.count > 0) await notifyRoles("fms", AR, { type: "fms_invoices_due_soon", title: `${plural(dueSoon.count, "invoice")} due in the next 3 days`, body: `${inr(dueSoon.amount)} expected.`, link: "/cashflow-ai/invoices", dedupeKey: `fms-due-soon:${today()}` });
   },
+  /** Daily: filings past their date and not marked filed, and filings falling due within 7 days. Only filings with a date can be reminded. */
+  filingsDigest: async (overdue: { count: number; names: string[] }, dueSoon: { count: number; names: string[] }) => {
+    if (overdue.count > 0) await notifyRoles("fms", CONTROL, { type: "fms_filings_overdue", title: `${plural(overdue.count, "filing")} overdue`, body: `${overdue.names.slice(0, 3).join(", ")}${overdue.count > 3 ? ` and ${overdue.count - 3} more` : ""} — past the due date and not marked filed.`, link: "/cashflow-ai/compliance/calendar", priority: "high", dedupeKey: `fms-filings-overdue:${today()}` });
+    if (dueSoon.count > 0) await notifyRoles("fms", CONTROL, { type: "fms_filings_due_soon", title: `${plural(dueSoon.count, "filing")} due within 7 days`, body: `${dueSoon.names.slice(0, 3).join(", ")}${dueSoon.count > 3 ? ` and ${dueSoon.count - 3} more` : ""}.`, link: "/cashflow-ai/compliance/calendar", dedupeKey: `fms-filings-due-soon:${today()}` });
+  },
+  /** Daily: pieces of work from "My work" that are overdue, and those due today. One of each per day at most. */
+  workDigest: async (counts: { overdue: number; dueToday: number; overdueTitles: string[]; dueTodayTitles: string[]; day: string }) => {
+    const names = (t: string[]) => { const u = [...new Set(t)]; return `${u.slice(0, 3).join(", ")}${u.length > 3 ? " and more" : ""}`; };
+    const over = names(counts.overdueTitles);
+    const due = names(counts.dueTodayTitles);
+    if (counts.overdue > 0) await notifyRoles("fms", CONTROL, { type: "fms_work_overdue", title: `${plural(counts.overdue, "piece")} of work overdue`, body: over ? `${over} — open My work to catch up.` : "Open My work to catch up.", link: "/cashflow-ai/work", priority: "high", dedupeKey: `fms-work-overdue:${counts.day}` });
+    if (counts.dueToday > 0) await notifyRoles("fms", CONTROL, { type: "fms_work_due_today", title: `${plural(counts.dueToday, "piece")} of work due today`, body: due ? `${due}.` : "Open My work.", link: "/cashflow-ai/work", dedupeKey: `fms-work-due-today:${counts.day}` });
+  },
   payablesDigest: async (overdue: { count: number; amount: number }) => {
     if (overdue.count > 0) await notifyRoles("fms", AP, { type: "fms_bills_overdue", title: `${plural(overdue.count, "vendor bill")} overdue`, body: `${inr(overdue.amount)} is past its due date.`, link: "/cashflow-ai/payables", priority: "high", dedupeKey: `fms-bills-overdue:${today()}` });
   },

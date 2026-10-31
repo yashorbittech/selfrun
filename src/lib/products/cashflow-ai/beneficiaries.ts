@@ -67,7 +67,7 @@ export async function getBeneficiaryByEntity(entityType: BeneficiaryEntity, enti
   return collection.findOne({ entityType, entityId, ...notDeleted });
 }
 
-export async function saveBeneficiary(
+async function saveBeneficiaryRecord(
   data: {
     entityType: BeneficiaryEntity;
     entityId: string;
@@ -129,4 +129,18 @@ export async function saveBeneficiary(
 
   await collection.insertOne(doc);
   return doc;
+}
+
+/** Saves a payee's bank details. For a vendor, the vendor-controls check runs straight away so the person who made the change is on record and it awaits someone else's verification. */
+export async function saveBeneficiary(data: Parameters<typeof saveBeneficiaryRecord>[0], actorId: string): Promise<BeneficiaryBankAccount> {
+  const saved = await saveBeneficiaryRecord(data, actorId);
+  if (data.entityType === "vendor") {
+    try {
+      const { syncVendorBank } = await import("@/lib/products/cashflow-ai/vendor-controls/store");
+      await syncVendorBank(data.entityId);
+    } catch {
+      // the check also runs on every payout and page view; a failure here must not undo the save
+    }
+  }
+  return saved;
 }

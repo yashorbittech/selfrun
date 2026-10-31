@@ -1,5 +1,6 @@
 "use client";
 
+import { SELECTABLE_GST_STATES } from "@/lib/platform/billing/gst";
 import { useState, useTransition, type ReactElement, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ function fromClient(c: SerializedClient | undefined): FormState {
     billingAddress: c.billing.addressLine ?? "",
     billingCity: c.billing.city ?? "",
     billingCountry: c.billing.country ?? "",
+    billingState: c.billing.state ?? "",
     billingGstin: c.billing.gstin ?? "",
     billingCurrency: c.billing.currency ?? "INR",
     paymentTermsDays: c.billing.paymentTermsDays != null ? String(c.billing.paymentTermsDays) : "",
@@ -153,6 +155,11 @@ export default function ClientForm({
               <div className="space-y-1.5">
                 <Label>Country</Label>
                 <Input value={form.billingCountry ?? ""} onChange={(e) => set("billingCountry", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>State (India)</Label>
+                <Input list="gst-states" value={form.billingState ?? ""} onChange={(e) => set("billingState", e.target.value)} placeholder="e.g. Karnataka" />
+                <datalist id="gst-states">{Object.values(SELECTABLE_GST_STATES).map((n) => <option key={n} value={n} />)}</datalist>
               </div>
               <div className="space-y-1.5">
                 <Label>GSTIN / Tax ID</Label>

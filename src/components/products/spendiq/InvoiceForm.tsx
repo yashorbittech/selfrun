@@ -17,10 +17,13 @@ import type { SerializedInvoice } from "@/lib/products/spendiq/invoices";
 export default function InvoiceForm({
   invoice,
   vendors,
+  tdsSections = [],
   trigger,
 }: {
   invoice?: SerializedInvoice;
-  vendors: { _id: string; companyName: string }[];
+  vendors: { _id: string; companyName: string; hasPan?: boolean }[];
+  /** The TDS sections offered this year: the platform's rulebook less what the company switched off. */
+  tdsSections?: { code: string; label: string; rate: number | null; noPanRate?: number | null; confirmed: boolean }[];
   trigger: ReactNode;
 }) {
   const router = useRouter();
@@ -36,6 +39,7 @@ export default function InvoiceForm({
     subtotal: invoice ? String(invoice.subtotal) : "",
     gstAmount: invoice ? String(invoice.gstAmount) : "",
     tdsRate: invoice ? String(invoice.tdsRate) : "0",
+    tdsSection: invoice?.tdsSection ?? "",
     currency: invoice?.currency ?? "INR",
     notes: invoice?.notes ?? "",
   });
@@ -44,9 +48,32 @@ export default function InvoiceForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  // The rate the law gives for a section; the higher no-PAN rate when the chosen vendor has no valid PAN on file.
+  function lawRate(sectionCode: string, vendorId: string): number | null {
+    const sec = tdsSections.find((s) => s.code === sectionCode);
+    if (!sec) return null;
+    const vendor = vendors.find((v) => v._id === vendorId);
+    return vendor && vendor.hasPan === false && sec.noPanRate != null ? sec.noPanRate : sec.rate;
+  }
+  // Choosing a section or vendor refreshes the TDS % only while it still holds the suggested value (or nothing), so a figure typed by hand is kept.
+  function change(k: "tdsSection" | "vendorId", v: string) {
+    setForm((f) => {
+      const next = { ...f, [k]: v };
+      const before = lawRate(f.tdsSection, f.vendorId);
+      const after = next.tdsSection ? lawRate(next.tdsSection, next.vendorId) : null;
+      const untouched = (Number(f.tdsRate) || 0) === 0 || (before !== null && Number(f.tdsRate) === before);
+      if (after !== null && untouched) next.tdsRate = String(after);
+      return next;
+    });
+  }
+
   const subtotal = Number(form.subtotal) || 0;
   const gst = Number(form.gstAmount) || 0;
   const tds = round2(subtotal * (Number(form.tdsRate) || 0) / 100);
+  // A bill keeps its section even if it has since been switched off, so it is listed too.
+  const chosen = tdsSections.find((s) => s.code === form.tdsSection);
+  const chosenVendor = vendors.find((v) => v._id === form.vendorId);
+  const noPan = !!chosen && chosenVendor?.hasPan === false && chosen.noPanRate != null;
   const total = round2(subtotal + gst);
   const net = round2(total - tds);
 
@@ -84,7 +111,7 @@ export default function InvoiceForm({
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
           <div className="space-y-1.5">
             <Label>Vendor *</Label>
-            <Select value={form.vendorId} onValueChange={(v) => set("vendorId", v ?? "")}>
+            <Select value={form.vendorId} onValueChange={(v) => change("vendorId", v ?? "")}>
               <SelectTrigger className="w-full"><SelectValue placeholder="Select" /></SelectTrigger>
               <SelectContent>
                 {vendors.map((v) => (
@@ -129,6 +156,27 @@ export default function InvoiceForm({
               <Label>TDS %</Label>
               <Input type="number" min={0} value={form.tdsRate} onChange={(e) => set("tdsRate", e.target.value)} />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>TDS section (optional)</Label>
+            <Select value={form.tdsSection || "none"} onValueChange={(v) => change("tdsSection", !v || v === "none" ? "" : v)}>
+              <SelectTrigger className="w-full"><SelectValue placeholder="No TDS section" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No TDS section</SelectItem>
+                {form.tdsSection && !chosen && <SelectItem value={form.tdsSection}>{form.tdsSection} (switched off)</SelectItem>}
+                {tdsSections.map((s) => (
+                  <SelectItem key={s.code} value={s.code}>{s.code}: {s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.tdsSection && <p className="text-xs text-destructive">{errors.tdsSection}</p>}
+            {chosen && chosen.rate !== null && (
+              <p className="text-xs text-muted-foreground">
+                {noPan ? `No PAN on file: higher rate may apply. ${chosen.noPanRate}% is used instead of ${chosen.rate}%.` : `The law gives ${chosen.rate}% for this section.`} You can change the TDS %.
+                {!chosen.confirmed && " These figures have not been checked by the platform yet."}
+              </p>
+            )}
           </div>
 
           <div className="space-y-1.5">

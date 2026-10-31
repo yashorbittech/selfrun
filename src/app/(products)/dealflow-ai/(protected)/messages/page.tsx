@@ -12,8 +12,7 @@ export default async function LmsMessagesPage({ searchParams }: { searchParams: 
   const conversations = await listLeadConversations();
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col gap-3">
-      <PanelPageHeader title={<>Messages</>} description={<>Two-way conversations with leads and portal users.</>} />
+    <div className="relative flex h-full min-h-0 flex-col">
       <LmsMessagesInbox conversations={conversations} initialLeadId={lead} />
     </div>
   );

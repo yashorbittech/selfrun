@@ -25,11 +25,14 @@ import {
   BarChart3,
   Settings,
   Send,
+  CalendarCheck,
+  Percent,
+  ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { FmsRole } from "@/lib/fms-roles";
-import { canManageAccounts, canViewAuditLog, canViewCommercialFinance, canViewFinancialStatements, canViewPayrollFinance } from "@/lib/fms-roles";
+import { canManageAccounts, canViewAuditLog, canViewBanking, canViewCommercialFinance, canViewFinancialStatements, canViewPayrollFinance } from "@/lib/fms-roles";
 
 function NavLink({
   href,
@@ -39,6 +42,7 @@ function NavLink({
   collapsed = false,
   badge,
   onNavigate,
+  matches,
 }: {
   href: string;
   label: string;
@@ -47,9 +51,11 @@ function NavLink({
   collapsed?: boolean;
   badge?: string | number;
   onNavigate?: () => void;
+  /** Other places that belong under this item, so it stays lit while you are inside any of them. */
+  matches?: string[];
 }) {
   const pathname = usePathname();
-  const active = exact ? pathname === href : pathname?.startsWith(href);
+  const active = exact ? pathname === href : [href, ...(matches ?? [])].some((p) => pathname === p || pathname?.startsWith(`${p}/`));
 
   const inner = (
     <>
@@ -121,6 +127,7 @@ export default function FmsSidebar({
     icon: React.ComponentType<{ className?: string }>;
     exact?: boolean;
     badge?: string | number;
+    matches?: string[];
   }) => <NavLink {...props} collapsed={collapsed} onNavigate={onNavigate} />;
 
   return (
@@ -135,15 +142,15 @@ export default function FmsSidebar({
       {canViewPayrollFinance(roleCtx) && panels.hrms?.available !== false && nav({ href: "/cashflow-ai/products/hrms", label: panelLabel("hrms", "TalentOS Product"), icon: Users })}
       {panels.tms?.available !== false && nav({ href: "/cashflow-ai/products/tms", label: panelLabel("tms", "Cohort AI Product"), icon: GraduationCap })}
 
-      {/* ── FINANCE DESK ── */}
-      <SectionLabel collapsed={collapsed}>Finance Desk</SectionLabel>
-      {canViewCommercialFinance(roleCtx) && nav({ href: "/cashflow-ai/receivables", label: "Receivables", icon: ArrowDownLeft })}
-      {canViewCommercialFinance(roleCtx) && nav({ href: "/cashflow-ai/payouts", label: "Payouts", icon: Send })}
-      {canViewCommercialFinance(roleCtx) && nav({ href: "/cashflow-ai/beneficiaries", label: "Bank Directory", icon: Building2 })}
-      {nav({ href: "/cashflow-ai/transactions", label: "Transactions", icon: ArrowLeftRight })}
-
-      <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
-      {canViewFinancialStatements(roleCtx) && nav({ href: "/cashflow-ai/reports/financial-summary", label: "Analytics", icon: BarChart3 })}
+      {/* ── ACCOUNTS: eight places, in the order a company uses them. Everything else is one click inside these (see docs/accounts-simplification.md). ── */}
+      <SectionLabel collapsed={collapsed}>Accounts</SectionLabel>
+      {(canViewFinancialStatements(roleCtx) || canViewCommercialFinance(roleCtx)) && nav({ href: "/cashflow-ai/work", label: "My work", icon: ListChecks, matches: ["/cashflow-ai/work"] })}
+      {canViewCommercialFinance(roleCtx) && nav({ href: "/cashflow-ai/receivables", label: "Money in", icon: ArrowDownLeft, matches: ["/cashflow-ai/invoices", "/cashflow-ai/receipts", "/cashflow-ai/credit-notes", "/cashflow-ai/refunds", "/cashflow-ai/customers", "/cashflow-ai/payment-links", "/cashflow-ai/payments"] })}
+      {canViewCommercialFinance(roleCtx) && nav({ href: "/cashflow-ai/payouts", label: "Money out", icon: Send, matches: ["/cashflow-ai/bills", "/cashflow-ai/payables", "/cashflow-ai/vendor-payments", "/cashflow-ai/vendors", "/cashflow-ai/debit-notes", "/cashflow-ai/employee-expenses", "/cashflow-ai/advances", "/cashflow-ai/reimbursements", "/cashflow-ai/salary-payments"] })}
+      {(canViewBanking(roleCtx) || canViewCommercialFinance(roleCtx) || canViewFinancialStatements(roleCtx)) && nav({ href: "/cashflow-ai/banking", label: "Bank & cash", icon: Landmark, matches: ["/cashflow-ai/transactions", "/cashflow-ai/bank-accounts", "/cashflow-ai/cash-accounts", "/cashflow-ai/bank-reconciliation", "/cashflow-ai/cash-reconciliation", "/cashflow-ai/settlements", "/cashflow-ai/beneficiaries", "/cashflow-ai/transfers"] })}
+      {canViewFinancialStatements(roleCtx) && nav({ href: "/cashflow-ai/taxes", label: "Taxes", icon: Percent, matches: ["/cashflow-ai/gst", "/cashflow-ai/tds", "/cashflow-ai/income-tax"] })}
+      {(canViewFinancialStatements(roleCtx) || canViewCommercialFinance(roleCtx)) && nav({ href: "/cashflow-ai/closing", label: "Month & year-end", icon: CalendarCheck, matches: ["/cashflow-ai/month-close", "/cashflow-ai/compliance", "/cashflow-ai/party-reconciliation", "/cashflow-ai/vendor-controls"] })}
+      {canViewFinancialStatements(roleCtx) && nav({ href: "/cashflow-ai/reports/financial-summary", label: "Reports", icon: BarChart3, matches: ["/cashflow-ai/reports", "/cashflow-ai/trial-balance", "/cashflow-ai/general-ledger"] })}
       {canManageAccounts(roleCtx) && nav({ href: "/cashflow-ai/settings/accounts", label: "Settings", icon: Settings })}
     </nav>
   );

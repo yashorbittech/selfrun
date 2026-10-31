@@ -58,6 +58,7 @@ const rzpBalance = async () => (await listBankAccounts()).find((a) => a.accountN
 
 (async () => {
   assert.ok((await getPlatformDb()).databaseName.startsWith("zz_throwaway_"), "refusing: not a throwaway database");
+  await (await getPlatformDb()).dropDatabase(); // every run starts clean (only ever a zz_throwaway_ database, checked above)
   assert.ok(process.env.PLATFORM_ENCRYPTION_KEY, "set PLATFORM_ENCRYPTION_KEY (base64, 32 bytes)");
   await (await getPlatformDb()).collection("companies").updateOne({ _id: A as never }, { $set: { slug: "rzpa", name: "Rzp A Co" } }, { upsert: true });
 

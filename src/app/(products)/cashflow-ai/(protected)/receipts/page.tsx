@@ -15,11 +15,14 @@ import { formatMoney } from "@/lib/products/cashflow-ai/constants";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
+import { getAccrualSettings } from "@/lib/products/cashflow-ai/accrual/settings";
+
 export default async function ReceiptsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const accrualOn = !!(await getAccrualSettings());
   const sp = await searchParams;
   const user = await getCurrentFmsUser();
   const canManage = user ? canManageTransactions(user) : false;
@@ -43,6 +46,7 @@ export default async function ReceiptsPage({
         actions={<>{canManage && (
           <ReceiptForm
             customers={customerOpts}
+            allowTds={accrualOn}
             fundAccounts={fundAccounts}
             trigger={
               <Button type="button" size="sm">

@@ -38,6 +38,7 @@ import {
 } from "@/lib/products/cashflow-ai/constants";
 import { canManageTransactions, canApproveTransactions, canManageAccounts, canManageBanking, canManageFiscalPeriods, canManageTaxConfig, canReconcile, canViewReports, canViewAuditLog } from "@/lib/fms-roles";
 import { fail, str } from "@/lib/ai/agent/entities/helpers";
+import { hsnSacError } from "@/lib/products/cashflow-ai/gst/hsn";
 import type { ActionDef, AgentUser, EntityDef, FieldDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
@@ -67,8 +68,8 @@ const fundKey = (v: Json): { fundAccountId: string | null; fundAccountType: "ban
 const FUND: FieldDef = { key: "fundAccountKey", label: "Paid from / into account, as bank:<id> or cash:<id> (fms.bank_account / fms.cash_account)", type: "string" };
 const needMoney = (u: AgentUser) => canManageTransactions(u);
 
-interface RawLine { description?: unknown; quantity?: unknown; unitPrice?: unknown; taxRate?: unknown }
-function lineItems(v: unknown): { ok: true; items: { description: string; quantity: number; unitPrice: number; taxRate: number }[] } | { ok: false; error: Json } {
+interface RawLine { description?: unknown; quantity?: unknown; unitPrice?: unknown; taxRate?: unknown; hsnSac?: unknown }
+function lineItems(v: unknown): { ok: true; items: { description: string; quantity: number; unitPrice: number; taxRate: number; hsnSac: string | null }[] } | { ok: false; error: Json } {
   if (!Array.isArray(v) || !v.length) return { ok: false, error: fail("Add at least one line item: [{description, quantity, unitPrice, taxRate}].") };
   const items = [];
   for (const raw of (v as RawLine[]).slice(0, 50)) {
@@ -77,7 +78,10 @@ function lineItems(v: unknown): { ok: true; items: { description: string; quanti
     const unitPrice = Number(raw.unitPrice);
     const taxRate = raw.taxRate === undefined || raw.taxRate === null ? 0 : Number(raw.taxRate);
     if (!description || !(quantity > 0) || !(unitPrice >= 0) || !Number.isFinite(taxRate) || taxRate < 0) return { ok: false, error: fail("Each line item needs a description, a quantity above 0, a unit price and an optional tax rate (percent).") };
-    items.push({ description: description.slice(0, 300), quantity, unitPrice, taxRate });
+    const hsnSac = typeof raw.hsnSac === "string" ? raw.hsnSac.trim() : "";
+    const hsnErr = hsnSacError(hsnSac);
+    if (hsnErr) return { ok: false, error: fail(hsnErr) };
+    items.push({ description: description.slice(0, 300), quantity, unitPrice, taxRate, hsnSac: hsnSac || null });
   }
   return { ok: true, items };
 }
@@ -130,7 +134,7 @@ export const FMS_ENTITIES: EntityDef[] = [
       { key: "customerId", label: "Customer (pms.client id)", type: "ref", ref: "pms.client", required: true, createOnly: true },
       { key: "invoiceDate", label: "Invoice date", type: "dateString", required: true },
       { key: "dueDate", label: "Due date", type: "dateString", required: true },
-      { key: "items", label: "Line items: [{description, quantity, unitPrice, taxRate(percent)}]", type: "json", required: true },
+      { key: "items", label: "Line items: [{description, quantity, unitPrice, taxRate(percent), hsnSac(optional 4/6/8 digit HSN or SAC)}]", type: "json", required: true },
       { key: "discount", label: "Discount amount", type: "number" },
       { key: "currency", label: "Currency", type: "enum", options: CURRENCIES },
       { key: "projectId", label: "Project (pms.project id)", type: "ref", ref: "pms.project" },

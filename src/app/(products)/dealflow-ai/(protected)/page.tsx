@@ -42,6 +42,8 @@ import { isValidDateRangePreset, resolveDateRangePreset, type DateRangePreset } 
 import { iconForCategory } from "@/lib/category-icons";
 import { getCampaignAnalytics } from "@/lib/campaigns";
 import type { SerializedLead } from "@/components/products/dealflow-ai/types";
+import OmnichannelCommandCenter from "@/components/products/dealflow-ai/OmnichannelCommandCenter";
+import { getIntegrationsStatus, listAiApprovalDrafts, listDealLeads, listDealJobApplications } from "@/lib/dealflow-ai/store";
 
 function parseDateParam(value: string | undefined, endOfDay = false): Date | undefined {
   if (!value) return undefined;
@@ -186,6 +188,14 @@ export default async function LmsDashboardPage({
               dateTo={dateTo.toISOString().slice(0, 10)}
               hasActiveFilters={hasActiveFilters}
             />}
+      />
+
+      {/* Omnichannel AI Command Center & Multi-Platform Acquisition Engine */}
+      <OmnichannelCommandCenter
+        pendingApprovalsCount={listAiApprovalDrafts({ status: "pending_approval" }).length}
+        integrations={getIntegrationsStatus()}
+        leadsTotal={listDealLeads().length}
+        applicantsTotal={listDealJobApplications().length}
       />
 
       {/* Overview KPIs */}
