@@ -1,6 +1,10 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
 import { newId, createStamp, updateStamp, notDeleted, type AuditFields } from "@/lib/products/talentos/db";
+import type { StatutoryFlags } from "@/lib/products/talentos/payroll/statutory";
+import { DEFAULT_STATUTORY } from "@/lib/products/talentos/payroll/statutory";
+export { DEFAULT_STATUTORY };
+export type { StatutoryFlags } from "@/lib/products/talentos/payroll/statutory";
 
 /**
  * Payroll-ready employee records (Phase 1 — structure only, no run/payslip
@@ -23,33 +27,6 @@ export interface PayComponent {
 }
 
 /** Which statutory deductions apply to one employee, and how. */
-export interface StatutoryFlags {
-  pfApplicable: boolean;
-  /** "ceiling", "actual", or null to follow the company's default. */
-  pfMode: "ceiling" | "actual" | null;
-  /** Member of the pension scheme (EPS). Not for someone who first joined PF after 1 September 2014 with wages above the ceiling. */
-  epsEligible: boolean;
-  esiApplicable: boolean;
-  /** A person with disability (higher ESI wage threshold). */
-  esiDisabled: boolean;
-  ptApplicable: boolean;
-  lwfApplicable: boolean;
-  tdsApplicable: boolean;
-  /** The state the person works in (professional tax, labour welfare fund and state holidays); null = the office's state. */
-  workState: string | null;
-}
-
-export const DEFAULT_STATUTORY: StatutoryFlags = {
-  pfApplicable: true,
-  pfMode: null,
-  epsEligible: true,
-  esiApplicable: true,
-  esiDisabled: false,
-  ptApplicable: true,
-  lwfApplicable: true,
-  tdsApplicable: true,
-  workState: null,
-};
 
 export interface BankDetails {
   accountName: string | null;

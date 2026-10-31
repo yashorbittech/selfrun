@@ -7,6 +7,35 @@
  */
 import type { BonusRates, EsiRates, GratuityRates, LeaveEncashmentRates, LwfRule, ProvidentFundRates, PtRule, PtSlab } from "@/lib/products/talentos/payroll/rates";
 
+/** Which statutory deductions apply to one employee, and how. */
+export interface StatutoryFlags {
+  pfApplicable: boolean;
+  /** "ceiling", "actual", or null to follow the company's default. */
+  pfMode: "ceiling" | "actual" | null;
+  /** Member of the pension scheme (EPS). Not for someone who first joined PF after 1 September 2014 with wages above the ceiling. */
+  epsEligible: boolean;
+  esiApplicable: boolean;
+  /** A person with disability (higher ESI wage threshold). */
+  esiDisabled: boolean;
+  ptApplicable: boolean;
+  lwfApplicable: boolean;
+  tdsApplicable: boolean;
+  /** The state the person works in (professional tax, labour welfare fund and state holidays); null = the office's state. */
+  workState: string | null;
+}
+
+export const DEFAULT_STATUTORY: StatutoryFlags = {
+  pfApplicable: true,
+  pfMode: null,
+  epsEligible: true,
+  esiApplicable: true,
+  esiDisabled: false,
+  ptApplicable: true,
+  lwfApplicable: true,
+  tdsApplicable: true,
+  workState: null,
+};
+
 // ── Provident fund ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
 
 export interface PfInput {
