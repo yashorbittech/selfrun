@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 /**
  * POST /api/dealflow-ai/meetings/agent-speak
  * Generates an ultra-human, contextual AI agent response based on:
@@ -27,6 +25,12 @@ export async function POST(req: NextRequest) {
     if (!agentName || !personality || !knowledgeBase || !triggerText) {
       return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
     }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ ok: false, error: "OPENAI_API_KEY not configured" }, { status: 503 });
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     // Build the ultra-human system prompt
     const systemPrompt = `You are ${agentName}, a ${agentRole} at this company. You are currently in a live video call.
