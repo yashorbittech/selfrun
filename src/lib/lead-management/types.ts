@@ -71,6 +71,8 @@ export interface LeadRecord {
   ownerStaffId: string | null;
   /** A portal-authored reply landed in the Communication Center since staff last opened this lead. */
   hasUnreadPortalReply: boolean;
+  /** The lead asked not to be contacted: DealFlow's email / WhatsApp sends refuse them. Absent means contactable. */
+  doNotContact?: boolean;
   sourceRef: LeadSourceRef | null;
   applicationId: string | null; // career_applications._id
   offerId: string | null; // hrms_offers._id
@@ -109,7 +111,9 @@ export type LeadEventKind =
   | "offer_released"
   | "enrolled"
   | "certificate_issued"
-  | "owner_assigned";
+  | "owner_assigned"
+  | "ai_call"
+  | "meeting";
 
 export interface LeadTimelineEvent {
   _id: string;

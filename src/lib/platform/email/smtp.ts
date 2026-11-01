@@ -25,6 +25,7 @@ export function createSmtpEmailProvider(v: Record<string, string>): EmailProvide
           html: message.html,
           text: message.text,
           ...(message.replyTo ? { replyTo: message.replyTo } : {}),
+          ...(message.calendar ? { icalEvent: { method: message.calendar.method, filename: "invite.ics", content: message.calendar.ics } } : {}),
         });
         return { ok: true, id: info.messageId ?? null };
       } catch (err) {

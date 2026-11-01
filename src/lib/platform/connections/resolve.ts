@@ -21,6 +21,7 @@ const ENV: Record<string, Record<string, string[]>> = {
   elevenlabs: { apiKey: ["ELEVENLABS_API_KEY"] },
   "google-service-account": { clientEmail: ["GOOGLE_SEO_CLIENT_EMAIL", "GOOGLE_INDEXING_CLIENT_EMAIL"], privateKey: ["GOOGLE_SEO_PRIVATE_KEY", "GOOGLE_INDEXING_PRIVATE_KEY"] },
   pagespeed: { apiKey: ["PAGESPEED_API_KEY"] },
+  livekit: { url: ["LIVEKIT_URL"], apiKey: ["LIVEKIT_API_KEY"], apiSecret: ["LIVEKIT_API_SECRET"] },
   turn: { url: ["MESSENGER_TURN_URL"], username: ["MESSENGER_TURN_USERNAME"], credential: ["MESSENGER_TURN_CREDENTIAL"] },
   meta: { appId: ["META_APP_ID"], appSecret: ["META_APP_SECRET"] },
   google: { clientId: ["GOOGLE_OAUTH_CLIENT_ID"], clientSecret: ["GOOGLE_OAUTH_CLIENT_SECRET"] },

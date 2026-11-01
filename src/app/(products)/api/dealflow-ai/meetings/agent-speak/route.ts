@@ -1,89 +1,76 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { NextRequest } from "next/server";
+import { getOpenAI } from "@/lib/openai";
+import { requireLms } from "@/lib/lms-auth";
+import { limitOr429, userRateLimit } from "@/lib/security/rate-limit";
+import { getMeeting } from "@/lib/dealflow-ai/db-meetings";
+import { getAgentForSpeech } from "@/lib/dealflow-ai/meeting-agents";
+import { reserveSpeech } from "@/lib/dealflow-ai/meeting-speech-guard";
+import { handleAnswer, type AnswerDeps } from "@/lib/dealflow-ai/meetings/answer";
+import { buildBriefing } from "@/lib/products/agentos/calls/briefing";
+import { viewerForUserId } from "@/lib/products/agentos/viewer";
+import type { MeetingDoc } from "@/lib/dealflow-ai/meetings/types";
+
+import { withTransport } from "@/lib/security/transport";
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
+/** The model that writes meeting replies: small and fast, because the first spoken word has to follow the question within a couple of seconds. */
+const MEETING_MODEL = "gpt-4.1-mini";
 
 /**
  * POST /api/dealflow-ai/meetings/agent-speak
- * Generates an ultra-human, contextual AI agent response based on:
- * - Agent personality & knowledge base
- * - Current conversation context
- * - Who triggered the agent (sales person or client)
+ * Streams what an AI agent says next in a live meeting (NDJSON, see handleAnswer). Requires a signed-in team member who is on the meeting's
+ * roster: the AI quota is spent only on behalf of staff, never by a guest link. The agent's instructions, persona, knowledge, the agenda and
+ * the lead briefing are read server-side; the browser sends the room, the agent and the recent lines only.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
-    const {
-      agentName,
-      agentRole,
-      personality,
-      knowledgeBase,
-      triggerText,
-      calledBy,
-      conversationContext,
-      clientName,
-      salesPersonName,
-    } = await req.json();
-
-    if (!agentName || !personality || !knowledgeBase || !triggerText) {
-      return NextResponse.json({ ok: false, error: "Missing required fields" }, { status: 400 });
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json({ ok: false, error: "OPENAI_API_KEY not configured" }, { status: 503 });
-    }
-
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-    // Build the ultra-human system prompt
-    const systemPrompt = `You are ${agentName}, a ${agentRole} at this company. You are currently in a live video call.
-
-CRITICAL RULES — READ CAREFULLY:
-1. You are NOT an AI assistant. You are a REAL human employee named ${agentName}.
-2. NEVER mention AI, bot, machine learning, language model, or technology behind you.
-3. NEVER say phrases like "As an AI", "I'm designed to", "I'm programmed to", "As a language model".
-4. Speak exactly like a confident, knowledgeable human professional in a business meeting.
-5. Be warm, natural, and conversational — like a real colleague on a call.
-6. Keep responses focused and concise (2-4 sentences usually) unless a detailed answer is needed.
-7. Use natural speech patterns — occasional pauses expressed as "...", natural transitions.
-8. Show personality — be engaging, confident, and professional.
-9. If you don't know something, say "I'll get back to you on that" like a real person would.
-10. Refer to the client as "${clientName}" and your colleague as "${salesPersonName || "my colleague"}".
-
-YOUR IDENTITY & EXPERTISE:
-${personality}
-
-YOUR KNOWLEDGE BASE (what you know deeply):
-${knowledgeBase}
-
-MEETING CONTEXT:
-- Client name: ${clientName}
-- Sales colleague: ${salesPersonName || "your colleague"}
-- Your role in this meeting: ${agentRole}
-- You were just addressed by the ${calledBy === "sales" ? "sales colleague" : "client"}
-
-RECENT CONVERSATION:
-${conversationContext || "(beginning of conversation)"}
-
-Respond naturally to what was just said to you. Be human. Be helpful. Be professional.`;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: `${calledBy === "sales" ? salesPersonName || "Colleague" : clientName} just said: "${triggerText}"` },
-      ],
-      max_tokens: 300,
-      temperature: 0.82,  // Slightly elevated for natural human variation
-      presence_penalty: 0.3,
-      frequency_penalty: 0.4,
-    });
-
-    const response = completion.choices[0]?.message?.content?.trim() ?? "";
-    if (!response) {
-      return NextResponse.json({ ok: false, error: "No response generated" }, { status: 500 });
-    }
-
-    return NextResponse.json({ ok: true, response });
+    const limited = await limitOr429(req, "dealflow-agent-speak", 60, 60);
+    if (limited) return limited;
+    const body = await req.json().catch(() => null);
+    const deps: AnswerDeps = {
+      staff: async () => {
+        const u = await requireLms("VIEW_LEADS");
+        return u ? { id: u.id } : null;
+      },
+      limit: async (userId) => {
+        const r = await userRateLimit("meeting-answer", userId, 40, 60);
+        return r.ok ? null : Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429, headers: { "Retry-After": String(r.retryAfter) } });
+      },
+      getMeeting: async (roomId) => (await getMeeting(roomId)) as unknown as MeetingDoc | null,
+      agent: (roomId, agentId) => getAgentForSpeech(roomId, agentId),
+      reserve: (roomId) => reserveSpeech(roomId, "llm"),
+      briefing: async (userId, target) => {
+        const viewer = await viewerForUserId(userId);
+        if (!viewer) return "";
+        const b = await buildBriefing(viewer, target);
+        return b.available ? b.text : "";
+      },
+      stream: async ({ system, user, maxTokens }) => {
+        const openai = await getOpenAI({ timeoutMs: 25_000, maxRetries: 1 });
+        const completion = await openai.chat.completions.create({
+          model: MEETING_MODEL,
+          stream: true,
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+          max_tokens: maxTokens,
+          temperature: 0.6,
+        });
+        return (async function* () {
+          for await (const chunk of completion) {
+            const d = chunk.choices[0]?.delta?.content;
+            if (d) yield d;
+          }
+        })();
+      },
+    };
+    return await handleAnswer(body, deps);
   } catch (err) {
     console.error("[agent-speak] POST error:", err);
-    return NextResponse.json({ ok: false, error: "Failed to generate agent response" }, { status: 500 });
+    return Response.json({ ok: false, error: "Failed to generate agent response" }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

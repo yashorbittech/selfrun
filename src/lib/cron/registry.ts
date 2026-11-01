@@ -52,10 +52,26 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "CyberVault settings", href: "/cybervault/settings" },
   },
   {
-    key: "viralpulse", name: "Scheduled posts", product: "smms", scope: "each company", path: "/api/viralpulse-ai/cron", schedule: "30 4 * * *", maxDurationSec: 300,
-    description: "Publishes approved scheduled posts that are due and reminds publishers about due posts nobody approved and ads due to go live.",
-    alsoRunsOn: "Page loads in ViralPulse (throttled).",
+    key: "viralpulse-publisher", name: "Scheduled posts", product: "smms", scope: "each company", path: "/api/viralpulse-ai/publisher/cron", schedule: "*/5 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Publishes approved scheduled posts that are due, retries failed publishes with backoff, checks media the platforms are still processing, reminds publishers about due posts nobody approved and ads due to go live.",
+    alsoRunsOn: "Right after Publish now (in the background).",
     configure: { label: "ViralPulse settings", href: "/viralpulse-ai/settings" },
+  },
+  {
+    key: "viralpulse-ugc", name: "AI UGC videos", product: "smms", scope: "each company", path: "/api/viralpulse-ai/ugc/cron", schedule: "*/2 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Submits and checks the scene renders of AI UGC videos that were approved, retries failed scenes with backoff, downloads finished clips and joins them into the final video.",
+    alsoRunsOn: "Right after a video is approved (the browser does not have to stay open).",
+    configure: { label: "ViralPulse settings", href: "/viralpulse-ai/settings" },
+  },
+  {
+    key: "viralpulse-ads", name: "Paid ads status and results", product: "smms", scope: "each company", path: "/api/viralpulse-ai/ads/cron", schedule: "*/30 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Reads the status of every launched Meta campaign, ad set and ad, tells the admins when Meta disapproves an ad, pauses a campaign, restricts the ad account or the account's spend limit is nearly used, and saves the daily results (impressions, clicks, spend, conversions) for the analytics pages.",
+    configure: { label: "ViralPulse campaigns", href: "/viralpulse-ai/campaigns" },
+  },
+  {
+    key: "viralpulse-accounts", name: "Connected account checks", product: "smms", scope: "each company", path: "/api/viralpulse-ai/accounts/cron", schedule: "*/30 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Renews social logins that are about to expire, asks Meta, Google, LinkedIn and X whether each login is still valid and what it allows, updates each account's status and warns the admins before a login expires (14, 7, 3 and 1 days ahead), when it has expired or been revoked, or when a permission is missing.",
+    configure: { label: "Connected accounts", href: "/viralpulse-ai/settings/accounts" },
   },
   {
     key: "evaliq", name: "Test deadlines", product: "ots", scope: "each company", path: "/api/evaliq/cron", schedule: "0 5 * * *", maxDurationSec: 300,
@@ -83,6 +99,17 @@ export const CRON_JOBS: CronJob[] = [
     description: "Overdue invoices, stale leads, expiring documents, ending offers and HR, project, procurement and training deadlines: tells people even if nobody opened the product. Also sends announcements a company scheduled that have come due.",
     alsoRunsOn: "Opening the product (each product runs its own sweep, throttled; every notification dedupes per day). Scheduled announcements are sent the moment anyone opens the workspace, and by this job at least once a day.",
     configure: { label: "Notification center", href: "/commandos/settings/notifications" },
+  },
+  {
+    key: "agentos-calls", name: "Scheduled voice calls", product: "aibots", scope: "each company", path: "/api/agentos/cron", schedule: "*/5 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Dials the voice calls people scheduled when they are due (re-checking the calling hours, do-not-call list and limits at that moment, never retrying by itself), and collects the results of calls whose results haven't arrived.",
+    alsoRunsOn: "ElevenLabs' post-call webhook delivers results as soon as a call ends; this job is the safety net.",
+    configure: { label: "Call settings", href: "/agentos/settings" },
+  },
+  {
+    key: "meetings", name: "Meeting reminders & summaries", product: "lms", scope: "each company", path: "/api/dealflow-ai/meetings/cron", schedule: "*/5 * * * *", maxDurationSec: 300, frequent: true,
+    description: "Reminds staff 60 and 10 minutes before a meeting, ends meetings nobody closed, and writes the summary and action items of ended meetings.",
+    alsoRunsOn: "Opening an ended meeting's page (the summary is written then if the job has not yet).",
   },
   {
     key: "apps", name: "App builds", product: "platform", scope: "platform", path: "/api/apps/builds/cron", schedule: "0 7 * * *", maxDurationSec: 300,

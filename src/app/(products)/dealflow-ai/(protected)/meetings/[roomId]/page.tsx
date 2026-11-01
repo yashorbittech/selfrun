@@ -1,58 +1,31 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getMeeting } from "@/lib/dealflow-ai/db-meetings";
-import { getVoiceAgent } from "@/lib/dealflow-ai/db-voice-agents";
-import MeetingRoomClient from "./MeetingRoomClient";
+import { canSeeMeeting, staffProfile } from "@/lib/dealflow-ai/meetings/access";
+import JoinFlow from "@/components/products/dealflow-ai/meetings/JoinFlow";
 import { requireLmsPage } from "@/lib/lms-auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function MeetingRoomPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ roomId: string }>;
-  searchParams: Promise<{ mode?: string; name?: string }>;
-}) {
-  // Sales people need to be authenticated
-  const sp = await searchParams;
-  const mode = (sp.mode === "client" ? "client" : "sales") as "sales" | "client";
-
-  if (mode === "sales") {
-    await requireLmsPage("VIEW_LEADS");
-  }
-
+/**
+ * The room for signed-in staff. Nothing is issued here: JoinFlow asks the token route (which checks the roster) and renders the live room
+ * (`MeetingRoom`) with what the server returns. Guests use `/meeting/[roomId]?t=…`.
+ */
+export default async function MeetingRoomPage({ params }: { params: Promise<{ roomId: string }> }) {
+  const user = await requireLmsPage("VIEW_LEADS");
   const { roomId } = await params;
   const meeting = await getMeeting(roomId);
-  if (!meeting) notFound();
-
-  // Fetch all assigned agents
-  const agents = (
-    await Promise.all(meeting.agentIds.map((id) => getVoiceAgent(id)))
-  ).filter(Boolean);
-
-  const participantName =
-    mode === "client"
-      ? (sp.name ?? meeting.clientName)
-      : (sp.name ?? meeting.salesPersonName ?? "Sales Person");
-
+  if (!meeting || !canSeeMeeting(user, meeting)) notFound();
+  if (meeting.status === "ended" || meeting.status === "cancelled") redirect(`/dealflow-ai/meetings/${roomId}/details`);
+  const profile = await staffProfile(user.id);
+  const me = meeting.participants.find((p) => p.kind === "internal" && p.refId === user.id);
   return (
-    <MeetingRoomClient
-      meeting={{
-        roomId: meeting.roomId,
-        title: meeting.title,
-        clientName: meeting.clientName,
-        clientEmail: meeting.clientEmail,
-        status: meeting.status,
-        agentIds: meeting.agentIds,
-        agentNames: meeting.agentNames,
-        salesPersonName: meeting.salesPersonName ?? "",
-        clientJoinLink: meeting.clientJoinLink,
-        notes: meeting.notes ?? "",
-      }}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      agents={agents as any[]}
-      participantMode={mode}
-      participantName={participantName}
+    <JoinFlow
+      roomId={roomId}
+      title={meeting.title}
+      scheduledAt={meeting.scheduledAt}
+      timezone={meeting.timezone}
+      displayName={me?.name ?? profile?.name ?? user.email}
+      leaveHref={`/dealflow-ai/meetings/${roomId}/details`}
     />
   );
 }

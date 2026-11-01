@@ -2,6 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { Copy, Archive, ArchiveRestore, Trash2, Rocket, CalendarClock, CalendarX, XCircle } from "lucide-react";
 import { PageHeader, SectionCard, Notice } from "@/components/products/viralpulse-ai/SmmsUi";
 import { PlatformChip, StatusBadge, KindChip } from "@/components/products/viralpulse-ai/SmmsBits";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import ActionButton from "@/components/products/viralpulse-ai/ActionButton";
 import InputDialogButton from "@/components/products/viralpulse-ai/InputDialogButton";
 import GenerateBar from "@/components/products/viralpulse-ai/GenerateBar";
@@ -15,6 +17,7 @@ import { getMediaMany, getMedia, toMediaCard } from "@/lib/products/viralpulse-a
 import { listVersions } from "@/lib/products/viralpulse-ai/generations";
 import { getBrandSnapshot } from "@/lib/products/viralpulse-ai/brand";
 import { isOpenAIConfigured } from "@/lib/openai";
+import { campaignBriefContext } from "@/lib/products/viralpulse-ai/ai-field/context";
 import { defaultScheduleInput } from "@/lib/products/viralpulse-ai/page-data";
 import { formatDateTime } from "@/lib/utils";
 import { archiveAdAction, deleteAdAction, duplicateAdAction, generateAdAction, markAdLiveAction, scheduleAdAction } from "@/app/(products)/viralpulse-ai/(protected)/actions";
@@ -29,6 +32,7 @@ export default async function AdPage({ params }: { params: Promise<{ id: string;
   const [c, ad] = await Promise.all([getCampaign(id), getAd(adId)]);
   if (!c || !ad || ad.campaignId !== id) notFound();
   const [media, thumb, versions, brand] = await Promise.all([getMediaMany(ad.mediaIds), ad.thumbnailId ? getMedia(ad.thumbnailId) : null, listVersions("ad", adId), getBrandSnapshot()]);
+  const metaAd = ad.platform === "facebook" || ad.platform === "instagram";
   const locked = ad.status === "archived" || ad.status === "published" || c.status === "archived";
   const canEdit = can(viewer, "CREATE_ADS") && !locked;
   const hasContent = Boolean(ad.content.headline || ad.content.primaryText);
@@ -51,16 +55,17 @@ export default async function AdPage({ params }: { params: Promise<{ id: string;
           <>
             {can(viewer, "CREATE_ADS") && c.status !== "archived" && <ActionButton action={duplicateAdAction.bind(null, id, adId, undefined)} success="Duplicated" redirectPrefix={`/viralpulse-ai/campaigns/${id}/ads/`}><Copy className="size-3.5" /> Duplicate</ActionButton>}
             {can(viewer, "CREATE_ADS") && c.status !== "archived" && <AdaptButton campaignId={id} adId={adId} platforms={c.platforms} current={ad.platform} canGenerate={can(viewer, "GENERATE_AI_CONTENT") && (await isOpenAIConfigured())} />}
-            {!locked && can(viewer, "SCHEDULE_POSTS") && (ad.status === "scheduled" ? (
+            {!locked && !metaAd && can(viewer, "SCHEDULE_POSTS") && (ad.status === "scheduled" ? (
               <ActionButton action={scheduleAdAction.bind(null, id, adId, null)} success="Unscheduled"><CalendarX className="size-3.5" /> Unschedule</ActionButton>
             ) : (
               <InputDialogButton title="Schedule go-live" description="Put this ad on the calendar. Publishers are reminded when it's due — the ad itself is launched by hand in the ads manager." inputLabel="Go-live date & time" inputType="datetime-local" defaultValue={defaultScheduleInput(ad.scheduledAt)} required submitLabel="Schedule" success="Scheduled" action={scheduleAdAction.bind(null, id, adId)}>
                 <CalendarClock className="size-3.5" /> Schedule
               </InputDialogButton>
             ))}
-            {!locked && can(viewer, "PUBLISH_CONTENT") && (
+            {metaAd && <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/viralpulse-ai/campaigns/${id}/edit?step=ads`} />}><Rocket className="size-3.5" /> Launch from the campaign</Button>}
+            {!locked && !metaAd && can(viewer, "PUBLISH_CONTENT") && (
               <>
-                <InputDialogButton variant="default" title="Mark this ad as live" description="Confirm you've launched it in the platform's ads manager. Optionally paste the ad's id or URL there." inputLabel="Ad id or URL (optional)" placeholder="e.g. 120210000000000 or https://…" submitLabel="Mark live" success="Marked live" action={markAdLiveAction.bind(null, id, adId)}>
+                <InputDialogButton variant="default" title="Mark this ad as tracked by hand (audited)" description="Confirm you've launched it in the platform's ads manager. Optionally paste the ad's id or URL there." inputLabel="Ad id or URL (optional)" placeholder="e.g. 120210000000000 or https://…" submitLabel="Mark live" success="Marked live" action={markAdLiveAction.bind(null, id, adId)}>
                   <Rocket className="size-3.5" /> Mark live
                 </InputDialogButton>
                 {ad.status === "scheduled" && <ActionButton action={markAdLiveAction.bind(null, id, adId, "", true)} success="Marked failed"><XCircle className="size-3.5" /> Mark failed</ActionButton>}
@@ -101,6 +106,7 @@ export default async function AdPage({ params }: { params: Promise<{ id: string;
         thumbnail={thumb ? toMediaCard(thumb) : null}
         brand={brand.companyName}
         landingPage={c.landingPage}
+        campaign={campaignBriefContext(c)}
         canEdit={canEdit}
         canGenerate={can(viewer, "GENERATE_AI_CONTENT") && (await isOpenAIConfigured())}
         canUpload={can(viewer, "MANAGE_MEDIA")}

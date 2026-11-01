@@ -32,6 +32,12 @@ export interface UnifiedPipelineContact {
     formName?: string;
   };
   detailUrl?: string;
+  /** Which kind of record this is, for the "Call with AI" button: a lead record, a career application or a website form submission. */
+  callEntity?: "lead" | "applicant" | "submission";
+  /** Submissions only: the form category (the submission page and the call target need it). */
+  submissionCategory?: string;
+  /** Lead records only. */
+  doNotContact?: boolean;
 }
 
 export type LeadSourcePlatform = "facebook" | "instagram" | "meta" | "upwork" | "website" | "portal" | "manual";
@@ -194,31 +200,27 @@ export interface WhatsAppNotificationLog {
   sentAt: string;
 }
 
+/** A connection from the platform connections system (Workspace → Settings → Integrations), as the DealFlow Integrations page shows it. */
+export interface IntegrationConnectionStatus {
+  key: string;
+  name: string;
+  connected: boolean;
+  /** "workspace" = the company's own keys; "platform" = SelfRun's fallback keys. */
+  source: "workspace" | "platform" | null;
+}
+
 export interface IntegrationStatus {
-  meta: {
-    connected: boolean;
-    connectedAccounts: string[];
-    activeFormsCount: number;
-    lastSyncedAt: string;
-    totalLeadsFetched: number;
+  /** Connection state of the providers DealFlow uses (only providers that exist in the connections catalog). */
+  connections: {
+    meta: IntegrationConnectionStatus;
+    whatsapp: IntegrationConnectionStatus;
   };
-  upwork: {
-    connected: boolean;
-    activeQueries: string[];
-    lastSyncedAt: string;
-    totalOpportunitiesFetched: number;
-  };
+  /** Leads and applicants recorded in the lead inbox, by where they came from. Only sources with at least one record. */
+  leadSources: { source: string; label: string; count: number }[];
   website: {
     portalUrl: string;
-    webhookActive: boolean;
     openJobPositions: number;
-    lastApplicationReceivedAt: string;
-    totalApplicationsFetched: number;
-  };
-  whatsapp: {
-    connected: boolean;
-    businessPhoneNumber: string;
-    notificationsEnabled: boolean;
-    totalNotificationsSent: number;
+    totalApplications: number;
+    lastApplicationReceivedAt: string | null;
   };
 }

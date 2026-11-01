@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 /** Shared, server-renderable pieces of the Social Media UI — the same visual language as SOP/SEO/DLMS. */
 
 export function PageHeader({ title, description, crumbs, actions }: { title: ReactNode; description?: ReactNode; crumbs: { label: string; href?: string }[]; actions?: ReactNode }) {
-  return <PanelPageHeader breadcrumbs={[{ label: "Social Media", href: "/viralpulse-ai" }, ...crumbs]} title={title} description={description} actions={actions} />;
+  return <PanelPageHeader breadcrumbs={[{ label: "ViralPulse AI", href: "/viralpulse-ai" }, ...crumbs]} title={title} description={description} actions={actions} />;
 }
 
 export function SectionCard({ title, description, children, className, action }: { title: ReactNode; description?: ReactNode; children: ReactNode; className?: string; action?: ReactNode }) {

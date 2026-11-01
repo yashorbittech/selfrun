@@ -1,3 +1,4 @@
+import { avatarUrlFor } from "@/lib/products/agentos/avatar-shared";
 import PanelTabs from "@/components/platform/panel/PanelTabs";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -41,7 +42,7 @@ export default async function EditBotPage({ params, searchParams }: { params: Pr
         description={`${bot.category} · ${bot.model} · ${bot.status === "active" ? "Active" : "Inactive"}`}
         actions={
           <>
-            <BotAvatar icon={bot.icon} color={bot.color} />
+            <BotAvatar icon={bot.icon} color={bot.color} imageUrl={avatarUrlFor(bot._id, bot.avatarKey)} />
             <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/agentos/b/${bot._id}`} />}>
               <MessageSquare className="size-4" /> Test chat
             </Button>
@@ -55,6 +56,7 @@ export default async function EditBotPage({ params, searchParams }: { params: Pr
           key={bot.updatedAt.toISOString()}
           botId={bot._id}
           initial={formValuesFor(bot, o.settings.defaultModel)}
+          avatarUrl={avatarUrlFor(bot._id, bot.avatarKey)}
           models={o.models}
           roleOptions={o.roleOptions}
           userOptions={o.userOptions}

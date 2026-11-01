@@ -82,7 +82,7 @@ export default function SettingsForm({
       </Button>
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label htmlFor="s-def">Default model (new bots &amp; Start New Chat)</Label>
+          <Label htmlFor="s-def">Default model (new bots &amp; General Chat)</Label>
           <OptionSelect id="s-def" value={def} onChange={setDef} options={rows.filter((r) => r.id.trim()).map((r) => ({ value: r.id.trim(), label: r.label || r.id }))} />
         </div>
         <div className="space-y-1.5">
@@ -96,7 +96,7 @@ export default function SettingsForm({
         </div>
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="s-general">Start New Chat — instructions</Label>
+        <Label htmlFor="s-general">General Chat — instructions</Label>
         <Textarea id="s-general" rows={5} maxLength={20000} value={general} onChange={(e) => setGeneral(e.target.value)} className="font-mono text-xs" />
         <p className="text-[11px] text-muted-foreground">How the general assistant behaves. It has no knowledge base and runs on the default model above; changes apply to the next message in every general chat.</p>
       </div>

@@ -1,11 +1,12 @@
 import { withTransport } from "@/lib/security/transport";
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import type OpenAI from "openai";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { sanitizeUserMessage } from "@/lib/prompt-safety";
 import { getViewer, can, AibotsInputError, NotFoundError } from "@/lib/products/agentos/viewer";
 import { getUsableBot } from "@/lib/products/agentos/bots";
-import { autoTitle, chatsCollection, createChat, ensureConversation, getChat, touchChat, type ChatDoc } from "@/lib/products/agentos/chats";
+import { autoTitle, chatsCollection, createChat, ensureConversation, getChat, textChatBlockReason, touchChat, type ChatDoc } from "@/lib/products/agentos/chats";
 import { refreshProcessing, friendlyError } from "@/lib/products/agentos/knowledge";
 import { botHasKnowledge, buildUserContent, citationTitles, collectCitedFileIds, plainText, popLastTurn, startResponse, type UserContent } from "@/lib/products/agentos/engine";
 import { countUserRunsToday, recordRun } from "@/lib/products/agentos/runs";
@@ -61,6 +62,9 @@ async function handlePOST(req: NextRequest) {
     return fail("That bot or chat isn't available to you.", 404);
   }
 
+  const textBlock = textChatBlockReason(bot, chat);
+  if (textBlock) return fail(textBlock, 400);
+
   const planBlock = await aiBlockReason();
   if (planBlock) return fail(planBlock, 402);
 
@@ -84,6 +88,8 @@ async function handlePOST(req: NextRequest) {
       if (!chat) {
         chat = await createChat(viewer, bot._id, sanitized.text);
         isNew = true;
+        // The sidebar lists agents the viewer has chatted with: a first chat adds this one.
+        revalidatePath("/agentos", "layout");
       } else {
         await ensureConversation(chat);
       }

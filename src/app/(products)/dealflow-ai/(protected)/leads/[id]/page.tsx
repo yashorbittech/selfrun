@@ -15,11 +15,15 @@ import { workflowFor, nextStageOptions, stageMeta } from "@/lib/lead-management/
 import { LEAD_SOURCE_META } from "@/lib/lead-management/types";
 import LeadStageControl from "./LeadStageControl";
 import LeadComms from "./LeadComms";
+import DoNotContactToggle from "./DoNotContactToggle";
 import LeadLinksPanel from "./LeadLinksPanel";
 import LeadInterviewsPanel from "./LeadInterviewsPanel";
 import LeadDocsPanel from "./LeadDocsPanel";
 import LeadTimelineView from "./LeadTimelineView";
 import LoginAsPortalUserButton from "../list/LoginAsPortalUserButton";
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import DealflowCallHistory from "@/components/products/dealflow-ai/DealflowCallHistory";
+import { leadCallSpec } from "@/lib/dealflow-ai/call-targets";
 
 export const dynamic = "force-dynamic";
 
@@ -77,7 +81,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               Career application <ExternalLink className="size-3" />
             </Link>
           )}
-          <div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <DealflowCallButton spec={leadCallSpec(lead)} />
             <LoginAsPortalUserButton
               externalUserId={lead.externalUserId}
               leadId={lead._id}
@@ -108,6 +113,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             nextStages={nextStages.map((w) => ({ key: w.key, label: w.label }))}
           />
 
+          <DoNotContactToggle leadId={id} doNotContact={Boolean(lead.doNotContact)} />
+
           <LeadLinksPanel
             leadId={id}
             type={lead.type}
@@ -117,6 +124,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           />
 
           {lead.type === "job_applicant" && <LeadInterviewsPanel leadId={id} initial={interviews} />}
+
+          <DealflowCallHistory entityType="lead" entityId={id} />
 
           <LeadComms leadId={id} internal={internalMsgs} portal={portalMsgs} />
 

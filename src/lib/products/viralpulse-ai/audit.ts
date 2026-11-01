@@ -11,7 +11,7 @@ import { COLLECTIONS, escapeRegex, newId } from "@/lib/products/viralpulse-ai/db
  * only, and `metadata` is scrubbed of any secret-looking key (see `scrub`).
  */
 
-export const AUDIT_ENTITIES = ["campaign", "ad", "post", "media", "ai", "integration", "settings"] as const;
+export const AUDIT_ENTITIES = ["campaign", "ad", "post", "media", "ai", "integration", "settings", "ugc"] as const;
 export type AuditEntity = (typeof AUDIT_ENTITIES)[number];
 
 export const AUDIT_ACTION_LABEL = {

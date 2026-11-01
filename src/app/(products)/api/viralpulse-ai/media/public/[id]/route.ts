@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyMediaToken } from "@/lib/products/viralpulse-ai/crypto";
 import { getMedia } from "@/lib/products/viralpulse-ai/media";
 import { getObject } from "@/lib/storage/blob";
+import { imageBytesFor } from "@/lib/products/viralpulse-ai/publishers/media-facts";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -19,6 +20,12 @@ async function handleGET(req: NextRequest, { params }: Context) {
   if (!verifyMediaToken(id, exp, sig)) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const media = await getMedia(id);
   if (!media) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  // `fmt=jpeg`: a JPEG rendition for Instagram (JPEG is the only image format it accepts). Images only; bounded size.
+  if (req.nextUrl.searchParams.get("fmt") === "jpeg" && media.kind === "image" && media.contentType !== "image/jpeg") {
+    const out = await imageBytesFor(id, { jpeg: true }).catch(() => null);
+    if (!out) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return new NextResponse(new Uint8Array(out.bytes), { headers: { "Content-Type": "image/jpeg", "Content-Length": String(out.bytes.length), "X-Content-Type-Options": "nosniff", "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex" } });
+  }
   const object = await getObject(media.storageKey).catch(() => null);
   if (!object) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(object.stream, {

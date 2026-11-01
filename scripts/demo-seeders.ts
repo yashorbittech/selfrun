@@ -7,7 +7,8 @@
  *   npm run demo:seeders -- --company <slug>   # a specific company
  *
  * Every row goes through the company-scoped database, so nothing outside that company is read or written. Re-running replaces
- * the previous demo rows instead of duplicating them. Refuses the platform operator company.
+ * the previous demo rows instead of duplicating them. Refuses the platform operator company, any company not flagged as demo
+ * (node --env-file=.env.local scripts/mark-demo-company.mjs <slug>) and any production environment (scripts/demo/guard.mjs).
  */
 
 import { OpenAI } from "openai";
@@ -29,6 +30,7 @@ import { seedSeo, SEO_DEMO_ACCOUNTS } from "./demo/seo.mjs";
 import { seedDlms, DLMS_DEMO_ACCOUNTS } from "./demo/dlms.mjs";
 import { seedAibots, AIBOTS_DEMO_ACCOUNTS } from "./demo/aibots.mjs";
 import { seedSmms, SMMS_DEMO_ACCOUNTS } from "./demo/smms.mjs";
+import { assertDemoTarget } from "./demo/guard.mjs";
 import { seedOts, OTS_DEMO_ACCOUNTS, OTS_PORTAL_ACCOUNTS } from "./demo/ots.mjs";
 import { seedOtsCareers } from "./demo/ots-careers.mjs";
 import { seedCms, CMS_DEMO_ACCOUNTS } from "./demo/cms.mjs";
@@ -62,6 +64,13 @@ async function main() {
   }
   if (company!.isPlatformOwner) fail("That is the platform operator company. Demo data belongs in a customer company.");
 
+  // The social-media seeder writes invented numbers and known-password logins: check up front so a refusal doesn't leave the other products half seeded.
+  try {
+    assertDemoTarget(company, process.env, "demo data");
+  } catch (e) {
+    fail(`${(e as Error).message}`);
+  }
+
   const companyId = String(company!._id);
   const companyName = String(company!.name);
   const db = scopeDb(platform, companyId);
@@ -92,7 +101,7 @@ async function main() {
   await step("Digi Locker (DLMS)", () => seedDlms(seedDb), (r: any) => `${r.credentials} credentials, ${r.documents} documents`);
   const openai = process.env.OPENAI_API_KEY?.trim() ? new OpenAI() : null;
   await step("AI assistants", () => seedAibots(seedDb, { openai, log: () => {} }), (r: any) => `${r.bots} bots, ${r.chats} chats${r.openai ? "" : " (no OpenAI key: metadata only)"}`);
-  await step("Social media (SMMS)", () => seedSmms(seedDb), (r: any) => `${r.campaigns} campaigns, ${r.posts} posts`);
+  await step("Social media (SMMS)", () => seedSmms(seedDb, { company }), (r: any) => `${r.campaigns} campaigns, ${r.posts} posts`);
   await step("Online tests (OTS)", () => seedOts(seedDb), (r: any) => `${r.tests} tests, ${r.attempts} attempts`);
   const manager = await seedDb.collection("admin_users").findOne({ email: "demo.ots.manager@example.com" }, { projection: { _id: 1 } });
   const evaluator = await seedDb.collection("admin_users").findOne({ email: "demo.ots.evaluator@example.com" }, { projection: { _id: 1 } });

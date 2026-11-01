@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Bot,
   Sparkles,
@@ -24,6 +26,7 @@ import {
   Building2,
   Globe,
 } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import type { BotColor, BotIcon } from "@/lib/products/agentos/constants";
 
@@ -71,12 +74,19 @@ export function BotIconGlyph({ icon, className }: { icon: string; className?: st
   return <Icon className={className} />;
 }
 
-export default function BotAvatar({ icon, color, size = "md", className }: { icon: string; color: string; size?: "sm" | "md" | "lg"; className?: string }) {
+export default function BotAvatar({ icon, color, imageUrl, size = "md", className }: { icon: string; color: string; /** The agent's photo; falls back to icon + colour when absent or if it fails to load. */ imageUrl?: string | null; size?: "sm" | "md" | "lg"; className?: string }) {
   const box = { sm: "size-6 rounded-md", md: "size-9 rounded-xl", lg: "size-12 rounded-2xl" }[size];
   const glyph = { sm: "size-3.5", md: "size-4.5", lg: "size-6" }[size];
+  const [failed, setFailed] = useState<string | null>(null);
+  const showImage = Boolean(imageUrl) && failed !== imageUrl;
   return (
-    <span className={cn("inline-flex shrink-0 items-center justify-center", box, BOT_COLOR_CLASSES[color as BotColor] ?? BOT_COLOR_CLASSES.indigo, className)}>
-      <BotIconGlyph icon={icon} className={glyph} />
+    <span className={cn("inline-flex shrink-0 items-center justify-center overflow-hidden", box, showImage ? "bg-muted" : (BOT_COLOR_CLASSES[color as BotColor] ?? BOT_COLOR_CLASSES.indigo), className)}>
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element -- an authenticated, already square-cropped photo from our own route
+        <img src={imageUrl!} alt="" className="size-full object-cover" onError={() => setFailed(imageUrl!)} />
+      ) : (
+        <BotIconGlyph icon={icon} className={glyph} />
+      )}
     </span>
   );
 }

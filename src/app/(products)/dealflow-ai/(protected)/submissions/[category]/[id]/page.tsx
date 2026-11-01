@@ -14,6 +14,9 @@ import DealValueEditor from "./DealValueEditor";
 import { getLead, isValidCategory, getCategoryLabel, categoryAcceptsResume, DEFAULT_LEAD_STATUS } from "@/lib/leads";
 import { getLeadSourceLabel } from "@/lib/lead-sources";
 import { formatDateTime } from "@/lib/utils";
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import DealflowCallHistory from "@/components/products/dealflow-ai/DealflowCallHistory";
+import { submissionCallSpec, submissionEntityId } from "@/lib/dealflow-ai/call-targets";
 
 export default async function SubmissionDetailPage({
   params,
@@ -36,7 +39,7 @@ export default async function SubmissionDetailPage({
           { label: lead.name },
         ]}
         title={<>{lead.name}</>}
-        actions={<><StatusBadge status={lead.status} /></>}
+        actions={<><div className="flex items-center gap-2"><DealflowCallButton spec={submissionCallSpec({ id, category, name: lead.name, phone: lead.phone, subService: lead.subService, message: lead.message, categoryLabel: getCategoryLabel(category) })} /><StatusBadge status={lead.status} /></div></>}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -125,6 +128,8 @@ export default async function SubmissionDetailPage({
           </CardContent>
         </GlassCard>
       )}
+
+      <DealflowCallHistory entityType="submission" entityId={submissionEntityId(category, id)} />
 
       <GlassCard>
         <CardHeader><CardTitle>Internal Notes</CardTitle></CardHeader>

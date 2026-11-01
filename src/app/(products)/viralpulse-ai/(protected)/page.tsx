@@ -19,8 +19,8 @@ const KIND_LABEL: Record<string, string> = { campaign_strategy: "Campaign strate
 function genHref(g: { targetType: string; targetId: string }) {
   if (g.targetType === "campaign") return `/viralpulse-ai/campaigns/${g.targetId}`;
   if (g.targetType === "post") return `/viralpulse-ai/posts/${g.targetId}`;
-  if (g.targetType === "media") return `/viralpulse-ai/media?open=${g.targetId}`;
-  if (g.targetType === "workspace") return "/viralpulse-ai/ai";
+  if (g.targetType === "media") return `/viralpulse-ai/image-studio?tab=library&open=${g.targetId}`;
+  if (g.targetType === "workspace") return "/viralpulse-ai/posts/generator";
   return null;
 }
 
@@ -45,7 +45,7 @@ export default async function SmmsDashboardPage({ searchParams }: { searchParams
           ]}
         />}
         title="Social Media Overview"
-        breadcrumbs={[{ label: "Social Media", href: "/viralpulse-ai" }, { label: "Dashboard" }]}
+        breadcrumbs={[{ label: "ViralPulse AI", href: "/viralpulse-ai" }, { label: "Dashboard" }]}
         description="Plan, publish and measure campaigns, ads and posts across Instagram, Facebook, YouTube, LinkedIn and Google."
         actions={
           <>

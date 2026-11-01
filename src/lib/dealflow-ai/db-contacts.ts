@@ -1,6 +1,6 @@
 import "server-only";
 import { getDb } from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import { isValidCategory } from "@/lib/categories";
 import type { PipelineTab, UnifiedPipelineContact } from "./types";
 
 function toIsoString(val: unknown): string {
@@ -40,20 +40,19 @@ export async function loadPipelineContactsFromDb(
       results.push({
         id,
         pipeline: "jobs",
-        name: String(app.name || "Candidate"),
+        name: String(app.name || "Unnamed applicant"),
         email: String(app.email || ""),
         phone: String(app.phone || ""),
-        companyOrCollege: app.notes ? String(app.notes) : "Website Careers Applicant",
-        titleOrService: String(app.positionTitle || "Software Engineer"),
+        titleOrService: String(app.positionTitle || "General application"),
         source: "website",
         sourceLabel: "Website Careers Portal",
-        budgetOrSalary: "₹12,00,000 - ₹24,00,000 LPA",
         status: String(app.status || "new"),
         statusLabel: String(app.status || "applied").replace(/_/g, " ").toUpperCase(),
         message: app.coverNote ? String(app.coverNote) : undefined,
         resumeUrl: app.resume?.storageKey ? `/api/lead-messages/files/${app.resume.storageKey}` : undefined,
         submittedAt: toIsoString(app.createdAt),
         detailUrl: `/dealflow-ai/careers/applicants/${id}`,
+        callEntity: "applicant",
       });
     }
 
@@ -62,11 +61,10 @@ export async function loadPipelineContactsFromDb(
       results.push({
         id,
         pipeline: "jobs",
-        name: String(lead.name || "Candidate"),
+        name: String(lead.name || "Unnamed applicant"),
         email: String(lead.email || ""),
         phone: String(lead.phone || ""),
-        companyOrCollege: "Website Careers Applicant",
-        titleOrService: String(lead.subService || "Software Development Position"),
+        titleOrService: lead.subService ? String(lead.subService) : "Job application",
         source: "website",
         sourceLabel: "Website Careers Portal",
         status: String(lead.stage || "applied"),
@@ -74,6 +72,8 @@ export async function loadPipelineContactsFromDb(
         message: lead.message ? String(lead.message) : undefined,
         submittedAt: toIsoString(lead.createdAt),
         detailUrl: `/dealflow-ai/leads/${id}`,
+        callEntity: "lead",
+        doNotContact: Boolean(lead.doNotContact),
       });
     }
   }
@@ -92,19 +92,19 @@ export async function loadPipelineContactsFromDb(
       results.push({
         id,
         pipeline: "interns",
-        name: String(intern.name || "Intern Applicant"),
+        name: String(intern.name || "Unnamed applicant"),
         email: String(intern.email || ""),
         phone: String(intern.phone || ""),
-        companyOrCollege: "University / College Internship Applicant",
-        titleOrService: intern.subService ? `${intern.subService} Internship` : "Software & AI Engineering Internship",
+        titleOrService: intern.subService ? String(intern.subService) : "Internship",
         source: "website",
         sourceLabel: "Website Internship Portal",
-        budgetOrSalary: "₹25,000 / month Stipend",
         status: String(intern.stage || "applied"),
         statusLabel: String(intern.stage || "applied").replace(/_/g, " ").toUpperCase(),
-        message: intern.message ? String(intern.message) : "Applied for college software internship through website portal.",
+        message: intern.message ? String(intern.message) : undefined,
         submittedAt: toIsoString(intern.createdAt),
         detailUrl: `/dealflow-ai/leads/${id}`,
+        callEntity: "lead",
+        doNotContact: Boolean(intern.doNotContact),
       });
     }
   }
@@ -123,19 +123,19 @@ export async function loadPipelineContactsFromDb(
       results.push({
         id,
         pipeline: "trainees",
-        name: String(trainee.name || "Trainee Candidate"),
+        name: String(trainee.name || "Unnamed applicant"),
         email: String(trainee.email || ""),
         phone: String(trainee.phone || ""),
-        companyOrCollege: "Industrial Training (College Credit)",
-        titleOrService: trainee.subService ? `${trainee.subService} Industrial Training` : "6-Months Industrial Training",
+        titleOrService: trainee.subService ? String(trainee.subService) : "Industrial training",
         source: "website",
         sourceLabel: "Website Training Registration",
-        budgetOrSalary: "Training Enrollment",
         status: String(trainee.stage || "applied"),
         statusLabel: String(trainee.stage || "applied").replace(/_/g, " ").toUpperCase(),
-        message: trainee.message ? String(trainee.message) : "Interested in industrial training live project cohort.",
+        message: trainee.message ? String(trainee.message) : undefined,
         submittedAt: toIsoString(trainee.createdAt),
         detailUrl: `/dealflow-ai/leads/${id}`,
+        callEntity: "lead",
+        doNotContact: Boolean(trainee.doNotContact),
       });
     }
   }
@@ -161,50 +161,35 @@ export async function loadPipelineContactsFromDb(
       const id = String(lead._id);
       const rawSource = String(lead.source || "website").toLowerCase();
 
-      let source = "website";
-      let sourceLabel = "Website Contact Form";
-
-      if (rawSource.includes("meta")) {
-        source = "meta";
-        sourceLabel = "Meta Lead Ads (Campaign Q4)";
-      } else if (rawSource.includes("facebook") || rawSource.includes("fb")) {
-        source = "facebook";
-        sourceLabel = "Facebook Lead Ads";
-      } else if (rawSource.includes("instagram") || rawSource.includes("ig")) {
-        source = "instagram";
-        sourceLabel = "Instagram Story Ad";
-      } else if (rawSource.includes("upwork")) {
-        source = "upwork";
-        sourceLabel = "Upwork Enterprise ($65/hr)";
-      } else if (rawSource.includes("google")) {
-        source = "google";
-        sourceLabel = "Google Search Campaign";
-      } else if (rawSource.includes("linkedin")) {
-        source = "linkedin";
-        sourceLabel = "LinkedIn InMail Lead";
-      }
+      const SOURCES: [string, RegExp, string][] = [
+        ["meta", /meta/, "Meta"],
+        ["facebook", /facebook|fb/, "Facebook"],
+        ["instagram", /instagram|ig/, "Instagram"],
+        ["upwork", /upwork/, "Upwork"],
+        ["google", /google/, "Google"],
+        ["linkedin", /linkedin/, "LinkedIn"],
+      ];
+      const hit = SOURCES.find(([, re]) => re.test(rawSource));
+      const source = hit ? hit[0] : "website";
+      const sourceLabel = hit ? hit[2] : "Website contact form";
 
       results.push({
         id,
         pipeline: "clients",
-        name: String(lead.name || "Client Lead"),
+        name: String(lead.name || "Unnamed lead"),
         email: String(lead.email || ""),
         phone: String(lead.phone || ""),
-        companyOrCollege: lead.company ? String(lead.company) : "Enterprise Inbound Client",
-        titleOrService: lead.category ? String(lead.category).replace(/-/g, " ").toUpperCase() : "Custom Software & AI Automations",
+        companyOrCollege: lead.company ? String(lead.company) : undefined,
+        titleOrService: lead.category ? String(lead.category).replace(/-/g, " ") : "Enquiry",
         source,
         sourceLabel,
-        budgetOrSalary: lead.dealValue ? `₹${Number(lead.dealValue).toLocaleString("en-IN")}` : "₹6,00,000",
+        budgetOrSalary: Number(lead.dealValue) > 0 ? `₹${Number(lead.dealValue).toLocaleString("en-IN")}` : undefined,
         status: String(lead.status || "new"),
         statusLabel: String(lead.status || "new").replace(/_/g, " ").toUpperCase(),
-        message: lead.message ? String(lead.message) : "Inquiry for software architecture and development services.",
+        message: lead.message ? String(lead.message) : undefined,
         submittedAt: toIsoString(lead.createdAt),
-        detailUrl: `/dealflow-ai/leads/${id}`,
-        campaignInfo: source === "meta" || source === "facebook" || source === "instagram" ? {
-          campaignName: "High-Growth B2B Scaling Campaign",
-          adName: `${sourceLabel} - Video Demonstration`,
-          formName: "Instant Scope Request Form",
-        } : undefined,
+        // These rows come from the website-form collections, whose page is the submission page (not Lead Management).
+        ...(isValidCategory(String(lead.category)) ? { detailUrl: `/dealflow-ai/submissions/${String(lead.category)}/${id}`, callEntity: "submission" as const, submissionCategory: String(lead.category) } : { detailUrl: `/dealflow-ai/leads/${id}` }),
       });
     }
 
@@ -213,11 +198,10 @@ export async function loadPipelineContactsFromDb(
       results.push({
         id,
         pipeline: "clients",
-        name: String(lead.name || "Client Lead"),
+        name: String(lead.name || "Unnamed lead"),
         email: String(lead.email || ""),
         phone: String(lead.phone || ""),
-        companyOrCollege: "Direct Business Inquiry",
-        titleOrService: lead.subService ? String(lead.subService) : "Software Development",
+        titleOrService: lead.subService ? String(lead.subService) : "Enquiry",
         source: "website",
         sourceLabel: "Website Business Inbound",
         status: String(lead.stage || "inquiry"),
@@ -225,6 +209,8 @@ export async function loadPipelineContactsFromDb(
         message: lead.message ? String(lead.message) : undefined,
         submittedAt: toIsoString(lead.createdAt),
         detailUrl: `/dealflow-ai/leads/${id}`,
+        callEntity: "lead",
+        doNotContact: Boolean(lead.doNotContact),
       });
     }
   }

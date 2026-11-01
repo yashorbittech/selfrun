@@ -11,7 +11,7 @@ import { COLLECTIONS, escapeRegex, newId } from "@/lib/products/agentos/db";
  * only, and `metadata` is scrubbed of any secret-looking key (see `scrub`).
  */
 
-export const AUDIT_ENTITIES = ["bot", "file", "chat", "settings"] as const;
+export const AUDIT_ENTITIES = ["bot", "file", "chat", "settings", "call", "number", "dnc"] as const;
 export type AuditEntity = (typeof AUDIT_ENTITIES)[number];
 
 export const AUDIT_ACTION_LABEL = {

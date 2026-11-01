@@ -17,13 +17,15 @@ async function handleGET(req: NextRequest, { params }: Context) {
   const { id } = await params;
   const media = await getMedia(id);
   if (!media) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const object = await getObject(media.storageKey).catch(() => null);
+  const wantThumb = req.nextUrl.searchParams.get("thumb") === "1" && !!media.thumbKey;
+  const object = await getObject(wantThumb ? media.thumbKey! : media.storageKey).catch(() => null);
   if (!object) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  const ext = media.contentType.split("/")[1] ?? "bin";
+  const type = wantThumb ? "image/webp" : media.contentType;
+  const ext = type.split("/")[1] ?? "bin";
   const filename = `${media.name.replace(/[^\w .-]+/g, "").trim() || "media"}.${ext}`;
   return new NextResponse(object.stream, {
     headers: {
-      "Content-Type": media.contentType,
+      "Content-Type": type,
       "Content-Disposition": `${req.nextUrl.searchParams.get("download") === "1" ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(filename)}`,
       "X-Content-Type-Options": "nosniff",
       "Cache-Control": "private, max-age=300",

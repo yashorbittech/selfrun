@@ -1,24 +1,18 @@
 import { requireLmsPage } from "@/lib/lms-auth";
-import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
-import { listAllMessages, listDealLeads, listDealJobApplications } from "@/lib/dealflow-ai/store";
-import DealFlowEmailClient from "./DealFlowEmailClient";
+import { lmsCan } from "@/lib/lms-roles";
+import ChannelInbox from "@/components/products/dealflow-ai/ChannelInbox";
+import { CHANNEL_SETTINGS_HREF, channelStatus, listChannelLeads } from "@/lib/dealflow-ai/channels";
 
 export const dynamic = "force-dynamic";
 
-export default async function DealFlowEmailsPage() {
-  await requireLmsPage("VIEW_LEADS");
-
-  const emailMessages = listAllMessages("email");
-  const leads = listDealLeads();
-  const applications = listDealJobApplications();
+export default async function PageEmails({ searchParams }: { searchParams: Promise<{ lead?: string }> }) {
+  const user = await requireLmsPage("VIEW_LEADS");
+  const { lead } = await searchParams;
+  const [leads, status] = await Promise.all([listChannelLeads(), channelStatus("email")]);
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <DealFlowEmailClient
-        initialMessages={emailMessages}
-        leads={leads}
-        applications={applications}
-      />
+      <ChannelInbox mode="email" leads={leads} status={status} settingsHref={CHANNEL_SETTINGS_HREF} canSend={lmsCan(user, "MESSAGE_LEADS")} initialLeadId={lead} />
     </div>
   );
 }

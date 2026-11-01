@@ -1,23 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, Settings, Search } from "lucide-react";
+import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, Settings, Search, LayoutGrid, Bell, Phone, PhoneCall } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import BotAvatar from "@/components/products/agentos/BotAvatar";
-import { GENERAL_BOT_ID } from "@/lib/products/agentos/constants";
+import { buildNavGroups, isNavActive, mergeRecentAgents, type NavFlags, type NavIconKey, type NavItem } from "@/lib/products/agentos/sidebar-model";
 
 /** Which optional sections this viewer may see — computed on the server from the real permission model. */
-export interface AibotsNavFlags {
-  createBot: boolean;
-  manageBots: boolean;
-  allChats: boolean;
-  audit: boolean;
-  settings: boolean;
-}
+export type AibotsNavFlags = NavFlags;
 
 /** One bot as the sidebar needs it — loaded from the database, never hardcoded. */
 export interface SidebarBot {
@@ -25,13 +19,18 @@ export interface SidebarBot {
   name: string;
   icon: string;
   color: string;
+  avatarUrl?: string | null;
+  kind?: "text" | "voice";
 }
+
+/** Fired by the chat / voice UI when the viewer starts using an agent, so the sidebar lists it before the server refresh. */
+export const AGENT_USED_EVENT = "agentos:agent-used";
 
 function NavLink({
   href,
   label,
   icon,
-  exact = false,
+  match = "prefix",
   collapsed = false,
   onNavigate,
   highlight = false,
@@ -39,13 +38,13 @@ function NavLink({
   href: string;
   label: string;
   icon: React.ReactNode;
-  exact?: boolean;
+  match?: NavItem["match"];
   collapsed?: boolean;
   onNavigate?: () => void;
   highlight?: boolean;
 }) {
   const pathname = usePathname();
-  const active = exact ? pathname === href : pathname === href || pathname?.startsWith(`${href}/`);
+  const active = isNavActive(pathname, { href, match });
 
   const link = (
     <Link
@@ -87,38 +86,65 @@ function SectionLabel({ children, collapsed }: { children: React.ReactNode; coll
   return <div className="mt-4 mb-1 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{children}</div>;
 }
 
-export default function AibotsSidebar({ flags, bots, onNavigate, collapsed = false }: { flags: AibotsNavFlags; bots: SidebarBot[]; onNavigate?: () => void; collapsed?: boolean }) {
+const NAV_ICONS: Record<NavIconKey, React.ReactNode> = {
+  dashboard: <LayoutDashboard className="size-4" />,
+  hub: <LayoutGrid className="size-4" />,
+  create: <Plus className="size-4" />,
+  chat: <MessageSquarePlus className="size-4" />,
+  manage: <Bot className="size-4" />,
+  chats: <MessagesSquare className="size-4" />,
+  calls: <Phone className="size-4" />,
+  phone: <PhoneCall className="size-4" />,
+  settings: <Settings className="size-4" />,
+  notifications: <Bell className="size-4" />,
+};
+
+export default function AibotsSidebar({ flags, bots: serverBots, onNavigate, collapsed = false }: { flags: AibotsNavFlags; bots: SidebarBot[]; onNavigate?: () => void; collapsed?: boolean }) {
   const [filter, setFilter] = useState("");
+  // Agents used in this session, newest first; merged over the server list until the next layout render includes them.
+  const [fresh, setFresh] = useState<SidebarBot[]>([]);
+  useEffect(() => {
+    const onUsed = (e: Event) => {
+      const bot = (e as CustomEvent<SidebarBot>).detail;
+      if (bot?._id) setFresh((p) => [bot, ...p.filter((b) => b._id !== bot._id)]);
+    };
+    window.addEventListener(AGENT_USED_EVENT, onUsed);
+    return () => window.removeEventListener(AGENT_USED_EVENT, onUsed);
+  }, []);
+  const bots = mergeRecentAgents(fresh, serverBots, 50);
   const shown = filter ? bots.filter((b) => b.name.toLowerCase().includes(filter.toLowerCase())) : bots;
   const common = { collapsed, onNavigate };
+  const groups = buildNavGroups(flags);
+  const renderItem = (i: NavItem) => <NavLink key={i.key} {...common} href={i.href} label={i.label} match={i.match} highlight={i.highlight} icon={NAV_ICONS[i.icon]} />;
 
   return (
-    <nav className="flex h-full flex-col gap-1 p-3">
-      <NavLink {...common} href="/agentos" label="Dashboard" icon={<LayoutDashboard className="size-4" />} exact />
+    <nav className="flex h-full flex-col gap-1 p-3" aria-label="AgentOS">
+      {groups.top.items.map(renderItem)}
 
-      <SectionLabel collapsed={collapsed}>Create</SectionLabel>
-      <NavLink {...common} href={`/agentos/b/${GENERAL_BOT_ID}`} label="Start New Chat" icon={<MessageSquarePlus className="size-4" />} highlight />
-      {flags.createBot && <NavLink {...common} href="/agentos/bots/new" label="Create Bot" icon={<Plus className="size-4" />} exact />}
+      <SectionLabel collapsed={collapsed}>{groups.agents.label}</SectionLabel>
+      {groups.agents.items.map(renderItem)}
 
-      <SectionLabel collapsed={collapsed}>AgentOS</SectionLabel>
+      <SectionLabel collapsed={collapsed}>Your recent agents</SectionLabel>
+      {renderItem(groups.recentLead)}
       {!collapsed && bots.length > 8 && (
         <label className="mb-1 flex items-center gap-2 rounded-lg border border-border/50 bg-background/60 px-2.5 py-1.5 text-xs text-muted-foreground focus-within:border-primary/40">
           <Search className="size-3.5 shrink-0" />
-          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Find a bot" aria-label="Find a bot" className="w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground" />
+          <input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Find an agent" aria-label="Find an agent" className="w-full bg-transparent text-foreground outline-none placeholder:text-muted-foreground" />
         </label>
       )}
-      {shown.map((b) => (
-        <NavLink key={b._id} {...common} href={`/agentos/b/${b._id}`} label={b.name} icon={<BotAvatar icon={b.icon} color={b.color} size="sm" />} />
+      {shown.slice(0, filter ? 50 : 8).map((b) => (
+        <NavLink key={b._id} {...common} href={`/agentos/b/${b._id}`} label={b.name} icon={<BotAvatar icon={b.icon} color={b.color} imageUrl={b.avatarUrl} size="sm" />} />
       ))}
-      {bots.length === 0 && !collapsed && (
-        <p className="px-3 py-2 text-xs text-muted-foreground">{flags.createBot ? "No bots yet — create the first one." : "No bots have been shared with you yet."}</p>
+      {!collapsed && bots.length > 0 && (
+        <Link href="/agentos/hub" onClick={onNavigate} className="px-3 py-1.5 text-xs font-medium text-primary hover:underline">
+          See all in Agent Hub
+        </Link>
       )}
-      {filter && shown.length === 0 && !collapsed && <p className="px-3 py-2 text-xs text-muted-foreground">No bot matches “{filter}”.</p>}
+      {bots.length === 0 && !collapsed && <p className="px-3 py-2 text-xs text-muted-foreground">Other agents you chat or talk with show up here. Browse them in the Agent Hub.</p>}
+      {filter && shown.length === 0 && !collapsed && <p className="px-3 py-2 text-xs text-muted-foreground">No agent matches “{filter}”.</p>}
 
-      {(flags.manageBots || flags.allChats || flags.audit || flags.settings) && <SectionLabel collapsed={collapsed}>Manage</SectionLabel>}
-      {flags.manageBots && <NavLink {...common} href="/agentos/bots" label="Manage Bots" icon={<Bot className="size-4" />} exact />}
-      {flags.allChats && <NavLink {...common} href="/agentos/chats" label="All Chats" icon={<MessagesSquare className="size-4" />} />}
-      {flags.settings && <NavLink {...common} href="/agentos/settings" label="Settings" icon={<Settings className="size-4" />} />}
+      <SectionLabel collapsed={collapsed}>{groups.manage.label}</SectionLabel>
+      {groups.manage.items.map(renderItem)}
     </nav>
   );
 }

@@ -2,6 +2,7 @@ import "server-only";
 import { ROLE_GROUPS } from "@/lib/products/commandos/role-catalog";
 import { listAibotsStaff, type BotDoc } from "@/lib/products/agentos/bots";
 import { getSettings } from "@/lib/products/agentos/settings";
+import type { AgentKind } from "@/lib/products/agentos/voice/types";
 import type { BotFormValues } from "@/components/products/agentos/BotForm";
 
 /** Everything the bot form's pickers need, read live from the role catalog, staff list and settings. */
@@ -15,9 +16,11 @@ export async function botFormOptions() {
   };
 }
 
-export function formValuesFor(bot: BotDoc | null, defaultModel: string): BotFormValues {
+export function formValuesFor(bot: BotDoc | null, defaultModel: string, kind: AgentKind = "text"): BotFormValues {
   if (!bot) {
     return {
+      kind,
+      voice: null,
       name: "",
       icon: "bot",
       color: "indigo",
@@ -35,6 +38,8 @@ export function formValuesFor(bot: BotDoc | null, defaultModel: string): BotForm
     };
   }
   return {
+    kind: bot.kind === "voice" ? "voice" : "text",
+    voice: bot.voice ?? null,
     name: bot.name,
     icon: bot.icon,
     color: bot.color,

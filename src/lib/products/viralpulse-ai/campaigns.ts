@@ -2,12 +2,15 @@ import "server-only";
 import { COLLECTIONS, smmsCollection, newId, createStamp, updateStamp, notDeleted, str, strList, dateOrNull, escapeRegex, type Stamps } from "@/lib/products/viralpulse-ai/db";
 import { isAdPlatform, type AdPlatform, type ContentStatus } from "@/lib/products/viralpulse-ai/constants";
 import { EMPTY_CAMPAIGN_AI, normalizeCampaignAi, type CampaignAi } from "@/lib/products/viralpulse-ai/content";
-import { SmmsInputError, NotFoundError } from "@/lib/products/viralpulse-ai/viewer";
+import { SmmsInputError, NotFoundError, can, ForbiddenError, type SmmsViewer } from "@/lib/products/viralpulse-ai/viewer";
+import { PAID_SCHEMA_VERSION, normalizeCampaignPaid, type CampaignPaid } from "@/lib/products/viralpulse-ai/ads-platforms/meta/draft";
+import { AD_COLLECTIONS } from "@/lib/products/viralpulse-ai/ads-platforms/types";
 
 /**
  * A campaign is the creative brief + AI strategy for a paid push across one or
- * more ad platforms. SMMS does not create or spend on ads inside Meta /
- * Google / LinkedIn — launching is a deliberate human step in each ad manager.
+ * more ad platforms, plus the real launch draft (`paid`, schema version 2: ad account,
+ * objective, budget, ad sets, targeting) that `ads-platforms/launches.ts` turns into a
+ * Meta campaign. Nothing spends until a person approves the budget and starts it.
  * Spend and results are the LMS's (CSV-imported `campaigns` +
  * `campaign_metrics`); a campaign links to them by `lmsCampaignKeys`.
  */
@@ -40,6 +43,8 @@ export interface CampaignDoc extends CampaignBrief, Stamps {
   _id: string;
   status: ContentStatus;
   ai: CampaignAi;
+  /** The paid-ads launch draft (schema version 2). Older campaigns hold copy only; `getCampaign` lifts them on read. */
+  paid: CampaignPaid;
   /** LMS `campaigns.nameKey`s whose imported spend/results belong to this campaign. */
   lmsCampaignKeys: string[];
   launchedAt: Date | null;
@@ -96,7 +101,7 @@ export function parseBrief(input: Record<string, unknown>): CampaignBrief {
 
 export async function createCampaign(brief: CampaignBrief, actorId: string): Promise<CampaignDoc> {
   const col = await campaignsCollection();
-  const doc: CampaignDoc = { _id: newId(), ...brief, status: "draft", ai: EMPTY_CAMPAIGN_AI, lmsCampaignKeys: [], launchedAt: null, launchedBy: null, archivedFrom: null, ...createStamp(actorId) };
+  const doc: CampaignDoc = { _id: newId(), ...brief, status: "draft", ai: EMPTY_CAMPAIGN_AI, paid: normalizeCampaignPaid(null, brief), lmsCampaignKeys: [], launchedAt: null, launchedBy: null, archivedFrom: null, ...createStamp(actorId) };
   await col.insertOne(doc);
   return doc;
 }
@@ -105,7 +110,7 @@ export async function getCampaign(id: string): Promise<CampaignDoc | null> {
   if (!id) return null;
   const col = await campaignsCollection();
   const doc = await col.findOne({ _id: id, ...notDeleted });
-  return doc ? { ...doc, ai: normalizeCampaignAi(doc.ai) } : null;
+  return doc ? { ...doc, ai: normalizeCampaignAi(doc.ai), paid: normalizeCampaignPaid(doc.paid, doc) } : null;
 }
 
 export async function requireCampaign(id: string): Promise<CampaignDoc> {
@@ -146,7 +151,7 @@ export async function duplicateCampaign(id: string, actorId: string): Promise<Ca
   const src = await requireCampaign(id);
   const col = await campaignsCollection();
   const hasAi = Boolean(src.ai.summary || src.ai.adConcepts.length);
-  const doc: CampaignDoc = { ...src, _id: newId(), name: `${src.name} (copy)`.slice(0, 120), status: hasAi ? "edited" : "draft", lmsCampaignKeys: [], launchedAt: null, launchedBy: null, archivedFrom: null, ...createStamp(actorId) };
+  const doc: CampaignDoc = { ...src, paid: normalizeCampaignPaid(src.paid, src), _id: newId(), name: `${src.name} (copy)`.slice(0, 120), status: hasAi ? "edited" : "draft", lmsCampaignKeys: [], launchedAt: null, launchedBy: null, archivedFrom: null, ...createStamp(actorId) };
   await col.insertOne(doc);
   return doc;
 }
@@ -215,4 +220,34 @@ export function briefPrompt(c: CampaignBrief): string {
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+// ── paid launch draft ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Saves the Meta launch draft (`paid`). The draft is normalised (unknown values dropped), so a form can post what it has. A campaign with a
+ * launch that is delivering is edited through `editLaunch`, not here.
+ */
+export async function saveCampaignPaid(id: string, paid: unknown, viewer: SmmsViewer): Promise<CampaignDoc> {
+  if (!can(viewer, "EDIT_CAMPAIGNS")) throw new ForbiddenError("EDIT_CAMPAIGNS");
+  const c = await requireCampaign(id);
+  if (c.status === "archived") throw new SmmsInputError("Restore the campaign before editing it.");
+  const launches = await smmsCollection<{ _id: string; campaignId: string; active: boolean; state: string }>(AD_COLLECTIONS.launches);
+  const live = await launches.findOne({ campaignId: id, active: true, state: { $in: ["ready", "creating", "partial"] } });
+  if (live) throw new SmmsInputError("This campaign has a launch in Meta. Change it with the launch controls, or archive the launch first.");
+  const next = normalizeCampaignPaid({ ...(paid as object), schemaVersion: PAID_SCHEMA_VERSION }, c);
+  const col = await campaignsCollection();
+  await col.updateOne({ _id: id }, { $set: { paid: next, status: statusAfterEdit(c.status), ...updateStamp(viewer.userId) } });
+  return (await getCampaign(id))!;
+}
+
+/**
+ * Persists schema version 2 on every campaign that still holds copy only (idempotent: already-lifted campaigns are skipped). Reads already
+ * lift on the fly, so this only makes the stored shape match; the sync cron runs it in small batches.
+ */
+export async function migrateLegacyCampaigns(limit = 200): Promise<number> {
+  const col = await campaignsCollection();
+  const rows = await col.find({ "paid.schemaVersion": { $ne: PAID_SCHEMA_VERSION } } as never).limit(limit).toArray();
+  for (const r of rows) await col.updateOne({ _id: r._id }, { $set: { paid: normalizeCampaignPaid(null, r) } });
+  return rows.length;
 }

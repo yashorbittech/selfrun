@@ -85,3 +85,13 @@ export async function deleteClientAction(id: string): Promise<ClientActionResult
   revalidate(id);
   return { ok: true };
 }
+
+export async function setClientDoNotContactAction(clientId: string, value: boolean): Promise<{ error?: string }> {
+  const user = await getCurrentPmsUser();
+  if (!user || !canManageClients(user)) return { error: "You don't have permission to change this." };
+  if (typeof clientId !== "string" || typeof value !== "boolean") return { error: "Invalid request." };
+  const { setClientDoNotContact } = await import("@/lib/products/sprintos/calls");
+  if (!(await setClientDoNotContact(clientId, value))) return { error: "Client not found." };
+  revalidate(clientId);
+  return {};
+}

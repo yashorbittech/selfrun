@@ -6,6 +6,7 @@ import { trialLockedFor } from "@/lib/platform/billing/trial-lock";
 import { TRIAL_LOCK_OPEN_PATH } from "@/lib/platform/billing/trial-lock-rule";
 import { LAPSE_OPEN_PATH } from "@/lib/platform/email-lapse-rule";
 import type { NextRequest } from "next/server";
+import { frameAncestorsFor } from "@/lib/products/agentos/calls/public-embed";
 import { isMaintenanceOn, isPublicSitePath } from "@/lib/products/sitecraft-ai/maintenance-gate";
 import { resolveCompanyIdByHost, resolveHostInfo, resolveSuspendedHost, normalizeHost, type HostInfo } from "@/lib/platform/tenancy/companies";
 import { gateApi, gatePage, hardenApiResponse, isAssetPath } from "@/lib/security/gate";
@@ -281,6 +282,11 @@ export async function proxy(request: NextRequest) {
   // Anonymous, first-party device id — lets the referral fraud check notice one browser creating several "referred" accounts. HttpOnly, random, carries no personal data.
   if (!request.cookies.get("yo_did")) {
     response.cookies.set("yo_did", crypto.randomUUID(), { maxAge: 365 * 24 * 60 * 60, path: "/", sameSite: "lax", httpOnly: true, secure: process.env.NODE_ENV === "production" });
+  }
+  // The agent directory may be shown inside a frame by the websites the company listed on its public agents, and by no other website.
+  if (companyId && request.nextUrl.pathname === "/agentos-public/agents") {
+    response.headers.set("Content-Security-Policy", `${await frameAncestorsFor(companyId)}; base-uri 'self'; object-src 'none'; form-action 'self'`);
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
   }
   // A signed-in page is for that person only: no browser, shared or CDN cache may keep a copy of it.
   if (appSurface) response.headers.set("Cache-Control", "private, no-store, max-age=0");

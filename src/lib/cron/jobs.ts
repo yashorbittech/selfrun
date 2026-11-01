@@ -11,7 +11,10 @@ export const JOB_RUNNERS: Record<string, () => Promise<unknown>> = {
   playbook: async () => forEachCompany(async () => (await import("@/lib/products/playbook-ai/reminders")).runSopReminders()),
   rankmax: async () => forEachCompany(async () => (await import("@/lib/products/rankmax-ai/housekeeping")).runSeoHousekeeping()),
   cybervault: async () => forEachCompany(async () => (await import("@/lib/products/cybervault/alerts")).runExpirySweep()),
-  viralpulse: async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/publishing")).runDueSweep()),
+  "viralpulse-publisher": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/publishing")).runDueSweep()),
+  "viralpulse-ads": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/ads-platforms/ads-sync")).runAdsSync()),
+  "viralpulse-accounts": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/accounts/service")).runAccountsSweep()),
+  "viralpulse-ugc": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/ugc/api")).runUgcCron()),
   evaliq: async () =>
     forEachCompany(async () => {
       await (await import("@/lib/products/evaliq/db")).ensureOtsIndexes();
@@ -21,6 +24,8 @@ export const JOB_RUNNERS: Record<string, () => Promise<unknown>> = {
   trials: async () => (await import("@/lib/platform/billing/trials")).runTrialSweep(new Date()),
   subscriptions: async () => (await import("@/lib/platform/billing/subscriptions")).runDunningSweep(),
   notifications: async () => (await import("@/lib/notify/sweeps")).runAllSweeps(),
+  "agentos-calls": async () => forEachCompany(async () => (await import("@/lib/products/agentos/calls/engine")).runCallsSweep()),
+  meetings: async () => forEachCompany(async () => (await import("@/lib/dealflow-ai/meetings/sweep")).runMeetingsSweep()),
   apps: async () => (await import("@/lib/apps/enqueue")).runBuildCron(),
 };
 

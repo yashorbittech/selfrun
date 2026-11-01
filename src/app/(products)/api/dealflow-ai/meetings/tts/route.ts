@@ -1,62 +1,47 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+import { requireLms } from "@/lib/lms-auth";
+import { limitOr429, userRateLimit } from "@/lib/security/rate-limit";
+import { getMeeting } from "@/lib/dealflow-ai/db-meetings";
+import { getAgentForSpeech } from "@/lib/dealflow-ai/meeting-agents";
+import { reserveSpeech } from "@/lib/dealflow-ai/meeting-speech-guard";
+import { handleTts } from "@/lib/dealflow-ai/meetings/speech-routes";
+import { streamTts } from "@/lib/elevenlabs";
+import type { MeetingDoc } from "@/lib/dealflow-ai/meetings/types";
+
+import { withTransport } from "@/lib/security/transport";
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 /**
  * POST /api/dealflow-ai/meetings/tts
- * Converts text to ultra-realistic speech using ElevenLabs API.
- * Returns audio/mpeg binary stream.
+ * Speaks one sentence of an AI agent's reply in that agent's own ElevenLabs voice (from its AgentOS voice settings), with the company's
+ * ElevenLabs key (else the platform's). Team members on the meeting's roster only: the browser sends the room, the agent and the text,
+ * never a voice id or a key. Returns audio/mpeg.
  */
-export async function POST(req: NextRequest) {
+async function handlePOST(req: NextRequest) {
   try {
-    const { text, voiceId } = await req.json();
-
-    if (!text || !voiceId) {
-      return NextResponse.json({ ok: false, error: "text and voiceId are required" }, { status: 400 });
-    }
-
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, error: "ElevenLabs API key not configured" }, { status: 503 });
-    }
-
-    // ElevenLabs Text-to-Speech API — using Turbo v2.5 for ultra-low latency
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream?output_format=mp3_44100_128`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: "eleven_turbo_v2_5",  // Lowest latency, best for real-time
-          voice_settings: {
-            stability: 0.45,         // Slight variation = more human-like
-            similarity_boost: 0.82,  // High fidelity to selected voice
-            style: 0.30,             // Natural expressiveness
-            use_speaker_boost: true, // Higher clarity in calls
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("[tts] ElevenLabs error:", errorText);
-      return NextResponse.json({ ok: false, error: "ElevenLabs TTS failed" }, { status: 500 });
-    }
-
-    // Stream the audio back directly
-    const audioBuffer = await response.arrayBuffer();
-    return new NextResponse(audioBuffer, {
-      headers: {
-        "Content-Type": "audio/mpeg",
-        "Content-Length": audioBuffer.byteLength.toString(),
-        "Cache-Control": "no-cache",
+    const limited = await limitOr429(req, "dealflow-tts", 120, 60);
+    if (limited) return limited;
+    const body = await req.json().catch(() => null);
+    return await handleTts(body, {
+      staff: async () => {
+        const u = await requireLms("VIEW_LEADS");
+        return u ? { id: u.id } : null;
       },
+      limit: async (userId) => {
+        const r = await userRateLimit("meeting-tts", userId, 90, 60);
+        return r.ok ? null : Response.json({ ok: false, error: "Too many requests. Please wait a moment." }, { status: 429, headers: { "Retry-After": String(r.retryAfter) } });
+      },
+      getMeeting: async (roomId) => (await getMeeting(roomId)) as unknown as MeetingDoc | null,
+      agent: (roomId, agentId) => getAgentForSpeech(roomId, agentId),
+      reserve: (roomId, chars) => reserveSpeech(roomId, "tts", chars),
+      speak: (text, voiceId) =>
+        streamTts(text, { voiceId, modelId: "eleven_turbo_v2_5", stability: 0.5, similarityBoost: 0.75, style: 0, speed: 1 }),
     });
   } catch (err) {
     console.error("[tts] POST error:", err);
-    return NextResponse.json({ ok: false, error: "TTS request failed" }, { status: 500 });
+    return Response.json({ ok: false, error: "TTS request failed" }, { status: 500 });
   }
 }
+
+export const POST = withTransport(handlePOST);

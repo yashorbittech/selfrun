@@ -36,6 +36,9 @@ import { getApplicantProfile } from "@/lib/careers/applicant-profile";
 import { getCurrentLmsUser } from "@/lib/lms-auth";
 import { DEFAULT_CAREER_APPLICATION_STATUS, getCareerApplicationStatusMeta } from "@/lib/career-application-status";
 import { cn, formatCurrency, formatDateTime } from "@/lib/utils";
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import DealflowCallHistory from "@/components/products/dealflow-ai/DealflowCallHistory";
+import { applicantCallSpec } from "@/lib/dealflow-ai/call-targets";
 import LoginAsPortalUserButton from "@/app/(products)/dealflow-ai/(protected)/leads/list/LoginAsPortalUserButton";
 
 export const dynamic = "force-dynamic";
@@ -165,6 +168,8 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
           </GlassCard>
         </div>
       </div>
+
+      <DealflowCallHistory entityType="applicant" entityId={id} />
 
       <Section title="Internal HR Notes">
         <NotesEditor id={id} initialNotes={application.notes ?? ""} />
@@ -378,6 +383,7 @@ export default async function ApplicantDetailPage({ params, searchParams }: { pa
         title={<>{application.name}</>}
         description={<>{`${application.positionTitle} · applied ${formatDateTime(application.createdAt)}${lead ? ` · ${lead.code}` : ""}`}</>}
         actions={<><div className="flex flex-wrap items-center gap-2">
+          <DealflowCallButton spec={applicantCallSpec({ _id: id, name: application.name, phone: application.phone, positionTitle: application.positionTitle })} />
           {account ? (
             <LoginAsPortalUserButton
               applicationId={id}

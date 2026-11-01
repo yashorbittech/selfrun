@@ -9,6 +9,7 @@ import InputDialogButton from "@/components/products/viralpulse-ai/InputDialogBu
 import GenerateBar from "@/components/products/viralpulse-ai/GenerateBar";
 import PostEditor from "@/components/products/viralpulse-ai/PostEditor";
 import PublishPanel from "@/components/products/viralpulse-ai/PublishPanel";
+import PublishTracker from "@/components/products/viralpulse-ai/post-wizard/PublishTracker";
 import VersionHistory from "@/components/products/viralpulse-ai/VersionHistory";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
 import { getPost } from "@/lib/products/viralpulse-ai/posts";
@@ -49,7 +50,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
     <div className="space-y-4">
       <PageHeader
         title={p.title}
-        crumbs={[{ label: "Social Media Posts", href: "/viralpulse-ai/posts" }, { label: p.title }]}
+        crumbs={[{ label: "Social Media Reels/Posts", href: "/viralpulse-ai/posts" }, { label: p.title }]}
         description={
           <span className="flex flex-wrap items-center gap-1.5">
             <StatusBadge status={p.status} />
@@ -60,7 +61,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         }
         actions={
           <>
-            {can(viewer, "MANAGE_POSTS") && !archived && <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/viralpulse-ai/posts/${id}/edit`} />}><Pencil className="size-3.5" /> Edit brief</Button>}
+            {can(viewer, "MANAGE_POSTS") && !archived && <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/viralpulse-ai/posts/${id}/edit`} />}><Pencil className="size-3.5" /> Edit post</Button>}
             {can(viewer, "MANAGE_POSTS") && <ActionButton action={duplicatePostAction.bind(null, id)} success="Duplicated" redirectPrefix="/viralpulse-ai/posts/"><Copy className="size-3.5" /> Duplicate</ActionButton>}
             {canSchedule && (
               <InputDialogButton
@@ -125,12 +126,17 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
         thumbnail={thumb ? toMediaCard(thumb) : null}
         brand={brand.companyName}
         link={p.link}
+        brief={{ topic: p.topic, objective: p.objective, serviceProduct: p.serviceProduct, audience: p.audience, tone: p.tone, language: p.language, contentType: p.contentType, platforms: p.platforms, link: p.link ?? "", notes: p.notes, offerId: p.offerId ?? "", clientId: p.clientId ?? "" }}
         canEdit={canEdit}
         canGenerate={can(viewer, "GENERATE_AI_CONTENT") && (await isOpenAIConfigured())}
         canUpload={can(viewer, "MANAGE_MEDIA")}
       />
 
       <SectionCard title="Publishing" description="Publish through a connected account, or post it yourself in the platform's app and mark it published. Nothing is published without one of these actions or an approved schedule.">
+        {can(viewer, "MANAGE_POSTS") && <div className="mb-4 border-b border-border/50 pb-4">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">Publishing progress</p>
+          <PublishTracker postId={id} platforms={p.platforms} canPublish={canPublish} canCancel={canSchedule} compact />
+        </div>}
         <PublishPanel
           postId={id}
           locked={archived}

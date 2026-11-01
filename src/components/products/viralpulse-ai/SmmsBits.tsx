@@ -33,8 +33,8 @@ export function KindChip({ kind }: { kind: "image" | "video" }) {
 export const mediaSrc = (id: string, bust?: string) => `/api/viralpulse-ai/media/${id}${bust ? `?v=${encodeURIComponent(bust)}` : ""}`;
 
 /** Thumbnail for a library item: the image itself, a video's thumbnail image, or a placeholder. */
-export function MediaThumb({ media, className }: { media: { _id: string; kind: "image" | "video"; name: string; thumbnailId: string | null; updatedAt?: string; altText?: string }; className?: string }) {
-  const src = media.kind === "image" ? mediaSrc(media._id, media.updatedAt) : media.thumbnailId ? mediaSrc(media.thumbnailId) : null;
+export function MediaThumb({ media, className }: { media: { _id: string; kind: "image" | "video"; name: string; thumbnailId: string | null; updatedAt?: string; altText?: string; hasThumb?: boolean }; className?: string }) {
+  const src = media.kind === "image" ? mediaSrc(media._id, media.updatedAt) + (media.hasThumb ? (mediaSrc(media._id, media.updatedAt).includes("?") ? "&" : "?") + "thumb=1" : "") : media.thumbnailId ? mediaSrc(media.thumbnailId) : null;
   return (
     <div className={cn("relative flex items-center justify-center overflow-hidden rounded-lg bg-muted", className)}>
       {src ? (

@@ -1,34 +1,18 @@
 import { requireLmsPage } from "@/lib/lms-auth";
-import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
-import {
-  listAllMessages,
-  listWhatsAppNotifications,
-  listDealLeads,
-  listDealJobApplications,
-  getIntegrationsStatus,
-} from "@/lib/dealflow-ai/store";
-import DealFlowWhatsAppClient from "./DealFlowWhatsAppClient";
+import { lmsCan } from "@/lib/lms-roles";
+import ChannelInbox from "@/components/products/dealflow-ai/ChannelInbox";
+import { CHANNEL_SETTINGS_HREF, channelStatus, listChannelLeads } from "@/lib/dealflow-ai/channels";
 
 export const dynamic = "force-dynamic";
 
-export default async function DealFlowWhatsAppPage() {
-  await requireLmsPage("VIEW_LEADS");
-
-  const whatsappMessages = listAllMessages("whatsapp");
-  const notifications = listWhatsAppNotifications();
-  const leads = listDealLeads();
-  const applications = listDealJobApplications();
-  const integrations = getIntegrationsStatus();
+export default async function PageWhatsApp({ searchParams }: { searchParams: Promise<{ lead?: string }> }) {
+  const user = await requireLmsPage("VIEW_LEADS");
+  const { lead } = await searchParams;
+  const [leads, status] = await Promise.all([listChannelLeads(), channelStatus("whatsapp")]);
 
   return (
     <div className="relative flex h-full min-h-0 flex-col">
-      <DealFlowWhatsAppClient
-        initialMessages={whatsappMessages}
-        initialNotifications={notifications}
-        leads={leads}
-        applications={applications}
-        integrationStatus={integrations.whatsapp}
-      />
+      <ChannelInbox mode="whatsapp" leads={leads} status={status} settingsHref={CHANNEL_SETTINGS_HREF} canSend={lmsCan(user, "MESSAGE_LEADS")} initialLeadId={lead} />
     </div>
   );
 }

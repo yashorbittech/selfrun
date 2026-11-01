@@ -6,6 +6,8 @@ export interface EmailMessage {
   /** Plain-text alternative; always provide one for deliverability. */
   text: string;
   replyTo?: string;
+  /** A calendar invitation (iCalendar text with METHOD:REQUEST or METHOD:CANCEL). Mail clients show it as an invitation they can accept. */
+  calendar?: { method: "REQUEST" | "CANCEL"; ics: string };
 }
 
 /** Which Notification-center event an email belongs to (and, for platform mail, which company it is for), so it is logged and can be switched off. */

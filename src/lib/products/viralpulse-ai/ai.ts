@@ -6,8 +6,9 @@ import { getOpenAI, isOpenAIConfigured, isUnsupportedParamError } from "@/lib/op
 import { getSettings, estimateCost, type AiSettings } from "@/lib/products/viralpulse-ai/settings";
 import { countUserAiToday } from "@/lib/products/viralpulse-ai/generations";
 import { SmmsInputError } from "@/lib/products/viralpulse-ai/viewer";
-import { PLATFORM_META, isPlatform, type ImageSize } from "@/lib/products/viralpulse-ai/constants";
+import { PLATFORM_META, isPlatform } from "@/lib/products/viralpulse-ai/constants";
 import { aiBlockReason, isBillingLimitError } from "@/lib/platform/billing/enforce";
+import { ModelUnavailableError, resolveForCall } from "@/lib/products/viralpulse-ai/models";
 
 /**
  * The only AI provider in SMMS is OpenAI. Text goes through the Responses API
@@ -93,7 +94,12 @@ export function platformGuide(platforms: string[]): string {
 
 export interface AiResult<T> {
   data: T;
+  /** The model that actually ran (differs from Settings when the configured one was retired and a fallback was used). */
   model: string;
+  /** Set when the configured model was unavailable and a fallback ran: show it to the user. */
+  modelNote?: string | null;
+  /** How `costUsd` was derived for images: reported token usage, the price table, or the flat setting. */
+  costBasis?: string;
   inputTokens: number;
   outputTokens: number;
   costUsd: number;
@@ -106,11 +112,13 @@ export function aiErrorMessage(err: unknown): string {
   const e = err as { status?: number; message?: string };
   if (e?.status === 401) return "OpenAI rejected the API key configured on the server.";
   if (e?.status === 429) return "OpenAI rate limit or quota reached — try again shortly.";
+  if (err instanceof ModelUnavailableError || (err as Error)?.name === "ModelUnavailableError") return (err as Error).message;
+  if (e?.status === 404) return "OpenAI doesn't know the configured model any more (it may have been retired). Pick a current model in Settings > AI.";
   if (e?.status === 400 && e.message) return `OpenAI couldn't process that request: ${e.message.replace(/sk-[A-Za-z0-9_-]+/g, "[redacted]").slice(0, 200)}`;
   return "OpenAI didn't respond as expected. Please try again.";
 }
 
-async function guard(userId: string, ai: AiSettings) {
+export async function guard(userId: string, ai: AiSettings) {
   if (!(await isOpenAIConfigured())) throw new SmmsInputError("OpenAI isn't connected for this workspace (Settings → Integrations), so AI generation is unavailable.");
   const planBlock = await aiBlockReason();
   if (planBlock) throw new SmmsInputError(planBlock);
@@ -125,9 +133,10 @@ export async function generateStructured<T>(opts: { userId: string; schema: Sche
   await guard(opts.userId, ai);
   setAiFeature("Social media AI");
   const openai = await getOpenAI();
+  const choice = await resolveForCall("text", ai.textModel);
   const started = Date.now();
   const params: OpenAI.Responses.ResponseCreateParamsNonStreaming = {
-    model: ai.textModel,
+    model: choice.model,
     instructions: await getPrompt("smms.system"),
     input: opts.input,
     max_output_tokens: ai.maxOutputTokens,
@@ -150,24 +159,10 @@ export async function generateStructured<T>(opts: { userId: string; schema: Sche
   }
   const inputTokens = res.usage?.input_tokens ?? 0;
   const outputTokens = res.usage?.output_tokens ?? 0;
-  return { data: opts.normalize(parsed), model: ai.textModel, inputTokens, outputTokens, costUsd: estimateCost(ai, ai.textModel, inputTokens, outputTokens), durationMs: Date.now() - started };
+  return { data: opts.normalize(parsed), model: choice.model, modelNote: choice.note, inputTokens, outputTokens, costUsd: estimateCost(ai, choice.model, inputTokens, outputTokens), durationMs: Date.now() - started };
 }
 
-/** One image from OpenAI's image model. Returns PNG bytes. */
-export async function generateImage(opts: { userId: string; prompt: string; size: ImageSize }): Promise<AiResult<Buffer>> {
-  const { ai } = await getSettings();
-  await guard(opts.userId, ai);
-  const prompt = opts.prompt.trim();
-  if (prompt.length < 10) throw new SmmsInputError("Write (or generate) an image prompt first.");
-  setAiFeature("Social media AI");
-  const openai = await getOpenAI();
-  const started = Date.now();
-  const res = await openai.images.generate({ model: ai.imageModel, prompt: prompt.slice(0, 4000), size: opts.size, quality: ai.imageQuality, n: 1 });
-  const b64 = res.data?.[0]?.b64_json;
-  if (!b64) throw new SmmsInputError("OpenAI didn't return an image. Try a different prompt.");
-  const usage = (res as { usage?: { input_tokens?: number; output_tokens?: number } }).usage;
-  return { data: Buffer.from(b64, "base64"), model: ai.imageModel, inputTokens: usage?.input_tokens ?? 0, outputTokens: usage?.output_tokens ?? 0, costUsd: ai.imageCostUsd, durationMs: Date.now() - started };
-}
+export { generateImage } from "@/lib/products/viralpulse-ai/ai/image";
 
 /** Appended to a prompt when the user asked to refine the existing content rather than start over (the "Refine existing content" prompt). */
 export async function refineBlock(current: unknown, instruction: string | null): Promise<string> {

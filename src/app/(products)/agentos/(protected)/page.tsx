@@ -73,7 +73,7 @@ export default async function AibotsDashboardPage({ searchParams }: { searchPara
             <ul className="divide-y divide-border/50">
               {d.topBots.map((b) => (
                 <li key={b.botId} className="flex items-center gap-3 py-2">
-                  <BotAvatar icon={b.icon} color={b.color} size="sm" />
+                  <BotAvatar icon={b.icon} color={b.color} imageUrl={b.avatarUrl} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{b.name}</p>
                     <p className="text-[11px] text-muted-foreground">

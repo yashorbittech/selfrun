@@ -15,7 +15,12 @@ export function createSendgridEmailProvider(apiKey: string): EmailProvider {
           from: fromMatch ? { email: fromMatch[2], ...(fromMatch[1] ? { name: fromMatch[1].replace(/^"|"$/g, "") } : {}) } : { email: message.from },
           ...(message.replyTo ? { reply_to: { email: message.replyTo } } : {}),
           subject: message.subject,
-          content: [...(message.text ? [{ type: "text/plain", value: message.text }] : []), { type: "text/html", value: message.html }],
+          content: [
+            ...(message.text ? [{ type: "text/plain", value: message.text }] : []),
+            { type: "text/html", value: message.html },
+            ...(message.calendar ? [{ type: `text/calendar; method=${message.calendar.method}; charset=UTF-8`, value: message.calendar.ics }] : []),
+          ],
+          ...(message.calendar ? { attachments: [{ content: Buffer.from(message.calendar.ics, "utf8").toString("base64"), type: "application/ics", filename: "invite.ics", disposition: "attachment" }] } : {}),
         }),
         signal: AbortSignal.timeout(15_000),
       });

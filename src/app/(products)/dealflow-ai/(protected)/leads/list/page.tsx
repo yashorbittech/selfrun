@@ -13,6 +13,8 @@ import type { LeadType, LeadManagementSource } from "@/lib/lead-management/types
 import { isPortalRole } from "@/lib/portal-roles";
 import { formatDateTime } from "@/lib/utils";
 import LoginAsPortalUserButton from "./LoginAsPortalUserButton";
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import { leadCallSpec } from "@/lib/dealflow-ai/call-targets";
 
 export const dynamic = "force-dynamic";
 
@@ -136,12 +138,15 @@ export default async function LeadsListPage({
                   </td>
                   <td className="py-2 pr-3 text-muted-foreground">{formatDateTime(l.createdAt)}</td>
                   <td className="py-2">
+                    <div className="flex items-center gap-1">
+                    <DealflowCallButton spec={leadCallSpec(l)} compact />
                     <LoginAsPortalUserButton
                       externalUserId={l.externalUserId}
                       leadId={l._id}
                       displayName={l.name}
                       variant="icon"
                     />
+                    </div>
                   </td>
                 </tr>
               ))}

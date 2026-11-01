@@ -3,27 +3,46 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Megaphone, Share2, Images, Sparkles, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Megaphone, Share2, ImagePlus, BarChart3, Settings, Clapperboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { activeItem, badgeFor, badgeText, groupedNav, visibleNav, type BadgeView, type NavBadges, type NavIcon, type NavItem, type SmmsNavFlags } from "@/lib/products/viralpulse-ai/nav";
 
-/** Which sections this viewer may see — computed on the server from the real permission model. */
-export interface SmmsNavFlags {
-  campaigns: boolean;
-  posts: boolean;
-  media: boolean;
-  ai: boolean;
-  analytics: boolean;
-  audit: boolean;
-  settings: boolean;
+export type { SmmsNavFlags } from "@/lib/products/viralpulse-ai/nav";
+
+const ICONS: Record<NavIcon, React.ReactNode> = {
+  dashboard: <LayoutDashboard className="size-4" />,
+  campaigns: <Megaphone className="size-4" />,
+  posts: <Share2 className="size-4" />,
+  image: <ImagePlus className="size-4" />,
+  ugc: <Clapperboard className="size-4" />,
+  analytics: <BarChart3 className="size-4" />,
+  settings: <Settings className="size-4" />,
+};
+
+const TONE: Record<BadgeView["tone"], string> = {
+  danger: "bg-rose-600 text-white",
+  warn: "bg-amber-500 text-white",
+  info: "bg-primary text-primary-foreground",
+};
+
+function Badge({ badge, collapsed }: { badge: BadgeView; collapsed: boolean }) {
+  return (
+    <span
+      className={cn("relative flex shrink-0 items-center justify-center rounded-full text-[10px] leading-none font-bold tabular-nums", TONE[badge.tone], collapsed ? "absolute top-0.5 right-1.5 min-w-4 px-1 py-0.5" : "ml-auto min-w-5 px-1.5 py-1")}
+      aria-label={badge.label}
+      title={badge.label}
+    >
+      {badgeText(badge.count)}
+    </span>
+  );
 }
 
-function NavLink({ href, label, icon, exact = false, collapsed = false, onNavigate }: { href: string; label: string; icon: React.ReactNode; exact?: boolean; collapsed?: boolean; onNavigate?: () => void }) {
-  const pathname = usePathname();
-  const active = exact ? pathname === href : pathname === href || pathname?.startsWith(`${href}/`);
+function NavLink({ item, active, badge, collapsed, onNavigate }: { item: NavItem; active: boolean; badge: BadgeView | null; collapsed: boolean; onNavigate?: () => void }) {
+  const label = badge ? `${item.label} (${badge.label})` : item.label;
   const link = (
     <Link
-      href={href}
+      href={item.href}
       onClick={onNavigate}
       aria-label={collapsed ? label : undefined}
       aria-current={active ? "page" : undefined}
@@ -34,8 +53,9 @@ function NavLink({ href, label, icon, exact = false, collapsed = false, onNaviga
       )}
     >
       {active && <motion.span layoutId="smms-nav-active" className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/15 to-secondary/10" transition={{ type: "spring", stiffness: 400, damping: 32 }} />}
-      <span className="relative flex shrink-0 items-center transition-transform duration-200 group-hover:scale-110">{icon}</span>
-      {!collapsed && <span className="relative truncate">{label}</span>}
+      <span className="relative flex shrink-0 items-center transition-transform duration-200 group-hover:scale-110">{ICONS[item.icon]}</span>
+      {!collapsed && <span className="relative truncate">{item.label}</span>}
+      {badge && <Badge badge={badge} collapsed={collapsed} />}
     </Link>
   );
   if (!collapsed) return link;
@@ -47,28 +67,26 @@ function NavLink({ href, label, icon, exact = false, collapsed = false, onNaviga
   );
 }
 
+/** One sidebar for desktop, collapsed and mobile: the items, their order and their active matching come from `lib/.../nav.ts`. */
 function SectionLabel({ children, collapsed }: { children: React.ReactNode; collapsed?: boolean }) {
   if (collapsed) return <div className="mt-4 mb-1 border-t border-border/50" />;
   return <div className="mt-4 mb-1 px-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{children}</div>;
 }
 
-export default function SmmsSidebar({ flags, onNavigate, collapsed = false }: { flags: SmmsNavFlags; onNavigate?: () => void; collapsed?: boolean }) {
-  const common = { collapsed, onNavigate };
+/** One sidebar for desktop, collapsed and mobile: sections, items, order and active matching come from `lib/.../nav.ts`. */
+export default function SmmsSidebar({ flags, badges, onNavigate, collapsed = false }: { flags: SmmsNavFlags; badges?: NavBadges; onNavigate?: () => void; collapsed?: boolean }) {
+  const pathname = usePathname();
+  const current = activeItem(visibleNav(flags), pathname);
   return (
-    <nav className="flex h-full flex-col gap-1 p-3">
-      <NavLink {...common} href="/viralpulse-ai" label="Dashboard" icon={<LayoutDashboard className="size-4" />} exact />
-
-      {(flags.campaigns || flags.posts || flags.media) && <SectionLabel collapsed={collapsed}>Content</SectionLabel>}
-      {flags.campaigns && <NavLink {...common} href="/viralpulse-ai/campaigns" label="Campaigns & Ads" icon={<Megaphone className="size-4" />} />}
-      {flags.posts && <NavLink {...common} href="/viralpulse-ai/posts" label="Social Media Posts" icon={<Share2 className="size-4" />} />}
-      {flags.media && <NavLink {...common} href="/viralpulse-ai/media" label="Media Library" icon={<Images className="size-4" />} />}
-
-      {(flags.ai || flags.analytics) && <SectionLabel collapsed={collapsed}>Insights</SectionLabel>}
-      {flags.ai && <NavLink {...common} href="/viralpulse-ai/ai" label="AI Content Generator" icon={<Sparkles className="size-4" />} />}
-      {flags.analytics && <NavLink {...common} href="/viralpulse-ai/analytics" label="Analytics" icon={<BarChart3 className="size-4" />} />}
-
-      {flags.settings && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
-      {flags.settings && <NavLink {...common} href="/viralpulse-ai/settings" label="Settings" icon={<Settings className="size-4" />} />}
+    <nav className="flex h-full flex-col gap-1 p-3" aria-label="ViralPulse">
+      {groupedNav(flags).map((g) => (
+        <div key={g.key} className="flex flex-col gap-1">
+          {g.label && <SectionLabel collapsed={collapsed}>{g.label}</SectionLabel>}
+          {g.items.map((item) => (
+            <NavLink key={item.key} item={item} active={current?.key === item.key} badge={badgeFor(item, badges)} collapsed={collapsed} onNavigate={onNavigate} />
+          ))}
+        </div>
+      ))}
     </nav>
   );
 }

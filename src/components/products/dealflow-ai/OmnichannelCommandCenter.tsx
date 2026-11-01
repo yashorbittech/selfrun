@@ -1,98 +1,48 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
 import {
   MessageSquare,
   Mail,
   Radio,
-  PhoneCall,
   Briefcase,
   GraduationCap,
   Wrench,
   Building2,
-  Plug,
-  RefreshCw,
   ArrowRight,
   Sparkles,
-  CheckCircle2,
-  BookOpen,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import type { IntegrationStatus } from "@/lib/dealflow-ai/types";
 
 export default function OmnichannelCommandCenter({
-  integrations,
-  jobsCount = 3,
-  internsCount = 2,
-  traineesCount = 2,
-  clientsCount = 5,
+  jobsCount,
+  internsCount,
+  traineesCount,
+  clientsCount,
 }: {
-  pendingApprovalsCount?: number;
-  integrations: IntegrationStatus;
-  jobsCount?: number;
-  internsCount?: number;
-  traineesCount?: number;
-  clientsCount?: number;
-  leadsTotal?: number;
-  applicantsTotal?: number;
+  jobsCount: number;
+  internsCount: number;
+  traineesCount: number;
+  clientsCount: number;
 }) {
-  const [syncingMeta, setSyncingMeta] = useState(false);
-  const [syncingUpwork, setSyncingUpwork] = useState(false);
-
-  const handleSyncMeta = async () => {
-    setSyncingMeta(true);
-    try {
-      const res = await fetch("/api/dealflow-ai/integrations/meta/sync", { method: "POST" });
-      const data = await res.json();
-      if (data.ok) toast.success(data.message);
-    } catch {
-      toast.error("Failed to sync Meta.");
-    } finally {
-      setSyncingMeta(false);
-    }
-  };
-
-  const handleSyncUpwork = async () => {
-    setSyncingUpwork(true);
-    try {
-      const res = await fetch("/api/dealflow-ai/integrations/upwork/sync", { method: "POST" });
-      const data = await res.json();
-      if (data.ok) toast.success(data.message);
-    } catch {
-      toast.error("Failed to sync Upwork.");
-    } finally {
-      setSyncingUpwork(false);
-    }
-  };
-
   return (
     <div className="space-y-4">
-      {/* 4 Dedicated AI Communication Channels Hub */}
+      {/* 3 Dedicated AI Communication Channels Hub */}
       <div className="rounded-3xl border border-border/60 bg-card p-5 shadow-sm space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/50 pb-3">
           <div>
             <h3 className="text-base font-black text-foreground flex items-center gap-2">
               <Sparkles className="size-4 text-primary" />
-              Four Dedicated AI Communication Channels
+              Three Dedicated AI Communication Channels
             </h3>
             <p className="text-xs text-muted-foreground">
               Direct, unified communication with Jobs, Interns, Trainees, and Clients — AI replies auto-fill right inside your composer!
             </p>
           </div>
 
-          <Link
-            href="/dealflow-ai/knowledge-base"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary hover:bg-primary/20 transition-colors"
-          >
-            <BookOpen className="size-3.5" /> Central Knowledge Base
-          </Link>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {/* 1. AI Chat */}
           <Link
             href="/dealflow-ai/messages"
@@ -138,7 +88,7 @@ export default function OmnichannelCommandCenter({
                 Dedicated Email
               </h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Two-way client with attachments & threading; AI auto-populates subject and body.
+                Send email to leads through your own connected email account, with an optional AI draft.
               </p>
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-border/40 text-xs font-bold text-purple-600">
@@ -158,45 +108,18 @@ export default function OmnichannelCommandCenter({
                   <Radio className="size-4" />
                 </span>
                 <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-black uppercase text-emerald-600">
-                  WhatsApp API
+                  WhatsApp
                 </span>
               </div>
               <h4 className="mt-3 text-sm font-black text-foreground group-hover:text-emerald-600 transition-colors">
                 WhatsApp Hub
               </h4>
               <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                Automated alerts on incoming submissions and instant Knowledge-Base AI replies.
+                Message leads on WhatsApp through your own connected WhatsApp account.
               </p>
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-border/40 text-xs font-bold text-emerald-600">
               <span>Open WhatsApp Hub</span>
-              <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-1" />
-            </div>
-          </Link>
-
-          {/* 4. AI Voice Calls */}
-          <Link
-            href="/dealflow-ai/voice-calls"
-            className="group relative flex flex-col justify-between rounded-2xl border border-border/60 bg-muted/20 p-4 transition-all hover:-translate-y-0.5 hover:border-amber-500/40 hover:bg-amber-500/[0.04]"
-          >
-            <div>
-              <div className="flex items-center justify-between">
-                <span className="flex size-9 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
-                  <PhoneCall className="size-4" />
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                  Channel 4
-                </span>
-              </div>
-              <h4 className="mt-3 text-sm font-black text-foreground group-hover:text-amber-600 transition-colors">
-                AI Voice Calls
-              </h4>
-              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                1-click "Call via AI" CTA with real speech audio dialogue, live transcripts, and human takeover.
-              </p>
-            </div>
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-border/40 text-xs font-bold text-amber-600">
-              <span>Dialer & Voice Center</span>
               <ChevronRight className="size-3.5 transition-transform group-hover:translate-x-1" />
             </div>
           </Link>

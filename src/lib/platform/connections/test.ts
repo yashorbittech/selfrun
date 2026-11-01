@@ -42,6 +42,17 @@ async function run(provider: string, v: Record<string, string>): Promise<TestOut
         return fail(`Google rejected the key: ${err instanceof Error ? err.message : "invalid credentials"}.`);
       }
     }
+    case "livekit": {
+      // Lists rooms (read-only) with a short-lived admin token: proves the URL, key and secret belong together.
+      const { RoomServiceClient } = await import("livekit-server-sdk");
+      const host = (v.url || "").replace(/^wss:/, "https:").replace(/^ws:/, "http:");
+      try {
+        await new RoomServiceClient(host, v.apiKey, v.apiSecret).listRooms();
+        return { ok: true, message: "LiveKit accepted the URL and credentials." };
+      } catch (err) {
+        return fail(`LiveKit rejected the credentials: ${err instanceof Error ? err.message : "check failed"}.`);
+      }
+    }
     case "smtp": {
       const transporter = nodemailer.createTransport({
         host: v.host, port: Number(v.port) || 587, secure: v.secure === "ssl", requireTLS: v.secure === "starttls", ignoreTLS: v.secure === "none",

@@ -34,17 +34,23 @@ export const SESSION_COOKIES = [
 ];
 
 type Class = "machine" | "bearer-or-session" | "asset" | "public" | "navigation" | "session";
-interface Rule { re: RegExp; methods?: string[]; cls: Class }
+interface Rule { re: RegExp; methods?: string[]; cls: Class; /** Declared body cap in bytes, enforced at the door for machine routes. */ maxBody?: number }
 
 // First match wins. Anything not listed is "session": a signed-in person is required.
 const RULES: Rule[] = [
   // Machine-to-machine: signed / bearer requests from payment providers, schedulers and our own build pipeline.
   // Razorpay's webhooks (customer payments in CashFlow, RazorpayX payouts in TalentOS): no browser, no session, only the signature header.
   { re: /^\/api\/(platform\/billing\/webhook|cashflow-ai\/webhooks\/|talentos\/payroll\/webhook)/, cls: "machine" },
+  // Voice calls: Twilio (voice / status / transcription callbacks of the conference) and the ElevenLabs post-call webhook. POST only; the handler
+  // verifies the signature (HMAC / X-Twilio-Signature) against the company named by the opaque ?t= token. Nothing else under /api/agentos is opened.
+  { re: /^\/api\/agentos\/twilio\/(voice|status|transcription)$/, methods: ["POST"], cls: "machine", maxBody: 64 * 1024 },
+  { re: /^\/api\/agentos\/voice\/webhook$/, methods: ["POST"], cls: "machine", maxBody: 5_000_000 },
   { re: /\/cron$|^\/api\/wallet\/expiry-sweep$|^\/api\/apps\/builds\/(callback|cron)$|^\/api\/indexing$/, cls: "machine" },
   { re: /^\/api\/lms\/chatbot\/reindex$/, cls: "bearer-or-session" },
   // A provider fetches a signed link (the signature is checked by the handler).
   { re: /^\/api\/smms\/media\/public\//, cls: "asset" },
+  // The photos of the agents a company lists on its website (read-only; the route serves public agents only).
+  { re: /^\/api\/agentos-public\/avatar\/[^/]+$/, methods: ["GET"], cls: "asset" },
   // Public pictures and files the site itself embeds (also loaded from emails): read-only, rate limited.
   { re: /^\/api\/(platform\/brand-logo|cms\/media|apps\/assets|desktop\/branding|site-verification)\//, methods: ["GET", "HEAD"], cls: "asset" },
   { re: /^\/api\/desktop\/branding$/, methods: ["GET", "HEAD"], cls: "asset" },
@@ -59,6 +65,8 @@ const RULES: Rule[] = [
   // The public website talking to its own backend (forms, chat, offers, push sign-up …).
   { re: /^\/api\/(chat|careers|offers|referral|web-push|voice|game|client-error|consent|push\/config|support\/public)(\/|$)/, cls: "public" },
   { re: /^\/api\/leads\/[^/]+$/, methods: ["POST"], cls: "public" },
+  // A visitor of the company's website talking to a public voice agent (browser origin and rate limits still apply; the handlers check the rest).
+  { re: /^\/api\/agentos-public\/session(\/finish)?$/, methods: ["POST"], cls: "public" },
   { re: /^\/api\/cms\/theme-preview\/exit$/, cls: "public" },
   // Pre-sale video meetings: external clients join without a staff session
   { re: /^\/api\/dealflow-ai\/meetings\/[^/]+(\/token)?$/, cls: "public" },
@@ -67,9 +75,12 @@ const RULES: Rule[] = [
   { re: /^\/api\/secure\/action$/, methods: ["POST"], cls: "public" },
 ];
 
+function matchRule(pathname: string, method: string): Rule | null {
+  for (const r of RULES) if (r.re.test(pathname) && (!r.methods || r.methods.includes(method))) return r;
+  return null;
+}
 export function classify(pathname: string, method: string): Class {
-  for (const r of RULES) if (r.re.test(pathname) && (!r.methods || r.methods.includes(method))) return r.cls;
-  return "session";
+  return matchRule(pathname, method)?.cls ?? "session";
 }
 
 // ── Scripted clients ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -200,7 +211,8 @@ export async function gateApi(req: NextRequest, host: string, companyId: string 
   if (!["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"].includes(method)) return json(405, { error: "Method not allowed" });
   if (TRAPS.test(path)) { if (STRICT) ban(ip, 60); return json(404, { error: "Not found" }); }
 
-  const cls = action ? "session" : classify(path, method);
+  const rule = action ? null : matchRule(path, method);
+  const cls: Class = rule?.cls ?? "session";
   const ua = req.headers.get("user-agent") ?? "";
   const kind = userAgentKind(ua);
 
@@ -209,6 +221,7 @@ export async function gateApi(req: NextRequest, host: string, companyId: string 
     const h = req.headers;
     const signed = h.has("authorization") || [...h.keys()].some((k) => /signature|webhook-secret|x-hub-signature/i.test(k));
     if (!signed) return refuse();
+    if (rule?.maxBody && Number(h.get("content-length") ?? 0) > rule.maxBody) return json(413, { error: "Payload too large" });
     const r = hit(`machine:${ip}`, 600, 60_000);
     return r.ok ? null : tooMany(r.retryAfter, true);
   }

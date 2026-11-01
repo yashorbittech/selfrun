@@ -4,7 +4,7 @@ import { getCurrentAibotsUser } from "@/lib/aibots-auth";
 import { hasAibotsAccess } from "@/lib/aibots-roles";
 import { getViewer, can } from "@/lib/products/agentos/viewer";
 import { listAibotsNotifications } from "@/lib/products/agentos/notifications";
-import { listUsableBots } from "@/lib/products/agentos/bots";
+import { listRecentAgents } from "@/lib/products/agentos/hub";
 import AibotsSidebarShell from "@/components/products/agentos/AibotsSidebarShell";
 import AibotsTopbar from "@/components/products/agentos/AibotsTopbar";
 import type { AibotsNavFlags } from "@/components/products/agentos/AibotsSidebar";
@@ -27,15 +27,16 @@ export default async function ProtectedAibotsLayout({ children }: { children: Re
   const viewer = await getViewer();
   if (!viewer) redirect("/agentos/login");
 
-  // The sidebar's bot list is whatever the database says this viewer may use — nothing is hardcoded.
-  const [bell, bots] = await Promise.all([listAibotsNotifications(viewer.userId), listUsableBots(viewer)]);
-  const sidebarBots = bots.map((b) => ({ _id: b._id, name: b.name, icon: b.icon, color: b.color }));
+  // The sidebar lists only the agents this viewer has actually chatted or talked with, newest first.
+  const [bell, recent] = await Promise.all([listAibotsNotifications(viewer.userId), listRecentAgents(viewer)]);
+  const sidebarBots = recent.agents;
   const flags: AibotsNavFlags = {
     createBot: can(viewer, "CREATE_BOT"),
     manageBots: can(viewer, "EDIT_BOT") || can(viewer, "DELETE_BOT") || can(viewer, "MANAGE_KB"),
     allChats: can(viewer, "VIEW_CHATS"),
     audit: can(viewer, "VIEW_AUDIT"),
     settings: can(viewer, "MANAGE_SETTINGS"),
+    phone: can(viewer, "VOICE_CALL_MANAGE"),
   };
 
   return (

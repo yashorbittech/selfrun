@@ -20,6 +20,7 @@ export function createResendEmailProvider(apiKey: string | null): EmailProvider 
           html: message.html,
           text: message.text,
           ...(message.replyTo ? { reply_to: message.replyTo } : {}),
+          ...(message.calendar ? { attachments: [{ filename: "invite.ics", content: Buffer.from(message.calendar.ics, "utf8").toString("base64"), content_type: `text/calendar; method=${message.calendar.method}; charset=UTF-8` }] } : {}),
         }),
         signal: AbortSignal.timeout(15_000),
       });

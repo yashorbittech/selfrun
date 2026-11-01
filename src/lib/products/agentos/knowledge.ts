@@ -147,6 +147,12 @@ async function pushToOpenAI(bot: BotDoc, upload: Awaited<ReturnType<typeof toFil
   }
 }
 
+/** Voice agents carry their knowledge on ElevenLabs: re-sync after it changes (no-op for text agents; never throws). */
+async function knowledgeChanged(bot: Pick<BotDoc, "_id" | "kind">): Promise<void> {
+  if (bot.kind !== "voice") return;
+  await (await import("@/lib/products/agentos/voice/sync")).resyncAfterKnowledgeChange(bot._id);
+}
+
 const statusFrom = (s: string): KbFileStatus => (s === "completed" ? "ready" : s === "in_progress" ? "processing" : "failed");
 
 export async function uploadBotFile(bot: BotDoc, file: File, meta: { title: unknown; description: unknown; category: unknown }, actorId: string): Promise<KbFileDoc> {
@@ -237,6 +243,7 @@ export async function setBotFileEnabled(bot: BotDoc, fileId: string, enabled: bo
     });
     await col.updateOne({ _id: f._id }, { $set: { enabled: true, status: statusFrom(vsFile.status), vectorStoreFileId: vsFile.id, lastError: null, ...updateStamp(actorId) } });
   }
+  await knowledgeChanged(bot);
   return f;
 }
 
@@ -247,6 +254,7 @@ export async function deleteBotFile(bot: BotDoc, fileId: string, actorId: string
   }
   const col = await filesCollection();
   await col.updateOne({ _id: f._id }, { $set: { deletedAt: new Date(), status: "disabled", enabled: false, ...updateStamp(actorId) } });
+  await knowledgeChanged(bot);
   return f;
 }
 
@@ -258,6 +266,7 @@ export async function refreshProcessing(bot: BotDoc): Promise<void> {
   if (pending.length === 0) return;
   setAiFeature("AI Bots knowledge");
   const openai = await getOpenAI();
+  let nowReady = false;
   await Promise.all(
     pending.map(async (f) => {
       if (!f.vectorStoreFileId) return;
@@ -266,6 +275,7 @@ export async function refreshProcessing(bot: BotDoc): Promise<void> {
         const status = statusFrom(vs.status);
         if (status !== "processing") {
           await col.updateOne({ _id: f._id }, { $set: { status, usageBytes: vs.usage_bytes ?? null, lastError: vs.last_error ? friendlyError(new Error(vs.last_error.message)) : null } });
+          if (status === "ready") nowReady = true;
           await aibotsEvents.fileProcessed({ id: bot._id, name: bot.name }, { id: f._id, title: f.title }, status === "ready", vs.last_error?.message ?? null);
         }
       } catch (err) {
@@ -273,6 +283,7 @@ export async function refreshProcessing(bot: BotDoc): Promise<void> {
       }
     })
   );
+  if (nowReady) await knowledgeChanged(bot);
 }
 
 const VIEW_MAX_CHARS = 60000;

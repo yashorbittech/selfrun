@@ -1,6 +1,7 @@
 import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { COLLECTIONS, aibotsCollection, newId, notDeleted } from "@/lib/products/agentos/db";
+import { avatarUrlFor } from "@/lib/products/agentos/avatar-shared";
 import { chatsCollection, toListItem, type ChatListItem } from "@/lib/products/agentos/chats";
 import { botsCollection, listUsableBots, GENERAL_BOT_ID, GENERAL_BOT_NAME } from "@/lib/products/agentos/bots";
 import type { AibotsViewer } from "@/lib/products/agentos/viewer";
@@ -77,7 +78,7 @@ export interface DashboardData {
   outputTokens30: number;
   cost30: number;
   daily: { date: string; runs: number; tokens: number; cost: number; failed: number }[];
-  topBots: { botId: string; name: string; icon: string; color: string; runs: number; tokens: number; cost: number }[];
+  topBots: { botId: string; name: string; icon: string; color: string; avatarUrl: string | null; runs: number; tokens: number; cost: number }[];
   recentChats: (ChatListItem & { botName: string })[];
   recentFailures: { botName: string; model: string; error: string | null; createdAt: string }[];
 }
@@ -136,7 +137,7 @@ export async function getDashboard(viewer: AibotsViewer, filters: { from?: strin
     runs.find({ ...who, status: "failed" }).sort({ createdAt: -1 }).limit(5).toArray(),
   ]);
 
-  const botById = new Map<string, { name: string; icon: string; color: string }>(allBots.map((b) => [b._id, b]));
+  const botById = new Map<string, { _id?: string; name: string; icon: string; color: string; avatarKey?: string | null }>(allBots.map((b) => [b._id, b]));
   botById.set(GENERAL_BOT_ID, { name: GENERAL_BOT_NAME, icon: "sparkles", color: "indigo" });
   const byDay = new Map(daily.map((d) => [d._id, d]));
   const days: DashboardData["daily"] = [];
@@ -162,7 +163,7 @@ export async function getDashboard(viewer: AibotsViewer, filters: { from?: strin
     daily: days,
     topBots: top.map((r) => {
       const b = botById.get(r._id);
-      return { botId: r._id, name: b?.name ?? "Deleted bot", icon: b?.icon ?? "bot", color: b?.color ?? "slate", runs: r.runs, tokens: r.tokens, cost: r.cost };
+      return { botId: r._id, name: b?.name ?? "Deleted bot", icon: b?.icon ?? "bot", color: b?.color ?? "slate", avatarUrl: b?._id ? avatarUrlFor(b._id, b.avatarKey) : null, runs: r.runs, tokens: r.tokens, cost: r.cost };
     }),
     recentChats: recent.map((c) => ({ ...toListItem(c), botName: botById.get(c.botId)?.name ?? "Deleted bot" })),
     recentFailures: failures.map((f) => ({ botName: botById.get(f.botId)?.name ?? "Deleted bot", model: f.model, error: f.error, createdAt: f.createdAt.toISOString() })),

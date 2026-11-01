@@ -10,6 +10,9 @@ import ClientActions from "@/components/products/sprintos/ClientActions";
 import ProgressBar from "@/components/products/sprintos/ProgressBar";
 import { getCurrentPmsUser } from "@/lib/pms-auth";
 import { canManageClients } from "@/lib/pms-roles";
+import DoNotContactSwitch from "@/components/products/agentos/calls/DoNotContactSwitch";
+import { isClientDoNotContact } from "@/lib/products/sprintos/calls";
+import { setClientDoNotContactAction } from "../actions";
 import { getClient, serializeClient } from "@/lib/products/sprintos/clients";
 import { listProjectsForClient, serializeProject } from "@/lib/products/sprintos/projects";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -22,6 +25,7 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
   const canManage = user ? canManageClients(user) : false;
   const projects = (await listProjectsForClient(id)).map((p) => serializeProject(p));
   const serialized = serializeClient(client);
+  const doNotContact = canManage ? await isClientDoNotContact(id) : false;
 
   return (
     <div className="space-y-4">
@@ -89,6 +93,8 @@ export default async function ClientProfilePage({ params }: { params: Promise<{ 
           </CardContent>
         </GlassCard>
       </div>
+
+      {canManage && <DoNotContactSwitch initial={doNotContact} who={client.primaryContact.name} action={setClientDoNotContactAction.bind(null, id)} />}
 
       {client.notes && (
         <GlassCard>

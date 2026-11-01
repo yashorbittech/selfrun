@@ -689,7 +689,7 @@ Until 15.6 is done, builds wait in the queue ("Waiting for the build service") a
 | `/api/playbook-ai/cron` | 03:00 | Procedure reminders: Moves procedures through their date-driven statuses (review due, expired) and sends acknowledgement reminders. |
 | `/api/rankmax-ai/cron` | 03:30 | SEO housekeeping: Syncs Search Console and Analytics, runs the scheduled website audit, re-checks backlinks on Mondays and flags big ranking drops, for the companies that turned those on. |
 | `/api/cybervault/cron` | 04:00 | Vault expiry alerts: Tells the vault's owners about credentials and documents that have expired or are about to. |
-| `/api/viralpulse-ai/cron` | 04:30 | Scheduled posts: Publishes approved scheduled posts that are due and reminds publishers about due posts nobody approved and ads due to go live. |
+| `/api/viralpulse-ai/publisher/cron` | every 5 min | Scheduled posts: publishes approved scheduled posts that are due (DB leases, retries with backoff, resumes partly finished publishes), checks media the platforms are still processing, reminds publishers about due posts nobody approved and ads due to go live. |
 | `/api/evaliq/cron` | 05:00 | Test deadlines: Finishes timed-out test attempts, expires missed assignments, sends opens-soon / due-soon / expired notices and releases results after a test closes. |
 | `/api/platform/domains/cron` | 05:30 | Custom domain re-check: Re-checks every company's pending custom domains so they go live as soon as their DNS is right. |
 | `/api/platform/billing/trials/cron` | 06:00 | Trial reminders & expiry: Emails trial reminders at the platform's reminder days and moves ended trials on (the workspace locks until a plan is subscribed). |

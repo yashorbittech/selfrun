@@ -5,6 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CharCount } from "@/components/products/viralpulse-ai/SmmsBits";
+import AiField from "@/components/products/viralpulse-ai/shared/AiField";
+import { isFieldKey, type FieldKey } from "@/lib/products/viralpulse-ai/ai-field/registry";
+import type { FieldValue } from "@/lib/products/viralpulse-ai/ai-field/types";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,7 +24,18 @@ export type FieldSpec =
 
 type Rec = Record<string, unknown>;
 
-function FieldInput({ spec, value, onChange, disabled, idPrefix }: { spec: FieldSpec; value: unknown; onChange: (v: unknown) => void; disabled?: boolean; idPrefix: string }) {
+/**
+ * Puts an AI button on every field the registry knows. `scope` + the field's key is the registry key (scope "ad.video" + "hook" =
+ * "ad.video.hook"; inside a list of objects the scope grows by the list's key). `getContext` returns the surrounding form values.
+ */
+export interface StructuredAi {
+  scope: string;
+  getContext: () => Rec;
+  /** False hides the buttons (no permission, OpenAI not connected). */
+  enabled: boolean;
+}
+
+function FieldInput({ spec, value, onChange, disabled, idPrefix, ai }: { spec: FieldSpec; value: unknown; onChange: (v: unknown) => void; disabled?: boolean; idPrefix: string; ai?: StructuredAi }) {
   const id = `${idPrefix}-${spec.key}`;
   if (spec.kind === "objects") {
     const items = Array.isArray(value) ? (value as Rec[]) : [];
@@ -37,7 +51,7 @@ function FieldInput({ spec, value, onChange, disabled, idPrefix }: { spec: Field
                 </Button>
               )}
             </div>
-            <StructuredFields specs={spec.fields} value={item} onChange={(next) => onChange(items.map((x, j) => (j === i ? next : x)))} disabled={disabled} idPrefix={`${id}-${i}`} />
+            <StructuredFields specs={spec.fields} value={item} onChange={(next) => onChange(items.map((x, j) => (j === i ? next : x)))} disabled={disabled} idPrefix={`${id}-${i}`} ai={ai ? { scope: `${ai.scope}.${spec.key}`, enabled: ai.enabled, getContext: () => ({ ...ai.getContext(), item }) } : undefined} />
           </div>
         ))}
         {!disabled && (
@@ -63,12 +77,33 @@ function FieldInput({ spec, value, onChange, disabled, idPrefix }: { spec: Field
   );
 }
 
-export function StructuredFields({ specs, value, onChange, disabled, idPrefix = "sf" }: { specs: FieldSpec[]; value: Rec; onChange: (v: Rec) => void; disabled?: boolean; idPrefix?: string }) {
+export function StructuredFields({ specs, value, onChange, disabled, idPrefix = "sf", ai }: { specs: FieldSpec[]; value: Rec; onChange: (v: Rec) => void; disabled?: boolean; idPrefix?: string; ai?: StructuredAi }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {specs.map((spec) => {
         const v = value?.[spec.key];
         const limit = "limit" in spec ? spec.limit : null;
+        const key = ai && spec.kind !== "objects" ? `${ai.scope}.${spec.key}` : null;
+        if (ai && key && isFieldKey(key) && !disabled) {
+          return (
+            <AiField
+              key={spec.key}
+              fieldKey={key as FieldKey}
+              label={spec.label}
+              id={`${idPrefix}-${spec.key}`}
+              as="custom"
+              className={cn((spec.wide || spec.kind === "textarea" || spec.kind === "list") && "sm:col-span-2")}
+              value={(spec.kind === "list" ? (Array.isArray(v) ? (v as string[]) : []) : spec.kind === "number" ? (typeof v === "number" ? v : 0) : typeof v === "string" ? v : "") as FieldValue}
+              limit={limit ?? null}
+              aiDisabled={!ai.enabled}
+              aiDisabledReason="AI isn't available here (no permission, or OpenAI isn't connected)."
+              getContext={() => ({ ...ai.getContext(), [spec.key]: v })}
+              onChange={(next) => onChange({ ...value, [spec.key]: spec.kind === "number" ? Number(next) || 0 : next })}
+            >
+              <FieldInput spec={spec} value={v} disabled={disabled} idPrefix={idPrefix} onChange={(next) => onChange({ ...value, [spec.key]: next })} />
+            </AiField>
+          );
+        }
         return (
           <div key={spec.key} className={cn("space-y-1.5", (spec.wide || spec.kind === "objects" || spec.kind === "textarea" || spec.kind === "list") && "sm:col-span-2")}>
             <div className="flex items-center justify-between gap-2">
@@ -77,7 +112,7 @@ export function StructuredFields({ specs, value, onChange, disabled, idPrefix = 
               </label>
               {limit ? <CharCount value={typeof v === "string" ? v : ""} limit={limit} /> : null}
             </div>
-            <FieldInput spec={spec} value={v} disabled={disabled} idPrefix={idPrefix} onChange={(next) => onChange({ ...value, [spec.key]: next })} />
+            <FieldInput spec={spec} value={v} disabled={disabled} idPrefix={idPrefix} ai={ai} onChange={(next) => onChange({ ...value, [spec.key]: next })} />
           </div>
         );
       })}

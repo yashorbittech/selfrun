@@ -11,6 +11,7 @@ import {
   setLeadLink,
   mirrorLinkToAccount,
   clearLeadPortalUnread,
+  setLeadDoNotContact,
 } from "@/lib/lead-management/records";
 import { postLeadMessage } from "@/lib/lead-management/messages";
 import { recordLeadEvent } from "@/lib/lead-management/timeline";
@@ -55,6 +56,14 @@ export async function advanceLeadStageAction(leadId: string, toStage: string): P
 export async function assignLeadToMeAction(leadId: string, unassign: boolean): Promise<{ error?: string }> {
   const user = await requireLmsUser("EDIT_LEADS");
   await assignLeadOwner(leadId, unassign ? null : user.id, user.id);
+  touch(leadId);
+  return {};
+}
+
+export async function setLeadDoNotContactAction(leadId: string, doNotContact: boolean): Promise<{ error?: string }> {
+  const user = await requireLmsUser("EDIT_LEADS");
+  if (typeof leadId !== "string" || typeof doNotContact !== "boolean") return { error: "Invalid request." };
+  if (!(await setLeadDoNotContact(leadId, doNotContact, user.id))) return { error: "Lead not found." };
   touch(leadId);
   return {};
 }

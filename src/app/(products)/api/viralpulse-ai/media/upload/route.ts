@@ -2,7 +2,7 @@ import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
-import { UPLOAD_PATH } from "@/lib/products/viralpulse-ai/media";
+import { UPLOAD_PATH, assertUploadOwner } from "@/lib/products/viralpulse-ai/media";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, VIDEO_TYPES } from "@/lib/products/viralpulse-ai/constants";
 import { blobAuth } from "@/lib/storage/blob-token";
 
@@ -35,6 +35,7 @@ async function handlePOST(req: NextRequest) {
       request: req,
       onBeforeGenerateToken: async (pathname) => {
         if (!UPLOAD_PATH.test(pathname)) throw new Error("Invalid upload path.");
+        await assertUploadOwner(pathname);
         const isVideo = /\.(mp4|mov|webm)$/.test(pathname);
         return {
           allowedContentTypes: Object.keys(isVideo ? VIDEO_TYPES : IMAGE_TYPES),

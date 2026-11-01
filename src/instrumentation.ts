@@ -7,6 +7,10 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   // Not on Vercel (which has its own cron): RUN_SCHEDULER=1 on one instance runs the scheduled jobs from inside the app.
   if (process.env.RUN_SCHEDULER === "1" && !process.env.VERCEL) void import("@/lib/cron/scheduler").then((m) => m.startScheduler()).catch((err) => console.error("[scheduler] could not start", err));
+  // DealFlow tells the calling engine how to write call results back, honour its do-not-contact flag and recognise callers.
+  void import("@/lib/dealflow-ai/call-hooks").catch((err) => console.error("[dealflow] could not register call hooks", err));
+  // TalentOS and SprintOS do the same for their records.
+  void import("@/lib/products/call-integrations").catch((err) => console.error("[calls] could not register product call hooks", err));
   const email = process.env.SAAS_ADMIN_EMAIL?.trim();
   if (!email) return;
   // The dev server runs this once per compiler; one run per process is enough.

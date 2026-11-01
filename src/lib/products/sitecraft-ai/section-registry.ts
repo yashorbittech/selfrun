@@ -20,6 +20,7 @@ import { brandify, type BrandName } from "@/lib/brand";
 import { HOME_SECTION_TYPES } from "@/lib/products/sitecraft-ai/section-registry-home";
 import { PAGE_SECTION_TYPES } from "@/lib/products/sitecraft-ai/section-registry-pages";
 import { FORM_SECTION_TYPES } from "@/lib/products/sitecraft-ai/section-registry-forms";
+import { AGENT_SECTION_TYPES } from "@/lib/products/sitecraft-ai/section-registry-agents";
 import type { BlogPostMeta } from "@/types/content";
 import type { Job } from "@/types/content";
 import type { EngagementCategory } from "@/types/content";
@@ -910,6 +911,7 @@ export const SECTION_REGISTRY: Record<string, SectionTypeDef<any>> = {
   ...Object.fromEntries(HOME_SECTION_TYPES.map((d) => [d.type, d])),
   ...Object.fromEntries(PAGE_SECTION_TYPES.map((d) => [d.type, d])),
   ...Object.fromEntries(FORM_SECTION_TYPES.map((d) => [d.type, d])),
+  ...Object.fromEntries(AGENT_SECTION_TYPES.map((d) => [d.type, d])),
 };
 
 export type SectionType = keyof typeof SECTION_REGISTRY;

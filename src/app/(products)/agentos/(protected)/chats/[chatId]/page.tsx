@@ -12,10 +12,15 @@ import { recordAuditThrottled } from "@/lib/products/agentos/audit";
 export default async function OversightChatPage({ params }: { params: Promise<{ chatId: string }> }) {
   const viewer = await getViewer();
   if (!viewer) redirect("/agentos/login");
-  if (!can(viewer, "VIEW_CHATS")) redirect("/agentos");
   const { chatId } = await params;
+  // A link to a chat (calls placed from a chat point here): people without oversight rights land in their own workspace for it.
+  const own = can(viewer, "VIEW_CHATS") ? null : await getChat(viewer, chatId).catch(() => null);
+  if (own && !own.voiceCall) redirect(`/agentos/b/${encodeURIComponent(own.botId)}/${encodeURIComponent(own._id)}`);
+  if (!can(viewer, "VIEW_CHATS")) redirect("/agentos");
   const chat = await getChat(viewer, chatId, { allowOversight: true }).catch(() => null);
   if (!chat) notFound();
+  // A voice call has no text transcript here: its recording and transcript live on the call page.
+  if (chat.voiceCall) redirect(`/agentos/calls/${chat._id}`);
   // Deleted bots still render their old chats here, so read the row directly.
   const bot = chat.botId === GENERAL_BOT_ID ? await generalBot() : await (await botsCollection()).findOne({ _id: chat.botId });
   if (!bot) notFound();

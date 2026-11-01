@@ -8,6 +8,7 @@ import SmmsProfileMenu from "@/components/products/viralpulse-ai/SmmsProfileMenu
 import { useSidebarCollapse, SidebarProfileSlot } from "@/components/products/dealflow-ai/SidebarCollapseContext";
 import { cn } from "@/lib/utils";
 import type { SmmsNavFlags } from "@/components/products/viralpulse-ai/SmmsSidebar";
+import type { NavBadges } from "@/lib/products/viralpulse-ai/nav";
 
 const EXPANDED_WIDTH = 244;
 const COLLAPSED_WIDTH = 68;
@@ -16,12 +17,14 @@ export default function SmmsSidebarShell({
   email,
   roles,
   flags,
+  badges,
   createdAt,
   lastLoginAt,
 }: {
   email: string;
   roles: string[];
   flags: SmmsNavFlags;
+  badges: NavBadges;
   createdAt: string;
   lastLoginAt: string | null;
 }) {
@@ -54,7 +57,7 @@ export default function SmmsSidebarShell({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <SmmsSidebar flags={flags} collapsed={collapsed} />
+        <SmmsSidebar flags={flags} badges={badges} collapsed={collapsed} />
       </div>
 
       <SidebarProfileSlot>

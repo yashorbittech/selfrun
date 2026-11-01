@@ -1,5 +1,7 @@
 "use client";
 
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import { applicantCallSpec } from "@/lib/dealflow-ai/call-targets";
 import { Fragment, useEffect, useState, useTransition } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -350,6 +352,7 @@ export default function CareerApplicationsDataTable({
                         <Button type="button" variant="ghost" size="icon-sm" onClick={() => openSheet(application)} aria-label="Quick view" title="Quick view">
                           <Eye className="size-3.5" />
                         </Button>
+                        <DealflowCallButton spec={applicantCallSpec({ _id: application._id, name: application.name, phone: application.phone, positionTitle: application.positionTitle })} compact className="size-7" />
                         <Button variant="ghost" size="icon-sm" nativeButton={false} render={<Link href={`/dealflow-ai/careers/applicants/${application._id}`} />} aria-label="Open profile" title="Open full profile">
                           <UserRound className="size-3.5" />
                         </Button>

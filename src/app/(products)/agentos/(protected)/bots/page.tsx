@@ -1,3 +1,4 @@
+import { avatarUrlFor } from "@/lib/products/agentos/avatar-shared";
 import PanelListFilters from "@/components/platform/panel/PanelListFilters";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -68,7 +69,7 @@ export default async function ManageBotsPage() {
                   <tr key={b._id}>
                     <td className="py-2 pr-3">
                       <div className="flex items-center gap-3">
-                        <BotAvatar icon={b.icon} color={b.color} />
+                        <BotAvatar icon={b.icon} color={b.color} imageUrl={avatarUrlFor(b._id, b.avatarKey)} />
                         <div className="min-w-0">
                           <Link href={`/agentos/bots/${b._id}${mayEdit ? "" : "?tab=knowledge"}`} className="font-semibold hover:text-primary">
                             {b.name}

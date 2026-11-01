@@ -12,6 +12,7 @@ import {
   Award,
   UserCheck,
   CircleDot,
+  PhoneCall,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { SerializedLeadTimelineEvent, LeadEventKind } from "@/lib/lead-management/types";
@@ -33,6 +34,8 @@ const ICON: Record<LeadEventKind, LucideIcon> = {
   enrolled: GraduationCap,
   certificate_issued: Award,
   owner_assigned: UserCheck,
+  ai_call: PhoneCall,
+  meeting: CalendarClock,
 };
 
 function when(iso: string) {

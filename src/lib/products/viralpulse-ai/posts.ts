@@ -3,6 +3,8 @@ import { COLLECTIONS, smmsCollection, newId, createStamp, updateStamp, notDelete
 import { isPostPlatform, type PostPlatform, type ContentStatus } from "@/lib/products/viralpulse-ai/constants";
 import { EMPTY_CREATIVE, EMPTY_VARIANT, normalizeCreative, normalizeVariant, type PostCreative, type PostVariantContent } from "@/lib/products/viralpulse-ai/content";
 import { SmmsInputError, NotFoundError } from "@/lib/products/viralpulse-ai/viewer";
+import type { PublishOptions } from "@/lib/products/viralpulse-ai/publishers/types";
+import type { PostWizardMeta } from "@/lib/products/viralpulse-ai/post-wizard/helpers";
 
 /**
  * A social media post: one idea, adapted into a separate version (variant) per
@@ -83,6 +85,14 @@ export interface PostDoc extends PostBrief, Stamps {
   approvedAt: Date | null;
   publishedAt: Date | null;
   archivedFrom: ContentStatus | null;
+  /** IANA zone the schedule was entered in - display only; `scheduledAt` is the UTC instant. */
+  scheduledTz?: string | null;
+  /** Set by the 5-minute job when the schedule was handed to the publish engine; cleared on reschedule/cancel. */
+  publishQueuedAt?: Date | null;
+  /** Per-platform publishing choices (YouTube privacy, Instagram format, accounts ...). */
+  publishOptions?: PublishOptions;
+  /** Wizard-only choices (last step, content type per platform, key message, UTM...). Absent on posts made before the wizard: they open with defaults. */
+  wizard?: PostWizardMeta;
 }
 
 let indexesEnsured = false;
@@ -93,6 +103,7 @@ export async function postsCollection() {
     await Promise.all([
       col.createIndex({ deletedAt: 1, updatedAt: -1 }).catch(() => {}),
       col.createIndex({ status: 1, scheduledAt: 1 }).catch(() => {}),
+      col.createIndex({ status: 1, publishQueuedAt: 1, scheduledAt: 1 }).catch(() => {}),
       col.createIndex({ campaignId: 1 }).catch(() => {}),
     ]);
   }
@@ -222,7 +233,7 @@ export interface PostFilter {
 export async function listPosts(f: PostFilter = {}) {
   const col = await postsCollection();
   const filter: Record<string, unknown> = { ...notDeleted };
-  if (f.status && f.status !== "all") filter.status = f.status;
+  if (f.status && f.status !== "all") filter.status = f.status.includes(",") ? { $in: f.status.split(",").filter(Boolean) } : f.status;
   else if (!f.status) filter.status = { $ne: "archived" };
   if (f.platform && isPostPlatform(f.platform)) filter.platforms = f.platform;
   if (f.contentType === "image" || f.contentType === "video") filter.contentType = f.contentType;
@@ -241,6 +252,27 @@ export async function listPosts(f: PostFilter = {}) {
   const pageSize = Math.min(Math.max(f.pageSize ?? 25, 1), 100);
   const [items, total] = await Promise.all([col.find(filter).sort({ updatedAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).toArray(), col.countDocuments(filter)]);
   return { items: items.map(hydrate), total, page, pageSize, totalPages: Math.max(Math.ceil(total / pageSize), 1) };
+}
+
+export interface PostStats {
+  scheduled: number;
+  publishedThisMonth: number;
+  failed: number;
+  drafts: number;
+  awaitingApproval: number;
+}
+
+/** Counts for the stat cards of the posts list (live posts only). `monthStart` is the first instant of the current month in the company's zone. */
+export async function postStats(monthStart: Date): Promise<PostStats> {
+  const col = await postsCollection();
+  const [scheduled, publishedThisMonth, failed, drafts, awaitingApproval] = await Promise.all([
+    col.countDocuments({ ...notDeleted, status: "scheduled" }),
+    col.countDocuments({ ...notDeleted, status: "published", publishedAt: { $gte: monthStart } }),
+    col.countDocuments({ ...notDeleted, status: "failed" }),
+    col.countDocuments({ ...notDeleted, status: { $in: ["draft", "generated", "edited"] } }),
+    col.countDocuments({ ...notDeleted, status: "scheduled", approvedBy: null }),
+  ]);
+  return { scheduled, publishedThisMonth, failed, drafts, awaitingApproval };
 }
 
 /** Posts on the calendar between two dates (scheduled or published). */

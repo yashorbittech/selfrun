@@ -26,6 +26,27 @@ export interface ChatDoc {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  /** Voice calls only: the ElevenLabs conversation and its transcript (see voice/calls.ts). Absent on text chats. */
+  voiceCall?: VoiceCallRecord;
+}
+
+export interface VoiceCallRecord {
+  /** ElevenLabs conversation id, set when the call connects. */
+  conversationId: string | null;
+  status: "started" | "processing" | "done" | "failed";
+  durationSecs: number | null;
+  transcript: { role: "agent" | "user"; text: string; atSecs: number | null }[] | null;
+  /** Set once the call's seconds were counted against the plan (never twice). */
+  meteredAt: Date | null;
+  /** While a worker is counting the seconds: others skip until it passes. Cleared when counting fails, so the next visit retries. */
+  meterLeaseUntil?: Date | null;
+  /** Kept from ElevenLabs when the call settles, so history survives their retention window. All absent on older calls. */
+  hasAudio?: boolean | null;
+  summary?: string | null;
+  summaryTitle?: string | null;
+  callSuccess?: "success" | "failure" | "unknown" | null;
+  dataCollection?: { key: string; value: string }[];
+  terminationReason?: string | null;
 }
 
 export interface ChatListItem {
@@ -66,6 +87,13 @@ export async function listMyChats(viewer: AibotsViewer, botId: string, limit = 3
 }
 
 /** The viewer's own chat, or (with VIEW_CHATS) anyone's. Throws NotFound otherwise. */
+/** Why a text chat turn must be refused, or null. Voice agents are only used by calling them; a voice call's row never carries text turns. */
+export function textChatBlockReason(bot: { kind?: "text" | "voice" | null }, chat: { voiceCall?: unknown } | null): string | null {
+  if (bot.kind === "voice") return "This is a voice agent. Start a call to talk to it.";
+  if (chat?.voiceCall) return "This conversation is a voice call and can't take text messages.";
+  return null;
+}
+
 export async function getChat(viewer: AibotsViewer, chatId: string, opts: { allowOversight?: boolean } = {}): Promise<ChatDoc> {
   if (typeof chatId !== "string" || chatId.length > 64) throw new NotFoundError();
   const col = await chatsCollection();

@@ -87,7 +87,7 @@ export default function PlatformPreview({
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white" style={{ backgroundColor: meta.color }}>{initials}</span>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[13px] font-semibold">{brand}</p>
-          <p className="flex items-center gap-1 text-[11px] text-muted-foreground">{sponsored ? "Sponsored" : "Just now"} · <Globe className="size-3" /></p>
+          <p className="flex items-center gap-1 text-[11px] text-muted-foreground">{sponsored ? "Sponsored" : platform === "x" ? `@${brand.toLowerCase().replace(/\s+/g, "")} · now` : "Just now"}{platform === "x" ? null : <> · <Globe className="size-3" /></>}</p>
         </div>
         <MoreHorizontal className="size-4 text-muted-foreground" />
       </div>
@@ -111,6 +111,10 @@ export default function PlatformPreview({
         {platform === "instagram" ? (
           <>
             <Heart className="size-4" /><MessageCircle className="size-4" /><Send className="size-4" /><Bookmark className="ml-auto size-4" />
+          </>
+        ) : platform === "x" ? (
+          <>
+            <MessageCircle className="size-4" /><Repeat2 className="size-4" /><Heart className="size-4" /><Send className="ml-auto size-4" />
           </>
         ) : (
           <>

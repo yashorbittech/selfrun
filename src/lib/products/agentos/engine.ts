@@ -45,7 +45,7 @@ export type UserContent = InputContent;
  * precedence, so a bot's prompt can shape tone and format but can't loosen them.
  */
 /** The platform rules appended after a bot's own instructions (the "Bot rules" prompts): knowledge-base mode or instructions-only mode, the date and privacy rules, and the language rules. */
-async function platformInstructions(hasKnowledge: boolean, lang: Lang | null): Promise<string> {
+export async function platformInstructions(hasKnowledge: boolean, lang: Lang | null): Promise<string> {
   return getPrompt("agentos.platform", {
     rules: await getPrompt(hasKnowledge ? "agentos.rules.knowledge" : "agentos.rules.instructions_only"),
     footer: await getPrompt("agentos.rules.footer", { today: new Date().toISOString().slice(0, 10) }),

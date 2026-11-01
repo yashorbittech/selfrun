@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Search,
-  PhoneCall,
   MessageSquare,
   Mail,
   Radio,
@@ -22,6 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { PipelineTab, UnifiedPipelineContact } from "@/lib/dealflow-ai/types";
+import DealflowCallButton from "@/components/products/dealflow-ai/DealflowCallButton";
+import { pipelineCallSpec } from "@/lib/dealflow-ai/call-targets";
 
 function getSourceStyle(source: string) {
   switch (source.toLowerCase()) {
@@ -209,14 +210,8 @@ export default function PipelineCategoryClient({
                 </div>
               </div>
 
-              {/* Action Buttons with AI Voice Call CTA */}
+              {/* Action buttons */}
               <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/50 pt-3">
-                <Link
-                  href={`/dealflow-ai/voice-calls?contactId=${contact.id}&phone=${encodeURIComponent(contact.phone)}&name=${encodeURIComponent(contact.name)}`}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 transition-colors"
-                >
-                  <PhoneCall className="size-3.5" /> Call via AI
-                </Link>
 
                 <div className="flex items-center gap-1.5">
                   <Link
@@ -227,25 +222,30 @@ export default function PipelineCategoryClient({
                   </Link>
 
                   <Link
-                    href={`/dealflow-ai/messages?tab=${category}&id=${contact.id}`}
+                    href={`/dealflow-ai/messages?lead=${contact.id}`}
                     className="inline-flex items-center gap-1 rounded-xl border border-border/60 bg-muted/30 px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
                   >
                     <MessageSquare className="size-3 text-primary" /> Chat
                   </Link>
 
                   <Link
-                    href={`/dealflow-ai/emails?tab=${category}&id=${contact.id}`}
+                    href={`/dealflow-ai/emails?lead=${contact.id}`}
                     className="inline-flex items-center gap-1 rounded-xl border border-border/60 bg-muted/30 px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
                   >
                     <Mail className="size-3 text-purple-600" /> Email
                   </Link>
 
                   <Link
-                    href={`/dealflow-ai/whatsapp?tab=${category}&id=${contact.id}`}
+                    href={`/dealflow-ai/whatsapp?lead=${contact.id}`}
                     className="inline-flex items-center gap-1 rounded-xl border border-border/60 bg-muted/30 px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
                   >
                     <Radio className="size-3 text-emerald-600" /> WhatsApp
                   </Link>
+
+                  {(() => {
+                    const spec = pipelineCallSpec({ ...contact, pipeline: category });
+                    return spec ? <DealflowCallButton spec={spec} size="sm" className="rounded-xl" /> : null;
+                  })()}
                 </div>
               </div>
             </div>

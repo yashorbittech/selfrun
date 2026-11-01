@@ -1,5 +1,5 @@
 import "server-only";
-import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash, createHmac, hkdfSync, randomBytes, timingSafeEqual } from "node:crypto";
 import { derivedKey } from "@/lib/security/derived-key";
 
 /**
@@ -14,20 +14,50 @@ import { derivedKey } from "@/lib/security/derived-key";
  * The plaintext is only ever produced by `decryptSecret`, called from the one
  * place a token is used (see `integrations.ts`); it is never logged or sent to a list.
  *
- * Key rotation: keep the old key, decrypt every token in `smms_integrations`
- * and re-encrypt with the new key, then swap `SMMS_ENCRYPTION_KEY`.
+ * Key rotation: every value records the id of the key that sealed it (`k`, a short hash of the key, never the key). To rotate, set
+ * the new key as `PLATFORM_ENCRYPTION_KEY` (or `SMMS_ENCRYPTION_KEY`) and keep the old one in `SMMS_ENCRYPTION_KEY_PREVIOUS`
+ * (base64 32 bytes) or `PLATFORM_ENCRYPTION_KEY_PREVIOUS` (the old root key). Values sealed with the old key still open, and the
+ * accounts sweep re-seals them with the new key (`isSealedWithCurrentKey` / `resealSecret`); once none are stale, drop the old key.
  */
 
 export interface EncryptedValue {
   c: string; // ciphertext (base64)
   iv: string; // 12-byte nonce (base64)
   t: string; // GCM auth tag (base64)
+  k?: string; // id of the key that sealed it (absent on values written before key ids existed)
 }
 
 const ALGO = "aes-256-gcm";
 
 function getKey(): Buffer | null {
   return derivedKey("smms", "SMMS_ENCRYPTION_KEY");
+}
+
+const keyIdOf = (key: Buffer): string => createHash("sha256").update("smms-kid:").update(key).digest("hex").slice(0, 8);
+
+function previousKeys(): Buffer[] {
+  const out: Buffer[] = [];
+  const direct = process.env.SMMS_ENCRYPTION_KEY_PREVIOUS;
+  if (direct) {
+    const k = Buffer.from(direct, "base64");
+    if (k.length === 32) out.push(k);
+  }
+  const root = process.env.PLATFORM_ENCRYPTION_KEY_PREVIOUS;
+  if (root) {
+    const secret = Buffer.from(root, "base64");
+    if (secret.length === 32) out.push(Buffer.from(hkdfSync("sha256", secret, Buffer.alloc(0), "selfrun:smms", 32)));
+  }
+  return out;
+}
+
+/** Id of the key new values are sealed with, or null when no key is configured. */
+export function currentKeyId(): string | null {
+  try {
+    const k = getKey();
+    return k ? keyIdOf(k) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function isEncryptionConfigured(): boolean {
@@ -45,23 +75,42 @@ export function encryptSecret(plain: string, recordId: string): EncryptedValue {
   const cipher = createCipheriv(ALGO, key, iv);
   cipher.setAAD(Buffer.from(recordId, "utf8"));
   const ciphertext = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
-  return { c: ciphertext.toString("base64"), iv: iv.toString("base64"), t: cipher.getAuthTag().toString("base64") };
+  return { c: ciphertext.toString("base64"), iv: iv.toString("base64"), t: cipher.getAuthTag().toString("base64"), k: keyIdOf(key) };
+}
+
+/** True when the value was sealed with the key currently in use (false = it should be re-sealed after a rotation). */
+export function isSealedWithCurrentKey(value: EncryptedValue | null | undefined): boolean {
+  return !value || (value.k !== undefined && value.k === currentKeyId());
+}
+
+/** Opens a value (with whichever configured key sealed it) and seals it again with the current key, binding it to `newRecordId`. */
+export function resealSecret(value: EncryptedValue, recordId: string, newRecordId: string = recordId): EncryptedValue | null {
+  const plain = decryptSecret(value, recordId);
+  return plain === null ? null : encryptSecret(plain, newRecordId);
 }
 
 /** Never throws into a render — a bad key or tampered data returns null (and logs the failure, not the value). */
 export function decryptSecret(value: EncryptedValue | null | undefined, recordId: string): string | null {
   if (!value) return null;
   try {
-    const key = getKey();
-    if (!key) return null;
-    const decipher = createDecipheriv(ALGO, key, Buffer.from(value.iv, "base64"));
-    decipher.setAAD(Buffer.from(recordId, "utf8"));
-    decipher.setAuthTag(Buffer.from(value.t, "base64"));
-    return Buffer.concat([decipher.update(Buffer.from(value.c, "base64")), decipher.final()]).toString("utf8");
+    const current = getKey();
+    if (!current) return null;
+    const candidates = [current, ...previousKeys()].filter((k) => !value.k || keyIdOf(k) === value.k);
+    for (const key of candidates) {
+      try {
+        const decipher = createDecipheriv(ALGO, key, Buffer.from(value.iv, "base64"));
+        decipher.setAAD(Buffer.from(recordId, "utf8"));
+        decipher.setAuthTag(Buffer.from(value.t, "base64"));
+        return Buffer.concat([decipher.update(Buffer.from(value.c, "base64")), decipher.final()]).toString("utf8");
+      } catch {
+        // wrong key or tampered: try the next candidate
+      }
+    }
   } catch {
-    console.error("smms/crypto: failed to decrypt a stored secret");
-    return null;
+    // fall through
   }
+  console.error("smms/crypto: failed to decrypt a stored secret");
+  return null;
 }
 
 /**

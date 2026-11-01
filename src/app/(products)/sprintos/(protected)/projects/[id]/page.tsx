@@ -22,6 +22,11 @@ import { recentActivityForProject, serializeActivityLog } from "@/lib/products/s
 import { taskCountsByStatus, projectHasTasks, listTasks } from "@/lib/products/sprintos/tasks";
 import { listMilestones } from "@/lib/products/sprintos/milestones";
 import { TASK_STATUSES } from "@/lib/products/sprintos/constants";
+import ProjectClosePrompt from "@/components/products/sprintos/ProjectClosePrompt";
+import { AiCallSummaries, CallsList } from "@/components/products/agentos/calls/AiCallSection";
+import { getProjectAiCalls, isClientDoNotContact, SPRINTOS_PRODUCT } from "@/lib/products/sprintos/calls";
+import { projectCloseContext } from "@/lib/products/sprintos/call-context";
+import { listCallsForTarget } from "@/lib/products/call-target-calls";
 import { employeeFullName, getEmployee } from "@/lib/products/talentos/employees";
 import { getProjectChannelSlug } from "@/lib/products/huddle-ai/projects";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
@@ -48,6 +53,10 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   ]);
   const totalTasks = Object.values(taskCounts).reduce((s, n) => s + n, 0);
   const messengerSlug = await getProjectChannelSlug(id).catch(() => null);
+  const closed = project.status === "completed";
+  const [aiCalls, projectCalls, clientBlocked] = canManage
+    ? await Promise.all([getProjectAiCalls(id), listCallsForTarget(SPRINTOS_PRODUCT, "project", id), isClientDoNotContact(project.clientId)])
+    : [[], [], false];
 
   return (
     <div className="space-y-4">
@@ -90,6 +99,17 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       />
 
       <ProjectTabs projectId={id} />
+
+      {canManage && closed && (
+        <ProjectClosePrompt
+          projectId={id}
+          projectName={project.name}
+          contactName={client?.primaryContact.name ?? null}
+          contactPhone={client?.primaryContact.phone ?? null}
+          context={projectCloseContext(project, client?.primaryContact ?? null)}
+          doNotContact={clientBlocked}
+        />
+      )}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <GlassCard>
@@ -195,6 +215,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
         canManage={canManage}
         managerEmployeeId={project.projectManagerId}
       />
+
+      {canManage && (aiCalls.length > 0 || projectCalls.length > 0) && (
+        <>
+          <AiCallSummaries entries={aiCalls} />
+          <CallsList rows={projectCalls} />
+        </>
+      )}
 
       <GlassCard>
         <CardHeader><CardTitle>Activity</CardTitle></CardHeader>

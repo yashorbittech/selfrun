@@ -1,18 +1,24 @@
 import { redirect } from "next/navigation";
-import { Check, Minus } from "lucide-react";
+import { headers } from "next/headers";
+import { originFromHeaders } from "@/lib/products/viralpulse-ai/oauth-redirect";
+import { Check, Minus, TriangleAlert } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { PageHeader, SectionCard, Notice } from "@/components/products/viralpulse-ai/SmmsUi";
+import SettingsLanding from "./SettingsLanding";
+import { parseSettingsTab, type SmmsNavFlags } from "@/lib/products/viralpulse-ai/nav";
 import { BrandForm, AiSettingsForm, IntegrationsPanel } from "@/components/products/viralpulse-ai/SettingsForms";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
+import { getViralPulseHealth } from "@/lib/products/viralpulse-ai/health";
 import { getSettings } from "@/lib/products/viralpulse-ai/settings";
 import { getBrandSnapshot, serviceCatalogue, listLiveOffers } from "@/lib/products/viralpulse-ai/brand";
 import { listIntegrationViews } from "@/lib/products/viralpulse-ai/integrations";
 import { isEncryptionConfigured } from "@/lib/products/viralpulse-ai/crypto";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { SMMS_PERMISSIONS, SMMS_PERMISSION_META, SMMS_ROLE_META, SMMS_ROLE_PERMISSIONS } from "@/lib/smms-roles";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatDateTime } from "@/lib/utils";
 
+const SECTION_TITLE: Record<string, string> = { brand: "Brand kit", ai: "AI & models", integrations: "Connected accounts", health: "System health", roles: "Team & roles" };
 const ROLES = ["smms_employee", "smms_specialist", "smms_manager", "smms_admin"] as const;
 
 export default async function SmmsSettingsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -20,20 +26,30 @@ export default async function SmmsSettingsPage({ searchParams }: { searchParams:
   if (!viewer) redirect("/viralpulse-ai/login");
   if (!can(viewer, "MANAGE_INTEGRATIONS")) redirect("/viralpulse-ai");
   const sp = await searchParams;
-  const [settings, snap, integrations, offers] = await Promise.all([getSettings(), getBrandSnapshot(), listIntegrationViews(), listLiveOffers(10)]);
-  const tab = ["brand", "ai", "integrations", "roles"].includes(sp.tab ?? "") ? sp.tab! : "brand";
+  // Connected accounts moved to their own page; the old address (and old links, notifications and the Settings landing) land there.
+  if (sp.tab === "integrations") redirect(`/viralpulse-ai/settings/accounts${sp.error ? `?error=${encodeURIComponent(sp.error)}` : ""}`);
+  // No section chosen: the Settings landing (a list of sections). Each section keeps its old URL (`?tab=…`), so links and OAuth returns still work.
+  if (!parseSettingsTab(sp.tab)) {
+    const flags: SmmsNavFlags = { campaigns: can(viewer, "VIEW_CAMPAIGNS"), posts: can(viewer, "MANAGE_POSTS") || can(viewer, "VIEW_CAMPAIGNS"), media: can(viewer, "MANAGE_MEDIA"), ai: can(viewer, "GENERATE_AI_CONTENT"), ugc: can(viewer, "GENERATE_AI_CONTENT"), analytics: can(viewer, "VIEW_ANALYTICS"), audit: can(viewer, "VIEW_AUDIT_LOG"), settings: true };
+    return <SettingsLanding flags={flags} />;
+  }
+  const [settings, snap, integrations, offers] = await Promise.all([getSettings(), getBrandSnapshot(), listIntegrationViews(originFromHeaders(await headers())), listLiveOffers(10)]);
+  const tab = ["brand", "ai", "integrations", "health", "roles"].includes(sp.tab ?? "") ? sp.tab! : "brand";
+  // Health probes the network (OpenAI/Gemini model lists, ffmpeg), so it only runs when its tab is opened.
+  const health = tab === "health" ? await getViralPulseHealth(originFromHeaders(await headers())) : null;
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Settings" crumbs={[{ label: "Settings" }]} description="Brand context for the AI, OpenAI settings, platform connections and role permissions." />
+      <PageHeader title="Settings" crumbs={[{ label: "Settings", href: "/viralpulse-ai/settings" }, { label: SECTION_TITLE[tab] ?? tab }]} description="Brand context for the AI, OpenAI settings, platform connections and role permissions." />
       {sp.error && <Notice tone="error">{sp.error}</Notice>}
       {sp.connected && <Notice tone="ok">Connected. Choose which page / account / location each platform publishes to.</Notice>}
       <Tabs defaultValue={tab}>
         <TabsList>
-          <TabsTrigger value="brand">Brand context</TabsTrigger>
-          <TabsTrigger value="ai">AI (OpenAI)</TabsTrigger>
-          <TabsTrigger value="integrations">Integrations</TabsTrigger>
-          <TabsTrigger value="roles">Roles</TabsTrigger>
+          <TabsTrigger value="brand">Brand kit</TabsTrigger>
+          <TabsTrigger value="ai">AI &amp; models</TabsTrigger>
+          <TabsTrigger value="integrations">Connected accounts</TabsTrigger>
+          <TabsTrigger value="health">System health</TabsTrigger>
+          <TabsTrigger value="roles">Team &amp; roles</TabsTrigger>
         </TabsList>
         <TabsContent value="brand" className="mt-4 space-y-4">
           <SectionCard title="Read live from other products" description="Not copied into ViralPulse — edit them where they live.">
@@ -45,7 +61,7 @@ export default async function SmmsSettingsPage({ searchParams }: { searchParams:
             </ul>
           </SectionCard>
           <SectionCard title="Marketing voice" description="Used in every AI prompt (campaigns, ads, posts, generator).">
-            <BrandForm brand={settings.brand} services={serviceCatalogue().map((s) => s.value)} />
+            <BrandForm brand={settings.brand} services={serviceCatalogue().map((s) => s.value)} canGenerate={can(viewer, "GENERATE_AI_CONTENT")} />
           </SectionCard>
         </TabsContent>
         <TabsContent value="ai" className="mt-4 space-y-4">
@@ -61,6 +77,30 @@ export default async function SmmsSettingsPage({ searchParams }: { searchParams:
         <TabsContent value="integrations" className="mt-4 space-y-4">
           <Notice tone="info">Connections are used only when someone presses Publish or approves a schedule. Paid ads (incl. Google Ads) are never created from here — they&apos;re launched in each ads manager; their results come in through DealFlow → Campaigns imports.</Notice>
           <IntegrationsPanel items={integrations} encryptionReady={isEncryptionConfigured()} />
+        </TabsContent>
+        <TabsContent value="health" className="mt-4 space-y-4">
+          {health ? (
+            <>
+              <Notice tone={health.status === "ok" ? "ok" : "error"}>{health.status === "ok" ? "Everything ViralPulse depends on is working." : `${health.attentionCount} item${health.attentionCount === 1 ? "" : "s"} need attention.`}</Notice>
+              {health.groups.map((g) => (
+                <SectionCard key={g.id} title={g.title} description={g.status === "ok" ? "OK" : "Needs attention"}>
+                  <ul className="space-y-3 text-sm">
+                    {g.items.map((i) => (
+                      <li key={i.id} className="flex items-start gap-2">
+                        {i.status === "ok" ? <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-label="OK" /> : <TriangleAlert className="mt-0.5 size-4 shrink-0 text-rose-600" aria-label="Needs attention" />}
+                        <div>
+                          <p className="font-medium">{i.label}</p>
+                          <p className="text-muted-foreground">{i.detail}</p>
+                          {i.fix && <p className="text-xs">{`How to fix: ${i.fix}`}</p>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </SectionCard>
+              ))}
+              <p className="text-[11px] text-muted-foreground">{`Checked ${formatDateTime(health.checkedAt)}`}</p>
+            </>
+          ) : null}
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
           <SectionCard title="Role permissions" description="Defaults per role. Roles are assigned (and individual capabilities overridden) under Admin → Users.">

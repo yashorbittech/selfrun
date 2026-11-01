@@ -7,6 +7,7 @@ import { getChat, listMyChats } from "@/lib/products/agentos/chats";
 import { workspaceMessages } from "@/lib/products/agentos/workspace";
 import { countAssignedFiles } from "@/lib/products/agentos/engine";
 import { isOpenAIConfigured } from "@/lib/openai";
+import VoiceAgentPage from "@/components/products/agentos/voice/VoiceAgentPage";
 
 /**
  * Any bot's workspace — or the general assistant ("Start New Chat"). One page
@@ -21,6 +22,11 @@ export default async function BotWorkspacePage({ params }: { params: Promise<{ b
   if (segments.length > 1) notFound();
   const bot = await getChatBot(viewer, botId);
   if (!bot) notFound();
+  // Voice agents have a call surface instead of a chat workspace (their calls are listed on it).
+  if (bot.kind === "voice") {
+    if (segments.length > 0) notFound();
+    return <VoiceAgentPage viewer={viewer} bot={bot} />;
+  }
 
   const chat = segments[0] ? await getChat(viewer, segments[0]).catch(() => null) : null;
   if (segments[0] && (!chat || chat.botId !== bot._id)) notFound();

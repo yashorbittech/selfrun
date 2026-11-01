@@ -11,6 +11,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { getCurrentHrmsUser } from "@/lib/hrms-auth";
 import { canManageEmployees } from "@/lib/hrms-roles";
 import { getConvertibleApplicants } from "@/lib/products/talentos/recruitment";
+import { listPipelineCandidates } from "@/lib/products/talentos/calls";
+import { getCareerApplicationStatusMeta } from "@/lib/career-application-status";
 import { listOffers, serializeOffer } from "@/lib/products/talentos/offers";
 import { formatDate } from "@/lib/utils";
 
@@ -18,9 +20,9 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
   const user = await getCurrentHrmsUser();
   const canConvert = !!user && canManageEmployees(user);
   const sp = await searchParams;
-  const tab = sp.tab === "convert" ? "convert" : "offers";
+  const tab = sp.tab === "convert" ? "convert" : sp.tab === "pipeline" ? "pipeline" : "offers";
 
-  const [applicants, offers] = await Promise.all([getConvertibleApplicants(), listOffers()]);
+  const [applicants, offers, pipeline] = await Promise.all([getConvertibleApplicants(), listOffers(), listPipelineCandidates()]);
   const offeredIds = new Set(offers.map((o) => o.applicationId));
   const applicantsWithoutOffer = applicants.filter((a) => !offeredIds.has(a.id));
 
@@ -39,7 +41,7 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
         {applicants.map((a) => (
           <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 p-3 text-sm">
             <div className="min-w-0">
-              <p className="truncate font-medium">{a.name}</p>
+              <Link href={`/talentos/recruitment/${a.id}`} className="block truncate font-medium hover:text-primary hover:underline">{a.name}</Link>
               <p className="truncate text-xs text-muted-foreground">
                 {a.positionTitle} · {a.email} · applied {formatDate(a.appliedAt)}
                 {offeredIds.has(a.id) ? " · has an offer" : ""}
@@ -55,6 +57,29 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
             )}
           </div>
         ))}
+      </CardContent>
+    </GlassCard>
+  );
+
+  const pipelineTab = (
+    <GlassCard interactive={false}>
+      <CardHeader>
+        <CardTitle>Candidate pipeline</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        {pipeline.length === 0 && <p className="text-sm text-muted-foreground">No candidates are shortlisted, in interview or selected yet.</p>}
+        {pipeline.map((c) => {
+          const meta = getCareerApplicationStatusMeta(c.status);
+          return (
+            <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 p-3 text-sm">
+              <div className="min-w-0">
+                <Link href={`/talentos/recruitment/${c.id}`} className="block truncate font-medium hover:text-primary hover:underline">{c.name}</Link>
+                <p className="truncate text-xs text-muted-foreground">{c.positionTitle}{c.appliedAt ? ` · applied ${formatDate(c.appliedAt)}` : ""}{c.doNotContact ? " · do not contact" : ""}</p>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${meta.badgeClass}`}>{meta.label}</span>
+            </div>
+          );
+        })}
       </CardContent>
     </GlassCard>
   );
@@ -99,6 +124,7 @@ export default async function RecruitmentPage({ searchParams }: { searchParams: 
               />
             ),
           },
+          { key: "pipeline", label: "Pipeline", content: pipelineTab },
           { key: "convert", label: "Ready to Convert", content: convertTab },
         ]}
       />

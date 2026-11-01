@@ -84,3 +84,13 @@ export async function updateOfferDetailsAction(id: string, input: Record<string,
   revalidatePath("/talentos/recruitment");
   return { ok: true };
 }
+
+export async function setApplicantDoNotContactAction(applicationId: string, value: boolean): Promise<{ error?: string }> {
+  const user = await getCurrentHrmsUser();
+  if (!user || !canManageEmployees(user)) return { error: "You don't have permission to change this." };
+  if (typeof applicationId !== "string" || typeof value !== "boolean") return { error: "Invalid request." };
+  const { setApplicantDoNotContact } = await import("@/lib/products/talentos/calls");
+  if (!(await setApplicantDoNotContact(applicationId, value))) return { error: "Candidate not found." };
+  revalidatePath(`/talentos/recruitment/${applicationId}`);
+  return {};
+}

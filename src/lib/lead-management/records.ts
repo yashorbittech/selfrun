@@ -305,6 +305,11 @@ export async function setLeadLink(
   );
 }
 
+export async function setLeadDoNotContact(leadId: string, doNotContact: boolean, actorId: string): Promise<boolean> {
+  const r = await (await collection()).updateOne({ _id: leadId, deletedAt: null }, { $set: { doNotContact, updatedAt: new Date(), updatedBy: actorId } });
+  return r.matchedCount > 0;
+}
+
 export async function mirrorLinkToAccount(
   externalUserId: string,
   patch: { applicationId?: string | null; studentId?: string | null; clientId?: string | null }

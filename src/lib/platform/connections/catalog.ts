@@ -85,11 +85,15 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
   // ── WhatsApp ───────────────────────────────────────────────────
   {
     key: "twilio", name: "Twilio", group: "messaging", testable: true, docsUrl: "https://www.twilio.com/docs",
-    description: "Send WhatsApp messages from automations (and any product that notifies by message).",
-    usedBy: ["Automations", "Notifications", "Reminders"],
+    description: "Send WhatsApp messages from automations (and any product that notifies by message). Also the phone line for AgentOS voice agents: your Twilio numbers are imported so agents can make and answer calls.",
+    usedBy: ["Automations", "Notifications", "Reminders", "Voice calls (AgentOS)"],
     fields: [
       text("accountSid", "Account SID", "AC…"), secret("authToken", "Auth token"),
       text("whatsappFrom", "WhatsApp sender", "whatsapp:+14155550123", "Your approved WhatsApp sender, if you use WhatsApp.", false),
+      // Live phone console (AgentOS): lets a team member listen to a call and take over from the browser.
+      text("apiKeySid", "API key SID (live calls)", "SK…", "Twilio Console → Account → API keys. Needed only to listen to and take over AI calls from the browser.", false),
+      secret("apiKeySecret", "API key secret (live calls)", "Shown once when you create the API key.", false),
+      text("twimlAppSid", "TwiML App SID (live calls)", "AP…", "A TwiML App whose Voice request URL is the address shown in AgentOS → Phone → Live calls setup.", false),
     ],
   },
   {
@@ -111,6 +115,12 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     usedBy: ["Website chatbot voice mode"],
     fields: [secret("apiKey", "API key")],
   },
+  {
+    key: "gemini", name: "Google Gemini (video)", group: "ai", testable: false, docsUrl: "https://aistudio.google.com/apikey",
+    description: "Your Gemini API key renders the AI UGC Studio videos (Gemini Omni Flash, Veo). Video generation is billed to your Google account by the second of video; SelfRun never pays for it, so there is no shared fallback key.",
+    usedBy: ["AI UGC Studio (ViralPulse)"],
+    fields: [secret("apiKey", "API key", "Starts with AIza")],
+  },
   // ── Social & Advertising ─────────────────────────────────────────────
   {
     key: "meta", name: "Facebook & Instagram (Meta app)", group: "social", docsUrl: "https://developers.facebook.com/apps",
@@ -118,21 +128,28 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     usedBy: ["Social Media (SMMS)"],
     managedElsewhere: undefined,
     fields: [text("appId", "App ID"), secret("appSecret", "App secret")],
-    note: "Set the app's OAuth redirect URL to  <your workspace address>/api/viralpulse-ai/oauth/meta  (shown in the Social Media product).",
+    note: "Set the app's Valid OAuth Redirect URI to  <your workspace address>/api/viralpulse-ai/oauth/meta/callback  (the exact address is shown in ViralPulse > Settings > Connected accounts).",
   },
   {
     key: "google", name: "YouTube & Google Business (Google OAuth app)", group: "social", docsUrl: "https://console.cloud.google.com/apis/credentials",
     description: "Your Google OAuth client for YouTube and Google Business Profile publishing. Connect the accounts from the Social Media product afterwards.",
     usedBy: ["Social Media (SMMS)"],
     fields: [text("clientId", "OAuth client ID"), secret("clientSecret", "OAuth client secret")],
-    note: "Authorised redirect URI:  <your workspace address>/api/viralpulse-ai/oauth/google",
+    note: "Authorised redirect URI:  <your workspace address>/api/viralpulse-ai/oauth/google/callback  (the exact address is shown in ViralPulse > Settings > Connected accounts).",
   },
   {
     key: "linkedin", name: "LinkedIn (app)", group: "social", docsUrl: "https://www.linkedin.com/developers/apps",
     description: "Your LinkedIn app for publishing to your company page and profile.",
     usedBy: ["Social Media (SMMS)"],
     fields: [text("clientId", "Client ID"), secret("clientSecret", "Client secret")],
-    note: "Authorised redirect URL:  <your workspace address>/api/viralpulse-ai/oauth/linkedin",
+    note: "Authorised redirect URL:  <your workspace address>/api/viralpulse-ai/oauth/linkedin/callback  (the exact address is shown in ViralPulse > Settings > Connected accounts).",
+  },
+  {
+    key: "x", name: "X (developer app)", group: "social", docsUrl: "https://developer.x.com/en/portal/dashboard",
+    description: "Your X developer app (OAuth 2.0 with PKCE) for posting to your X account. X bills posting by use, so keep credits on the developer account.",
+    usedBy: ["Social Media (SMMS)"],
+    fields: [text("clientId", "OAuth 2.0 Client ID"), secret("clientSecret", "OAuth 2.0 Client Secret")],
+    note: "Set the app to a Web App / Automated App (confidential client), turn on OAuth 2.0, and add the callback URL:  <your workspace address>/api/viralpulse-ai/oauth/x/callback  (the exact address is shown in ViralPulse > Settings > Connected accounts). Permissions: Read and write.",
   },
   // ── Search & Analytics ───────────────────────────────────────────────
   {
@@ -163,6 +180,12 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
     description: "Relay server for Messenger voice and video calls behind strict firewalls. Optional — calls work on most networks without it.",
     usedBy: ["Messenger calls"],
     fields: [text("url", "TURN URL", "turn:turn.yourcompany.com:3478"), text("username", "Username", undefined, undefined, false), secret("credential", "Credential", undefined, false)],
+  },
+  {
+    key: "livekit", name: "LiveKit (meetings)", group: "realtime", testable: true, docsUrl: "https://docs.livekit.io/home/cloud/keys-and-tokens/",
+    description: "The video and audio server behind DealFlow Meetings. Use your own LiveKit Cloud project or self-hosted server. Without it, SelfRun's server is used and its use counts against your plan.",
+    usedBy: ["DealFlow Meetings"],
+    fields: [text("url", "Server URL", "wss://your-project.livekit.cloud"), text("apiKey", "API key", "API…"), secret("apiSecret", "API secret")],
   },
   // ── Managed on their own pages ───────────────────────────────────────
   {
@@ -196,6 +219,6 @@ export const providerByKey = new Map(CONNECTION_PROVIDERS.map((p) => [p.key, p])
  * uses its own account; one that does not uses SelfRun's, counted against its plan. Email works the same way (see `email/index.ts`).
  * Payments and the social apps never fall back: money and publishing identities stay with the company.
  */
-export const PLATFORM_FALLBACK: readonly string[] = ["openai", "elevenlabs", "twilio", "pagespeed", "turn", "google-service-account"];
+export const PLATFORM_FALLBACK: readonly string[] = ["openai", "elevenlabs", "twilio", "pagespeed", "turn", "google-service-account", "livekit"];
 /** Hidden from a company's Integrations page: the automations tile has its own page. */
 export const HIDDEN_FROM_COMPANIES: readonly string[] = ["webhooks"];

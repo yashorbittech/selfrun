@@ -8,7 +8,16 @@ const nextConfig: NextConfig = {
   // Node-only libs used inside route handlers — keep them out of the bundler.
   // Big server-only libraries are loaded at run time from node_modules instead of being bundled: far less for the build to parse
   // and bundle (the build of this app is large and slow), with no change in behaviour.
-  serverExternalPackages: ["exceljs", "mongodb", "openai", "cheerio", "@react-pdf/renderer", "jszip", "nodemailer", "web-push", "qrcode"],
+  serverExternalPackages: ["exceljs", "mongodb", "openai", "cheerio", "@react-pdf/renderer", "jszip", "nodemailer", "web-push", "qrcode", "ffmpeg-static", "sharp"],
+  // AI UGC Studio joins scene clips with ffmpeg. `findFfmpeg()` (ugc/assemble.ts) loads the `ffmpeg-static` package by a computed name, which
+  // the file tracer cannot see, so the binary would be left out of the deployed function. Ship it explicitly with the routes that render:
+  // the UGC cron (advances the queue and assembles), the UGC pages (server actions) and Settings (the System health check looks for it).
+  outputFileTracingIncludes: {
+    "/api/viralpulse-ai/ugc/cron": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
+    "/viralpulse-ai/ugc/**": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
+    "/viralpulse-ai/**": ["./src/lib/products/viralpulse-ai/images/fonts/*"],
+    "/viralpulse-ai/settings": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
+  },
   images: {
     remotePatterns: [
       {
@@ -21,6 +30,10 @@ const nextConfig: NextConfig = {
   // URLs stored in notifications keep working. Order matters: first match wins.
   async redirects() {
     return [
+      // Voice agents moved from DealFlow AI to AgentOS (Agent Hub). Old links and bookmarks keep working. (/dealflow-ai/voice-calls is now DealFlow's own AI Voice Calls page, a view over AgentOS calls.)
+      { source: "/dealflow-ai/agents", destination: "/agentos/hub", permanent: true },
+      // The DealFlow knowledge base was removed (agents keep their knowledge in AgentOS).
+      { source: "/dealflow-ai/knowledge-base", destination: "/dealflow-ai", permanent: true },
       // Festival Offers, Wallet & Credits, AI Chatbot, Conversation AI moved from the LMS panel to the CMS panel.
       { source: "/lms/:section(offers|wallet|chatbot)", destination: "/cms/:section", permanent: true },
       { source: "/lms/:section(offers|wallet|chatbot)/:path*", destination: "/cms/:section/:path*", permanent: true },
@@ -88,19 +101,23 @@ const nextConfig: NextConfig = {
       },
       // Pages: no <base> hijack, no plugins, framed only by this site (same intent as X-Frame-Options, which old browsers use).
       {
-        source: "/((?!api/).*)",
+        // /agentos-public/agents is the embeddable agent directory: its proxy sets frame-ancestors from the company's allowed websites instead.
+        source: "/((?!api/|agentos-public/agents).*)",
         // No plugins or embedded objects, no <base> hijack, framed only by this site, forms post only to https, and (in production) any
         // stray http:// sub-resource is upgraded to https. A script-src is deliberately not set here: companies add their own tracking scripts
         // and chat widgets in CMS → Settings, which a fixed script policy would break (see docs/compliance/gap-assessment.md).
         headers: [{ key: "Content-Security-Policy", value: `frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https:${process.env.NODE_ENV === "production" ? "; upgrade-insecure-requests" : ""}` }],
+      },
+      // Only this site may frame itself (the theme customizer previews the site in a same-origin frame). The embeddable agent directory is the exception.
+      {
+        source: "/((?!agentos-public/agents).*)",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
       },
       {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          // Only this site may frame itself (the theme customizer previews the site in a same-origin frame).
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Permissions-Policy", value: "camera=(), geolocation=(), payment=(self), microphone=(self), interest-cohort=(), browsing-topics=()" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           // Other windows (another site that opened this one) get no handle on it; payment / OAuth popups still work.

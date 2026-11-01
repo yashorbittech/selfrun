@@ -38,10 +38,14 @@ export interface TranscriptionResult {
 
 export async function transcribeAudio(
   audio: Buffer,
-  mimeType: string
+  mimeType: string,
+  opts: { languageCode?: string | null } = {}
 ): Promise<TranscriptionResult> {
   const form = new FormData();
   form.append("model_id", STT_MODEL);
+  // Without a hint Scribe detects the language itself, which also handles Hindi and English mixed in one sentence.
+  if (opts.languageCode && /^[a-z]{2,3}$/.test(opts.languageCode)) form.append("language_code", opts.languageCode);
+  form.append("tag_audio_events", "false");
   const ext = mimeType.includes("mp4") || mimeType.includes("m4a") ? "mp4" : mimeType.includes("ogg") ? "ogg" : "webm";
   form.append("file", new Blob([new Uint8Array(audio)], { type: mimeType || "audio/webm" }), `speech.${ext}`);
 

@@ -10,7 +10,7 @@ import { recordAudit, diffSummary } from "@/lib/products/viralpulse-ai/audit";
 import { markSmmsNotificationsRead, notifySmmsUsers } from "@/lib/products/viralpulse-ai/notifications";
 import { recordVersion, getVersion, listWorkspaceRuns, type TargetType } from "@/lib/products/viralpulse-ai/generations";
 import { createCampaign, duplicateCampaign, parseBrief, requireCampaign, saveCampaignAi, setCampaignStatus, setLmsLinks, softDeleteCampaign, statusAfterEdit, updateBrief } from "@/lib/products/viralpulse-ai/campaigns";
-import { contentFromConcept, createAd, duplicateAd, parseAdHeader, parseSchedule, requireAd, softDeleteAd, updateAd } from "@/lib/products/viralpulse-ai/ads";
+import { contentFromConcept, createAd, duplicateAd, markAdManuallyTracked, parseAdHeader, parseSchedule, requireAd, softDeleteAd, updateAd } from "@/lib/products/viralpulse-ai/ads";
 import { createPost, duplicatePost, parsePostBrief, reconcileVariants, requirePost, softDeletePost, updatePost, METRIC_KEYS, type PostMetrics } from "@/lib/products/viralpulse-ai/posts";
 import { deleteMedia, getMedia, registerUpload, replaceMediaFile, updateMediaMeta, validMediaIds, toMediaCard, listMedia, mediaUsage } from "@/lib/products/viralpulse-ai/media";
 import { generateAdCreative, generateCampaignStrategy, generateImageToLibrary, generateMediaPrompt, generatePostContent, regenerateVariant, runWorkspace, postSnapshot } from "@/lib/products/viralpulse-ai/generate";
@@ -231,14 +231,17 @@ export async function scheduleAdAction(campaignId: string, adId: string, when: s
   });
 }
 
-export async function markAdLiveAction(campaignId: string, adId: string, externalRef: string, failed = false) {
+/**
+ * The audited "manually tracked" override. Facebook and Instagram ads launch from the app (see `ads-platforms/launches.ts`), so this is
+ * refused for them; for other platforms the ad is labelled "manually tracked" and the reason is recorded.
+ */
+export async function markAdLiveAction(campaignId: string, adId: string, externalRef: string, failed = false, reason = "Launched outside the app in the platform's ads manager.") {
   return run(["PUBLISH_CONTENT"], async (v) => {
     const ad = await requireAd(campaignId, adId);
     if (ad.status === "archived") throw new SmmsInputError("Restore the ad first.");
-    const ref = externalRef.trim().slice(0, 500) || null;
     if (failed) await updateAd(adId, { status: "failed" }, v.userId);
-    else await updateAd(adId, { status: "published", externalRef: ref, launchedAt: new Date(), launchedBy: v.userId }, v.userId);
-    await recordAudit({ ...who(v), action: failed ? "publish_failed" : "publish", entity: "ad", entityId: adId, entityLabel: ad.name, recordId: campaignId, summary: failed ? "Marked failed" : `Marked live${ref ? ` · ${ref}` : ""}` });
+    else await markAdManuallyTracked(ad, { reason, externalRef }, v);
+    await recordAudit({ ...who(v), action: failed ? "publish_failed" : "publish", entity: "ad", entityId: adId, entityLabel: ad.name, recordId: campaignId, summary: failed ? "Marked failed" : `Manually tracked (not verified by the platform)${externalRef.trim() ? ` · ${externalRef.trim().slice(0, 200)}` : ""}`, metadata: failed ? null : { manuallyTracked: true } });
     return {};
   });
 }

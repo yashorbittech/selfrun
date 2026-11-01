@@ -6,9 +6,10 @@ import { toast } from "sonner";
 import { Loader2, Sparkles, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import OptionSelect from "@/components/products/playbook-ai/OptionSelect";
 import { Field, PlatformChip } from "@/components/products/viralpulse-ai/SmmsBits";
+import AiField from "@/components/products/viralpulse-ai/shared/AiField";
+import type { FieldKey } from "@/lib/products/viralpulse-ai/ai-field/registry";
 import { createCampaignAction, updateCampaignBriefAction } from "@/app/(products)/viralpulse-ai/(protected)/actions";
 import { AD_PLATFORMS, CAMPAIGN_OBJECTIVES, CTAS, INDUSTRIES, LANGUAGES, TONES } from "@/lib/products/viralpulse-ai/constants";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,8 @@ export default function CampaignForm({ campaignId, initial, offers, clients, ser
   const [pending, start] = useTransition();
   const [mode, setMode] = useState<"save" | "generate" | null>(null);
   const set = <K extends keyof CampaignFormValues>(k: K, val: CampaignFormValues[K]) => setV((x) => ({ ...x, [k]: val }));
+  // Every field's AI button reads the other fields of this form at click time; the server keeps only what that field may read.
+  const ai = (fieldKey: FieldKey) => ({ fieldKey, getContext: () => ({ ...v }) as unknown as Record<string, unknown>, aiDisabled: !canGenerate, aiDisabledReason: "AI generation isn't available to you here." });
 
   function submit(generate: boolean) {
     setMode(generate ? "generate" : "save");
@@ -61,10 +64,8 @@ export default function CampaignForm({ campaignId, initial, offers, clients, ser
       }}
     >
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Campaign name *" htmlFor="c-name" className="sm:col-span-2">
-          <Input id="c-name" value={v.name} onChange={(e) => set("name", e.target.value)} required maxLength={120} placeholder="e.g. Diwali AI Automation Push" />
-        </Field>
-        <Field label="Platforms *" className="sm:col-span-2" hint="Where the ads will run. Each ad targets one of these.">
+        <AiField {...ai("campaign.name")} label="Campaign name *" id="c-name" className="sm:col-span-2" value={v.name} onChange={(x) => set("name", String(x))} required maxLength={120} placeholder="Name the campaign after its offer or goal" />
+        <AiField {...ai("campaign.platforms")} label="Platforms *" as="custom" className="sm:col-span-2" hint="Where the ads will run. Each ad targets one of these." value={v.platforms} onChange={(x) => set("platforms", Array.isArray(x) ? x : [String(x)])}>
           <div className="flex flex-wrap gap-2">
             {AD_PLATFORMS.map((p) => {
               const on = v.platforms.includes(p);
@@ -75,30 +76,30 @@ export default function CampaignForm({ campaignId, initial, offers, clients, ser
               );
             })}
           </div>
-        </Field>
-        <Field label="Objective" htmlFor="c-obj"><Suggest id="c-obj" value={v.objective} onChange={(x) => set("objective", x)} options={CAMPAIGN_OBJECTIVES} placeholder="Lead generation" /></Field>
-        <Field label="Industry" htmlFor="c-ind"><Suggest id="c-ind" value={v.industry} onChange={(x) => set("industry", x)} options={INDUSTRIES} /></Field>
-        <Field label="Target audience" htmlFor="c-aud" className="sm:col-span-2"><Textarea id="c-aud" rows={2} value={v.targetAudience} onChange={(e) => set("targetAudience", e.target.value)} placeholder="Who should see this — roles, company size, interests, pain points" /></Field>
-        <Field label="Location" htmlFor="c-loc"><Input id="c-loc" value={v.location} onChange={(e) => set("location", e.target.value)} placeholder="India — Delhi NCR, Bengaluru" /></Field>
+        </AiField>
+        <AiField {...ai("campaign.objective")} label="Objective" id="c-obj" as="custom" value={v.objective} onChange={(x) => set("objective", String(x))}><Suggest id="c-obj" value={v.objective} onChange={(x) => set("objective", x)} options={CAMPAIGN_OBJECTIVES} placeholder="Lead generation" /></AiField>
+        <AiField {...ai("campaign.industry")} label="Industry" id="c-ind" as="custom" value={v.industry} onChange={(x) => set("industry", String(x))}><Suggest id="c-ind" value={v.industry} onChange={(x) => set("industry", x)} options={INDUSTRIES} /></AiField>
+        <AiField {...ai("campaign.targetAudience")} label="Target audience" id="c-aud" as="textarea" rows={2} className="sm:col-span-2" value={v.targetAudience} onChange={(x) => set("targetAudience", String(x))} placeholder="Who should see this — roles, company size, interests, pain points" />
+        <AiField {...ai("campaign.location")} label="Location" id="c-loc" value={v.location} onChange={(x) => set("location", String(x))} placeholder="India — Delhi NCR, Bengaluru" />
         <div className="grid grid-cols-[1fr_5rem] gap-2">
-          <Field label="Budget" htmlFor="c-bud"><Input id="c-bud" type="number" min={0} value={v.budget} onChange={(e) => set("budget", e.target.value)} placeholder="50000" /></Field>
+          <AiField {...ai("campaign.budget")} label="Budget" id="c-bud" inputType="number" value={v.budget} onChange={(x) => set("budget", String(x))} placeholder="50000" />
           <Field label="Currency" htmlFor="c-cur"><Input id="c-cur" value={v.currency} onChange={(e) => set("currency", e.target.value.toUpperCase().slice(0, 3))} /></Field>
         </div>
-        <Field label="Start date" htmlFor="c-start"><Input id="c-start" type="date" value={v.startDate} onChange={(e) => set("startDate", e.target.value)} /></Field>
-        <Field label="End date" htmlFor="c-end"><Input id="c-end" type="date" value={v.endDate} onChange={(e) => set("endDate", e.target.value)} /></Field>
-        <Field label="Call to action" htmlFor="c-cta"><Suggest id="c-cta" value={v.cta} onChange={(x) => set("cta", x)} options={CTAS} /></Field>
-        <Field label="Landing page" htmlFor="c-lp"><Input id="c-lp" type="url" value={v.landingPage} onChange={(e) => set("landingPage", e.target.value)} placeholder="https://…" /></Field>
-        <Field label="Offer / service" htmlFor="c-os" hint="From the site's service catalogue, or free text."><Suggest id="c-os" value={v.offerService} onChange={(x) => set("offerService", x)} options={services} /></Field>
+        <AiField {...ai("campaign.startDate")} label="Start date" id="c-start" inputType="date" value={v.startDate} onChange={(x) => set("startDate", String(x))} />
+        <AiField {...ai("campaign.endDate")} label="End date" id="c-end" inputType="date" value={v.endDate} onChange={(x) => set("endDate", String(x))} hint="With a live offer chosen, the AI button fills the offer's own end date." />
+        <AiField {...ai("campaign.cta")} label="Call to action" id="c-cta" as="custom" value={v.cta} onChange={(x) => set("cta", String(x))}><Suggest id="c-cta" value={v.cta} onChange={(x) => set("cta", x)} options={CTAS} /></AiField>
+        <AiField {...ai("campaign.landingPage")} label="Landing page" id="c-lp" inputType="url" value={v.landingPage} onChange={(x) => set("landingPage", String(x))} placeholder="https://…" />
+        <AiField {...ai("campaign.offerService")} label="Offer / service" id="c-os" as="custom" hint="From the site's service catalogue, or free text." value={v.offerService} onChange={(x) => set("offerService", String(x))}><Suggest id="c-os" value={v.offerService} onChange={(x) => set("offerService", x)} options={services} /></AiField>
         <Field label="Promote a live offer" hint="Read live from Festival Offers.">
           <OptionSelect value={v.offerId} onChange={(x) => set("offerId", x)} options={offers.map((o) => ({ value: o._id, label: `${o.title} · ${o.badge}` }))} noneLabel="No specific offer" aria-label="Offer" />
         </Field>
         <Field label="Client (optional)" hint="Run for a SprintOS client — the AI then writes in the client's voice.">
           <OptionSelect value={v.clientId} onChange={(x) => set("clientId", x)} options={clients.map((c) => ({ value: c._id, label: c.name }))} noneLabel="Our own brand" aria-label="Client" />
         </Field>
-        <Field label="Keywords" htmlFor="c-kw" hint="Comma or line separated."><Input id="c-kw" value={v.keywords} onChange={(e) => set("keywords", e.target.value)} placeholder="ai automation, workflow automation, rpa" /></Field>
-        <Field label="Tone" htmlFor="c-tone"><Suggest id="c-tone" value={v.tone} onChange={(x) => set("tone", x)} options={TONES} placeholder="Brand default" /></Field>
-        <Field label="Language" htmlFor="c-lang"><Suggest id="c-lang" value={v.language} onChange={(x) => set("language", x)} options={LANGUAGES} /></Field>
-        <Field label="Brand information for this campaign" htmlFor="c-bi" className="sm:col-span-2" hint="Anything beyond the central brand context (Settings) the AI should know."><Textarea id="c-bi" rows={3} value={v.brandInfo} onChange={(e) => set("brandInfo", e.target.value)} /></Field>
+        <AiField {...ai("campaign.keywords")} label="Keywords" id="c-kw" as="custom" hint="Comma or line separated." value={v.keywords.split(/[,\n]/).map((k) => k.trim()).filter(Boolean)} onChange={(x) => set("keywords", Array.isArray(x) ? x.join(", ") : String(x))}><Input id="c-kw" value={v.keywords} onChange={(e) => set("keywords", e.target.value)} placeholder="Words people would search for" /></AiField>
+        <AiField {...ai("campaign.tone")} label="Tone" id="c-tone" as="custom" value={v.tone} onChange={(x) => set("tone", String(x))}><Suggest id="c-tone" value={v.tone} onChange={(x) => set("tone", x)} options={TONES} placeholder="Brand default" /></AiField>
+        <AiField {...ai("campaign.language")} label="Language" id="c-lang" as="custom" value={v.language} onChange={(x) => set("language", String(x))}><Suggest id="c-lang" value={v.language} onChange={(x) => set("language", x)} options={LANGUAGES} /></AiField>
+        <AiField {...ai("campaign.brandInfo")} label="Brand information for this campaign" id="c-bi" as="textarea" rows={3} className="sm:col-span-2" hint="Anything beyond the central brand context (Settings) the AI should know." value={v.brandInfo} onChange={(x) => set("brandInfo", String(x))} />
       </div>
       <div className="flex flex-wrap gap-2">
         {!campaignId && canGenerate && (

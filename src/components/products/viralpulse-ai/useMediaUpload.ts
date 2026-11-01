@@ -4,6 +4,7 @@ import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { toast } from "sonner";
 import { registerMediaAction, replaceMediaAction } from "@/app/(products)/viralpulse-ai/(protected)/actions";
+import { newUploadPathAction } from "@/app/(products)/viralpulse-ai/(protected)/image-studio/actions";
 import { IMAGE_TYPES, MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, VIDEO_TYPES } from "@/lib/products/viralpulse-ai/constants";
 import type { MediaCard } from "@/lib/products/viralpulse-ai/media";
 
@@ -57,7 +58,12 @@ export function useMediaUpload() {
     }
     setProgress(0);
     try {
-      const pathname = `smms/uploads/${crypto.randomUUID()}.${ext}`;
+      const made = await newUploadPathAction(ext);
+      if (!made.ok) {
+        toast.error(made.error);
+        return null;
+      }
+      const pathname = made.path;
       await upload(pathname, file, {
         access: "private",
         handleUploadUrl: "/api/viralpulse-ai/media/upload",

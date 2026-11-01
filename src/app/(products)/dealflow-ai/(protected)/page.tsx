@@ -43,7 +43,7 @@ import { iconForCategory } from "@/lib/category-icons";
 import { getCampaignAnalytics } from "@/lib/campaigns";
 import type { SerializedLead } from "@/components/products/dealflow-ai/types";
 import OmnichannelCommandCenter from "@/components/products/dealflow-ai/OmnichannelCommandCenter";
-import { getIntegrationsStatus, listAiApprovalDrafts, listDealLeads, listDealJobApplications } from "@/lib/dealflow-ai/store";
+import { getLeadStats } from "@/lib/lead-management/records";
 
 function parseDateParam(value: string | undefined, endOfDay = false): Date | undefined {
   if (!value) return undefined;
@@ -103,7 +103,7 @@ export default async function LmsDashboardPage({
 
   const platform = sp.platform && isValidPlatform(sp.platform) ? sp.platform : undefined;
 
-  const [stats, savedFilters, campaignAnalytics] = await Promise.all([
+  const [stats, savedFilters, campaignAnalytics, leadStats] = await Promise.all([
     getDashboardStats({ category, status, source, search, dateFrom, dateTo, granularity }),
     lmsUser ? listSavedFilters(lmsUser.id) : Promise.resolve([]),
     getCampaignAnalytics({
@@ -113,6 +113,7 @@ export default async function LmsDashboardPage({
       dateTo,
       granularity,
     }),
+    getLeadStats(),
   ]);
 
   const categoryChartData = CATEGORIES.map((c) => ({ label: c.label, value: stats.byCategory[c.slug] ?? 0 }));
@@ -192,10 +193,10 @@ export default async function LmsDashboardPage({
 
       {/* Omnichannel AI Command Center & Multi-Platform Acquisition Engine */}
       <OmnichannelCommandCenter
-        pendingApprovalsCount={listAiApprovalDrafts({ status: "pending_approval" }).length}
-        integrations={getIntegrationsStatus()}
-        leadsTotal={listDealLeads().length}
-        applicantsTotal={listDealJobApplications().length}
+        jobsCount={leadStats.byType.job_applicant ?? 0}
+        internsCount={leadStats.byType.intern ?? 0}
+        traineesCount={leadStats.byType.trainee ?? 0}
+        clientsCount={leadStats.byType.client ?? 0}
       />
 
       {/* Overview KPIs */}

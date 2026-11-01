@@ -55,6 +55,7 @@ export const SMMS_PERMISSIONS = [
   "VIEW_ANALYTICS",
   "MANAGE_INTEGRATIONS",
   "VIEW_AUDIT_LOG",
+  "APPROVE_AD_SPEND",
 ] as const;
 export type SmmsPermission = (typeof SMMS_PERMISSIONS)[number];
 
@@ -73,6 +74,7 @@ export const SMMS_PERMISSION_KEY: Record<SmmsPermission, string> = {
   VIEW_ANALYTICS: "smms.canViewAnalytics",
   MANAGE_INTEGRATIONS: "smms.canManageIntegrations",
   VIEW_AUDIT_LOG: "smms.canViewAuditLog",
+  APPROVE_AD_SPEND: "smms.canApproveAdSpend",
 };
 
 export const SMMS_PERMISSION_META: Record<SmmsPermission, { label: string; description: string }> = {
@@ -89,11 +91,12 @@ export const SMMS_PERMISSION_META: Record<SmmsPermission, { label: string; descr
   VIEW_ANALYTICS: { label: "View analytics", description: "Read the analytics page and enter post performance numbers." },
   MANAGE_INTEGRATIONS: { label: "Manage integrations & settings", description: "Connect or disconnect platform accounts, and edit brand context and AI settings." },
   VIEW_AUDIT_LOG: { label: "View activity log", description: "Read the Social Media activity log." },
+  APPROVE_AD_SPEND: { label: "Approve ad spend", description: "Approve the budget of a paid ad launch before it can start spending, and set the company spending limits." },
 };
 
 const EMPLOYEE: SmmsPermission[] = ["VIEW_CAMPAIGNS", "MANAGE_POSTS", "GENERATE_AI_CONTENT", "MANAGE_MEDIA"];
 const SPECIALIST: SmmsPermission[] = [...EMPLOYEE, "CREATE_CAMPAIGNS", "EDIT_CAMPAIGNS", "CREATE_ADS", "SCHEDULE_POSTS", "VIEW_ANALYTICS"];
-const MANAGER: SmmsPermission[] = [...SPECIALIST, "DELETE_CAMPAIGNS", "PUBLISH_CONTENT", "VIEW_AUDIT_LOG"];
+const MANAGER: SmmsPermission[] = [...SPECIALIST, "DELETE_CAMPAIGNS", "PUBLISH_CONTENT", "VIEW_AUDIT_LOG", "APPROVE_AD_SPEND"];
 const ADMIN: SmmsPermission[] = [...SMMS_PERMISSIONS];
 
 export const SMMS_ROLE_PERMISSIONS: Record<SmmsRole, readonly SmmsPermission[]> = {

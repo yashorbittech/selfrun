@@ -53,6 +53,9 @@ export const AIBOTS_PERMISSIONS = [
   "DELETE_CHATS",
   "VIEW_AUDIT",
   "MANAGE_SETTINGS",
+  "VOICE_CALL",
+  "VOICE_CALL_MANAGE",
+  "VOICE_CALL_TAKEOVER",
 ] as const;
 export type AibotsPermission = (typeof AIBOTS_PERMISSIONS)[number];
 
@@ -69,6 +72,9 @@ export const AIBOTS_PERMISSION_KEY: Record<AibotsPermission, string> = {
   DELETE_CHATS: "aibots.canDeleteAnyChat",
   VIEW_AUDIT: "aibots.canViewAudit",
   MANAGE_SETTINGS: "aibots.canManageSettings",
+  VOICE_CALL: "aibots.canPlaceVoiceCalls",
+  VOICE_CALL_MANAGE: "aibots.canManageVoiceCalls",
+  VOICE_CALL_TAKEOVER: "aibots.canTakeOverVoiceCalls",
 };
 
 export const AIBOTS_PERMISSION_META: Record<AibotsPermission, { label: string; description: string }> = {
@@ -83,10 +89,13 @@ export const AIBOTS_PERMISSION_META: Record<AibotsPermission, { label: string; d
   DELETE_CHATS: { label: "Delete any chat", description: "Delete other users' chats. Everyone can always delete their own." },
   VIEW_AUDIT: { label: "View activity log", description: "Read the AgentOS activity log." },
   MANAGE_SETTINGS: { label: "Manage settings", description: "Change allowed OpenAI models, token pricing and limits." },
+  VOICE_CALL: { label: "Place voice calls", description: "Start or schedule a phone call with a voice agent they can use. Every call is checked against the calling rules and logged." },
+  VOICE_CALL_MANAGE: { label: "Manage voice calls", description: "Cancel other people's scheduled calls, call outside the calling hours with a stated reason, and manage phone numbers, the do-not-call list and calling rules." },
+  VOICE_CALL_TAKEOVER: { label: "Take over live calls", description: "Watch a live call's transcript, add a note for the AI mid-call, end the call or move it to a human's phone." },
 };
 
-const USER: AibotsPermission[] = ["USE_BOT"];
-const MANAGER: AibotsPermission[] = [...USER, "CREATE_BOT", "EDIT_BOT", "MANAGE_KB", "UPLOAD_FILES", "DELETE_FILES", "VIEW_CHATS", "VIEW_AUDIT"];
+const USER: AibotsPermission[] = ["USE_BOT", "VOICE_CALL"];
+const MANAGER: AibotsPermission[] = [...USER, "VOICE_CALL_TAKEOVER", "CREATE_BOT", "EDIT_BOT", "MANAGE_KB", "UPLOAD_FILES", "DELETE_FILES", "VIEW_CHATS", "VIEW_AUDIT"];
 const ADMIN: AibotsPermission[] = [...AIBOTS_PERMISSIONS];
 
 export const AIBOTS_ROLE_PERMISSIONS: Record<AibotsRole, readonly AibotsPermission[]> = {

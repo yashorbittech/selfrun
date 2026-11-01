@@ -10,6 +10,9 @@ import { BOT_COLORS, BOT_ICONS, GENERAL_BOT_ID, GENERAL_BOT_NAME, LIMITS, type B
 import { AibotsInputError, NotFoundError, can, type AibotsViewer } from "@/lib/products/agentos/viewer";
 import { getSettings } from "@/lib/products/agentos/settings";
 import { getCompanyBrand } from "@/lib/platform/branding";
+import type { AgentKind, VoiceConfig } from "@/lib/products/agentos/voice/types";
+import { avatarUrlFor } from "@/lib/products/agentos/avatar-shared";
+import { normalizeVoiceInput, VoiceConfigError, withServerFields } from "@/lib/products/agentos/voice/config";
 
 /**
  * A bot is pure configuration: instructions + model + an OpenAI vector store
@@ -26,9 +29,15 @@ export interface BotAccess {
 
 export interface BotDoc extends Stamps {
   _id: string;
+  /** "text" (OpenAI chat bot) or "voice" (ElevenLabs agent). Rows written before voice existed have no field: read as "text". */
+  kind: AgentKind;
+  /** The voice block of a "voice" agent; null for text agents. */
+  voice: VoiceConfig | null;
   name: string;
   icon: BotIcon;
   color: BotColor;
+  /** Storage key of the optional profile photo (see avatar.ts); null/absent = the icon + colour is shown. Never set through the form body. */
+  avatarKey?: string | null;
   description: string;
   category: string;
   instructions: string;
@@ -46,9 +55,12 @@ export interface BotDoc extends Stamps {
 /** What the client needs to render a bot anywhere (sidebar, picker, workspace header). */
 export interface BotSummary {
   _id: string;
+  kind: AgentKind;
   name: string;
   icon: BotIcon;
   color: BotColor;
+  /** Authenticated URL of the agent's photo, or null (render icon + colour). */
+  avatarUrl: string | null;
   description: string;
   category: string;
   model: string;
@@ -57,12 +69,24 @@ export interface BotSummary {
   starterPrompts: string[];
 }
 
+/** Legacy rows have no `kind`; they are all text agents. */
+export function kindOf(b: { kind?: AgentKind | null }): AgentKind {
+  return b.kind === "voice" ? "voice" : "text";
+}
+
+/** Fills the fields older rows lack, so every reader sees a complete BotDoc. */
+export function normalizeBot(b: BotDoc): BotDoc {
+  return { ...b, kind: kindOf(b), voice: b.voice ?? null };
+}
+
 export function toSummary(b: BotDoc): BotSummary {
   return {
     _id: b._id,
+    kind: kindOf(b),
     name: b.name,
     icon: b.icon,
     color: b.color,
+    avatarUrl: avatarUrlFor(b._id, b.avatarKey),
     description: b.description,
     category: b.category,
     model: b.model,
@@ -108,16 +132,26 @@ export async function listUsableBots(viewer: AibotsViewer): Promise<BotSummary[]
   return rows.map(toSummary);
 }
 
+/** The ACTIVE agents a viewer may use (optionally one kind), as a Mongo filter. Shared by the Hub, the sidebar and the picker. */
+export function usableAgentsFilter(viewer: AibotsViewer, kind?: AgentKind): Record<string, unknown> {
+  const base = usableFilter(viewer);
+  if (!kind) return base;
+  // Legacy rows have no `kind` field: they are text agents.
+  const kindClause = kind === "text" ? { $or: [{ kind: "text" }, { kind: { $exists: false } }, { kind: null }] } : { kind };
+  return { $and: [base, kindClause] };
+}
+
 /** Management list (every non-deleted bot, active or not). Caller checks EDIT_BOT. */
 export async function listAllBots(): Promise<BotDoc[]> {
   const col = await botsCollection();
-  return col.find(notDeleted).sort({ status: 1, name: 1 }).toArray();
+  return (await col.find(notDeleted).sort({ status: 1, name: 1 }).toArray()).map(normalizeBot);
 }
 
 export async function getBot(botId: string): Promise<BotDoc | null> {
   if (typeof botId !== "string" || botId.length > 64) return null;
   const col = await botsCollection();
-  return col.findOne({ _id: botId, ...notDeleted });
+  const row = await col.findOne({ _id: botId, ...notDeleted });
+  return row ? normalizeBot(row) : null;
 }
 
 /**
@@ -133,9 +167,12 @@ export async function generalBot(): Promise<BotDoc> {
   const epoch = new Date(0);
   return {
     _id: GENERAL_BOT_ID,
+    kind: "text",
+    voice: null,
     name: GENERAL_BOT_NAME,
     icon: "sparkles",
     color: "indigo",
+    avatarKey: null,
     description: "Ask anything — writing, analysis, planning or research. Not tied to any bot or knowledge base.",
     category: "General",
     instructions: settings.generalInstructions,
@@ -188,6 +225,10 @@ export interface BotInput {
   accessRoles: unknown;
   accessUserIds: unknown;
   status: unknown;
+  /** "text" (default) or "voice". Ignored on update unless present; a bot never changes kind once created. */
+  kind?: unknown;
+  /** Voice block, passed through for the voice sync (see `voice sync hook`). */
+  voice?: unknown;
 }
 
 async function clean(input: BotInput) {
@@ -196,7 +237,9 @@ async function clean(input: BotInput) {
   const instructions = str(input.instructions, LIMITS.instructionsMax);
   if (!instructions) throw new AibotsInputError("Write the bot's instructions — they define how it behaves.");
   const settings = await getSettings();
-  const model = str(input.model, 64);
+  const kind: AgentKind = input.kind === "voice" ? "voice" : "text";
+  // A voice agent speaks through ElevenLabs; the OpenAI model only matters for text agents, so voice falls back to the default.
+  const model = kind === "voice" && !settings.models.some((m) => m.id === str(input.model, 64)) ? settings.defaultModel : str(input.model, 64);
   if (!settings.models.some((m) => m.id === model)) throw new AibotsInputError("Pick one of the allowed OpenAI models.");
   let temperature: number | null = null;
   if (input.temperature !== null && input.temperature !== "" && input.temperature !== undefined) {
@@ -208,7 +251,19 @@ async function clean(input: BotInput) {
     Array.isArray(v) ? Array.from(new Set(v.map((x) => str(x, len)).filter(Boolean))).slice(0, max) : [];
   const accessMode = input.accessMode === "restricted" ? "restricted" : "all";
   const userIds = arr(input.accessUserIds, 500, 40).filter((id) => ObjectId.isValid(id));
+  // voice sync hook (1/2): only the editable fields survive; the ElevenLabs sync state is server-owned (see voice/config.ts).
+  let voice: VoiceConfig | null = null;
+  if (kind === "voice") {
+    try {
+      voice = normalizeVoiceInput(input.voice);
+    } catch (err) {
+      if (err instanceof VoiceConfigError) throw new AibotsInputError(err.message);
+      throw err;
+    }
+  }
   return {
+    kind,
+    voice,
     name,
     icon: (BOT_ICONS as readonly string[]).includes(input.icon as string) ? (input.icon as BotIcon) : "bot",
     color: (BOT_COLORS as readonly string[]).includes(input.color as string) ? (input.color as BotColor) : "indigo",
@@ -259,18 +314,34 @@ export async function createBot(input: BotInput, actorId: string): Promise<BotDo
     await ensureBotVectorStore(doc).then((id) => (doc.vectorStoreId = id)).catch((err) => console.error("[aibots] vector store create failed", err instanceof Error ? err.message : err));
   }
   await aibotsEvents.created({ id: doc._id, name: doc.name }, actorId);
+  // voice sync hook (2/2): the row is saved first; a failed sync only records voice.syncError.
+  if (doc.kind === "voice") {
+    const { syncVoiceAgent } = await import("@/lib/products/agentos/voice/sync");
+    await syncVoiceAgent(doc._id);
+    doc.voice = (await getBot(doc._id))?.voice ?? doc.voice;
+  }
   return doc;
 }
 
 export async function updateBot(botId: string, input: BotInput, actorId: string): Promise<{ before: BotDoc; after: BotDoc }> {
   const before = await getBot(botId);
   if (!before) throw new NotFoundError();
-  const data = await clean(input);
+  const data = await clean({ ...input, kind: before.kind });
   const col = await botsCollection();
   const clash = await col.findOne({ ...notDeleted, _id: { $ne: botId }, name: { $regex: `^${escapeRegex(data.name)}$`, $options: "i" } });
   if (clash) throw new AibotsInputError("A bot with that name already exists.");
-  await col.updateOne({ _id: botId }, { $set: { ...data, ...updateStamp(actorId) } });
-  return { before, after: { ...before, ...data } };
+  // A bot never changes kind after creation (its knowledge/voice setup would no longer match).
+  const { kind: _ignoredKind, voice, ...rest } = data;
+  void _ignoredKind;
+  const patch = { ...rest, ...(before.kind === "voice" ? { voice: voice ? withServerFields(voice, before.voice) : before.voice } : {}) };
+  await col.updateOne({ _id: botId }, { $set: { ...patch, ...updateStamp(actorId) } });
+  let after: BotDoc = { ...before, ...patch };
+  if (before.kind === "voice") {
+    const { syncVoiceAgent } = await import("@/lib/products/agentos/voice/sync");
+    await syncVoiceAgent(botId);
+    after = (await getBot(botId)) ?? after;
+  }
+  return { before, after };
 }
 
 export async function setBotStatus(botId: string, status: BotStatus, actorId: string): Promise<BotDoc> {
@@ -279,6 +350,12 @@ export async function setBotStatus(botId: string, status: BotStatus, actorId: st
   const col = await botsCollection();
   await col.updateOne({ _id: botId }, { $set: { status, ...updateStamp(actorId) } });
   if (bot.status !== status) await aibotsEvents.status({ id: bot._id, name: bot.name }, status, actorId);
+  if (bot.kind === "voice" && bot.status !== status) {
+    // Archiving removes the live ElevenLabs agent; re-activating creates it again from the saved config.
+    const sync = await import("@/lib/products/agentos/voice/sync");
+    if (status === "active") await sync.syncVoiceAgent(botId);
+    else await sync.removeRemoteVoiceAgent(botId);
+  }
   return bot;
 }
 
@@ -293,6 +370,8 @@ export async function deleteBot(botId: string, actorId: string): Promise<BotDoc>
   await col.updateOne({ _id: botId }, { $set: { deletedAt: new Date(), status: "inactive", ...updateStamp(actorId) } });
   const { purgeBotFiles } = await import("@/lib/products/agentos/knowledge");
   await purgeBotFiles(bot).catch(() => {});
+  await (await import("@/lib/products/agentos/avatar")).purgeBotAvatar(bot);
+  if (bot.kind === "voice") await (await import("@/lib/products/agentos/voice/sync")).removeRemoteVoiceAgent(botId);
   await aibotsEvents.deleted({ id: bot._id, name: bot.name }, actorId);
   return bot;
 }

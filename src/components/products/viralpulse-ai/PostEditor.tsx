@@ -7,10 +7,10 @@ import { toast } from "sonner";
 import { Loader2, Save, Undo2, Sparkles, Paperclip, ImagePlus, Lock, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import OptionSelect from "@/components/products/playbook-ai/OptionSelect";
 import { StructuredFields, type FieldSpec } from "@/components/products/viralpulse-ai/StructuredEditor";
 import { PlatformChip } from "@/components/products/viralpulse-ai/SmmsBits";
+import AiField from "@/components/products/viralpulse-ai/shared/AiField";
 import { SectionCard } from "@/components/products/viralpulse-ai/SmmsUi";
 import PlatformPreview from "@/components/products/viralpulse-ai/PlatformPreview";
 import MediaPicker, { AttachedMedia } from "@/components/products/viralpulse-ai/MediaPicker";
@@ -18,7 +18,6 @@ import { savePostContentAction, generatePostAction, generatePostImageAction } fr
 import { PLATFORM_META, type PostPlatform } from "@/lib/products/viralpulse-ai/constants";
 import type { PostCreative, PostVariantContent } from "@/lib/products/viralpulse-ai/content";
 import type { MediaCard } from "@/lib/products/viralpulse-ai/media";
-import { cn } from "@/lib/utils";
 
 export interface EditorVariant extends PostVariantContent {
   platform: PostPlatform;
@@ -35,6 +34,8 @@ export interface PostEditorProps {
   thumbnail: MediaCard | null;
   brand: string;
   link: string | null;
+  /** The post brief (topic, objective, audience, tone...) read by the AI buttons. */
+  brief: Record<string, unknown>;
   canEdit: boolean;
   canGenerate: boolean;
   canUpload: boolean;
@@ -72,6 +73,8 @@ export default function PostEditor(p: PostEditorProps) {
   const touch = () => setDirty(true);
   const current = variants.find((v) => v.platform === tab) ?? variants[0];
   const meta = current ? PLATFORM_META[current.platform] : null;
+  const aiEnabled = p.canEdit && p.canGenerate;
+  const postContext = (): Record<string, unknown> => ({ ...p.brief, idea, platform: current?.platform ?? "", variant: current ? { title: current.title, content: current.content, caption: current.caption, cta: current.cta, hashtags: current.hashtags, keywords: current.keywords } : null, creative });
 
   const variantSpec: FieldSpec[] = meta
     ? [
@@ -141,7 +144,7 @@ export default function PostEditor(p: PostEditorProps) {
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
       <div className="min-w-0 space-y-4 self-start">
         <SectionCard title="Core idea" description="The single idea every platform version is adapted from.">
-          <Textarea rows={2} value={idea} disabled={!p.canEdit} onChange={(e) => { setIdea(e.target.value); touch(); }} placeholder="Generate with AI or write the idea" />
+          <AiField fieldKey="post.idea" label="Core idea" id="post-idea" as="textarea" rows={2} value={idea} disabled={!p.canEdit} aiDisabled={!aiEnabled} getContext={postContext} onChange={(x) => { setIdea(String(x)); touch(); }} placeholder="Generate with AI or write the idea" />
         </SectionCard>
 
         <SectionCard title="Platform versions" description="Each platform gets its own version within its limits and conventions.">
@@ -155,6 +158,7 @@ export default function PostEditor(p: PostEditorProps) {
                 value={current as unknown as Record<string, unknown>}
                 disabled={!p.canEdit || current.published}
                 idPrefix={`pv-${current.platform}`}
+                ai={{ scope: "post.variant", enabled: aiEnabled, getContext: postContext }}
                 onChange={(x) => { setVariants((vs) => vs.map((v) => (v.platform === current.platform ? { ...v, ...(x as unknown as PostVariantContent) } : v))); touch(); }}
               />
               {p.canEdit && p.canGenerate && !current.published && (
@@ -170,7 +174,7 @@ export default function PostEditor(p: PostEditorProps) {
         </SectionCard>
 
         <SectionCard title={p.contentType === "video" ? "Video creative" : "Image creative"}>
-          <StructuredFields specs={creativeSpec} value={creative as unknown as Record<string, unknown>} disabled={!p.canEdit} idPrefix="pc" onChange={(x) => { setCreative(x as unknown as PostCreative); touch(); }} />
+          <StructuredFields specs={creativeSpec} value={creative as unknown as Record<string, unknown>} disabled={!p.canEdit} idPrefix="pc" ai={{ scope: "post.creative", enabled: aiEnabled, getContext: postContext }} onChange={(x) => { setCreative(x as unknown as PostCreative); touch(); }} />
           {p.canEdit && p.canGenerate && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {p.contentType === "image" && imgFormats.length > 0 && (

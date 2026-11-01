@@ -21,6 +21,13 @@ import { paidPerformance } from "@/lib/products/viralpulse-ai/analytics";
 import { listLiveOffers, listClientChoices } from "@/lib/products/viralpulse-ai/brand";
 import { listCampaigns as listLmsCampaigns } from "@/lib/campaigns";
 import { isOpenAIConfigured } from "@/lib/openai";
+import { campaignBriefContext } from "@/lib/products/viralpulse-ai/ai-field/context";
+import SourceBadge from "@/components/products/viralpulse-ai/shared/SourceBadge";
+import LaunchHost from "@/components/products/viralpulse-ai/ads/LaunchHost";
+import { loadPerformance, loadWizard } from "@/lib/products/viralpulse-ai/ads-platforms/wizard-data";
+import { LIST_STATUS_LABEL, adsManagerUrl, formatMinor, goalLabel, listStatus, reviewLabel, DESTINATION_LABEL } from "@/lib/products/viralpulse-ai/ads-platforms/ui";
+import { META_OBJECTIVE_LABEL } from "@/lib/products/viralpulse-ai/ads-platforms/meta/constants";
+import { ExternalLink } from "lucide-react";
 import { PLATFORM_META, findFormat } from "@/lib/products/viralpulse-ai/constants";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import {
@@ -50,6 +57,12 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
     listClientChoices(),
     listLmsCampaigns().catch(() => []),
   ]);
+  const wiz = await loadWizard(id);
+  const launch = wiz?.launch ?? null;
+  const metaPerf = launch ? await loadPerformance(id, launch.currency) : null;
+  const isMetaCampaign = c.platforms.some((p) => p === "facebook" || p === "instagram");
+  const draftMeta = wiz?.state.meta ?? null;
+  const overall = listStatus(launch ? { state: launch.state, delivery: launch.delivery, active: launch.active, review: launch.review, stopTime: launch.stopTime } : null);
   const thumbs = new Map((await getMediaMany(ads.flatMap((a) => [a.mediaIds[0], a.thumbnailId].filter((x): x is string => Boolean(x))))).map((m) => [m._id, toMediaCard(m)]));
   const canEdit = can(viewer, "EDIT_CAMPAIGNS") && c.status !== "archived";
   const canAds = can(viewer, "CREATE_ADS") && c.status !== "archived";
@@ -81,23 +94,23 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
         crumbs={[{ label: "Campaigns & Ads", href: "/viralpulse-ai/campaigns" }, { label: c.name }]}
         description={
           <span className="flex flex-wrap items-center gap-1.5">
-            <StatusBadge status={c.status} />
+            {isMetaCampaign ? <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold">{LIST_STATUS_LABEL[overall]}</span> : <StatusBadge status={c.status} />}
             {c.platforms.map((p) => <PlatformChip key={p} platform={p} />)}
             <span>{`· ${ads.length} ad${ads.length === 1 ? "" : "s"} · updated ${formatDateTime(c.updatedAt)}`}</span>
           </span>
         }
         actions={
           <>
-            {canEdit && <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/viralpulse-ai/campaigns/${id}/edit`} />}><Pencil className="size-3.5" /> Edit brief</Button>}
+            {canEdit && <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/viralpulse-ai/campaigns/${id}/edit`} />}><Pencil className="size-3.5" /> {isMetaCampaign ? "Open in wizard" : "Edit brief"}</Button>}
             {can(viewer, "CREATE_CAMPAIGNS") && <ActionButton action={duplicateCampaignAction.bind(null, id)} success="Duplicated" redirectPrefix="/viralpulse-ai/campaigns/"><Copy className="size-3.5" /> Duplicate</ActionButton>}
-            {c.status !== "archived" && c.status !== "published" && can(viewer, "SCHEDULE_POSTS") && (c.status === "scheduled" ? (
+            {!isMetaCampaign && c.status !== "archived" && c.status !== "published" && can(viewer, "SCHEDULE_POSTS") && (c.status === "scheduled" ? (
               <ActionButton action={setCampaignLifecycleAction.bind(null, id, "unschedule")} success="Launch unscheduled"><CalendarX className="size-3.5" /> Unschedule</ActionButton>
             ) : (
               <ActionButton action={setCampaignLifecycleAction.bind(null, id, "scheduled")} success="Launch scheduled for the start date"><CalendarClock className="size-3.5" /> Schedule launch</ActionButton>
             ))}
-            {c.status !== "archived" && c.status !== "published" && can(viewer, "PUBLISH_CONTENT") && (
-              <ActionButton variant="default" action={setCampaignLifecycleAction.bind(null, id, "published")} success="Marked as launched" confirm={{ title: "Mark this campaign as launched?", description: "ViralPulse never launches or spends on paid ads itself. Confirm you've set the campaign live in each ad platform's ads manager.", confirmLabel: "Mark launched" }}>
-                <Rocket className="size-3.5" /> Mark launched
+            {!isMetaCampaign && c.status !== "archived" && c.status !== "published" && can(viewer, "PUBLISH_CONTENT") && (
+              <ActionButton variant="default" action={setCampaignLifecycleAction.bind(null, id, "published")} success="Marked as launched" confirm={{ title: "Track this campaign as launched by hand?", description: "This platform cannot be launched from here. Confirm you set it live in the platform's own ads manager. It is recorded under your name and shown as manually tracked, not as verified.", confirmLabel: "Mark launched" }}>
+                <Rocket className="size-3.5" /> Launched by hand
               </ActionButton>
             )}
             {can(viewer, "EDIT_CAMPAIGNS") && (c.status === "archived" ? (
@@ -115,14 +128,94 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
       />
       {c.status === "archived" && <Notice tone="warn">This campaign is archived — restore it to edit, generate or add ads.</Notice>}
 
-      <Tabs defaultValue={hasAi ? "strategy" : "brief"}>
+      <Tabs defaultValue={isMetaCampaign ? "overview" : hasAi ? "strategy" : "brief"}>
         <TabsList>
+          {isMetaCampaign && <TabsTrigger value="overview">Overview</TabsTrigger>}
+          {isMetaCampaign && <TabsTrigger value="structure">Structure</TabsTrigger>}
+          {isMetaCampaign && <TabsTrigger value="launch">Launch</TabsTrigger>}
           <TabsTrigger value="brief">Brief</TabsTrigger>
           <TabsTrigger value="strategy">AI strategy</TabsTrigger>
           <TabsTrigger value="ads">{`Ads (${ads.length})`}</TabsTrigger>
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="history">{`History (${versions.length})`}</TabsTrigger>
         </TabsList>
+
+
+        {isMetaCampaign && (
+          <TabsContent value="overview" className="mt-4 space-y-4">
+            <SectionCard title="Status" description="From the launch record and what Meta last reported.">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold">{LIST_STATUS_LABEL[overall]}</span>
+                <SourceBadge source={launch?.lastSyncAt ? "synced" : "estimate"} at={launch?.lastSyncAt} label={launch?.lastSyncAt ? "Synced from Meta" : "Not synced from Meta yet"} />
+              </div>
+              <dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-3">
+                {([
+                  ["Objective", draftMeta?.objective ? META_OBJECTIVE_LABEL[draftMeta.objective] : ""],
+                  ["Ad sets", String(draftMeta?.adSets.length ?? 0)],
+                  ["Ads", String(wiz?.state.ads.length ?? 0)],
+                  ["Daily budget", launch ? formatMinor(launch.commitment.dailyMinor, launch.currency) : ""],
+                  ["Total it can spend", launch ? (launch.commitment.totalMinor === null ? "No end date" : formatMinor(launch.commitment.totalMinor, launch.currency)) : ""],
+                  ["Created in Meta", launch ? formatDateTime(launch.createdAt) : ""],
+                ] as [string, string][]).map(([k, val]) => <div key={k}><dt className="text-[11px] font-semibold text-muted-foreground">{k}</dt><dd className="text-sm">{val || <span className="text-muted-foreground">-</span>}</dd></div>)}
+              </dl>
+              {!launch && <p className="mt-3 text-xs text-muted-foreground">This campaign is a draft. <Link className="underline" href={`/viralpulse-ai/campaigns/${id}/edit`}>Continue in the wizard.</Link></p>}
+            </SectionCard>
+            <SectionCard title="Performance" description={metaPerf ? `From Meta insights, ${metaPerf.from} to ${metaPerf.to} (${metaPerf.days} day${metaPerf.days === 1 ? "" : "s"} synced).` : "Results from Meta."}>
+              {metaPerf ? (
+                <div className="space-y-3">
+                  <SourceBadge source="synced" at={metaPerf.capturedAt} label="Synced from Meta" />
+                  <dl className="grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                    {([["Spend", metaPerf.totals.spend !== undefined && metaPerf.currency ? new Intl.NumberFormat("en-IN", { style: "currency", currency: metaPerf.currency }).format(metaPerf.totals.spend) : null], ["Impressions", metaPerf.totals.impressions], ["Reach (sum of days)", metaPerf.totals.reach], ["Clicks", metaPerf.totals.clicks], ["Link clicks", metaPerf.totals.inline_link_clicks]] as [string, string | number | null | undefined][]).map(([k, val]) => <div key={k} className="rounded-xl border border-border/50 p-3"><dt className="text-[11px] text-muted-foreground">{k}</dt><dd className="text-sm font-semibold tabular-nums">{val === null || val === undefined ? "Not reported" : typeof val === "number" ? Math.round(val).toLocaleString("en-IN") : val}</dd></div>)}
+                  </dl>
+                  {metaPerf.actions.length > 0 && <p className="text-xs text-muted-foreground">Actions Meta counted: {metaPerf.actions.map((a) => `${a.metric.replaceAll("_", " ")} ${Math.round(a.value).toLocaleString("en-IN")}`).join(", ")}.</p>}
+                </div>
+              ) : <p className="text-sm text-muted-foreground">Not synced yet. Results appear after the campaign has been created in Meta and its first sync has run.</p>}
+            </SectionCard>
+          </TabsContent>
+        )}
+
+        {isMetaCampaign && (
+          <TabsContent value="structure" className="mt-4">
+            <SectionCard title="Structure" description="Campaign, ad sets and ads as drafted, with their Meta ids and review status once created.">
+              {!draftMeta || draftMeta.adSets.length === 0 ? <EmptyState title="Nothing built yet">Add ad sets and ads in the wizard.</EmptyState> : (
+                <ul className="space-y-3 text-sm">
+                  <li>
+                    <p className="font-semibold">{c.name}</p>
+                    <p className="text-xs text-muted-foreground">{draftMeta.objective ? META_OBJECTIVE_LABEL[draftMeta.objective] : "No objective"}{launch?.objects.campaign ? ` · Meta ${launch.objects.campaign}` : ""}</p>
+                    {launch?.objects.campaign && <a className="inline-flex items-center gap-1 text-xs text-primary hover:underline" target="_blank" rel="noreferrer" href={adsManagerUrl(launch.actId, "campaign", launch.objects.campaign)}>Ads Manager <ExternalLink className="size-3" /></a>}
+                    <ul className="mt-2 space-y-3 border-l border-border/60 pl-4">
+                      {draftMeta.adSets.map((set) => {
+                        const ext = launch?.objects.adSets[set.key];
+                        const rv = ext ? launch?.review[ext] : undefined;
+                        return (
+                          <li key={set.key}>
+                            <p className="font-medium">{set.name || "Ad set"}</p>
+                            <p className="text-xs text-muted-foreground">{[set.optimizationGoal ? goalLabel(set.optimizationGoal) : "No goal", set.destinationType ? (DESTINATION_LABEL[set.destinationType]?.label ?? set.destinationType) : null, set.budget ? `${set.budget.type} ${launch ? formatMinor(set.budget.amountMinor, launch.currency) : ""}` : null, ext ? `Meta ${ext}` : null, ext ? reviewLabel(rv?.effectiveStatus ?? null) : null].filter(Boolean).join(" · ")}</p>
+                            <ul className="mt-1 space-y-1 border-l border-border/60 pl-4">
+                              {(wiz?.state.ads ?? []).filter((a) => a.meta.adSetKey === set.key).map((a) => {
+                                const aext = launch?.objects.ads[a.id ?? ""];
+                                const ar = aext ? launch?.review[aext] : undefined;
+                                return <li key={a.key} className="text-xs"><Link href={`/viralpulse-ai/campaigns/${id}/ads/${a.id}`} className="font-medium hover:text-primary">{a.name || "Ad"}</Link> <span className="text-muted-foreground">{[a.meta.creativeType, aext ? `Meta ${aext}` : null, aext ? reviewLabel(ar?.effectiveStatus ?? null) : null].filter(Boolean).join(" · ")}</span></li>;
+                              })}
+                            </ul>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </li>
+                </ul>
+              )}
+            </SectionCard>
+          </TabsContent>
+        )}
+
+        {isMetaCampaign && (
+          <TabsContent value="launch" className="mt-4">
+            <SectionCard title="Launch" description="Approve, switch on, pause, edit, archive or roll back. Everything is recorded.">
+              <LaunchHost campaignId={id} initial={launch} perms={{ canCreate: can(viewer, "CREATE_ADS") && can(viewer, "EDIT_CAMPAIGNS"), canApprove: can(viewer, "APPROVE_AD_SPEND"), canPublish: can(viewer, "PUBLISH_CONTENT"), canEdit: can(viewer, "EDIT_CAMPAIGNS"), userId: viewer.userId }} />
+            </SectionCard>
+          </TabsContent>
+        )}
 
         <TabsContent value="brief" className="mt-4">
           <SectionCard title="Campaign brief" description="What the AI works from, together with the brand context in Settings.">
@@ -171,7 +264,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
           )}
           {hasAi ? (
             <SectionCard title="Strategy" description="Edit anything — saving creates a new version.">
-              <CampaignStrategyEditor key={versions[0]?._id ?? "none"} campaignId={id} ai={c.ai} canEdit={canEdit} />
+              <CampaignStrategyEditor key={versions[0]?._id ?? "none"} campaignId={id} ai={c.ai} canEdit={canEdit} campaign={campaignBriefContext(c)} canGenerate={can(viewer, "GENERATE_AI_CONTENT") && (await isOpenAIConfigured())} />
             </SectionCard>
           ) : (
             <EmptyState title="No strategy yet">Generate one from the brief — you&apos;ll get a strategy, ideas, audiences, keywords, hashtags and ad concepts per platform.</EmptyState>
@@ -181,7 +274,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
         <TabsContent value="ads" className="mt-4 space-y-4">
           {canAds && (
             <SectionCard title="New ad" description="One platform and format per ad. Duplicate an ad to adapt it for another platform.">
-              <NewAdForm campaignId={id} platforms={c.platforms} />
+              <NewAdForm campaignId={id} platforms={c.platforms} campaign={campaignBriefContext(c)} canGenerate={can(viewer, "GENERATE_AI_CONTENT") && (await isOpenAIConfigured())} />
             </SectionCard>
           )}
           <SectionCard title="Ads">
@@ -248,7 +341,7 @@ export default async function CampaignPage({ params }: { params: Promise<{ id: s
           </SectionCard>
         </TabsContent>
       </Tabs>
-      <p className="text-[11px] text-muted-foreground">{`Ads are written here and launched by a person in each platform's ads manager (${c.platforms.map((p) => PLATFORM_META[p].label).join(", ")}) — ViralPulse never spends on ads by itself.`}</p>
+      <p className="text-[11px] text-muted-foreground">{isMetaCampaign ? "Nothing spends until an approver approves the budget and someone switches the campaign on. Facebook and Instagram campaigns launch through Meta's API from the wizard; other platforms are launched by hand in their own ads manager." : `Launch these by hand in the platform's ads manager (${c.platforms.map((p) => PLATFORM_META[p].label).join(", ")}). ViralPulse never spends on ads by itself.`}</p>
     </div>
   );
 }

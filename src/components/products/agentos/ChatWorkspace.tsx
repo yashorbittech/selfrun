@@ -25,7 +25,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/chat/Markdown";
 import BotAvatar from "@/components/products/agentos/BotAvatar";
+import ChatCallControls from "@/components/products/agentos/chat/ChatCallControls";
 import ActionButton from "@/components/products/agentos/ActionButton";
+import { AGENT_USED_EVENT } from "@/components/products/agentos/AibotsSidebar";
 import { cn } from "@/lib/utils";
 import { deleteChatAction, renameChatAction } from "@/app/(products)/agentos/(protected)/actions";
 import { ATTACHMENT_EXTENSIONS, LIMITS, MAX_ATTACHMENTS_PER_MESSAGE, MAX_UPLOAD_BYTES } from "@/lib/products/agentos/constants";
@@ -192,7 +194,7 @@ function MessageRow({ m, bot, isLast, busy, onRegenerate, readOnly, ownerLabel }
       {mine ? (
         <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{ownerLabel.slice(0, 1).toUpperCase()}</div>
       ) : (
-        <BotAvatar icon={bot.icon} color={bot.color} className="mt-0.5 size-8 rounded-full" />
+        <BotAvatar icon={bot.icon} color={bot.color} imageUrl={bot.avatarUrl} className="mt-0.5 size-8 rounded-full" />
       )}
       <div className={cn("min-w-0", mine ? "flex max-w-[85%] flex-col items-end sm:max-w-[75%]" : "flex-1")}>
         <p className="mb-0.5 text-xs font-semibold text-muted-foreground">{mine ? ownerLabel : bot.name}</p>
@@ -371,6 +373,7 @@ export default function ChatWorkspace({
             setActiveChatId(evt.chatId);
             setTitle(evt.title);
             if (evt.isNew) {
+              window.dispatchEvent(new CustomEvent(AGENT_USED_EVENT, { detail: { _id: bot._id, name: bot.name, icon: bot.icon, color: bot.color, avatarUrl: bot.avatarUrl, kind: bot.kind } }));
               newChatId = evt.chatId;
               // Put the new chat's id in the URL — no navigation, no refetch.
               window.history.replaceState(null, "", `/agentos/b/${bot._id}/${evt.chatId}`);
@@ -521,7 +524,7 @@ export default function ChatWorkspace({
               <History className="size-4" />
             </Button>
           )}
-          <BotAvatar icon={bot.icon} color={bot.color} />
+          <BotAvatar icon={bot.icon} color={bot.color} imageUrl={bot.avatarUrl} />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-2 truncate text-sm font-semibold text-foreground">
               <span className="truncate">{bot.name}</span>
@@ -540,6 +543,13 @@ export default function ChatWorkspace({
               <Settings2 className="size-4" />
               <span className="hidden sm:inline">Configure</span>
             </Button>
+          )}
+          {!readOnly && bot.kind !== "voice" && (
+            <ChatCallControls
+              chatId={activeChatId}
+              chatTitle={title}
+              onNote={(text) => setMessages((m) => [...m, { id: `note-${Date.now()}`, role: "user", text, attachments: [], citations: [] }])}
+            />
           )}
           {!readOnly && activeChatId && (
             <Button size="sm" variant="outline" nativeButton={false} render={<Link href={`/agentos/b/${bot._id}`} onClick={newChat} />}>
@@ -561,7 +571,7 @@ export default function ChatWorkspace({
           {historyError && <p className="mx-6 mb-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">{historyError}</p>}
           {messages.length === 0 ? (
             <div className="mx-auto flex max-w-xl flex-col items-center gap-3 px-6 py-10 text-center">
-              <BotAvatar icon={bot.icon} color={bot.color} size="lg" />
+              <BotAvatar icon={bot.icon} color={bot.color} imageUrl={bot.avatarUrl} size="lg" />
               <h2 className="text-xl font-bold text-foreground">{bot.name}</h2>
               <p className="text-sm text-muted-foreground">{bot.description || "Ask anything to get started."}</p>
               {knowledgeFiles > 0 && (

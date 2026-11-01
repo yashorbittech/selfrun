@@ -183,7 +183,7 @@ export default function OffersManager({
                 return (
                   <TableRow key={o._id}>
                     <TableCell>
-                      <div className="font-medium">{o.candidateName}</div>
+                      <Link href={`/talentos/recruitment/${o.applicationId}`} className="font-medium hover:text-primary hover:underline">{o.candidateName}</Link>
                       <div className="text-xs text-muted-foreground">{o.candidateEmail}</div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{o.positionTitle}</TableCell>

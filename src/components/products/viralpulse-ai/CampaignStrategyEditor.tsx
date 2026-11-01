@@ -39,7 +39,7 @@ const SPEC: FieldSpec[] = [
   },
 ];
 
-export default function CampaignStrategyEditor({ campaignId, ai, canEdit }: { campaignId: string; ai: CampaignAi; canEdit: boolean }) {
+export default function CampaignStrategyEditor({ campaignId, ai, canEdit, campaign, canGenerate }: { campaignId: string; ai: CampaignAi; canEdit: boolean; campaign: Record<string, unknown>; canGenerate: boolean }) {
   const router = useRouter();
   const [value, setValue] = useState<CampaignAi>(ai);
   const [dirty, setDirty] = useState(false);
@@ -59,7 +59,7 @@ export default function CampaignStrategyEditor({ campaignId, ai, canEdit }: { ca
 
   return (
     <div className="space-y-4">
-      <StructuredFields specs={SPEC} value={value as unknown as Record<string, unknown>} disabled={!canEdit} idPrefix="cai" onChange={(v) => { setValue(v as unknown as CampaignAi); setDirty(true); }} />
+      <StructuredFields specs={SPEC} value={value as unknown as Record<string, unknown>} disabled={!canEdit} idPrefix="cai" ai={{ scope: "campaign.strategy", enabled: canGenerate, getContext: () => ({ campaign, strategy: value, language: campaign.language, tone: campaign.tone, offerId: campaign.offerId, clientId: campaign.clientId }) }} onChange={(v) => { setValue(v as unknown as CampaignAi); setDirty(true); }} />
       {canEdit && (
         <div className="sticky bottom-0 flex gap-2 rounded-xl border border-border/50 bg-background/95 p-2 backdrop-blur">
           <Button type="button" onClick={save} disabled={!dirty || pending}>{pending ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save edits</Button>

@@ -9,8 +9,9 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import SmmsSidebar from "@/components/products/viralpulse-ai/SmmsSidebar";
 import SidebarBrand from "@/components/SidebarBrand";
 import type { SmmsNavFlags } from "@/components/products/viralpulse-ai/SmmsSidebar";
+import type { NavBadges } from "@/lib/products/viralpulse-ai/nav";
 
-export default function SmmsMobileSidebar({ flags }: { flags: SmmsNavFlags }) {
+export default function SmmsMobileSidebar({ flags, badges }: { flags: SmmsNavFlags; badges: NavBadges }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -26,7 +27,7 @@ export default function SmmsMobileSidebar({ flags }: { flags: SmmsNavFlags }) {
             <SidebarBrand />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <SmmsSidebar flags={flags} onNavigate={() => setOpen(false)} />
+            <SmmsSidebar flags={flags} badges={badges} onNavigate={() => setOpen(false)} />
           </div>
           <MobileSidebarProfile />
         </SheetContent>

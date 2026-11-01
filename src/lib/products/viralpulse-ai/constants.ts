@@ -4,7 +4,7 @@ export type Option = { value: string; label: string };
 
 // ── Platforms ───────────────────────────────────────────────────────────────
 
-export const PLATFORMS = ["instagram", "facebook", "youtube", "linkedin", "google_ads", "google_business"] as const;
+export const PLATFORMS = ["instagram", "facebook", "youtube", "linkedin", "x", "google_ads", "google_business"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 /** Where paid campaigns & ads run. */
@@ -12,7 +12,7 @@ export const AD_PLATFORMS = ["instagram", "facebook", "youtube", "linkedin", "go
 export type AdPlatform = (typeof AD_PLATFORMS)[number];
 
 /** Where organic posts go. */
-export const POST_PLATFORMS = ["instagram", "facebook", "youtube", "linkedin", "google_business"] as const satisfies readonly Platform[];
+export const POST_PLATFORMS = ["instagram", "facebook", "youtube", "linkedin", "x", "google_business"] as const satisfies readonly Platform[];
 export type PostPlatform = (typeof POST_PLATFORMS)[number];
 
 /** The OAuth provider that owns each platform's API (Meta covers Facebook + Instagram; Google covers YouTube + Business Profile). */
@@ -29,7 +29,7 @@ export interface PlatformFormat {
 export interface PlatformMeta {
   label: string;
   short: string;
-  provider: Provider;
+  provider: Provider | "x";
   /** The LMS ad-platform bucket its paid performance is imported under (`campaigns.platform`), if any. */
   lmsPlatform: "meta" | "google" | "linkedin" | null;
   /** Tailwind classes for the platform chip. */
@@ -111,6 +111,22 @@ export const PLATFORM_META: Record<Platform, PlatformMeta> = {
       { key: "li_square", label: "Square 1:1", width: 1200, height: 1200, kind: "both" },
       { key: "li_landscape", label: "Landscape 1.91:1", width: 1200, height: 627, kind: "both" },
       { key: "li_portrait", label: "Portrait 4:5", width: 1080, height: 1350, kind: "both" },
+    ],
+  },
+  x: {
+    label: "X",
+    short: "X",
+    provider: "x",
+    lmsPlatform: null,
+    chip: "bg-zinc-900/10 text-zinc-900 dark:bg-zinc-100/10 dark:text-zinc-100",
+    color: "#111111",
+    captionLimit: 280,
+    headlineLimit: null,
+    hashtagAdvice: "1–2 hashtags at most; X counts every character, links count as 23",
+    needsMedia: "none",
+    formats: [
+      { key: "x_landscape", label: "Landscape 16:9", width: 1600, height: 900, kind: "both" },
+      { key: "x_square", label: "Square 1:1", width: 1080, height: 1080, kind: "both" },
     ],
   },
   google_ads: {

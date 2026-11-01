@@ -8,6 +8,7 @@
 // none exist yet (admin-owned).
 import { ObjectId } from "mongodb";
 import { hashPassword } from "./lib.mjs";
+import { assertDemoTarget } from "./guard.mjs";
 
 const PASSWORD = "Demo@12345";
 const D = "demo-smms-";
@@ -118,7 +119,9 @@ const metrics = (m, by, days) => ({ impressions: 0, reach: 0, clicks: 0, engagem
 /**
  * @param {import("mongodb").Db} db
  */
-export async function seedSmms(db) {
+export async function seedSmms(db, target) {
+  // Writes invented copy and metrics and logins with a known password: only ever into a company flagged as the demo company.
+  assertDemoTarget(target?.company, process.env, "Social media (SMMS) demo data");
   const passwordHash = hashPassword(PASSWORD);
   const users = {};
   for (const a of SMMS_DEMO_ACCOUNTS) {

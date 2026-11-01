@@ -1,34 +1,22 @@
 import { notFound, redirect } from "next/navigation";
-import { PageHeader, SectionCard } from "@/components/products/viralpulse-ai/SmmsUi";
-import PostBriefForm from "@/components/products/viralpulse-ai/PostBriefForm";
+import { PageHeader } from "@/components/products/viralpulse-ai/SmmsUi";
+import PostWizard from "@/components/products/viralpulse-ai/post-wizard/PostWizard";
 import { getViewer, can } from "@/lib/products/viralpulse-ai/viewer";
-import { getPost } from "@/lib/products/viralpulse-ai/posts";
-import { briefPickers, toLocalInput } from "@/lib/products/viralpulse-ai/page-data";
-import { listCampaignOptions } from "@/lib/products/viralpulse-ai/campaigns";
+import { loadWizardInit, parseHandoff } from "@/lib/products/viralpulse-ai/post-wizard/server";
 
-const local = (d: Date | null) => (d ? toLocalInput(d) : "");
+export const maxDuration = 300;
 
-export default async function EditPostBriefPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditPostPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const viewer = await getViewer();
   if (!viewer) redirect("/viralpulse-ai/login");
   const { id } = await params;
   if (!can(viewer, "MANAGE_POSTS")) redirect(`/viralpulse-ai/posts/${id}`);
-  const p = await getPost(id);
-  if (!p) notFound();
-  const [pickers, campaigns] = await Promise.all([briefPickers(), listCampaignOptions()]);
+  const init = await loadWizardInit(id, parseHandoff(await searchParams), viewer);
+  if (!init) notFound();
   return (
     <div className="space-y-4">
-      <PageHeader title="Edit post brief" crumbs={[{ label: "Social Media Posts", href: "/viralpulse-ai/posts" }, { label: p.title, href: `/viralpulse-ai/posts/${id}` }, { label: "Edit brief" }]} description="Adding a platform adds an empty version for it — regenerate that version afterwards." />
-      <SectionCard title="Post brief">
-        <PostBriefForm
-          postId={id}
-          {...pickers}
-          campaigns={campaigns}
-          canGenerate={false}
-          lockedPlatforms={p.variants.filter((v) => v.publish.state === "published").map((v) => v.platform)}
-          initial={{ title: p.title, topic: p.topic, serviceProduct: p.serviceProduct, audience: p.audience, tone: p.tone, language: p.language, objective: p.objective, contentType: p.contentType, platforms: p.platforms, link: p.link ?? "", plannedAt: local(p.plannedAt), campaignId: p.campaignId ?? "", offerId: p.offerId ?? "", clientId: p.clientId ?? "", notes: p.notes }}
-        />
-      </SectionCard>
+      <PageHeader title="Edit post" crumbs={[{ label: "Social Media Reels/Posts", href: "/viralpulse-ai/posts" }, { label: init.state.title || "Post", href: `/viralpulse-ai/posts/${id}` }, { label: "Edit" }]} description="Your changes are saved as you go. Every checkpoint is kept in the post's version history." />
+      <PostWizard key={id} init={init} />
     </div>
   );
 }
