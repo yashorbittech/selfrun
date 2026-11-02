@@ -1,4 +1,5 @@
 import "server-only";
+import { stripPostDisclosureOverride } from "@/lib/products/viralpulse-ai/publishers/types";
 import { getMediaMany, toMediaCard, validMediaIds, type MediaCard } from "@/lib/products/viralpulse-ai/media";
 import { listAccounts } from "@/lib/products/viralpulse-ai/accounts/service";
 import type { AccountProvider } from "@/lib/products/viralpulse-ai/accounts/types";
@@ -153,7 +154,7 @@ export async function saveWizardDraft(raw: unknown, opts: { checkpoint: boolean 
     if (!d || cur.publish.state === "published") return cur;
     return { ...cur, ...normalizeVariant({ ...d, caption: cur.caption }) };
   });
-  const options = buildPublishOptions(s, base.publishOptions);
+  const options = stripPostDisclosureOverride(buildPublishOptions(s, base.publishOptions));
   const status = statusAfterEdit(base.status);
   const changedContent = JSON.stringify(postSnapshot({ idea: base.idea, creative: base.creative, variants: base.variants })) !== JSON.stringify(postSnapshot({ idea: base.idea, creative: base.creative, variants }));
   await updatePost(base._id, {

@@ -1,7 +1,7 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMediaToken } from "@/lib/products/viralpulse-ai/crypto";
-import { getMedia } from "@/lib/products/viralpulse-ai/media";
+import { getMedia, keyBelongsToCompany } from "@/lib/products/viralpulse-ai/media";
 import { getObject } from "@/lib/storage/blob";
 import { imageBytesFor } from "@/lib/products/viralpulse-ai/publishers/media-facts";
 
@@ -19,7 +19,7 @@ async function handleGET(req: NextRequest, { params }: Context) {
   const sig = req.nextUrl.searchParams.get("sig") ?? "";
   if (!verifyMediaToken(id, exp, sig)) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const media = await getMedia(id);
-  if (!media) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!media || !(await keyBelongsToCompany(media.storageKey))) return NextResponse.json({ error: "Not found" }, { status: 404 });
   // `fmt=jpeg`: a JPEG rendition for Instagram (JPEG is the only image format it accepts). Images only; bounded size.
   if (req.nextUrl.searchParams.get("fmt") === "jpeg" && media.kind === "image" && media.contentType !== "image/jpeg") {
     const out = await imageBytesFor(id, { jpeg: true }).catch(() => null);

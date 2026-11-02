@@ -1,4 +1,3 @@
-import { mongoTimeZone } from "@/lib/timezone";
 import "server-only";
 import { getCampaignAnalytics, type CampaignRow } from "@/lib/campaigns";
 import { notDeleted } from "@/lib/products/viralpulse-ai/db";
@@ -10,11 +9,10 @@ import { generationsCollection, recentAiGenerations, type RecentGeneration } fro
 import { CONTENT_STATUSES, POST_PLATFORMS, AD_PLATFORMS, type ContentStatus, type Platform } from "@/lib/products/viralpulse-ai/constants";
 
 /**
- * Dashboard + analytics numbers. Organic post performance is what the team
- * records per platform version (entered, or pasted from each platform's
- * insights). Paid campaign performance is NOT stored here — it's the LMS's
- * imported ad-platform data (`campaigns` / `campaign_metrics` + attributed
- * leads), read for the LMS campaigns each SMMS campaign is linked to.
+ * Dashboard numbers. `postMetricsByPlatform` / `postTotals` sum what the team typed in per platform version (an audited manual override,
+ * shown as such). The Analytics page does NOT use them: it reads synced platform snapshots (`metrics/queries.ts`).
+ * `paidPerformance` is the legacy LMS CSV-import join (an optional import, used by the campaign page); the Analytics page reads paid
+ * results from the ad-platform snapshots (WP6a) instead.
  */
 
 export type MetricTotals = Record<MetricKey, number>;
@@ -171,74 +169,5 @@ export async function getDashboard(filters: { from?: string; to?: string } = {})
   };
 }
 
-export interface TopPost {
-  _id: string;
-  title: string;
-  platform: Platform;
-  contentType: "image" | "video";
-  url: string | null;
-  engagements: number;
-  reach: number;
-  impressions: number;
-  clicks: number;
-}
-
-export interface AnalyticsData {
-  byPlatform: Awaited<ReturnType<typeof postMetricsByPlatform>>;
-  byType: { type: "image" | "video"; posts: number; engagements: number; reach: number; clicks: number }[];
-  topPosts: TopPost[];
-  weekly: { week: string; published: number }[];
-  paid: Awaited<ReturnType<typeof paidPerformance>>;
-}
-
-export async function getAnalytics(from?: Date, to?: Date): Promise<AnalyticsData> {
-  const posts = await postsCollection();
-  const range: Record<string, Date> = {};
-  if (from) range.$gte = from;
-  if (to) range.$lte = to;
-  const inRange = from || to ? [{ $match: { "variants.publish.at": range } }] : [];
-  const tz = mongoTimeZone();
-  const [byPlatform, byType, top, weekly, paid] = await Promise.all([
-    postMetricsByPlatform(from, to),
-    posts
-      .aggregate<{ _id: "image" | "video"; posts: number; engagements: number; reach: number; clicks: number }>([
-        { $match: notDeleted },
-        { $unwind: "$variants" },
-        { $match: { "variants.publish.state": "published" } },
-        ...inRange,
-        { $group: { _id: "$contentType", posts: { $sum: 1 }, engagements: { $sum: { $ifNull: ["$variants.metrics.engagements", 0] } }, reach: { $sum: { $ifNull: ["$variants.metrics.reach", 0] } }, clicks: { $sum: { $ifNull: ["$variants.metrics.clicks", 0] } } } },
-      ])
-      .toArray(),
-    posts
-      .aggregate<TopPost>([
-        { $match: notDeleted },
-        { $unwind: "$variants" },
-        { $match: { "variants.publish.state": "published" } },
-        ...inRange,
-        { $project: { title: 1, contentType: 1, platform: "$variants.platform", url: "$variants.publish.url", engagements: { $ifNull: ["$variants.metrics.engagements", 0] }, reach: { $ifNull: ["$variants.metrics.reach", 0] }, impressions: { $ifNull: ["$variants.metrics.impressions", 0] }, clicks: { $ifNull: ["$variants.metrics.clicks", 0] } } },
-        { $sort: { engagements: -1, reach: -1 } },
-        { $limit: 10 },
-      ])
-      .toArray(),
-    posts
-      .aggregate<{ _id: string; published: number }>([
-        { $match: notDeleted },
-        { $unwind: "$variants" },
-        { $match: { "variants.publish.state": "published", "variants.publish.at": { $gte: from ?? new Date(Date.now() - 84 * 86400000), ...(to ? { $lte: to } : {}) } } },
-        { $group: { _id: { $dateToString: { format: "%G-W%V", date: "$variants.publish.at", timezone: tz } }, published: { $sum: 1 } } },
-        { $sort: { _id: 1 } },
-      ])
-      .toArray(),
-    paidPerformance({ from, to }),
-  ]);
-  return {
-    byPlatform,
-    byType: (["image", "video"] as const).map((t) => {
-      const r = byType.find((x) => x._id === t);
-      return { type: t, posts: r?.posts ?? 0, engagements: r?.engagements ?? 0, reach: r?.reach ?? 0, clicks: r?.clicks ?? 0 };
-    }),
-    topPosts: top,
-    weekly: weekly.map((w) => ({ week: w._id, published: w.published })),
-    paid,
-  };
-}
+/** The Analytics page's data (synced platform snapshots) lives in `metrics/queries.ts`. */
+export { loadAnalytics } from "@/lib/products/viralpulse-ai/metrics/queries";

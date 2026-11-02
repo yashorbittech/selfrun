@@ -13,6 +13,11 @@ export const JOB_RUNNERS: Record<string, () => Promise<unknown>> = {
   cybervault: async () => forEachCompany(async () => (await import("@/lib/products/cybervault/alerts")).runExpirySweep()),
   "viralpulse-publisher": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/publishing")).runDueSweep()),
   "viralpulse-ads": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/ads-platforms/ads-sync")).runAdsSync()),
+  "viralpulse-metrics": async () =>
+    forEachCompany(async () => {
+      const [{ runMetricsSync }, { defaultMetricsDeps }] = await Promise.all([import("@/lib/products/viralpulse-ai/metrics/sync"), import("@/lib/products/viralpulse-ai/metrics/deps")]);
+      return runMetricsSync(defaultMetricsDeps);
+    }),
   "viralpulse-accounts": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/accounts/service")).runAccountsSweep()),
   "viralpulse-ugc": async () => forEachCompany(async () => (await import("@/lib/products/viralpulse-ai/ugc/api")).runUgcCron()),
   evaliq: async () =>

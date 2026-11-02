@@ -398,7 +398,7 @@ async function main() {
     const g = groupedNav(ALL).map((s) => [s.label, s.items.map((i) => i.label)]);
     assert.deepEqual(g, [
       [null, ["Dashboard"]],
-      ["Content Studio", ["AI Image Studio", "AI UGC Studio"]],
+      ["Content Studio", ["AI Image Studio", "Generate Image", "AI UGC Studio", "Media Library", "Brand Kit"]],
       ["Publish & Advertise", ["Social Media Reels/Posts", "Campaigns & Ads"]],
       ["Insights", ["Analytics"]],
       ["Manage", ["Settings"]],
@@ -410,8 +410,8 @@ async function main() {
     assert.deepEqual(groupedNav(NONE).map((s) => s.key), ["top"]);
     const only = groupedNav({ ...NONE, posts: true, analytics: true });
     assert.deepEqual(only.map((s) => s.label), [null, "Publish & Advertise", "Insights"]);
-    assert.deepEqual(visibleNav({ ...NONE, media: true }).map((i) => i.key), ["dashboard", "image-studio"]);
-    assert.deepEqual(visibleNav({ ...NONE, ai: true }).map((i) => i.key), ["dashboard", "image-studio"]);
+    assert.deepEqual(visibleNav({ ...NONE, media: true }).map((i) => i.key), ["dashboard", "image-studio", "library", "brand-kit"]);
+    assert.deepEqual(visibleNav({ ...NONE, ai: true }).map((i) => i.key), ["dashboard", "image-studio", "generate-image", "brand-kit"]);
     assert.ok(!visibleNav({ ...NONE, ai: true, ugc: false }).some((i) => i.key === "ugc"));
   });
   await t("nav: active matching covers nested routes and never double-highlights", () => {
@@ -423,7 +423,10 @@ async function main() {
     assert.equal(at("/viralpulse-ai/campaigns/abc/ads/def"), "campaigns");
     assert.equal(at("/viralpulse-ai/posts/new"), "posts");
     assert.equal(at("/viralpulse-ai/posts/generator"), "posts");
-    assert.equal(at("/viralpulse-ai/image-studio?tab=library"), "image-studio");
+    assert.equal(at("/viralpulse-ai/image-studio?tab=projects"), "image-studio");
+    assert.equal(at("/viralpulse-ai/generate-image"), "generate-image");
+    assert.equal(at("/viralpulse-ai/library"), "library");
+    assert.equal(at("/viralpulse-ai/brand-kit"), "brand-kit");
     assert.equal(at("/viralpulse-ai/ugc/abc/edit"), "ugc");
     assert.equal(at("/viralpulse-ai/ugc/settings"), "ugc");
     assert.equal(at("/viralpulse-ai/analytics"), "analytics");
@@ -437,9 +440,9 @@ async function main() {
     for (const n of ["Campaigns & Ads", "Social Media Reels/Posts", "AI Image Studio", "AI UGC Studio", "Analytics", "Settings"]) assert.ok(NAV_ITEMS.some((i) => i.label === n), n);
   });
   await t("nav: old URLs redirect, query kept, unknown paths untouched", () => {
-    assert.equal(legacyTarget("/viralpulse-ai/media"), "/viralpulse-ai/image-studio?tab=library");
-    assert.equal(legacyTarget("/viralpulse-ai/media", "open=abc&kind=image"), "/viralpulse-ai/image-studio?tab=library&open=abc&kind=image");
-    assert.equal(legacyTarget("/viralpulse-ai/media/", new URLSearchParams("tab=generate")), "/viralpulse-ai/image-studio?tab=library");
+    assert.equal(legacyTarget("/viralpulse-ai/media"), "/viralpulse-ai/library");
+    assert.equal(legacyTarget("/viralpulse-ai/media", "open=abc&kind=image"), "/viralpulse-ai/library?open=abc&kind=image");
+    assert.equal(legacyTarget("/viralpulse-ai/media/", new URLSearchParams("tab=generate")), "/viralpulse-ai/library?tab=generate");
     assert.equal(legacyTarget("/viralpulse-ai/ai"), "/viralpulse-ai/posts/generator");
     assert.equal(legacyTarget("/viralpulse-ai/campaigns"), null);
     assert.equal(LEGACY_REDIRECTS.length, 2);

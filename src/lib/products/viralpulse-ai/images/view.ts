@@ -12,6 +12,8 @@ export const toProjectView = (p: ProjectDoc): ProjectView => ({
   totalCostUsd: p.totalCostUsd,
   error: p.error,
   updatedAt: p.updatedAt.toISOString(),
+  createdAt: p.createdAt.toISOString(),
+  progress: p.progress ?? { total: p.variants.length, done: p.variants.length },
 });
 
 export const variantUrl = (projectId: string, variantId: string) => `/api/viralpulse-ai/image-studio/variant/${projectId}/${variantId}`;

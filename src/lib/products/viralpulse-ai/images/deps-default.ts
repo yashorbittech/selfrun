@@ -94,7 +94,7 @@ export function defaultImageDeps(): ImageDeps {
       return saveStudioImage(buf, meta, actorId);
     },
     async audit(e) {
-      await recordAudit({ actorId: e.actorId, actorEmail: e.actorEmail, action: e.action as AuditAction, entity: "media", entityId: e.entityId, entityLabel: e.entityLabel, recordId: null, summary: e.summary, metadata: e.metadata ?? null });
+      await recordAudit({ actorId: e.actorId, actorEmail: e.actorEmail, action: e.action as AuditAction, entity: "media", entityId: e.entityId, entityLabel: e.entityLabel, recordId: e.entityId, summary: e.summary, metadata: e.metadata ?? null });
     },
     async notify(ids, n) {
       await notifySmmsUsers(ids, { type: "smms_ugc_approval", title: n.title, body: n.body, link: n.link });

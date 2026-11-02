@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import OptionSelect from "@/components/products/playbook-ai/OptionSelect";
 import { Field, MediaThumb, PlatformChip, formatBytes, mediaSrc } from "@/components/products/viralpulse-ai/SmmsBits";
 import MediaPicker from "@/components/products/viralpulse-ai/MediaPicker";
-import ImageGenerateForm from "@/components/products/viralpulse-ai/ImageGenerateForm";
 import AiField from "@/components/products/viralpulse-ai/shared/AiField";
 import { useMediaUpload } from "@/components/products/viralpulse-ai/useMediaUpload";
 import { deleteMediaAction, generateLibraryImageAction, generateMediaPromptAction, mediaUsageAction, updateMediaMetaAction } from "@/app/(products)/viralpulse-ai/(protected)/actions";
@@ -187,25 +186,6 @@ function Detail({ item, canManage, canGenerate, canPost, canAds, onClose }: { it
   );
 }
 
-function GenerateImageDialog() {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Button type="button" variant="outline" onClick={() => setOpen(true)}><Sparkles className="size-4" /> Generate image</Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Generate an image with OpenAI</DialogTitle>
-            <DialogDescription>The result is saved to the media library, sized to the nearest supported aspect for the chosen format.</DialogDescription>
-          </DialogHeader>
-          <ImageGenerateForm idPrefix="gid" onDone={() => { setOpen(false); router.refresh(); }} />
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-}
-
 export default function MediaLibrary({ items, canManage, canGenerate, canPost = false, canAds = false, openId }: { items: LibraryItem[]; canManage: boolean; canGenerate: boolean; canPost?: boolean; canAds?: boolean; openId: string | null }) {
   const router = useRouter();
   const [open, setOpen] = useState<LibraryItem | null>(() => items.find((i) => i._id === openId) ?? null);
@@ -236,7 +216,7 @@ export default function MediaLibrary({ items, canManage, canGenerate, canPost = 
               <Button type="button" onClick={() => fileRef.current?.click()} disabled={progress !== null}>{progress !== null ? <><Loader2 className="size-4 animate-spin" />{`Uploading ${progress}%`}</> : <><Upload className="size-4" /> Upload images / videos</>}</Button>
             </>
           )}
-          {canManage && canGenerate && <GenerateImageDialog />}
+          {canManage && canGenerate && <Button variant="outline" nativeButton={false} render={<Link href="/viralpulse-ai/generate-image" />}><Sparkles className="size-4" /> Generate image</Button>}
           {canManage && items.length > 0 && <Button type="button" variant={picking ? "secondary" : "outline"} onClick={() => { setPicking((p) => !p); setSel([]); }}><CheckSquare className="size-4" /> {picking ? "Done selecting" : "Select"}</Button>}
         </div>
       )}

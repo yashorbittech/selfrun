@@ -626,3 +626,39 @@ Routes: `/viralpulse-ai/campaigns` (list), `/campaigns/new` and `/campaigns/[id]
 - **Hand-offs.** Library "Use in a new campaign" and UGC "Use in a campaign or ad" open `/campaigns/new?step=ads&media=ID[&ugc=ID]`; the media (with its AI-generated flag) lands in a first ad.
 - Tests: `scripts/test-viralpulse-ads-ui.ts` (in `npm run test:viralpulse`): money per currency, goal/destination filters against the validator, placement rules, field-path mapping, wizard reducer, commitment, status, polling, hand-off parsing, planner helpers.
 - **What the company must set up.** Connect a Meta login with an ad account and Page (Standard access works for your own accounts; other businesses' ad accounts need Advanced access for `ads_management`); set the ad spending limits per currency (nothing can be switched on without them unless uncapped launches are allowed); at least two people, one with Approve ad spend, because budgets above the threshold need an approver other than the creator. Google Ads, LinkedIn and X need their API approvals before they can ever launch.
+
+### ViralPulse: Analytics sync (WP7)
+- Cron job `viralpulse-metrics` (`/api/viralpulse-ai/metrics/cron`, `0 */3 * * *`, each company). Reads Instagram, Facebook, YouTube, LinkedIn and X numbers for connected accounts and published posts into `smms_metric_snapshots` (see `src/lib/products/viralpulse-ai/metrics/SPEC.md`). No new environment variable: tokens come from the connected accounts; every limit is a setting in Analytics > Accounts > Sync settings (history kept, recent/older post windows, YouTube daily quota allowance, X reads on/off and caps).
+- Collections: `smms_metric_sync` (per-account last synced / next sync / error), `smms_metric_settings`.
+- Analytics page: `/viralpulse-ai/analytics` (tabs Overview, Posts & Reels, Campaigns & Ads, Creatives, Accounts, Best time to post). Hand-typed post numbers are shown only as an audited override badge and never counted.
+
+### ViralPulse: review fixes
+- Spend: turning the kill switch on pauses everything delivering in Meta (recorded active, last-synced ACTIVE, or ACTIVE on a live read) with one recorded result per launch; the ads sync also pauses any campaign found ACTIVE in Meta while the switch is on or the budget is unapproved. Activation and launch edits run under a per-company lease (`lease.ts`); so does the Image Studio daily-cap booking. With no approval threshold set, every launch needs an approver other than its creator. Changing limits, relaxing the approval rule or allowing uncapped launches needs the separate `MANAGE_AD_LIMITS` permission (admins); turning the kill switch off needs it too.
+- Tenancy: ids in shared collections are never fixed (legacy connection/account ids, the metrics settings row, the housekeeping marker and snapshot ids carry the company id). Legacy upload paths without a company prefix are no longer accepted for new registrations.
+- Disclosure: media with `source: "ai"` is always AI generated (backfilled on read); a per-post `aiDisclosureOff` is stripped and ignored.
+- Tests: `scripts/test-viralpulse-fixes.ts` and `scripts/test-viralpulse-client-graph.ts` (no "use client" file may reach a `server-only` module).
+- Dashboard: the landing page streams one card per section (setup checklist, needs attention, key numbers, upcoming schedule, recently published with synced results, campaigns and ads, creative studios, analytics highlights with best time, accounts health, activity), each limited to what the viewer's permissions allow. Every figure is read from the company's own posts, launches, synced snapshots, media, UGC projects, accounts and audit log; month figures use the company time zone, and a change against last month's same days shows only when both periods have data. Rules in `dashboard-core.ts`, loaders in `dashboard.ts`, test `scripts/test-viralpulse-dashboard.ts` (in `test:viralpulse`).
+
+## ViralPulse AI: Image Studio projects, Generate Image, Media Library and Brand Kit
+
+- Sidebar, Content Studio group, in order: AI Image Studio, Generate Image, AI UGC Studio, Media Library, Brand Kit. Library and Brand Kit
+  left the Image Studio tabs: `/viralpulse-ai/library` (permission: media/posts/ads) and `/viralpulse-ai/brand-kit` (media/posts/ads or AI).
+  Old links keep working: `?tab=library` (and `&open=`), `?tab=brand|kit`, `?tab=quick|generate` answer a permanent redirect; `/viralpulse-ai/media`
+  goes straight to the library. The "Generate an image with OpenAI" dialog is gone; the library's button links to Generate Image.
+- Image Studio has two tabs: Create (five-step wizard) and Projects (search and format filter, stat cards, All/Draft/Generating/Ready/Failed).
+  Generate Image (`/viralpulse-ai/generate-image`) is the same wizard in three steps (Describe, Options, Review and generate).
+- Projects are saved server-side as the person goes (autosave, 1.5 s after the last edit; before a project exists a draft is kept in the browser and
+  offered back). Status machine (`images/state.ts`): draft -> briefed -> generating | awaiting_approval -> ready | failed -> finished.
+  Resume: `?tab=create&project=<id>` lands on the first incomplete step (or the review).
+- Generation is one provider request per picture, run after the response (`afterForCompany`), so progress is real and leaving the page is safe.
+  A failure on the first picture is `failed`; a later one keeps the finished pictures (`ready` plus the error). A generation untouched for 15
+  minutes is shown as failed and can be restarted. The project page (`/viralpulse-ai/image-studio/<id>`) polls with backoff (3 s up to 30 s, stops
+  when hidden, finished or after repeated errors), compares, edits one picture with an instruction (copy, original kept), saves per-platform
+  exports, hands them to a post, an ad or a new campaign, and shows version history and the audit trail. Duplicate copies the brief and clears the consent.
+  Delete is a soft delete and is refused while generating.
+- Shared with the UGC wizard: `shared/WizardFrame.tsx` (stepper, card header with autosave status, sticky action bar) now frames both wizards.
+- Format cards draw an honest layout guide (exact aspect ratio, hatched platform-covered margins, dashed safe area, text band), never a sample
+  picture. Source tags: Verified (official page), Partly verified, Re-check for paid ads (secondary sources), from `images/specs.ts`.
+- Consent for reference photos is stamped (who, when) on the server from the session; a duplicate or a changed attestation must be confirmed again.
+- Tests: `scripts/test-viralpulse-image-projects.ts` (state machine, reducer, validation, drafts, format cards, estimate and gate maths, engine
+  with a fake provider on a throwaway database, tenancy) is part of `npm run test:viralpulse`.

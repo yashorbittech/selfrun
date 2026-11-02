@@ -4,7 +4,7 @@ import { getObject } from "@/lib/storage/blob";
 import { companySiteUrl } from "@/lib/platform/tenancy/site-url";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 import { signMediaToken } from "@/lib/products/viralpulse-ai/crypto";
-import { getMedia, getMediaMany, type MediaDoc } from "@/lib/products/viralpulse-ai/media";
+import { getMedia, getMediaMany, isAiMedia, type MediaDoc } from "@/lib/products/viralpulse-ai/media";
 import { SmmsInputError } from "@/lib/products/viralpulse-ai/viewer";
 import type { MediaFacts } from "./types";
 
@@ -34,8 +34,9 @@ export function factsOf(m: MediaDoc): MediaFacts {
     height: m.height,
     durationSec: m.durationSec,
     altText: m.altText,
-    aiGenerated: Boolean(m.ai?.aiGenerated),
-    aiDisclosureRequired: m.ai ? m.ai.disclosureRequired !== false : false,
+    aiGenerated: isAiMedia(m),
+    // An AI item without a provenance block is disclosed by default; only an explicit `disclosureRequired: false` opts out.
+    aiDisclosureRequired: isAiMedia(m) ? m.ai?.disclosureRequired !== false : false,
   };
 }
 

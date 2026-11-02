@@ -12,7 +12,7 @@ import { getPublishSettings } from "./publish-settings";
 import { languageCodeFor } from "./schedule";
 import { ProviderError } from "./errors";
 import type { AttemptDoc } from "./attempts";
-import type { MediaFacts, PlatformKey, PublishOptions, PublishPost } from "./types";
+import { stripPostDisclosureOverride, type MediaFacts, type PlatformKey, type PublishOptions, type PublishPost } from "./types";
 import { composeCaption, disclosureFor_ } from "./validate";
 import type { PostDoc } from "@/lib/products/viralpulse-ai/posts";
 
@@ -28,7 +28,8 @@ export function buildPublishPost(p: PostDoc, platform: PlatformKey, media: { ima
   const v = p.variants.find((x) => x.platform === platform);
   if (!v) return null;
   const mod = PUBLISHER_MODULES[platform];
-  const options: PublishOptions = { ...(p.publishOptions ?? {}), ...(aiDisclosureOff ? { aiDisclosureOff: true } : {}) };
+  // A per-post `aiDisclosureOff` is never honoured: only the company setting (publish-settings) may relax the disclosure.
+  const options: PublishOptions = { ...stripPostDisclosureOverride(p.publishOptions), ...(aiDisclosureOff ? { aiDisclosureOff: true } : {}) };
   const all = [...media.images, ...(media.video ? [media.video] : [])];
   const d = disclosureFor_(platform, mod.capabilities, all, options, p.language);
   const text = (v.content || v.caption).trim();

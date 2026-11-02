@@ -91,12 +91,38 @@ export interface AiMediaMeta {
   disclosureRequired: boolean;
 }
 
+/**
+ * Anything with `source: "ai"` is AI generated, whether or not it carries the `ai` provenance block (older rows and any generation path that
+ * forgot it). The disclosure decision and the library's AI badge go through this, never through `m.ai` alone.
+ */
+export const isAiMedia = (m: Pick<MediaDoc, "source" | "ai">): boolean => m.source === "ai" || Boolean(m.ai?.aiGenerated);
+
+/** The provenance block an AI item without one is treated as having: disclosed, provider unknown. */
+export const legacyAiMeta = (m: Pick<MediaDoc, "kind">): AiMediaMeta => ({ aiGenerated: true, provider: "unknown", model: "unknown", projectId: "", role: m.kind === "video" ? "render" : "image", disclosureRequired: true });
+
+/** Read-side backfill: an AI item without provenance gets the legacy block, so every consumer sees it as AI generated. */
+export function withLegacyAi<T extends MediaDoc>(m: T): T {
+  return m.source === "ai" && !m.ai?.aiGenerated ? { ...m, ai: legacyAiMeta(m) } : m;
+}
+
 let indexesEnsured = false;
+const aiBackfilled = new Set<string>();
 export async function mediaCollection() {
   const col = await smmsCollection<MediaDoc>(COLLECTIONS.media);
   if (!indexesEnsured) {
     indexesEnsured = true;
     await Promise.all([col.createIndex({ deletedAt: 1, createdAt: -1 }).catch(() => {}), col.createIndex({ kind: 1, deletedAt: 1 }).catch(() => {}), col.createIndex({ storageKey: 1 }).catch(() => {})]);
+  }
+  // Once per company per process: persist the provenance of AI items saved without it (the read side already treats them as AI).
+  const cid = (await currentCompanyIdOrNull()) ?? "shared";
+  if (!aiBackfilled.has(cid)) {
+    try {
+      await col.updateMany({ source: "ai", "ai.aiGenerated": { $ne: true } }, { $set: { ai: legacyAiMeta({ kind: "image" }) } });
+      await col.updateMany({ source: "ai", kind: "video", "ai.role": "image" }, { $set: { "ai.role": "render" } });
+      aiBackfilled.add(cid);
+    } catch (e) {
+      console.error("[viralpulse] AI media provenance backfill failed; it will be retried", e instanceof Error ? e.message : e);
+    }
   }
   return col;
 }
@@ -106,9 +132,26 @@ export const UPLOAD_PATH = /^smms\/(?:[A-Za-z0-9_-]{1,64}\/)?uploads\/[0-9a-f-]{
 
 /** New uploads live under the company's own prefix (`smms/<companyId>/uploads/...`); older ones have no prefix. A prefixed path must be this company's. */
 export async function assertUploadOwner(pathname: string): Promise<void> {
+  const cid = await currentCompanyIdOrNull();
   const m = /^smms\/([A-Za-z0-9_-]{1,64})\/uploads\//.exec(pathname);
-  if (!m) return;
-  if (m[1] !== (await currentCompanyIdOrNull())) throw new SmmsInputError("That upload isn't valid.");
+  // The old un-prefixed form names no company, so it could be any company's blob: inside a company it is never accepted for a NEW registration
+  // (the server hands out prefixed paths only; library rows already holding a legacy path keep working).
+  if (!m) {
+    if (cid) throw new SmmsInputError("That upload isn't valid. Upload the file again.");
+    return;
+  }
+  if (m[1] !== cid) throw new SmmsInputError("That upload isn't valid.");
+}
+
+/**
+ * Whether a stored key may be served to the current company. A key under another company's prefix never is. A legacy un-prefixed key is
+ * served only because THIS company's own library row names it (rows are company-scoped), which is why callers pass a row they just read.
+ */
+export async function keyBelongsToCompany(storageKey: string): Promise<boolean> {
+  const cid = await currentCompanyIdOrNull();
+  const m = /^smms\/([A-Za-z0-9_-]{1,64})\/(?:uploads|ai|thumbs|studio)\//.exec(storageKey);
+  if (!m || !cid) return true;
+  return m[1] === cid || m[1] === "shared";
 }
 
 export async function newUploadPath(ext: string): Promise<string> {
@@ -175,7 +218,7 @@ export async function listMedia(f: MediaFilter = {}) {
   const page = Math.max(f.page ?? 1, 1);
   const pageSize = Math.min(Math.max(f.pageSize ?? 36, 1), 100);
   const [items, total] = await Promise.all([col.find(filter).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).toArray(), col.countDocuments(filter)]);
-  return { items, total, page, pageSize, totalPages: Math.max(Math.ceil(total / pageSize), 1) };
+  return { items: items.map(withLegacyAi), total, page, pageSize, totalPages: Math.max(Math.ceil(total / pageSize), 1) };
 }
 
 /** Folders and tags in use, for the library's filter bar. */
@@ -191,7 +234,8 @@ export const platformFit = (m: Pick<MediaDoc, "kind" | "width" | "height">) => (
 export async function getMedia(id: string): Promise<MediaDoc | null> {
   if (!id) return null;
   const col = await mediaCollection();
-  return col.findOne({ _id: id, ...notDeleted });
+  const m = await col.findOne({ _id: id, ...notDeleted });
+  return m ? withLegacyAi(m) : null;
 }
 
 export async function getMediaMany(ids: string[]): Promise<MediaDoc[]> {
@@ -199,7 +243,7 @@ export async function getMediaMany(ids: string[]): Promise<MediaDoc[]> {
   if (wanted.length === 0) return [];
   const col = await mediaCollection();
   const rows = await col.find({ _id: { $in: wanted }, ...notDeleted }).toArray();
-  const byId = new Map(rows.map((r) => [r._id, r]));
+  const byId = new Map(rows.map((r) => [r._id, withLegacyAi(r)]));
   return wanted.map((id) => byId.get(id)).filter((m): m is MediaDoc => Boolean(m));
 }
 
@@ -365,7 +409,7 @@ export async function saveAiImage(buf: Buffer, meta: { name: string; creativePro
   const col = await mediaCollection();
   const id = newId();
   const contentType = meta.contentType ?? "image/png";
-  const put = await putObject(`${MEDIA_FOLDER}/ai`, `${id}.${contentType === "image/jpeg" ? "jpg" : "png"}`, buf, contentType);
+  const put = await putObject(`${MEDIA_FOLDER}/${(await currentCompanyIdOrNull()) ?? "shared"}/ai`, `${id}.${contentType === "image/jpeg" ? "jpg" : "png"}`, buf, contentType);
   const doc: MediaDoc = {
     _id: id,
     kind: "image",
@@ -434,7 +478,7 @@ export async function saveStudioImage(buf: Buffer, meta: { name: string; prompt:
 export async function saveAiVideo(buf: Buffer, meta: { name: string; creativePrompt: string; platform: string | null; width: number; height: number; durationSec: number | null; thumbnailId: string | null; script: string; caption: string; tags?: string[]; ai: AiMediaMeta }, actorId: string): Promise<MediaDoc> {
   const col = await mediaCollection();
   const id = newId();
-  const put = await putObject(`${MEDIA_FOLDER}/ai`, `${id}.mp4`, buf, "video/mp4");
+  const put = await putObject(`${MEDIA_FOLDER}/${(await currentCompanyIdOrNull()) ?? "shared"}/ai`, `${id}.mp4`, buf, "video/mp4");
   const doc: MediaDoc = {
     _id: id,
     kind: "video",
@@ -547,5 +591,5 @@ export interface MediaCard {
 }
 
 export function toMediaCard(m: MediaDoc): MediaCard {
-  return { _id: m._id, kind: m.kind, name: m.name, contentType: m.contentType, size: m.size, width: m.width, height: m.height, durationSec: m.durationSec, source: m.source, thumbnailId: m.thumbnailId, altText: m.altText, updatedAt: m.updatedAt.toISOString(), hasThumb: !!m.thumbKey, ...(m.ai?.aiGenerated ? { aiDisclosed: true } : {}) };
+  return { _id: m._id, kind: m.kind, name: m.name, contentType: m.contentType, size: m.size, width: m.width, height: m.height, durationSec: m.durationSec, source: m.source, thumbnailId: m.thumbnailId, altText: m.altText, updatedAt: m.updatedAt.toISOString(), hasThumb: !!m.thumbKey, ...(isAiMedia(m) ? { aiDisclosed: true } : {}) };
 }

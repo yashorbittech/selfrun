@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, FolderOpen, Images, Tag } from "lucide-react";
+import KpiCard from "@/components/products/dealflow-ai/KpiCard";
+import KpiGrid from "@/components/products/dealflow-ai/KpiGrid";
 import { buttonVariants } from "@/components/ui/button";
 import SmmsFilterBar from "@/components/products/viralpulse-ai/SmmsFilterBar";
 import MediaLibrary from "@/components/products/viralpulse-ai/MediaLibrary";
@@ -9,20 +11,24 @@ import { isOpenAIConfigured } from "@/lib/openai";
 import { PLATFORMS, PLATFORM_META } from "@/lib/products/viralpulse-ai/constants";
 import { SPECS } from "@/lib/products/viralpulse-ai/images/specs";
 
-/** The Library tab of the AI Image Studio: every reusable image and video, with upload, details, versions and "used in". */
+/** The Media Library page (own sidebar item): every reusable image and video, with upload, details, versions and "used in". */
 export default async function MediaLibraryTab({ viewer, sp }: { viewer: SmmsViewer; sp: Record<string, string | undefined> }) {
   const page = Math.max(Number(sp.page) || 1, 1);
   const [r, facets] = await Promise.all([listMedia({ q: sp.q, kind: sp.kind, origin: sp.origin, platform: sp.platform, folder: sp.folder, tag: sp.tag, fit: sp.fit, minWidth: sp.minWidth, page, pageSize: 48 }), mediaFacets()]);
   const thumbs = new Map((await getMediaMany(r.items.map((m) => m.thumbnailId).filter((x): x is string => Boolean(x)))).map((m) => [m._id, toMediaCard(m)]));
   const href = (p: number) => {
     const qs = new URLSearchParams(Object.entries(sp).filter((e): e is [string, string] => !!e[1] && e[0] !== "open"));
-    qs.set("tab", "library");
+    qs.delete("tab");
     qs.set("page", String(p));
-    return `/viralpulse-ai/image-studio?${qs}`;
+    return `/viralpulse-ai/library?${qs}`;
   };
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">{`${r.total} reusable image${r.total === 1 ? "" : "s"} and videos for ads and posts. Files are private — served only to signed-in staff.`}</p>
+      <KpiGrid>
+        <KpiCard label={sp.q || sp.kind || sp.origin || sp.platform || sp.folder || sp.tag || sp.fit || sp.minWidth ? "Matching files" : "Files"} value={r.total} icon={<Images className="size-4" />} />
+        <KpiCard label="Folders" value={facets.folders.length} icon={<FolderOpen className="size-4" />} />
+        <KpiCard label="Tags" value={facets.tags.length} icon={<Tag className="size-4" />} />
+      </KpiGrid>
       <SmmsFilterBar
         values={{ q: sp.q ?? "", kind: sp.kind ?? "", origin: sp.origin ?? "", platform: sp.platform ?? "", folder: sp.folder ?? "", tag: sp.tag ?? "", fit: sp.fit ?? "", minWidth: sp.minWidth ?? "" }}
         fields={[

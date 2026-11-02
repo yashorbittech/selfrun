@@ -385,7 +385,17 @@ async function saveConnection(p: {
   const conns = await connectionsCol();
   const accts = await accountsCol();
   const now = new Date();
-  const existing = await conns.findOne({ oauth: p.oauth, externalUserId: p.identity.externalUserId });
+  let existing = await conns.findOne({ oauth: p.oauth, externalUserId: p.identity.externalUserId });
+  if (p.reconnectId) {
+    const target = await conns.findOne({ _id: p.reconnectId });
+    if (target && target.oauth === p.oauth && !target.legacyFrom) {
+      // Reconnect renews THIS login. Signing in as someone else must not quietly create a second login (and leave this one expired).
+      if (target.externalUserId !== p.identity.externalUserId) {
+        throw new SmmsInputError(`You signed in as "${p.identity.name}", but this reconnect is for "${target.name}". Sign in as ${target.name} to renew it, or use Connect to add ${p.identity.name} as a separate login.`);
+      }
+      existing = target;
+    }
+  }
   const id = existing?._id ?? randomUUID();
   const previousRefresh = existing?.refreshEnc ? decryptSecret(existing.refreshEnc, connAad(id, "refresh")) : null;
   const refresh = p.tokens.refresh ?? previousRefresh;
@@ -410,7 +420,15 @@ async function saveConnection(p: {
       tokenEnc: d.token ? encryptSecret(d.token, acctAad(aid)) : null, lastVerifiedAt: now, lastError: null, disconnectedAt: null, updatedAt: now,
     };
     if (old) {
-      await accts.updateOne({ _id: aid }, { $set: { ...common, status: computeStatus({ provider: d.provider, now, connectionStatus: "active", tokenExpiresAt: expiresAt ?? null, dataAccessExpiresAt: p.insp.dataAccessExpiresAt ?? null, refreshable: Boolean(refresh), scopes: p.granted }) } });
+      // An account switched off because its login was disconnected comes back as it was; one nobody ever decided on follows the first-of-its-kind rule.
+      let restore: { enabled: boolean; isDefault: boolean } | null = null;
+      if (old.disconnectedAt) {
+        const otherEnabled = (await accts.countDocuments({ provider: d.provider, enabled: true, disconnectedAt: null, _id: { $ne: aid } })) > 0;
+        const otherDefault = (await accts.countDocuments({ provider: d.provider, isDefault: true, enabled: true, disconnectedAt: null, _id: { $ne: aid } })) > 0;
+        const enabled = old.enabledBeforeDisconnect ?? !otherEnabled;
+        restore = { enabled, isDefault: enabled && !otherDefault && (old.defaultBeforeDisconnect ?? !otherEnabled) };
+      }
+      await accts.updateOne({ _id: aid }, { $set: { ...common, ...(restore ?? {}), status: computeStatus({ provider: d.provider, now, connectionStatus: "active", tokenExpiresAt: expiresAt ?? null, dataAccessExpiresAt: p.insp.dataAccessExpiresAt ?? null, refreshable: Boolean(refresh), scopes: p.granted }) } });
     } else {
       // The first account of a kind is switched on (and made the default) so a single-account company can publish straight away; more are the admin's choice.
       const hasEnabled = (await accts.countDocuments({ provider: d.provider, enabled: true, disconnectedAt: null })) > 0;
@@ -425,7 +443,7 @@ async function saveConnection(p: {
   const mine = await accts.find({ connectionId: id, disconnectedAt: null }).toArray();
   for (const m of mine) {
     if (seen.has(`${m.provider}|${m.externalId}`)) continue;
-    await accts.updateOne({ _id: m._id }, { $set: { disconnectedAt: now, enabled: false, isDefault: false, lastError: `${CONNECTION_INFO[p.oauth].short} no longer gives this login access to it.`, updatedAt: now } });
+    await accts.updateOne({ _id: m._id }, { $set: { disconnectedAt: now, enabledBeforeDisconnect: m.enabled, defaultBeforeDisconnect: m.isDefault, enabled: false, isDefault: false, lastError: `${CONNECTION_INFO[p.oauth].short} no longer gives this login access to it.`, updatedAt: now } });
   }
   await pruneLegacyConnection(p.oauth, id);
   const missing = [...new Set(p.disc.accounts.flatMap((d) => diffScopes(d.provider, p.granted).missingRequired))];
@@ -434,10 +452,10 @@ async function saveConnection(p: {
 
 /** Once a real login has taken over the accounts of the migrated one, the migrated login and the old document are retired. */
 async function pruneLegacyConnection(oauth: ConnectionProvider, keepId: string): Promise<void> {
-  const legacyId = `legacy-${oauth}`;
-  if (legacyId === keepId) return;
   const conns = await connectionsCol();
-  if (!(await conns.findOne({ _id: legacyId }))) return;
+  const legacy = await conns.findOne({ legacyFrom: oauth });
+  if (!legacy || legacy._id === keepId) return;
+  const legacyId = legacy._id;
   if ((await (await accountsCol()).countDocuments({ connectionId: legacyId, disconnectedAt: null })) === 0) {
     await conns.deleteOne({ _id: legacyId });
     await (await smmsCollection<IntegrationDoc>(COLLECTIONS.integrations)).deleteOne({ _id: oauth as never });
@@ -498,7 +516,12 @@ export async function disconnectConnection(connId: string, actor: Actor): Promis
   }
   const now = new Date();
   await conns.deleteOne({ _id: connId });
-  await (await accountsCol()).updateMany({ connectionId: connId }, { $set: { disconnectedAt: now, enabled: false, isDefault: false, tokenEnc: null, status: "revoked", updatedAt: now } });
+  const acctCol = await accountsCol();
+  for (const a of await acctCol.find({ connectionId: connId }).toArray()) {
+    // Remember the switches of an account that was live; one already disconnected keeps what was remembered then.
+    const remembered = a.disconnectedAt ? {} : { enabledBeforeDisconnect: a.enabled, defaultBeforeDisconnect: a.isDefault };
+    await acctCol.updateOne({ _id: a._id }, { $set: { ...remembered, disconnectedAt: a.disconnectedAt ?? now, enabled: false, isDefault: false, tokenEnc: null, status: "revoked", updatedAt: now } });
+  }
   if (c.legacyFrom) await (await smmsCollection<IntegrationDoc>(COLLECTIONS.integrations)).deleteOne({ _id: c.legacyFrom as never });
   await recordAudit({ actorId: actor.userId, actorEmail: actor.email, action: "disconnect", entity: "integration", entityId: connId, entityLabel: `${CONNECTION_INFO[c.oauth].label}: ${c.name}`, summary: revoked ? "Access revoked at the platform" : "Tokens deleted here; revoke it in the platform's settings too" });
   await smmsEvents.disconnected(`${CONNECTION_INFO[c.oauth].short} (${c.name})`);

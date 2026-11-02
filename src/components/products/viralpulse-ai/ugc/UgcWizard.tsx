@@ -4,13 +4,12 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, CloudOff, ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
+import { ArrowRight, ImagePlus, Loader2, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import OptionSelect from "@/components/products/playbook-ai/OptionSelect";
 import MediaPicker from "@/components/products/viralpulse-ai/MediaPicker";
-import GlassCard from "@/components/products/dealflow-ai/GlassCard";
-import { CardContent } from "@/components/ui/card";
+import WizardFrame, { SaveStatus, type SaveState } from "@/components/products/viralpulse-ai/shared/WizardFrame";
 import { Field, mediaSrc } from "@/components/products/viralpulse-ai/SmmsBits";
 import AiField from "@/components/products/viralpulse-ai/shared/AiField";
 import type { FieldKey } from "@/lib/products/viralpulse-ai/ai-field/registry";
@@ -30,14 +29,19 @@ import type { ProjectView, UgcConnections } from "@/lib/products/viralpulse-ai/u
 import type { UgcSettings } from "@/lib/products/viralpulse-ai/ugc/store";
 import type { MediaCard } from "@/lib/products/viralpulse-ai/media";
 import type { ScenePlan, UgcOptions } from "@/lib/products/viralpulse-ai/ugc/types";
-import { cn } from "@/lib/utils";
 
 const INDUSTRIES = [...new Set((listStyles() as UgcStyle[]).flatMap((s) => s.industries))].filter((i) => i !== "any").sort();
 const DRAFT_KEY = "ugc-wizard-draft";
 const metaKey = (id: string) => `ugc-meta:${id}`;
 const newSeed = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
-type SaveState = "idle" | "saving" | "saved" | "local" | "error";
+const STEP_SUBTITLES = [
+  "Tell us what the video is about. The video can only mention what you write here.",
+  "Pick the kind of video. You can look at the details of any style before choosing.",
+  "Choose who appears, where, and how it is filmed.",
+  "Read and edit the script, scene by scene.",
+  "Check the cost and labelling, then approve.",
+];
 
 export interface WizardProps {
   initialProject: ProjectView | null;
@@ -310,63 +314,39 @@ export default function UgcWizard({ initialProject, settings, spentTodayUsd, con
   const referencesBlocked = !project ? "Photos can be attached on this step once your style is saved." : caps && caps.maxReferenceImages === 0 ? "The selected video model can't use reference photos." : !editable ? "Cancel the video first to change its photos." : null;
 
   return (
-    <div className="space-y-4 rounded-[1.75rem] bg-gradient-to-br from-primary/20 via-primary/5 to-transparent p-1.5 sm:p-2">
-      {restore && (
+    <WizardFrame
+      steps={WIZARD_STEPS}
+      step={state.step}
+      reached={state.reached}
+      busy={!!busy}
+      onGoTo={(n) => void goTo(n as WizardStep)}
+      title={`${state.step}. ${stepDef.label}`}
+      subtitle={STEP_SUBTITLES[state.step - 1]}
+      headingRef={headingRef}
+      status={<SaveStatus save={save} msg={saveMsg} localText="Kept in this browser until you choose a style" />}
+      banner={
+        restore && (
         <div role="status" className="flex flex-wrap items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
           <span className="flex-1">You have an unfinished brief saved in this browser.</span>
           <Button type="button" size="sm" onClick={() => { const d = restoreDraft(restore); if (d) dispatch({ type: "load", state: { ...d, step: Math.min(d.step, 2) as WizardStep, reached: Math.min(d.reached, 2) as WizardStep } }); setRestore(null); }}>Restore it</Button>
           <Button type="button" size="sm" variant="ghost" onClick={() => { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } setRestore(null); }}>Start fresh</Button>
         </div>
-      )}
-
-      <nav aria-label="Progress" className="rounded-2xl border border-primary/15 bg-background/90 p-3 shadow-sm backdrop-blur-xl dark:bg-[#080711]/95">
-        <ol className="flex items-center gap-1 overflow-x-auto [scrollbar-width:none]">
-          {WIZARD_STEPS.map((s, i) => {
-            const done = s.n < state.step || (s.n <= state.reached && s.n !== state.step && s.n < state.step);
-            const current = s.n === state.step;
-            const clickable = s.n <= state.step && !busy;
-            return (
-              <li key={s.key} className="flex min-w-0 flex-1 items-center gap-1">
-                <button
-                  type="button"
-                  disabled={!clickable}
-                  aria-current={current ? "step" : undefined}
-                  onClick={() => goTo(s.n as WizardStep)}
-                  className={cn("flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:px-3", current ? "bg-primary/10 dark:bg-violet-500/15" : clickable ? "hover:bg-muted/60" : "opacity-60")}
-                >
-                  <span className={cn("flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold", current ? "bg-primary text-primary-foreground" : done ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground")}>
-                    {done ? <Check className="size-3.5" /> : s.n}
-                  </span>
-                  <span className={cn("truncate text-xs font-semibold sm:text-sm", current ? "text-primary" : "text-muted-foreground", !current && "max-sm:hidden")}>{s.label}</span>
-                </button>
-                {i < WIZARD_STEPS.length - 1 && <span aria-hidden className="h-px min-w-3 flex-1 bg-border dark:bg-white/15" />}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
-
-      <GlassCard interactive={false} className="border-primary/15 bg-background/95 shadow-xl dark:bg-[#080711]/95">
-        <CardContent className="space-y-5">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div>
-              <h2 ref={headingRef} tabIndex={-1} className="text-lg font-bold outline-none">{`${state.step}. ${stepDef.label}`}</h2>
-              <p className="text-xs text-muted-foreground">
-                {state.step === 1 && "Tell us what the video is about. The video can only mention what you write here."}
-                {state.step === 2 && "Pick the kind of video. You can look at the details of any style before choosing."}
-                {state.step === 3 && "Choose who appears, where, and how it is filmed."}
-                {state.step === 4 && "Read and edit the script, scene by scene."}
-                {state.step === 5 && "Check the cost and labelling, then approve."}
-              </p>
-            </div>
-            <p className={cn("flex items-center gap-1.5 text-[11px]", save === "error" ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground")} role="status" aria-live="polite">
-              {save === "saving" && <><Loader2 className="size-3 animate-spin" /> Saving…</>}
-              {save === "saved" && <><Check className="size-3 text-emerald-600" /> Saved as draft</>}
-              {save === "local" && <><CloudOff className="size-3" /> Kept in this browser until you choose a style</>}
-              {save === "error" && <>{`Not saved${saveMsg ? `: ${saveMsg}` : ""}`}</>}
-            </p>
-          </div>
-
+      )
+      }
+      backDisabled={state.step === 1}
+      onBack={() => void goTo((state.step - 1) as WizardStep)}
+      actions={
+        <>
+          {project && <Button type="button" variant="ghost" disabled={!!busy} onClick={async () => { if (await persist()) router.push(`/viralpulse-ai/ugc/${project.id}`); }}><Save className="size-4" /> <span className="max-sm:hidden">Save and close</span><span className="sm:hidden">Close</span></Button>}
+          {state.step < 5 && (
+            <Button type="button" disabled={!!busy || !editable} onClick={() => goTo((state.step + 1) as WizardStep)}>
+              {busy === "next" ? <Loader2 className="size-4 animate-spin" /> : null}
+              {state.step === 4 ? "Review and estimate" : "Next"} <ArrowRight className="size-4" />
+            </Button>
+          )}
+        </>
+      }
+    >
           {!editable && project && (
             <p className="rounded-xl bg-muted/60 p-3 text-xs">This video is {project.status}, so it can&apos;t be edited here. <Link href={`/viralpulse-ai/ugc/${project.id}`} className="font-semibold text-primary underline">Open it</Link>.</p>
           )}
@@ -484,21 +464,6 @@ export default function UgcWizard({ initialProject, settings, spentTodayUsd, con
             />
           )}
           {err("script") && <p role="alert" className="text-xs font-medium text-rose-600 dark:text-rose-400">{err("script")}</p>}
-        </CardContent>
-      </GlassCard>
-
-      <div className="sticky bottom-0 z-20 -mx-1 flex items-center justify-between gap-2 rounded-2xl border border-primary/15 bg-background/95 p-3 shadow-xl backdrop-blur-xl dark:bg-[#080711]/95">
-        <Button type="button" variant="outline" disabled={state.step === 1 || !!busy} onClick={() => goTo((state.step - 1) as WizardStep)}><ArrowLeft className="size-4" /> Back</Button>
-        <div className="flex items-center gap-2">
-          {project && <Button type="button" variant="ghost" disabled={!!busy} onClick={async () => { if (await persist()) router.push(`/viralpulse-ai/ugc/${project.id}`); }}><Save className="size-4" /> <span className="max-sm:hidden">Save and close</span><span className="sm:hidden">Close</span></Button>}
-          {state.step < 5 && (
-            <Button type="button" disabled={!!busy || !editable} onClick={() => goTo((state.step + 1) as WizardStep)}>
-              {busy === "next" ? <Loader2 className="size-4 animate-spin" /> : null}
-              {state.step === 4 ? "Review and estimate" : "Next"} <ArrowRight className="size-4" />
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
+    </WizardFrame>
   );
 }

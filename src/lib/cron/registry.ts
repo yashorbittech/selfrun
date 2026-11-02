@@ -69,6 +69,11 @@ export const CRON_JOBS: CronJob[] = [
     configure: { label: "ViralPulse campaigns", href: "/viralpulse-ai/campaigns" },
   },
   {
+    key: "viralpulse-metrics", name: "Social post and account results", product: "smms", scope: "each company", path: "/api/viralpulse-ai/metrics/cron", schedule: "0 */3 * * *", maxDurationSec: 300, frequent: true,
+    description: "Reads the real numbers from Instagram, Facebook, YouTube, LinkedIn and X for every connected account (reach, views, likes, comments, shares, saves, followers, watch time) and for the posts published through ViralPulse. Recent posts every 3 hours, older posts daily; keeps daily history for growth charts and tells the admins when an account's numbers stop updating.",
+    configure: { label: "Analytics", href: "/viralpulse-ai/analytics?tab=accounts" },
+  },
+  {
     key: "viralpulse-accounts", name: "Connected account checks", product: "smms", scope: "each company", path: "/api/viralpulse-ai/accounts/cron", schedule: "*/30 * * * *", maxDurationSec: 300, frequent: true,
     description: "Renews social logins that are about to expire, asks Meta, Google, LinkedIn and X whether each login is still valid and what it allows, updates each account's status and warns the admins before a login expires (14, 7, 3 and 1 days ahead), when it has expired or been revoked, or when a permission is missing.",
     configure: { label: "Connected accounts", href: "/viralpulse-ai/settings/accounts" },

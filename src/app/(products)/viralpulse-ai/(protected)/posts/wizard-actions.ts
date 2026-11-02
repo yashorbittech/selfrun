@@ -4,7 +4,7 @@ import { run } from "@/lib/products/viralpulse-ai/run";
 import { SmmsInputError } from "@/lib/products/viralpulse-ai/viewer";
 import { requirePost } from "@/lib/products/viralpulse-ai/posts";
 import { generatePostContent, regenerateVariant } from "@/lib/products/viralpulse-ai/generate";
-import { cancelScheduled, getPublishPlan, listAttempts, publishNow, retryPublish, schedulePost, smmsUsersWith } from "@/lib/products/viralpulse-ai/publishing";
+import { cancelScheduled, getPublishPlan, listAttempts, publishNow, retryPublish, schedulePost, smmsUsersWith, withdrawApprovalForMedia } from "@/lib/products/viralpulse-ai/publishing";
 import { notifySmmsUsers } from "@/lib/products/viralpulse-ai/notifications";
 import { getMedia, updateMediaMeta } from "@/lib/products/viralpulse-ai/media";
 import { recordAudit } from "@/lib/products/viralpulse-ai/audit";
@@ -113,6 +113,7 @@ export async function setAltTextAction(mediaId: string, altText: string) {
     if (!m) throw new SmmsInputError("That file no longer exists.");
     if (m.kind !== "image") throw new SmmsInputError("Only pictures have alt text.");
     await updateMediaMeta(m._id, { name: m.name, description: m.description, altText: String(altText ?? "").slice(0, 500), tags: m.tags, platform: m.platform, creativePrompt: m.creativePrompt, caption: m.caption, folder: m.folder ?? undefined }, v.userId);
+    if (m.altText !== String(altText ?? "").slice(0, 500)) await withdrawApprovalForMedia(m._id, v, "alt text of attached media changed");
     await recordAudit({ actorId: v.userId, actorEmail: v.email, action: "update", entity: "media", entityId: m._id, entityLabel: m.name, summary: "Alt text" });
     return {};
   });

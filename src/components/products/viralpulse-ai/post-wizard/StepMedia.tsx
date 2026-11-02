@@ -157,7 +157,7 @@ export default function StepMedia(p: StepProps) {
           {issues.map((i, k) => (
             <li key={`${i.platform}-${i.code}-${k}`} className={cn("rounded-xl border px-3 py-2 text-xs", i.severity === "error" ? "border-rose-500/40 bg-rose-500/5" : "border-amber-500/40 bg-amber-500/5")}>
               <p className="flex flex-wrap items-center gap-2"><PlatformChip platform={i.platform} /><span className="font-medium">{i.message}</span><span className="text-[10px] font-semibold uppercase">{i.severity === "error" ? "Must fix" : "Check"}</span></p>
-              <p className="mt-0.5 text-muted-foreground">{i.fix}{/aspect|dimension/.test(i.code) && <> <Link href="/viralpulse-ai/image-studio" className="font-semibold text-primary underline">Open the Image Studio</Link> to make a version in the right shape.</>}</p>
+              <p className="mt-0.5 text-muted-foreground">{i.fix}{/aspect|dimension/.test(i.code) && <> <Link href="/viralpulse-ai/generate-image" className="font-semibold text-primary underline">Open Generate Image</Link> to make a version in the right shape.</>}</p>
             </li>
           ))}
         </ul>

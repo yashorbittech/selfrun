@@ -519,3 +519,6 @@ Phone calls, live listen and take-over, and website voice agents are part of the
 
 When the build scripts, commands, options, output folders or install steps change, this file changes in the same commit. If you add a
 new `npm run build:…` command, add it to the Quick start, the quick reference (section 10) and the install section (section 12).
+
+## ViralPulse Analytics sync (cron `viralpulse-metrics`)
+Run `npm run cron:sync` after pulling this change so `vercel.json` has the `0 */3 * * *` entry (every 3 hours; on Vercel Hobby use Pro or the in-app scheduler). No new env var. To test: `npm run test:viralpulse` (includes `scripts/test-viralpulse-wp7.ts`, throwaway DB `zz_throwaway_vpwp7`, fake platform server). Platforms need the analytics permissions listed in `src/lib/products/viralpulse-ai/metrics/SPEC.md` (Meta `instagram_manage_insights` + `read_insights`, Google `yt-analytics.readonly`, LinkedIn Community Management API approval); without them the account shows a plain "not synced yet" reason.

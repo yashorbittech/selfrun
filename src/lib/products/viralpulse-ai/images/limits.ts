@@ -1,4 +1,4 @@
-import type { ImageQuality } from "@/lib/products/viralpulse-ai/models";
+import type { ImageQuality } from "@/lib/products/viralpulse-ai/image-pricing-core";
 import type { ImageProviderId } from "@/lib/products/viralpulse-ai/images/types";
 import type { GeminiPriceTable } from "@/lib/products/viralpulse-ai/images/pricing";
 

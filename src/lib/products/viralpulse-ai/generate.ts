@@ -142,7 +142,7 @@ export async function generateImageToLibrary(opts: { prompt: string; platform: s
   const size = fmt ? imageSizeFor(fmt.width, fmt.height) : "1024x1024";
   const [w, h] = size.split("x").map(Number);
   const r = await generateImage({ userId: opts.actor.userId, prompt: opts.prompt, size });
-  const media = await saveAiImage(r.data, { name: opts.name, creativePrompt: opts.prompt, platform: opts.platform, width: w, height: h }, opts.actor.userId);
+  const media = await saveAiImage(r.data, { name: opts.name, creativePrompt: opts.prompt, platform: opts.platform, width: w, height: h, ai: { aiGenerated: true, provider: "openai", model: r.model, projectId: "", role: "image", disclosureRequired: true } }, opts.actor.userId);
   await recordVersion({ targetType: "media", targetId: media._id, source: "ai", kind: "image", label: opts.name, platform: opts.platform, snapshot: { prompt: opts.prompt, size, link: opts.link ?? null }, userId: opts.actor.userId, userEmail: opts.actor.email, model: r.model, inputTokens: r.inputTokens, outputTokens: r.outputTokens, costUsd: r.costUsd, durationMs: r.durationMs });
   return media;
 }

@@ -16,7 +16,7 @@ export interface SmmsNavFlags {
   settings: boolean;
 }
 
-export type NavIcon = "dashboard" | "campaigns" | "posts" | "image" | "ugc" | "analytics" | "settings";
+export type NavIcon = "dashboard" | "campaigns" | "posts" | "image" | "ugc" | "library" | "brand" | "generate" | "analytics" | "settings";
 export type NavBadgeKey = "failedPosts" | "dueAds" | "generatingUgc" | "failingAccounts";
 export type BadgeTone = "danger" | "warn" | "info";
 
@@ -47,7 +47,10 @@ export const NAV_GROUPS: readonly { key: NavGroupKey; label: string }[] = [
 export const NAV_ITEMS: readonly NavItem[] = [
   { key: "dashboard", href: "/viralpulse-ai", label: "Dashboard", icon: "dashboard", exact: true },
   { key: "image-studio", href: "/viralpulse-ai/image-studio", label: "AI Image Studio", icon: "image", anyOf: ["media", "ai"], group: "studio" },
+  { key: "generate-image", href: "/viralpulse-ai/generate-image", label: "Generate Image", icon: "generate", anyOf: ["ai"], group: "studio" },
   { key: "ugc", href: "/viralpulse-ai/ugc", label: "AI UGC Studio", icon: "ugc", anyOf: ["ugc"], badge: "generatingUgc", group: "studio" },
+  { key: "library", href: "/viralpulse-ai/library", label: "Media Library", icon: "library", anyOf: ["media"], group: "studio" },
+  { key: "brand-kit", href: "/viralpulse-ai/brand-kit", label: "Brand Kit", icon: "brand", anyOf: ["media", "ai"], group: "studio" },
   { key: "posts", href: "/viralpulse-ai/posts", label: "Social Media Reels/Posts", icon: "posts", anyOf: ["posts"], badge: "failedPosts", group: "publish" },
   { key: "campaigns", href: "/viralpulse-ai/campaigns", label: "Campaigns & Ads", icon: "campaigns", anyOf: ["campaigns"], badge: "dueAds", group: "publish" },
   { key: "analytics", href: "/viralpulse-ai/analytics", label: "Analytics", icon: "analytics", anyOf: ["analytics"], group: "insights" },
@@ -123,11 +126,11 @@ export const badgeText = (n: number) => (n > 99 ? "99+" : String(n));
 
 /**
  * Old URL -> current URL. Served as HTTP 308 by route handlers at the old paths (`app/(products)/viralpulse-ai/<old>/route.ts`),
- * with the query string carried over. Campaigns and posts keep their URLs (their labels changed only); the Media Library became a
- * tab of the Image Studio and the AI Content Generator became the copy generator of Social Media Reels/Posts.
+ * with the query string carried over. Campaigns and posts keep their URLs (their labels changed only); the Media Library and Brand Kit are their own
+ * sidebar items (old Image Studio tabs redirect there) and the AI Content Generator became the copy generator of Social Media Reels/Posts.
  */
 export const LEGACY_REDIRECTS: readonly { from: string; to: string }[] = [
-  { from: "/viralpulse-ai/media", to: "/viralpulse-ai/image-studio?tab=library" },
+  { from: "/viralpulse-ai/media", to: "/viralpulse-ai/library" },
   { from: "/viralpulse-ai/ai", to: "/viralpulse-ai/posts/generator" },
 ];
 
@@ -153,6 +156,9 @@ export const SECTION_CRUMB: Record<string, { label: string; href: string }> = {
   posts: { label: "Social Media Reels/Posts", href: "/viralpulse-ai/posts" },
   "image-studio": { label: "AI Image Studio", href: "/viralpulse-ai/image-studio" },
   ugc: { label: "AI UGC Studio", href: "/viralpulse-ai/ugc" },
+  "generate-image": { label: "Generate Image", href: "/viralpulse-ai/generate-image" },
+  library: { label: "Media Library", href: "/viralpulse-ai/library" },
+  "brand-kit": { label: "Brand Kit", href: "/viralpulse-ai/brand-kit" },
   analytics: { label: "Analytics", href: "/viralpulse-ai/analytics" },
   settings: { label: "Settings", href: "/viralpulse-ai/settings" },
 };
@@ -171,7 +177,8 @@ export interface SettingsSection {
 export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
   { key: "accounts", title: "Connected accounts", description: "Facebook, Instagram, YouTube, LinkedIn and Google Business logins, and where each one publishes.", href: "/viralpulse-ai/settings?tab=integrations" },
   { key: "publishing", title: "Publishing", description: "Time zone, AI disclosure note, how many posts go out per run and Google Business Profile posting.", href: "/viralpulse-ai/settings/publishing" },
-  { key: "brand", title: "Brand kit", description: "The brand voice, services, audience and rules the AI writes from.", href: "/viralpulse-ai/settings?tab=brand" },
+  { key: "brand", title: "Brand voice", description: "The brand voice, services, audience and rules the AI writes from.", href: "/viralpulse-ai/settings?tab=brand" },
+  { key: "image-kit", title: "Brand Kit (images)", description: "Logo, colours and rules the Image Studio applies to every picture.", href: "/viralpulse-ai/brand-kit" },
   { key: "ai", title: "AI & models", description: "OpenAI text and image models, quality and daily limits.", href: "/viralpulse-ai/settings?tab=ai" },
   { key: "limits", title: "Limits & approvals", description: "Spend caps and manager approval for AI video.", href: "/viralpulse-ai/ugc/settings", needs: "ugc" },
   { key: "health", title: "System health", description: "Checks that keys, AI models, connected logins and scheduled jobs are working.", href: "/viralpulse-ai/settings?tab=health" },

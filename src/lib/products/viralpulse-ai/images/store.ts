@@ -29,6 +29,7 @@ export interface ProjectDoc extends Stamps {
   totalCostUsd: number;
   error: string | null;
   ackFlags: string[];
+  progress?: { total: number; done: number };
 }
 
 /** One row per generation request: the ledger the rate limit and the daily spend cap count over. */
@@ -71,8 +72,19 @@ export async function listProjects(limit = 30): Promise<ProjectDoc[]> {
   return (await projectsCollection()).find(notDeleted).sort({ updatedAt: -1 }).limit(limit).toArray();
 }
 
+/** Counts per status and this month's image count and spend: the list page's stat cards. */
+export async function projectOverview(now: Date): Promise<{ total: number; counts: Partial<Record<ProjectStatus, number>>; imagesMonth: number; spendMonthUsd: number }> {
+  const col = await projectsCollection();
+  const rows = await col.aggregate<{ _id: ProjectStatus; n: number }>([{ $match: { deletedAt: null } }, { $group: { _id: "$status", n: { $sum: 1 } } }]).toArray();
+  const counts: Partial<Record<ProjectStatus, number>> = {};
+  for (const r of rows) counts[r._id] = r.n;
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const jobs = await (await jobsCollection()).find({ at: { $gte: monthStart }, status: { $ne: "failed" } }, { projection: { images: 1, costUsd: 1 } }).toArray();
+  return { total: rows.reduce((a, r) => a + r.n, 0), counts, imagesMonth: jobs.reduce((a, j) => a + j.images, 0), spendMonthUsd: Math.round(jobs.reduce((a, j) => a + j.costUsd, 0) * 1e6) / 1e6 };
+}
+
 export async function insertProject(brief: Brief, actorId: string): Promise<ProjectDoc> {
-  const doc: ProjectDoc = { _id: newId(), brief, status: "draft", variants: [], chosenIds: [], exports: [], pendingApproval: null, totalCostUsd: 0, error: null, ackFlags: [], ...createStamp(actorId) };
+  const doc: ProjectDoc = { _id: newId(), brief, status: "draft", variants: [], chosenIds: [], exports: [], pendingApproval: null, totalCostUsd: 0, error: null, ackFlags: [], progress: { total: 0, done: 0 }, ...createStamp(actorId) };
   await (await projectsCollection()).insertOne(doc);
   return doc;
 }

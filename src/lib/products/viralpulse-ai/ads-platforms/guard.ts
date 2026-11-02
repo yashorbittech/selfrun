@@ -1,5 +1,6 @@
 import "server-only";
 import { COLLECTIONS, smmsCollection } from "@/lib/products/viralpulse-ai/db";
+import { currencyDigits } from "./types";
 import type { MetaCampaignDraft, MinorMoney } from "./meta/draft";
 
 /**
@@ -10,6 +11,12 @@ import type { MetaCampaignDraft, MinorMoney } from "./meta/draft";
  */
 
 export const GUARD_DAILY_OVERSHOOT = 1.25;
+
+/** "1,500.50 USD" / "1,500 JPY": a minor amount in the currency's own number of decimals (not always 2). */
+export function formatMinorPlain(minor: number, currency: string): string {
+  const d = currencyDigits(currency);
+  return `${(minor / 10 ** d).toLocaleString("en", { minimumFractionDigits: d, maximumFractionDigits: d })} ${currency}`;
+}
 const DAY_MS = 86_400_000;
 
 export interface CurrencyCaps {
@@ -21,7 +28,7 @@ export interface CurrencyCaps {
   companyDailyCapMinor: number | null;
   /** Sum of 30-day commitments of everything active. */
   companyMonthlyCapMinor: number | null;
-  /** A launch above this needs an approver who did not create it (when `requireSecondApprover`). null = every launch needs the approval but may be self-approved. */
+  /** A launch above this needs an approver who did not create it (when `requireSecondApprover`). null = NO threshold: every launch needs a different approver. A company relaxes this on purpose, by setting a threshold or switching `requireSecondApprover` off; both are limits changes (audit-logged, MANAGE_AD_LIMITS). */
   approvalThresholdMinor: number | null;
 }
 export interface GuardSettings {
@@ -116,7 +123,7 @@ export function evaluateGuard(g: GuardSettings, currency: string, c: Commitment,
   const caps = g.perCurrency[currency];
   if (g.killSwitch) reasons.push("The ads kill switch is on. Turn it off in the spending limits before anything can run.");
   if (!caps && !g.allowUncapped) reasons.push(`No spending limit is set for ${currency}. Set one in the spending limits (or explicitly allow uncapped launches) first.`);
-  const fmt = (n: number) => `${(n / 100).toLocaleString("en")} ${currency}`;
+  const fmt = (n: number) => formatMinorPlain(n, currency);
   if (caps) {
     if (caps.maxDailyPerLaunchMinor && c.dailyMinor > caps.maxDailyPerLaunchMinor) reasons.push(`The daily budget (${fmt(c.dailyMinor)}) is above the per-launch limit of ${fmt(caps.maxDailyPerLaunchMinor)}.`);
     if (caps.maxTotalPerLaunchMinor) {
@@ -132,7 +139,8 @@ export function evaluateGuard(g: GuardSettings, currency: string, c: Commitment,
       if (used > caps.companyMonthlyCapMinor) reasons.push(`Together with running ads the 30-day spend (${fmt(used)}) would pass the company monthly limit of ${fmt(caps.companyMonthlyCapMinor)}.`);
     }
   }
+  // No threshold set means no relaxation was chosen: any spend needs an approver other than the creator.
   const threshold = caps?.approvalThresholdMinor ?? null;
-  const needsSecond = g.requireSecondApprover && threshold !== null && (c.dailyMinor > threshold || (c.totalMinor ?? Infinity) > threshold);
+  const needsSecond = g.requireSecondApprover && (threshold === null || c.dailyMinor > threshold || (c.totalMinor ?? Infinity) > threshold);
   return { ok: reasons.length === 0, reasons, needsSecondApprover: needsSecond };
 }

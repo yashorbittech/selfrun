@@ -1,4 +1,5 @@
 import "server-only";
+import { currentCompanyId } from "@/lib/platform/tenancy/context";
 import { smmsCollection } from "@/lib/products/viralpulse-ai/db";
 import { AD_COLLECTIONS } from "./types";
 
@@ -53,18 +54,20 @@ export function resetSnapshotIndexCacheForTests() {
   ensured = false;
 }
 
+/** The natural key of a snapshot WITHIN one company. The stored `_id` is `<companyId>|<this>`: two companies connecting the same Page / channel / ad account must not collide on a shared collection. */
 export const snapshotKey = (s: Pick<SnapshotInput, "platform" | "externalId" | "level" | "metric" | "date" | "source">) => [s.platform, s.externalId, s.level, s.metric, s.date, s.source].join("|");
 
 /** Idempotent: the same rows twice leave one row each, holding the latest value. Returns the number written. */
 export async function upsertSnapshots(rows: SnapshotInput[], capturedAt: Date = new Date()): Promise<number> {
   if (!rows.length) return 0;
   const col = await snapshotsCollection();
+  const company = await currentCompanyId();
   const unique = new Map<string, SnapshotInput>();
   for (const r of rows) if (Number.isFinite(r.value)) unique.set(snapshotKey(r), r);
   const ops = [...unique.values()].map((r) => ({
     updateOne: {
       filter: { platform: r.platform, externalId: r.externalId, level: r.level, metric: r.metric, date: r.date, source: r.source },
-      update: { $set: { value: r.value, capturedAt, ...(r.launchId ? { launchId: r.launchId } : {}), ...(r.campaignId ? { campaignId: r.campaignId } : {}), ...(r.adId ? { adId: r.adId } : {}) }, $setOnInsert: { _id: snapshotKey(r) } },
+      update: { $set: { value: r.value, capturedAt, ...(r.launchId ? { launchId: r.launchId } : {}), ...(r.campaignId ? { campaignId: r.campaignId } : {}), ...(r.adId ? { adId: r.adId } : {}) }, $setOnInsert: { _id: `${company}|${snapshotKey(r)}` } },
       upsert: true,
     },
   }));

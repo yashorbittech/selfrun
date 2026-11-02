@@ -17,10 +17,10 @@ const FIELDS: { key: keyof Omit<Row, "currency">; cap: keyof GuardSummary["curre
   { key: "maxTotalPerLaunch", cap: "maxTotalPerLaunchMinor", label: "Total per launch", help: "The most one launch may spend over its life. A launch with no end date is refused when this is set." },
   { key: "companyDaily", cap: "companyDailyCapMinor", label: "Company daily limit", help: "All running ads together, counting Meta's 25% daily overshoot." },
   { key: "companyMonthly", cap: "companyMonthlyCapMinor", label: "Company 30-day limit", help: "All running ads together over 30 days." },
-  { key: "approvalThreshold", cap: "approvalThresholdMinor", label: "Second approver above", help: "A launch above this must be approved by someone other than its creator." },
+  { key: "approvalThreshold", cap: "approvalThresholdMinor", label: "Second approver above", help: "A launch above this must be approved by someone other than its creator. Leave it empty and EVERY launch needs a different approver." },
 ];
 
-export default function GuardForm({ initial }: { initial: GuardSummary }) {
+export default function GuardForm({ initial, canManage = true, canKill = true }: { initial: GuardSummary; canManage?: boolean; canKill?: boolean }) {
   const [rows, setRows] = useState<Row[]>(Object.entries(initial.currencies).map(([currency, c]) => ({ currency, maxDailyPerLaunch: minorToInput(c.maxDailyPerLaunchMinor, currency), maxTotalPerLaunch: minorToInput(c.maxTotalPerLaunchMinor, currency), companyDaily: minorToInput(c.companyDailyCapMinor, currency), companyMonthly: minorToInput(c.companyMonthlyCapMinor, currency), approvalThreshold: minorToInput(c.approvalThresholdMinor, currency) })));
   const [second, setSecond] = useState(initial.requireSecondApprover);
   const [uncapped, setUncapped] = useState(initial.allowUncapped);
@@ -52,10 +52,10 @@ export default function GuardForm({ initial }: { initial: GuardSummary }) {
 
   return (
     <div className="space-y-4">
-      <Section title="Kill switch" description="Stops anything from being switched on. It does not pause ads that are already running; use Pause all running on the campaigns page for that.">
+      <Section title="Kill switch" description="Turning it on pauses every campaign that is running (or running in Meta without our knowing) and stops anything from being switched on. Turning it off again needs the &quot;Manage ad spending limits&quot; permission.">
         <div className="flex flex-wrap items-center gap-3">
           <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${kill ? "bg-rose-500/10 text-rose-700 dark:text-rose-300" : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"}`}>{kill ? "On: nothing can start" : "Off"}</span>
-          <ActionButton variant={kill ? "outline" : "destructive"} success={kill ? "Kill switch off" : "Kill switch on"} action={async () => { const r = await setKillSwitchAction(!kill); if (r.ok) setKill(r.guard.killSwitch); return r; }} confirm={{ title: kill ? "Turn the kill switch off?" : "Turn the kill switch on?", description: kill ? "Approved launches can be switched on again." : "No launch can be switched on until it is turned off. This is recorded under your name.", confirmLabel: kill ? "Turn off" : "Turn on" }}><Power className="size-3.5" /> {kill ? "Turn off" : "Turn on"}</ActionButton>
+          {(kill ? canManage : canKill) && <ActionButton variant={kill ? "outline" : "destructive"} success={kill ? "Kill switch off" : "Kill switch on"} action={async () => { const r = await setKillSwitchAction(!kill); if (!r.ok) return r; setKill(r.guard.killSwitch); return r.failed > 0 ? { ok: false as const, error: `Kill switch is on, but ${r.failed} campaign${r.failed === 1 ? "" : "s"} could not be paused in Meta. Pause ${r.failed === 1 ? "it" : "them"} in Ads Manager; the sync keeps trying.` } : r; }} confirm={{ title: kill ? "Turn the kill switch off?" : "Turn the kill switch on?", description: kill ? "Approved launches can be switched on again." : "Every running campaign is paused in Meta now, and no launch can be switched on until it is turned off. This is recorded under your name.", confirmLabel: kill ? "Turn off" : "Turn on" }}><Power className="size-3.5" /> {kill ? "Turn off" : "Turn on"}</ActionButton>}
         </div>
       </Section>
       <Section title="Spending limits" description="Per currency. A launch cannot be switched on above these. Amounts are in the currency's normal unit (rupees, dollars). Empty means no limit of that kind.">
@@ -77,7 +77,8 @@ export default function GuardForm({ initial }: { initial: GuardSummary }) {
         <CheckRow id="g-second" checked={second} onChange={setSecond} label="Require a second approver above the threshold" help="The person who created a launch cannot approve it when its budget is above the threshold." />
         <CheckRow id="g-uncapped" checked={uncapped} onChange={setUncapped} label="Allow launches in a currency that has no limits" help="Not recommended: a currency without limits has no ceiling." />
         {err && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{err}</p>}
-        <Button type="button" disabled={busy} onClick={() => void save()}>{busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save limits</Button>
+        {!canManage && <Note tone="warn">Changing the limits needs the &quot;Manage ad spending limits&quot; permission, which is separate from approving spend. You can look at them here.</Note>}
+        <Button type="button" disabled={busy || !canManage} onClick={() => void save()}>{busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save limits</Button>
       </Section>
     </div>
   );

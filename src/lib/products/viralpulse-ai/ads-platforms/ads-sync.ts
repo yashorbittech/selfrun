@@ -4,7 +4,8 @@ import { smmsCollection } from "@/lib/products/viralpulse-ai/db";
 import { migrateLegacyCampaigns } from "@/lib/products/viralpulse-ai/campaigns";
 import { AD_COLLECTIONS } from "./types";
 import { defaultDeps, type AdsDeps } from "./deps";
-import { launchesCollection, type LaunchDoc } from "./launches";
+import { approvalCovers, launchesCollection, type LaunchDoc } from "./launches";
+import { formatMinorPlain, getGuard } from "./guard";
 import { MetaApiError } from "./meta/errors";
 import { getAdAccountInfo } from "./meta/account";
 import { readInsights, readStatuses, type InsightRow, type ObjectStatus } from "./meta/sync";
@@ -62,7 +63,9 @@ export async function runAdsSync(deps: AdsDeps = defaultDeps): Promise<SyncRunDo
   const run: SyncRunDoc = { _id: randomUUID(), startedAt: now, finishedAt: null, launches: 0, snapshots: 0, alerts: 0, errors: [], usage: { maxPct: 0, tier: null, calls: 0 }, skippedRateLimited: 0 };
   await migrateLegacyCampaigns().catch(() => 0);
   const col = await launchesCollection();
-  const due = await col.find({ active: true, state: "ready", "objects.campaign": { $exists: true }, $and: [{ $or: [{ lastSyncAt: null }, { lastSyncAt: { $lt: new Date(now.getTime() - MIN_GAP_MS) } }] }, { $or: [{ syncDeferredUntil: null }, { syncDeferredUntil: { $lt: now } }] }] }).toArray();
+  // While the kill switch is on every launch is looked at on every run (no minimum gap): a pause that failed must be retried at once.
+  const killSwitch = (await getGuard()).killSwitch;
+  const due = await col.find({ active: true, state: "ready", "objects.campaign": { $exists: true }, $and: [...(killSwitch ? [] : [{ $or: [{ lastSyncAt: null }, { lastSyncAt: { $lt: new Date(now.getTime() - MIN_GAP_MS) } }] }]), { $or: [{ syncDeferredUntil: null }, { syncDeferredUntil: { $lt: now } }] }] }).toArray();
   const total = await col.countDocuments({ active: true, state: "ready", syncDeferredUntil: { $gt: now } });
   run.skippedRateLimited = total;
   for (const l of due) {
@@ -110,6 +113,8 @@ async function syncOne(l: LaunchDoc, deps: AdsDeps, run: SyncRunDoc): Promise<vo
       if (adId) review[adId] = { status: s.status, effectiveStatus: s.effectiveStatus, issues: s.issues, at: now };
     }
     // Paused/archived/deleted inside Meta.
+    const guard = await getGuard();
+    let pushEvent: LaunchDoc["events"][number] | null = null;
     const cStatus = cs.get(campaignExt);
     const set: Record<string, unknown> = { review, lastSyncAt: now, syncDeferredUntil: null, externalStatus: { campaign: cStatus?.effectiveStatus ?? null, at: now } };
     if (cStatus?.status === "DELETED" || cStatus?.status === "ARCHIVED") {
@@ -119,12 +124,24 @@ async function syncOne(l: LaunchDoc, deps: AdsDeps, run: SyncRunDoc): Promise<vo
       set.delivery = "paused";
       await deps.notify({ title: `${l.campaignName} was paused in Meta`, body: "Someone paused the campaign inside Meta Ads Manager. It is shown as paused here.", link, dedupeKey: `ads-paused:${l._id}:${day(now)}` });
       run.alerts++;
-    } else if (cStatus?.status === "ACTIVE" && l.delivery === "paused" && !l.approval) {
-      // Started in Meta without our approval: record it loudly; we do not touch spend we did not start.
-      await deps.notify({ title: `${l.campaignName} is running in Meta without approval`, body: "The campaign was switched on inside Meta Ads Manager, outside the approval step. Pause it there or approve the budget here.", link, dedupeKey: `ads-unapproved:${l._id}:${day(now)}` });
+    } else if (cStatus?.status === "ACTIVE" && (guard.killSwitch || !l.approval || !approvalCovers(l))) {
+      // Spending in Meta that our records do not allow: the kill switch is on, or the budget was never approved (or changed since). Pause it.
+      const why = guard.killSwitch ? "the ads kill switch is on" : "its budget is not approved";
+      try {
+        await c.post(campaignExt, { status: "PAUSED" }, { idempotentWrite: true });
+        set.delivery = "paused";
+        set.externalStatus = { campaign: "PAUSED", at: now };
+        pushEvent = { at: now, by: "system", type: "paused", note: `Found running in Meta while ${why}; paused.` };
+        await deps.notify({ title: `${l.campaignName} was paused: ${why}`, body: `The campaign was running in Meta Ads Manager but ${why}, so it was paused automatically.`, link, dedupeKey: `ads-enforced:${l._id}:${day(now)}` });
+        await deps.audit({ actorId: "system", actorEmail: null, action: "status", entity: "campaign", entityId: l.campaignId, entityLabel: l.campaignName, recordId: l.campaignId, summary: `Paused automatically: running in Meta while ${why}`, metadata: { launchId: l._id } });
+      } catch (e) {
+        const message = (e instanceof Error ? e.message : "pause failed").slice(0, 200);
+        run.errors.push({ launchId: l._id, message: `Could not pause a campaign that must not run (${why}): ${message}` });
+        await deps.notify({ title: `${l.campaignName} is running in Meta and could not be paused`, body: `It must not run (${why}) but the automatic pause failed: ${message} Pause it in Meta Ads Manager. This is retried on the next sync.`, link, dedupeKey: `ads-enforce-failed:${l._id}:${day(now)}` });
+      }
       run.alerts++;
     }
-    await col.updateOne({ _id: l._id }, { $set: set });
+    await col.updateOne({ _id: l._id }, { $set: set, ...(pushEvent ? { $push: { events: { $each: [pushEvent], $slice: -100 } } } : {}) } as never);
     // Account health.
     const info = await getAdAccountInfo(c, l.actId).catch(() => null);
     if (info) {
@@ -136,7 +153,7 @@ async function syncOne(l: LaunchDoc, deps: AdsDeps, run: SyncRunDoc): Promise<vo
         const left = info.spendCapMinor - info.amountSpentMinor;
         if (left <= l.commitment.dailyMinor * 2) {
           run.alerts++;
-          await deps.notify({ title: "Meta ad account spend limit almost reached", body: `${info.name} has ${(Math.max(left, 0) / 100).toLocaleString("en")} ${info.currency} left under its spend limit. Ads stop when it is used up.`, link, dedupeKey: `ads-lowcap:${l.actId}:${day(now)}` });
+          await deps.notify({ title: "Meta ad account spend limit almost reached", body: `${info.name} has ${formatMinorPlain(Math.max(left, 0), info.currency)} left under its spend limit. Ads stop when it is used up.`, link, dedupeKey: `ads-lowcap:${l.actId}:${day(now)}` });
         }
       }
     }

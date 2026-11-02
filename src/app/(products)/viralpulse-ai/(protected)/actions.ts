@@ -14,7 +14,8 @@ import { contentFromConcept, createAd, duplicateAd, markAdManuallyTracked, parse
 import { createPost, duplicatePost, parsePostBrief, reconcileVariants, requirePost, softDeletePost, updatePost, METRIC_KEYS, type PostMetrics } from "@/lib/products/viralpulse-ai/posts";
 import { deleteMedia, getMedia, registerUpload, replaceMediaFile, updateMediaMeta, validMediaIds, toMediaCard, listMedia, mediaUsage } from "@/lib/products/viralpulse-ai/media";
 import { generateAdCreative, generateCampaignStrategy, generateImageToLibrary, generateMediaPrompt, generatePostContent, regenerateVariant, runWorkspace, postSnapshot } from "@/lib/products/viralpulse-ai/generate";
-import { markPublishedManually, publishPostNow, resetPublish } from "@/lib/products/viralpulse-ai/publishing";
+import { buildPlan, cancelScheduled, markPublishedManually, publishPostNow, resetPublish, schedulePost, smmsUsersWith, withdrawApprovalForMedia, withdrawApprovalForPosts } from "@/lib/products/viralpulse-ai/publishing";
+import { cancelAttempts } from "@/lib/products/viralpulse-ai/publishers/attempts";
 import { saveAi, saveBrand } from "@/lib/products/viralpulse-ai/settings";
 import { disconnect, isProvider, selectTarget } from "@/lib/products/viralpulse-ai/integrations";
 import { normalizeAd, normalizeCampaignAi, normalizeCreative, normalizeVariant } from "@/lib/products/viralpulse-ai/content";
@@ -344,6 +345,7 @@ export async function generatePostImageAction(id: string, prompt: string, platfo
     const plat = platform && isPostPlatform(platform) ? platform : p.platforms[0];
     const media = await generateImageToLibrary({ prompt: prompt || p.creative.imagePrompt, platform: plat, formatKey, name: `${p.title} — AI image`, actor: v, link: { targetType: "post", targetId: id } });
     await updatePost(id, p.contentType === "video" ? { thumbnailId: p.thumbnailId ?? media._id } : { mediaIds: [...p.mediaIds, media._id].slice(0, 10) }, v.userId);
+    if (p.status === "scheduled") await withdrawApprovalForPosts([id], v, "media was added to the post");
     await recordAudit({ ...who(v), action: "generate", entity: "media", entityId: media._id, entityLabel: media.name, recordId: id, summary: `AI image for post ${p.title}` });
     return { media: toMediaCard(media) };
   });
@@ -381,21 +383,26 @@ export async function deletePostAction(id: string) {
   });
 }
 
+/**
+ * Kept for the post page's Schedule / Unschedule buttons, but it is only a thin door onto the publishing engine: scheduling runs the
+ * same preflight (`schedulePost`), cancels waiting attempts and resets the publish claim, and unscheduling goes through `cancelScheduled`.
+ */
 export async function schedulePostAction(id: string, when: string | null, approve: boolean) {
   return run(["SCHEDULE_POSTS"], async (v) => {
-    const p = await requirePost(id);
-    if (p.status === "archived" || p.status === "published") throw new SmmsInputError("This post can't be scheduled in its current state.");
+    const postId = String(id ?? "");
     if (!when) {
-      await updatePost(id, { status: p.idea || p.variants.some((x) => x.content) ? "edited" : "draft", scheduledAt: null, scheduledBy: null, approvedBy: null, approvedAt: null }, v.userId);
-      await recordAudit({ ...who(v), action: "unschedule", entity: "post", entityId: id, entityLabel: p.title, recordId: id });
+      await cancelScheduled(postId, v);
       return { approved: false };
     }
-    if (!p.variants.some((x) => (x.content || x.caption).trim())) throw new SmmsInputError("Write or generate the post before scheduling it.");
-    const at = parseSchedule(when);
-    const canApprove = approve && can(v, "PUBLISH_CONTENT");
-    await updatePost(id, { status: "scheduled", scheduledAt: at, scheduledBy: v.userId, approvedBy: canApprove ? v.userId : null, approvedAt: canApprove ? new Date() : null }, v.userId);
-    await recordAudit({ ...who(v), action: "schedule", entity: "post", entityId: id, entityLabel: p.title, recordId: id, summary: `${at.toISOString()}${canApprove ? " · approved to auto-publish" : " · awaiting approval"}` });
-    return { approved: canApprove };
+    const p = await requirePost(postId);
+    const w = String(when);
+    // A browser datetime-local value or an agent's "2026-10-20T10:00" is wall-clock time in the company time zone; an explicit offset / Z is an instant.
+    const r = await schedulePost(postId, /(?:Z|[+-]\d\d:?\d\d)$/i.test(w) ? { at: w, approve: approve === true } : { local: w, approve: approve === true }, v);
+    if (!r.approved) {
+      const approvers = (await smmsUsersWith("PUBLISH_CONTENT")).filter((u) => u !== v.userId);
+      if (approvers.length) await notifySmmsUsers(approvers, { type: "smms_approval_needed", title: `Approval needed: ${p.title}`, body: `Scheduled for ${r.plan.scheduledDisplay ?? r.scheduledAt.toISOString()}. It publishes only after someone with Publish approves it.`, link: `/viralpulse-ai/posts/${postId}`, dedupeKey: `smms-approval-${postId}-${r.scheduledAt.getTime()}` });
+    }
+    return { approved: r.approved };
   });
 }
 
@@ -403,7 +410,15 @@ export async function approvePostAction(id: string, approve: boolean) {
   return run(["PUBLISH_CONTENT"], async (v) => {
     const p = await requirePost(id);
     if (p.status !== "scheduled") throw new SmmsInputError("Only scheduled posts can be approved.");
-    await updatePost(id, { approvedBy: approve ? v.userId : null, approvedAt: approve ? new Date() : null }, v.userId);
+    if (approve) {
+      // Approval is a decision about what will go out: it needs the same preflight as scheduling, run against the post as it is now.
+      const blockers = (await buildPlan(p)).platforms.filter((x) => x.variantState !== "published" && x.blocking);
+      if (blockers.length) throw new SmmsInputError(`Fix these before approving - ${blockers.map((b) => `${b.label}: ${b.issues.filter((i) => i.severity === "error").map((i) => i.message).join(" ")}`).join(" | ")}`.slice(0, 600));
+      await updatePost(id, { approvedBy: v.userId, approvedAt: new Date() }, v.userId);
+    } else {
+      await cancelAttempts(id);
+      await updatePost(id, { approvedBy: null, approvedAt: null, publishQueuedAt: null }, v.userId);
+    }
     await recordAudit({ ...who(v), action: "approve", entity: "post", entityId: id, entityLabel: p.title, recordId: id, summary: approve ? "Approved to auto-publish" : "Approval withdrawn" });
     if (p.createdBy && p.createdBy !== v.userId) {
       await notifySmmsUsers([p.createdBy], { type: approve ? "smms_post_approved" : "smms_approval_withdrawn", title: approve ? `Approved to publish: ${p.title}` : `Approval withdrawn: ${p.title}`, body: approve ? "Your scheduled post will publish automatically." : "This post will not auto-publish until it is approved again.", link: `/viralpulse-ai/posts/${id}` });
@@ -529,6 +544,7 @@ export async function registerMediaAction(pathname: string, meta: Record<string,
 export async function replaceMediaAction(id: string, pathname: string, meta: Record<string, unknown>) {
   return run(["MANAGE_MEDIA"], async (v) => {
     const { after } = await replaceMediaFile(id, String(pathname), meta, v.userId);
+    await withdrawApprovalForMedia(id, v, "an attached picture or video was replaced");
     await recordAudit({ ...who(v), action: "replace", entity: "media", entityId: id, entityLabel: after.name, summary: `New file (${(after.size / 1048576).toFixed(1)} MB)` });
     return {};
   });
@@ -537,6 +553,7 @@ export async function replaceMediaAction(id: string, pathname: string, meta: Rec
 export async function updateMediaMetaAction(id: string, meta: Record<string, unknown>) {
   return run(["MANAGE_MEDIA"], async (v) => {
     const { before, after } = await updateMediaMeta(id, meta, v.userId);
+    if (before.altText !== after.altText) await withdrawApprovalForMedia(id, v, "alt text of attached media changed");
     await recordAudit({ ...who(v), action: "update", entity: "media", entityId: id, entityLabel: after.name, summary: diffSummary({ ...before, tags: before.tags.join(",") }, { ...after, tags: after.tags.join(",") }, ["name", "platform", "tags", "thumbnailId"]) ?? "Details edited" });
     return {};
   });

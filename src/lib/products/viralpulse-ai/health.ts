@@ -156,7 +156,7 @@ function videoItems(d: HealthDeps): HealthItem[] {
 }
 
 function schedulerItems(d: HealthDeps): HealthItem[] {
-  const wanted: [string, string][] = [["viralpulse-publisher", "Scheduled posts"], ["viralpulse-accounts", "Connected account checks"], ["viralpulse-ugc", "AI UGC videos"]];
+  const wanted: [string, string][] = [["viralpulse-publisher", "Scheduled posts"], ["viralpulse-accounts", "Connected account checks"], ["viralpulse-ugc", "AI UGC videos"], ["viralpulse-metrics", "Social post and account results"]];
   return wanted.map(([key, label]) => {
     const j = d.jobs.find((x) => x.key === key);
     const id = `cron.${key}`;

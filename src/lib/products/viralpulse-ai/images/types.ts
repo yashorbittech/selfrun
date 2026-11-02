@@ -1,4 +1,4 @@
-import type { ImageQuality } from "@/lib/products/viralpulse-ai/models";
+import type { ImageQuality } from "@/lib/products/viralpulse-ai/image-pricing-core";
 
 /** Plain shared shapes for the Image Studio. No server imports: safe in client bundles. */
 
@@ -83,6 +83,10 @@ export interface Brief {
   applyKit: boolean;
   referenceIds: string[];
   consent: Consent | null;
+  /** Show a visible "AI generated" badge on exports (chosen in the review step; absent = decided when finishing). */
+  badge?: boolean;
+  /** Place the brand-kit logo on exports (absent = decided when finishing). */
+  applyLogo?: boolean;
 }
 
 export interface Variant {
@@ -105,7 +109,8 @@ export interface Variant {
   createdAt: string;
 }
 
-export type ProjectStatus = "draft" | "generating" | "ready" | "awaiting_approval" | "finished";
+/** draft (brief incomplete) -> briefed (brief complete) -> generating / awaiting_approval -> ready | failed -> finished (saved to the library). */
+export type ProjectStatus = "draft" | "briefed" | "generating" | "ready" | "awaiting_approval" | "finished" | "failed";
 
 export interface ExportRecord {
   specKey: string;
@@ -125,4 +130,7 @@ export interface ProjectView {
   totalCostUsd: number;
   error: string | null;
   updatedAt: string;
+  createdAt: string;
+  /** Pictures wanted / produced by the current or last generation. */
+  progress: { total: number; done: number };
 }

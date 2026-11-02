@@ -7,9 +7,12 @@ import { estimateJob, geminiImageCost, openAiImageCost, GEMINI_TOKENS_PER_IMAGE 
 import { evaluateRequest, type ImageSettings } from "@/lib/products/viralpulse-ai/images/limits";
 import { ImageProviderError, type ImageProvider, type ImageRequest, type RefImage } from "@/lib/products/viralpulse-ai/images/providers/types";
 import { composeExport, toPng } from "@/lib/products/viralpulse-ai/images/compose";
+import { withCompanyLease } from "@/lib/products/viralpulse-ai/lease";
 import { getProject, insertProject, jobsCollection, projectsCollection, recentImagesByUser, spentToday, type ProjectDoc } from "@/lib/products/viralpulse-ai/images/store";
 import type { BrandKit, Brief, Consent, ExportRecord, Variant } from "@/lib/products/viralpulse-ai/images/types";
 import type { AiMediaMeta, MediaDoc, StudioMeta } from "@/lib/products/viralpulse-ai/media";
+import { briefComplete, duplicateBrief } from "@/lib/products/viralpulse-ai/images/wizard";
+import { isStale, statusAfterBriefSave, statusWhenIdle } from "@/lib/products/viralpulse-ai/images/state";
 import { isImageQuality, type ImageQuality } from "@/lib/products/viralpulse-ai/models";
 
 /**
@@ -52,7 +55,21 @@ export interface ImageDeps {
 
 // ── brief normalisation ─────────────────────────────────────────────────────
 
-export function cleanBrief(input: Partial<Brief> & Record<string, unknown>, settings: ImageSettings, cur?: Brief): Brief {
+/**
+ * `stamp` is who is saving and when, taken from the SERVER session by the caller. The consent record's `by` / `at` are always written from
+ * it (kept from the stored brief only while the attestation is unchanged); anything the browser sent for them is ignored.
+ */
+function cleanConsent(raw: Partial<Consent>, prev: Consent | null, stamp?: { by: string; at: string }): Consent {
+  const attested = !!raw.attested;
+  const showsPeople = !!raw.showsPeople;
+  const publicFigure = !!raw.publicFigure;
+  if (!attested) return { attested, showsPeople, publicFigure, at: null, by: null };
+  const unchanged = prev?.attested && prev.showsPeople === showsPeople && prev.publicFigure === publicFigure && prev.at && prev.by;
+  if (unchanged) return { attested, showsPeople, publicFigure, at: prev.at, by: prev.by };
+  return { attested, showsPeople, publicFigure, at: stamp?.at ?? null, by: stamp?.by ?? null };
+}
+
+export function cleanBrief(input: Partial<Brief> & Record<string, unknown>, settings: ImageSettings, cur?: Brief, stamp?: { by: string; at: string }): Brief {
   const goal = goalById(String(input.goalId ?? cur?.goalId ?? ""));
   if (!goal) throw new SmmsInputError("Choose what the picture is for.");
   const goalChanged = cur && cur.goalId !== goal.id;
@@ -74,7 +91,7 @@ export function cleanBrief(input: Partial<Brief> & Record<string, unknown>, sett
   const consentIn = (input.consent ?? cur?.consent ?? null) as Partial<Consent> | null;
   const q = input.quality ?? cur?.quality ?? settings.defaultQuality;
   const referenceIds = strList(input.referenceIds ?? cur?.referenceIds ?? [], 8, 64);
-  const consent: Consent | null = consentIn ? { attested: !!consentIn.attested, showsPeople: !!consentIn.showsPeople, publicFigure: !!consentIn.publicFigure, at: consentIn.at ?? null, by: consentIn.by ?? null } : null;
+  const consent = consentIn ? cleanConsent(consentIn, cur?.consent ?? null, stamp) : null;
   return {
     goalId: goal.id,
     name: str(input.name ?? cur?.name, 160),
@@ -93,8 +110,12 @@ export function cleanBrief(input: Partial<Brief> & Record<string, unknown>, sett
     applyKit: input.applyKit === undefined ? (cur?.applyKit ?? true) : !!input.applyKit,
     referenceIds,
     consent,
+    ...(input.badge !== undefined ? { badge: !!input.badge } : cur?.badge !== undefined ? { badge: cur.badge } : {}),
+    ...(input.applyLogo !== undefined ? { applyLogo: !!input.applyLogo } : cur?.applyLogo !== undefined ? { applyLogo: cur.applyLogo } : {}),
   };
 }
+
+const ctxFor = (s: ImageSettings) => ({ maxVariants: s.maxVariants, providers: { openai: true, gemini: true } });
 
 export function policyInput(b: Brief, extra: { instruction?: string; prompt?: string } = {}) {
   return { subject: b.subject, product: b.product, style: b.style, negative: b.negative, overlayText: b.overlayText, goalId: b.goalId, hasReferenceImages: b.referenceIds.length > 0, consent: b.consent, ...extra };
@@ -163,17 +184,20 @@ export function createEngine(d: ImageDeps) {
 
   async function createProject(actor: Actor, input: Record<string, unknown>) {
     const settings = await d.settings();
-    const brief = cleanBrief(input, settings);
+    const brief = cleanBrief(input, settings, undefined, { by: actor.email ?? actor.userId, at: d.now().toISOString() });
     const p = await insertProject(brief, actor.userId);
+    const status = statusAfterBriefSave("draft", briefComplete(brief, ctxFor(settings)), false);
+    if (status !== "draft") await (await projectsCollection()).updateOne({ _id: p._id }, { $set: { status } });
     await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: "create", entityId: p._id, entityLabel: brief.name || goalById(brief.goalId)?.label || "Image project", summary: "Started an Image Studio project" });
-    return p;
+    return must(p._id);
   }
 
   async function updateBrief(actor: Actor, id: string, input: Record<string, unknown>) {
     const p = await must(id);
     if (p.status === "generating") throw new SmmsInputError("Wait for the current generation to finish.");
-    const brief = cleanBrief(input, await d.settings(), p.brief);
-    await (await projectsCollection()).updateOne({ _id: id }, { $set: { brief, ...(p.status === "finished" ? { status: "ready" } : {}), pendingApproval: null, ...updateStamp(actor.userId) } });
+    const brief = cleanBrief(input, await d.settings(), p.brief, { by: actor.email ?? actor.userId, at: d.now().toISOString() });
+    const status = statusAfterBriefSave(p.status, briefComplete(brief, ctxFor(await d.settings())), p.variants.length > 0);
+    await (await projectsCollection()).updateOne({ _id: id }, { $set: { brief, status, pendingApproval: null, ...updateStamp(actor.userId) } });
     return must(id);
   }
 
@@ -200,12 +224,19 @@ export function createEngine(d: ImageDeps) {
   }
 
   /** Runs one provider call and books its cost. `references` present => edit. */
-  async function runCall(actor: Actor, p: ProjectDoc, settings: ImageSettings, opts: { prompt: string; n: number; references?: RefImage[]; est: { totalUsd: number }; parent?: Variant; instruction?: string; slides?: (number | null)[] }): Promise<Variant[]> {
+  async function runCall(actor: Actor, p: ProjectDoc, settings: ImageSettings, opts: { prompt: string; n: number; references?: RefImage[]; est: { totalUsd: number }; parent?: Variant; instruction?: string; slides?: (number | null)[]; last?: boolean }): Promise<Variant[]> {
     const b = p.brief;
     const rp = await d.resolveProvider(b.provider, settings);
     const jobs = await jobsCollection();
     const jobId = newId();
-    await jobs.insertOne({ _id: jobId, userId: actor.userId, projectId: p._id, images: opts.n, estimateUsd: opts.est.totalUsd, costUsd: opts.est.totalUsd, status: "running", provider: b.provider, model: rp.model, at: d.now() });
+    // The daily cap and the rate limit are checked once more and the job (which is what the cap counts) is booked in one step under a company
+    // lease, so two requests that both passed the early check cannot both spend the last of the day's budget. A failed call releases it (cost 0).
+    await withCompanyLease("images-spend-lock", { now: () => d.now(), waitMs: 10_000, leaseMs: 15_000, busy: () => new SmmsInputError("Another picture request is being booked. Try again in a moment.") }, async () => {
+      const now = d.now();
+      const dec = evaluateRequest({ settings, images: opts.n, estimateUsd: opts.est.totalUsd, recentImagesByUser: await recentImagesByUser(actor.userId, now), spentTodayUsd: await spentToday(now), canApprove: true });
+      if (!dec.ok) throw new SmmsInputError(dec.message);
+      await jobs.insertOne({ _id: jobId, userId: actor.userId, projectId: p._id, images: opts.n, estimateUsd: opts.est.totalUsd, costUsd: opts.est.totalUsd, status: "running", provider: b.provider, model: rp.model, at: d.now() });
+    });
     await (await projectsCollection()).updateOne({ _id: p._id }, { $set: { status: "generating", error: null, ...updateStamp(actor.userId) } });
     const sizes = unitSize(b);
     const req: ImageRequest = { prompt: opts.prompt, n: opts.n, model: rp.model, quality: b.quality, openAiSize: sizes.openAiSize, geminiRatio: sizes.geminiRatio, references: opts.references };
@@ -226,13 +257,14 @@ export function createEngine(d: ImageDeps) {
       const spent = Math.round(out.reduce((a, v) => a + v.costUsd, 0) * 1e6) / 1e6;
       if (rp.meter) await rp.meter({ model: rp.model, images: out.length, usage: res.usage }).catch(() => {});
       await jobs.updateOne({ _id: jobId }, { $set: { status: "done", costUsd: spent } });
-      await (await projectsCollection()).updateOne({ _id: p._id }, { $push: { variants: { $each: out } }, $inc: { totalCostUsd: spent }, $set: { status: "ready", pendingApproval: null, error: null, ...updateStamp(actor.userId) } });
+      await (await projectsCollection()).updateOne({ _id: p._id }, { $push: { variants: { $each: out } }, $inc: { totalCostUsd: spent, "progress.done": out.length }, $set: { status: opts.last === false ? "generating" : "ready", pendingApproval: null, error: null, ...updateStamp(actor.userId) } });
       await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: opts.parent ? "regenerate" : "generate", entityId: p._id, entityLabel: b.name || p._id, summary: `${opts.parent ? "Edited" : "Generated"} ${out.length} image${out.length === 1 ? "" : "s"} with ${rp.model}`, metadata: { provider: b.provider, model: rp.model, images: out.length, costUsd: spent, quality: b.quality } });
       return out;
     } catch (err) {
       await jobs.updateOne({ _id: jobId }, { $set: { status: "failed", costUsd: 0 } });
       const msg = err instanceof ImageProviderError ? err.message : "Something went wrong while generating. Please try again.";
-      await (await projectsCollection()).updateOne({ _id: p._id }, { $set: { status: p.variants.length ? "ready" : "draft", error: msg, ...updateStamp(actor.userId) } });
+      const fresh = await getProject(p._id);
+      await (await projectsCollection()).updateOne({ _id: p._id }, { $set: { status: (fresh?.variants.length ?? p.variants.length) ? "ready" : "failed", error: msg, ...updateStamp(actor.userId) } });
       await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: "generate", entityId: p._id, entityLabel: b.name || p._id, summary: `Image generation failed: ${err instanceof ImageProviderError ? err.code : "error"}`, metadata: { provider: b.provider } });
       toUserError(err);
     }
@@ -240,15 +272,18 @@ export function createEngine(d: ImageDeps) {
 
   async function queueApproval(actor: Actor, p: ProjectDoc, kind: "generate" | "edit", est: number, thresholdUsd: number, request: Record<string, unknown>) {
     await (await projectsCollection()).updateOne({ _id: p._id }, { $set: { status: "awaiting_approval", pendingApproval: { by: actor.userId, email: actor.email, at: d.now(), estimateUsd: est, kind, request }, ...updateStamp(actor.userId) } });
-    await d.notify(await d.managerIds(), { title: `Approve image spend: ${p.brief.name || "Image project"}`, body: `About $${est.toFixed(2)} for AI images. Over the $${thresholdUsd.toFixed(2)} limit that needs a manager.`, link: `/viralpulse-ai/image-studio?tab=create&project=${p._id}` });
+    await d.notify(await d.managerIds(), { title: `Approve image spend: ${p.brief.name || "Image project"}`, body: `About $${est.toFixed(2)} for AI images. Over the $${thresholdUsd.toFixed(2)} limit that needs a manager.`, link: `/viralpulse-ai/image-studio/${p._id}` });
   }
 
-  async function generate(actor: Actor, id: string, opts: { acknowledge?: string[]; approved?: boolean } = {}): Promise<Outcome<ProjectDoc>> {
+  /**
+   * Checks everything (policy, acknowledgements, limits, approval) and, when the request may run, marks the project "generating" with
+   * its progress counter. Nothing is drawn or charged yet: `execute` does that, so a route can answer first and work in the background.
+   */
+  async function start(actor: Actor, id: string, opts: { acknowledge?: string[]; approved?: boolean } = {}): Promise<Outcome<ProjectDoc>> {
     const p = await must(id);
     if (p.status === "generating") throw new SmmsInputError("Already generating. Wait for it to finish.");
     const settings = await d.settings();
     const b = p.brief;
-    const goal = goalById(b.goalId)!;
     const n = imageCountFor(b);
     const est = await estimate(b, settings, n);
     const ack = opts.acknowledge ?? p.ackFlags;
@@ -262,20 +297,72 @@ export function createEngine(d: ImageDeps) {
       if (e instanceof NeedsAckError) return { outcome: "needs_ack", flags: e.flags };
       throw e;
     }
-    await (await projectsCollection()).updateOne({ _id: id }, { $set: { ackFlags: ack } });
-    const kit = b.applyKit ? await d.kit() : null;
-    const refs = await loadRefs(d, b.referenceIds);
-    if (goal.slides) {
-      // One request per slide so each gets its own scene; the cost estimate above already counts them all.
-      const per = { totalUsd: est.perImageUsd };
-      for (let i = 0; i < n; i++) await runCall(actor, i === 0 ? p : await must(id), settings, { prompt: buildPrompt(b, kit, goal, i), n: 1, references: refs.length ? refs : undefined, est: per, slides: [i] });
-    } else {
-      await runCall(actor, p, settings, { prompt: buildPrompt(b, kit, goal, null), n, references: refs.length ? refs : undefined, est, slides: [] });
-    }
+    await (await projectsCollection()).updateOne({ _id: id }, { $set: { ackFlags: ack, status: "generating", error: null, pendingApproval: null, progress: { total: n, done: 0 }, ...updateStamp(actor.userId) } });
     return { outcome: "done", project: await must(id) };
   }
 
-  async function editVariant(actor: Actor, id: string, variantId: string, instruction: string, opts: { acknowledge?: string[]; approved?: boolean } = {}): Promise<Outcome<ProjectDoc>> {
+  /** Draws the pictures one request at a time, so progress is real and a failure keeps what already finished. Call after `start`. */
+  async function execute(actor: Actor, id: string): Promise<ProjectDoc> {
+    const p = await must(id);
+    const settings = await d.settings();
+    const b = p.brief;
+    const goal = goalById(b.goalId)!;
+    const n = imageCountFor(b);
+    const est = await estimate(b, settings, n);
+    const kit = b.applyKit ? await d.kit() : null;
+    let refs: RefImage[];
+    try {
+      refs = await loadRefs(d, b.referenceIds);
+    } catch (e) {
+      await (await projectsCollection()).updateOne({ _id: id }, { $set: { status: p.variants.length ? "ready" : "failed", error: e instanceof Error ? e.message : "A reference picture is missing.", ...updateStamp(actor.userId) } });
+      throw e;
+    }
+    // One request per picture (per slide for a carousel, each with its own scene). The estimate above already counts them all.
+    const per = { totalUsd: est.perImageUsd };
+    for (let i = 0; i < n; i++) {
+      await runCall(actor, await must(id), settings, { prompt: buildPrompt(b, kit, goal, goal.slides ? i : null), n: 1, references: refs.length ? refs : undefined, est: per, slides: [goal.slides ? i : null], last: i === n - 1 });
+    }
+    return must(id);
+  }
+
+  async function generate(actor: Actor, id: string, opts: { acknowledge?: string[]; approved?: boolean; defer?: (run: () => Promise<unknown>) => void } = {}): Promise<Outcome<ProjectDoc>> {
+    const s = await start(actor, id, opts);
+    if (s.outcome !== "done") return s;
+    if (opts.defer) {
+      opts.defer(() => execute(actor, id));
+      return s;
+    }
+    return { outcome: "done", project: await execute(actor, id) };
+  }
+
+  /** A generation nobody is working on any more (the server restarted mid-run) is shown as failed so it can be started again. */
+  async function reconcile(id: string): Promise<ProjectDoc> {
+    const p = await must(id);
+    if (!isStale(p.status, p.updatedAt, d.now())) return p;
+    await (await projectsCollection()).updateOne({ _id: id, status: "generating", updatedAt: p.updatedAt }, { $set: { status: p.variants.length ? "ready" : "failed", error: "Generation stopped before it finished. Nothing more was charged. Start it again.", updatedAt: d.now() } });
+    return must(id);
+  }
+
+  async function duplicate(actor: Actor, id: string) {
+    const p = await must(id);
+    const settings = await d.settings();
+    const brief = cleanBrief(duplicateBrief(p.brief) as never, settings, undefined, { by: actor.email ?? actor.userId, at: d.now().toISOString() });
+    const c = await insertProject(brief, actor.userId);
+    const status = statusAfterBriefSave("draft", briefComplete(brief, ctxFor(settings)), false);
+    if (status !== "draft") await (await projectsCollection()).updateOne({ _id: c._id }, { $set: { status } });
+    await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: "create", entityId: c._id, entityLabel: brief.name || goalById(brief.goalId)?.label || "Image project", summary: `Duplicated an Image Studio project`, metadata: { from: id } });
+    return must(c._id);
+  }
+
+  /** Soft delete: the project leaves the list; pictures already saved to the library stay there. */
+  async function remove(actor: Actor, id: string) {
+    const p = await must(id);
+    if (p.status === "generating") throw new SmmsInputError("Wait for the pictures to finish before deleting this project.");
+    await (await projectsCollection()).updateOne({ _id: id }, { $set: { deletedAt: d.now(), ...updateStamp(actor.userId) } });
+    await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: "delete", entityId: id, entityLabel: p.brief.name || id, summary: "Deleted an Image Studio project" });
+  }
+
+  async function editVariant(actor: Actor, id: string, variantId: string, instruction: string, opts: { acknowledge?: string[]; approved?: boolean; defer?: (run: () => Promise<unknown>) => void } = {}): Promise<Outcome<ProjectDoc>> {
     const p = await must(id);
     const ins = str(instruction, 500);
     if (ins.length < 4) throw new SmmsInputError("Say what to change, for example: make the background warmer.");
@@ -294,35 +381,46 @@ export function createEngine(d: ImageDeps) {
       if (e instanceof NeedsAckError) return { outcome: "needs_ack", flags: e.flags };
       throw e;
     }
-    const src = await d.getBlob(parent.storageKey);
-    if (!src) throw new SmmsInputError("The picture file is missing. Generate it again.");
-    const extra = await loadRefs(d, p.brief.referenceIds.slice(0, 5));
-    const refs: RefImage[] = [{ data: src, mimeType: "image/png" }, ...extra];
-    const goal = goalById(p.brief.goalId)!;
-    const kit = p.brief.applyKit ? await d.kit() : null;
-    const prompt = `${buildPrompt(p.brief, kit, goal, parent.slide, ins)}\nEdit the first picture. Return the whole edited picture.`;
-    await runCall(actor, p, settings, { prompt, n: 1, references: refs, est, parent, instruction: ins, slides: [parent.slide] });
+    const run = async () => {
+      const src = await d.getBlob(parent.storageKey);
+      if (!src) {
+        await (await projectsCollection()).updateOne({ _id: id }, { $set: { status: "ready", error: "The picture file is missing. Generate it again.", ...updateStamp(actor.userId) } });
+        throw new SmmsInputError("The picture file is missing. Generate it again.");
+      }
+      const extra = await loadRefs(d, p.brief.referenceIds.slice(0, 5));
+      const refs: RefImage[] = [{ data: src, mimeType: "image/png" }, ...extra];
+      const goal = goalById(p.brief.goalId)!;
+      const kit = p.brief.applyKit ? await d.kit() : null;
+      const prompt = `${buildPrompt(p.brief, kit, goal, parent.slide, ins)}\nEdit the first picture. Return the whole edited picture.`;
+      await runCall(actor, p, settings, { prompt, n: 1, references: refs, est, parent, instruction: ins, slides: [parent.slide] });
+    };
+    await (await projectsCollection()).updateOne({ _id: id }, { $set: { progress: { total: 1, done: 0 }, status: "generating", error: null, pendingApproval: null, ...updateStamp(actor.userId) } });
+    if (opts.defer) {
+      opts.defer(run);
+      return { outcome: "done", project: await must(id) };
+    }
+    await run();
     return { outcome: "done", project: await must(id) };
   }
 
   /** A manager approves the stored request, and it runs. */
-  async function approve(actor: Actor, id: string): Promise<Outcome<ProjectDoc>> {
+  async function approve(actor: Actor, id: string, opts: { defer?: (run: () => Promise<unknown>) => void } = {}): Promise<Outcome<ProjectDoc>> {
     if (!actor.canApprove) throw new SmmsInputError("Only a manager can approve image spend.");
     const p = await must(id);
     const pa = p.pendingApproval;
     if (!pa) throw new SmmsInputError("Nothing is waiting for approval.");
-    const claim = await (await projectsCollection()).updateOne({ _id: id, "pendingApproval.at": pa.at }, { $set: { pendingApproval: null, status: p.variants.length ? "ready" : "draft" } });
+    const claim = await (await projectsCollection()).updateOne({ _id: id, "pendingApproval.at": pa.at }, { $set: { pendingApproval: null, status: statusWhenIdle(p.variants.length > 0) } });
     if (claim.modifiedCount !== 1) throw new SmmsInputError("Someone else already handled this approval.");
     await d.audit({ actorId: actor.userId, actorEmail: actor.email, action: "approve", entityId: id, entityLabel: p.brief.name || id, summary: `Approved image spend of about $${pa.estimateUsd.toFixed(2)}`, metadata: { requestedBy: pa.by, estimateUsd: pa.estimateUsd } });
     const requester: Actor = { userId: pa.by, email: pa.email, canApprove: true };
     const req = pa.request as { variantId?: string; instruction?: string; acknowledge?: string[] };
-    return pa.kind === "edit" ? editVariant(requester, id, req.variantId ?? "", req.instruction ?? "", { acknowledge: req.acknowledge, approved: true }) : generate(requester, id, { acknowledge: req.acknowledge, approved: true });
+    return pa.kind === "edit" ? editVariant(requester, id, req.variantId ?? "", req.instruction ?? "", { acknowledge: req.acknowledge, approved: true, defer: opts.defer }) : generate(requester, id, { acknowledge: req.acknowledge, approved: true, defer: opts.defer });
   }
 
   async function reject(actor: Actor, id: string) {
     if (!actor.canApprove) throw new SmmsInputError("Only a manager can decline image spend.");
     const p = await must(id);
-    await (await projectsCollection()).updateOne({ _id: id }, { $set: { pendingApproval: null, status: p.variants.length ? "ready" : "draft", ...updateStamp(actor.userId) } });
+    await (await projectsCollection()).updateOne({ _id: id }, { $set: { pendingApproval: null, status: statusWhenIdle(p.variants.length > 0), ...updateStamp(actor.userId) } });
   }
 
   async function choose(actor: Actor, id: string, ids: string[]) {
@@ -384,7 +482,7 @@ export function createEngine(d: ImageDeps) {
           folder: opts.folder ?? null,
           altText: opts.altText ?? (b.subject ? b.subject.slice(0, 200) : ""),
           ai: { aiGenerated: true, provider: v.provider, model: v.model, projectId: p._id, role: "image", disclosureRequired: true },
-          studio: { projectId: p._id, variantId: v.id, specKey: key, goalId: goal.id, badge: opts.badge, metadataMarked: true, consentRecorded: !!b.consent?.attested },
+          studio: { projectId: p._id, variantId: v.id, specKey: key, goalId: goal.id, badge: opts.badge, metadataMarked: true, consentRecorded: !!(b.consent?.attested && b.consent.showsPeople) },
         }, actor.userId);
         done.push({ specKey: key, mediaId: saved._id, variantId: v.id, badge: opts.badge });
       }
@@ -394,7 +492,7 @@ export function createEngine(d: ImageDeps) {
     return { exports: done, warnings, project: await must(id) };
   }
 
-  return { createProject, updateBrief, check, generate, editVariant, approve, reject, choose, finish, getProject: must, estimate };
+  return { createProject, updateBrief, check, generate, start, execute, reconcile, duplicate, remove, editVariant, approve, reject, choose, finish, getProject: must, estimate };
 }
 
 const GROUP_PLATFORM: Record<string, string | null> = { Instagram: "instagram", Facebook: "facebook", YouTube: "youtube", LinkedIn: "linkedin", "Google Ads": "google_ads", "Google Business Profile": "google_business", X: null };

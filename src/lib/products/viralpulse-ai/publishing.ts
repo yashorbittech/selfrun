@@ -13,7 +13,7 @@ import { getPublishSettings } from "@/lib/products/viralpulse-ai/publishers/publ
 import { isConnected } from "@/lib/products/viralpulse-ai/publishers/publisherAuth";
 import { DEFAULT_TIMEZONE, checkSchedule, formatInZone, isValidTimezone, zonedToUtc, LocalTimeError } from "@/lib/products/viralpulse-ai/publishers/schedule";
 import { hasErrors } from "@/lib/products/viralpulse-ai/publishers/validate";
-import type { PlatformKey, PublishIssue, PublishOptions } from "@/lib/products/viralpulse-ai/publishers/types";
+import { stripPostDisclosureOverride, type PlatformKey, type PublishIssue, type PublishOptions } from "@/lib/products/viralpulse-ai/publishers/types";
 import { EMPTY_PUBLISH, getPost, postsCollection, statusFromVariants, updatePost, type PostDoc, type VariantPublish } from "@/lib/products/viralpulse-ai/posts";
 import { adsCollection } from "@/lib/products/viralpulse-ai/ads";
 import { recordAudit } from "@/lib/products/viralpulse-ai/audit";
@@ -219,7 +219,7 @@ export async function schedulePost(postId: string, input: ScheduleInput, viewer:
   }
   const chk = checkSchedule(at, now);
   if (!chk.ok) throw new SmmsInputError(`${chk.message} ${chk.fix}`);
-  const merged: PostDoc = { ...p, publishOptions: { ...(p.publishOptions ?? {}), ...(input.options ?? {}) } };
+  const merged: PostDoc = { ...p, publishOptions: stripPostDisclosureOverride({ ...(p.publishOptions ?? {}), ...(input.options ?? {}) }) };
   const plan = await buildPlan({ ...merged, scheduledAt: at, scheduledTz: tz });
   if (!plan.platforms.some((x) => x.variantState !== "published")) throw new SmmsInputError("Every platform of this post is already published.");
   const blockers = plan.platforms.filter((x) => x.variantState !== "published" && x.blocking);
@@ -249,8 +249,8 @@ export async function publishNow(postId: string, platforms: PostPlatform[], view
   if (p.status === "archived") throw new SmmsInputError("Restore the post before publishing it.");
   const wanted = platforms.filter((x) => p.platforms.includes(x));
   if (wanted.length === 0) throw new SmmsInputError("Pick at least one of the post's platforms.");
-  if (opts.options) await updatePost(postId, { publishOptions: { ...(p.publishOptions ?? {}), ...opts.options } }, viewer.userId);
-  const plan = await buildPlan({ ...p, publishOptions: { ...(p.publishOptions ?? {}), ...(opts.options ?? {}) } });
+  if (opts.options) await updatePost(postId, { publishOptions: stripPostDisclosureOverride({ ...(p.publishOptions ?? {}), ...opts.options }) }, viewer.userId);
+  const plan = await buildPlan({ ...p, publishOptions: stripPostDisclosureOverride({ ...(p.publishOptions ?? {}), ...(opts.options ?? {}) }) });
   const results: QueuedResult[] = [];
   const ids: string[] = [];
   for (const platform of wanted) {
@@ -318,6 +318,29 @@ export async function cancelScheduled(postId: string, viewer: SmmsViewer): Promi
   if (p.status === "scheduled") await updatePost(postId, { status: p.idea || p.variants.some((x) => x.content) ? "edited" : "draft", scheduledAt: null, scheduledBy: null, approvedBy: null, approvedAt: null, publishQueuedAt: null }, viewer.userId);
   await recordAudit({ actorId: viewer.userId, actorEmail: viewer.email, action: "unschedule", entity: "post", entityId: postId, entityLabel: p.title, recordId: postId, summary: n ? `${n} waiting publish${n === 1 ? "" : "es"} cancelled` : null });
   return { cancelled: n };
+}
+
+/**
+ * A scheduled post's approval covers what was approved. When media it uses is replaced, or a picture's alt text (which goes out with it)
+ * changes, the approval is withdrawn like a brief or content save does, and waiting attempts are cancelled so the old approval cannot fire.
+ */
+export async function withdrawApprovalForPosts(postIds: string[], actor: { userId: string; email: string | null }, why: string): Promise<string[]> {
+  if (!postIds.length) return [];
+  const posts = await postsCollection();
+  const rows = await posts.find({ ...notDeleted, _id: { $in: postIds }, status: "scheduled", $or: [{ approvedBy: { $ne: null } }, { publishQueuedAt: { $ne: null } }] }, { projection: { title: 1, createdBy: 1 } }).toArray();
+  for (const p of rows) {
+    await cancelAttempts(p._id);
+    await updatePost(p._id, { approvedBy: null, approvedAt: null, publishQueuedAt: null }, actor.userId);
+    await recordAudit({ actorId: actor.userId, actorEmail: actor.email, action: "approve", entity: "post", entityId: p._id, entityLabel: p.title, recordId: p._id, summary: `Approval withdrawn: ${why}` });
+    if (p.createdBy && p.createdBy !== actor.userId) await notifySmmsUsers([p.createdBy], { type: "smms_approval_withdrawn", title: `Approval withdrawn: ${p.title}`, body: `${why[0].toUpperCase()}${why.slice(1)}. It will not auto-publish until it is approved again.`, link: `/viralpulse-ai/posts/${p._id}` });
+  }
+  return rows.map((r) => r._id);
+}
+
+export async function withdrawApprovalForMedia(mediaId: string, actor: { userId: string; email: string | null }, why = "attached media changed"): Promise<string[]> {
+  const posts = await postsCollection();
+  const ids = (await posts.find({ ...notDeleted, status: "scheduled", $or: [{ mediaIds: mediaId }, { thumbnailId: mediaId }] }, { projection: { _id: 1 } }).toArray()).map((r) => r._id);
+  return withdrawApprovalForPosts(ids, actor, why);
 }
 
 export async function listAttempts(postId: string, viewer: SmmsViewer): Promise<AttemptView[]> {

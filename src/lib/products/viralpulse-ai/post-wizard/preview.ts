@@ -1,6 +1,6 @@
 /** What a platform will actually receive as text: the same composition the publishers use (`composeCaption`), so the preview is exact. Pure. */
 import { composeCaption, disclosureFor_, type Disclosure } from "@/lib/products/viralpulse-ai/publishers/validate";
-import type { MediaFacts, PublishOptions } from "@/lib/products/viralpulse-ai/publishers/types";
+import { stripPostDisclosureOverride, type MediaFacts, type PublishOptions } from "@/lib/products/viralpulse-ai/publishers/types";
 import { languageCodeFor } from "@/lib/products/viralpulse-ai/publishers/schedule";
 import type { PostPlatform } from "@/lib/products/viralpulse-ai/constants";
 import { splitThread, buildPublishOptions, finalLink, type WizardState } from "./helpers";
@@ -31,7 +31,7 @@ export interface PlatformPreviewData {
 
 export function previewFor(s: WizardState, platform: PostPlatform, media: PreviewMedia[], caps: { captionLimit: number; nativeAiLabel: boolean }, aiDisclosureOff: boolean): PlatformPreviewData {
   const v = s.variants[platform];
-  const opts: PublishOptions = { ...buildPublishOptions(s, undefined), ...(aiDisclosureOff ? { aiDisclosureOff: true } : {}) };
+  const opts: PublishOptions = { ...stripPostDisclosureOverride(buildPublishOptions(s, undefined)), ...(aiDisclosureOff ? { aiDisclosureOff: true } : {}) };
   const d = disclosureFor_(platform, caps, media.map(toFacts), opts, languageCodeFor(s.language));
   const text = (v?.content ?? "").trim();
   const link = finalLink(s.link, s.utm) || null;

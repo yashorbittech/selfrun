@@ -59,7 +59,7 @@ export interface PublishOptions {
   youtube?: { privacy?: "private" | "unlisted" | "public"; categoryId?: string; madeForKids?: boolean; short?: boolean };
   linkedin?: { visibility?: "PUBLIC" | "CONNECTIONS" };
   x?: { thread?: boolean };
-  /** Company turned the AI disclosure caption suffix off. Only honoured when the platform has no label requirement. */
+  /** Set at publish time from the COMPANY setting only (publish-settings); a value stored on a post is stripped and ignored. Only honoured when the platform has no label requirement. */
   aiDisclosureOff?: boolean;
   /** Ask the provider to hold the post until the schedule time where it supports that (otherwise our 5-minute job publishes it). */
   nativeSchedule?: boolean;
@@ -168,4 +168,11 @@ export class PendingProcessing extends Error {
     super(message);
     this.name = "PendingProcessing";
   }
+}
+
+/** Drops any per-post `aiDisclosureOff`: the AI disclosure may be relaxed by the company setting alone. */
+export function stripPostDisclosureOverride<T extends PublishOptions | undefined | null>(o: T): Omit<NonNullable<T>, "aiDisclosureOff"> {
+  const { aiDisclosureOff: _ignored, ...rest } = (o ?? {}) as PublishOptions;
+  void _ignored;
+  return rest as Omit<NonNullable<T>, "aiDisclosureOff">;
 }

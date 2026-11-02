@@ -14,7 +14,9 @@ import { getAdAccountInfo, type AdAccountInfo } from "./meta/account";
 import { buildAdPayload, buildAdSetPayload, buildCampaignPayload, buildCreativePayload, buildTargetingSpec, type CreativeAssets } from "./meta/build";
 import { normalizeAdPaid, normalizeCampaignPaid, type MetaAdDraft, type MetaCampaignDraft, type MetaTargetingDraft } from "./meta/draft";
 import { validateMetaLaunch, type AdForValidation, type MediaFacts } from "./meta/validate";
-import { commitmentOf, evaluateGuard, getGuard, type Commitment, type GuardVerdict } from "./guard";
+import { commitmentOf, evaluateGuard, formatMinorPlain, getGuard, setKillSwitch, type Commitment, type GuardSettings, type GuardVerdict } from "./guard";
+import { readStatuses } from "./meta/sync";
+import { withCompanyLease } from "@/lib/products/viralpulse-ai/lease";
 
 /**
  * The paid-ads launch service for Meta. One launch = one Meta campaign (with its ad sets, creatives and ads) created from a campaign's
@@ -592,7 +594,7 @@ async function doApprove(l: LaunchDoc, viewer: SmmsViewer, note: string, deps: A
   if (hard.length) throw new LaunchBlockedError("This launch is above your spending limits, so it cannot be approved as it is.", hard);
   if (verdict.needsSecondApprover && viewer.userId === l.createdBy) throw new LaunchBlockedError("This launch is above the approval threshold. Someone other than its creator must approve it.");
   const approval: LaunchApproval = { by: viewer.userId, byEmail: viewer.email, at: deps.now(), note: note.trim().slice(0, 500), committedDailyMinor: l.commitment.dailyMinor, committedTotalMinor: l.commitment.totalMinor, currency: l.currency, secondApproverRequired: verdict.needsSecondApprover };
-  const doc = await patch(l._id, { approval }, event(viewer.userId, "approved", `Approved ${l.commitment.dailyMinor / 100} ${l.currency}/day${l.commitment.totalMinor !== null ? `, ${l.commitment.totalMinor / 100} total` : ", no end date"}.`));
+  const doc = await patch(l._id, { approval }, event(viewer.userId, "approved", `Approved ${formatMinorPlain(l.commitment.dailyMinor, l.currency)}/day${l.commitment.totalMinor !== null ? `, ${formatMinorPlain(l.commitment.totalMinor, l.currency)} total` : ", no end date"}.`));
   await deps.audit({ actorId: viewer.userId, actorEmail: viewer.email, action: "approve", entity: "campaign", entityId: l.campaignId, entityLabel: l.campaignName, recordId: l.campaignId, summary: "Ad spend approved", metadata: { launchId: l._id, dailyMinor: approval.committedDailyMinor, totalMinor: approval.committedTotalMinor ?? -1, currency: l.currency } });
   return doc;
 }
@@ -623,8 +625,23 @@ async function setStatuses(l: LaunchDoc, status: "ACTIVE" | "PAUSED", deps: AdsD
   });
 }
 
+const SPEND_LOCK_ID = "ads-spend-lock";
+
+/**
+ * One spend decision at a time per company. The daily / monthly caps are checked against what is delivering NOW, so two activations (or an
+ * edit and an activation) running together could each see room that the other is about to use. The check and the switch-on therefore run
+ * under a company lease (see `lease.ts`).
+ */
+export function withSpendLock<T>(deps: Pick<AdsDeps, "now" | "sleep">, fn: () => Promise<T>, o: { waitMs?: number; leaseMs?: number } = {}): Promise<T> {
+  return withCompanyLease(SPEND_LOCK_ID, { now: deps.now, sleep: deps.sleep, waitMs: o.waitMs ?? 20_000, leaseMs: o.leaseMs ?? 90_000, busy: () => new LaunchBlockedError("Another change to ad spending is in progress. Try again in a moment.") }, fn);
+}
+
 export async function activateLaunch(launchId: string, viewer: SmmsViewer, deps: AdsDeps = defaultDeps): Promise<LaunchDoc> {
   assertCan(viewer, "PUBLISH_CONTENT");
+  return withSpendLock(deps, () => activateLocked(launchId, viewer, deps));
+}
+
+async function activateLocked(launchId: string, viewer: SmmsViewer, deps: AdsDeps): Promise<LaunchDoc> {
   const l = await requireLaunch(launchId);
   if (l.state !== "ready") throw new LaunchBlockedError("The launch is not fully created in Meta yet.");
   if (l.delivery === "archived") throw new LaunchBlockedError("An archived launch cannot be started.");
@@ -633,9 +650,16 @@ export async function activateLaunch(launchId: string, viewer: SmmsViewer, deps:
   if (!approvalCovers(l)) throw new ApprovalRequiredError("The budget changed since it was approved. It needs to be approved again.");
   const verdict = await guardFor(l.currency, l.commitment, l._id);
   if (!verdict.ok) throw new LaunchBlockedError("The spending limits do not allow this to start.", verdict.reasons);
+  // The second-approver rule is judged against the limits as they are NOW, not as they were when the approval was given.
+  if (verdict.needsSecondApprover && l.approval.by === l.createdBy) throw new ApprovalRequiredError("Under the current approval rules someone other than the launch's creator must approve it. Ask another approver to approve it again.");
   const info = await deps.withMeta(l.adAccountId, (c) => getAdAccountInfo(c, l.actId));
   if (info.status !== null && info.status !== 1) throw new LaunchBlockedError(`The Meta ad account is not active (${info.statusLabel}). Fix it in Meta Business settings first.`);
   await setStatuses(l, "ACTIVE", deps);
+  // The kill switch can be turned on while this was switching things on: look again, and undo if so.
+  if ((await getGuard()).killSwitch) {
+    await setStatuses(l, "PAUSED", deps);
+    throw new LaunchBlockedError("The ads kill switch was turned on while this was starting, so it was paused again.");
+  }
   const doc = await patch(launchId, { delivery: "active", activatedBy: viewer.userId, activatedAt: deps.now() }, event(viewer.userId, "activated", "Started in Meta."));
   await deps.audit({ actorId: viewer.userId, actorEmail: viewer.email, action: "status", entity: "campaign", entityId: l.campaignId, entityLabel: l.campaignName, recordId: l.campaignId, summary: "Ads switched on in Meta", metadata: { launchId } });
   return doc;
@@ -665,23 +689,69 @@ export async function archiveLaunch(launchId: string, viewer: SmmsViewer, deps: 
   return doc;
 }
 
-/** Pauses everything that is spending (company kill switch). Returns how many launches were paused. */
-export async function pauseAllRunning(viewer: SmmsViewer, deps: AdsDeps = defaultDeps): Promise<{ paused: number; failed: number }> {
+export interface PauseResult {
+  launchId: string;
+  campaignName: string;
+  /** Why it was a candidate: our records say it delivers, the last sync said Meta delivers, or a live read said so. */
+  found: "recorded_active" | "meta_active" | "live_read" | "unverified";
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * Pauses everything that is, or may be, spending: launches our records call active AND launches whose last synced (or a live) Meta status
+ * is ACTIVE although our records say paused (somebody switched them on in Meta, or a pause never reached it). A launch whose Meta status
+ * cannot be read is paused anyway: pausing is safe to repeat. Returns one result per launch.
+ */
+export async function pauseAllRunning(viewer: SmmsViewer, deps: AdsDeps = defaultDeps, opts: { reason?: string } = {}): Promise<{ paused: number; failed: number; results: PauseResult[] }> {
   assertCan(viewer, "APPROVE_AD_SPEND");
   const col = await launchesCollection();
-  const running = await col.find({ active: true, delivery: "active" }).toArray();
-  let paused = 0;
-  let failed = 0;
-  for (const l of running) {
+  const candidates = await col.find({ active: true, state: "ready", delivery: { $ne: "archived" }, "objects.campaign": { $exists: true, $ne: null } }).toArray();
+  const reason = opts.reason ?? "Paused by the kill switch.";
+  const results: PauseResult[] = [];
+  for (const l of candidates) {
+    const campaign = l.objects.campaign!;
+    let found: PauseResult["found"] | null = l.delivery === "active" ? "recorded_active" : l.externalStatus?.campaign === "ACTIVE" ? "meta_active" : null;
     try {
+      if (!found) {
+        try {
+          const st = (await deps.withMeta(l.adAccountId, (c) => readStatuses(c, "campaign", [campaign]))).get(campaign);
+          if (st?.status === "ACTIVE" || st?.effectiveStatus === "ACTIVE") found = "live_read";
+          else if (st?.status === "PAUSED" || st?.status === "ARCHIVED" || st?.status === "DELETED") continue;
+          else found = "unverified";
+        } catch {
+          found = "unverified";
+        }
+      }
       await setStatuses(l, "PAUSED", deps);
-      await patch(l._id, { delivery: "paused" }, event(viewer.userId, "paused", "Paused by the kill switch."));
-      paused++;
-    } catch {
-      failed++;
+      await patch(l._id, { delivery: "paused", externalStatus: { campaign: "PAUSED", at: deps.now() } }, event(viewer.userId, "paused", reason));
+      results.push({ launchId: l._id, campaignName: l.campaignName, found, ok: true });
+    } catch (e) {
+      const message = (e instanceof Error ? e.message : "pause failed").slice(0, 300);
+      await patch(l._id, {}, event(viewer.userId, "pause_failed", `${reason} Could not pause in Meta: ${message}`)).catch(() => {});
+      results.push({ launchId: l._id, campaignName: l.campaignName, found: found ?? "unverified", ok: false, error: message });
     }
   }
-  return { paused, failed };
+  return { paused: results.filter((r) => r.ok && r.found !== "unverified").length, failed: results.filter((r) => !r.ok).length, results };
+}
+
+/**
+ * Turning the kill switch ON must stop spend, not only block new starts: the switch is set first (so nothing can start meanwhile), then
+ * everything delivering is paused in Meta, one recorded result per launch, and the admins are told. Anything that could not be paused
+ * stays flagged and is retried by every ads sync while the switch is on.
+ */
+export async function engageKillSwitch(viewer: SmmsViewer, deps: AdsDeps = defaultDeps): Promise<{ guard: GuardSettings; paused: number; failed: number; results: PauseResult[] }> {
+  assertCan(viewer, "APPROVE_AD_SPEND");
+  const guard = await setKillSwitch(true, viewer.userId);
+  const r = await pauseAllRunning(viewer, deps);
+  await deps.audit({ actorId: viewer.userId, actorEmail: viewer.email, action: "status", entity: "campaign", entityId: "ads-guard", entityLabel: "Ad spending limits", recordId: "ads-guard", summary: `Ads kill switch turned on: ${r.paused} paused${r.failed ? `, ${r.failed} could not be paused` : ""}`, metadata: { results: r.results.map((x) => ({ launchId: x.launchId, found: x.found, ok: x.ok, error: x.error ?? null })) } });
+  await deps.notify({
+    title: r.failed ? `Ads kill switch is on: ${r.failed} campaign${r.failed === 1 ? "" : "s"} could not be paused` : "Ads kill switch is on: all ads paused",
+    body: r.failed ? `${r.paused} paused. Not paused: ${r.results.filter((x) => !x.ok).map((x) => x.campaignName).join(", ").slice(0, 300)}. Pause them in Meta Ads Manager; the sync keeps trying.` : `${r.paused} running campaign${r.paused === 1 ? "" : "s"} paused. Nothing can start until it is turned off.`,
+    link: "/viralpulse-ai/campaigns",
+    dedupeKey: `ads-killswitch:${guard.killSwitchAt?.getTime() ?? Date.now()}`,
+  }).catch(() => {});
+  return { guard, ...r };
 }
 
 // ── editing after launch ─────────────────────────────────────────────────────────────────────────────
@@ -699,6 +769,10 @@ export interface LaunchEdit {
  */
 export async function editLaunch(launchId: string, viewer: SmmsViewer, edit: LaunchEdit, deps: AdsDeps = defaultDeps): Promise<LaunchDoc> {
   assertCan(viewer, "EDIT_CAMPAIGNS");
+  return withSpendLock(deps, () => editLocked(launchId, viewer, edit, deps));
+}
+
+async function editLocked(launchId: string, viewer: SmmsViewer, edit: LaunchEdit, deps: AdsDeps): Promise<LaunchDoc> {
   const l = await requireLaunch(launchId);
   if (l.state !== "ready" || l.delivery === "archived") throw new LaunchBlockedError("Only a created, not archived launch can be edited.");
   const next: MetaCampaignDraft = JSON.parse(JSON.stringify(l.campaign));

@@ -171,6 +171,9 @@ export interface AccountDoc {
   updatedAt: Date;
   /** Set when the login was disconnected or no longer returns this account; the row is kept so a reconnect revives it. */
   disconnectedAt: Date | null;
+  /** What the account was set to when its login was disconnected, so reconnecting the same login restores it instead of leaving it off. */
+  enabledBeforeDisconnect?: boolean;
+  defaultBeforeDisconnect?: boolean;
 }
 
 /** What a page may see: never a token. */

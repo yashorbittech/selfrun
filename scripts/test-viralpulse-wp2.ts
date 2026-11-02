@@ -41,6 +41,7 @@ const log: { url: string; method: string; body: string }[] = [];
 const fake = {
   metaDebug: { is_valid: true, expires_at: 0, data_access_expires_at: 0, scopes: [] as string[] },
   metaPageTokenRotates: false,
+  metaUserId: "meta-user-1",
   googleExpiresIn: 3600,
   googleBusiness: false,
   gCounter: 1,
@@ -71,7 +72,7 @@ async function providerFetch(input: RequestInfo | URL, init?: RequestInit): Prom
       if (q.get("grant_type") === "fb_exchange_token") { hit("meta.long"); assert.equal(q.get("fb_exchange_token"), "meta-short-1"); return json({ access_token: "meta-long-1", expires_in: 5_184_000 }); }
     }
     if (rest === "/debug_token") { hit("meta.debug"); assert.equal(q.get("access_token"), "APPID|APPSECRET"); return json({ data: fake.metaDebug }); }
-    if (rest === "/me") return json({ id: "meta-user-1", name: "Maya Owner", picture: { data: { url: "https://fb.example/maya.jpg" } } });
+    if (rest === "/me") return json({ id: fake.metaUserId, name: fake.metaUserId === "meta-user-1" ? "Maya Owner" : "Other Person", picture: { data: { url: "https://fb.example/maya.jpg" } } });
     if (rest === "/me/accounts") return json({ data: [{ id: "PAGE1", name: "Acme Page", access_token: "page-token-1", picture: { data: { url: "https://fb.example/p.jpg" } }, instagram_business_account: { id: "IG1", username: "acme", profile_picture_url: "https://ig.example/a.jpg" } }] });
     if (rest === "/me/adaccounts") return json({ data: [{ id: "act_555", account_id: "555", name: "Acme Ads", currency: "INR", account_status: 1 }] });
     if (rest === "/PAGE1" && q.get("fields") === "access_token") { hit("meta.pagetoken"); return json({ access_token: "page-token-2" }); }
@@ -396,6 +397,8 @@ async function main() {
 
       await t("disconnect: revokes at Meta, deletes tokens, switches accounts off, audits without tokens", async () => {
         reset();
+        const enabledBefore = (await svc.listAccounts()).filter((a) => a.enabled).map((a) => a.id).sort();
+        assert.ok(enabledBefore.length > 0, "something was enabled before the disconnect");
         const r = await svc.disconnectConnection(metaConn, me);
         assert.equal(r.revokedAtProvider, true);
         const accts = await svc.listAccounts({ includeDisconnected: true });
@@ -412,11 +415,33 @@ async function main() {
         const back = await svc.listAccounts();
         assert.equal(back.length, 3);
         assert.ok(back.some((a) => a.id === pageAcct));
+        // Reconnecting the same login restores what was switched on: the accounts do not come back disabled.
+        assert.deepEqual(back.filter((a) => a.enabled).map((a) => a.id).sort(), enabledBefore, "enabled state restored after reconnect");
         reset();
         const conn = (await svc.listConnections())[0];
         const d = await svc.disconnectConnection(conn.id, me);
         assert.equal(d.revokedAtProvider, true);
         assert.equal(calls["meta.revoke"], 1);
+      });
+
+      await t("reconnect: the same platform user renews the same login; a different user is refused and no second login appears", async () => {
+        reset();
+        fake.metaDebug = { ...fake.metaDebug, expires_at: 0, scopes: META_ALL };
+        await (await connect("meta")).finish();
+        const before = await svc.listConnections();
+        assert.equal(before.length, 1);
+        const id = before[0].id;
+        await (await connect("meta", { connectionId: id })).finish();
+        const same = await svc.listConnections();
+        assert.deepEqual(same.map((c) => c.id), [id], "renewed in place");
+        fake.metaUserId = "meta-user-2";
+        try {
+          await assert.rejects((await connect("meta", { connectionId: id })).finish(), /signed in as|different/i);
+          assert.equal((await svc.listConnections()).length, 1, "no second login was created");
+        } finally {
+          fake.metaUserId = "meta-user-1";
+        }
+        await svc.disconnectConnection(id, me);
       });
     });
 

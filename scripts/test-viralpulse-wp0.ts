@@ -220,6 +220,7 @@ async function main() {
       { key: "viralpulse-publisher", name: "Scheduled posts", health: "healthy", healthNote: "Ran when it was due.", enabled: true, last: { id: "1", trigger: "cron", by: null, status: "ok", startedAt: "2026-11-01T04:30:00.000Z", durationMs: 100, summary: "", error: "" }, lastOkAt: "2026-11-01T04:30:00.000Z", effectiveSchedule: "30 4 * * *", when: "Every day at 04:30" },
       { key: "viralpulse-accounts", name: "Connected account checks", health: "healthy", healthNote: "Ran when it was due.", enabled: true, last: { id: "2", trigger: "cron", by: null, status: "ok", startedAt: "2026-11-01T00:00:00.000Z", durationMs: 100, summary: "", error: "" }, lastOkAt: "2026-11-01T00:00:00.000Z", effectiveSchedule: "*/2 * * * *", when: "Every 2 minutes" },
       { key: "viralpulse-ugc", name: "AI UGC videos", health: "healthy", healthNote: "Ran when it was due.", enabled: true, last: { id: "2", trigger: "cron", by: null, status: "ok", startedAt: "2026-11-01T00:00:00.000Z", durationMs: 100, summary: "", error: "" }, lastOkAt: "2026-11-01T00:00:00.000Z", effectiveSchedule: "*/2 * * * *", when: "Every 2 minutes" },
+      { key: "viralpulse-metrics", name: "Social post and account results", health: "healthy", healthNote: "Ran when it was due.", enabled: true, last: { id: "2", trigger: "cron", by: null, status: "ok", startedAt: "2026-11-01T00:00:00.000Z", durationMs: 100, summary: "", error: "" }, lastOkAt: "2026-11-01T00:00:00.000Z", effectiveSchedule: "0 */3 * * *", when: "Every 3 hours" },
     ],
     encryptionReady: true,
   });

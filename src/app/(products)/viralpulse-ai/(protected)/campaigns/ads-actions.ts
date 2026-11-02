@@ -12,9 +12,9 @@ import { META_OBJECTIVE_LABEL, normalizeAdSet, normalizeMetaCampaign, normalizeM
 import { defaultDeps } from "@/lib/products/viralpulse-ai/ads-platforms/deps";
 import { getAdAccountInfo, listCustomAudiences, listPixels, listLeadForms, listAdAccountInstagramAccounts } from "@/lib/products/viralpulse-ai/ads-platforms/meta/account";
 import { searchInterests, listTargetingCategory, searchGeo, searchLocales, deliveryEstimate, type TargetingClass } from "@/lib/products/viralpulse-ai/ads-platforms/meta/search";
-import { getGuard, saveGuard, setKillSwitch, type CurrencyCaps } from "@/lib/products/viralpulse-ai/ads-platforms/guard";
+import { formatMinorPlain, getGuard, saveGuard, setKillSwitch, type CurrencyCaps } from "@/lib/products/viralpulse-ai/ads-platforms/guard";
 import {
-  activateLaunch, approveLaunch, archiveLaunch, createLaunch, editLaunch, getActiveLaunchForCampaign, getLaunch, listLaunches, LaunchBlockedError, LaunchValidationError, pauseAllRunning, pauseLaunch, resumeLaunch, revokeApproval, rollbackLaunch, validateLaunch,
+  activateLaunch, approveLaunch, archiveLaunch, createLaunch, editLaunch, getActiveLaunchForCampaign, getLaunch, listLaunches, LaunchBlockedError, LaunchValidationError, engageKillSwitch, pauseAllRunning, pauseLaunch, resumeLaunch, revokeApproval, rollbackLaunch, validateLaunch,
   type LaunchDoc, type LaunchEdit,
 } from "@/lib/products/viralpulse-ai/ads-platforms/launches";
 import { guardSummary, launchView, loadAccountOptions } from "@/lib/products/viralpulse-ai/ads-platforms/wizard-data";
@@ -272,7 +272,7 @@ export async function editLaunchAction(launchId: string, edit: LaunchEdit) {
 export async function pauseAllRunningAction() {
   return run(["APPROVE_AD_SPEND"], async (v) => {
     const r = await meta(() => pauseAllRunning(v));
-    return { paused: r.paused, failed: r.failed };
+    return { paused: r.paused, failed: r.failed, results: r.results };
   });
 }
 
@@ -298,8 +298,26 @@ export async function loadGuardAction() {
   return run(["VIEW_CAMPAIGNS"], async () => ({ guard: guardSummary(await getGuard()) }), { revalidate: false });
 }
 
+/** What changed between two sets of limits, in words, for the activity log. */
+function describeGuardChange(before: Awaited<ReturnType<typeof getGuard>>, after: Awaited<ReturnType<typeof getGuard>>): string {
+  const out: string[] = [];
+  if (before.requireSecondApprover !== after.requireSecondApprover) out.push(`second approver ${after.requireSecondApprover ? "required" : "NOT required"}`);
+  if (before.allowUncapped !== after.allowUncapped) out.push(`launches without limits ${after.allowUncapped ? "ALLOWED" : "not allowed"}`);
+  const names: [keyof CurrencyCaps, string][] = [["maxDailyPerLaunchMinor", "daily per launch"], ["maxTotalPerLaunchMinor", "total per launch"], ["companyDailyCapMinor", "company daily"], ["companyMonthlyCapMinor", "company 30-day"], ["approvalThresholdMinor", "approval threshold"]];
+  for (const cur of new Set([...Object.keys(before.perCurrency), ...Object.keys(after.perCurrency)])) {
+    for (const [k, label] of names) {
+      const b = before.perCurrency[cur]?.[k] ?? null;
+      const a2 = after.perCurrency[cur]?.[k] ?? null;
+      if (b !== a2) out.push(`${cur} ${label}: ${b === null ? "none" : formatMinorPlain(b, cur)} -> ${a2 === null ? "none" : formatMinorPlain(a2, cur)}`);
+    }
+  }
+  return out.length ? out.join("; ").slice(0, 900) : "No limit changed";
+}
+
 export async function saveGuardAction(patch: { perCurrency?: Record<string, Partial<CurrencyCaps>>; requireSecondApprover?: boolean; allowUncapped?: boolean }) {
-  return run(["APPROVE_AD_SPEND"], async (v) => {
+  // Lifting a cap, relaxing the approval rule or allowing uncapped launches is its own permission: not the one that approves spend.
+  return run(["MANAGE_AD_LIMITS"], async (v) => {
+    const before = await getGuard();
     const g = await saveGuard(
       {
         requireSecondApprover: typeof patch?.requireSecondApprover === "boolean" ? patch.requireSecondApprover : undefined,
@@ -308,16 +326,21 @@ export async function saveGuardAction(patch: { perCurrency?: Record<string, Part
       },
       v.userId,
     );
-    await recordAudit({ ...who(v), action: "update", entity: "campaign", entityId: "ads-guard", entityLabel: "Ad spending limits", recordId: "ads-guard", summary: "Ad spending limits changed" });
+    await recordAudit({ ...who(v), action: "update", entity: "campaign", entityId: "ads-guard", entityLabel: "Ad spending limits", recordId: "ads-guard", summary: `Ad spending limits changed: ${describeGuardChange(before, g)}` });
     return { guard: guardSummary(g) };
   });
 }
 
 export async function setKillSwitchAction(on: boolean) {
-  return run(["APPROVE_AD_SPEND"], async (v) => {
-    const g = await setKillSwitch(on === true, v.userId);
-    await recordAudit({ ...who(v), action: "status", entity: "campaign", entityId: "ads-guard", entityLabel: "Ad spending limits", recordId: "ads-guard", summary: on ? "Ads kill switch turned on" : "Ads kill switch turned off" });
-    return { guard: guardSummary(g) };
+  // Turning it ON is a safety action anyone who approves spend may take (and it pauses what is running); turning it OFF lets spending resume.
+  return run([on === true ? "APPROVE_AD_SPEND" : "MANAGE_AD_LIMITS"], async (v) => {
+    if (on === true) {
+      const r = await engageKillSwitch(v);
+      return { guard: guardSummary(r.guard), paused: r.paused, failed: r.failed };
+    }
+    const g = await setKillSwitch(false, v.userId);
+    await recordAudit({ ...who(v), action: "status", entity: "campaign", entityId: "ads-guard", entityLabel: "Ad spending limits", recordId: "ads-guard", summary: "Ads kill switch turned off" });
+    return { guard: guardSummary(g), paused: 0, failed: 0 };
   });
 }
 

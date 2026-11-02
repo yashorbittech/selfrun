@@ -147,6 +147,13 @@ async function resolveField(id: Parameters<RunDeps["resolve"]>[0], input: Parame
     case "start_today":
       return { ok: true, value: istDate(input.now), note: "Starts today (India time).", sources: [] };
     case "best_time": {
+      // Synced platform numbers first (real, per post); the hand-entered numbers are only a fallback for companies with nothing synced.
+      const synced = await (await import("@/lib/products/viralpulse-ai/metrics/queries")).loadSyncedPostSamples().catch(() => []);
+      if (synced.length > 0) {
+        const best = bestPostingTime(synced, input.now);
+        if (!best.ok) return { ok: false, error: best.reason };
+        return { ok: true, value: best.value, note: `Your posts get the most engagement around ${String(best.hour).padStart(2, "0")}:00 India time (average ${best.avg}, from ${best.basedOn} published posts with numbers synced from the platforms).`, sources: [{ kind: "analytics", ref: `${best.basedOn} published posts (synced)` }] };
+      }
       const col = await postsCollection();
       const rows = await col.find({ ...notDeleted, publishedAt: { $ne: null } }, { projection: { publishedAt: 1, variants: 1 } }).sort({ publishedAt: -1 }).limit(300).toArray();
       const samples: PostSample[] = [];

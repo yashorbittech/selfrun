@@ -553,8 +553,9 @@ async function main() {
         assert.equal(out.outcome, "done");
         const doc = await getProject(p._id);
         assert.equal(doc!.variants.length, 2);
-        assert.equal(h.fp.calls.length, 1);
-        assert.equal(h.fp.calls[0].req.n, 2);
+        assert.equal(h.fp.calls.length, 2, "one request per picture, so progress is real");
+        assert.ok(h.fp.calls.every((c) => c.req.n === 1));
+        assert.equal(doc!.progress?.done, 2);
         assert.equal(h.fp.calls[0].req.openAiSize, "1024x1024");
         assert.ok(!h.fp.calls[0].req.prompt.includes("Festive offers"), "overlay words never reach the model");
         assert.equal(doc!.variants[0].costBasis, "price-table");
@@ -656,7 +657,7 @@ async function main() {
         const d = await getProject(p._id);
         assert.equal(d!.variants.length, 0);
         assert.equal(d!.totalCostUsd, 0);
-        assert.equal(d!.status, "draft");
+        assert.equal(d!.status, "failed");
         assert.match(d!.error ?? "", /safety/);
         assert.ok(hf.audits.some((x) => /failed: moderation/.test(x)));
       });
@@ -696,7 +697,7 @@ async function main() {
         await assert.rejects(() => e4.approve(u, p._id), /Only a manager/);
         const ok = await e4.approve(mgr, p._id);
         assert.equal(ok.outcome, "done");
-        assert.equal(h4.fp.calls.length, 1);
+        assert.equal(h4.fp.calls.length, 2);
         assert.equal((await getProject(p._id))!.variants.length, 2);
         await assert.rejects(() => e4.approve(mgr, p._id), /Nothing is waiting/);
         const direct = await e4.generate(mgr, p._id);

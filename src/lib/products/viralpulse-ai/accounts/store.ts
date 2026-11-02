@@ -110,6 +110,17 @@ const LEGACY_PROVIDERS: ConnectionProvider[] = ["meta", "google", "linkedin"];
 export async function ensureMigrated(): Promise<void> {
   const company = await currentCompanyId();
   if (migrated.has(company)) return;
+  let failures = 0;
+  /** One failed write must not hide the rest, and must not be forgotten: it is logged and the migration runs again on the next call. A duplicate key means a concurrent run already wrote it. */
+  const attempt = async (what: string, write: () => Promise<unknown>) => {
+    try {
+      await write();
+    } catch (e) {
+      if ((e as { code?: number }).code === 11000) return;
+      failures++;
+      console.error(`[viralpulse] legacy connection migration: ${what} failed for company ${company}; it will be retried`, e instanceof Error ? e.message : e);
+    }
+  };
   const legacy = await smmsCollection<IntegrationDoc>(COLLECTIONS.integrations);
   const docs = await legacy.find({}).toArray();
   const conns = await connectionsCol();
@@ -119,12 +130,15 @@ export async function ensureMigrated(): Promise<void> {
     if (!LEGACY_PROVIDERS.includes(p)) continue;
     const access = decryptSecret(d.accessEnc, `${p}:access`);
     const refresh = d.refreshEnc ? decryptSecret(d.refreshEnc, `${p}:refresh`) : null;
-    const connId = `legacy-${p}`;
+    // `_id`s are unique across the whole collection (every company shares it), so a fixed `legacy-meta` would make the second company's
+    // migration collide with the first. The company id is part of the id; an earlier plain-id row is found by `legacyFrom` and kept.
+    const existingConn = await conns.findOne({ legacyFrom: p });
+    const connId = existingConn?._id ?? `legacy-${company}-${p}`;
     const now = new Date();
-    if (!(await conns.findOne({ _id: connId })) && access) {
-      await conns
+    if (!existingConn && access) {
+      await attempt(`connection ${p}`, () => conns
         .updateOne(
-          { _id: connId },
+          { legacyFrom: p },
           {
             $setOnInsert: {
               _id: connId,
@@ -152,11 +166,17 @@ export async function ensureMigrated(): Promise<void> {
             } satisfies ConnectionDoc,
           },
           { upsert: true },
-        )
-        .catch(() => {});
+        ));
     }
     if (!access) continue;
-    const t = { facebookPages: [], instagramAccounts: [], youtubeChannels: [], gbpLocations: [], linkedinAuthors: [], ...(d.targets ?? {}) };
+    const tg = d.targets;
+    const t = {
+      facebookPages: tg?.facebookPages ?? [],
+      instagramAccounts: tg?.instagramAccounts ?? [],
+      youtubeChannels: tg?.youtubeChannels ?? [],
+      gbpLocations: tg?.gbpLocations ?? [],
+      linkedinAuthors: tg?.linkedinAuthors ?? [],
+    };
     const rows: { provider: AccountProvider; id: string; name: string; token?: string | null; meta?: Record<string, string>; platform: string }[] = [
       ...t.facebookPages.map((x) => ({ provider: "facebook_page" as const, id: x.id, name: x.name, token: x.tokenEnc ? decryptSecret(x.tokenEnc, `meta:page:${x.id}`) : null, platform: "facebook" })),
       ...t.instagramAccounts.map((x) => {
@@ -168,9 +188,9 @@ export async function ensureMigrated(): Promise<void> {
       ...t.linkedinAuthors.map((x) => ({ provider: "linkedin_member" as const, id: x.id, name: x.name, platform: "linkedin" })),
     ];
     for (const r of rows) {
-      const id = `legacy-${r.provider}-${r.id}`;
+      const id = `legacy-${company}-${r.provider}-${r.id}`;
       const selected = d.selected?.[r.platform as keyof typeof d.selected] === r.id;
-      await accts
+      await attempt(`account ${r.provider} ${r.id}`, () => accts
         .updateOne(
           { provider: r.provider, externalId: r.id },
           {
@@ -199,9 +219,8 @@ export async function ensureMigrated(): Promise<void> {
             } satisfies AccountDoc,
           },
           { upsert: true },
-        )
-        .catch(() => {});
+        ));
     }
   }
-  migrated.add(company);
+  if (failures === 0) migrated.add(company);
 }

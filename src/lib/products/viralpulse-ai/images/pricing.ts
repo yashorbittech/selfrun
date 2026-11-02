@@ -1,4 +1,4 @@
-import { IMAGE_FALLBACK_PRICES, imageCost, isImageQuality, type ImageCost, type ImagePriceTable, type ImageQuality, type ImageUsage } from "@/lib/products/viralpulse-ai/models";
+import { IMAGE_FALLBACK_PRICES, imageCost, isImageQuality, type ImageCost, type ImagePriceTable, type ImageQuality, type ImageUsage } from "@/lib/products/viralpulse-ai/image-pricing-core";
 import type { ImageProviderId } from "@/lib/products/viralpulse-ai/images/types";
 
 /**

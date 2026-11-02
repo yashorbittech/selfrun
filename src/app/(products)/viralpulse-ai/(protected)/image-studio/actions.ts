@@ -1,20 +1,21 @@
 "use server";
 
+import { afterForCompany } from "@/lib/platform/tenancy/context";
 import { run } from "@/lib/products/viralpulse-ai/run";
 import { can, SmmsInputError, type SmmsViewer } from "@/lib/products/viralpulse-ai/viewer";
-import { createEngine, type Actor } from "@/lib/products/viralpulse-ai/images/engine";
+import { cleanBrief, createEngine, type Actor } from "@/lib/products/viralpulse-ai/images/engine";
 import { defaultImageDeps } from "@/lib/products/viralpulse-ai/images/deps-default";
-import { getBrandKit, getImageSettings, listProjects, saveBrandKit, saveImageSettings } from "@/lib/products/viralpulse-ai/images/store";
+import { getBrandKit, getImageSettings, saveBrandKit, saveImageSettings, spentToday } from "@/lib/products/viralpulse-ai/images/store";
 import { toProjectView } from "@/lib/products/viralpulse-ai/images/view";
 import type { BrandKit } from "@/lib/products/viralpulse-ai/images/types";
 import type { ImageSettings } from "@/lib/products/viralpulse-ai/images/limits";
 import { deleteMedia, getMedia, mediaCollection, mediaUsage, newUploadPath } from "@/lib/products/viralpulse-ai/media";
 import { createPost, updatePost } from "@/lib/products/viralpulse-ai/posts";
 import { adsCollection, updateAd } from "@/lib/products/viralpulse-ai/ads";
-import { recordAudit } from "@/lib/products/viralpulse-ai/audit";
+import { listAudit, recordAudit } from "@/lib/products/viralpulse-ai/audit";
 import { notDeleted, str } from "@/lib/products/viralpulse-ai/db";
 import { isPostPlatform, POST_PLATFORMS } from "@/lib/products/viralpulse-ai/constants";
-import { fitsFor, GROUP_TO_POST_PLATFORM } from "@/lib/products/viralpulse-ai/images/specs";
+import { fitsFor, goalById, GROUP_TO_POST_PLATFORM } from "@/lib/products/viralpulse-ai/images/specs";
 
 const actorOf = (v: SmmsViewer): Actor => ({ userId: v.userId, email: v.email, canApprove: can(v, "PUBLISH_CONTENT") });
 const engine = () => createEngine(defaultImageDeps());
@@ -26,17 +27,14 @@ const strs = (v: unknown, n = 20): string[] => (Array.isArray(v) ? v.filter((x):
 
 export async function createProjectAction(input: Bag) {
   return run([...GEN], async (v) => {
-    const consent = bag(input.consent);
-    const withConsent = input.consent ? { ...input, consent: { ...consent, at: new Date().toISOString(), by: v.email } } : input;
-    return { project: toProjectView(await engine().createProject(actorOf(v), bag(withConsent))) };
+    // The consent record's who / when are written by the engine from the session; whatever the browser sends for them is ignored.
+    return { project: toProjectView(await engine().createProject(actorOf(v), bag(input))) };
   }, { revalidate: false });
 }
 
 export async function updateBriefAction(id: string, input: Bag) {
   return run([...GEN], async (v) => {
-    const consent = bag(input.consent);
-    const withConsent = input.consent ? { ...input, consent: { ...consent, at: consent.attested ? new Date().toISOString() : null, by: consent.attested ? v.email : null } } : input;
-    return { project: toProjectView(await engine().updateBrief(actorOf(v), String(id), bag(withConsent))) };
+    return { project: toProjectView(await engine().updateBrief(actorOf(v), String(id), bag(input))) };
   }, { revalidate: false });
 }
 
@@ -46,16 +44,28 @@ function outcome(o: Awaited<ReturnType<ReturnType<typeof createEngine>["generate
   return { outcome: "needs_ack" as const, flags: o.flags };
 }
 
-export async function generateAction(id: string, acknowledge: string[]) {
-  return run([...GEN], async (v) => outcome(await engine().generate(actorOf(v), String(id), { acknowledge: strs(acknowledge, 40) })), { revalidate: false });
+/** Runs the engine call, and any work it hands back to run after the response (generation continues if the person leaves the page). */
+async function withDefer<T>(fn: (defer: (run: () => Promise<unknown>) => void) => Promise<T>): Promise<T> {
+  let job: (() => Promise<unknown>) | null = null;
+  const out = await fn((r) => { job = r; });
+  if (job) {
+    const j = job as () => Promise<unknown>;
+    await afterForCompany(() => j().catch((e) => console.error("[image studio]", (e as Error)?.message)));
+  }
+  return out;
+}
+
+/** Starts drawing in the background. The page polls `getProjectAction` for progress. */
+export async function generateAction(id: string, acknowledge?: string[]) {
+  return run([...GEN], async (v) => withDefer(async (defer) => outcome(await engine().generate(actorOf(v), String(id), { acknowledge: acknowledge === undefined ? undefined : strs(acknowledge, 40), defer }))), { revalidate: false });
 }
 
 export async function editVariantAction(id: string, variantId: string, instruction: string, acknowledge: string[]) {
-  return run([...GEN], async (v) => outcome(await engine().editVariant(actorOf(v), String(id), String(variantId), String(instruction ?? ""), { acknowledge: strs(acknowledge, 40) })), { revalidate: false });
+  return run([...GEN], async (v) => withDefer(async (defer) => outcome(await engine().editVariant(actorOf(v), String(id), String(variantId), String(instruction ?? ""), { acknowledge: strs(acknowledge, 40), defer }))), { revalidate: false });
 }
 
 export async function approveAction(id: string) {
-  return run(["PUBLISH_CONTENT", "MANAGE_MEDIA"], async (v) => outcome(await engine().approve(actorOf(v), String(id))), { revalidate: false });
+  return run(["PUBLISH_CONTENT", "MANAGE_MEDIA"], async (v) => withDefer(async (defer) => outcome(await engine().approve(actorOf(v), String(id), { defer }))), { revalidate: false });
 }
 
 export async function rejectAction(id: string) {
@@ -85,12 +95,8 @@ export async function finishAction(id: string, input: Bag) {
   });
 }
 
-export async function listProjectsAction() {
-  return run(["MANAGE_MEDIA"], async () => ({ projects: (await listProjects(20)).map((p) => ({ id: p._id, name: p.brief.name, goalId: p.brief.goalId, status: p.status, updatedAt: p.updatedAt.toISOString(), images: p.variants.length })) }), { revalidate: false });
-}
-
 export async function getProjectAction(id: string) {
-  return run(["MANAGE_MEDIA"], async (v) => ({ project: toProjectView(await engine().getProject(String(id))), canApprove: can(v, "PUBLISH_CONTENT") }), { revalidate: false });
+  return run(["MANAGE_MEDIA"], async (v) => ({ project: toProjectView(await engine().reconcile(String(id))), canApprove: can(v, "PUBLISH_CONTENT") }), { revalidate: false });
 }
 
 // ── brand kit and limits ────────────────────────────────────────────────────
@@ -197,6 +203,46 @@ export async function attachMediaToAdAction(mediaId: string, adId: string) {
 }
 
 
+
+/** Saves the wizard's brief: creates the draft project the first time, updates it afterwards. */
+export async function saveDraftAction(id: string | null, input: Bag) {
+  return run([...GEN], async (v) => {
+    const e = engine();
+    const p = id ? await e.updateBrief(actorOf(v), String(id), bag(input)) : await e.createProject(actorOf(v), bag(input));
+    return { project: toProjectView(p) };
+  }, { revalidate: false });
+}
+
+/** The live estimate and the day's spend for a brief that may not be saved yet. */
+export async function estimateBriefAction(input: Bag) {
+  return run([...GEN], async (v) => {
+    const e = engine();
+    const settings = await getImageSettings();
+    const brief = cleanBrief(bag(input), settings);
+    const est = await e.estimate(brief, settings, brief.variants);
+    const goal = goalById(brief.goalId);
+    const images = goal?.slides ? brief.overlayText.length : brief.variants;
+    const total = Math.round(est.perImageUsd * images * 1e6) / 1e6;
+    return { estimate: { perImageUsd: est.perImageUsd, totalUsd: total, images, basis: est.basis, model: est.model }, spentTodayUsd: await spentToday(new Date()), canApprove: can(v, "PUBLISH_CONTENT") };
+  }, { revalidate: false });
+}
+
+export async function duplicateProjectAction(id: string) {
+  return run([...GEN], async (v) => ({ id: (await engine().duplicate(actorOf(v), String(id)))._id }), { revalidate: false });
+}
+
+export async function deleteProjectAction(id: string) {
+  return run([...GEN], async (v) => { await engine().remove(actorOf(v), String(id)); return {}; });
+}
+
+/** Who did what to a project, newest first (from the audit log). */
+export async function projectTrailAction(id: string) {
+  return run(["MANAGE_MEDIA"], async () => {
+    await engine().getProject(String(id));
+    const r = await listAudit({ entity: "media", recordId: String(id), pageSize: 50 });
+    return { items: r.items.map((a) => ({ id: a._id, at: a.createdAt.toISOString(), by: a.actorEmail, action: String(a.action), summary: a.summary ?? "" })) };
+  }, { revalidate: false });
+}
 
 export async function estimateAction(id: string) {
   return run([...GEN], async () => {
