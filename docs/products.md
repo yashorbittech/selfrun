@@ -181,6 +181,13 @@ levels; assignment to people and departments with acknowledgement tracking; feed
 - Staff can leave feedback on a procedure, and reports and analytics show usage and compliance trends.
 - Settings, permissions and the full history are recorded in the audit trail.
 
+**In progress: business documents.** Playbook is being extended from procedures to every kind of business document (HR letters,
+contracts, proposals, policies, brochures and more), each created from a template with AI, edited by hand, versioned and exported
+to PDF and Word on A4 pages, with signing handled in ContractFlow. Today the foundation is in place: the document model (headings,
+clauses, lists, tables, images, variables, headers and footers, signature blocks), A4 page settings, and permissions listed under
+"Playbook documents" in the Director's permission list. The Documents page (administrators only) says what is ready; creating and
+exporting documents arrive in the next releases. The plan is in `docs/playbook-audit-and-plan.md`.
+
 ---
 
 ## SelfRun DealFlow AI (`/dealflow-ai`)
@@ -236,19 +243,27 @@ periods and financial reports.
 
 ## SelfRun ContractFlow AI (`/contractflow-ai`)
 
-**What it is.** A document maker for agreements and policies. Admins define **document types** (employment agreements,
-NDAs, service agreements, privacy and internal policies) with fields and numbering, build **templates** from blocks
-(headings, clauses, tables, variables, signature blocks), and run documents through **approval workflows**. Documents carry
-versions, signature requests and a full audit trail, and export as PDF, DOCX or print.
+**What it is.** The signing and signed-document vault side of the document suite. Documents are written in Playbook AI; ContractFlow
+is being rebuilt around that: a document is cloned here, signed with a built-in simple electronic signature and filed in a
+party-wise vault (client, vendor, employee, partner, freelancer, candidate, trainee, other). **Not yet available:** the clone, the
+signing screens, the vault, PDF or Word export, and any e-signature. ContractFlow does not provide Aadhaar eSign, a digital
+signature certificate or a licensed signing provider, and none is planned.
 
-**Benefits**
-- Standard wording is written once and reused, with variables filled from HR, projects, finance and Digi Locker data.
-- Every document has an owner, a status (draft, review, pending approval, approved, published, active, archived) and a history.
-- Optional AI drafting from a short prompt.
-- A legal documents dashboard shows document status, creation trends and approval activity.
-- Maker types control who can create which kinds of documents; workflows define the approval chain for each document type; categories keep the library organised.
-- Approvals and signature requests are tracked in one place, and document history shows who changed and approved what.
-- Notifications go out when documents are issued, approved or expiring.
+**What works today** (the earlier, simpler version, kept while the rebuild proceeds and reachable from the sidebar as "Old documents")
+- A register of existing documents with status, owner, effective and expiry dates, versions and an audit trail, and the approvals
+  that were started on them.
+- Documents that have an expiry date still remind their owner as the date approaches (one notice per document per stage).
+- Authoring (new documents, templates, document types, workflows, categories) is retired from the menu. Write documents in Playbook AI.
+- Old data (`lpms_*` collections) is kept untouched. A read-only report (`planLpmsArchive`) shows what exists and how it would be
+  moved into the new model; nothing is moved or deleted without an explicit decision.
+
+**Building blocks already in place (no screens yet)**
+- Company-scoped collections for the new model (`cf_*`), a party index that links to the system of record instead of copying it (clients from
+  SprintOS and ClientOS, vendors from SpendIQ, employees and candidates from TalentOS, plus manual partners, freelancers, trainees and others),
+  signature requests, signers and an append-only event log, and signer links that are random, stored only as a hash, single-purpose, expiring
+  and revocable.
+- The platform stamp rulebook (Console > Stamp rulebook): every state and union territory by instrument category, with duty entries that are
+  **never treated as correct until a reviewer confirms them**. It ships with no duty amounts.
 
 ---
 

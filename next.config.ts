@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
   // Node-only libs used inside route handlers — keep them out of the bundler.
   // Big server-only libraries are loaded at run time from node_modules instead of being bundled: far less for the build to parse
   // and bundle (the build of this app is large and slow), with no change in behaviour.
-  serverExternalPackages: ["exceljs", "mongodb", "openai", "cheerio", "@react-pdf/renderer", "jszip", "nodemailer", "web-push", "qrcode", "ffmpeg-static", "sharp"],
+  serverExternalPackages: ["exceljs", "mongodb", "openai", "cheerio", "@react-pdf/renderer", "docx", "jszip", "nodemailer", "web-push", "qrcode", "ffmpeg-static", "sharp"],
   // AI UGC Studio joins scene clips with ffmpeg. `findFfmpeg()` (ugc/assemble.ts) loads the `ffmpeg-static` package by a computed name, which
   // the file tracer cannot see, so the binary would be left out of the deployed function. Ship it explicitly with the routes that render:
   // the UGC cron (advances the queue and assembles), the UGC pages (server actions) and Settings (the System health check looks for it).
@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
     "/api/viralpulse-ai/ugc/cron": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
     "/viralpulse-ai/ugc/**": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
     "/viralpulse-ai/**": ["./src/lib/products/viralpulse-ai/images/fonts/*"],
+    // Playbook documents: the PDF and Word renderers read the bundled Noto Sans files by path, so the tracer must ship them with every route that renders.
+    "/api/playbook-ai/**": ["./src/lib/fonts/noto/*"],
+    "/playbook-ai/**": ["./src/lib/fonts/noto/*"],
+    "/contractflow-ai/**": ["./src/lib/fonts/noto/*"],
+    "/api/contractflow-ai/**": ["./src/lib/fonts/noto/*"],
     "/viralpulse-ai/settings": ["./node_modules/ffmpeg-static/ffmpeg", "./node_modules/ffmpeg-static/index.js", "./node_modules/ffmpeg-static/package.json"],
   },
   images: {

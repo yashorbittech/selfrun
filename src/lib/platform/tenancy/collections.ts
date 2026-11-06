@@ -73,6 +73,7 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "portal_counters",
   "seo_counters",
   "sop_counters",
+  "pb_counters", // Playbook document numbering series, `_id` = <series>:<financial year> (see lib/products/playbook-ai/pb-collections.ts)
   // Settings / config singletons
   "aibots_settings",
   "cms_settings",
@@ -92,6 +93,8 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "seo_settings",
   "smms_settings",
   "sop_settings",
+  "pb_settings", // Playbook settings singleton (`_id: "main"`)
+  "pb_brand", // a company's letterhead and brand for documents (`_id: "main"`)
   "training_settings",
   "fms_tax_config",
   "fms_compliance_profile", // what the company says about itself so the filing calendar holds only what applies (`_id: "main"`, see lib/products/cashflow-ai/compliance/filings.ts)

@@ -829,11 +829,6 @@ export const BUSINESS_WORKFLOWS_FAQS: FaqHubGroup[] = [
         evidence: ["src/lib/products/contractflow-ai/types.ts:32-39"],
       },
       {
-        q: "Can a document type define its output formats?",
-        a: "Yes. Maker types store output-format choices; supported format identifiers are PDF, DOCX and print.",
-        evidence: ["src/lib/products/contractflow-ai/types.ts:1-3", "src/lib/products/contractflow-ai/types.ts:41-60"],
-      },
-      {
         q: "Can maker types be archived?",
         a: "Yes. Maker-type administration includes an archive operation, and the model records an archived flag.",
         evidence: ["src/lib/products/contractflow-ai/makers.ts:86-108", "src/lib/products/contractflow-ai/types.ts:41-60"],
@@ -997,66 +992,6 @@ export const BUSINESS_WORKFLOWS_FAQS: FaqHubGroup[] = [
         q: "Can I see the approval history for one document?",
         a: "Yes. The approval lookup returns approval records associated with a specific document.",
         evidence: ["src/lib/products/contractflow-ai/workflows.ts:128-141"],
-      },
-      {
-        q: "Does ContractFlow provide a PDF download?",
-        a: "The document detail screen exposes a download link when the viewer has download permission; the product documentation lists PDF, DOCX and print output formats.",
-        evidence: ["src/app/(products)/contractflow-ai/(protected)/documents/[id]/page.tsx:25-65", "docs/products.md:156-158"],
-      },
-      {
-        q: "Can ContractFlow export a document as DOCX or print?",
-        a: "DOCX and print are listed as supported output-format values, alongside PDF; actual per-document choices depend on the maker type configuration.",
-        evidence: ["src/lib/products/contractflow-ai/types.ts:1-3", "src/lib/products/contractflow-ai/types.ts:41-60"],
-      },
-      {
-        q: "Can I send signature requests to more than one signer?",
-        a: "The signature-request interface accepts a list of signers and creates a pending request containing the individual signer records.",
-        evidence: ["src/lib/products/contractflow-ai/signatures.ts:39-85"],
-      },
-      {
-        q: "Can signature request status be tracked?",
-        a: "Yes. Signer updates track pending, signed, declined or expired states and update the overall request once everyone has signed or a signer declines.",
-        evidence: ["src/lib/products/contractflow-ai/signatures.ts:88-132", "src/lib/products/contractflow-ai/types.ts:198-225"],
-      },
-      {
-        q: "Does ContractFlow mandate a particular e-signature provider?",
-        a: "No provider is hardcoded in the signature-provider interface. The code describes an integration point, but a configured provider is not confirmed by this FAQ.",
-        evidence: ["src/lib/products/contractflow-ai/signatures.ts:5-37", "src/app/(products)/contractflow-ai/(protected)/settings/page.tsx:115-127"],
-      },
-      {
-        q: "Can signature requests have an expiry date?",
-        a: "Yes. Signature requests can be created with an optional expiry date, which is saved on the request.",
-        evidence: ["src/lib/products/contractflow-ai/signatures.ts:39-85"],
-      },
-      {
-        q: "Can the AI draft document content from a prompt?",
-        a: "Yes. The AI drafting function accepts a prompt and can return structured blocks such as headings, paragraphs, lists, notes and dividers.",
-        evidence: ["src/lib/products/contractflow-ai/ai.ts:6-32", "src/lib/products/contractflow-ai/ai.ts:38-59"],
-      },
-      {
-        q: "Can AI drafting use a title and known field values?",
-        a: "Yes. The generation request can include a document title and known field values along with the prompt.",
-        evidence: ["src/lib/products/contractflow-ai/ai.ts:6-15", "src/lib/products/contractflow-ai/ai.ts:48-61"],
-      },
-      {
-        q: "Is AI generation permission-checked?",
-        a: "Yes. The AI generation API requires an authenticated ContractFlow user and checks the GENERATE permission before invoking document generation.",
-        evidence: ["src/app/(products)/api/contractflow-ai/ai/generate/route.ts:1-22"],
-      },
-      {
-        q: "Does AI generation work if the AI client is not configured?",
-        a: "No. The generator returns an error when it cannot obtain the OpenAI client, and the API route can return a not-configured response.",
-        evidence: ["src/lib/products/contractflow-ai/ai.ts:22-34", "src/app/(products)/api/contractflow-ai/ai/generate/route.ts:15-24"],
-      },
-      {
-        q: "Does ContractFlow AI generation claim to certify legal documents?",
-        a: "No. The implementation drafts structured text from a prompt; it does not establish that a generated document is legally compliant or legally reviewed.",
-        evidence: ["src/lib/products/contractflow-ai/ai.ts:22-59"],
-      },
-      {
-        q: "Can AI-generated content be marked on a document?",
-        a: "Yes. Documents store an AI-generated flag and the prompt used to generate content.",
-        evidence: ["src/lib/products/contractflow-ai/documents.ts:10-38", "src/lib/products/contractflow-ai/types.ts:100-136"],
       },
       {
         q: "Can users without admin access still be restricted from unpublished documents?",

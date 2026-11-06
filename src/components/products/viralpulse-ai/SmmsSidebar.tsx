@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, Megaphone, Share2, ImagePlus, BarChart3, Settings, Clapperboard, Images, Palette, Wand2 } from "lucide-react";
+import { LayoutDashboard, Megaphone, Share2, ImagePlus, BarChart3, Settings, Clapperboard, Images, Palette, Wand2, BookOpen, CreditCard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { activeItem, badgeFor, badgeText, groupedNav, visibleNav, type BadgeView, type NavBadges, type NavIcon, type NavItem, type SmmsNavFlags } from "@/lib/products/viralpulse-ai/nav";
@@ -21,6 +21,8 @@ const ICONS: Record<NavIcon, React.ReactNode> = {
   brand: <Palette className="size-4" />,
   analytics: <BarChart3 className="size-4" />,
   settings: <Settings className="size-4" />,
+  brochure: <BookOpen className="size-4" />,
+  vcard: <CreditCard className="size-4" />,
 };
 
 const TONE: Record<BadgeView["tone"], string> = {

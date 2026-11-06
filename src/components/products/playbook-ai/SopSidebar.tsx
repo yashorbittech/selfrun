@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   BarChart3,
   Settings,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -26,6 +27,8 @@ export interface SopNavFlags {
   reports: boolean;
   audit: boolean;
   settings: boolean;
+  /** Documents (preview): shown to Playbook administrators until documents can be created. */
+  documents: boolean;
   /** Number of assignments still awaiting the viewer's acknowledgement. */
   assignedOpen: number;
 }
@@ -104,6 +107,9 @@ export default function SopSidebar({ flags, onNavigate, collapsed = false }: { f
       {nav({ href: "/playbook-ai/library", label: "SOP Library", icon: Library })}
       {flags.mySops && nav({ href: "/playbook-ai/my", label: "My SOPs", icon: UserRoundPen })}
       {nav({ href: "/playbook-ai/assigned", label: "Assigned SOPs", icon: ClipboardCheck, badge: flags.assignedOpen })}
+
+      {flags.documents && <SectionLabel collapsed={collapsed}>Documents</SectionLabel>}
+      {flags.documents && nav({ href: "/playbook-ai/documents", label: "Documents (preview)", icon: FileText })}
 
       <SectionLabel collapsed={collapsed}>Structure</SectionLabel>
       {nav({ href: "/playbook-ai/departments", label: "Departments", icon: Building2 })}

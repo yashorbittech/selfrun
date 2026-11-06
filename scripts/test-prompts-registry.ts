@@ -74,9 +74,8 @@ t("an async prompt helper is never dropped into a template literal un-awaited", 
   }
 });
 t("a literal {{variable.name}} the prompt talks about is left alone", () => {
-  const p = PROMPTS.find((x) => x.key === "contractflow.generate")!;
-  assert.ok(p.text.includes("{{variable.name}}"));
-  assert.ok(renderPrompt(p.text, {}, p.vars.map((v) => v.name)).includes("{{variable.name}}"));
+  const text = "Use variables with {{variable.name}} syntax. Hello {{a}}.";
+  assert.equal(renderPrompt(text, { a: "x" }, ["a"]), "Use variables with {{variable.name}} syntax. Hello x.");
 });
 t("rendering fills declared variables and blanks missing ones", () => {
   assert.equal(renderPrompt("Hi {{a}} {{b}}!", { a: "x" }, ["a", "b"]), "Hi x !");

@@ -203,9 +203,9 @@ const added: Doc[] = [
     ],
   }),
   d({
-    slug: "documents-and-vault", title: "Generate documents and keep credentials safe", summary: "Templates, approvals and signatures — and an encrypted vault for what must not be lost.", category: "Operations", readMinutes: 5, shot: "lpms", panel: "lpms",
+    slug: "documents-and-vault", title: "Generate documents and keep credentials safe", summary: "A register of agreements with approvals — and an encrypted vault for what must not be lost.", category: "Operations", readMinutes: 5, shot: "lpms", panel: "lpms",
     sections: [
-      { heading: "Documents from templates", body: ["Build reusable templates, create documents from them, route them through the approval workflow for their type and collect signatures. The register keeps status and history."], shot: "lpms-documents" },
+      { heading: "Documents from templates", body: ["Write documents in Playbook AI. ContractFlow keeps a register of agreements with status, owner, dates, approvals and history."], shot: "lpms-documents" },
       { heading: "A vault for credentials and files", body: ["SelfRun CyberVault holds business and per-client vaults for credentials, documents, links and notes. Records are encrypted and shared record by record; expiry alerts warn before anything lapses."], shot: "dlms-credentials" },
     ],
   }),

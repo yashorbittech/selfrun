@@ -49,7 +49,7 @@ export const PRODUCT_SEO: Record<string, ProductSeo> = {
   },
   lpms: {
     title: "ContractFlow AI: Contract Management Software",
-    keywords: ["contract management software", "e-signature software", "agreement management software", "contract approval workflow", "legal document management", "contract template software", "digital signature for contracts", "contract lifecycle management", "document approval software", "contract management for small business", "legal document automation"],
+    keywords: ["contract management software", "agreement management software", "contract approval workflow", "legal document management", "contract template software", "contract lifecycle management", "document approval software", "contract management for small business", "legal document automation"],
   },
   dlms: {
     title: "CyberVault: Secure Document & Password Vault",

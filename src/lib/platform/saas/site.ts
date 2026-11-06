@@ -420,7 +420,7 @@ export const REPLACES: { software: string; panel: string; icon: IconKey }[] = [
   { software: "Course & training management", panel: "tms", icon: "graduation" },
   { software: "Team chat & meetings", panel: "messenger", icon: "chat" },
   { software: "Policy & procedure manager", panel: "sop", icon: "book" },
-  { software: "Documents & e-signatures", panel: "lpms", icon: "file" },
+  { software: "Agreement register", panel: "lpms", icon: "file" },
   { software: "Password & file storage", panel: "dlms", icon: "lock" },
   { software: "Online tests", panel: "ots", icon: "check" },
   { software: "AI chatbot builder", panel: "aibots", icon: "bot" },

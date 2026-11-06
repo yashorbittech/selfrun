@@ -201,28 +201,27 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
     ],
     connects: [
       { panel: "hrms", text: "New joiners are given their procedures." },
-      { panel: "lpms", text: "Policies that need signatures." },
+      { panel: "lpms", text: "Agreements and their approval history." },
       { panel: "messenger", text: "Notify people of new or updated procedures." },
     ],
   },
   lpms: {
-    intro: "Generate documents from templates, route them for approval and signature, and keep a clean register.",
+    intro: "Keep a register of agreements and policy documents with their status, owner, dates and approval history. Documents are written in Playbook AI.",
     audience: [
-      { who: "Legal & admin", does: "Maintain templates, workflows and the document register." },
-      { who: "Document authors", does: "Create documents from approved templates." },
-      { who: "Approvers & signers", does: "Review, approve and sign." },
+      { who: "Legal & admin", does: "Maintain the document register and its approval history." },
+      { who: "Document authors", does: "Write documents in Playbook AI." },
+      { who: "Approvers", does: "Review and approve." },
       { who: "Everyone else", does: "Read documents shared with them." },
     ],
     workflow: [
-      { title: "Template", text: "Build reusable blocks and layouts." },
-      { title: "Create", text: "Generate the document from a template for a person or business." },
-      { title: "Approve", text: "It follows the approval workflow for its type." },
-      { title: "Sign & file", text: "Signatures are collected and the document is registered with its history." },
+      { title: "Register", text: "Existing documents are listed with their status, owner and dates." },
+      { title: "Approve", text: "Approvals already started follow the workflow for their type." },
+      { title: "Track", text: "Versions and the audit trail show who changed and approved what." },
     ],
     connects: [
       { panel: "hrms", text: "Employment documents are created and tracked here." },
-      { panel: "dlms", text: "Store signed originals securely." },
-      { panel: "sop", text: "Policies that need a signature." },
+      { panel: "dlms", text: "Keep important originals securely." },
+      { panel: "sop", text: "Documents written in Playbook AI." },
     ],
   },
   dlms: {
@@ -240,7 +239,7 @@ export const PANEL_DETAIL: Record<string, PanelDetail> = {
       { title: "Audit", text: "The activity log shows who opened or changed what." },
     ],
     connects: [
-      { panel: "lpms", text: "Signed documents are filed here." },
+      { panel: "lpms", text: "Agreements and their dates are registered there." },
       { panel: "pms", text: "Client passwords and access details for project work." },
       { panel: "workspace", text: "Expiry alerts reach the right people." },
     ],

@@ -19,6 +19,7 @@
  */
 
 import { SOP_PERMISSIONS, SOP_PERMISSION_KEY, SOP_PERMISSION_META } from "@/lib/sop-roles";
+import { PLAYBOOK_PERMISSIONS, PLAYBOOK_PERMISSION_KEY, PLAYBOOK_PERMISSION_META } from "@/lib/playbook-roles";
 import { DLMS_PERMISSIONS, DLMS_PERMISSION_KEY, DLMS_PERMISSION_META } from "@/lib/dlms-roles";
 import { AIBOTS_PERMISSIONS, AIBOTS_PERMISSION_KEY, AIBOTS_PERMISSION_META } from "@/lib/aibots-roles";
 import { INTELLIGENCE_PERMISSIONS, INTELLIGENCE_PERMISSION_KEY, INTELLIGENCE_PERMISSION_META } from "@/lib/intelligence-roles";
@@ -404,6 +405,15 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       key: SOP_PERMISSION_KEY[p],
       label: SOP_PERMISSION_META[p].label,
       description: SOP_PERMISSION_META[p].description,
+    })),
+  },
+  {
+    module: "Playbook documents",
+    // Derived from the Playbook document model so the catalog can never drift from what `playbookCan()` checks.
+    permissions: PLAYBOOK_PERMISSIONS.map((p) => ({
+      key: PLAYBOOK_PERMISSION_KEY[p],
+      label: PLAYBOOK_PERMISSION_META[p].label,
+      description: PLAYBOOK_PERMISSION_META[p].description,
     })),
   },
   {

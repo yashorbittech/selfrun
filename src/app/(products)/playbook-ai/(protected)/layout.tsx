@@ -2,6 +2,7 @@ import { twoStepGate } from "@/lib/security/two-step-gate";
 import { redirect } from "next/navigation";
 import { getCurrentSopUser } from "@/lib/sop-auth";
 import { hasSopAccess, sopCan } from "@/lib/sop-roles";
+import { playbookCan } from "@/lib/playbook-roles";
 import { getViewer } from "@/lib/products/playbook-ai/viewer";
 import { canViewCompliance } from "@/lib/products/playbook-ai/access";
 import { listSopNotifications } from "@/lib/products/playbook-ai/notifications";
@@ -38,6 +39,7 @@ export default async function ProtectedSopLayout({ children }: { children: React
     reports: canViewCompliance(viewer) || sopCan(ctx, "EXPORT"),
     audit: sopCan(ctx, "VIEW_AUDIT"),
     settings: sopCan(ctx, "MANAGE_PERMISSIONS"),
+    documents: playbookCan(ctx, "SETTINGS"),
     assignedOpen: assigned.filter((a) => a.state !== "acknowledged").length,
   };
 

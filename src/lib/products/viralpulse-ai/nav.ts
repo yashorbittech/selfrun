@@ -16,7 +16,7 @@ export interface SmmsNavFlags {
   settings: boolean;
 }
 
-export type NavIcon = "dashboard" | "campaigns" | "posts" | "image" | "ugc" | "library" | "brand" | "generate" | "analytics" | "settings";
+export type NavIcon = "dashboard" | "campaigns" | "posts" | "image" | "ugc" | "library" | "brand" | "generate" | "analytics" | "settings" | "brochure" | "vcard";
 export type NavBadgeKey = "failedPosts" | "dueAds" | "generatingUgc" | "failingAccounts";
 export type BadgeTone = "danger" | "warn" | "info";
 
@@ -49,6 +49,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { key: "image-studio", href: "/viralpulse-ai/image-studio", label: "AI Image Studio", icon: "image", anyOf: ["media", "ai"], group: "studio" },
   { key: "generate-image", href: "/viralpulse-ai/generate-image", label: "Generate Image", icon: "generate", anyOf: ["ai"], group: "studio" },
   { key: "ugc", href: "/viralpulse-ai/ugc", label: "AI UGC Studio", icon: "ugc", anyOf: ["ugc"], badge: "generatingUgc", group: "studio" },
+  { key: "brochure", href: "/viralpulse-ai/brochures", label: "Brochure Builder", icon: "brochure", anyOf: ["media", "ai", "posts"], group: "studio" },
+  { key: "vcard", href: "/viralpulse-ai/vcards", label: "AI Visiting Cards", icon: "vcard", anyOf: ["media", "ai", "posts"], group: "studio" },
   { key: "library", href: "/viralpulse-ai/library", label: "Media Library", icon: "library", anyOf: ["media"], group: "studio" },
   { key: "brand-kit", href: "/viralpulse-ai/brand-kit", label: "Brand Kit", icon: "brand", anyOf: ["media", "ai"], group: "studio" },
   { key: "posts", href: "/viralpulse-ai/posts", label: "Social Media Reels/Posts", icon: "posts", anyOf: ["posts"], badge: "failedPosts", group: "publish" },
@@ -156,6 +158,8 @@ export const SECTION_CRUMB: Record<string, { label: string; href: string }> = {
   posts: { label: "Social Media Reels/Posts", href: "/viralpulse-ai/posts" },
   "image-studio": { label: "AI Image Studio", href: "/viralpulse-ai/image-studio" },
   ugc: { label: "AI UGC Studio", href: "/viralpulse-ai/ugc" },
+  brochures: { label: "Brochure Builder", href: "/viralpulse-ai/brochures" },
+  vcards: { label: "AI Visiting Cards", href: "/viralpulse-ai/vcards" },
   "generate-image": { label: "Generate Image", href: "/viralpulse-ai/generate-image" },
   library: { label: "Media Library", href: "/viralpulse-ai/library" },
   "brand-kit": { label: "Brand Kit", href: "/viralpulse-ai/brand-kit" },

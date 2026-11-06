@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BarChart3, CalendarDays, Images, Megaphone, Plus, Send, Sparkles, Clapperboard, Wallet } from "lucide-react";
+import { BarChart3, CalendarDays, Images, Megaphone, Plus, Send, Sparkles, Clapperboard, Wallet, BookOpen, CreditCard } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { PageHeader } from "@/components/products/viralpulse-ai/SmmsUi";
 import { AccountsSection, ActivitySection, AdsSection, AttentionSection, HighlightsSection, PublishedSection, ScheduleSection, SectionSkeleton, SetupSection, StatsSection, StudiosSection } from "@/components/products/viralpulse-ai/dashboard/DashboardSections";
@@ -34,6 +34,8 @@ export default async function ViralPulseDashboardPage() {
   const quick = [
     perms.viewPosts && { href: "/viralpulse-ai/posts?view=month", label: "Content calendar", icon: CalendarDays },
     perms.viewPosts && { href: "/viralpulse-ai/posts?tab=drafts", label: "Draft posts", icon: Send },
+    { href: "/viralpulse-ai/brochures", label: "Brochures", icon: BookOpen },
+    { href: "/viralpulse-ai/vcards", label: "Visiting Cards", icon: CreditCard },
     perms.viewStudios && { href: "/viralpulse-ai/image-studio?tab=library", label: "Media library", icon: Images },
     perms.viewCampaigns && { href: "/viralpulse-ai/campaigns", label: "All campaigns", icon: Megaphone },
     perms.manageLimits && { href: "/viralpulse-ai/campaigns/limits", label: "Ad spending limits", icon: Wallet },

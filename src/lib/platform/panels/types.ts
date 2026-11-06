@@ -110,7 +110,7 @@ export const DEFAULT_PANELS: PanelRecord[] = [
   P("tms", "SelfRun Cohort AI", "Cohort AI", "Interactive training programs, batch scheduling, student curriculum and certificates", "training", 60),
   P("messenger", "SelfRun Huddle AI", "Huddle", "Context-aware team chat channels, direct messaging, voice meetings and company calls", "chat", 70, true),
   P("sop", "SelfRun Playbook AI", "Playbook", "Digital standard operating procedures, policy versioning and staff compliance", "book", 80),
-  P("lpms", "SelfRun ContractFlow AI", "ContractFlow", "AI contract generation, legal agreements, approval chains and electronic signatures", "file", 90),
+  P("lpms", "SelfRun ContractFlow AI", "ContractFlow", "A register of agreements and policy documents with approval history; signing and a signed-document vault are being built", "file", 90),
   P("dlms", "SelfRun CyberVault", "CyberVault", "Zero-trust encrypted credential vault, sensitive document lockers and expiry alerts", "vault", 100),
   P("ots", "SelfRun EvalIQ", "EvalIQ", "Timed online skill assessments, automated anti-cheat grading and verifiable certificates", "test", 110),
   P("aibots", "SelfRun AgentOS", "AgentOS", "Custom AI agents, trained bots, enterprise knowledge grounding and chat copilots", "bot", 120),

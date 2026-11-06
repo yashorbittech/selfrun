@@ -7,6 +7,7 @@ import { Loader2, Mail, MailCheck } from "lucide-react";
 import { toast } from "sonner";
 import { verifyStripHiddenOn } from "@/lib/platform/email-verification-rule";
 import { sendVerificationEmailAction, type VerifyEmailSendState } from "@/app/(products)/commandos/(protected)/actions";
+import { useStripDismiss, StripDismissButton } from "@/lib/platform/use-strip-dismiss";
 
 const RESEND_COOLDOWN_S = 30;
 
@@ -21,6 +22,7 @@ export default function VerifyEmailBanner({ email, daysLeft }: { email: string; 
   const [state, setState] = useState<VerifyEmailSendState>({ status: "idle" });
   const [pending, start] = useTransition();
   const [cooldown, setCooldown] = useState(0);
+  const { isDismissed, dismiss } = useStripDismiss("verify-email", "Verify email");
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -28,7 +30,7 @@ export default function VerifyEmailBanner({ email, daysLeft }: { email: string; 
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  if (verifyStripHiddenOn(path)) return null;
+  if (isDismissed || verifyStripHiddenOn(path)) return null;
 
   const send = () =>
     start(async () => {
@@ -46,7 +48,7 @@ export default function VerifyEmailBanner({ email, daysLeft }: { email: string; 
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       title={sent ? "The link stays valid for 24 hours. Check spam too." : "One click keeps your account secure."}
-      className={`inline-flex max-w-full shrink-0 items-center gap-2 rounded-full border py-1 pl-3 pr-1 text-xs transition-colors ${sent ? "border-emerald-500/30 bg-emerald-500/10 dark:border-border dark:bg-card" : "border-amber-500/30 bg-amber-500/10 dark:border-border dark:bg-card"}`}
+      className={`inline-flex max-w-full shrink-0 items-center gap-2 rounded-full border py-1 pl-3 pr-1.5 text-xs transition-colors ${sent ? "border-emerald-500/30 bg-emerald-500/10 dark:border-border dark:bg-card" : "border-amber-500/30 bg-amber-500/10 dark:border-border dark:bg-card"}`}
     >
       {sent ? <MailCheck className="size-3.5 shrink-0 text-emerald-600" /> : <Mail className="size-3.5 shrink-0 text-amber-600" />}
       <span role="status" aria-live="polite" className="flex min-w-0 items-center gap-1.5">
@@ -79,6 +81,7 @@ export default function VerifyEmailBanner({ email, daysLeft }: { email: string; 
           Verify
         </button>
       )}
+      <StripDismissButton onDismiss={dismiss} label="Verify email" />
     </motion.div>
   );
 }

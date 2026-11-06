@@ -1,5 +1,4 @@
 import BillingNotice from "@/components/platform/BillingNotice";
-import PanelBackLink from "@/components/hub/PanelBackLink";
 import SetupBanner from "@/components/products/commandos/SetupBanner";
 import { getEmailLapse } from "@/lib/platform/email-lapse";
 import { getUpgradeOffer } from "@/lib/platform/billing/upgrade-offer";
@@ -11,9 +10,8 @@ import { setupStripNeeded } from "@/lib/platform/onboarding/state";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
 
 /**
- * The top action row every product shares: "Back to Workspace" on the left; Verify email, Choose plan (billing) and
- * Setup on the right. Products open in the same tab from the Workspace, so this is the way home. The back link and the
- * Verify / Setup strips show only to people signed in to the Workspace (products also serve people who never see it).
+ * The top action row every product shares: Verify email, Choose plan (billing) and
+ * Setup banners. The back link has been removed across all products.
  */
 export default async function PanelBackBar() {
   let user = null;
@@ -38,14 +36,11 @@ export default async function PanelBackBar() {
   }
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-      <div className="min-w-0">{user && <PanelBackLink />}</div>
-      <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 empty:hidden">
-        {user && verify && <VerifyEmailBanner email={user.email} daysLeft={daysLeft} />}
-        <BillingNotice />
-        {user && setup.show && <SetupBanner done={setup.done} total={setup.total} />}
-        {user && upgrade && <UpgradeBanner offer={upgrade} />}
-      </div>
+    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 empty:hidden">
+      {user && verify && <VerifyEmailBanner email={user.email} daysLeft={daysLeft} />}
+      <BillingNotice />
+      {user && setup.show && <SetupBanner done={setup.done} total={setup.total} />}
+      {user && upgrade && <UpgradeBanner offer={upgrade} />}
     </div>
   );
 }

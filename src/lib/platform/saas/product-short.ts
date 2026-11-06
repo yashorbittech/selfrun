@@ -12,7 +12,7 @@ export const PRODUCT_SHORT: Record<string, string> = {
   tms: "Training programs, batches, students and certificates",
   messenger: "Team chat, announcements, meetings and calls next to the work",
   sop: "Procedures and policies you can assign, and check that people have read",
-  lpms: "Documents, approvals and signatures, created and tracked",
+  lpms: "A register of agreements with status, dates and approval history",
   dlms: "A secure place for passwords, files and client documents",
   ots: "Timed online tests with automatic evaluation and certificates",
   aibots: "AI assistants trained on your own knowledge",
