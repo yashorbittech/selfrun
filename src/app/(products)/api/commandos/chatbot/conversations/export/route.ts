@@ -1,6 +1,6 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
-import { authorizeWorkspaceApi } from "@/lib/products/commandos/access";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { exportConversations } from "@/lib/chat-conversations";
 import { toCsv } from "@/lib/csv";
 
@@ -11,7 +11,7 @@ function parseDateParam(value: string | null, endOfDay = false): Date | undefine
 }
 
 async function handleGET(req: NextRequest) {
-  const auth = await authorizeWorkspaceApi("manage.chatbot.conversations");
+  const auth = await authorizeChatbotApi("export");
   if (!auth.ok) return auth.response;
 
   const sp = req.nextUrl.searchParams;

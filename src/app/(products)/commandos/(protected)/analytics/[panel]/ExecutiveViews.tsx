@@ -1013,7 +1013,6 @@ async function TmsView({ filters }: { filters?: PanelAnalyticsFilters }) {
           <KpiCard label="Active Batches" value={d.kpis.activeBatches} icon={<Activity className="size-4" />} />
           <KpiCard label="Running Programs" value={d.kpis.runningPrograms} icon={<BookOpen className="size-4" />} />
           <KpiCard label="Completed Programs" value={d.kpis.completedPrograms} icon={<CheckCircle2 className="size-4" />} />
-          <KpiCard label="Pending Applications" value={d.kpis.pendingApplications} tone={d.kpis.pendingApplications > 0 ? "down" : undefined} icon={<Clock className="size-4" />} />
           <KpiCard label="Placement Rate" value={d.kpis.placementSuccessRate} suffix="%" tone={d.kpis.placementSuccessRate >= 50 ? "up" : "down"} icon={<Award className="size-4" />} />
           <KpiCard label="Total Revenue" value={d.kpis.totalRevenue} format="currency" icon={<IndianRupee className="size-4" />} />
           <KpiCard label="Certificates Issued" value={d.kpis.certificatesIssued} icon={<Award className="size-4" />} />

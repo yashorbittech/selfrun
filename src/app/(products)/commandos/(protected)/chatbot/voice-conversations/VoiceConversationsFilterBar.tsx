@@ -7,15 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const DEVICES = ["desktop", "mobile", "tablet"];
+const MIN_DURATIONS = [
+  { value: "0", label: "Any length" },
+  { value: "30", label: "30s+" },
+  { value: "60", label: "1 min+" },
+  { value: "180", label: "3 min+" },
+];
 
 export default function VoiceConversationsFilterBar({
   initialSearch,
   initialDevice,
+  initialMinDuration,
   initialDateFrom,
   initialDateTo,
 }: {
   initialSearch: string;
   initialDevice: string;
+  initialMinDuration: string;
   initialDateFrom: string;
   initialDateTo: string;
 }) {
@@ -61,6 +69,19 @@ export default function VoiceConversationsFilterBar({
             <SelectItem value="all">All devices</SelectItem>
             {DEVICES.map((d) => (
               <SelectItem key={d} value={d} className="capitalize">{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">Duration</label>
+        <Select value={initialMinDuration || "0"} onValueChange={(v) => updateParams({ minDuration: !v || v === "0" ? undefined : v })}>
+          <SelectTrigger className="h-9 w-36 rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MIN_DURATIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>

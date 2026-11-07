@@ -36,25 +36,25 @@ async function crawlBaseUrl(): Promise<string> {
 export async function deleteConversationAction(id: string): Promise<void> {
   await requireLmsUser();
   await deleteConversation(id);
-  revalidatePath("/sitecraft-ai/chatbot/conversations");
-  revalidatePath("/sitecraft-ai/chatbot");
-  redirect("/sitecraft-ai/chatbot/conversations");
+  revalidatePath("/commandos/chatbot/conversations");
+  revalidatePath("/commandos/chatbot");
+  redirect("/commandos/chatbot/conversations");
 }
 
 export async function deleteConversationInPlaceAction(id: string): Promise<{ error?: string }> {
   await requireLmsUser();
   const ok = await deleteConversation(id);
   if (!ok) return { error: "Conversation not found." };
-  revalidatePath("/sitecraft-ai/chatbot/conversations");
-  revalidatePath("/sitecraft-ai/chatbot");
+  revalidatePath("/commandos/chatbot/conversations");
+  revalidatePath("/commandos/chatbot");
   return {};
 }
 
 export async function bulkDeleteConversationsAction(ids: string[]): Promise<{ deleted: number }> {
   await requireLmsUser();
   const deleted = await bulkDeleteConversations(ids);
-  revalidatePath("/sitecraft-ai/chatbot/conversations");
-  revalidatePath("/sitecraft-ai/chatbot");
+  revalidatePath("/commandos/chatbot/conversations");
+  revalidatePath("/commandos/chatbot");
   return { deleted };
 }
 
@@ -64,20 +64,20 @@ export async function bulkDeleteConversationsAction(ids: string[]): Promise<{ de
 
 export async function triggerWebsiteIndexAction(mode: "full" | "incremental"): Promise<{ runId?: string; error?: string }> {
   const lmsUser = await requireLmsUser();
-  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
+  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in CommandOS → Settings → Integrations." };
   const aiBlock = await aiBlockReason();
   if (aiBlock) return { error: aiBlock };
   const incremental = mode === "incremental";
   const { runId, logger } = await beginWebsiteIndex({ triggeredBy: lmsUser.email, incremental });
   const baseUrl = await crawlBaseUrl();
   await afterForCompany(() => runWebsiteIndex(logger, { baseUrl, incremental, triggeredBy: lmsUser.email }));
-  revalidatePath("/sitecraft-ai/chatbot/knowledge-base");
+  revalidatePath("/commandos/chatbot/knowledge-base");
   return { runId };
 }
 
 export async function reindexPagesAction(pageIds: string[]): Promise<{ runId?: string; error?: string }> {
   const lmsUser = await requireLmsUser();
-  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
+  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in CommandOS → Settings → Integrations." };
   const aiBlock = await aiBlockReason();
   if (aiBlock) return { error: aiBlock };
   const urls = await urlsForPageIds(pageIds);
@@ -87,13 +87,13 @@ export async function reindexPagesAction(pageIds: string[]): Promise<{ runId?: s
   await afterForCompany(() =>
     runWebsiteIndex(logger, { baseUrl, onlyUrls: urls, triggeredBy: lmsUser.email })
   );
-  revalidatePath("/sitecraft-ai/chatbot/knowledge-base");
+  revalidatePath("/commandos/chatbot/knowledge-base");
   return { runId };
 }
 
 export async function reindexPdfAction(id: string): Promise<{ error?: string }> {
   const lmsUser = await requireLmsUser();
-  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." };
+  if (!(await isOpenAIConfigured())) return { error: "OpenAI isn't connected. Add your key in CommandOS → Settings → Integrations." };
   const aiBlock = await aiBlockReason();
   if (aiBlock) return { error: aiBlock };
   let ok = false;
@@ -104,7 +104,7 @@ export async function reindexPdfAction(id: string): Promise<{ error?: string }> 
     throw err;
   }
   if (!ok) return { error: "Document not found." };
-  revalidatePath("/sitecraft-ai/chatbot/knowledge-base");
+  revalidatePath("/commandos/chatbot/knowledge-base");
   return {};
 }
 
@@ -112,7 +112,7 @@ export async function deletePdfAction(id: string): Promise<{ error?: string }> {
   await requireLmsUser();
   const ok = await deletePdf(id);
   if (!ok) return { error: "Document not found." };
-  revalidatePath("/sitecraft-ai/chatbot/knowledge-base");
+  revalidatePath("/commandos/chatbot/knowledge-base");
   return {};
 }
 
@@ -129,8 +129,8 @@ export async function saveChatbotConfigAction(
     return { error: "Please fix the highlighted fields.", fieldErrors: validation.errors };
   }
   await updateChatbotConfig(validation.data, lmsUser.email);
-  revalidatePath("/sitecraft-ai/chatbot/config");
-  revalidatePath("/sitecraft-ai/chatbot");
+  revalidatePath("/commandos/chatbot/config");
+  revalidatePath("/commandos/chatbot");
   return {};
 }
 
@@ -147,32 +147,32 @@ export async function saveVoiceConfigAction(
     return { error: validation.errors.voice ?? "Please fix the highlighted fields.", fieldErrors: validation.errors };
   }
   await updateChatbotConfig(validation.data, lmsUser.email);
-  revalidatePath("/sitecraft-ai/chatbot/voice/config");
-  revalidatePath("/sitecraft-ai/chatbot/voice");
+  revalidatePath("/commandos/chatbot/voice/config");
+  revalidatePath("/commandos/chatbot/voice");
   return {};
 }
 
 export async function deleteVoiceConversationAction(id: string): Promise<void> {
   await requireLmsUser();
   await deleteVoiceConversation(id);
-  revalidatePath("/sitecraft-ai/chatbot/voice/conversations");
-  revalidatePath("/sitecraft-ai/chatbot/voice");
-  redirect("/sitecraft-ai/chatbot/voice/conversations");
+  revalidatePath("/commandos/chatbot/voice-conversations");
+  revalidatePath("/commandos/chatbot/voice");
+  redirect("/commandos/chatbot/voice-conversations");
 }
 
 export async function deleteVoiceConversationInPlaceAction(id: string): Promise<{ error?: string }> {
   await requireLmsUser();
   const ok = await deleteVoiceConversation(id);
   if (!ok) return { error: "Conversation not found." };
-  revalidatePath("/sitecraft-ai/chatbot/voice/conversations");
-  revalidatePath("/sitecraft-ai/chatbot/voice");
+  revalidatePath("/commandos/chatbot/voice-conversations");
+  revalidatePath("/commandos/chatbot/voice");
   return {};
 }
 
 export async function bulkDeleteVoiceConversationsAction(ids: string[]): Promise<{ deleted: number }> {
   await requireLmsUser();
   const deleted = await bulkDeleteVoiceConversations(ids);
-  revalidatePath("/sitecraft-ai/chatbot/voice/conversations");
-  revalidatePath("/sitecraft-ai/chatbot/voice");
+  revalidatePath("/commandos/chatbot/voice-conversations");
+  revalidatePath("/commandos/chatbot/voice");
   return { deleted };
 }

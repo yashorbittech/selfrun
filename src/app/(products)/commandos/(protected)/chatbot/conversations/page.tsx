@@ -1,7 +1,7 @@
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
-import { requireWorkspaceAccess } from "@/lib/products/commandos/access";
+import { requireChatbotViewAccess } from "../access";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
-import { searchConversations } from "@/lib/chat-conversations";
+import { getConversationSourcePages, searchConversations } from "@/lib/chat-conversations";
 import ConversationsFilterBar from "./ConversationsFilterBar";
 import ConversationsGrid, { type AdminConversationRow } from "./ConversationsGrid";
 
@@ -20,14 +20,16 @@ export default async function AdminChatbotConversationsPage({
     page?: string;
     search?: string;
     device?: string;
+    sourcePage?: string;
     dateFrom?: string;
     dateTo?: string;
     sortBy?: string;
     sortDir?: string;
   }>;
 }) {
-  await requireWorkspaceAccess("manage.chatbot.conversations");
+  await requireChatbotViewAccess();
   const sp = await searchParams;
+  const sourcePages = await getConversationSourcePages();
   const page = Math.max(Number(sp.page) || 1, 1);
   const sortBy = (SORT_FIELDS as readonly string[]).includes(sp.sortBy ?? "")
     ? (sp.sortBy as (typeof SORT_FIELDS)[number])
@@ -39,6 +41,7 @@ export default async function AdminChatbotConversationsPage({
     pageSize: 20,
     search: sp.search,
     device: sp.device,
+    sourcePage: sp.sourcePage,
     dateFrom: parseDateParam(sp.dateFrom),
     dateTo: parseDateParam(sp.dateTo, true),
     sortBy,
@@ -61,7 +64,7 @@ export default async function AdminChatbotConversationsPage({
     flagged: c.flagged,
   }));
 
-  const hasActiveFilters = Boolean(sp.search || sp.device || sp.dateFrom || sp.dateTo);
+  const hasActiveFilters = Boolean(sp.search || sp.device || sp.sourcePage || sp.dateFrom || sp.dateTo);
 
   return (
     <div className="space-y-4">
@@ -83,6 +86,8 @@ export default async function AdminChatbotConversationsPage({
           <ConversationsFilterBar
             initialSearch={sp.search ?? ""}
             initialDevice={sp.device ?? ""}
+            initialSourcePage={sp.sourcePage ?? ""}
+            sourcePages={sourcePages}
             initialDateFrom={sp.dateFrom ?? ""}
             initialDateTo={sp.dateTo ?? ""}
           />

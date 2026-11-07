@@ -37,7 +37,7 @@ export const PRODUCT_START: Record<string, StartStep[]> = {
   ],
   tms: [
     { t: "Create a program and a batch", x: "Set up what you teach in Programs, then add a Batch with dates, mentors and a seat limit." },
-    { t: "Enrol students", x: "Applications arrive in Applications list or Applications board. Accepted students join a batch and get their own page." },
+    { t: "Enrol students", x: "Add students directly, then assign them to a batch so they can access their own page." },
     { t: "Run classes and issue certificates", x: "Schedule Classes, give out Assignments, and issue Certificates when a student completes the program." },
   ],
   messenger: [

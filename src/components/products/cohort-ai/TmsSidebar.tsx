@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Layers,
   Users,
-  Inbox,
   CalendarDays,
   FolderGit2,
   ClipboardList,
@@ -16,13 +15,12 @@ import {
   Wallet,
   Briefcase,
   BarChart3,
-  Settings,
   CircleUser,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { TmsRole } from "@/lib/tms-roles";
-import { canManageSettings, canViewAuditLog, canManagePayments, canManageTraining, hasTmsStaffRole } from "@/lib/tms-roles";
+import { canManagePayments, canManageTraining, hasTmsStaffRole } from "@/lib/tms-roles";
 
 function NavLink({
   href,
@@ -133,7 +131,6 @@ export default function TmsSidebar({
       {nav({ href: "/cohort-ai/programs", label: "Programs", icon: GraduationCap })}
       {nav({ href: "/cohort-ai/batches", label: "Batches", icon: Layers })}
       {nav({ href: "/cohort-ai/students", label: "Students", icon: Users })}
-      {nav({ href: "/cohort-ai/applications", label: "Applications", icon: Inbox })}
 
       <SectionLabel collapsed={collapsed}>Delivery</SectionLabel>
       {nav({ href: "/cohort-ai/classes", label: "Classes", icon: CalendarDays })}
@@ -147,7 +144,6 @@ export default function TmsSidebar({
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {canManageTraining(roleCtx) && nav({ href: "/cohort-ai/reports", label: "Analytics", icon: BarChart3 })}
-      {canManageSettings(roleCtx) && nav({ href: "/cohort-ai/settings", label: "Settings", icon: Settings })}
 
       {studentId && !roles.includes("super_admin") && (
         <>

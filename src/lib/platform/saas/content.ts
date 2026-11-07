@@ -83,7 +83,7 @@ export const MODULE_COPY: Record<string, ModuleCopy> = {
   },
   tms: {
     icon: "graduation",
-    short: "A place to run training courses, from student applications to certificates.",
+    short: "A place to run training courses, from enrolment through certificates.",
     headline: "Run training from enrolment to certificate",
     summary: "For institutes and business training teams: courses (programs), batches, classes, students, assignments, fees and certificates. Students get their own page, and anyone can check that a certificate is genuine.",
     capabilities: ["Programs, batches and class timetables", "Applications and student records", "Attendance, assignments and projects", "Fees and payments", "Certificates that can be verified", "A page for each student, and tools for mentors"],

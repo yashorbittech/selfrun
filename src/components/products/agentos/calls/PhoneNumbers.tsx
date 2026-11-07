@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import ActionButton from "@/components/products/agentos/ActionButton";
 import AgentPicker from "@/components/products/agentos/AgentPicker";
 import { EmptyState } from "@/components/products/agentos/AibotsUi";
-import { assignInboundAgentAction, importNumberAction, removeNumberAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { assignInboundAgentAction, importNumberAction, removeNumberAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import type { PhoneNumberView } from "@/lib/products/agentos/calls/numbers";
 import type { AgentOption } from "@/lib/products/agentos/picker-types";
 

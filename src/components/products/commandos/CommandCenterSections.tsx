@@ -506,6 +506,8 @@ export function PanelPerformanceMatrix({
                     )}
                     <Link
                       href={panel.panelHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-[var(--color-brand-accent)] px-3 text-xs font-semibold text-white shadow-sm shadow-primary/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:shadow-primary/25"
                     >
                       Open

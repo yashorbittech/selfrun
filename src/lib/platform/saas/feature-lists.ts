@@ -63,7 +63,7 @@ export const FEATURE_LISTS: Record<string, FeatureGroupList[]> = {
     { title: "Notifications", items: [f("SpendIQ notifications", "Review procurement events and mark notifications as read")] },
   ],
   tms: [
-    { title: "Training", items: [f("Programs", "Courses and curriculum"), f("Batches", "Groups with schedule, mentors and capacity"), f("Batch calendar", "All batches on one calendar"), f("Students", "Records, progress and attendance"), f("Applications list", "Review and manage enrolment requests in a searchable list"), f("Applications board", "Review and move applicants through the application pipeline")] },
+    { title: "Training", items: [f("Programs", "Courses and curriculum"), f("Batches", "Groups with schedule, mentors and capacity"), f("Batch calendar", "All batches on one calendar"), f("Students", "Records, progress and attendance")] },
     { title: "Delivery", items: [f("Classes", "Schedules and attendance"), f("Projects", "Live projects for students"), f("Assignments", "Set, submit and review"), f("Mentor tools", "Guide students through the program")] },
     { title: "Records", items: [f("Certificates", "Issued with public verification"), f("Payments", "Fees, instalments, receipts and reminders"), f("Placements", "Track student placements"), f("Reports", "Enrolment, attendance and revenue")] },
     { title: "Staff workspace", items: [f("Staff dashboard", "A staff overview for managing training operations and pending work")] },

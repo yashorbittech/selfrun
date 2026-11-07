@@ -14,7 +14,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { deleteVoiceConversationAction } from "@/app/(products)/sitecraft-ai/(protected)/chatbot/actions";
+import { deleteVoiceConversationAndRedirectAction } from "@/app/(products)/commandos/(protected)/chatbot/voice-conversations/actions";
 
 export default function DeleteVoiceConversationButton({ id }: { id: string }) {
   const [isPending, startTransition] = useTransition();
@@ -37,7 +37,7 @@ export default function DeleteVoiceConversationButton({ id }: { id: string }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => startTransition(() => deleteVoiceConversationAction(id))}>
+          <AlertDialogAction onClick={() => startTransition(() => deleteVoiceConversationAndRedirectAction(id))}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

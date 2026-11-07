@@ -463,7 +463,6 @@ export async function getTmsAnalytics(filters?: PanelAnalyticsFilters) {
   });
 
   const alerts: { type: "warning" | "danger"; message: string }[] = [];
-  if (stats.pendingApplications > 0) alerts.push({ type: "warning", message: `${stats.pendingApplications} student application(s) awaiting review` });
   if (stats.placementSuccessRate < 50 && stats.totalStudents > 0)
     alerts.push({ type: "warning", message: `Placement rate at ${stats.placementSuccessRate}% — below 50% target` });
 
@@ -475,7 +474,6 @@ export async function getTmsAnalytics(filters?: PanelAnalyticsFilters) {
       activeBatches: stats.activeBatches,
       runningPrograms: stats.runningPrograms,
       completedPrograms: stats.completedPrograms,
-      pendingApplications: stats.pendingApplications,
       placementSuccessRate: stats.placementSuccessRate,
       totalRevenue: stats.totalRevenue,
       certificatesIssued: stats.certificatesIssued,

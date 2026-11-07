@@ -10,7 +10,7 @@ export default function InboundNumbersPanel({ numbers, timeZone }: { numbers: In
   if (numbers.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No number answers incoming calls yet. Choose an agent for a number on the <Link href="/agentos/phone" className="font-semibold text-primary hover:underline">Phone numbers</Link> page.
+        No number answers incoming calls yet. Choose an agent for a number on the <Link href="/commandos/settings/products/agentos/phone" className="font-semibold text-primary hover:underline">Phone numbers in CommandOS</Link>.
       </p>
     );
   }

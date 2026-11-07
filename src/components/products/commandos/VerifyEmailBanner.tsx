@@ -17,12 +17,20 @@ const RESEND_COOLDOWN_S = 30;
  * blocked while it shows (until the 30 days run out: `daysLeft` counts them down). "Verify email" sends the link and the strip changes
  * in place; Resend appears after a short cooldown.
  */
-export default function VerifyEmailBanner({ email, daysLeft }: { email: string; daysLeft?: number }) {
+export default function VerifyEmailBanner({
+  email,
+  daysLeft,
+  initiallyDismissed = false,
+}: {
+  email: string;
+  daysLeft?: number;
+  initiallyDismissed?: boolean;
+}) {
   const path = usePathname();
   const [state, setState] = useState<VerifyEmailSendState>({ status: "idle" });
   const [pending, start] = useTransition();
   const [cooldown, setCooldown] = useState(0);
-  const { isDismissed, dismiss } = useStripDismiss("verify-email", "Verify email");
+  const { isDismissed, dismiss } = useStripDismiss("verify-email", "Verify email", undefined, initiallyDismissed);
 
   useEffect(() => {
     if (cooldown <= 0) return;

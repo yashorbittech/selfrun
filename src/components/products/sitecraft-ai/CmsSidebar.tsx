@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Files, Image as ImageIcon, Menu as MenuIcon, PanelBottom, ClipboardList, Palette, Settings, BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush, BellRing,
-  Bot, MessagesSquare, BookOpen, SlidersHorizontal, AudioLines, Mic, Settings2, Gift, TicketPercent, Coins, Sparkles, BookText,
+  LayoutDashboard, Files, Image as ImageIcon, Menu as MenuIcon, PanelBottom, ClipboardList, Palette, BadgeInfo, Layers, Newspaper, Briefcase, Users, Boxes, SearchCheck, Paintbrush, BellRing,
+  Gift, TicketPercent, Coins, Sparkles, BookText,
   Share2, Megaphone, SlidersVertical, WalletCards,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -123,14 +123,6 @@ export default function CmsSidebar({ flags, onNavigate, collapsed = false }: { f
       ],
     },
     {
-      label: "Search",
-      items: [{ href: "/sitecraft-ai/seo", label: "SEO Overview", icon: SearchCheck }],
-    },
-    {
-      label: "Applicants",
-      items: [{ href: "/dealflow-ai/careers", label: "Applicants", icon: Briefcase }],
-    },
-    {
       label: "Festival Offers",
       items: [
         { href: "/sitecraft-ai/offers", label: "Campaigns", icon: Gift },
@@ -152,28 +144,8 @@ export default function CmsSidebar({ flags, onNavigate, collapsed = false }: { f
       ],
     },
     {
-      label: "AI Chatbot",
-      items: [
-        { href: "/sitecraft-ai/chatbot", label: "Dashboard", icon: Bot, exact: true },
-        { href: "/sitecraft-ai/chatbot/conversations", label: "Conversations", icon: MessagesSquare },
-        { href: "/sitecraft-ai/chatbot/knowledge-base", label: "Knowledge Base", icon: BookOpen },
-        { href: "/sitecraft-ai/chatbot/config", label: "AI Config", icon: SlidersHorizontal, exact: true },
-      ],
-    },
-    {
-      label: "Conversation AI",
-      items: [
-        { href: "/sitecraft-ai/chatbot/voice", label: "Voice Dashboard", icon: AudioLines, exact: true },
-        { href: "/sitecraft-ai/chatbot/voice/conversations", label: "Voice Conversations", icon: Mic },
-        { href: "/sitecraft-ai/chatbot/voice/config", label: "ElevenLabs Config", icon: Settings2 },
-      ],
-    },
-    ...(flags.settings ? [{ label: "Engagement", items: [{ href: "/sitecraft-ai/push", label: "Push notifications", icon: BellRing }] }] : []),
-    {
-      label: "Settings",
-      items: [
-        ...(flags.settings ? [{ href: "/sitecraft-ai/settings", label: "Settings", icon: Settings }] : []),
-      ],
+      label: "Search",
+      items: [{ href: "/sitecraft-ai/seo", label: "SEO Overview", icon: SearchCheck }],
     },
   ];
 

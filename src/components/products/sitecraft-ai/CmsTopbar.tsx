@@ -35,14 +35,6 @@ export default function CmsTopbar({ roles: _roles, flags, unread = 0 }: { roles:
           <Sparkles className="size-4" />
         </button>
         <PanelBellLink href="/sitecraft-ai/notifications" unread={unread} panel="cms" />
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden items-center gap-1.5 rounded-full border border-border/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary sm:inline-flex"
-        >
-          <ExternalLink className="size-3.5" /> View website
-        </a>
       </div>
       <AskAiDrawer
         open={aiOpen}

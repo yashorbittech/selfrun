@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Notice } from "@/components/products/agentos/AibotsUi";
 import { confirmLiveSetupStepAction } from "@/lib/products/agentos/calls/conference-actions";
-import { saveCallModeAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { saveCallModeAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import { setupSummary } from "@/lib/products/agentos/calls/call-display";
 import type { ConferenceSetup } from "@/lib/products/agentos/calls/conference-setup";
 import { cn } from "@/lib/utils";

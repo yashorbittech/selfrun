@@ -89,7 +89,7 @@ export default function DlmsSidebar({ flags, onNavigate, collapsed = false }: { 
 
       <SectionLabel collapsed={collapsed}>Owners</SectionLabel>
       {flags.company && nav({ href: "/cybervault/company", label: "Company Vault", icon: Building2 })}
-      {nav({ href: "/cybervault/clients", label: "Clients", icon: Users })}
+      {nav({ href: "/cybervault/clients", label: "Clients Vault", icon: Users })}
 
       <SectionLabel collapsed={collapsed}>Vault</SectionLabel>
       {nav({ href: "/cybervault/credentials", label: "Credential Vault", icon: KeyRound })}
@@ -99,7 +99,6 @@ export default function DlmsSidebar({ flags, onNavigate, collapsed = false }: { 
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {nav({ href: "/cybervault/expiry", label: "Expiry & Alerts", icon: CalendarClock, badge: flags.expired })}
-      {flags.settings && nav({ href: "/cybervault/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

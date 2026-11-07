@@ -8,7 +8,6 @@ import { BATCHES_COLLECTION, enrolledCountByBatch } from "@/lib/products/cohort-
 import { PROGRAM_CATEGORIES, type TrainingMode } from "@/lib/products/cohort-ai/constants";
 
 const STUDENTS_COLLECTION = "training_students";
-const APPLICATIONS_COLLECTION = "training_applications";
 const ENROLLMENTS_COLLECTION = "student_enrollments";
 const CERTIFICATES_COLLECTION = "certificates";
 const PAYMENTS_COLLECTION = "payments";
@@ -36,7 +35,6 @@ export interface TmsDashboardStats {
   activeBatches: number;
   runningPrograms: number;
   completedPrograms: number;
-  pendingApplications: number;
   placementSuccessRate: number;
   totalRevenue: number;
   certificatesIssued: number;
@@ -65,7 +63,6 @@ export async function getTmsDashboardStats(filters: TmsDashboardFilters = {}): P
   const programsCol = db.collection<TmsDoc>(PROGRAMS_COLLECTION);
   const batchesCol = db.collection<TmsDoc>(BATCHES_COLLECTION);
   const studentsCol = db.collection<TmsDoc>(STUDENTS_COLLECTION);
-  const applicationsCol = db.collection<TmsDoc>(APPLICATIONS_COLLECTION);
   const enrollmentsCol = db.collection<TmsDoc>(ENROLLMENTS_COLLECTION);
   const certificatesCol = db.collection<TmsDoc>(CERTIFICATES_COLLECTION);
   const paymentsCol = db.collection<TmsDoc>(PAYMENTS_COLLECTION);
@@ -109,7 +106,6 @@ export async function getTmsDashboardStats(filters: TmsDashboardFilters = {}): P
     activeBatches,
     runningPrograms,
     completedProgramsCount,
-    pendingApplications,
     placementsTotal,
     completedEnrollmentsForPlacement,
     certificatesIssued,
@@ -134,7 +130,6 @@ export async function getTmsDashboardStats(filters: TmsDashboardFilters = {}): P
     batchesCol.countDocuments({ ...notDeleted, status: "running", ...(filters.programId ? { programId: filters.programId } : {}) }),
     programsCol.countDocuments({ ...notDeleted, status: "active", ...(filters.programId ? { _id: filters.programId } : {}), ...(filters.mode ? { mode: filters.mode } : {}) }),
     programsCol.countDocuments({ ...notDeleted, status: "archived", ...(filters.mode ? { mode: filters.mode } : {}) }),
-    applicationsCol.countDocuments({ ...notDeleted, status: { $in: ["new", "contacted", "shortlisted"] }, ...enrollScope }),
     placementsCol.countDocuments({ ...notDeleted }),
     enrollmentsCol.countDocuments({ deletedAt: null, status: "completed", ...enrollScope }),
     certificatesCol.countDocuments({ ...notDeleted, ...enrollScope }),
@@ -252,7 +247,6 @@ export async function getTmsDashboardStats(filters: TmsDashboardFilters = {}): P
     activeBatches,
     runningPrograms,
     completedPrograms: completedProgramsCount,
-    pendingApplications,
     placementSuccessRate,
     totalRevenue,
     certificatesIssued,

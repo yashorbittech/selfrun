@@ -51,7 +51,7 @@ export default function MessengerTopbar({
         >
           <Sparkles className="size-4" />
         </button>
-        <ConnectionPill />
+        {/* <ConnectionPill /> */}
         <MessengerNotificationsBell items={notifications} unread={unread} />
       </div>
       <AskAiDrawer

@@ -1,15 +1,14 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedLmsRequest } from "@/lib/api-auth";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { getPdfDocument } from "@/lib/kb-pdf";
 import { readKbFileStream } from "@/lib/kb-storage";
 
 type Context = { params: Promise<{ id: string }> };
 
 async function handleGET(req: NextRequest, { params }: Context) {
-  if (!(await isAuthorizedLmsRequest(req, "VIEW_CHATBOT"))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeChatbotApi("view");
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   const doc = await getPdfDocument(id);

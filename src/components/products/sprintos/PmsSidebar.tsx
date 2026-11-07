@@ -127,7 +127,6 @@ export default function PmsSidebar({
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {nav({ href: "/sprintos/analytics", label: "Analytics", icon: BarChart3 })}
-      {canManageSettings(roleCtx) && nav({ href: "/sprintos/settings", label: "Settings", icon: Settings })}
 
       {employeeId && !roles.includes("super_admin") && (
         <>

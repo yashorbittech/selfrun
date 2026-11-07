@@ -162,7 +162,7 @@ export default function StatutoryDues({
                 <option value="">Choose the account…</option>
                 {accounts.map((a) => <option key={a._id} value={a._id}>{a.label}</option>)}
               </select>
-              {accounts.length === 0 && <p className="text-xs text-amber-700 dark:text-amber-400">No account yet. <Link className="underline" href="/talentos/payroll/bank">Add your current account</Link> first.</p>}
+              {accounts.length === 0 && <p className="text-xs text-amber-700 dark:text-amber-400">No account yet. <Link className="underline" href="/commandos/settings/payments#payroll-bank">Add your current account</Link> first.</p>}
               {errors.accountId && <p className="text-xs text-destructive">{errors.accountId}</p>}
             </div>
             {field("Amount paid (₹)", "amount", { inputMode: "numeric" })}

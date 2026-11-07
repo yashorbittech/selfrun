@@ -31,7 +31,7 @@ export interface FailureContext {
   agentId?: string | null;
 }
 
-const ADMIN_PHONE = "Ask an admin to add a phone number in AgentOS → Phone numbers.";
+const ADMIN_PHONE = "Ask an admin to add a phone number in CommandOS → AgentOS settings → Phone.";
 
 interface Entry {
   title: string;
@@ -48,20 +48,20 @@ const ENTRIES: Record<CallFailureCode, Entry> = {
   countries_not_configured: {
     title: "Calling isn't set up yet",
     field: null,
-    hint: (c) => (c.isManager ? "Choose the countries you may call in the call settings." : "Ask an admin to choose the allowed countries in AgentOS → Phone → Call settings."),
-    link: (c) => managerOnly(c, { label: "Open call settings", href: "/agentos/phone/settings" }),
+    hint: (c) => (c.isManager ? "Choose the countries you may call in the call settings." : "Ask an admin to choose the allowed countries in CommandOS → AgentOS settings → Phone → Call settings."),
+    link: (c) => managerOnly(c, { label: "Open call settings in CommandOS", href: "/commandos/settings/products/agentos/phone/settings" }),
   },
   country_not_allowed: {
     title: "This country isn't allowed",
     field: "phone",
     hint: (c) => (c.isManager ? "Add the country code in the call settings if your company may call there." : "Use a number in an allowed country, or ask an admin to allow this one."),
-    link: (c) => managerOnly(c, { label: "Open call settings", href: "/agentos/phone/settings" }),
+    link: (c) => managerOnly(c, { label: "Open call settings in CommandOS", href: "/commandos/settings/products/agentos/phone/settings" }),
   },
   do_not_call: {
     title: "On the do-not-call list",
     field: "phone",
     hint: (c) => (c.isManager ? "If the person has agreed to be called again, remove the number from the do-not-call list first." : "This number can't be called. Ask a calls manager if you think this is a mistake."),
-    link: (c) => managerOnly(c, { label: "Open the do-not-call list", href: "/agentos/phone/do-not-call" }),
+    link: (c) => managerOnly(c, { label: "Open the do-not-call list in CommandOS", href: "/commandos/settings/products/agentos/phone/do-not-call" }),
   },
   do_not_contact: { title: "Asked not to be contacted", field: "phone", hint: () => "This person's record says they don't want to be contacted, so no call can be placed." },
   target_forbidden: { title: "No access to that record", field: null, hint: () => "You don't have access to the record this call is about, so no call was placed. Ask an admin for access in the product that owns it." },
@@ -105,7 +105,7 @@ const ENTRIES: Record<CallFailureCode, Entry> = {
     title: "No phone number to call from",
     field: null,
     hint: (c) => (c.isManager ? "Import a number from your Twilio account." : ADMIN_PHONE),
-    link: (c) => managerOnly(c, { label: "Open phone numbers", href: "/agentos/phone" }),
+    link: (c) => managerOnly(c, { label: "Open phone numbers in CommandOS", href: "/commandos/settings/products/agentos/phone" }),
   },
   purpose_unsupported: {
     title: "The agent isn't set up for this kind of call",

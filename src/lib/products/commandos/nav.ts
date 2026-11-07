@@ -28,11 +28,11 @@ import { hasIntelligenceAccess } from "@/lib/intelligence-roles";
 import { hasSmmsAccess, smmsCan } from "@/lib/smms-roles";
 import { hasOtsAccess, otsCan } from "@/lib/ots-roles";
 import { cmsCan, hasCmsAccess } from "@/lib/cms-roles";
-import { canViewLmsAnalytics } from "@/lib/lms-roles";
+import { canViewLmsAnalytics, lmsCan } from "@/lib/lms-roles";
 import { canViewWorkspaceAnalytics } from "@/lib/workspace-roles";
 import { resolvePermission, type RoleContext } from "@/lib/permission-overrides";
 
-export type NavSectionKey = "dashboard" | "panels" | "analytics" | "manage" | "company" | "account" | "platform";
+export type NavSectionKey = "dashboard" | "panels" | "analytics" | "manage" | "engagement" | "ai" | "company" | "account" | "platform";
 
 export type NavIcon =
   | "smartphone"
@@ -179,6 +179,7 @@ export const MANAGE_PERMISSIONS = {
   portalUsers: "workspace.managePortalUsers",
   careers: "workspace.manageCareers",
   chatbot: "workspace.manageChatbot",
+  pushNotifications: "workspace.manageWebsitePush",
 } as const;
 const may = (permission: string) => (u: RoleContext) => resolvePermission(u, permission, () => false);
 
@@ -196,6 +197,10 @@ export const canViewAuditLog = (u: RoleContext): boolean => may(MANAGE_PERMISSIO
 export const canViewWorkspaceEvents = (u: RoleContext): boolean => superAdmin(u);
 
 const P = MANAGE_PERMISSIONS;
+const chatbotAccess = (u: RoleContext) =>
+  may(P.chatbot)(u) || lmsCan(u, "VIEW_CHATBOT") || cmsCan(u, "SETTINGS_MANAGE");
+const websitePushAccess = (u: RoleContext) =>
+  resolvePermission(u, P.pushNotifications, () => cmsCan(u, "SETTINGS_MANAGE"));
 const MANAGE_PAGES: [group: string, path: string, label: string, icon: NavIcon, permission: string, module?: string][] = [
   ["CRM", "crm/leads", "Leads", "grid", P.crm, "lms"],
   ["CRM", "crm/clients", "Clients", "grid", P.crm, "pms"],
@@ -224,52 +229,57 @@ const MANAGE_PAGES: [group: string, path: string, label: string, icon: NavIcon, 
   ["Team chat", "teamchat/meetings", "Meetings", "chat", P.chat, "messenger"],
   ["People", "portal/users", "Portal users", "users", P.portalUsers, "portal"],
   ["People", "careers/applicants", "Job applicants", "users", P.careers],
-  ["Website chatbot", "chatbot/conversations", "Conversations", "bot", P.chatbot],
-  ["Website chatbot", "chatbot/voice-conversations", "Voice conversations", "bot", P.chatbot],
+  ["Engagement", "push", "Push notifications", "bell", P.pushNotifications, "cms"],
+  ["AI Chatbot", "chatbot", "Dashboard", "bot", P.chatbot],
+  ["AI Chatbot", "chatbot/conversations", "Conversations", "bot", P.chatbot],
+  ["AI Chatbot", "chatbot/knowledge-base", "Knowledge Base", "bot", P.chatbot],
+  ["AI Chatbot", "chatbot/config", "AI Config", "bot", P.chatbot],
+  ["Conversation AI", "chatbot/voice", "Voice Dashboard", "bot", P.chatbot],
+  ["Conversation AI", "chatbot/voice-conversations", "Voice Conversations", "bot", P.chatbot],
+  ["Conversation AI", "chatbot/voice/config", "ElevenLabs Config", "bot", P.chatbot],
 ];
 /** Management groups that ARE a product: their heading is that product's Product Registry name. */
 const GROUP_PANEL: Record<string, string> = { CRM: "lms", Projects: "pms", Procurement: "prms", Training: "tms", "Team chat": "messenger" };
 
+const AI_GROUPS = new Set(["AI Chatbot", "Conversation AI"]);
 const MANAGE: NavItemDef[] = MANAGE_PAGES.map(([group, path, label, icon, permission, module]) => ({
   key: `manage.${path.replace(/\//g, ".")}`,
-  section: "manage",
+  section: AI_GROUPS.has(group) ? "ai" : group === "Engagement" ? "engagement" : "manage",
   group,
   label,
   href: `/commandos/${path}`,
   icon,
-  module,
-  allow: may(permission),
+  module: module ?? (AI_GROUPS.has(group) ? "cms" : undefined),
+  allow: permission === P.chatbot ? chatbotAccess : permission === P.pushNotifications ? websitePushAccess : may(permission),
 }));
 
 // ── Company: the company managing itself ────────────────────────────────────
 const COMPANY_GROUPS: Record<string, string> = {
-  setup: "Organization", profile: "Organization", users: "Organization", roles: "Organization",
+  setup: "Organization", users: "Organization", roles: "Organization",
   billing: "Billing & plan", invoices: "Billing & plan", usage: "Billing & plan",
-  branding: "Branding & domains", addresses: "Branding & domains", domains: "Branding & domains", email: "Branding & domains", app: "Branding & domains",
-  payments: "Connections & automation", integrations: "Connections & automation", notifications: "Connections & automation", schedules: "Connections & automation", pdfs: "Connections & automation", prompts: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Security & logs",
-  audit: "Security & logs", security: "Security & logs",
+  addresses: "Branding & domains", domains: "Branding & domains", app: "Branding & domains",
+  email: "Connections & automation", payments: "Connections & automation", integrations: "Connections & automation", notifications: "Connections & automation", schedules: "Connections & automation", pdfs: "Connections & automation", prompts: "Connections & automation", automations: "Connections & automation", import: "Connections & automation", backups: "Connections & automation",
+  audit: "Connections & automation", security: "Connections & automation",
+  products: "Product settings",
 };
 const company = (key: string, href: string, icon: NavIcon, label: string, description: string, title?: string): NavItemDef => ({ key: `company.${key}`, section: "company", group: COMPANY_GROUPS[key], label, title, description, href, icon, allow: superAdmin });
 const COMPANY: NavItemDef[] = [
   company("setup", "/commandos/onboarding", "building", "Company setup", "Profile, departments, invitations and which products your team uses."),
-  company("profile", "/commandos/settings/profile", "building", "Organization profile", "Company name, legal name, industry, country, currency, time zone and contact details."),
   { ...company("users", "/commandos/users", "users", "People & access", "Everyone who can sign in: their designation, status (active, on leave, left the company …), access in every product, and seats used.", "People & access"), allow: may(P.users) },
   company("roles", "/commandos/roles", "users", "Designations & permissions", "The jobs in your company (HR Manager, Accountant …) and what each may do in every product. Start from the standard ones or add your own.", "Designations"),
   company("billing", "/commandos/settings/billing", "card", "Plan & billing", "Your plan, payments, coupon codes and GST billing details."),
   company("invoices", "/commandos/settings/billing/invoices", "receipt", "Invoices & payments", "Tax invoices, credit notes and every payment made for your subscription."),
   company("usage", "/commandos/settings/usage", "gauge", "Usage & limits", "What your workspace uses against its plan (seats, AI tokens, storage, emails, voice, domains), and where to add more capacity.", "Usage & limits"),
-  company("branding", "/commandos/settings/branding", "palette", "Branding", "Logo, name and colour across products, emails and PDFs."),
   company("app", "/commandos/settings/apps", "smartphone", "Apps & downloads", "Your company's own apps for phones and Windows, macOS and Linux computers: settings, and a Generate button and download link for each app.", "Apps"),
   company("addresses", "/commandos/addresses", "website", "Default domain", "The default addresses we give your company: your public website and the app where your team signs in to the Workspace and every product, ready to copy and share.", "Default domain"),
   company("domains", "/commandos/settings/domains", "globe", "Custom domains", "Your workspace address and your own custom domains, with automatic SSL.", "Domains"),
   company("email", "/commandos/settings/email", "mail", "Sender email", "Send your emails from your own address, like hello@yourbusiness.com, by connecting your domain.", "Sender email"),
-  company("payments", "/commandos/settings/payments", "bank", "Payment account", "Connect your own Razorpay account to collect invoice payments and pay salaries.", "Payments & payouts"),
+  company("payments", "/commandos/settings/payments", "bank", "Payments & payouts", "Connect Razorpay and manage the company bank accounts used for invoice payments, salaries and government dues.", "Payments & payouts"),
   company("integrations", "/commandos/settings/integrations", "plug", "Integrations", "What your workspace is connected to: payment gateway, webhooks and your own domain."),
   company("notifications", "/commandos/settings/notifications", "bell", "Notification center", "Every email, in-app and push notification your workspace sends: turn each on or off, change its wording, send your own announcements, and see what was delivered."),
   company("prompts", "/commandos/settings/prompts", "bot", "AI prompts", "How your AI assistants are told to write and behave: change the wording for your own workspace, with every version kept so you can go back to any of them. Fixed security rules always apply.", "AI prompts"),
   company("schedules", "/commandos/settings/schedules", "history", "Scheduled jobs", "What runs on its own and when: backups, reminders, notifications, billing checks and more. When each runs, when it last ran and what it does for your workspace.", "Scheduled jobs"),
   company("pdfs", "/commandos/settings/documents", "file", "Documents & PDFs", "Every PDF your workspace produces — invoices, receipts, certificates, payslips, reports — with a preview in your own letterhead, when each is made, where it is used and how it reaches people.", "Documents & PDFs"),
-  company("automations", "/commandos/settings/automations", "zap", "Automations", "When something happens, notify people, send an email or call a webhook."),
   company("backups", "/commandos/settings/backups", "history", "Backups & data", "Weekly backups you can download and restore, and deleting your data or your company."),
   company("import", "/commandos/settings/import", "upload", "Import data", "Bring leads, clients and employees in from CSV files, or download a copy of everything your workspace holds."),
   {
@@ -278,6 +288,7 @@ const COMPANY: NavItemDef[] = [
     allow: canViewAuditLog,
   },
   company("security", "/commandos/settings/security", "lock", "Security", "Your sign-in, password, active sessions and accounts that need attention."),
+  company("products", "/commandos/settings/products", "grid", "Product settings", "Configure every product your company uses — HR, Projects, Finance, SEO, Social Media, Training and more — from one place.", "All product settings"),
   { key: "analytics.overview", section: "company", label: "Analytics", href: "/commandos/analytics", icon: "chart", allow: (u) => canViewCommandCenter(u) || ANALYTICS.some((item) => item.allow(u)) },
 ];
 
@@ -317,6 +328,8 @@ export const NAV_SECTIONS: { key: NavSectionKey; label: string; href?: string; /
   { key: "company", label: "Company", href: "/commandos/settings" },
   { key: "account", label: "Account", sidebar: false },
   { key: "platform", label: "Platform" },
+  { key: "engagement", label: "Engagement" },
+  { key: "ai", label: "AI tools" },
 ];
 
 export const NAV_KEYS: string[] = NAV_ITEMS.map((i) => i.key);

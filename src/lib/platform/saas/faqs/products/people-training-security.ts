@@ -73,41 +73,6 @@ export const PEOPLE_TRAINING_SECURITY_FAQS: FaqHubGroup[] = [
         evidence: ["src/lib/products/cohort-ai/batches.ts:329-335", "src/app/(products)/api/commandos/tms/batches/export/route.ts:1-41"],
       },
       {
-        q: "Can prospective learners apply before they are students?",
-        a: "Yes. Applications are stored and managed as their own pipeline records before a learner is marked converted into the student flow.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:205-273", "src/app/(products)/cohort-ai/(protected)/(staff)/applications/page.tsx:1-99"],
-      },
-      {
-        q: "What statuses can an application move through?",
-        a: "The pipeline includes New, Contacted, Shortlisted, Enrolled and Rejected. Enrolled and Rejected are terminal statuses in the shared definitions.",
-        evidence: ["src/lib/products/cohort-ai/constants.ts:109-130", "src/lib/products/cohort-ai/applications.ts:229-263"],
-      },
-      {
-        q: "Does the application pipeline have a board view?",
-        a: "Yes. Staff can open an application pipeline board, and the application logic can build a board data set.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:165-176", "src/app/(products)/cohort-ai/(protected)/(staff)/applications/board/page.tsx:1-42"],
-      },
-      {
-        q: "Can application sources be managed or selected?",
-        a: "The application workflow exposes a list of supported application sources for staff to use when recording an application.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:182-203", "src/app/(products)/cohort-ai/(protected)/(staff)/applications/actions.ts:1-130"],
-      },
-      {
-        q: "Does an application receive its own application code?",
-        a: "Yes. Cohort AI generates application codes with a dedicated sequence-based operation.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:78-86", "src/lib/products/cohort-ai/applications.ts:205-228"],
-      },
-      {
-        q: "Can staff turn an application into a student record?",
-        a: "Yes. The application conversion operation links the accepted application to a student record, and student lookup can find a student by their application.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:256-263", "src/lib/products/cohort-ai/students.ts:101-111"],
-      },
-      {
-        q: "Can staff remove an application?",
-        a: "There is a delete operation for applications; the action layer is responsible for checking the user's authority before invoking product operations.",
-        evidence: ["src/lib/products/cohort-ai/applications.ts:264-273", "src/app/(products)/cohort-ai/(protected)/(staff)/applications/actions.ts:1-130"],
-      },
-      {
         q: "Can one student enrol in more than one batch?",
         a: "Enrolment is represented per student and batch, so a student may have separate enrolment records for different batches.",
         evidence: ["src/lib/products/cohort-ai/enrollments.ts:16-32", "src/lib/products/cohort-ai/enrollments.ts:60-103"],

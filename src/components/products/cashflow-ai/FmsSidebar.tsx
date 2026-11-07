@@ -151,7 +151,6 @@ export default function FmsSidebar({
       {canViewFinancialStatements(roleCtx) && nav({ href: "/cashflow-ai/taxes", label: "Taxes", icon: Percent, matches: ["/cashflow-ai/gst", "/cashflow-ai/tds", "/cashflow-ai/income-tax"] })}
       {(canViewFinancialStatements(roleCtx) || canViewCommercialFinance(roleCtx)) && nav({ href: "/cashflow-ai/closing", label: "Month & year-end", icon: CalendarCheck, matches: ["/cashflow-ai/month-close", "/cashflow-ai/compliance", "/cashflow-ai/party-reconciliation", "/cashflow-ai/vendor-controls"] })}
       {canViewFinancialStatements(roleCtx) && nav({ href: "/cashflow-ai/reports/financial-summary", label: "Reports", icon: BarChart3, matches: ["/cashflow-ai/reports", "/cashflow-ai/trial-balance", "/cashflow-ai/general-ledger"] })}
-      {canManageAccounts(roleCtx) && nav({ href: "/cashflow-ai/settings/accounts", label: "Settings", icon: Settings })}
     </nav>
   );
 }

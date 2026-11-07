@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { addAccountAction, setSalaryAccountAction, topUpAction } from "@/app/(products)/talentos/(protected)/(staff)/payroll/bank/actions";
+import { addAccountAction, setSalaryAccountAction, topUpAction } from "@/app/(products)/commandos/(protected)/settings/payments/payroll-actions";
 
 interface Account {
   _id: string;

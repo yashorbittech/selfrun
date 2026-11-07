@@ -170,7 +170,7 @@ export default function ConversationSheet({
         <SheetFooter className="flex-row items-center justify-between gap-2">
           {session && (
             <Link
-              href={`/sitecraft-ai/chatbot/conversations/${session.sessionId}`}
+              href={`/commandos/chatbot/conversations/${session.sessionId}`}
               className={buttonVariants({ variant: "outline", size: "sm" })}
             >
               Open full page

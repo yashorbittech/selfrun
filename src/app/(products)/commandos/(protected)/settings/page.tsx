@@ -2,7 +2,7 @@ import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowUpRight, Bell, Bot, CalendarClock, FileText, Building, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, Lock, Mail, Palette, Plug, ReceiptText, Smartphone, Users, Zap, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Bell, Bot, CalendarClock, FileText, Building2, CreditCard, FileUp, Gauge, Globe, Globe2, History, Landmark, LayoutGrid, Lock, Mail, Plug, ReceiptText, Users, type LucideIcon } from "lucide-react";
 import GlassCard from "@/components/products/dealflow-ai/GlassCard";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { getCurrentHubUser } from "@/lib/hub-auth";
@@ -14,7 +14,6 @@ export const metadata: Metadata = { title: "Company settings", robots: { index: 
 /** Card icons for the Company items of the Workspace navigation (`src/lib/commandos/nav.ts`). */
 const ICONS: Record<string, LucideIcon> = {
   "company.setup": Building2,
-  "company.profile": Building,
   "company.users": Users,
   "company.billing": CreditCard,
   "company.invoices": ReceiptText,
@@ -22,10 +21,8 @@ const ICONS: Record<string, LucideIcon> = {
   "company.domains": Globe,
   "company.email": Mail,
   "company.addresses": Globe2,
-  "company.branding": Palette,
   "company.payments": Landmark,
   "company.integrations": Plug,
-  "company.automations": Zap,
   "company.notifications": Bell,
   "company.pdfs": FileText,
   "company.prompts": Bot,
@@ -33,6 +30,7 @@ const ICONS: Record<string, LucideIcon> = {
   "company.import": FileUp,
   "company.activity": History,
   "company.security": Lock,
+  "company.products": LayoutGrid,
   "platform.panel": Globe2,
 };
 

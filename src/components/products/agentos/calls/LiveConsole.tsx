@@ -123,7 +123,7 @@ export default function LiveConsole({ callId, agent, purpose, targetLabel, phone
       {setupBanner && !conference && (
         <div className="flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          <span>{setupBanner} <Link href="/agentos/phone" className="font-semibold underline">Open the live-call setup</Link></span>
+          <span>{setupBanner} <Link href="/commandos/settings/products/agentos/phone" className="font-semibold underline">Open the live-call setup in CommandOS</Link></span>
         </div>
       )}
 
@@ -190,7 +190,7 @@ export default function LiveConsole({ callId, agent, purpose, targetLabel, phone
               )}
             </div>
           )}
-          {phoneLine.error && <p className="text-xs text-rose-600" role="alert">{phoneLine.error}{/set(?:up| up)|checklist/i.test(phoneLine.error) && <> <Link href="/agentos/phone" className="font-semibold underline">Open the live-call setup</Link></>}</p>}
+          {phoneLine.error && <p className="text-xs text-rose-600" role="alert">{phoneLine.error}{/set(?:up| up)|checklist/i.test(phoneLine.error) && <> <Link href="/commandos/settings/products/agentos/phone" className="font-semibold underline">Open the live-call setup in CommandOS</Link></>}</p>}
           {!view.control.canHandBack && view.control.mode === "human" && <p className="text-xs text-amber-700 dark:text-amber-300">The AI has left this call, so it can&apos;t take over again. You can keep talking or end the call.</p>}
 
           <div className="flex gap-2">

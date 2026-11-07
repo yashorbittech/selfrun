@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
-  { href: "/agentos/phone", label: "Phone numbers", exact: true },
-  { href: "/agentos/phone/settings", label: "Call settings", exact: false },
-  { href: "/agentos/phone/do-not-call", label: "Do not call", exact: false },
+  { href: "/commandos/settings/products/agentos/phone", label: "Phone numbers", exact: true },
+  { href: "/commandos/settings/products/agentos/phone/settings", label: "Call settings", exact: false },
+  { href: "/commandos/settings/products/agentos/phone/do-not-call", label: "Do not call", exact: false },
 ] as const;
 
 /** The three pages of the Phone area, as tabs. */

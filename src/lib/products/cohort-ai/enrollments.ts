@@ -6,9 +6,8 @@ import { DEFAULT_STUDENT_STATUS, type StudentStatus } from "@/lib/products/cohor
 import { notifyStudent } from "@/lib/products/cohort-ai/notifications";
 
 /**
- * A student's enrolment in one batch of one program. Created by the application
- * "convert to student" flow (Phase 3) and managed from the student profile
- * (Phase 4). Seat availability on a batch is derived from these rows.
+ * A student's enrolment in one batch of one program. Seat availability on a
+ * batch is derived from these rows.
  */
 
 export const ENROLLMENTS_COLLECTION = "student_enrollments";

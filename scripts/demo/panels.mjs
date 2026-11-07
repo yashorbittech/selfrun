@@ -1,5 +1,5 @@
 // Cross-product repair + fill: removes the wrong-shaped docs the legacy base seeder wrote (they crash pages), then seeds schema-correct data for
-// HRMS (org, employees, leave), FMS (chart of accounts, ledger transactions), TMS applications and the audit trail of every module.
+// HRMS (org, employees, leave), FMS (chart of accounts, ledger transactions), TMS and the audit trail of every module.
 import { rng, rint, pick, chance, weighted, shuffle, ago, audit, dayAgo, dayAhead, isoDay, personName, slug, phone, CITIES, insertAll } from "./lib.mjs";
 
 const AUDIT = {
@@ -29,7 +29,6 @@ async function wipeLegacy(db) {
   const rules = {
     career_applications: { resume: { $exists: false }, _demo: { $ne: true } },
     portal_interviews: { applicationId: { $exists: false } },
-    training_applications: { applicationCode: { $exists: false } },
     live_projects: { projectCode: { $exists: false } },
     pms_clients: { primaryContact: { $exists: false } },
     pms_activity_logs: { actorId: { $exists: false } },
@@ -166,13 +165,6 @@ export async function seedPanels(db, tms, pms) {
     transactions.push({ _id: `demo-txn-${++tn}`, transactionNumber: `TXN-2026-D${String(tn).padStart(5, "0")}`, type: "expense", transactionDate: d, postingDate: d, amount: rint(lo, hi), currency: "INR", paymentMethod: pick(["bank_transfer", "neft", "upi", "credit_card"]), sourceModule: code === "5000" ? "hrms" : "fms", sourceRecordId: null, customerId: null, vendorId: null, employeeId: null, projectId: null, department: pick(["Engineering", "Operations", "Marketing"]), accountId: `demo-acc-${code}`, fundAccountId: null, fundAccountType: null, transferId: null, taxAmount: 0, referenceNumber: `REF${rint(100000, 999999)}`, description: desc, attachments: [], approvedBy: "demo", approvedAt: d, status: "completed", ...audit(d) });
   }
 
-  // ---------------------------------------------------------------- TMS applications (new enquiries)
-  const applications = Array.from({ length: 60 }, (_, i) => {
-    const name = personName();
-    const prog = pick(tms.programs);
-    return { _id: `demo-tapp-${i + 1}`, applicationCode: `APP-2026-${String(i + 1).padStart(4, "0")}`, fullName: name, email: `${slug(name)}.${i}@apply.demo.in`, mobile: phone(), programId: prog._id, source: pick(["website", "referral", "campaign", "walk-in"]), college: pick(["IIT Delhi", "NIT Trichy", "VIT Vellore", "SRM University"]), graduationYear: pick([2026, 2027]), message: "Please share the batch schedule and fee structure.", status: weighted([["new", 4], ["contacted", 3], ["interested", 2], ["converted", 2], ["rejected", 1]]), studentId: null, convertedAt: null, notes: null, ...audit(ago(rint(1, 90))) };
-  });
-
   // ---------------------------------------------------------------- audit trails for every module
   const actors = employees.slice(0, 12);
   const auditDocs = {};
@@ -185,7 +177,7 @@ export async function seedPanels(db, tms, pms) {
     });
   }
 
-  for (const c of ["hrms_departments", "hrms_designations", "hrms_teams", "hrms_employees", "hrms_leave_types", "hrms_leave_balances", "hrms_leave_requests", "hrms_payroll_profiles", "hrms_payroll_runs", "hrms_payslips", "fms_accounts", "fms_transactions", "training_applications", ...Object.keys(AUDIT)]) await wipe(c);
+  for (const c of ["hrms_departments", "hrms_designations", "hrms_teams", "hrms_employees", "hrms_leave_types", "hrms_leave_balances", "hrms_leave_requests", "hrms_payroll_profiles", "hrms_payroll_runs", "hrms_payslips", "fms_accounts", "fms_transactions", ...Object.keys(AUDIT)]) await wipe(c);
   await insertAll(db.collection("hrms_departments"), departments);
   await insertAll(db.collection("hrms_designations"), designations);
   await insertAll(db.collection("hrms_teams"), teams);
@@ -206,7 +198,6 @@ export async function seedPanels(db, tms, pms) {
   await insertAll(db.collection("fms_cash_accounts"), cashAccounts);
   await insertAll(db.collection("fms_accounts"), accounts);
   await insertAll(db.collection("fms_transactions"), transactions);
-  await insertAll(db.collection("training_applications"), applications);
   for (const [col, docs] of Object.entries(auditDocs)) await insertAll(db.collection(col), docs);
-  console.log(`  ✓ Products: removed ${removed} legacy-shaped docs, backfilled ${backfilled} audit stamps; ${departments.length} departments, ${designations.length} designations, ${employees.length} employees, ${requests.length} leave requests, ${runs.length} payroll runs / ${payslips.length} payslips, ${accounts.length} accounts, ${transactions.length} ledger transactions, ${applications.length} TMS applications, ${Object.values(auditDocs).flat().length} audit entries`);
+  console.log(`  ✓ Products: removed ${removed} legacy-shaped docs, backfilled ${backfilled} audit stamps; ${departments.length} departments, ${designations.length} designations, ${employees.length} employees, ${requests.length} leave requests, ${runs.length} payroll runs / ${payslips.length} payslips, ${accounts.length} accounts, ${transactions.length} ledger transactions, ${Object.values(auditDocs).flat().length} audit entries`);
 }

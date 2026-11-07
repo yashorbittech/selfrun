@@ -14,7 +14,6 @@ import {
   MessageSquare,
   Mail,
   Radio,
-  Plug,
   Video,
   PhoneCall,
 } from "lucide-react";
@@ -136,9 +135,6 @@ export default function LmsSidebar({ onNavigate, collapsed = false }: { onNaviga
 
       <SectionLabel collapsed={collapsed}>Pre-Sale Meetings</SectionLabel>
       <NavLink href="/dealflow-ai/meetings" label="Meetings" icon={Video} collapsed={collapsed} onNavigate={onNavigate} />
-
-      <SectionLabel collapsed={collapsed}>Knowledge & Engine</SectionLabel>
-      <NavLink href="/dealflow-ai/integrations" label="Integrations & Sync" icon={Plug} collapsed={collapsed} onNavigate={onNavigate} />
     </nav>
   );
 }

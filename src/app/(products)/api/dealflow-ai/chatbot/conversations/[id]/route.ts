@@ -1,11 +1,11 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
-import { requireLms } from "@/lib/lms-auth";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { getConversation } from "@/lib/chat-conversations";
 
 async function handleGET(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const lmsUser = await requireLms("VIEW_CHATBOT");
-  if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeChatbotApi("view");
+  if (!auth.ok) return auth.response;
 
   const { id } = await ctx.params;
   const detail = await getConversation(id);

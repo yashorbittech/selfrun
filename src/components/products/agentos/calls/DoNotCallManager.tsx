@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ActionButton from "@/components/products/agentos/ActionButton";
 import { EmptyState } from "@/components/products/agentos/AibotsUi";
-import { addDoNotCallAction, removeDoNotCallAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { addDoNotCallAction, removeDoNotCallAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import { formatInZone } from "@/lib/products/agentos/calls/call-ui";
 import type { DncEntryView } from "@/lib/products/agentos/calls/dnc";
 

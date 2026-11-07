@@ -67,7 +67,7 @@ export async function saveStudentAction(
     return { ok: true, id: updated?._id };
   }
 
-  const created = await createStudent(v.data, user.id, null);
+  const created = await createStudent(v.data, user.id);
   await recordAudit({
     actorId: user.id,
     actorEmail: user.email,

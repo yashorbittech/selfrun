@@ -136,7 +136,6 @@ export default function PrmsSidebar({
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {nav({ href: "/spendiq/analytics", label: "Analytics", icon: BarChart3 })}
-      {canManageSettings(roleCtx) && nav({ href: "/spendiq/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

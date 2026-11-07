@@ -1,15 +1,14 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
-import { isAuthorizedLmsRequest } from "@/lib/api-auth";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { getVoiceMessageAudioKey } from "@/lib/voice-conversations";
 import { readVoiceAudioStream } from "@/lib/voice-storage";
 
 type Context = { params: Promise<{ id: string }> };
 
 async function handleGET(req: NextRequest, { params }: Context) {
-  if (!(await isAuthorizedLmsRequest(req, "VIEW_CHATBOT"))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await authorizeChatbotApi("view");
+  if (!auth.ok) return auth.response;
 
   const { id } = await params;
   const msg = req.nextUrl.searchParams.get("msg");

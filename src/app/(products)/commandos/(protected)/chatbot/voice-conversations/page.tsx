@@ -1,5 +1,5 @@
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
-import { requireWorkspaceAccess } from "@/lib/products/commandos/access";
+import { requireChatbotViewAccess } from "../access";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
 import { searchVoiceConversations } from "@/lib/voice-conversations";
 import VoiceConversationsFilterBar from "./VoiceConversationsFilterBar";
@@ -20,13 +20,14 @@ export default async function AdminVoiceConversationsPage({
     page?: string;
     search?: string;
     device?: string;
+    minDuration?: string;
     dateFrom?: string;
     dateTo?: string;
     sortBy?: string;
     sortDir?: string;
   }>;
 }) {
-  await requireWorkspaceAccess("manage.chatbot.voice-conversations");
+  await requireChatbotViewAccess();
   const sp = await searchParams;
   const page = Math.max(Number(sp.page) || 1, 1);
   const sortBy = (SORT_FIELDS as readonly string[]).includes(sp.sortBy ?? "")
@@ -39,6 +40,7 @@ export default async function AdminVoiceConversationsPage({
     pageSize: 20,
     search: sp.search,
     device: sp.device,
+    minDurationMs: Number(sp.minDuration) * 1000 || undefined,
     dateFrom: parseDateParam(sp.dateFrom),
     dateTo: parseDateParam(sp.dateTo, true),
     sortBy,
@@ -46,7 +48,7 @@ export default async function AdminVoiceConversationsPage({
   });
 
   const rows: AdminVoiceConversationRow[] = items;
-  const hasActiveFilters = Boolean(sp.search || sp.device || sp.dateFrom || sp.dateTo);
+  const hasActiveFilters = Boolean(sp.search || sp.device || sp.minDuration || sp.dateFrom || sp.dateTo);
 
   return (
     <div className="space-y-4">
@@ -68,6 +70,7 @@ export default async function AdminVoiceConversationsPage({
           <VoiceConversationsFilterBar
             initialSearch={sp.search ?? ""}
             initialDevice={sp.device ?? ""}
+            initialMinDuration={sp.minDuration ?? ""}
             initialDateFrom={sp.dateFrom ?? ""}
             initialDateTo={sp.dateTo ?? ""}
           />

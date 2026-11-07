@@ -99,7 +99,6 @@ const PRIORITY_BY_TYPE: Record<string, NotificationPriority> = {
   resource_renewal: "medium",
   recurring_expenses_generated: "medium",
   // TMS
-  applications_stale: "medium",
   fees_pending: "medium",
   class_reminder: "low",
   // Messenger

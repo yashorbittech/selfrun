@@ -116,9 +116,8 @@ export default function SopSidebar({ flags, onNavigate, collapsed = false }: { f
       {nav({ href: "/playbook-ai/categories", label: "Categories", icon: Tags })}
       {flags.templates && nav({ href: "/playbook-ai/templates", label: "Templates", icon: LayoutTemplate })}
 
-      {(flags.reports || flags.settings) && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
+      {flags.reports && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
       {flags.reports && nav({ href: "/playbook-ai/reports", label: "Reports & Analytics", icon: BarChart3 })}
-      {flags.settings && nav({ href: "/playbook-ai/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

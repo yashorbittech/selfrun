@@ -16,6 +16,7 @@ import UpgradeBanner from "@/components/products/commandos/UpgradeBanner";
 import VerifyEmailBanner, { VerifiedNotice } from "@/components/products/commandos/VerifyEmailBanner";
 import { showVerifyStrip } from "@/lib/platform/email-verification-rule";
 import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
+import { isStripDismissedServer } from "@/lib/platform/strip-dismiss-server";
 
 /**
  * The Workspace frame: sidebar, top bar, billing notice. One layout
@@ -29,10 +30,13 @@ import { isPlatformOwnerContext } from "@/lib/platform/tenancy/context";
  * Neither blocks anything.
  */
 export default async function WorkspaceShell({ user, nav, children }: { user: CurrentHubUser; nav: ResolvedNav; children: React.ReactNode }) {
-  const [unread, setup, ownCompany] = await Promise.all([
+  const [unread, setup, ownCompany, verifyDismissed, setupDismissed, upgradeDismissed] = await Promise.all([
     workspaceUnreadCount(user).catch(() => 0),
     setupStripNeeded(user.roles).catch(() => ({ show: false, done: 0, total: 0 })),
     isPlatformOwnerContext().catch(() => false),
+    isStripDismissedServer("verify-email"),
+    isStripDismissedServer("setup"),
+    isStripDismissedServer("upgrade"),
   ]);
   const verifyStrip = showVerifyStrip({ emailVerified: user.emailVerified !== false, isPlatformOwnerCompany: ownCompany });
   // Directors are offered the next plan up; nobody else can buy one.
@@ -57,9 +61,9 @@ export default async function WorkspaceShell({ user, nav, children }: { user: Cu
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2 empty:hidden">
               <BillingNotice />
-              {verifyStrip && <VerifyEmailBanner email={user.email} daysLeft={verifyDaysLeft} />}
-              {setup.show && <SetupBanner done={setup.done} total={setup.total} />}
-              {upgrade && <UpgradeBanner offer={upgrade} />}
+              {verifyStrip && <VerifyEmailBanner email={user.email} daysLeft={verifyDaysLeft} initiallyDismissed={verifyDismissed} />}
+              {setup.show && <SetupBanner done={setup.done} total={setup.total} initiallyDismissed={setupDismissed} />}
+              {upgrade && <UpgradeBanner offer={upgrade} initiallyDismissed={upgradeDismissed} />}
             </div>
             <main id="workspace-content" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto rounded-2xl">
               {children}

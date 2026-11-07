@@ -717,7 +717,6 @@ export async function seedBase(rawDb) {
     const submisCol = db.collection("assignment_submissions");
     const certCol = db.collection("certificates");
     const placeCol = db.collection("placement_records");
-    const tmsAppCol = db.collection("training_applications");
 
     const programs = [
       { code: "PROG-GENAI", title: "Enterprise GenAI & Agentic Systems", category: "AI/ML", duration: "12 Weeks" },
@@ -760,16 +759,11 @@ export async function seedBase(rawDb) {
         await placeCol.updateOne({ placementId: `PLC-${studentId}` }, { $set: { placementId: `PLC-${studentId}`, studentId, studentName: sName, companyName: choice(["Microsoft", "Google", "Amazon", "TCS", "Infosys", "Demo Company"]), package: `${randInt(8, 24)} LPA`, status: "placed", updatedAt: new Date() } }, { upsert: true });
       }
     }
-    // TMS Applications (50)
-    for (let a = 1; a <= 50; a++) {
-      const aName = randomName();
-      await tmsAppCol.insertOne({ appId: `TAPP-${a}`, applicantName: aName, email: `${aName.toLowerCase().replace(/\s+/g, ".")}@apply.com`, programCode: choice(programs).code, status: choice(["pending", "approved", "rejected"]), appliedAt: dateDaysAgo(a) });
-    }
     if (studentDocs.length) await studentCol.insertMany(studentDocs);
     if (enrollDocs.length) await enrollCol.insertMany(enrollDocs);
     if (classAttDocs.length) await classAttCol.insertMany(classAttDocs);
     if (submissionDocs.length) await submisCol.insertMany(submissionDocs);
-    console.log("  ✓ TMS Suite: 6 Programs, 24 Batches, 200 Students, 100 Certs, 100 Placements, 50 Applications.");
+    console.log("  ✓ TMS Suite: 6 Programs, 24 Batches, 200 Students, 100 Certs, 100 Placements.");
 
     // =========================================================================
     // 5. FMS Product (10+ Collections, 100 Invoices, 400 Transactions)

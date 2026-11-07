@@ -75,7 +75,7 @@ function RowActions({ row }: { row: AdminVoiceConversationRow }) {
         <DropdownMenuContent align="end">
           <DropdownMenuItem
             render={
-              <a href={`/sitecraft-ai/chatbot/voice/conversations/${row._id}`}>
+              <a href={`/commandos/chatbot/voice-conversations/${row._id}`}>
                 <ExternalLink className="size-3.5" />
                 View transcript
               </a>

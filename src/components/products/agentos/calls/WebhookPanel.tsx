@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ActionButton from "@/components/products/agentos/ActionButton";
-import { registerWebhookAction, resetWebhookUrlAction, saveWebhookSecretAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { registerWebhookAction, resetWebhookUrlAction, saveWebhookSecretAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import type { WebhookSetupView } from "@/lib/products/agentos/calls/webhook";
 
 /**

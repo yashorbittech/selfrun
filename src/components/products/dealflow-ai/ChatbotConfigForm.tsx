@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Save, TriangleAlert } from "lucide-react";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { saveChatbotConfigAction } from "@/app/(products)/sitecraft-ai/(protected)/chatbot/actions";
+import { saveChatbotConfigAction } from "@/app/(products)/commandos/(protected)/chatbot/actions";
 import type { SerializedChatbotConfig } from "@/lib/chatbot-config";
 
 const MODEL_SUGGESTIONS = ["gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-5.6-luna", "gpt-5.6-terra", "gpt-5-mini"];
@@ -107,8 +108,9 @@ export default function ChatbotConfigForm({
           <CardContent className="flex items-start gap-3 py-3 text-sm">
             <TriangleAlert className="mt-0.5 size-4 shrink-0 text-primary" />
             <p className="text-muted-foreground">
-              <span className="font-medium text-foreground">OpenAI isn&apos;t connected.</span> Add your key in Workspace → Settings → Integrations. Settings save
-              normally, but the assistant stays offline until the key is added to the server environment.
+              <span className="font-medium text-foreground">OpenAI isn&apos;t connected.</span> Add your key in{" "}
+              <Link href="/commandos/settings/integrations" className="font-medium text-primary underline">CommandOS → Settings → Integrations</Link>. Settings save
+              normally, but the assistant stays offline until the key is connected.
             </p>
           </CardContent>
         </GlassCard>

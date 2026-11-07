@@ -12,7 +12,9 @@ import {
   CalendarDays,
   CalendarCheck,
   Wallet,
-  Settings,
+  Banknote,
+  Landmark,
+  ListChecks,
   FileText,
   UserRound,
   Network,
@@ -22,7 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import type { HrmsRole } from "@/lib/hrms-roles";
-import { canApproveLeave, canViewAuditLog, canManagePayrollConfig, canManageSettings, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
+import { canApproveLeave, canRunPayroll, hasStaffRole } from "@/lib/hrms-roles";
 
 function NavLink({
   href,
@@ -172,11 +174,20 @@ export default function HrmsSidebar({
       {nav({ href: "/talentos/leave", label: "Leave", icon: CalendarDays })}
       {canApproveLeave(roleCtx) && nav({ href: "/talentos/requests", label: "Requests", icon: Inbox })}
       {nav({ href: "/talentos/holidays", label: "Holidays", icon: CalendarCheck })}
-      {canRunPayroll(roleCtx) && nav({ href: "/talentos/payroll", label: "Payroll", icon: Wallet })}
+
+      {canRunPayroll(roleCtx) && (
+        <>
+          <SectionLabel collapsed={collapsed}>Payroll</SectionLabel>
+          {nav({ href: "/talentos/payroll", label: "Payroll runs", icon: Wallet, exact: true })}
+          {nav({ href: "/talentos/payroll/items", label: "Payroll items", icon: ListChecks })}
+          {nav({ href: "/talentos/payroll/payouts", label: "Salary payouts", icon: Banknote })}
+          {nav({ href: "/talentos/payroll/compliance", label: "Government payments", icon: Landmark })}
+          {nav({ href: "/talentos/payroll/declarations", label: "Tax declarations", icon: FileText })}
+        </>
+      )}
 
       <SectionLabel collapsed={collapsed}>Governance</SectionLabel>
       {nav({ href: "/talentos/analytics", label: "Analytics", icon: BarChart3 })}
-      {(canManageSettings(roleCtx) || canManagePayrollConfig(roleCtx)) && nav({ href: "/talentos/settings", label: "Settings", icon: Settings })}
 
       {employeeId && !roles.includes("super_admin") && (
         <>

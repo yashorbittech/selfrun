@@ -183,26 +183,36 @@ export default function ProductLauncher({
                       {shortDesc}
                     </p>
                   </div>
-                  <ChevronRight className="size-4 shrink-0 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
                 </>
               );
 
               const className = cn(
-                "group flex items-center gap-3 rounded-xl p-2.5 transition-all text-left",
+                "group flex items-center rounded-xl transition-all text-left",
                 isCurrent ? "bg-primary/10 border border-primary/20" : "hover:bg-muted/60",
                 !product.available ? "cursor-not-allowed opacity-45" : "cursor-pointer"
               );
 
               return product.available ? (
-                <Link
-                  key={product.key}
-                  href={product.route}
-                  aria-label={product.name}
-                  className={className}
-                  onClick={() => setOpen(false)}
-                >
-                  {content}
-                </Link>
+                <div key={product.key} className={className}>
+                  <Link
+                    href={product.route}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${product.name} (opens in a new tab)`}
+                    className="flex min-w-0 flex-1 items-center gap-3 p-2.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    onClick={() => setOpen(false)}
+                  >
+                    {content}
+                  </Link>
+                  <Link
+                    href={product.route}
+                    aria-label={`Open ${product.name} in this tab`}
+                    className="flex size-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground/50 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    onClick={() => setOpen(false)}
+                  >
+                    <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+                  </Link>
+                </div>
               ) : (
                 <div
                   key={product.key}
@@ -263,6 +273,8 @@ export default function ProductLauncher({
                 <Link
                   key={product.key}
                   href={product.route}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={product.name}
                   className={className}
                   onClick={() => setOpen(false)}

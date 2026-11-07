@@ -165,8 +165,6 @@ const N: Record<string, [name: string, description: string]> = {
   support_request: ["Support request", "A support request is raised."],
   support_update: ["Support update", "A support request gets an update."],
   // CohortAI
-  application_received: ["New training application", "Someone applies for a training programme."],
-  applications_stale: ["Applications need follow-up", "Training applications have waited too long."],
   assignment_posted: ["Assignment posted", "A new assignment is posted for students."],
   batch_assigned: ["Added to a batch", "A student is added to a batch."],
   certificate_issued: ["Certificate issued", "A certificate is issued to a student."],

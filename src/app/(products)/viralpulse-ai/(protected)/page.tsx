@@ -60,7 +60,7 @@ export default async function ViralPulseDashboardPage() {
         })}
       />
 
-      <Suspense fallback={null}><SetupSection ctx={ctx} /></Suspense>
+      {/* <Suspense fallback={null}><SetupSection ctx={ctx} /></Suspense> */}
       <Suspense fallback={null}><AttentionSection ctx={ctx} /></Suspense>
 
       {showStats && (

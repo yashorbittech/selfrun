@@ -1,7 +1,7 @@
 import { withTransport } from "@/lib/security/transport";
 import { hasBearer } from "@/lib/security/bearer";
 import { NextRequest, NextResponse } from "next/server";
-import { requireLms } from "@/lib/lms-auth";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { beginWebsiteIndex, chatbotCrawlBaseOverride, runWebsiteIndex } from "@/lib/kb-website";
 import { listKbRuns, reapStaleRuns } from "@/lib/kb-runs";
@@ -11,8 +11,8 @@ import { afterForCompany } from "@/lib/platform/tenancy/context";
 async function authorize(req: NextRequest): Promise<string | null> {
   const secret = process.env.CHATBOT_ADMIN_API_SECRET;
   if (hasBearer(req, secret)) return "api";
-  const lmsUser = await requireLms("MANAGE_CHATBOT");
-  return lmsUser ? lmsUser.email : null;
+  const auth = await authorizeChatbotApi("manage");
+  return auth.ok ? auth.email : null;
 }
 
 /** Recent indexing runs (for polling progress). */

@@ -59,7 +59,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Clients" crumbs={[{ label: "Clients" }]} description="Each client has one vault profile: credentials, URLs, documents, notes and expiry. Clients themselves are managed in the client master (SprintOS)." />
+      <PageHeader title="Clients Vault" crumbs={[{ label: "Clients" }]} description="Each client has one vault profile: credentials, URLs, documents, notes and expiry. Clients themselves are managed in the client master (SprintOS)." />
       <DlmsFilterBar fields={[{ key: "q", label: "Search", type: "search", placeholder: "Client name or code…" }]} values={{ q: sp.q ?? "" }} />
       {!viewer.seesAll && <Notice tone="info">Showing the clients you have been assigned to.</Notice>}
       <SectionCard title={`${visible.length} client${visible.length === 1 ? "" : "s"}`}>

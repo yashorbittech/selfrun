@@ -50,6 +50,6 @@ export async function paymentHealth(): Promise<HealthCheck[]> {
   else add("email", "ok", "Email is set up", "Confirmation codes, payment links and alerts can be sent.");
 
   const accounts = await db.collection("fms_bank_accounts").countDocuments({ status: "active", deletedAt: null, accountName: { $nin: ["RazorpayX balance", "Razorpay collections (awaiting settlement)"] } });
-  if (accounts === 0) add("bank", "warn", "No current account added", "Top-ups and government dues are recorded against a company account. Add one under Payroll → Razorpay and bank.");
+  if (accounts === 0) add("bank", "warn", "No current account added", "Top-ups and government dues are recorded against a company account. Add one under CommandOS → Settings → Payments & payouts.");
   return out;
 }

@@ -16,9 +16,11 @@ export interface VoiceExportParams {
 export default function VoiceExportButton({
   params,
   label = "Export CSV",
+  endpoint = "/api/dealflow-ai/chatbot/voice/conversations/export",
 }: {
   params: VoiceExportParams;
   label?: string;
+  endpoint?: string;
 }) {
   const allowed = useLmsCan("EXPORT_DATA");
   if (!allowed) return null;
@@ -32,7 +34,7 @@ export default function VoiceExportButton({
 
   return (
     <a
-      href={`/api/dealflow-ai/chatbot/voice/conversations/export?${query.toString()}`}
+      href={`${endpoint}?${query.toString()}`}
       className={buttonVariants({ variant: "outline", size: "sm", className: "transition-transform duration-200 hover:scale-105" })}
     >
       <Download className="size-3.5" data-icon="inline-start" />

@@ -13,9 +13,7 @@ import {
 import { DEFAULT_STUDENT_STATUS, type StudentStatus } from "@/lib/products/cohort-ai/constants";
 
 /**
- * Student records. The data layer is introduced in Phase 3 because the
- * application "convert to student" flow needs it; the full student CRM / profile
- * / portal UI is built on top in Phase 4.
+ * Student records and student-facing profile data.
  */
 
 export const STUDENTS_COLLECTION = "training_students";
@@ -54,7 +52,7 @@ export interface Student extends AuditFields {
   guardian: GuardianDetails;
   links: StudentLinks;
   status: StudentStatus;
-  /** Set when this record was created by converting an application. */
+  /** Historical reference retained for students created from older application records. */
   applicationId: string | null;
   notes: string | null;
 }
@@ -86,7 +84,6 @@ async function getCollection() {
       collection.createIndex({ fullName: 1 }).catch(() => {}),
       collection.createIndex({ email: 1 }).catch(() => {}),
       collection.createIndex({ status: 1 }).catch(() => {}),
-      collection.createIndex({ applicationId: 1 }).catch(() => {}),
       collection.createIndex({ createdAt: -1 }).catch(() => {}),
     ]);
   }
@@ -101,11 +98,6 @@ export async function generateStudentCode(): Promise<string> {
 export async function getStudent(id: string): Promise<Student | null> {
   const collection = await getCollection();
   return collection.findOne({ _id: id, ...notDeleted });
-}
-
-export async function getStudentByApplication(applicationId: string): Promise<Student | null> {
-  const collection = await getCollection();
-  return collection.findOne({ applicationId, ...notDeleted });
 }
 
 /** Lightweight list for pickers (certificate / payment forms). */
@@ -209,8 +201,7 @@ export interface StudentWriteData {
 
 export async function createStudent(
   data: StudentWriteData,
-  actorId: string,
-  applicationId: string | null = null
+  actorId: string
 ): Promise<Student> {
   const collection = await getCollection();
   const doc: Student = {
@@ -224,7 +215,7 @@ export async function createStudent(
     guardian: data.guardian,
     links: data.links,
     status: data.status ?? DEFAULT_STUDENT_STATUS,
-    applicationId,
+    applicationId: null,
     notes: data.notes,
     ...createStamp(actorId),
   };

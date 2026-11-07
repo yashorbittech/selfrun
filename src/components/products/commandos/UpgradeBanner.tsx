@@ -11,9 +11,15 @@ import { useStripDismiss, StripDismissButton } from "@/lib/platform/use-strip-di
  * The "Upgrade plan" strip: one step up from the plan the company is on (Free → Starter → Growth → Business), for its Directors, on every
  * Workspace and product page. It opens billing with that plan already chosen. Not on the billing pages themselves.
  */
-export default function UpgradeBanner({ offer }: { offer: UpgradeOffer }) {
+export default function UpgradeBanner({
+  offer,
+  initiallyDismissed = false,
+}: {
+  offer: UpgradeOffer;
+  initiallyDismissed?: boolean;
+}) {
   const path = usePathname();
-  const { isDismissed, dismiss } = useStripDismiss("upgrade", "Upgrade offer");
+  const { isDismissed, dismiss } = useStripDismiss("upgrade", "Upgrade offer", undefined, initiallyDismissed);
 
   if (isDismissed || path.startsWith("/commandos/settings/billing")) return null;
   return (

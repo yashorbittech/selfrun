@@ -11,11 +11,15 @@ const DEVICES = ["desktop", "mobile", "tablet"];
 export default function ConversationsFilterBar({
   initialSearch,
   initialDevice,
+  initialSourcePage,
+  sourcePages,
   initialDateFrom,
   initialDateTo,
 }: {
   initialSearch: string;
   initialDevice: string;
+  initialSourcePage: string;
+  sourcePages: string[];
   initialDateFrom: string;
   initialDateTo: string;
 }) {
@@ -61,6 +65,20 @@ export default function ConversationsFilterBar({
             <SelectItem value="all">All devices</SelectItem>
             {DEVICES.map((d) => (
               <SelectItem key={d} value={d} className="capitalize">{d}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">Source page</label>
+        <Select value={initialSourcePage || "all"} onValueChange={(v) => updateParams({ sourcePage: !v || v === "all" ? undefined : v })}>
+          <SelectTrigger className="h-9 w-48 rounded-xl border-border/50 bg-background focus-visible:border-primary focus-visible:ring-primary/40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All pages</SelectItem>
+            {sourcePages.map((page) => (
+              <SelectItem key={page} value={page}>{page}</SelectItem>
             ))}
           </SelectContent>
         </Select>

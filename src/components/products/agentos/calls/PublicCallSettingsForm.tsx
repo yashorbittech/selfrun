@@ -7,7 +7,7 @@ import { LoaderCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { savePublicCallSettingsAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { savePublicCallSettingsAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import { validatePublicForm } from "@/lib/products/agentos/calls/call-display";
 import type { PublicCallSettings } from "@/lib/products/agentos/calls/settings";
 

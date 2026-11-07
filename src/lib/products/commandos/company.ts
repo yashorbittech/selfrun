@@ -92,7 +92,7 @@ export async function listCompanyIntegrations(): Promise<CompanyIntegration[]> {
     {
       key: "razorpay",
       name: "Razorpay (your own account)",
-      description: "Collect invoice payments from your clients and pay salaries from your own Razorpay account.",
+      description: "Collect invoice payments, pay salaries and manage the company bank accounts used for payouts and government dues.",
       connected: account.status === "connected",
       status: account.status === "connected" ? `Connected · ${account.mode === "live" ? "Live" : "Test"} mode${account.payoutsEnabled ? " · payouts on" : ""}` : account.status === "unreadable" ? "Saved keys can't be read — reconnect" : "Not connected",
       href: "/commandos/settings/payments",

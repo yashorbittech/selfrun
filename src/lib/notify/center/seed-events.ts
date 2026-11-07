@@ -145,8 +145,6 @@ export const SEED_EVENTS: readonly (readonly [key: string, product: string, titl
   ["sop_updated", "sop", "{code} updated to v{version}", "{title}: {changeSummary}{required}"],
   ["support_request", "support", null, null],
   ["support_update", "support", null, null],
-  ["application_received", "tms", "New training application: {name}", null],
-  ["applications_stale", "tms", "{staleApps} application(s) need follow-up", "Sitting in New / Contacted for over a week."],
   ["assignment_posted", "tms", "New assignment", "{title}{dueDate}"],
   ["batch_assigned", "tms", "You were added to a batch", null],
   ["certificate_issued", "tms", "A certificate was issued to you", "{certificateNumber} · {name}"],

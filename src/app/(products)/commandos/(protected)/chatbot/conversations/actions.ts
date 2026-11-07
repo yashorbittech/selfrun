@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireWorkspaceAction } from "@/lib/products/commandos/access";
+import { redirect } from "next/navigation";
+import { requireChatbotManageAction } from "../access";
 import { deleteConversation, bulkDeleteConversations } from "@/lib/chat-conversations";
 
 function revalidate() {
@@ -9,14 +10,22 @@ function revalidate() {
 }
 
 export async function deleteConversationAction(id: string): Promise<{ ok: boolean }> {
-  await requireWorkspaceAction("manage.chatbot.conversations");
+  await requireChatbotManageAction();
   const ok = await deleteConversation(id);
   if (ok) revalidate();
   return { ok };
 }
 
+export async function deleteConversationAndRedirectAction(id: string): Promise<never> {
+  await requireChatbotManageAction();
+  await deleteConversation(id);
+  revalidatePath("/commandos/chatbot/conversations");
+  revalidatePath("/commandos/chatbot");
+  redirect("/commandos/chatbot/conversations");
+}
+
 export async function bulkDeleteConversationsAction(ids: string[]): Promise<{ deleted: number }> {
-  await requireWorkspaceAction("manage.chatbot.conversations");
+  await requireChatbotManageAction();
   const deleted = await bulkDeleteConversations(ids);
   revalidate();
   return { deleted };

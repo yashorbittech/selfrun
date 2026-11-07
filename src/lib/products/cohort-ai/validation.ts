@@ -5,7 +5,6 @@ import {
   isValidProgramStatus,
   isValidTrainingMode,
   isValidBatchStatus,
-  isValidApplicationStatus,
   isValidStudentStatus,
   isValidLiveProjectStatus,
   isValidCertificateType,
@@ -13,14 +12,12 @@ import {
   DEFAULT_PROGRAM_STATUS,
   DEFAULT_TRAINING_MODE,
   DEFAULT_BATCH_STATUS,
-  DEFAULT_APPLICATION_STATUS,
   DEFAULT_STUDENT_STATUS,
   DEFAULT_CURRENCY,
   SUPPORTED_CURRENCIES,
 } from "@/lib/products/cohort-ai/constants";
 import type { ProgramWriteData } from "@/lib/products/cohort-ai/programs";
 import type { BatchWriteData } from "@/lib/products/cohort-ai/batches";
-import type { ApplicationWriteData } from "@/lib/products/cohort-ai/applications";
 import type { StudentWriteData } from "@/lib/products/cohort-ai/students";
 import type { ClassWriteData } from "@/lib/products/cohort-ai/classes";
 import type { LiveProjectWriteData, Milestone } from "@/lib/products/cohort-ai/projects";
@@ -187,52 +184,6 @@ export function validateBatch(input: Record<string, unknown>): Ok<BatchWriteData
       capacity: Math.round(capacity as number),
       mode: isValidTrainingMode(modeRaw) ? modeRaw : DEFAULT_TRAINING_MODE,
       status: isValidBatchStatus(statusRaw) ? statusRaw : DEFAULT_BATCH_STATUS,
-      notes: optStr(input.notes, 4000),
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Application
-// ---------------------------------------------------------------------------
-
-export function validateApplication(input: Record<string, unknown>): Ok<ApplicationWriteData> | Err {
-  const errors: Record<string, string> = {};
-
-  const fullName = str(input.fullName);
-  if (!fullName) errors.fullName = "Applicant name is required.";
-  if (fullName.length > 200) errors.fullName = "Name is too long.";
-
-  const email = str(input.email);
-  if (!email) errors.email = "Email is required.";
-  else if (!EMAIL_RE.test(email)) errors.email = "Enter a valid email.";
-
-  const mobile = str(input.mobile);
-  if (mobile && !PHONE_RE.test(mobile)) errors.mobile = "Enter a valid phone number.";
-
-  const programId = str(input.programId);
-  if (!programId) errors.programId = "Select a program.";
-
-  const statusRaw = str(input.status) || DEFAULT_APPLICATION_STATUS;
-  if (!isValidApplicationStatus(statusRaw)) errors.status = "Unknown status.";
-
-  const graduationYear = optNum(input.graduationYear, errors, "graduationYear", { min: 1950 });
-  if (graduationYear !== null && graduationYear > 2100) errors.graduationYear = "Enter a valid year.";
-
-  if (Object.keys(errors).length > 0) return { valid: false, errors };
-
-  return {
-    valid: true,
-    data: {
-      fullName,
-      email,
-      mobile: mobile || null,
-      programId,
-      source: optStr(input.source, 120),
-      college: optStr(input.college, 200),
-      graduationYear: graduationYear !== null ? Math.round(graduationYear) : null,
-      message: optStr(input.message, 4000),
-      status: isValidApplicationStatus(statusRaw) ? statusRaw : DEFAULT_APPLICATION_STATUS,
       notes: optStr(input.notes, 4000),
     },
   };

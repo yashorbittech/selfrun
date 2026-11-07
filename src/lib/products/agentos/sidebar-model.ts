@@ -8,11 +8,9 @@ export interface NavFlags {
   allChats: boolean;
   audit: boolean;
   settings: boolean;
-  /** Phone numbers, call settings and the do-not-call list (VOICE_CALL_MANAGE). */
-  phone: boolean;
 }
 
-export type NavIconKey = "dashboard" | "hub" | "create" | "chat" | "manage" | "chats" | "calls" | "phone" | "settings" | "notifications";
+export type NavIconKey = "dashboard" | "hub" | "create" | "chat" | "manage" | "chats" | "calls" | "settings" | "notifications";
 
 export interface NavItem {
   key: string;
@@ -46,12 +44,10 @@ export function buildNavGroups(flags: NavFlags): { top: NavGroup; agents: NavGro
     label: "Manage",
     items: [
       ...(flags.manageBots ? [{ key: "bots", href: "/agentos/bots", label: "Manage Agents", icon: "manage" as const, match: "manage-bots" as const }] : []),
-      ...(flags.allChats ? [{ key: "chats", href: "/agentos/chats", label: "All Chats", icon: "chats" as const, match: "prefix" as const }] : []),
+      ...(flags.allChats ? [{ key: "chats", href: "/agentos/chats", label: "Chat History", icon: "chats" as const, match: "prefix" as const }] : []),
       // Everyone sees their own calls; people with All Chats oversight see everyone's (the page decides).
       { key: "calls", href: "/agentos/calls", label: "Call History", icon: "calls", match: "prefix" },
-      ...(flags.phone ? [{ key: "phone", href: "/agentos/phone", label: "Phone", icon: "phone" as const, match: "prefix" as const }] : []),
-      ...(flags.settings ? [{ key: "settings", href: "/agentos/settings", label: "Settings", icon: "settings" as const, match: "prefix" as const }] : []),
-      { key: "notifications", href: "/agentos/notifications", label: "Notifications", icon: "notifications", match: "prefix" },
+      // { key: "notifications", href: "/agentos/notifications", label: "Notifications", icon: "notifications", match: "prefix" },
     ],
   };
   // The general assistant opens the "Your recent agents" section: it is always there, whoever the viewer has used.

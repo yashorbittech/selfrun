@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, Settings, Search, LayoutGrid, Bell, Phone, PhoneCall } from "lucide-react";
+import { LayoutDashboard, MessageSquarePlus, Plus, Bot, MessagesSquare, Settings, Search, LayoutGrid, Bell, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import BotAvatar from "@/components/products/agentos/BotAvatar";
@@ -94,7 +94,6 @@ const NAV_ICONS: Record<NavIconKey, React.ReactNode> = {
   manage: <Bot className="size-4" />,
   chats: <MessagesSquare className="size-4" />,
   calls: <Phone className="size-4" />,
-  phone: <PhoneCall className="size-4" />,
   settings: <Settings className="size-4" />,
   notifications: <Bell className="size-4" />,
 };

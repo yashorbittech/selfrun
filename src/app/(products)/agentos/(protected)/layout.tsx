@@ -36,7 +36,6 @@ export default async function ProtectedAibotsLayout({ children }: { children: Re
     allChats: can(viewer, "VIEW_CHATS"),
     audit: can(viewer, "VIEW_AUDIT"),
     settings: can(viewer, "MANAGE_SETTINGS"),
-    phone: can(viewer, "VOICE_CALL_MANAGE"),
   };
 
   return (

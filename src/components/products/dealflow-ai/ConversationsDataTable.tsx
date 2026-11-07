@@ -355,7 +355,7 @@ export default function ConversationsDataTable({
                   <TableCell className="text-sm text-muted-foreground">{formatDateTime(row.lastActivityAt)}</TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Link
-                      href={`/sitecraft-ai/chatbot/conversations/${row.sessionId}`}
+                      href={`/commandos/chatbot/conversations/${row.sessionId}`}
                       className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
                       aria-label="Open conversation"
                     >

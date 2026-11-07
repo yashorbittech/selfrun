@@ -96,30 +96,6 @@ export function getBatchStatusMeta(status: string | undefined) {
 }
 
 // ---------------------------------------------------------------------------
-// Application pipeline status
-// ---------------------------------------------------------------------------
-
-export const APPLICATION_STATUSES = [
-  { value: "new", label: "New", badgeClass: "bg-secondary/60 text-secondary-foreground", dotClass: "bg-secondary-foreground/50", terminal: false },
-  { value: "contacted", label: "Contacted", badgeClass: "bg-blue-500/15 text-blue-600 dark:text-blue-400", dotClass: "bg-blue-500", terminal: false },
-  { value: "shortlisted", label: "Shortlisted", badgeClass: "bg-purple-500/15 text-purple-600 dark:text-purple-400", dotClass: "bg-purple-500", terminal: false },
-  { value: "enrolled", label: "Enrolled", badgeClass: "bg-green-500/15 text-green-600 dark:text-green-400", dotClass: "bg-green-500", terminal: true },
-  { value: "rejected", label: "Rejected", badgeClass: "bg-destructive/15 text-destructive", dotClass: "bg-destructive", terminal: true },
-] as const;
-
-export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number]["value"];
-
-export const DEFAULT_APPLICATION_STATUS: ApplicationStatus = "new";
-
-export function isValidApplicationStatus(value: unknown): value is ApplicationStatus {
-  return typeof value === "string" && APPLICATION_STATUSES.some((s) => s.value === value);
-}
-
-export function getApplicationStatusMeta(status: string | undefined) {
-  return APPLICATION_STATUSES.find((s) => s.value === status) ?? APPLICATION_STATUSES[0];
-}
-
-// ---------------------------------------------------------------------------
 // Student lifecycle status
 // ---------------------------------------------------------------------------
 

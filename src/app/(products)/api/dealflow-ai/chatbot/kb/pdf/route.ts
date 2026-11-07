@@ -1,7 +1,7 @@
 import { withTransport } from "@/lib/security/transport";
 import { NextRequest, NextResponse } from "next/server";
 import { isBillingLimitError } from "@/lib/platform/billing/enforce";
-import { requireLms } from "@/lib/lms-auth";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { isOpenAIConfigured } from "@/lib/openai";
 import { addPdf, replacePdf, validateKbFile } from "@/lib/kb-pdf";
 
@@ -9,8 +9,8 @@ import { addPdf, replacePdf, validateKbFile } from "@/lib/kb-pdf";
 export const maxDuration = 300;
 
 async function handlePOST(req: NextRequest) {
-  const lmsUser = await requireLms("MANAGE_CHATBOT");
-  if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await authorizeChatbotApi("manage");
+  if (!auth.ok) return auth.response;
 
   if (!(await isOpenAIConfigured())) {
     return NextResponse.json({ error: "OpenAI isn't connected. Add your key in Workspace → Settings → Integrations." }, { status: 503 });
@@ -35,11 +35,11 @@ async function handlePOST(req: NextRequest) {
 
   try {
     if (typeof replaceId === "string" && replaceId) {
-      const ok = await replacePdf(replaceId, file, lmsUser.email);
+      const ok = await replacePdf(replaceId, file, auth.email);
       if (!ok) return NextResponse.json({ error: "Document to replace was not found." }, { status: 404 });
       return NextResponse.json({ ok: true, id: replaceId });
     }
-    const id = await addPdf(file, title || file.name, lmsUser.email);
+    const id = await addPdf(file, title || file.name, auth.email);
     return NextResponse.json({ ok: true, id }, { status: 201 });
   } catch (err) {
     if (isBillingLimitError(err)) return NextResponse.json({ error: err.message }, { status: 402 });

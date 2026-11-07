@@ -18,7 +18,6 @@ const META_COLLECTION = "tms_meta";
 const STUDENTS_COLLECTION = "training_students";
 const ENROLLMENTS_COLLECTION = "student_enrollments";
 const CLASSES_COLLECTION = "class_schedules";
-const APPLICATIONS_COLLECTION = "training_applications";
 const PAYMENTS_COLLECTION = "payments";
 
 export type NotificationAudience = "staff" | "student";
@@ -220,24 +219,7 @@ export async function runTmsSweep(): Promise<void> {
       });
     }
 
-    // 2. Applications sitting in new/contacted for > 7 days → nudge staff.
-    const staleCutoff = new Date(now.getTime() - 7 * 86400000);
-    const staleApps = await db
-      .collection<{ _id: string; fullName: string; createdAt: Date }>(APPLICATIONS_COLLECTION)
-      .find({ deletedAt: null, status: { $in: ["new", "contacted"] }, createdAt: { $lt: staleCutoff } })
-      .limit(50)
-      .toArray();
-    if (staleApps.length > 0) {
-      await notifyStaff({
-        type: "applications_stale",
-        title: `${staleApps.length} application(s) need follow-up`,
-        body: "Sitting in New / Contacted for over a week.",
-        link: "/cohort-ai/applications/board",
-        dedupeKey: `applications_stale:${today}`,
-      });
-    }
-
-    // 3. Fee plans with a pending balance → nudge staff weekly.
+    // 2. Fee plans with a pending balance → nudge staff weekly.
     const pendingPlans = await db
       .collection<{ _id: string; totalFees: number; discount: number; installments: { amount: number }[] }>(PAYMENTS_COLLECTION)
       .find({ deletedAt: null })

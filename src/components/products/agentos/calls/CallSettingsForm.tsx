@@ -7,7 +7,7 @@ import { AlertTriangle, LoaderCircle, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { saveCallSettingsAction } from "@/app/(products)/agentos/(protected)/phone-actions";
+import { saveCallSettingsAction } from "@/app/(products)/commandos/(protected)/settings/products/agentos/phone-actions";
 import { normalizeCallingCodes, normalizeE164 } from "@/lib/products/agentos/calls/phone";
 import type { CallSettings } from "@/lib/products/agentos/calls/types";
 

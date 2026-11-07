@@ -16,9 +16,11 @@ export interface ChatbotExportParams {
 export default function ChatbotExportButton({
   params,
   label = "Export CSV",
+  endpoint = "/api/dealflow-ai/chatbot/conversations/export",
 }: {
   params: ChatbotExportParams;
   label?: string;
+  endpoint?: string;
 }) {
   const allowed = useLmsCan("EXPORT_DATA");
   if (!allowed) return null;
@@ -32,7 +34,7 @@ export default function ChatbotExportButton({
 
   return (
     <a
-      href={`/api/dealflow-ai/chatbot/conversations/export?${query.toString()}`}
+      href={`${endpoint}?${query.toString()}`}
       className={buttonVariants({
         variant: "outline",
         size: "sm",

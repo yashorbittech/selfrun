@@ -110,17 +110,17 @@ function memStore(): AvatarStore & { files: Map<string, { body: Buffer; contentT
   });
 
   await t("sidebar: Dashboard, Agents, then Manage - permission flags hide items without reordering", async () => {
-    const all = buildNavGroups({ createBot: true, manageBots: true, allChats: true, audit: true, settings: true, phone: true });
+    const all = buildNavGroups({ createBot: true, manageBots: true, allChats: true, audit: true, settings: true });
     assert.deepEqual(all.top.items.map((i) => i.label), ["Dashboard"]);
     assert.deepEqual(all.agents.items.map((i) => i.label), ["Agent Hub", "Create Agent"]);
-    assert.deepEqual(all.manage.items.map((i) => i.label), ["Manage Agents", "All Chats", "Call History", "Phone", "Settings", "Notifications"]);
-    const none = buildNavGroups({ createBot: false, manageBots: false, allChats: false, audit: false, settings: false, phone: false });
+    assert.deepEqual(all.manage.items.map((i) => i.label), ["Manage Agents", "Chat History", "Call History"]);
+    const none = buildNavGroups({ createBot: false, manageBots: false, allChats: false, audit: false, settings: false });
     assert.deepEqual(none.agents.items.map((i) => i.label), ["Agent Hub"]);
-    assert.deepEqual(none.manage.items.map((i) => i.label), ["Call History", "Notifications"]);
+    assert.deepEqual(none.manage.items.map((i) => i.label), ["Call History"]);
     assert.equal(all.recentLead.label, "General Chat");
     const item = (k: string) => [...all.top.items, ...all.agents.items, all.recentLead, ...all.manage.items].find((i) => i.key === k)!;
     assert.ok(isNavActive("/agentos", item("dashboard")));
-    assert.ok(isNavActive("/agentos/phone/do-not-call", item("phone")) && !isNavActive("/agentos/calls", item("phone")));
+    assert.ok(![...all.top.items, ...all.agents.items, ...all.manage.items].some((i) => i.key === "phone"));
     assert.ok(!isNavActive("/agentos/hub", item("dashboard")));
     assert.ok(isNavActive("/agentos/hub", item("hub")));
     assert.ok(isNavActive("/agentos/bots/new", item("create")));

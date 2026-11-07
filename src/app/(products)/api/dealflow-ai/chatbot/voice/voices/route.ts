@@ -1,12 +1,12 @@
 import { withTransport } from "@/lib/security/transport";
-import { NextRequest, NextResponse } from "next/server";
-import { requireLms } from "@/lib/lms-auth";
+import { NextResponse } from "next/server";
+import { authorizeChatbotApi } from "@/app/(products)/commandos/(protected)/chatbot/access";
 import { isElevenLabsConfigured, listVoices } from "@/lib/elevenlabs";
 
 /** ElevenLabs voice catalogue for the AI Config voice picker. */
-async function handleGET(_req: NextRequest) {
-  const lmsUser = await requireLms("MANAGE_CHATBOT");
-  if (!lmsUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+async function handleGET() {
+  const auth = await authorizeChatbotApi("manage");
+  if (!auth.ok) return auth.response;
   if (!(await isElevenLabsConfigured())) return NextResponse.json({ voices: [], configured: false });
 
   try {

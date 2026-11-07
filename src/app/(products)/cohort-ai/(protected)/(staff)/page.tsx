@@ -7,7 +7,6 @@ import {
   Layers,
   Rocket,
   CheckCircle2,
-  Inbox,
   Target,
   IndianRupee,
   BadgeCheck,
@@ -113,7 +112,6 @@ export default async function TmsDashboardPage({
           <KpiCard label="Active Batches" value={stats.activeBatches} icon={<Layers className="size-4" />} />
           <KpiCard label="Running Programs" value={stats.runningPrograms} icon={<Rocket className="size-4" />} />
           <KpiCard label="Completed Programs" value={stats.completedPrograms} icon={<CheckCircle2 className="size-4" />} />
-          <KpiCard label="Pending Applications" value={stats.pendingApplications} tone={stats.pendingApplications > 0 ? "down" : undefined} icon={<Inbox className="size-4" />} />
         </KpiGrid>
       </DashboardSection>
 

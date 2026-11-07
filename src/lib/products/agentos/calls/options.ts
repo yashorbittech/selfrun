@@ -95,8 +95,8 @@ export async function loadCallOptions(viewer: AibotsViewer, deps: OptionDeps = {
   if (agents.length === 0) blockers.push({ code: "no_agent", message: "There is no voice agent you can use yet. Ask an AgentOS editor to create a voice agent and give you access.", link: link("Create a voice agent", "/agentos/bots/new") });
   else if (!agents.some((a) => a.ready)) blockers.push({ code: "no_ready_agent", message: "None of your voice agents is ready to call. Open an agent to see what it needs.", link: link("Manage agents", "/agentos/bots") });
   if (!connected) blockers.push({ code: "not_connected", message: "ElevenLabs isn't connected for this workspace. Ask an admin to add the ElevenLabs key under Settings → Integrations.", link: link("Open integrations", "/commandos/settings/integrations") });
-  if (!hasNumber) blockers.push({ code: "no_number", message: "No phone number is set up for outbound calls. Ask an admin to add a phone number in AgentOS → Phone numbers.", link: link("Add a phone number", "/agentos/phone") });
-  if (settings.allowedCallingCodes.length === 0) blockers.push({ code: "no_countries", message: "Calling isn't set up yet: no country is allowed. Ask an admin to choose the allowed countries in AgentOS → Phone → Call settings.", link: link("Open call settings", "/agentos/phone/settings") });
+  if (!hasNumber) blockers.push({ code: "no_number", message: "No phone number is set up for outbound calls. Ask an admin to add a phone number in CommandOS → AgentOS settings → Phone.", link: link("Add a phone number", "/commandos/settings/products/agentos/phone") });
+  if (settings.allowedCallingCodes.length === 0) blockers.push({ code: "no_countries", message: "Calling isn't set up yet: no country is allowed. Ask an admin to choose the allowed countries in CommandOS → AgentOS settings → Phone → Call settings.", link: link("Open call settings", "/commandos/settings/products/agentos/phone/settings") });
   if (!timeZone) blockers.push({ code: "no_timezone", message: "The workspace time zone isn't set, so calling hours can't be checked. Ask an admin to set it in the workspace settings.", link: null });
 
   return {

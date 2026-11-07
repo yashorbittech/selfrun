@@ -133,9 +133,6 @@ export default function SeoSidebar({ flags, onNavigate, collapsed = false }: { f
       {nav({ href: "/rankmax-ai/issues", label: "SEO Issues", icon: TriangleAlert, badge: flags.critical })}
       {nav({ href: "/rankmax-ai/tasks", label: "SEO Tasks", icon: ListChecks, badge: flags.myTasks })}
       {nav({ href: "/rankmax-ai/reports", label: "Reports", icon: BarChart3 })}
-
-      {flags.settings && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
-      {flags.settings && nav({ href: "/rankmax-ai/settings", label: "SEO Settings", icon: Settings })}
     </nav>
   );
 }

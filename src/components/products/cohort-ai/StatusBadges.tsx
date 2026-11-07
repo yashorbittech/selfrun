@@ -4,7 +4,6 @@ import {
   getProgramStatusMeta,
   getTrainingModeMeta,
   getBatchStatusMeta,
-  getApplicationStatusMeta,
   getStudentStatusMeta,
   getPaymentStatusMeta,
   getClassStatusMeta,
@@ -49,16 +48,6 @@ export function TrainingModeBadge({ mode }: { mode?: string }) {
 
 export function BatchStatusBadge({ status }: { status?: string }) {
   const meta = getBatchStatusMeta(status);
-  return (
-    <Badge className={meta.badgeClass}>
-      <Dot className={meta.dotClass} />
-      {meta.label}
-    </Badge>
-  );
-}
-
-export function ApplicationStatusBadge({ status }: { status?: string }) {
-  const meta = getApplicationStatusMeta(status);
   return (
     <Badge className={meta.badgeClass}>
       <Dot className={meta.dotClass} />

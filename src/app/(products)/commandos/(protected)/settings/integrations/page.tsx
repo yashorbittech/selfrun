@@ -9,6 +9,8 @@ import { resolveConnection } from "@/lib/platform/connections/resolve";
 import { isPlatformEncryptionConfigured } from "@/lib/platform/crypto";
 import { listCompanyIntegrations } from "@/lib/products/commandos/company";
 import { getTrackingForEdit } from "@/lib/products/sitecraft-ai/tracking";
+import { getIntegrationsStatus } from "@/lib/dealflow-ai/integrations";
+import DealFlowSyncStatus from "@/components/platform/DealFlowSyncStatus";
 import ConnectionsHub, { type HubProvider } from "./ConnectionsHub";
 
 export const metadata: Metadata = { title: "Integrations", robots: { index: false, follow: false } };
@@ -16,7 +18,12 @@ export const metadata: Metadata = { title: "Integrations", robots: { index: fals
 /** One place for every third-party service the workspace uses. Configure once; every product and automation uses it. */
 export default async function IntegrationsPage() {
   await requireWorkspaceAccess("company.integrations");
-  const [views, managed, tracking] = await Promise.all([listConnectionViews(), listCompanyIntegrations().catch(() => []), getTrackingForEdit().catch(() => null)]);
+  const [views, managed, tracking, dealFlowStatus] = await Promise.all([
+    listConnectionViews(),
+    listCompanyIntegrations().catch(() => []),
+    getTrackingForEdit().catch(() => null),
+    getIntegrationsStatus(),
+  ]);
   const managedByKey = new Map<string, (typeof managed)[number]>(managed.map((m) => [m.key, m]));
   const trackingOn = !!tracking && (tracking.ga4Ids.length + tracking.gtmIds.length + tracking.clarityIds.length + tracking.metaPixelIds.length + tracking.scripts.length > 0 || !!tracking.tawkId);
 
@@ -57,6 +64,13 @@ export default async function IntegrationsPage() {
         />
 <div className="space-y-6">
         <ConnectionsHub providers={providers} encryptionReady={isPlatformEncryptionConfigured()} />
+        <section id="dealflow-sync" className="space-y-4 border-t border-border/50 pt-6">
+          <div>
+            <h2 className="text-xl font-semibold">DealFlow AI integrations &amp; sync</h2>
+            <p className="text-sm text-muted-foreground">Review DealFlow connection status, lead sources and careers applications here in CommandOS.</p>
+          </div>
+          <DealFlowSyncStatus integrations={dealFlowStatus} />
+        </section>
       </div>
 </div>
     </div>

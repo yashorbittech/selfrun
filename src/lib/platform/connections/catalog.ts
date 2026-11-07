@@ -93,7 +93,7 @@ export const CONNECTION_PROVIDERS: ConnectionProvider[] = [
       // Live phone console (AgentOS): lets a team member listen to a call and take over from the browser.
       text("apiKeySid", "API key SID (live calls)", "SK…", "Twilio Console → Account → API keys. Needed only to listen to and take over AI calls from the browser.", false),
       secret("apiKeySecret", "API key secret (live calls)", "Shown once when you create the API key.", false),
-      text("twimlAppSid", "TwiML App SID (live calls)", "AP…", "A TwiML App whose Voice request URL is the address shown in AgentOS → Phone → Live calls setup.", false),
+      text("twimlAppSid", "TwiML App SID (live calls)", "AP…", "A TwiML App whose Voice request URL is the address shown in CommandOS → AgentOS settings → Phone → Live calls setup.", false),
     ],
   },
   {

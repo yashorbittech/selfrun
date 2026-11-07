@@ -7,7 +7,7 @@ import * as WalletCampaigns from "@/app/(products)/sitecraft-ai/(protected)/wall
 import * as Rules from "@/app/(products)/sitecraft-ai/(protected)/wallet/rules/actions";
 import * as UsageRules from "@/app/(products)/sitecraft-ai/(protected)/wallet/usage-rules/actions";
 import * as Bot from "@/app/(products)/sitecraft-ai/(protected)/chatbot/actions";
-import * as Push from "@/app/(products)/sitecraft-ai/(protected)/push/actions";
+import * as Push from "@/app/(products)/commandos/(protected)/push/actions";
 import * as Settings from "@/app/(products)/sitecraft-ai/(protected)/settings/actions";
 import { getChatbotConfig } from "@/lib/chatbot-config";
 import { getWebsiteKbSummary, listIndexedPages } from "@/lib/kb-website";

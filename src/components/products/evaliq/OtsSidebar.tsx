@@ -110,7 +110,7 @@ export default function OtsSidebar({ flags, onNavigate, collapsed = false }: { f
   );
   const manage = flags.tests || flags.questions || flags.assignments || flags.results;
   const insights = flags.reports || flags.analytics;
-  const setup = flags.categories || flags.audit || flags.settings;
+  const setup = flags.categories || flags.audit;
 
   return (
     <nav className="flex h-full flex-col gap-1 p-3">
@@ -134,7 +134,6 @@ export default function OtsSidebar({ flags, onNavigate, collapsed = false }: { f
       {setup && <SectionLabel collapsed={collapsed}>Setup</SectionLabel>}
       {flags.categories && nav({ href: "/evaliq/categories/questions", label: "Question Categories", icon: FolderTree })}
       {flags.categories && nav({ href: "/evaliq/categories/tests", label: "Test Categories", icon: Tags })}
-      {flags.settings && nav({ href: "/evaliq/settings", label: "Settings", icon: Settings })}
     </nav>
   );
 }

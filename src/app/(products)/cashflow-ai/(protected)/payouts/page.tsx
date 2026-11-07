@@ -36,7 +36,7 @@ export default async function PayoutDeskPage() {
     <div className="relative space-y-6">
       <PanelPageHeader
         title={<>Payments</>}
-        description={<>Every payment the company makes goes out through your RazorpayX account. A payment shows as paid, with its UTR, only when Razorpay confirms it. <Link href="/talentos/payroll/bank" className="underline">Top up and bank accounts</Link></>}
+        description={<>Every payment the company makes goes out through your RazorpayX account. A payment shows as paid, with its UTR, only when Razorpay confirms it. <Link href="/commandos/settings/payments#payroll-bank" className="underline">Top up and bank accounts</Link></>}
       />
       {health.some((h) => h.level !== "ok") && (
         <details open={health.some((h) => h.level === "fail")} className="rounded-lg border bg-card">

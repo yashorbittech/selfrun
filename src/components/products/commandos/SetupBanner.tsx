@@ -10,9 +10,17 @@ import { useStripDismiss, StripDismissButton } from "@/lib/platform/use-strip-di
  * (the dashboard included) until setup is completed, whether or not it was
  * skipped. Not on the wizard itself.
  */
-export default function SetupBanner({ done, total }: { done: number; total: number }) {
+export default function SetupBanner({
+  done,
+  total,
+  initiallyDismissed = false,
+}: {
+  done: number;
+  total: number;
+  initiallyDismissed?: boolean;
+}) {
   const path = usePathname();
-  const { isDismissed, dismiss } = useStripDismiss("setup", "Finish setup");
+  const { isDismissed, dismiss } = useStripDismiss("setup", "Finish setup", undefined, initiallyDismissed);
 
   if (isDismissed || path.startsWith("/commandos/onboarding")) return null;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;

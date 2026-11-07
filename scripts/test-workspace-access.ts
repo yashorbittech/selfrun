@@ -161,8 +161,9 @@ async function main() {
     for (const k of ["panel.hrms", "panel.pms", "panel.fms", "panel.lms", "panel.messenger", "analytics.fms", "analytics.portal", "analytics.workspace"]) assert.ok(a.has(k), k);
     assert.ok(!a.has("platform.panel"), "tenant never sees the Platform link");
     const nav = await navOf(acme, admin);
-    assert.deepEqual(nav.sections.map((s) => s.key), ["dashboard", "panels", "analytics", "manage", "company", "account"]);
-    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "company"], "the sidebar lists everything but the products");
+    assert.deepEqual(nav.sections.map((s) => s.key), ["dashboard", "panels", "analytics", "manage", "company", "account", "engagement", "ai"]);
+    assert.deepEqual(nav.sections.filter((s) => s.sidebar).map((s) => s.key), ["dashboard", "company", "engagement", "ai"], "AI tools appear last in the sidebar");
+    assert.ok(a.has("manage.push"), "website push notifications are available to the workspace admin");
     // Growth has no Training / Social / AI Bots: locked on the hub, absent from the nav.
     assert.ok(!a.has("panel.tms") && nav.lockedPanels.includes("tms"));
     assert.ok(!a.has("analytics.tms"));
@@ -232,6 +233,10 @@ async function main() {
       const panels = nav.sections.find((s) => s.key === "panels");
       assert.deepEqual((panels?.items ?? []).map((i) => i.key).sort(), nav.allowed.filter((k) => k.startsWith("panel.")).sort(), `${name}: the products still resolve for the Staff Hub tiles`);
       assert.ok(panels && panels.items.length > 0 && panels.sidebar === false, `${name}: products section is resolved but not for the sidebar`);
+      const ai = nav.sections.find((s) => s.key === "ai");
+      assert.equal(ai?.sidebar ?? false, ai?.items.some((item) => item.key.startsWith("manage.chatbot.")) ?? false, `${name}: chatbot tools appear in the sidebar only when available`);
+      const engagement = nav.sections.find((s) => s.key === "engagement");
+      assert.equal(engagement?.sidebar ?? false, engagement?.items.some((item) => item.key === "manage.push") ?? false, `${name}: push notifications appear in the sidebar only when available`);
     }
     const a = await navOf(acme, admin);
     for (const k of ["panel.hrms", "panel.pms", "panel.sop", "panel.dlms", "panel.ots", "panel.seo", "panel.cms"]) assert.equal(await runAsCompany(acme, () => checkWorkspaceAccess(admin.user, k)), true, k);

@@ -1,8 +1,7 @@
 import "server-only";
 import { getProgram, createProgram, updateProgram, deleteProgram, type Program } from "@/lib/products/cohort-ai/programs";
 import { getBatch, createBatch, updateBatch, deleteBatch, type Batch } from "@/lib/products/cohort-ai/batches";
-import { getStudent, createStudent, updateStudent, getStudentByApplication, type Student } from "@/lib/products/cohort-ai/students";
-import { getApplication, createApplication, updateApplication, deleteApplication, setApplicationStatus, markApplicationConverted, type Application } from "@/lib/products/cohort-ai/applications";
+import { getStudent, createStudent, updateStudent, type Student } from "@/lib/products/cohort-ai/students";
 import { enrollStudent, updateEnrollment, getEnrollment } from "@/lib/products/cohort-ai/enrollments";
 import { getClass, createClass, updateClass, deleteClass, markAttendance, isValidAttendanceStatus, batchAttendanceSummary, type ClassSchedule } from "@/lib/products/cohort-ai/classes";
 import { getAssignment, createAssignment, updateAssignment, deleteAssignment, reviewSubmission, type Assignment } from "@/lib/products/cohort-ai/assignments";
@@ -16,19 +15,18 @@ import { buildReport, REPORT_TYPES } from "@/lib/products/cohort-ai/reports";
 import { notifyStudent, notifyBatchStudents } from "@/lib/products/cohort-ai/notifications";
 import { recordAudit } from "@/lib/products/cohort-ai/audit";
 import {
-  validateProgram, validateBatch, validateApplication, validateStudent, validateClass, validateLiveProject, validateAssignment, validateCertificate, validatePaymentPlan, validateInstallment, validatePlacement,
+  validateProgram, validateBatch, validateStudent, validateClass, validateLiveProject, validateAssignment, validateCertificate, validatePaymentPlan, validateInstallment, validatePlacement,
 } from "@/lib/products/cohort-ai/validation";
 import {
-  PROGRAM_CATEGORIES, PROGRAM_STATUSES, TRAINING_MODES, BATCH_STATUSES, APPLICATION_STATUSES, STUDENT_STATUSES, CLASS_STATUSES, ATTENDANCE_STATUSES, LIVE_PROJECT_STATUSES, CERTIFICATE_TYPES, PAYMENT_METHODS, PLACEMENT_TYPES, SUPPORTED_CURRENCIES,
-  isValidApplicationStatus, isValidStudentStatus,
-  type ApplicationStatus,
+  PROGRAM_CATEGORIES, PROGRAM_STATUSES, TRAINING_MODES, BATCH_STATUSES, STUDENT_STATUSES, CLASS_STATUSES, ATTENDANCE_STATUSES, LIVE_PROJECT_STATUSES, CERTIFICATE_TYPES, PAYMENT_METHODS, PLACEMENT_TYPES, SUPPORTED_CURRENCIES,
+  isValidStudentStatus,
 } from "@/lib/products/cohort-ai/constants";
 import { canManageTraining, canManageProgramsBatches, canManageStudents, canIssueCertificates, canManagePayments, canManageSettings, canViewAuditLog } from "@/lib/tms-roles";
 import { check, crudOps, f, fail, values, str } from "@/lib/ai/agent/entities/helpers";
 import type { ActionDef, AgentUser, EntityDef, Json, ReportDef } from "@/lib/ai/agent/types";
 
 /**
- * Training (TMS) for the agent: programs, batches, applications and students, enrolment, classes and attendance, assignments, live projects,
+ * Training (TMS) for the agent: programs, batches and students, enrolment, classes and attendance, assignments, live projects,
  * fees and installments, certificates and placements. Students see their own enrolment, fees and certificates.
  */
 
@@ -36,7 +34,7 @@ const soft = { deletedAt: null };
 const audit = (u: AgentUser, e: { action: string; entity: string; entityId: string; entityLabel?: string | null; summary?: string | null }) => recordAudit({ actorId: u.id, actorEmail: u.email, ...e } as never);
 const L = (k: string) => (r: Json) => String(r[k] ?? r._id ?? "");
 const CATEGORY = values(PROGRAM_CATEGORIES); const PSTATUS = values(PROGRAM_STATUSES); const MODE = values(TRAINING_MODES); const BSTATUS = values(BATCH_STATUSES);
-const ASTATUS = values(APPLICATION_STATUSES); const SSTATUS = values(STUDENT_STATUSES); const CSTATUS = values(CLASS_STATUSES); const ATT = values(ATTENDANCE_STATUSES); const LPSTATUS = values(LIVE_PROJECT_STATUSES);
+const SSTATUS = values(STUDENT_STATUSES); const CSTATUS = values(CLASS_STATUSES); const ATT = values(ATTENDANCE_STATUSES); const LPSTATUS = values(LIVE_PROJECT_STATUSES);
 const CERT = values(CERTIFICATE_TYPES); const PTYPE = values(PLACEMENT_TYPES); const METHODS = [...PAYMENT_METHODS] as string[]; const CURRENCIES = [...SUPPORTED_CURRENCIES] as string[];
 const mine = (u: AgentUser): Json | null => (u.studentId ? { studentId: u.studentId } : null);
 
@@ -61,20 +59,6 @@ export const TMS_ENTITIES: EntityDef[] = [
     }),
   },
   {
-    key: "tms.application", panel: "tms", label: "Application", description: "People who applied to a program (new → … → enrolled). Convert one to a student with tms.convert_application.", collection: "training_applications", idType: "string", baseFilter: soft, titleField: "fullName", search: ["fullName", "email", "mobile", "applicationCode"],
-    read: "staff", write: "staff", allow: canManageStudents, canDelete: true,
-    fields: [f.str("fullName", "Full name", true), f.email("email", "Email", true), f.str("mobile", "Mobile"), f.ref("programId", "Program (tms.program id)", "tms.program", true), f.enum("status", "Status", ASTATUS), f.num("graduationYear", "Graduation year"), f.str("source", "Source"), f.str("college", "College"), f.text("message", "Message"), f.text("notes", "Notes")],
-    ops: crudOps<Application>({
-      entity: "application", validate: validateApplication, get: getApplication, label: L("fullName"), audit,
-      pre: async (d: Json, _u, mode, id) => {
-        if (!(await getProgram(String(d.programId)))) return fail("That program no longer exists.");
-        if (mode === "update" && id && (await getApplication(id))?.studentId) return fail("This application was already converted.");
-        return null;
-      },
-      create: (d, u) => createApplication(d, u.id), update: (id, d, u) => updateApplication(id, d, u.id), remove: (id, u) => deleteApplication(id, u.id),
-    }),
-  },
-  {
     key: "tms.student", panel: "tms", label: "Student", description: "Enrolled training students: contact, education, guardian, links and status.", collection: "training_students", idType: "string", baseFilter: soft, titleField: "fullName", search: ["fullName", "email", "mobile", "studentCode"],
     read: "staff", write: "staff", allow: canManageStudents, hide: ["links", "guardian"],
     self: (u) => (u.studentId ? { _id: u.studentId } : null),
@@ -82,7 +66,7 @@ export const TMS_ENTITIES: EntityDef[] = [
     ops: crudOps<Student>({
       entity: "student", validate: validateStudent, get: getStudent, label: L("fullName"), audit,
       toInput: (s) => ({ fullName: s.fullName, email: s.email, mobile: s.mobile, address: s.address, college: s.education.college, university: s.education.university, branch: s.education.branch, semester: s.education.semester, graduationYear: s.education.graduationYear, guardianName: s.guardian.name, guardianPhone: s.guardian.phone, guardianRelation: s.guardian.relation, linkedin: s.links.linkedin, github: s.links.github, resumeUrl: s.links.resumeUrl, photoUrl: s.links.photoUrl, status: s.status, notes: s.notes }),
-      create: (d, u) => createStudent(d, u.id, null), update: (id, d, u) => updateStudent(id, d, u.id),
+      create: (d, u) => createStudent(d, u.id), update: (id, d, u) => updateStudent(id, d, u.id),
     }),
   },
   { key: "tms.enrollment", panel: "tms", label: "Enrollment", description: "Which student is in which batch, with status and progress.", collection: "student_enrollments", idType: "string", baseFilter: soft, read: "staff", self: mine },
@@ -166,45 +150,6 @@ export const TMS_ENTITIES: EntityDef[] = [
 ];
 
 export const TMS_ACTIONS: ActionDef[] = [
-  {
-    key: "tms.convert_application", panel: "tms", label: "Convert an application into an enrolled student", description: "Create the student from an application and enrol them in a batch of the same program.", level: "staff", allow: canManageStudents,
-    params: [f.ref("applicationId", "Application id (tms.application)", "tms.application", true), f.ref("batchId", "Batch (tms.batch id)", "tms.batch", true), f.str("university", "University"), f.str("branch", "Branch")],
-    run: async (v, u) => {
-      const app = await getApplication(String(v.applicationId));
-      if (!app) return fail("Application not found.");
-      if (app.studentId) return fail("This application has already been converted.");
-      if (await getStudentByApplication(app._id)) return fail("A student already exists for this application.");
-      const batch = await getBatch(String(v.batchId));
-      if (!batch) return fail("Select a valid batch.");
-      if (batch.programId !== app.programId) return fail("That batch belongs to a different program.");
-      const student = await createStudent({ fullName: app.fullName, email: app.email, mobile: app.mobile, address: null, education: { college: app.college, university: str(v.university), branch: str(v.branch), semester: null, graduationYear: app.graduationYear }, guardian: { name: null, phone: null, relation: null }, links: { resumeUrl: null, linkedin: null, github: null, photoUrl: null }, status: "active", notes: app.notes } as never, u.id, app._id);
-      const enrol = await enrollStudent({ studentId: student._id, programId: app.programId, batchId: batch._id }, u.id);
-      if (!enrol.ok) {
-        const { getDb } = await import("@/lib/mongodb");
-        await (await getDb()).collection<{ _id: string }>("training_students").deleteOne({ _id: student._id });
-        return fail(enrol.reason);
-      }
-      await markApplicationConverted(app._id, student._id, u.id);
-      await audit(u, { action: "convert", entity: "application", entityId: app._id, entityLabel: app.fullName, summary: `converted to student ${student.studentCode}, enrolled in ${batch.batchCode}` });
-      await audit(u, { action: "enroll", entity: "enrollment", entityId: enrol.enrollment._id, entityLabel: `${student.fullName} → ${batch.name}` });
-      return { ok: true, id: student._id, result: `${student.fullName} (${student.studentCode}) enrolled in ${batch.name}.` };
-    },
-  },
-  {
-    key: "tms.set_application_status", panel: "tms", label: "Change an application's status", description: "Move an application through the pipeline (use convert_application to enrol).", level: "staff", allow: canManageStudents,
-    params: [f.ref("applicationId", "Application id", "tms.application", true), f.enum("status", "New status", ASTATUS, true)],
-    run: async (v, u) => {
-      const status = String(v.status);
-      if (!isValidApplicationStatus(status)) return fail("Unknown status.", { allowed: ASTATUS });
-      const before = await getApplication(String(v.applicationId));
-      if (!before) return fail("Application not found.");
-      if (before.studentId && status !== "enrolled") return fail("This application was converted to a student — its status is locked to Enrolled.");
-      if (status === "enrolled" && !before.studentId) return fail("Use convert_application to enrol this applicant.");
-      await setApplicationStatus(before._id, status as ApplicationStatus, u.id);
-      await audit(u, { action: "status_change", entity: "application", entityId: before._id, entityLabel: before.fullName, summary: `status: ${before.status} → ${status}` });
-      return { ok: true, id: before._id, result: `Application is now ${status}.` };
-    },
-  },
   {
     key: "tms.assign_batch", panel: "tms", label: "Enrol a student in a batch", description: "Put a student into a batch of a program (uses a seat).", level: "staff", allow: canManageStudents,
     params: [f.ref("studentId", "Student id", "tms.student", true), f.ref("batchId", "Batch id", "tms.batch", true)],

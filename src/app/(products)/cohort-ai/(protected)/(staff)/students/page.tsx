@@ -1,5 +1,4 @@
 import PanelPageHeader from "@/components/platform/panel/PanelPageHeader";
-import Link from "next/link";
 import { Plus, Users, GraduationCap, CheckCircle2, UserMinus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Breadcrumbs from "@/components/products/dealflow-ai/Breadcrumbs";
@@ -69,9 +68,7 @@ export default async function StudentsPage({
 
       {result.total === 0 && !sp.search && !sp.status && (
         <p className="text-center text-sm text-muted-foreground">
-          No students yet. Convert an application, or{" "}
-          {canManage ? "use “New Student” to add one directly." : "ask a training manager."}{" "}
-          <Link href="/cohort-ai/applications" className="text-primary hover:underline">Applications →</Link>
+          No students yet. {canManage ? "Use “New Student” to add one directly." : "Ask a training manager."}
         </p>
       )}
     </div>

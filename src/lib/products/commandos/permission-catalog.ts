@@ -387,7 +387,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       {
         key: "portal.canManageApplications",
         label: "Manage applications",
-        description: "Review and process incoming job and training applications.",
+        description: "Review and process incoming job applications.",
       },
       {
         key: "portal.canManageDocuments",
@@ -523,7 +523,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
       { key: "workspace.manageChat", label: "Manage team chat", description: "Channels, direct conversations and meetings registers." },
       { key: "workspace.managePortalUsers", label: "Manage portal users", description: "External portal accounts: status and forced sign-out." },
       { key: "workspace.manageCareers", label: "Manage job applicants", description: "Applicants register, statuses and resumes." },
-      { key: "workspace.manageChatbot", label: "Manage chatbot conversations", description: "Website chatbot and voice conversation transcripts." },
+      { key: "workspace.manageChatbot", label: "Manage website chatbot", description: "View chatbot dashboards and conversations; manage the knowledge base, AI settings and voice configuration." },
+      { key: "workspace.manageWebsitePush", label: "Manage website push notifications", description: "View subscriber counts and broadcasts; configure website notifications and send broadcasts." },
     ],
   },
   {

@@ -47,7 +47,7 @@ import {
   reindexPagesAction,
   reindexPdfAction,
   deletePdfAction,
-} from "@/app/(products)/sitecraft-ai/(protected)/chatbot/actions";
+} from "@/app/(products)/commandos/(protected)/chatbot/actions";
 import type { SerializedKbWebsitePage, WebsiteKbSummary } from "@/lib/kb-website";
 import type { SerializedKbPdfDocument, PdfKbSummary } from "@/lib/kb-pdf";
 import type { SerializedKbRun } from "@/lib/kb-runs";
