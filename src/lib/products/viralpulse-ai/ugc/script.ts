@@ -1,3 +1,4 @@
+import { defaultPrompt, defaultPromptAsync, type PromptFn } from "@/lib/prompts/defaults";
 import { offerBriefLines, offerFacts, offerProblems } from "./offer";
 import { LANGUAGE_LABEL, LANGUAGE_NOTES, WORDS_PER_SEC, maxWordsForDuration, normalizeLanguage } from "./styles/language";
 import type { UgcStyle } from "./styles/types";
@@ -21,6 +22,8 @@ export interface LlmResult {
 
 export interface LlmClient {
   json(args: { system: string; user: string; schemaName: string; schema: Record<string, unknown> }): Promise<LlmResult>;
+  /** Where the instructions come from: the registry through `getPrompt` for the real client; the built-in text when omitted (test clients). */
+  prompt?: PromptFn;
 }
 
 export class PlanError extends Error {
@@ -69,18 +72,9 @@ export function briefFacts(b: ProductBrief, extra: string[] = []): string[] {
   return [b.name, b.description, ...b.keyPoints, b.audience ?? "", b.callToAction ?? "", ...offerFacts(b.offer), ...extra].map((x) => x.trim()).filter(Boolean);
 }
 
+/** The script instructions: registry prompt "viralpulse.ugc.script" (editable part, then the pinned facts / fictional-people / no-claims rules). */
 export function buildSystemPrompt(): string {
-  return [
-    "You write short, realistic user-generated-content (UGC) style video scripts and shot plans for social media ads and posts. The video is rendered by an AI video model, which also speaks the dialogue.",
-    "Hard rules:",
-    "1. Facts: use ONLY facts in the product brief. Never invent prices, discounts, offers, awards, rankings, statistics, ingredients, certifications, results, customer counts, delivery times or guarantees. If the brief does not give a number, the script contains no number. List every brief fact a scene relies on, copied verbatim, in factsUsed.",
-    "2. People: every actor is a fictional adult (18+). Never name or imitate a real person, celebrity or politician. Never present the video as a real customer's review: if the style is testimonial-like, the speaker is an illustrative character.",
-    "3. No health cures, miracle or guaranteed-result claims, no competitor criticism, no adult, violent, hateful or illegal content.",
-    "4. Dialogue sounds spoken, not written: contractions, fillers, short sentences. It must fit the scene length at a natural speaking pace; if it does not fit, cut words rather than speeding up.",
-    "5. Structure follows the beats supplied: a hook in the first seconds, a body that shows the product naturally, and a closing call to action taken from the brief.",
-    "6. Describe actors once in the actors list (look, wardrobe); scenes refer to them by id. Do not redescribe their looks in scenes. Keep the same people, outfits and room across scenes.",
-    "7. Each scene is ONE continuous shot, no cuts inside a scene. Do not ask for on-screen text, logos or captions inside the video frame (overlay text goes only in onScreenText).",
-  ].join("\n");
+  return defaultPrompt("viralpulse.ugc.script");
 }
 
 export function buildUserPrompt(brief: ProductBrief, style: UgcStyle, o: PlanOptions): string {
@@ -175,7 +169,8 @@ export async function generateScenePlan(brief: ProductBrief, style: UgcStyle, op
   const offerErrors = offerProblems(brief, style);
   if (offerErrors.length) throw new PlanError(offerErrors[0] as string, offerErrors);
   const facts = briefFacts(brief, options.providedFacts);
-  const system = buildSystemPrompt();
+  const ask = deps.llm.prompt ?? defaultPromptAsync;
+  const system = await ask("viralpulse.ugc.script");
   let user = buildUserPrompt(brief, style, options);
   let tokensIn = 0;
   let tokensOut = 0;
@@ -193,7 +188,7 @@ export async function generateScenePlan(brief: ProductBrief, style: UgcStyle, op
     const v = validatePlan(last.plan, { caps: options.caps, totalRange: style.durationRange, maxActors: style.actorCount, briefFacts: facts, factsUsed: last.factsUsed, offerStyle: style });
     errors = v.errors;
     if (v.ok) return { ...last, model, inputTokens: tokensIn, outputTokens: tokensOut, costUsd: cost, attempts: attempt };
-    user = `${buildUserPrompt(brief, style, options)}\n\nYour previous attempt had these problems. Fix every one and return the full corrected plan:\n${v.errors.map((e) => `- ${e}`).join("\n")}\nPrevious attempt:\n${JSON.stringify(res.data).slice(0, 8000)}`;
+    user = `${buildUserPrompt(brief, style, options)}\n\n${await ask("viralpulse.ugc.script.fix", { problems: v.errors.map((e) => `- ${e}`).join("\n"), previous: JSON.stringify(res.data).slice(0, 8000) })}`;
   }
   throw new PlanError("The AI script didn't pass the checks after two attempts. Try again or adjust the brief.", errors);
 }

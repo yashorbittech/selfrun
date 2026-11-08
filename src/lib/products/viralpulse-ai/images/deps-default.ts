@@ -4,6 +4,7 @@ import { currentCompanyIdOrNull } from "@/lib/platform/tenancy/context";
 import { recordAiUsage } from "@/lib/platform/billing/ai-usage-log";
 import { getObject, putObject } from "@/lib/storage/blob";
 import { getOpenAI, isOpenAIConfigured } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
 import { getSettings } from "@/lib/products/viralpulse-ai/settings";
 import { ModelUnavailableError, resolveForCall } from "@/lib/products/viralpulse-ai/models";
 import { getMedia, readMediaBytes, saveStudioImage } from "@/lib/products/viralpulse-ai/media";
@@ -37,6 +38,7 @@ export async function isGeminiImageConfigured(): Promise<boolean> {
 export function defaultImageDeps(): ImageDeps {
   return {
     now: () => new Date(),
+    prompt: getPrompt,
     settings: getImageSettings,
     async openAiPricing() {
       const { ai } = await getSettings();

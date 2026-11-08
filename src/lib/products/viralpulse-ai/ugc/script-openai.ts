@@ -1,4 +1,5 @@
 import "server-only";
+import { getPrompt } from "@/lib/prompts/store";
 import { getOpenAI, isOpenAIConfigured, isUnsupportedParamError } from "@/lib/openai";
 import { aiBlockReason } from "@/lib/platform/billing/enforce";
 import { setAiFeature } from "@/lib/platform/billing/ai-usage-log";
@@ -9,6 +10,7 @@ import type { LlmClient } from "./script";
 /** The company's OpenAI as an `LlmClient`: Responses API, strict JSON schema, metered against the plan like every other AI call. */
 export function openAiLlm(): LlmClient {
   return {
+    prompt: getPrompt,
     async json({ system, user, schemaName, schema }) {
       if (!(await isOpenAIConfigured())) throw new SmmsInputError("OpenAI isn't connected for this workspace (Settings -> Integrations), so the script can't be written.");
       const block = await aiBlockReason();

@@ -24,6 +24,10 @@ export const PB_COLLECTIONS = {
   templates: "pb_templates",
   /** Append-only audit (A4). Random UUID `_id`s. */
   audit: "pb_audit",
+  /** Company-defined custom variables `custom.*` (A8). Random UUID `_id`s. */
+  variables: "pb_variables",
+  /** Metadata of brand images (logo, signature and stamp images); the bytes live in private storage under a company-prefixed key (A7). Random UUID `_id`s. */
+  brandAssets: "pb_brand_assets",
 } as const;
 
 export type PbCollectionName = (typeof PB_COLLECTIONS)[keyof typeof PB_COLLECTIONS];

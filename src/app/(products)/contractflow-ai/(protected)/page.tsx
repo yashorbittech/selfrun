@@ -8,13 +8,11 @@ import {
   PencilLine,
   Bot,
   CalendarClock,
-  Plus,
   ArrowRight,
   Clock,
   Layers,
 } from 'lucide-react';
 import { CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
-import { buttonVariants } from '@/components/ui/button';
 import GlassCard from '@/components/products/dealflow-ai/GlassCard';
 import KpiGrid from '@/components/products/dealflow-ai/KpiGrid';
 import Breadcrumbs from '@/components/products/dealflow-ai/Breadcrumbs';
@@ -55,7 +53,6 @@ export default async function LpmsDashboardPage({ searchParams }: { searchParams
   const k = d.kpis;
 
   const ctx = { roles: viewer.roles, permissionOverrides: viewer.overrides };
-  const canCreate = lpmsCan(ctx, 'CREATE');
   const canApprove = lpmsCan(ctx, 'APPROVE');
 
   return (
@@ -71,15 +68,7 @@ export default async function LpmsDashboardPage({ searchParams }: { searchParams
         />}
         breadcrumbs={[{ label: 'ContractFlow', href: '/contractflow-ai' }, { label: 'Dashboard' }]}
         title="Legal Documents Overview"
-        description="Monitor legal documents, templates and approval workflows, and act quickly on items that need review."
-        actions={
-          canCreate && (
-            <Link href="/contractflow-ai/documents/new" className={buttonVariants({ size: 'sm' })}>
-              <Plus className="size-3.5" data-icon="inline-start" />
-              New Document
-            </Link>
-          )
-        }
+        description="Documents are now written in Playbook AI. ContractFlow is being rebuilt for signing and a signed-document vault; the documents below come from the earlier version and are kept as they are."
       />
 
       {/* Pending approvals action banner */}

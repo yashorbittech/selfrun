@@ -1,5 +1,6 @@
 import "server-only";
 import { getOpenAI, isOpenAIConfigured } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
 import { getSettings } from "@/lib/products/viralpulse-ai/settings";
 import { resolveForCall } from "@/lib/products/viralpulse-ai/models";
 import type { VCardDetail, VCardStyle, VCardLayout, VCardColorScheme } from "./types";
@@ -117,34 +118,21 @@ export async function generateVCardContent(
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are an expert personal branding consultant and copywriter.
-Generate professional visiting card content for:
-- Name: "${name}"
-- Job Title: "${jobTitle}"
-- Company: "${company}"
-- Industry: "${industry}"
-- Target Audience: "${audience}"
-- Core Services/Expertise: "${services}"
-- Key Achievements: "${input.achievements || "Not specified"}"
-- Personality/Tone: "${personality}"
-
-Create compelling, authentic, and professional content. Return strictly valid JSON:
-{
-  "tagline": "One punchy tagline (max 10 words, no clichés)",
-  "bio": "Professional bio (2-3 sentences, first person, mentions key expertise and value proposition)",
-  "servicesTitle": "Services section heading",
-  "servicesList": ["Service 1", "Service 2", "Service 3", "Service 4"],
-  "skillsList": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6"],
-  "ctaHeadline": "Call-to-action headline (action-oriented, 5-8 words)",
-  "ctaBody": "CTA supporting text (1 sentence)",
-  "ctaButton": "CTA button label (2-3 words)",
-  "metaDescription": "SEO meta description (max 160 chars)"
-}`;
+      const systemPrompt = await getPrompt("viralpulse.vcard.content", {
+        name,
+        job_title: jobTitle,
+        company,
+        industry,
+        audience,
+        services,
+        achievements: input.achievements || "Not specified",
+        personality,
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You generate visiting card content. Return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.vcard.content.system") },
           { role: "user", content: systemPrompt },
         ],
         response_format: { type: "json_object" },
@@ -274,11 +262,11 @@ export async function aiUpdateVCardField(
         messages: [
           {
             role: "system",
-            content: `You rewrite visiting card fields for ${context.name}, ${context.jobTitle} at ${context.company}. Return only the new text value, no quotes, no explanation.`,
+            content: await getPrompt("viralpulse.vcard.field.system", { name: context.name, job_title: context.jobTitle, company: context.company }),
           },
           {
             role: "user",
-            content: `Field: "${field}"\nCurrent value: "${currentValue}"\nInstruction: "${prompt}"\n\nReturn only the improved value:`,
+            content: await getPrompt("viralpulse.vcard.field", { field, current_value: currentValue, instruction: prompt }),
           },
         ],
         temperature: 0.7,
@@ -313,14 +301,11 @@ export async function aiSuggestLayout(
         messages: [
           {
             role: "system",
-            content: "You suggest visiting card layout and color scheme. Return strictly valid JSON.",
+            content: await getPrompt("viralpulse.vcard.layout.system"),
           },
           {
             role: "user",
-            content: `Person: ${context.name}, ${context.jobTitle} at ${context.company} (${context.industry || "general"} industry).
-Layouts: classic, modern, minimal, bold, creative, executive.
-Color schemes: professional-blue, midnight-black, elegant-white, forest-green, royal-purple, rose-gold, coral-orange, slate-gray.
-Return JSON: { "layout": "...", "colorScheme": "...", "rationale": "One sentence why" }`,
+            content: await getPrompt("viralpulse.vcard.layout", { name: context.name, job_title: context.jobTitle, company: context.company, industry: context.industry || "general" }),
           },
         ],
         response_format: { type: "json_object" },
@@ -372,37 +357,22 @@ export async function aiChatVCard(
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are the AI Visiting Card Copilot for ViralPulse AI.
-You help users update their professional visiting card via chat.
-
-Current Card:
-- Name: "${vcard.name}"
-- Job Title: "${vcard.jobTitle}"
-- Company: "${vcard.company}"
-- Bio: "${vcard.bio || "Not set"}"
-- Layout: "${vcard.layout}"
-- Color Scheme: "${vcard.colorScheme}"
-- Tagline: "${vcard.branding.tagline || "Not set"}"
-- Contact: ${JSON.stringify(vcard.contact)}
-
-User message: "${message}"
-
-Classify the user's intent and return strictly valid JSON:
-{
-  "reply": "Friendly, helpful explanation of what you did or answered.",
-  "action": "update_field" | "change_layout" | "change_colors" | "update_contact" | "none",
-  "field"?: "name" | "jobTitle" | "company" | "bio" | "tagline",
-  "newValue"?: "the new value for the field",
-  "layout"?: "classic|modern|minimal|bold|creative|executive",
-  "colorScheme"?: "professional-blue|midnight-black|elegant-white|forest-green|royal-purple|rose-gold|coral-orange|slate-gray",
-  "contactPatch"?: { "email"?: "...", "phone"?: "...", "linkedin"?: "...", "website"?: "...", "whatsapp"?: "..." },
-  "suggestedPrompts": ["Prompt 1", "Prompt 2", "Prompt 3"]
-}`;
+      const systemPrompt = await getPrompt("viralpulse.vcard.chat", {
+        name: vcard.name,
+        job_title: vcard.jobTitle,
+        company: vcard.company,
+        bio: vcard.bio || "Not set",
+        layout: vcard.layout,
+        color_scheme: vcard.colorScheme,
+        tagline: vcard.branding.tagline || "Not set",
+        contact: JSON.stringify(vcard.contact),
+        message,
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You are the ViralPulse AI Visiting Card Chat Assistant. Return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.vcard.chat.system") },
           ...history.slice(-6).map((h) => ({ role: h.role as "user" | "assistant", content: h.content })),
           { role: "user", content: systemPrompt },
         ],

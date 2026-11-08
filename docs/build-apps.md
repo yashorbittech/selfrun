@@ -523,6 +523,9 @@ Phone calls, live listen and take-over, and website voice agents are part of the
 
 ---
 
+## 14d. ContractFlow (signing and vault) and the stamp rulebook: what an install needs
+No new environment variable, package or cron. New collections: `cf_*` (company-scoped; `cf_settings` and `cf_counters` are keyed) and the global `stamp_rulebook`; indexes are created on first use. The public signer link is `/sign/<token>` (works on any host; the company comes from the signature request). Console: **Stamp rulebook** with three permissions (`stamp.read`, `stamp.edit`, `stamp.confirm`); it ships with the state and union-territory list and no duty amounts. The earlier `lpms_*` data is untouched; `planLpmsArchive()` (read-only) reports what exists. Tests: `npm run test:contractflow` (throwaway database only).
+
 ## 15. Keeping this guide current
 
 When the build scripts, commands, options, output folders or install steps change, this file changes in the same commit. If you add a

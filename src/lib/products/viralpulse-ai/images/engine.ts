@@ -1,5 +1,6 @@
 import "server-only";
 import { newId, updateStamp, str, strList } from "@/lib/products/viralpulse-ai/db";
+import { defaultPrompt, defaultPromptAsync, type PromptFn } from "@/lib/prompts/defaults";
 import { SmmsInputError, NotFoundError } from "@/lib/products/viralpulse-ai/viewer";
 import { GOALS, goalById, geminiRatioFor, openAiSizeFor, specByKey, type GoalDef } from "@/lib/products/viralpulse-ai/images/specs";
 import { checkOverlayText, policyCheck, type ImagePolicyResult } from "@/lib/products/viralpulse-ai/images/policy";
@@ -51,6 +52,8 @@ export interface ImageDeps {
   managerIds(): Promise<string[]>;
   kit(): Promise<BrandKit>;
   storagePrefix(): Promise<string>;
+  /** Where the direction lines come from: the registry through `getPrompt` in production; the built-in text when omitted (tests). */
+  prompt?: PromptFn;
 }
 
 // ── brief normalisation ─────────────────────────────────────────────────────
@@ -121,8 +124,35 @@ export function policyInput(b: Brief, extra: { instruction?: string; prompt?: st
   return { subject: b.subject, product: b.product, style: b.style, negative: b.negative, overlayText: b.overlayText, goalId: b.goalId, hasReferenceImages: b.referenceIds.length > 0, consent: b.consent, ...extra };
 }
 
+/**
+ * Safety lines of every image request. Fixed in code, never from the registry and never editable: no drawn text or logos, fictional people
+ * only, no real person or brand, and reference pictures never change a person's face or body.
+ */
+export const IMAGE_SAFETY_LINE = "Do not draw any text, letters, numbers, captions, logos, watermarks or UI. Use only fictional people. No real person, celebrity or brand may appear.";
+export const IMAGE_REFERENCE_LINE = "Use the reference pictures for the product or setting they show; do not alter any person's face or body.";
+
+/** The editable direction lines ("viralpulse.image.brief.*"); the built-in text when a caller does not pass any. */
+export interface ImageTexts {
+  space: (where: "top" | "middle" | "bottom") => string;
+  centred: string;
+  edit: (instruction: string) => string;
+  editReturn: string;
+}
+export const defaultImageTexts = (): ImageTexts => ({
+  space: (space) => defaultPrompt("viralpulse.image.brief.space", { space }),
+  centred: defaultPrompt("viralpulse.image.brief.centred"),
+  edit: (instruction) => defaultPrompt("viralpulse.image.brief.edit", { instruction }),
+  editReturn: defaultPrompt("viralpulse.image.brief.edit_return"),
+});
+/** The wording in force now, for one run (an edit's instruction is filled in later). */
+export async function loadImageTexts(ask: PromptFn): Promise<ImageTexts> {
+  const spaces = { top: await ask("viralpulse.image.brief.space", { space: "top" }), middle: await ask("viralpulse.image.brief.space", { space: "middle" }), bottom: await ask("viralpulse.image.brief.space", { space: "bottom" }) };
+  const editTemplate = await ask("viralpulse.image.brief.edit", { instruction: "\u0000" });
+  return { space: (w) => spaces[w], centred: await ask("viralpulse.image.brief.centred"), edit: (instruction) => editTemplate.split("\u0000").join(instruction), editReturn: await ask("viralpulse.image.brief.edit_return") };
+}
+
 /** The prompt sent to the model. It never contains the overlay words: those are drawn by the app. */
-export function buildPrompt(b: Brief, kit: BrandKit | null, goal: GoalDef, slide: number | null, instruction?: string): string {
+export function buildPrompt(b: Brief, kit: BrandKit | null, goal: GoalDef, slide: number | null, instruction?: string, texts: ImageTexts = defaultImageTexts()): string {
   const lines: string[] = [];
   lines.push(`Create ${goal.promptRole}${slide !== null && goal.slides ? ` (slide ${slide + 1} of ${b.overlayText.length}; keep the same look across slides)` : ""}.`);
   if (b.subject) lines.push(`Subject: ${b.subject}`);
@@ -137,10 +167,10 @@ export function buildPrompt(b: Brief, kit: BrandKit | null, goal: GoalDef, slide
     if (avoid.length) lines.push(`Never: ${avoid.join("; ")}`);
   } else if (b.negative) lines.push(`Avoid: ${b.negative}`);
   const space = b.textPosition === "top" ? "top" : b.textPosition === "middle" ? "middle" : "bottom";
-  lines.push(b.overlayText.some(Boolean) ? `Leave calm, uncluttered space in the ${space} third for text that is added afterwards. Keep the main subject away from that area.` : "Compose the main subject so that a centred crop still works.");
-  lines.push("Do not draw any text, letters, numbers, captions, logos, watermarks or UI. Use only fictional people. No real person, celebrity or brand may appear.");
-  if (b.referenceIds.length) lines.push("Use the reference pictures for the product or setting they show; do not alter any person's face or body.");
-  if (instruction) lines.push(`Change requested: ${instruction}. Keep everything else the same.`);
+  lines.push(b.overlayText.some(Boolean) ? texts.space(space) : texts.centred);
+  lines.push(IMAGE_SAFETY_LINE);
+  if (b.referenceIds.length) lines.push(IMAGE_REFERENCE_LINE);
+  if (instruction) lines.push(texts.edit(instruction));
   return lines.join("\n");
 }
 
@@ -318,9 +348,10 @@ export function createEngine(d: ImageDeps) {
       throw e;
     }
     // One request per picture (per slide for a carousel, each with its own scene). The estimate above already counts them all.
+    const texts = await loadImageTexts(d.prompt ?? defaultPromptAsync);
     const per = { totalUsd: est.perImageUsd };
     for (let i = 0; i < n; i++) {
-      await runCall(actor, await must(id), settings, { prompt: buildPrompt(b, kit, goal, goal.slides ? i : null), n: 1, references: refs.length ? refs : undefined, est: per, slides: [goal.slides ? i : null], last: i === n - 1 });
+      await runCall(actor, await must(id), settings, { prompt: buildPrompt(b, kit, goal, goal.slides ? i : null, undefined, texts), n: 1, references: refs.length ? refs : undefined, est: per, slides: [goal.slides ? i : null], last: i === n - 1 });
     }
     return must(id);
   }
@@ -391,7 +422,8 @@ export function createEngine(d: ImageDeps) {
       const refs: RefImage[] = [{ data: src, mimeType: "image/png" }, ...extra];
       const goal = goalById(p.brief.goalId)!;
       const kit = p.brief.applyKit ? await d.kit() : null;
-      const prompt = `${buildPrompt(p.brief, kit, goal, parent.slide, ins)}\nEdit the first picture. Return the whole edited picture.`;
+      const texts = await loadImageTexts(d.prompt ?? defaultPromptAsync);
+      const prompt = `${buildPrompt(p.brief, kit, goal, parent.slide, ins, texts)}\n${texts.editReturn}`;
       await runCall(actor, p, settings, { prompt, n: 1, references: refs, est, parent, instruction: ins, slides: [parent.slide] });
     };
     await (await projectsCollection()).updateOne({ _id: id }, { $set: { progress: { total: 1, done: 0 }, status: "generating", error: null, pendingApproval: null, ...updateStamp(actor.userId) } });

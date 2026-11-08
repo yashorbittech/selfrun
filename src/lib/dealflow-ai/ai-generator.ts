@@ -1,4 +1,5 @@
 import { getOpenAI } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
 import { getCompanyBrand } from "@/lib/platform/branding";
 
 export interface GenerateAiReplyOptions {
@@ -31,23 +32,21 @@ export async function generateContextualAiReply(
   // Call OpenAI with the real system prompt
   try {
     const openai = await getOpenAI({ timeoutMs: 8000, maxRetries: 1 });
-    const systemInstruction = `You are DealFlow AI, the senior customer and talent communication assistant for ${(await getCompanyBrand()).name}.
-You communicate professionally across ${opts.channel.toUpperCase()}.
-Entity Type: ${opts.category.toUpperCase()} (${opts.contactName}).
-${opts.clientSource ? `Lead Origin Source: ${opts.clientSource.toUpperCase()}` : ""}
-${opts.serviceCategory ? `Service / Position: ${opts.serviceCategory}` : ""}
-${opts.budgetOrSalary ? `Budget / Expected Salary: ${opts.budgetOrSalary}` : ""}
-
-INSTRUCTIONS:
-- You have no company knowledge source. Do not state prices, salaries, stipends, dates, policies, technologies or process steps; say you will confirm the details and follow up. Never invent or estimate them.
-- Generate a polite, contextual, highly specific reply.
-- Address the user's inquiry directly.
-- Offer clear next steps (call time, schedule link, or document attachment).
-${opts.channel === "whatsapp" ? "- Use WhatsApp markdown like *bold*, bullet points, and friendly emojis." : ""}
-${opts.channel === "email" ? "- Provide a formal professional email body with greeting and sign-off." : ""}
-${opts.channel === "chat" ? "- Keep it crisp, conversational, and helpful." : ""}
-${opts.channel === "voice" ? "- Provide a natural conversational voice script suitable for spoken speech." : ""}
-`;
+    const systemInstruction = await getPrompt("dealflow.reply.draft", {
+      brand: (await getCompanyBrand()).name,
+      channel: opts.channel.toUpperCase(),
+      category: opts.category.toUpperCase(),
+      contact: opts.contactName,
+      origin_line: opts.clientSource ? `Lead Origin Source: ${opts.clientSource.toUpperCase()}` : "",
+      service_line: opts.serviceCategory ? `Service / Position: ${opts.serviceCategory}` : "",
+      budget_line: opts.budgetOrSalary ? `Budget / Expected Salary: ${opts.budgetOrSalary}` : "",
+      channel_lines: [
+        opts.channel === "whatsapp" ? "- Use WhatsApp markdown like *bold*, bullet points, and friendly emojis." : "",
+        opts.channel === "email" ? "- Provide a formal professional email body with greeting and sign-off." : "",
+        opts.channel === "chat" ? "- Keep it crisp, conversational, and helpful." : "",
+        opts.channel === "voice" ? "- Provide a natural conversational voice script suitable for spoken speech." : "",
+      ].join("\n"),
+    });
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -56,7 +55,7 @@ ${opts.channel === "voice" ? "- Provide a natural conversational voice script su
         { role: "system", content: systemInstruction },
         {
           role: "user",
-          content: `Generate the ${opts.channel} reply to ${opts.contactName}. Last query: "${lastMessageText}"`,
+          content: await getPrompt("dealflow.reply.request", { channel: opts.channel, contact: opts.contactName, last_query: lastMessageText }),
         },
       ],
     });

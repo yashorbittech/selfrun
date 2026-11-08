@@ -1,5 +1,6 @@
 import "server-only";
 import { getOpenAI, isOpenAIConfigured } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
 import { getSettings } from "@/lib/products/viralpulse-ai/settings";
 import { resolveForCall } from "@/lib/products/viralpulse-ai/models";
 import { getTemplatePreset } from "./templates";
@@ -69,52 +70,23 @@ export async function generateBrochureContent(input: BrochureBriefInput): Promis
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const prompt = `You are a world-class digital brochure designer and commercial copywriter.
-Generate professional, structured content for a digital brochure with the following brief:
-- Brochure Title: "${input.title}"
-- Category: ${input.category}${input.customCategory ? ` (${input.customCategory})` : ""}
-- Brand / Business Name: "${brand}"
-- Business Description / Objective: "${input.aboutBusiness || input.title}"
-- Target Audience: "${audience}"
-- Core Products / Offerings: "${offerings}"
-- Key Advantages / USPs: ${highlights.join(", ")}
-- Primary Call to Action: "${cta}"
-- Tone of Voice: ${tone}
-- Language: ${language}
-
-Return a valid JSON object matching this exact structure:
-{
-  "heroHeadline": "compelling punchy headline (max 8-10 words)",
-  "heroSubheadline": "clear positioning tagline (max 6-8 words)",
-  "heroDescription": "2-3 sentences explaining value proposition and benefit to the reader",
-  "overviewTitle": "section heading",
-  "overviewBody": "3-4 sentences summarizing organization, domain expertise, and capabilities",
-  "featuresTitle": "section heading",
-  "featuresSubtitle": "subheading",
-  "features": [
-    { "icon": "Star|Shield|Award|Zap|CheckCircle|Clock|Users|Cpu|Heart", "title": "feature title", "description": "concise description" },
-    { "icon": "Star|Shield|Award|Zap|CheckCircle|Clock|Users|Cpu|Heart", "title": "feature title", "description": "concise description" },
-    { "icon": "Star|Shield|Award|Zap|CheckCircle|Clock|Users|Cpu|Heart", "title": "feature title", "description": "concise description" }
-  ],
-  "servicesTitle": "section heading",
-  "services": [
-    { "title": "service 1", "description": "service 1 description", "icon": "Briefcase|Settings|Globe|Wrench", "price": "e.g. Inquire for pricing" },
-    { "title": "service 2", "description": "service 2 description", "icon": "Briefcase|Settings|Globe|Wrench", "price": "e.g. Custom quote" },
-    { "title": "service 3", "description": "service 3 description", "icon": "Briefcase|Settings|Globe|Wrench", "price": "e.g. Contact sales" }
-  ],
-  "faq": [
-    { "question": "relevant client question", "answer": "clear professional answer" },
-    { "question": "relevant client question", "answer": "clear professional answer" },
-    { "question": "relevant client question", "answer": "clear professional answer" }
-  ],
-  "seoDescription": "1-2 sentence meta description for search engines",
-  "keywords": "comma separated keywords"
-}`;
+      const prompt = await getPrompt("viralpulse.brochure.generate", {
+        title: input.title,
+        category: `${input.category}${input.customCategory ? ` (${input.customCategory})` : ""}`,
+        brand,
+        about: input.aboutBusiness || input.title,
+        audience,
+        offerings,
+        highlights: highlights.join(", "),
+        cta,
+        tone,
+        language,
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You are an expert commercial brochure content generator. You always return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.brochure.generate.system") },
           { role: "user", content: prompt },
         ],
         response_format: { type: "json_object" },
@@ -313,21 +285,18 @@ export async function aiUpdateSection(
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are an expert digital brochure copywriter and layout designer.
-You are updating a "${section.data.type}" section of a brochure for "${brand}" (Category: ${brochureContext.category}).
-Current section data:
-${JSON.stringify(section.data, null, 2)}
-
-User instruction:
-"${prompt}"
-
-Return ONLY a valid JSON object matching the exact schema of this section type (${section.data.type}).
-Preserve the "type": "${section.data.type}" field. Improve or rewrite the fields according to the user instruction while maintaining professionalism and industry realism.`;
+      const systemPrompt = await getPrompt("viralpulse.brochure.update", {
+        type: section.data.type,
+        brand,
+        category: brochureContext.category,
+        section_json: JSON.stringify(section.data, null, 2),
+        instruction: prompt,
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You update brochure sections. You always return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.brochure.update.system") },
           { role: "user", content: systemPrompt },
         ],
         response_format: { type: "json_object" },
@@ -387,27 +356,17 @@ export async function aiGenerateSection(
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are a digital brochure architect.
-A user wants to add a new section to their brochure for "${brand}" (Category: ${brochureContext.category}).
-User prompt: "${prompt}"
-Preferred type if specified: "${preferredType || "any suitable brochure section"}"
-
-Available section types:
-hero, overview, about, features, services, gallery, team, testimonials, pricing, stats, curriculum, process, projects, agenda, speakers, venue, floorplan, location, highlights, itinerary, offer, faq, cta, contact, custom.
-
-Determine the best section type (or use preferredType), and return a strictly valid JSON object matching the data schema for that section:
-{
-  "sectionType": "one of the available types above",
-  "sectionData": {
-    "type": "same as sectionType",
-    ... (all required fields for this section with realistic, professional content based on the prompt)
-  }
-}`;
+      const systemPrompt = await getPrompt("viralpulse.brochure.section", {
+        brand,
+        category: brochureContext.category,
+        instruction: prompt,
+        preferred_type: preferredType || "any suitable brochure section",
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You generate digital brochure sections. Return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.brochure.section.system") },
           { role: "user", content: systemPrompt },
         ],
         response_format: { type: "json_object" },
@@ -456,34 +415,12 @@ export async function aiStyleTheme(
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are a world-class graphic designer and brand stylist.
-Generate a digital brochure theme palette and typography configuration based on the user's design prompt.
-User aesthetic prompt: "${prompt}"
-
-Current theme:
-${JSON.stringify(currentTheme, null, 2)}
-
-Allowed headingFont options: "Inter", "Plus Jakarta Sans", "Montserrat", "Cinzel", "Playfair Display"
-Allowed bodyFont options: "Inter"
-Allowed borderRadius options: "none", "sm", "md", "lg", "xl"
-Allowed density options: "compact", "comfortable", "spacious"
-
-Return strictly a valid JSON object matching this schema:
-{
-  "primaryColor": "#hex (main brand accent)",
-  "accentColor": "#hex (secondary accent)",
-  "backgroundColor": "#hex (canvas background, e.g. #ffffff or dark #0f172a)",
-  "textColor": "#hex (high contrast text color)",
-  "headingFont": "Inter|Plus Jakarta Sans|Montserrat|Cinzel|Playfair Display",
-  "bodyFont": "Inter",
-  "borderRadius": "none|sm|md|lg|xl",
-  "density": "compact|comfortable|spacious"
-}`;
+      const systemPrompt = await getPrompt("viralpulse.brochure.theme", { aesthetic: prompt, theme_json: JSON.stringify(currentTheme, null, 2) });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You generate brochure design themes. Return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.brochure.theme.system") },
           { role: "user", content: systemPrompt },
         ],
         response_format: { type: "json_object" },
@@ -615,60 +552,33 @@ export async function aiChatAssistant(input: AiChatInput): Promise<AiChatResult>
       const { ai } = await getSettings();
       const choice = await resolveForCall("text", ai.textModel);
 
-      const systemPrompt = `You are the AI Brochure Copilot in ViralPulse AI. You assist users via chat to edit, rewrite, add sections, and restyle digital brochures in real-time.
-
-Brochure Context:
-- Title: "${input.brochure.title}"
-- Brand Name: "${brand}"
-- Category: "${input.brochure.category}"
-- Current Sections: ${JSON.stringify(
-        input.brochure.sections.map((s) => ({
-          id: s.id,
-          type: s.type,
-          label: s.headline || s.title || s.type,
-        }))
-      )}
-- Currently Selected Section ID: "${input.selectedSectionId || "none"}"
-${
-  input.selectedSectionData
-    ? `- Currently Selected Section Details: ${JSON.stringify({
-        id: input.selectedSectionData.id,
-        type: input.selectedSectionData.data.type,
-        data: input.selectedSectionData.data,
-      })}`
-    : ""
-}
-- Current Theme: ${JSON.stringify(input.brochure.theme)}
-
-User Request: "${msg}"
-
-Classify user intent into ONE of:
-1. "update_section": User wants to edit, rewrite, improve copy, change tone, or update a section.
-   - Set "targetSectionId" to the section ID (use selectedSectionId if applicable, or find the section matching user intent).
-   - Provide "updatedData": valid JSON object with updated fields for that section schema.
-2. "add_section": User wants to add/insert a new section (e.g. pricing, testimonials, FAQ, team, process, roadmap, stats).
-   - Set "sectionType" to one of: hero, overview, about, features, services, gallery, team, testimonials, pricing, stats, curriculum, process, projects, agenda, speakers, venue, floorplan, location, highlights, itinerary, offer, faq, cta, contact, custom.
-   - Provide "sectionData": complete JSON object matching schema with realistic copy tailored to this brand.
-3. "restyle_theme": User wants to change colors, dark/light mode, typography, or palette style.
-   - Provide "updatedTheme": complete BrochureTheme object with primaryColor, accentColor, backgroundColor, textColor, headingFont, bodyFont, borderRadius, density.
-4. "none": General conversation, greeting, advice, or clarification.
-
-Return strictly valid JSON:
-{
-  "reply": "Concise, friendly message explaining what was updated or answering the question.",
-  "actionTaken": "update_section" | "add_section" | "restyle_theme" | "none",
-  "targetSectionId"?: string,
-  "updatedData"?: object,
-  "sectionType"?: string,
-  "sectionData"?: object,
-  "updatedTheme"?: object,
-  "suggestedPrompts": ["Next prompt 1", "Next prompt 2", "Next prompt 3"]
-}`;
+      const systemPrompt = await getPrompt("viralpulse.brochure.chat", {
+        title: input.brochure.title,
+        brand,
+        category: input.brochure.category,
+        sections_json: JSON.stringify(
+          input.brochure.sections.map((s) => ({
+            id: s.id,
+            type: s.type,
+            label: s.headline || s.title || s.type,
+          }))
+        ),
+        selected_id: input.selectedSectionId || "none",
+        selected_line: input.selectedSectionData
+          ? `- Currently Selected Section Details: ${JSON.stringify({
+              id: input.selectedSectionData.id,
+              type: input.selectedSectionData.data.type,
+              data: input.selectedSectionData.data,
+            })}`
+          : "",
+        theme_json: JSON.stringify(input.brochure.theme),
+        message: msg,
+      });
 
       const res = await openai.chat.completions.create({
         model: choice.model,
         messages: [
-          { role: "system", content: "You are the ViralPulse AI Brochure Chat Assistant. Return strictly valid JSON." },
+          { role: "system", content: await getPrompt("viralpulse.brochure.chat.system") },
           { role: "user", content: systemPrompt },
         ],
         response_format: { type: "json_object" },

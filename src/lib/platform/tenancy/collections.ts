@@ -46,6 +46,7 @@ export const GLOBAL_COLLECTIONS = new Set<string>([
   "prompt_stats",
   "tax_rulebook", // the law's numbers for a company's accounts (TDS sections, income-tax rates, advance-tax dates, filing dates), one document per financial year, published by the platform for every company (see lib/products/cashflow-ai/rulebook/rules-store.ts)
   "payroll_statutory_rates", // the law's payroll figures (tax slabs, PF, ESI, professional tax …), published by the platform for every company (see lib/products/talentos/payroll/rates-store.ts)
+  "stamp_rulebook", // stamp duty by state / union territory and instrument, published by the platform and never authoritative until a reviewer confirms each entry (see lib/products/contractflow-ai/stamp/)
   "cron_settings", // per-job pause / schedule override, and who is alerted when one fails
   // The SaaS product website: demo requests and contact messages from visitors who are not (yet) a company
   "saas_inquiries",
@@ -73,6 +74,7 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "portal_counters",
   "seo_counters",
   "sop_counters",
+  "cf_counters", // ContractFlow sequences, `_id` = <series>:<financial year> (see lib/products/contractflow-ai/cf-collections.ts)
   "pb_counters", // Playbook document numbering series, `_id` = <series>:<financial year> (see lib/products/playbook-ai/pb-collections.ts)
   // Settings / config singletons
   "aibots_settings",
@@ -93,6 +95,7 @@ export const KEYED_COLLECTIONS = new Set<string>([
   "seo_settings",
   "smms_settings",
   "sop_settings",
+  "cf_settings", // ContractFlow settings singleton (`_id: "main"`)
   "pb_settings", // Playbook settings singleton (`_id: "main"`)
   "pb_brand", // a company's letterhead and brand for documents (`_id: "main"`)
   "training_settings",

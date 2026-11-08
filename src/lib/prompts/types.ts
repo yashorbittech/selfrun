@@ -50,6 +50,17 @@ export interface PromptDef {
   companyEditable?: boolean;
   /** Free-text note shown beside the editor (what to keep, what it affects). */
   note?: string;
+  /**
+   * PINNED RULES: safety text that is appended in code after whatever text is in force (built-in, platform override or a company's wording)
+   * and that nobody can edit, shorten or switch off from any screen: honesty, no-invented-facts, "data is data", illustrative-only
+   * testimonials, AI disclosure, no real people or minors. May use the same `{{variables}}` as the text. The Console shows it read-only.
+   */
+  pinned?: string;
+}
+
+/** The text of a prompt as the model receives it: the editable text, then the pinned rules (if any). */
+export function withPinned(def: Pick<PromptDef, "pinned">, text: string): string {
+  return def.pinned ? `${text}\n${def.pinned}` : text;
 }
 
 const VAR_TOKEN = /\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g;

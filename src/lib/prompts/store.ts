@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getPlatformDb } from "@/lib/platform/tenancy/platform-db";
 import { recordPlatformAudit } from "@/lib/platform/audit";
 import { PROMPT_BY_KEY, PROMPTS } from "@/lib/prompts/registry";
-import { renderPrompt, validatePromptText } from "@/lib/prompts/types";
+import { renderPrompt, validatePromptText, withPinned } from "@/lib/prompts/types";
 import { companyPromptText } from "@/lib/prompts/company-store";
 import { withSecurity } from "@/lib/prompts/guard";
 
@@ -119,11 +119,11 @@ export async function getPrompt(key: string, vars: Record<string, string | numbe
   const own = await companyPromptText(def);
   if (own !== null) {
     count(key, true);
-    return withSecurity(renderPrompt(own, vars, declared));
+    return withSecurity(renderPrompt(withPinned(def, own), vars, declared));
   }
   const { text, custom } = await promptText(key);
   count(key, custom);
-  return renderPrompt(text, vars, declared);
+  return renderPrompt(withPinned(def, text), vars, declared);
 }
 
 // ── Changing ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────

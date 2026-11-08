@@ -33,8 +33,8 @@ const PANEL_SEGMENTS = new Set([
   "clientos",
 ]);
 
-/** Public links that work on either host (payment links, certificate verification, portal login/register) and internal rewrite targets. */
-const SHARED_SEGMENTS = new Set(["pay", "verify", "product-unavailable", "workspace-not-found", "company-suspended", "maintenance", "offline-shell", "platform-maintenance", "login", "register"]);
+/** Public links that work on either host (payment links, certificate and signed-document verification, signer links, portal login/register) and internal rewrite targets. */
+const SHARED_SEGMENTS = new Set(["pay", "verify", "sign", "product-unavailable", "workspace-not-found", "company-suspended", "maintenance", "offline-shell", "platform-maintenance", "login", "register"]);
 
 const firstSegment = (pathname: string) => pathname.split("/")[1] ?? "";
 

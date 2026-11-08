@@ -143,24 +143,26 @@ export interface AccessInfo {
 }
 
 /** People with an approval or settings capability see and edit every document; everyone else only their own and those shared with them. */
-function seesAll(actor: RoleContext): boolean {
+export function seesAllDocuments(actor: RoleContext): boolean {
   return playbookCan(actor, "APPROVE") || playbookCan(actor, "ISSUE") || playbookCan(actor, "SETTINGS");
 }
 
 export function canViewDoc(actor: RoleContext & { id: string }, d: AccessInfo): boolean {
   if (!playbookCan(actor, "VIEW")) return false;
-  return seesAll(actor) || d.createdBy === actor.id || d.acl.some((a) => a.userId === actor.id);
+  return seesAllDocuments(actor) || d.createdBy === actor.id || d.acl.some((a) => a.userId === actor.id);
 }
 
 export function canEditDoc(actor: RoleContext & { id: string }, d: AccessInfo): boolean {
   if (!playbookCan(actor, "EDIT")) return false;
-  return seesAll(actor) || d.createdBy === actor.id || d.acl.some((a) => a.userId === actor.id && a.level === "edit");
+  return seesAllDocuments(actor) || d.createdBy === actor.id || d.acl.some((a) => a.userId === actor.id && a.level === "edit");
 }
 
 export interface DocCapabilities {
   view: boolean;
   edit: boolean;
   transitions: DocTransition[];
+  /** Download as PDF or Word. */
+  export: boolean;
   delete: boolean;
   purge: boolean;
   holdLegal: boolean;
@@ -185,6 +187,7 @@ export function documentCapabilities(
     view,
     edit: own && d.status === "draft" && !d.deleted,
     transitions: d.deleted ? [] : transitions,
+    export: view && !d.deleted && playbookCan(actor, "EXPORT"),
     delete: own && !d.deleted && (d.status === "draft" || d.status === "archived"),
     purge: playbookCan(actor, "MANAGE_RETENTION"),
     holdLegal: playbookCan(actor, "MANAGE_RETENTION"),

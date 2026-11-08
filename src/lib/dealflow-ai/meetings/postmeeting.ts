@@ -3,6 +3,8 @@ import { claimPostProcessing, claimTimelineWrite, getMeeting, releasePostProcess
 import { assembleTranscript, listUtterances } from "@/lib/dealflow-ai/meetings/utterances";
 import { writeTimelineEntry } from "@/lib/dealflow-ai/call-results";
 import { getOpenAI, isOpenAIConfigured } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
+import { defaultPrompt } from "@/lib/prompts/defaults";
 import type { MeetingUtterance } from "@/lib/dealflow-ai/meetings/types";
 
 /**
@@ -43,14 +45,12 @@ export function parseSummary(raw: string): Summary | null {
   return { summary, actionItems };
 }
 
-export function summaryPrompt(m: Pick<MeetingRoom, "title" | "agenda" | "participants">, transcript: string): { system: string; user: string } {
+/** `system` is the registry prompt "meetings.summary" (the caller fetches it with `getPrompt`); the built-in text is the default for callers without a database. */
+export function summaryPrompt(m: Pick<MeetingRoom, "title" | "agenda" | "participants">, transcript: string, system: string = defaultPrompt("meetings.summary")): { system: string; user: string } {
   const people = m.participants.map((p) => `${p.name} (${p.kind === "agent" ? "AI agent" : p.kind === "internal" ? "team member" : "guest"})`).join(", ");
   const body = transcript.length > PROMPT_MAX ? `${transcript.slice(0, PROMPT_MAX / 2)}\n[... middle of the transcript omitted ...]\n${transcript.slice(-PROMPT_MAX / 2)}` : transcript;
   return {
-    system:
-      "You write minutes of a business meeting from its transcript. Use ONLY what is in the transcript: do not add facts, numbers, names, decisions or commitments that were not said. " +
-      "If something is unclear, leave it out. Action items are things somebody explicitly agreed or was asked to do; give the owner only when the transcript names one and a due date only when one was said. " +
-      "Write in the language mostly used in the meeting. Reply with JSON: {\"summary\": string (3-8 sentences or short bullet lines), \"actionItems\": [{\"text\": string, \"owner\"?: string, \"due\"?: string}]}.",
+    system,
     user: `Meeting: ${m.title}\nParticipants: ${people}\n${m.agenda?.description ? `Agenda: ${m.agenda.description}\n` : ""}\nTranscript:\n${body}`,
   };
 }
@@ -63,7 +63,7 @@ export interface PostDeps {
 }
 
 async function defaultSummarize(m: MeetingRoom, transcript: string): Promise<Summary | null> {
-  const { system, user } = summaryPrompt(m, transcript);
+  const { system, user } = summaryPrompt(m, transcript, await getPrompt("meetings.summary"));
   const openai = await getOpenAI({ timeoutMs: 60_000, maxRetries: 1 });
   const res = await openai.chat.completions.create({ model: "gpt-4o-mini", temperature: 0.2, response_format: { type: "json_object" }, messages: [{ role: "system", content: system }, { role: "user", content: user }] });
   return parseSummary(res.choices[0]?.message?.content ?? "");

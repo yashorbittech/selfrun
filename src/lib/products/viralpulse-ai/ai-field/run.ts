@@ -5,7 +5,8 @@ import { FIELD_MODES, type AiFieldErrorCode, type AiFieldRequest, type AiFieldRe
 import { allowedCorpus, coerceCurrent, sanitizeContext, type CleanContext } from "@/lib/products/viralpulse-ai/ai-field/context";
 import { describeFindings, unsupportedFacts } from "@/lib/products/viralpulse-ai/ai-field/facts";
 import { maxCharsFor } from "@/lib/products/viralpulse-ai/ai-field/limits";
-import { buildFieldPrompt, FIELD_SYSTEM_PROMPT, outputSchema, readAnswer } from "@/lib/products/viralpulse-ai/ai-field/prompt";
+import { buildFieldPrompt, FIELD_RETRY_KEY, FIELD_SYSTEM_KEY, MODE_KEY, outputSchema, readAnswer } from "@/lib/products/viralpulse-ai/ai-field/prompt";
+import { defaultPromptAsync, type PromptFn } from "@/lib/prompts/defaults";
 import { checkOptions, checkValue, isBlank, valueToText, type CheckEnv } from "@/lib/products/viralpulse-ai/ai-field/validate";
 
 /**
@@ -47,6 +48,8 @@ export interface RunDeps {
   reserve(input: { fieldKey: string; mode: FieldMode; hash: string }): Promise<{ ok: true; handle: RunHandle } | { ok: false; code: "RATE" | "LIMIT"; error: string }>;
   classifyError(err: unknown): { code: AiFieldErrorCode; error: string };
   now(): Date;
+  /** Where the instructions come from: the registry through `getPrompt` in production; the built-in text when omitted (tests). */
+  prompt?: PromptFn;
 }
 
 const fail = (code: AiFieldErrorCode, error: string): AiFieldResult => ({ ok: false, code, error });
@@ -141,10 +144,13 @@ export async function runAiField(req: AiFieldRequest, deps: RunDeps): Promise<Ai
     const allowed = allowedCorpus(ctx, current, [trusted.text]);
     const scan = def.kind === "text" || def.kind === "longtext" || def.kind === "list";
 
+    const ask = deps.prompt ?? defaultPromptAsync;
+    const system = await ask(FIELD_SYSTEM_KEY);
+    const modeText = await ask(MODE_KEY[mode]);
     let retryReason: string | undefined;
     for (let attempt = 0; attempt < 2; attempt++) {
-      const input = buildFieldPrompt({ def, mode, maxChars: env.maxChars, current, context: ctx, trusted: trusted.text, instruction: instruction || undefined, tone: tone || undefined, language: lang.language, options, retryReason, platformGuide: platformGuide(ctx.platform) });
-      const res = await deps.llm({ system: FIELD_SYSTEM_PROMPT, input, schema, schemaName: `smms_field_${def.kind}${mode === "options" ? "_options" : ""}` });
+      const input = buildFieldPrompt({ def, mode, maxChars: env.maxChars, current, context: ctx, trusted: trusted.text, instruction: instruction || undefined, tone: tone || undefined, language: lang.language, options, retryReason, platformGuide: platformGuide(ctx.platform), texts: { mode: modeText, ...(retryReason ? { retry: await ask(FIELD_RETRY_KEY, { reason: retryReason }) } : {}) } });
+      const res = await deps.llm({ system, input, schema, schemaName: `smms_field_${def.kind}${mode === "options" ? "_options" : ""}` });
       addUsage(res.usage);
       const ans = readAnswer(def, mode, res.parsed);
 

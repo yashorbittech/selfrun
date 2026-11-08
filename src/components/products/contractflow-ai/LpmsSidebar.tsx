@@ -6,13 +6,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard,
   Library,
-  Plus,
   CheckSquare,
-  PenLine,
-  LayoutTemplate,
-  Layers,
-  Tags,
-  GitBranch,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -100,23 +94,9 @@ export default function LpmsSidebar({ flags, onNavigate, collapsed = false }: { 
     <nav className="flex h-full flex-col gap-1 p-3">
       {nav({ href: "/contractflow-ai", label: "Dashboard", icon: LayoutDashboard, exact: true })}
 
-      <SectionLabel collapsed={collapsed}>Documents</SectionLabel>
-      {nav({ href: "/contractflow-ai/documents", label: "Document Library", icon: Library })}
-      {flags.canCreate && nav({ href: "/contractflow-ai/new", label: "New Document", icon: Plus })}
+      <SectionLabel collapsed={collapsed}>Earlier version</SectionLabel>
+      {nav({ href: "/contractflow-ai/documents", label: "Old documents", icon: Library })}
       {flags.canApprove && nav({ href: "/contractflow-ai/approvals", label: "Approvals", icon: CheckSquare, badge: flags.pendingApprovals })}
-      {flags.canSign && nav({ href: "/contractflow-ai/signatures", label: "Signatures", icon: PenLine })}
-
-      {flags.canManageTemplates && (
-        <>
-          <SectionLabel collapsed={collapsed}>Templates</SectionLabel>
-          {nav({ href: "/contractflow-ai/templates", label: "Templates", icon: LayoutTemplate })}
-          {flags.canManageMakers && nav({ href: "/contractflow-ai/makers", label: "Maker Types", icon: Layers })}
-        </>
-      )}
-
-      <SectionLabel collapsed={collapsed}>Manage</SectionLabel>
-      {nav({ href: "/contractflow-ai/categories", label: "Categories", icon: Tags })}
-      {flags.canManageTemplates && nav({ href: "/contractflow-ai/workflows", label: "Workflows", icon: GitBranch })}
 
       {flags.canSettings && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
       {flags.canSettings && nav({ href: "/contractflow-ai/settings", label: "Settings", icon: Settings })}

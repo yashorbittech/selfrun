@@ -60,3 +60,15 @@ export function formatShortcut(keys: string, mac = false): string {
     })
     .join(mac ? "" : "+");
 }
+
+/** Whether a keyboard event is the given combination (`Mod` = Ctrl or Cmd). Used for the app-level shortcuts the editor itself does not bind. */
+export function eventMatches(e: { key: string; ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean }, keys: string): boolean {
+  const parts = keys.split("-");
+  const key = parts[parts.length - 1];
+  const mods = new Set(parts.slice(0, -1));
+  const mod = e.ctrlKey || e.metaKey;
+  if (mods.has("Mod") !== mod) return false;
+  if (mods.has("Shift") !== e.shiftKey) return false;
+  if (mods.has("Alt") !== e.altKey) return false;
+  return e.key.toLowerCase() === key.toLowerCase();
+}

@@ -1,6 +1,7 @@
 import "server-only";
 import type OpenAI from "openai";
 import { getOpenAI, isOpenAIConfigured, isUnsupportedParamError } from "@/lib/openai";
+import { getPrompt } from "@/lib/prompts/store";
 import { withAiFeature } from "@/lib/platform/billing/ai-usage-log";
 import { aiBlockReason, isBillingLimitError } from "@/lib/platform/billing/enforce";
 import { getCompanyDetails } from "@/lib/products/talentos/company";
@@ -177,6 +178,7 @@ export function makeRunDeps(user: { id: string }): RunDeps {
     resolve: resolveField,
     now: () => new Date(),
     classifyError: classifyFieldError,
+    prompt: getPrompt,
     async reserve({ fieldKey, mode, hash }) {
       const { ai } = await getSettings();
       const col = await runsCollection();

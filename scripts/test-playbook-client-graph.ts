@@ -21,6 +21,7 @@ const CLIENT_SAFE_FILES = [
   path.join(SRC, "lib/playbook-roles.ts"),
   path.join(SRC, "lib/products/playbook-ai/pb-collections.ts"),
   path.join(SRC, "lib/products/playbook-ai/constants.ts"),
+  path.join(SRC, "lib/products/playbook-ai/brand/types.ts"),
 ];
 function walkSafe(dir: string, out: string[] = []): string[] {
   if (!existsSync(dir)) return out;
@@ -129,6 +130,10 @@ ok(CLIENT_SAFE_FILES.length > 12, `found the client-safe model files (${CLIENT_S
   const renderFiles = walkSafe(path.join(SRC, "lib/products/playbook-ai/doc/render"));
   ok(renderFiles.length >= 4, `found the renderer files (${renderFiles.length})`);
   for (const f of renderFiles) ok(/^\s*import "server-only";/m.test(readFileSync(f, "utf8")), `${rel(f)} must start with import "server-only"`);
+  // Brand: everything except the pure types file touches the database, storage or Node APIs.
+  const brandFiles = walkSafe(path.join(SRC, "lib/products/playbook-ai/brand")).filter((f) => !/[\\/]types\.ts$/.test(f));
+  ok(brandFiles.length >= 5, `found the brand server files (${brandFiles.length})`);
+  for (const f of brandFiles) ok(/^\s*import "server-only";/m.test(readFileSync(f, "utf8")), `${rel(f)} must start with import "server-only"`);
   const barrel = readFileSync(path.join(SRC, "lib/products/playbook-ai/doc/index.ts"), "utf8");
   ok(!/render\//.test(barrel), "the client-safe barrel (doc/index.ts) does not export the renderers");
 }

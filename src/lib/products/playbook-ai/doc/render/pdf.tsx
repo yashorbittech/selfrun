@@ -5,7 +5,7 @@ import type { Style } from "@react-pdf/types";
 import type { AnyBlock, CellChild, ContentBlock, InlineNode, ListItem, Mark, TableBlock, ZoneBlock } from "@/lib/products/playbook-ai/doc/types";
 import { listMarker } from "@/lib/products/playbook-ai/doc/numbering";
 import { mmToPt } from "@/lib/products/playbook-ai/doc/page";
-import { fontPath, textColorHex, zoneGeometry, type StyleTokens } from "@/lib/products/playbook-ai/doc/render/tokens";
+import { FAMILIES, fontPath, textColorHex, zoneGeometry, type FamilyKey, type StyleTokens } from "@/lib/products/playbook-ai/doc/render/tokens";
 import { imageSizeMm, prepareRender, type Prepared, type RenderOptions, type TocEntry } from "@/lib/products/playbook-ai/doc/render/prepare";
 import type { PBDoc } from "@/lib/products/playbook-ai/doc/types";
 
@@ -17,21 +17,24 @@ import type { PBDoc } from "@/lib/products/playbook-ai/doc/types";
  * drawn as one run of plain text (the engine can only number pages inside a whole Text); text is not hyphenated.
  */
 
-const FAMILY = "NotoSans";
-let fontsRegistered = false;
-function registerFonts() {
-  if (fontsRegistered) return;
-  Font.register({
-    family: FAMILY,
-    fonts: [
-      { src: fontPath("regular"), fontWeight: 400, fontStyle: "normal" },
-      { src: fontPath("bold"), fontWeight: 700, fontStyle: "normal" },
-      { src: fontPath("italic"), fontWeight: 400, fontStyle: "italic" },
-      { src: fontPath("boldItalic"), fontWeight: 700, fontStyle: "italic" },
-    ],
-  });
-  fontsRegistered = true;
+const registered = new Set<FamilyKey>();
+function registerFonts(keys: readonly FamilyKey[]) {
+  for (const key of keys) {
+    if (registered.has(key)) continue;
+    Font.register({
+      family: FAMILIES[key].pdf,
+      fonts: [
+        { src: fontPath("regular", key), fontWeight: 400, fontStyle: "normal" },
+        { src: fontPath("bold", key), fontWeight: 700, fontStyle: "normal" },
+        { src: fontPath("italic", key), fontWeight: 400, fontStyle: "italic" },
+        { src: fontPath("boldItalic", key), fontWeight: 700, fontStyle: "italic" },
+      ],
+    });
+    registered.add(key);
+  }
 }
+const bodyFont = (t: StyleTokens) => FAMILIES[t.fonts.body].pdf;
+const headFont = (t: StyleTokens) => FAMILIES[t.fonts.heading].pdf;
 
 const noHyphen = (w: string) => [w];
 const mm = mmToPt;
@@ -102,7 +105,7 @@ function runs(c: Ctx, source: readonly InlineNode[], keyPrefix: string): React.R
       }
       case "var": return <Text key={key} style={markStyle(t, n.marks, { backgroundColor: t.colors.flagged })}>{`[${n.key}]`}</Text>;
       case "placeholder": return <Text key={key} style={{ backgroundColor: t.colors.flagged }}>{`[${n.label}]`}</Text>;
-      case "field": return <Text key={key} style={markStyle(t, n.marks, { fontFamily: FAMILY })}>{""}</Text>; // page fields are handled in `pageText`
+      case "field": return <Text key={key} style={markStyle(t, n.marks, { fontFamily: bodyFont(t) })}>{""}</Text>; // page fields are handled in `pageText`
       // A "\n" in a run makes react-pdf reference unembedded Helvetica (verified with pdffonts), so a hard break starts a new Text line instead.
       case "hardBreak": return null; // callers split lines first (see `textBlock`)
     }
@@ -117,7 +120,7 @@ function pageText(c: Ctx, nodes: readonly InlineNode[], style: Style, key: strin
   // react-pdf draws nothing for a `render` Text that sets lineHeight (verified), so it is dropped for these lines.
   const { lineHeight: _lineHeight, ...rest } = style;
   void _lineHeight;
-  const s = markStyle(c.t, first?.marks, { fontFamily: FAMILY, ...rest });
+  const s = markStyle(c.t, first?.marks, { fontFamily: bodyFont(c.t), ...rest });
   return (
     <Text key={key} style={s} render={({ pageNumber, totalPages }) =>
       nodes.map((n) => {
@@ -209,7 +212,7 @@ function heading(c: Ctx, b: Extract<ContentBlock, { type: "heading" }>) {
   return (
     // Keep-with-next: the heading moves to the next page unless some of what follows fits with it.
     <View key={b.id} id={b.id} minPresenceAhead={Math.max(60, h.pt * 3)} wrap={false} style={{ marginTop: h.beforePt, marginBottom: h.afterPt }}>
-      {textBlock(c, b.content, { fontSize: h.pt, fontWeight: 700, color: h.color === "primary" ? t.colors.primary : t.colors.text, lineHeight: 1.25, textAlign: alignOf(b.align) }, `${b.id}-t`)}
+      {textBlock(c, b.content, { fontFamily: headFont(t), fontSize: h.pt, fontWeight: 700, color: h.color === "primary" ? t.colors.primary : t.colors.text, lineHeight: 1.25, textAlign: alignOf(b.align) }, `${b.id}-t`)}
       {c.recorder ? <Text style={{ fontSize: 0.1, height: 0.1 }} render={({ pageNumber }) => { c.recorder!.set(b.id, pageNumber); return ""; }} /> : null}
     </View>
   );
@@ -220,10 +223,10 @@ function toc(c: Ctx) {
   if (!c.p.toc.length) return null;
   return (
     <View key="toc" style={{ marginBottom: t.paragraphAfterPt + 6 }}>
-      <Text style={{ fontSize: t.heading[2].pt, fontWeight: 700, color: t.colors.primary, marginBottom: 6 }}>Contents</Text>
+      <Text style={{ fontFamily: headFont(t), fontSize: t.heading[2].pt, fontWeight: 700, color: t.colors.primary, marginBottom: 6 }}>Contents</Text>
       {c.p.toc.map((e: TocEntry) => (
         <View key={e.id} style={{ flexDirection: "row", alignItems: "flex-end", marginBottom: 3, paddingLeft: (e.level - 1) * mm(5) }} wrap={false}>
-          <Link src={`#${e.id}`} style={{ fontFamily: FAMILY, fontSize: t.basePt, color: t.colors.text, textDecoration: "none" }}>{e.text}</Link>
+          <Link src={`#${e.id}`} style={{ fontFamily: bodyFont(t), fontSize: t.basePt, color: t.colors.text, textDecoration: "none" }}>{e.text}</Link>
           <View style={{ flexGrow: 1, borderBottomWidth: 0.75, borderBottomStyle: "dotted", borderColor: t.colors.muted, marginHorizontal: 4, marginBottom: 3 }} />
           <Text style={{ fontSize: t.basePt, color: t.colors.text }}>{c.pageOf?.get(e.id) ?? ""}</Text>
         </View>
@@ -318,7 +321,7 @@ function pdfDocument(c: Ctx) {
   const { p, t } = c;
   const g = zoneGeometry(t);
   const m = t.page.margins;
-  const hasHeader = p.doc.header.length > 0 || !!p.logo;
+  const hasHeader = p.letterhead !== "none" && (p.doc.header.length > 0 || !!p.logo);
   const hasFooter = p.doc.footer.length > 0 || !!p.footerText;
   const flagged = p.flagged.unresolved.length + p.flagged.placeholders.length > 0;
   return (
@@ -336,12 +339,13 @@ function pdfDocument(c: Ctx) {
         size={p.doc.page.size === "A4" ? "A4" : "A4"}
         orientation={p.doc.page.orientation}
         style={{
-          fontFamily: FAMILY, fontSize: t.basePt, color: t.colors.text,
-          paddingTop: hasHeader ? mm(g.headerTopMm) : mm(m.top), paddingBottom: mm(m.bottom), paddingLeft: mm(m.left), paddingRight: mm(m.right),
+          fontFamily: bodyFont(t), fontSize: t.basePt, color: t.colors.text,
+          // Letterhead on every page: the fixed header sits above the body area. First page only: the header flows once at the top of page 1.
+          paddingTop: hasHeader && p.letterhead === "all" ? mm(g.headerTopMm) : mm(m.top), paddingBottom: mm(m.bottom), paddingLeft: mm(m.left), paddingRight: mm(m.right),
         }}
       >
         {hasHeader ? (
-          <View fixed style={{ minHeight: mm(t.page.headerHeightMm), marginBottom: mm(t.gapMm) }}>
+          <View fixed={p.letterhead === "all"} style={{ minHeight: mm(t.page.headerHeightMm), marginBottom: mm(t.gapMm) }}>
             {logoNode(c)}
             {zone(c, p.doc.header)}
           </View>
@@ -381,8 +385,8 @@ export async function renderPdf(doc: PBDoc, opts: RenderOptions): Promise<PdfRes
 }
 
 async function renderPdfNow(doc: PBDoc, opts: RenderOptions): Promise<PdfResult> {
-  registerFonts();
   const prepared = prepareRender(doc, opts);
+  registerFonts([...new Set<FamilyKey>([prepared.tokens.fonts.body, prepared.tokens.fonts.heading])]);
   let pageOf: PageMap | null = null;
   let tocPageNumbers = false;
   if (prepared.toc.length) {

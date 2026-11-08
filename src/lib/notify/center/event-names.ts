@@ -155,6 +155,10 @@ const N: Record<string, [name: string, description: string]> = {
   smms_published: ["Post published", "A post is published."],
   // PlayBook
   sop_assigned: ["Procedure assigned", "A procedure is assigned to someone to read and acknowledge."],
+  sop_doc_approved: ["Document approved", "A document you wrote is approved."],
+  sop_doc_issued: ["Document issued", "A document you wrote is issued and numbered."],
+  sop_doc_rejected: ["Document sent back", "A document you submitted is sent back with a reason."],
+  sop_doc_review_requested: ["Document approval needed", "A document is waiting for your approval."],
   sop_expiring: ["Procedure expired", "A procedure has passed its expiry date."],
   sop_feedback: ["Procedure feedback", "Someone sends feedback or a change request on a procedure."],
   sop_overdue: ["Acknowledgement overdue", "A procedure was not acknowledged by its due date."],

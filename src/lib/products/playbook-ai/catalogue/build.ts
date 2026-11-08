@@ -142,9 +142,9 @@ export const f = {
   date: (key: string, label: string, o?: Opts) => field("date", key, label, o),
   yesno: (key: string, label: string, o?: Opts) => field("yesno", key, label, { defaultValue: "no", ...o }),
   select: (key: string, label: string, options: Array<string | SelectOption>, o?: Opts) =>
-    field("select", key, label, { options: options.map((x) => (typeof x === "string" ? { value: x.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), label: x } : x)), ...o }),
+    field("select", key, label, { options: options.map((x) => (typeof x === "string" ? { value: x, label: x } : x)), ...o }),
   multiselect: (key: string, label: string, options: Array<string | SelectOption>, o?: Opts) =>
-    field("multiselect", key, label, { options: options.map((x) => (typeof x === "string" ? { value: x.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), label: x } : x)), ...o }),
+    field("multiselect", key, label, { options: options.map((x) => (typeof x === "string" ? { value: x, label: x } : x)), ...o }),
   person: (key: string, label: string, picker: PickerNamespace, o?: Opts) => field("person", key, label, { picker, ...o }),
   rows: (key: string, label: string, columns: RowColumn[], o?: Opts) => field("rows", key, label, { columns, minRows: 1, ...o }),
 };

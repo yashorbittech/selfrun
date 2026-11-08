@@ -68,6 +68,8 @@ export interface Prepared {
   flagged: { unresolved: { key: string; reason: string }[]; placeholders: { key: string; label: string }[] };
   warnings: string[];
   footerText: string | null;
+  /** Where the header (logo and letterhead) is printed. */
+  letterhead: "all" | "first" | "none";
   /** Rough page count used for the size guard. */
   estimatedPages: number;
 }
@@ -265,7 +267,7 @@ export function prepareRender(input: PBDoc, opts: RenderOptions): Prepared {
   const warnings: string[] = [];
   if (estimatedPages > RENDER_LIMITS.warnEstimatedPages) warnings.push(`This is a long document (about ${estimatedPages} pages); exporting it may take a minute.`);
   const g = tokens.page;
-  if (estimateZoneMm(doc.header, images, tokens) + (logo ? (logo.widthMm * logo.asset.heightPx) / logo.asset.widthPx : 0) > g.headerHeightMm + 0.5) {
+  if ((opts.brand?.letterhead ?? "all") !== "none" && estimateZoneMm(doc.header, images, tokens) + (logo ? (logo.widthMm * logo.asset.heightPx) / logo.asset.widthPx : 0) > g.headerHeightMm + 0.5) {
     warnings.push("The header is taller than its reserved zone; body text will start lower on every page.");
   }
   if (estimateZoneMm(doc.footer, images, tokens) > g.footerHeightMm + 0.5) warnings.push("The footer is taller than its reserved zone and may crowd the body text.");
@@ -275,7 +277,7 @@ export function prepareRender(input: PBDoc, opts: RenderOptions): Prepared {
   const watermark = opts.watermark && opts.watermark.trim() ? opts.watermark : hasGaps ? "DRAFT" : null;
   return {
     doc, tokens, meta: opts.meta, watermark: watermark && watermark.trim() ? watermark.trim().slice(0, 24).toUpperCase() : null, images, logo, toc, tocLevels,
-    clauseLabels: clauseLabels(doc.body), flagged, warnings, footerText: opts.brand?.footerText?.trim() || null, estimatedPages,
+    clauseLabels: clauseLabels(doc.body), flagged, warnings, footerText: opts.brand?.footerText?.trim() || null, letterhead: opts.brand?.letterhead ?? "all", estimatedPages,
   };
 }
 

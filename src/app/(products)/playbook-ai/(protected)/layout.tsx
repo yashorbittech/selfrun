@@ -40,6 +40,7 @@ export default async function ProtectedSopLayout({ children }: { children: React
     audit: sopCan(ctx, "VIEW_AUDIT"),
     settings: sopCan(ctx, "MANAGE_PERMISSIONS"),
     documents: playbookCan(ctx, "SETTINGS"),
+    brand: playbookCan(ctx, "MANAGE_BRAND"),
     assignedOpen: assigned.filter((a) => a.state !== "acknowledged").length,
   };
 

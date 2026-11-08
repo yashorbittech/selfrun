@@ -47,12 +47,13 @@ export const STAMP_RULES = ["none", "maybe", "likely"] as const;
 export type StampRule = (typeof STAMP_RULES)[number];
 
 /**
- * Instrument category keys for the future stamp-duty rulebook (plan section 7.3a). A template only NAMES a category; the duty per state
- * is platform reference data that a legal reviewer confirms. No amounts live in the catalogue.
+ * Instrument category keys: EXACTLY the keys of the stamp rulebook (`INSTRUMENT_CATEGORIES` in contractflow-ai/stamp/structure.ts). A template
+ * only NAMES a category; the duty per state is platform reference data that a legal reviewer confirms. No amounts live in the catalogue.
+ * scripts/test-pb-catalogue.ts checks this list against the rulebook so they cannot drift.
  */
 export const STAMP_CATEGORIES = [
-  "employment", "service_agreement", "nda", "lease", "affidavit_declaration", "settlement", "partnership", "licence",
-  "bond_undertaking", "loi_mou", "amendment", "dpa", "agreement_general",
+  "agreement", "service_agreement", "nda", "mou", "employment", "lease", "indemnity", "guarantee", "loan", "power_of_attorney", "affidavit",
+  "partnership_deed", "sale_of_goods", "other",
 ] as const;
 export type StampCategory = (typeof STAMP_CATEGORIES)[number];
 
@@ -112,7 +113,7 @@ export const INPUT_TYPES = ["text", "longtext", "number", "money", "date", "sele
 export type InputType = (typeof INPUT_TYPES)[number];
 
 /** Namespaces a person/party picker can fill. The picked record's fields become `<namespace>.*` variables. */
-export const PICKER_NAMESPACES = ["employee", "candidate", "client", "vendor", "party"] as const;
+export const PICKER_NAMESPACES = ["employee", "candidate", "client", "vendor", "project", "party"] as const;
 export type PickerNamespace = (typeof PICKER_NAMESPACES)[number];
 
 export interface SelectOption { value: string; label: string }
@@ -196,6 +197,8 @@ export interface TemplateSection {
   dependsOn?: string[];
   /** Shown in drafts only (drafting notices); the issue step removes it. */
   draftOnly?: boolean;
+  /** Do not print the section title as a heading (the body supplies its own, e.g. a letter's opening). */
+  noHeading?: boolean;
   /** The PBDoc skeleton: blocks with variables, placeholders, conditionals and repeats. The section heading is added by the template. */
   body: RawBlock[];
 }

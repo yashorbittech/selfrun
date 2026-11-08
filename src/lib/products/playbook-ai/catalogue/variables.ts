@@ -1,39 +1,34 @@
 /**
  * Variables a catalogue template may use. Pure, client-safe.
  *
- * The PBDoc validator checks the NAMESPACE of a variable (company, employee, candidate, client, vendor, party, doc, input, custom).
- * Templates are stricter: for the record namespaces the FIELD must be in this list, so a typo (`employee.full_nmae`) fails at test time
- * instead of printing a blank in a letter. The data layer's variables registry is the runtime source of values; keep both in step.
- * `input.*` keys must be declared inputs of the template; `custom.*` is the company's own variables and is open.
+ * The source of truth is the variable registry (`variables-registry.ts`, which the editor's picker and the missing-data report also read):
+ * `KNOWN_FIELDS` is DERIVED from it, so a template can only use a variable the registry provides. `input.*` keys must be declared inputs of
+ * the template; `custom.*` is the company's own variables and is open; `party.*` is free-form in the registry, so templates are held to the
+ * common party fields below.
  */
 
+import { BUILTIN_VARIABLES } from "@/lib/products/playbook-ai/variables-registry";
 import type { PickerNamespace } from "@/lib/products/playbook-ai/catalogue/types";
 
-export const KNOWN_FIELDS = {
-  company: [
-    "name", "legal_name", "address", "address_line1", "city", "state", "postal_code", "country", "email", "phone", "website",
-    "pan", "gstin", "cin", "signatory_name", "signatory_designation", "hr_email", "grievance_officer_name", "grievance_officer_email",
-  ],
-  employee: [
-    "full_name", "first_name", "code", "designation", "department", "location", "joining_date", "reporting_manager", "email", "phone",
-    "address", "grade", "employment_type", "pan",
-  ],
-  candidate: ["full_name", "first_name", "email", "phone", "address"],
-  client: ["name", "contact_name", "contact_designation", "address", "email", "phone", "gstin", "pan"],
-  vendor: ["name", "contact_name", "contact_designation", "address", "email", "phone", "gstin", "pan"],
-  party: ["name", "contact_name", "designation", "address", "email", "phone"],
-  doc: ["date", "number", "title", "version"],
-} as const satisfies Record<string, readonly string[]>;
+/** Fields a template may use from the free-form `party` namespace (the document form offers exactly these). */
+export const PARTY_FIELDS = ["name", "address", "email", "phone", "contact_name", "designation"] as const;
 
-export type KnownNamespace = keyof typeof KNOWN_FIELDS;
+function derive(): Record<string, readonly string[]> {
+  const out: Record<string, string[]> = {};
+  for (const v of BUILTIN_VARIABLES) (out[v.namespace] ??= []).push(v.key.slice(v.namespace.length + 1));
+  out.party = [...PARTY_FIELDS];
+  return out;
+}
 
-/** Namespaces that need a matching person/party picker input in the template. */
-export const PICKER_BACKED: readonly PickerNamespace[] = ["employee", "candidate", "client", "vendor", "party"];
+export const KNOWN_FIELDS: Record<string, readonly string[]> = derive();
+
+/** Namespaces that need a matching person/party picker input in the template (the record the fields are read from). */
+export const PICKER_BACKED: readonly PickerNamespace[] = ["employee", "candidate", "client", "vendor", "project", "party"];
 
 export function isKnownVariable(key: string): boolean {
   const [ns, ...rest] = key.split(".");
   if (ns === "input" || ns === "custom") return rest.length >= 1;
-  const fields = (KNOWN_FIELDS as Record<string, readonly string[]>)[ns];
+  const fields = KNOWN_FIELDS[ns];
   return !!fields && rest.length === 1 && fields.includes(rest[0]);
 }
 

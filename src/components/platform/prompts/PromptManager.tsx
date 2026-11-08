@@ -225,6 +225,12 @@ function Editor({ def, status, canEdit, product, onClose, api, scope, companyUse
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
           {!company && <p className="text-[11px] text-muted-foreground">Used by: {def.usedBy.join(", ")}</p>}
           {def.note && <p className="rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">{def.note}</p>}
+          {def.pinned && (
+            <details className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+              <summary className="cursor-pointer font-medium">Fixed rules added after this text (cannot be edited)</summary>
+              <pre className="mt-2 whitespace-pre-wrap font-sans">{def.pinned}</pre>
+            </details>
+          )}
 
           {tab === "edit" && (
             <>

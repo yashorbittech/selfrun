@@ -1,4 +1,5 @@
 import type { PromptDef } from "@/lib/prompts/types";
+import { AI_CALL_PROMPTS } from "@/lib/prompts/registry-ai-calls";
 
 /**
  * Every prompt the system sends to an AI model, with its default text. The code asks for a prompt by key (`getPrompt` in `resolve.ts`);
@@ -1771,6 +1772,7 @@ export const PROMPTS: PromptDef[] = [
     ],
     text: "A tidy close-up arrangement of the main things a {{kind}} business offers ({{what}}), editorial still-life style",
   },
+  ...AI_CALL_PROMPTS,
 ];
 
 export const PROMPT_BY_KEY = new Map(PROMPTS.map((p) => [p.key, p]));

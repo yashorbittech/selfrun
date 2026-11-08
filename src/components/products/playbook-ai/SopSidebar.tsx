@@ -15,6 +15,7 @@ import {
   BarChart3,
   Settings,
   FileText,
+  Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -29,6 +30,8 @@ export interface SopNavFlags {
   settings: boolean;
   /** Documents (preview): shown to Playbook administrators until documents can be created. */
   documents: boolean;
+  /** Brand and letterhead: shown to people who may change the company brand. */
+  brand: boolean;
   /** Number of assignments still awaiting the viewer's acknowledgement. */
   assignedOpen: number;
 }
@@ -115,6 +118,7 @@ export default function SopSidebar({ flags, onNavigate, collapsed = false }: { f
       {nav({ href: "/playbook-ai/departments", label: "Departments", icon: Building2 })}
       {nav({ href: "/playbook-ai/categories", label: "Categories", icon: Tags })}
       {flags.templates && nav({ href: "/playbook-ai/templates", label: "Templates", icon: LayoutTemplate })}
+      {flags.brand && nav({ href: "/playbook-ai/brand", label: "Brand & letterhead", icon: Palette })}
 
       {flags.reports && <SectionLabel collapsed={collapsed}>Governance</SectionLabel>}
       {flags.reports && nav({ href: "/playbook-ai/reports", label: "Reports & Analytics", icon: BarChart3 })}

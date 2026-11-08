@@ -9,7 +9,7 @@ import type { IRunOptions, ParagraphChild } from "docx";
 import { TextWatermark } from "docx/watermarks";
 import type { AnyBlock, CellChild, InlineNode, ListItem, Mark, PBDoc, TableBlock, ZoneBlock } from "@/lib/products/playbook-ai/doc/types";
 import { mmToTwips } from "@/lib/products/playbook-ai/doc/page";
-import { FONT_FAMILY, readFont, textColorHex, zoneGeometry, type StyleTokens } from "@/lib/products/playbook-ai/doc/render/tokens";
+import { FAMILIES, readFont, textColorHex, zoneGeometry, type FamilyKey, type StyleTokens } from "@/lib/products/playbook-ai/doc/render/tokens";
 import { imageSizeMm, prepareRender, type Prepared, type RenderOptions } from "@/lib/products/playbook-ai/doc/render/prepare";
 import { sha256Hex } from "@/lib/products/playbook-ai/doc/hash";
 
@@ -60,7 +60,7 @@ class Ctx {
 // ---- runs ------------------------------------------------------------------------------------------------------------------
 
 function runStyle(t: StyleTokens, marks: readonly Mark[] | undefined, base: IRunOptions = {}): IRunOptions {
-  const o: IRunOptions = { ...base };
+  const o: { -readonly [K in keyof IRunOptions]: IRunOptions[K] } = { ...base };
   for (const m of marks ?? []) {
     switch (m.type) {
       case "bold": o.bold = true; break;
@@ -389,14 +389,14 @@ function styles(t: StyleTokens) {
     basedOn: "Normal",
     next: "Normal",
     quickFormat: true,
-    run: { bold: true, size: HALF(t.heading[id].pt), color: hex(t.heading[id].color === "primary" ? t.colors.primary : t.colors.text), font: FONT_FAMILY },
+    run: { bold: true, size: HALF(t.heading[id].pt), color: hex(t.heading[id].color === "primary" ? t.colors.primary : t.colors.text), font: FAMILIES[t.fonts.heading].name },
     // Keep-with-next: a heading never ends a page.
     paragraph: { keepNext: true, keepLines: true, outlineLevel: id - 1, spacing: { before: TW(t.heading[id].beforePt), after: TW(t.heading[id].afterPt), line: 300, lineRule: LineRuleType.AUTO } },
   });
   return {
     default: {
       document: {
-        run: { font: FONT_FAMILY, size: HALF(t.basePt), color: hex(t.colors.text), language: { value: "en-IN" } },
+        run: { font: t.fontFamily, size: HALF(t.basePt), color: hex(t.colors.text), language: { value: "en-IN" } },
         paragraph: { spacing: { after: TW(t.paragraphAfterPt), line: Math.round(t.lineHeight * 240), lineRule: LineRuleType.AUTO } },
       },
     },
@@ -404,14 +404,15 @@ function styles(t: StyleTokens) {
   };
 }
 
-function embeddedFonts(mode: FontEmbedding) {
+function embeddedFonts(mode: FontEmbedding, t: StyleTokens) {
   if (mode === "none") return undefined;
-  return [{
-    name: FONT_FAMILY,
-    data: readFont("regular"),
-    bold: readFont("bold"),
-    ...(mode === "all" ? { italic: readFont("italic"), boldItalic: readFont("boldItalic") } : {}),
-  }];
+  const keys = [...new Set<FamilyKey>([t.fonts.body, t.fonts.heading])];
+  return keys.map((key) => ({
+    name: FAMILIES[key].name,
+    data: readFont("regular", key),
+    bold: readFont("bold", key),
+    ...(mode === "all" ? { italic: readFont("italic", key), boldItalic: readFont("boldItalic", key) } : {}),
+  }));
 }
 
 /**
@@ -514,21 +515,41 @@ export async function renderDocx(doc: PBDoc, opts: DocxOptions): Promise<DocxRes
 
   const body = blocks(c, p.doc.body);
 
-  const headerKids: Out[] = [];
-  if (p.watermark) {
-    headerKids.push(new Paragraph({
-      spacing: { before: 0, after: 0, line: 20, lineRule: LineRuleType.EXACT },
-      children: [new TextWatermark({ text: p.watermark, font: FONT_FAMILY, color: flagged ? "B91C1C" : "94A3B8", opacity: 0.25, bold: true })],
-    }));
-  }
-  if (p.logo) {
-    const hMm = (p.logo.widthMm * p.logo.asset.heightPx) / p.logo.asset.widthPx;
-    headerKids.push(imageParagraph(c, p.logo.asset, p.logo.widthMm, hMm, p.logo.align, "Company logo", "logo"));
-  }
-  headerKids.push(...zoneChildren(c, p.doc.header));
-
-  const footerKids: Out[] = [...zoneChildren(c, p.doc.footer)];
-  if (p.footerText) footerKids.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 20, after: 0 }, children: [new TextRun({ text: p.footerText, size: HALF(t.basePt - 2.5), color: hex(t.colors.muted) })] }));
+  // Header content is built per use (a component instance belongs to one part). `scope`: every page, first page only, or no letterhead.
+  const scope = p.letterhead;
+  const watermarkKids = (): Out[] => p.watermark
+    ? [new Paragraph({
+        spacing: { before: 0, after: 0, line: 20, lineRule: LineRuleType.EXACT },
+        children: [new TextWatermark({ text: p.watermark, font: t.fontFamily, color: flagged ? "B91C1C" : "94A3B8", opacity: 0.25, bold: true })],
+      })]
+    : [];
+  const letterheadKids = (): Out[] => {
+    if (scope === "none") return [];
+    const out: Out[] = [];
+    if (p.logo) {
+      const hMm = (p.logo.widthMm * p.logo.asset.heightPx) / p.logo.asset.widthPx;
+      out.push(imageParagraph(c, p.logo.asset, p.logo.widthMm, hMm, p.logo.align, "Company logo", "logo"));
+    }
+    out.push(...zoneChildren(c, p.doc.header));
+    return out;
+  };
+  const footerKids = (): Out[] => {
+    const out: Out[] = [...zoneChildren(c, p.doc.footer)];
+    if (p.footerText) out.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 20, after: 0 }, children: [new TextRun({ text: p.footerText, size: HALF(t.basePt - 2.5), color: hex(t.colors.muted) })] }));
+    return out;
+  };
+  const emptyHeader = () => new Header({ children: [new Paragraph({ children: [], spacing: { before: 0, after: 0 } })] });
+  const hdr = (kids: Out[]) => (kids.length ? new Header({ children: kids as Paragraph[] }) : emptyHeader());
+  const hasFooter = p.doc.footer.length > 0 || !!p.footerText;
+  const wmOnly = watermarkKids();
+  const headers = scope === "first"
+    ? { first: hdr([...watermarkKids(), ...letterheadKids()]), default: hdr(wmOnly) }
+    : (wmOnly.length || p.doc.header.length || p.logo) && scope === "all"
+      ? { default: hdr([...watermarkKids(), ...letterheadKids()]) }
+      : wmOnly.length ? { default: hdr(wmOnly) } : undefined;
+  const footers = !hasFooter ? undefined : scope === "first"
+    ? { first: new Footer({ children: footerKids() as Paragraph[] }), default: new Footer({ children: footerKids() as Paragraph[] }) }
+    : { default: new Footer({ children: footerKids() as Paragraph[] }) };
 
   const m = t.page.margins;
   const document = new Document({
@@ -539,16 +560,17 @@ export async function renderDocx(doc: PBDoc, opts: DocxOptions): Promise<DocxRes
     description: p.meta.docNumber ? `${p.meta.title} (${p.meta.docNumber})` : p.meta.title,
     styles: styles(t),
     numbering: { config: numberingConfig(t, plan.ordered) },
-    fonts: embeddedFonts(embed),
+    fonts: embeddedFonts(embed, t),
     sections: [{
       properties: {
+        ...(scope === "first" ? { titlePage: true } : {}),
         page: {
           size: { width: t.page.widthTwips, height: t.page.heightTwips, orientation: p.doc.page.orientation === "landscape" ? "landscape" : "portrait" } as never,
           margin: { top: mmToTwips(m.top), right: mmToTwips(m.right), bottom: mmToTwips(m.bottom), left: mmToTwips(m.left), header: mmToTwips(g.headerTopMm), footer: mmToTwips(g.footerBottomMm) },
         },
       },
-      headers: headerKids.length ? { default: new Header({ children: headerKids as Paragraph[] }) } : undefined,
-      footers: footerKids.length ? { default: new Footer({ children: footerKids as Paragraph[] }) } : undefined,
+      headers,
+      footers,
       children: body as Paragraph[],
     }],
   });

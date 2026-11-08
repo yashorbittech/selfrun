@@ -73,6 +73,14 @@ export const PERMISSION_GROUPS = [
       { key: "audit.read", label: "View & export the audit log" },
     ],
   },
+  {
+    area: "Stamp rulebook",
+    permissions: [
+      { key: "stamp.read", label: "View the stamp-duty rulebook" },
+      { key: "stamp.edit", label: "Add, change, remove and copy stamp-duty entries (entries stay unconfirmed)" },
+      { key: "stamp.confirm", label: "Confirm a stamp-duty entry as checked against its source (separate from editing)" },
+    ],
+  },
 ] as const;
 
 export type PlatformPermission = (typeof PERMISSION_GROUPS)[number]["permissions"][number]["key"];
@@ -130,6 +138,7 @@ export const ROUTE_PERMISSIONS: Record<string, PlatformPermission | null> = {
   "/console/legal": "settings.read",
   "/console/payroll-rates": "settings.read",
   "/console/tax-rulebook": "settings.read",
+  "/console/stamp-rulebook": "stamp.read",
   "/console/subscriptions": "subscriptions.read",
   "/console/invoices": "invoices.read",
   "/console/coupons": "coupons.read",

@@ -1,6 +1,8 @@
 import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import type { FontPairId, LetterheadScope } from "@/lib/products/playbook-ai/brand/types";
+import { FONT_PAIRS } from "@/lib/products/playbook-ai/brand/types";
 import type { HighlightColor, TextColor } from "@/lib/products/playbook-ai/doc/types";
 import { PAGE_SIZES, mmToPt, mmToTwips, pageDimensionsMm, textAreaMm, type PageSettings } from "@/lib/products/playbook-ai/doc/page";
 
@@ -9,16 +11,18 @@ import { PAGE_SIZES, mmToPt, mmToTwips, pageDimensionsMm, textAreaMm, type PageS
  * Brand colours come from the company (validated `#RRGGBB`); everything else is fixed here. Server-only.
  */
 
-export const FONT_FAMILY = "Noto Sans";
-export const FONT_FILES = {
-  regular: "NotoSans-Regular.ttf",
-  bold: "NotoSans-Bold.ttf",
-  italic: "NotoSans-Italic.ttf",
-  boldItalic: "NotoSans-BoldItalic.ttf",
-} as const;
+export type FamilyKey = "sans" | "serif";
+export type FontFace = "regular" | "bold" | "italic" | "boldItalic";
+/** The bundled families. `pdf` is the name registered with react-pdf; `name` is what Word shows. */
+export const FAMILIES: Record<FamilyKey, { name: string; pdf: string; files: Record<FontFace, string> }> = {
+  sans: { name: "Noto Sans", pdf: "NotoSans", files: { regular: "NotoSans-Regular.ttf", bold: "NotoSans-Bold.ttf", italic: "NotoSans-Italic.ttf", boldItalic: "NotoSans-BoldItalic.ttf" } },
+  serif: { name: "Noto Serif", pdf: "NotoSerif", files: { regular: "NotoSerif-Regular.ttf", bold: "NotoSerif-Bold.ttf", italic: "NotoSerif-Italic.ttf", boldItalic: "NotoSerif-BoldItalic.ttf" } },
+};
+/** Default body family (kept for callers that do not choose a pair). */
+export const FONT_FAMILY = FAMILIES.sans.name;
 export const FONT_DIR = process.env.PLAYBOOK_FONT_DIR || path.join(process.cwd(), "src/lib/fonts/noto");
-export const fontPath = (face: keyof typeof FONT_FILES) => path.join(FONT_DIR, FONT_FILES[face]);
-export const readFont = (face: keyof typeof FONT_FILES): Buffer => readFileSync(fontPath(face));
+export const fontPath = (face: FontFace, family: FamilyKey = "sans") => path.join(FONT_DIR, FAMILIES[family].files[face]);
+export const readFont = (face: FontFace, family: FamilyKey = "sans"): Buffer => readFileSync(fontPath(face, family));
 
 export const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
@@ -35,6 +39,10 @@ export interface RenderLogo {
 /** What the renderers need to know about the company's brand. The brand store (A7) fills this; the defaults are neutral, not SelfRun's. */
 export interface RenderBrand {
   colors?: Partial<BrandColors>;
+  /** One of the bundled font pairs; "sans" when absent. */
+  fontPair?: FontPairId;
+  /** Where the header (logo and letterhead lines) is printed. Default every page. */
+  letterhead?: LetterheadScope;
   logo?: RenderLogo;
   /** One line printed in the footer zone under the document's own footer (registered office, CIN, GSTIN built from the company profile). */
   footerText?: string;
@@ -43,7 +51,10 @@ export interface RenderBrand {
 export const DEFAULT_COLORS: BrandColors = { primary: "#1E3A5F", accent: "#B45309", text: "#1F2937", muted: "#6B7280", rule: "#CBD5E1" };
 
 export interface StyleTokens {
+  /** Body font family name (what Word shows). */
   fontFamily: string;
+  /** Which bundled family the body and the headings use. */
+  fonts: { body: FamilyKey; heading: FamilyKey };
   basePt: number;
   lineHeight: number;
   paragraphAfterPt: number;
@@ -75,8 +86,10 @@ export function buildTokens(page: PageSettings, brand?: RenderBrand): StyleToken
   const area = textAreaMm(page);
   const base = PAGE_SIZES[page.size];
   const landscape = page.orientation === "landscape";
+  const pair = FONT_PAIRS.find((p) => p.id === brand?.fontPair) ?? FONT_PAIRS[0];
   return {
-    fontFamily: FONT_FAMILY,
+    fontFamily: FAMILIES[pair.body].name,
+    fonts: { body: pair.body, heading: pair.heading },
     basePt: 10.5,
     lineHeight: 1.4,
     paragraphAfterPt: 6,

@@ -96,7 +96,7 @@ export const PS_META: CatalogueMeta[] = [
     id: "ps.loi", name: "Letter of intent", category: "ps", purpose: "Record intent",
     party: "client", audience: "external", sign: "yes", needsSignature: true,
     legal: { review: true, statute: false }, esignIneligible: false,
-    stamp: { rule: "maybe", category: "loi_mou" },
+    stamp: { rule: "maybe", category: "mou" },
     retentionKey: "sales", numberingPrefix: "PS-LOI",
     inputsSummary: ["parties","subject"],
     sectionsSummary: ["Intent","Non-binding","Next steps"],

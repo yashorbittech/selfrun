@@ -217,7 +217,9 @@ export async function proxy(request: NextRequest) {
   } catch (err) {
     console.error("[tenancy] company lookup failed in proxy", err);
   }
-  if (info === null) {
+  // A signer's link (/sign/<token>) works on any address: the page takes the company from the signature request the token belongs to, never from the host.
+  const signLink = (request.nextUrl.pathname.split("/")[1] ?? "") === "sign";
+  if (info === null && !signLink) {
     // A suspended company's address explains that, and lets its people ask for reactivation (not the generic "no workspace" page).
     if (request.method === "GET" || request.method === "HEAD") {
       const suspended = await resolveSuspendedHost(request.headers.get("host")).catch(() => null);
@@ -255,7 +257,7 @@ export async function proxy(request: NextRequest) {
   // and never the product's own hosts, so the platform staff can always end it.
   if (info && !isSaasHost(request.headers.get("host")) && !isSaasAppHost(request.headers.get("host"))) {
     const first = request.nextUrl.pathname.split("/")[1] ?? "";
-    if (!["platform-maintenance", "offline-shell", "pay", "verify"].includes(first)) {
+    if (!["platform-maintenance", "offline-shell", "pay", "verify", "sign"].includes(first)) {
       const m = await getEffectiveMaintenance(info.companyId);
       if (isTakeoverNow(m, info.surface)) {
         return NextResponse.rewrite(new URL("/console-maintenance", request.url), { status: 503, headers: { "Retry-After": String(Math.max(30, Math.ceil((m.endsAt - Date.now()) / 1000))), "Cache-Control": "no-store" } });
